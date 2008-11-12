@@ -45,7 +45,7 @@ interrupt [EXT_INT4] void ext_int4_isr(void)
       case 0xC:                         // character time out. RBR read to clear interrupt
       case 0x4:                         // Receiver data available or trigger level reached
           rdata = UC_554A_RBR;        // read data from receiver FIFO. RBR read to clear int          
-          cm_pushc(rdata,GROUPA);
+          cm_pushc(rdata,SPORTA);
           return;
       case 0x1:                         // none interrupt
       case 0x2:                         // Transmitter Hold Register Empty
@@ -68,7 +68,7 @@ interrupt [EXT_INT5] void ext_int5_isr(void)
       case 0xC:                         // character time out. RBR read to clear interrupt
       case 0x4:                         // Receiver data available or trigger level reached
           rdata = UC_554B_RBR;        // read data from receiver FIFO. RBR read to clear int          
-          cm_pushc(rdata,GROUPB);
+          cm_pushc(rdata,SPORTB);
           return;
       case 0x1:                         // none interrupt
       case 0x2:                         // Transmitter Hold Register Empty
@@ -91,7 +91,7 @@ interrupt [EXT_INT6] void ext_int6_isr(void)
       case 0xC:                         // character time out. RBR read to clear interrupt
       case 0x4:                         // Receiver data available or trigger level reached
           rdata = UC_554C_RBR;        // read data from receiver FIFO. RBR read to clear int          
-          cm_pushc(rdata,GROUPC);
+          cm_pushc(rdata,SPORTC);
           return;
       case 0x1:                         // none interrupt
       case 0x2:                         // Transmitter Hold Register Empty
@@ -115,7 +115,7 @@ interrupt [EXT_INT7] void ext_int7_isr(void)
       case 0xC:                         // character time out. RBR read to clear interrupt
       case 0x4:                         // Receiver data available or trigger level reached
           rdata = UC_554D_RBR;        // read data from receiver FIFO. RBR read to clear int          
-          cm_pushc(rdata,GROUPD);
+          cm_pushc(rdata,SPORTD);
           return;
       case 0x1:                         // none interrupt
       case 0x2:                         // Transmitter Hold Register Empty
@@ -263,13 +263,12 @@ void Init_554(void)
 // arg1: string to be sent. arg2: port (A B,C,D)
 /********************************************************************************/
 void prints(u8 *str, u8 length, char uart_port)
-{              
+{           
     u8 len;
-    len = length & 0x0F;        //15bytes at most 
-
+    len = length & 0x0F;        //15bytes at most
     switch(uart_port)
     {
-       case GROUPA:
+       case SPORTA:
            // wait if data still being transmitted in UART
            // LSR5: Transmitter Holding Register Empty, 1 Empty, 0: Not Empty
            // LSR6: Transmitter Register Empty. 1 Empty, 0: Not Empty.
@@ -287,28 +286,28 @@ void prints(u8 *str, u8 length, char uart_port)
            }
                
            break;
-       case GROUPB:
+       case SPORTB:
            while(!(UC_554B_LSR & 0x20)); 
            
            while(len-- > 0){
               UC_554B_THR = *str++;
            }
            break;
-       case GROUPC:
+       case SPORTC:
            while(!(UC_554C_LSR & 0x20) ); 
            
            while(len-- > 0)
               UC_554C_THR = *str++;
               
            break;
-       case GROUPD:
+       case SPORTD:
            while( !(UC_554D_LSR & 0x20) );
            
            while(len-- > 0)
               UC_554D_THR = *str++;
               
            break; 
-       case GROUPPC:
+       case SPORTPC:
            while(len-- > 0)
                 putchar(*str++);          
        default:
