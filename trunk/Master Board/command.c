@@ -154,18 +154,15 @@ void cm_ack(u8 port)
 // ¸ñ    Ê½£º void cm_pushc(char,port) port: A,B,C,D,E
 // 
 /****************************************************************************/
-extern u8 debug_flag;
+extern u8 debug_mode;
 void cm_pushc(u8 c,u8 port)
-{                           
-      if (debug_flag & 0x80) 
-          d_putchar2(c);         // display data received
+{
       if(RFlag[port] == RF_CKSUM)                       //wait until it is processed
                 return;
       if(RFlag[port] == RF_DATABUF)               {     //checksum found
                 infrm[port].cksum = c;
                 if(((checksum((u8*)(&infrm[port]),6)+checksum(infrm[port].databuf,infrm[port].datalen)) & 0xff) == c){
-                        RFlag[port] = RF_CKSUM;         
-                        
+                        RFlag[port] = RF_CKSUM;
                         cm_process(port);
                         RFlag[port] = RF_IDLE;
                         return;
@@ -236,7 +233,7 @@ void parse_node_frm(u8* ptr, u8 port)
                                 {
                                         infrm[port].databuf[j] = n2m_map[infrm[port].databuf[j]];
                                         *(ptr+infrm[port].databuf[j]) = infrm[port].databuf[j+1];  
-                                }
+                                }		       
                         }
                         j = j+2;
                 }                              
@@ -293,11 +290,16 @@ void parse_sys_frm(u8* ptr, u8 port)
 			//search for duplication
 			tptr = prcmd_head;
 			while(tptr != prcmd_tail){
-				if(*tptr++ == infrm[port].databuf[j])
-					return;	//duplication request found
-                        	if(tptr == (rcmd_waiting + RCMD_BUF_SIZE))
+				if(*tptr == infrm[port].databuf[j]){
+					j++;
+					break;	//duplication request found
+				}
+				tptr++;
+                        	if(tptr == rcmd_waiting + RCMD_BUF_SIZE)
 	                        	tptr = rcmd_waiting;
 			}
+			if(tptr != prcmd_tail)
+			       continue;	
                         *prcmd_tail++ = infrm[port].databuf[j++]; 
                         if(prcmd_tail == (rcmd_waiting + RCMD_BUF_SIZE))            //come to border
                                 prcmd_tail = rcmd_waiting;
@@ -312,11 +314,16 @@ void parse_sys_frm(u8* ptr, u8 port)
        			//search for duplication
 			tptr = prcmd_head;
 			while(tptr != prcmd_tail){
-				if(*tptr++ == (0x80 | infrm[port].databuf[j]))
-					return;	//duplication request found
+				if(*tptr == (0x80 | infrm[port].databuf[j])){
+					j++;	//duplication request found
+					break;
+				}
+				tptr++;
                         	if(tptr == (rcmd_waiting + RCMD_BUF_SIZE))
 	                        	tptr = rcmd_waiting;
 			}
+			if(tptr != prcmd_tail)
+			       continue;	
        		        *prcmd_tail++ = 0x80 | infrm[port].databuf[j++]; 
                         if(prcmd_tail == (rcmd_waiting + RCMD_BUF_SIZE))            //come to border
                                 prcmd_tail = rcmd_waiting;
@@ -328,7 +335,7 @@ void cm_process(u8 port)   //incoming command from node
 {       
         u8 i;
         u8 addr;                                             
-        if(port == GROUPPC){
+        if(port == SPORTPC){
                 if(infrm[port].addr_to == MY_ADDR){ 
                         parse_sys_frm((u8*)&system,port);   
                         return;
@@ -368,7 +375,7 @@ void cm_process(u8 port)   //incoming command from node
         }
         if(infrm[port].addr_to == PC_ADDR){ //forward command  to pc    
                 FB_in_up = port;
-                FB_out_up = GROUPPC;
+                FB_out_up = SPORTPC;
                 return;
         }
         if(infrm[port].addr_to == MY_ADDR){ //content sent from node to system board                                    
@@ -395,36 +402,36 @@ void handle_pending_read(){
         cnt = 0;     
         
         if(type){       //read by word
-                outfrm[GROUPPC].cmd = 'X';         
-                outfrm[GROUPPC].addr_from = MY_ADDR;
-                outfrm[GROUPPC].addr_to = PC_ADDR;                
-                outfrm[GROUPPC].datalen = 0;
+                outfrm[SPORTPC].cmd = 'X';         
+                outfrm[SPORTPC].addr_from = MY_ADDR;
+                outfrm[SPORTPC].addr_to = PC_ADDR;                
+                outfrm[SPORTPC].datalen = 0;
                 while((prcmd_head != prcmd_tail) && (cnt++ < 5)){ // 3x5 = 15 < 16
                      value = 0x7f & *prcmd_head++;        
-                     outfrm[GROUPPC].databuf[outfrm[GROUPPC].datalen] = value;
-                     outfrm[GROUPPC].datalen++;
-                     outfrm[GROUPPC].databuf[outfrm[GROUPPC].datalen] = *((u8*)&system+value); 
-                     outfrm[GROUPPC].datalen++;
-                     outfrm[GROUPPC].databuf[outfrm[GROUPPC].datalen] = *((u8*)&system+1+value);
-                     outfrm[GROUPPC].datalen++;
+                     outfrm[SPORTPC].databuf[outfrm[SPORTPC].datalen] = value;
+                     outfrm[SPORTPC].datalen++;
+                     outfrm[SPORTPC].databuf[outfrm[SPORTPC].datalen] = *((u8*)&system+value); 
+                     outfrm[SPORTPC].datalen++;
+                     outfrm[SPORTPC].databuf[outfrm[SPORTPC].datalen] = *((u8*)&system+1+value);
+                     outfrm[SPORTPC].datalen++;
                      if(prcmd_head == rcmd_waiting + RCMD_BUF_SIZE)
                         prcmd_head = rcmd_waiting;
                 }
-                cm_ack(GROUPPC);                              
+                cm_ack(SPORTPC);                              
         }else{          //read by byte
-                outfrm[GROUPPC].cmd = 'W';         
-                outfrm[GROUPPC].addr_from = MY_ADDR;
-                outfrm[GROUPPC].addr_to = PC_ADDR;                
-                outfrm[GROUPPC].datalen = 0;
+                outfrm[SPORTPC].cmd = 'W';         
+                outfrm[SPORTPC].addr_from = MY_ADDR;
+                outfrm[SPORTPC].addr_to = PC_ADDR;                
+                outfrm[SPORTPC].datalen = 0;
                 while((prcmd_head != prcmd_tail) && (cnt++ < 7)){ // 2x7 = 14 < 16
                      value = *prcmd_head++;        
-                     outfrm[GROUPPC].databuf[outfrm[GROUPPC].datalen] = value;
-                     outfrm[GROUPPC].datalen++;
-                     outfrm[GROUPPC].databuf[outfrm[GROUPPC].datalen] = *((u8*)&system+value);
-                     outfrm[GROUPPC].datalen++;
+                     outfrm[SPORTPC].databuf[outfrm[SPORTPC].datalen] = value;
+                     outfrm[SPORTPC].datalen++;
+                     outfrm[SPORTPC].databuf[outfrm[SPORTPC].datalen] = *((u8*)&system+value);
+                     outfrm[SPORTPC].datalen++;
                      if(prcmd_head == rcmd_waiting + RCMD_BUF_SIZE)
                         prcmd_head = rcmd_waiting;
                 }
-                cm_ack(GROUPPC);         
+                cm_ack(SPORTPC);         
         }
 }

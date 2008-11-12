@@ -113,23 +113,25 @@ typedef struct  {
 #define NULL_INBUF   {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 #define MY_ADDR      0xff
 #define PC_ADDR	     0x00
-#define GROUPA       0
-#define GROUPB       1
-#define GROUPC       2
-#define GROUPD       3
-#define GROUPPC      4
+#define SPORTA       0
+#define SPORTB       1
+#define SPORTC       2
+#define SPORTD       3
+#define SPORT_TOTAL  4
+#define SPORTPC      4
 #define R_NOWAIT     0xff               
 
 #define STATE_BEIDLE            0
 #define STATE_DONE_FAIL         0xfe
 #define STATE_DONE_OK           0xfd
+#define CMD_START_SEARCH	0x02
 #define BOARD_TYPE_MASK         0xf0                          
 #define BOARD_TYPE_VIBRATE     	0x00
 #define BOARD_TYPE_WEIGHT       0x10
 #define BOARD_TYPE_INVALID      0xf0 
 
 #define BOARD_GROUP_MASK        0x0f
-#define BOARD_GROUP_MASK2       0x07
+#define BOARD_GROUP_MASK_SHORT  0x07
 #define BOARD_GROUP_A           0x00
 #define BOARD_GROUP_B           0x01
 #define BOARD_GROUP_C           0x02

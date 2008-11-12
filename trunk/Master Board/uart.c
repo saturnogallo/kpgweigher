@@ -69,7 +69,7 @@ interrupt [USART1_RXC] void usart1_rx_isr(void)
    status=UCSR1A;
    data=UDR1; 
   
-   cm_pushc(data,GROUPPC);
+   cm_pushc(data,SPORTPC);
 }
 
 /*********************************************************************************/
@@ -173,7 +173,6 @@ void mputs(u8 *buf, u8 size){
 /*********************************************************************************/
 void Init_UART()
 {
-   // Debug port
    // USART0 initialization
    // Communication Parameters: 8 Data, 1 Stop, No Parity
    // USART0 Receiver: On
@@ -186,9 +185,8 @@ void Init_UART()
       UCSR0C=0x06;
       UBRR0H=0x00;
       UBRR0L=0x5F;      //9600    
-//      UBRR0L=0x7;       //115200
+//    UBRR0L=0x7;       //115200
 
-   // PC data commmuncation. 
    // USART1 initialization
    // Communication Parameters: 8 Data, 1 Stop, No Parity
    // USART1 Receiver: On
@@ -200,7 +198,7 @@ void Init_UART()
       UCSR1C=0x06;
       UBRR1H=0x00;
       UBRR1L=0x5F;       //9600
-      //UBRR1L=0x7;       //115200
+//    UBRR1L=0x7;       //115200
       
    // Initialize buffer variables
       tx_wr_index0 = 0;
