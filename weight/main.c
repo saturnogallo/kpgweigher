@@ -77,7 +77,7 @@ interrupt [TIM2_OVF] void timer2_ovf_isr(void)
   }  
   else
   {  TIMSK &= 0xbf;       // stop timer2
-  }
+  } 
 }
   
 /*****************************************************************************/
@@ -98,13 +98,13 @@ void Init_Timers()
    // 200 pulses to run one cycle (1.8/step)
    // Motor Speed: 514/200 ~= 2.5 cycles/sec
    TCNT0=0xF2;  
-   
-   // Generate PWM pulses to drive Magnet.
-   // Timer/Counter 1 initialization
+      
+   // Timer/Counter 1 initialization 
+   // Used for delay from 220V AC cross zero point to Triac ON.
    // Clock source: System Clock
-   // Clock value: 7200Hz (MCU_CLK/1024)
-   // Mode: Ph. & fr. cor. PWM top=ICR1, Mode 8
-   // OC1A output: Toggle
+   // Clock value: 115.200 kHz
+   // Mode: Normal top=FFFFh
+   // OC1A output: Discon.
    // OC1B output: Discon.
    // Noise Canceler: Off
    // Input Capture on Falling Edge
@@ -112,21 +112,14 @@ void Init_Timers()
    // Input Capture Interrupt: Off
    // Compare A Match Interrupt: Off
    // Compare B Match Interrupt: Off
-   TCCR1A=0x80;
-   TCCR1B=0x15;
+   TCCR1A=0x00;
+   TCCR1B=0x03;
    TCNT1H=0x00;
    TCNT1L=0x00;
-   // PWM frequency defined in ICR
-   // Base frequence: 921600/(0x30*2) = 9600HZ
-   // This PWM pulse is used to build a switching regulator
-   // as the power supply of magnet
-   ICR1H=0x00; 
-   ICR1L=0x30;
-   // OC1A PWM pulse duty defined in OCR1A
-   // By tuning pulse duty, power supply amplitude can be changed.
+   ICR1H=0x00;
+   ICR1L=0x00;
    OCR1AH=0x00;
    OCR1AL=0x00;
-   //OC1A PWM pulse duty defined in OCR1A
    OCR1BH=0x00;
    OCR1BL=0x00;
    
@@ -166,10 +159,13 @@ void Init_PORT(void)
    DDRC=0x3F;
 
    // Port D initialization
-   // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=Out Func0=In 
-   // State7=0 State6=0 State5=1 State4=0 State3=T State2=T State1=1 State0=T 
+   // Func7=In Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=Out Func0=In 
+   // State7=T State6=0 State5=1 State4=0 State3=T State2=T State1=1 State0=T 
+   // PD7 is used as negative input of Analog comparator   
+   // PD6 can be still used as normal output because AIN is connected to 
+   // Bandgap Voltage Reference internally.
    PORTD=0x02;
-   DDRD=0xF2;
+   DDRD=0x72;
 
    // External Interrupt(s) initialization
    // INT0: Off
@@ -177,9 +173,12 @@ void Init_PORT(void)
    MCUCR=0x00;
              
    // Analog Comparator initialization
-   // Analog Comparator: Off
+   // Analog Comparator: On
+   // The Analog Comparator's positive input is
+   // connected to the Bandgap Voltage Reference
+   // Interrupt on Rising Output Edge
    // Analog Comparator Input Capture by Timer/Counter 1: Off
-   ACSR=0x80;
+   ACSR=0x43;  // disable AC interrupt when intialized. To be enabled later.
    SFIOR=0x00;
    
    // turn off LEDs
@@ -196,10 +195,10 @@ void Init_PORT(void)
 /*******************************************************************************/
 #ifdef _DISABLE_WATCHDOG_
 //dummy subroutine
-void Feed_Watchdog(){}
-void Turn_Off_Watchdog(){}
+void Feed_Watchdog(){;;}
+void Turn_Off_Watchdog(){;;}
 #else
-void Feed_Watchdog()
+/*void Feed_Watchdog()
 { 
   #asm("cli")
   #asm("wdr") // reset watchdog timer to avoid timeout reset
@@ -217,7 +216,7 @@ void Turn_Off_Watchdog()
   WDTCR |= (1<<WDCE) | (1<<WDE); // set WDCE and WDE bit
   WDTCR = 0x00; // turn off watch dog timer
   #asm("sei") // Enable global interrupt.
-}
+} //*/
 #endif
 
 /*******************************************************************************/
@@ -225,7 +224,7 @@ void Turn_Off_Watchdog()
 /*******************************************************************************/
 static u16 tick = 0;                              
 #define MYDEAD(a) dead_loop(a)
-/*void dead_loop(u16 refresh_cycle)
+void dead_loop(u16 refresh_cycle)
 { 
        tick++;
        if(tick == refresh_cycle)
@@ -417,15 +416,11 @@ u8 magnet_add_material()
 // Guideline: 
 // Check whether lower bucket is closed before open the upper bucket
 // Check whehter upper bucket is closed before open the lower bucket
-// Everytime only 1 bucket is allowed to be opened.       
+// Every time only 1 bucket is allowed to be opened.       
 // State Flag: WSM_Flag
 /*******************************************************************************/          
-// max weight alloweed in each bucket.
-#define MAX_WEIGHT_ALLOWED 2500.
-
 void motor_magnet_action()
 {                                                
-    u8 i;
     //status to indicate the state system is in
     //>200 means release material status
     //100~200 means motor_magnet status
@@ -527,15 +522,10 @@ void motor_magnet_action()
         // in automatic mode.
         // get weight
         RS485._global.flag_goon = 0;
-        RS485._global.Mtrl_Weight_gram = 0xffff;
-        // stop here until we get valid weight value.
-        // Need to be optimized here.
-        for(i=5;i>0;i--){
-           CS5532_PoiseWeight();  
-           CS5532_Poise2Result(); 
-           Feed_Watchdog(); // feed watch dog in case that we exceed the timeout limit.
-           if(RS485._global.Mtrl_Weight_gram != 0xffff) break;//got valid data, break
-        }
+        RS485._global.Mtrl_Weight_gram = INVALID_DATA ;  // forbid master board from reading data before available
+        // Read Weight: valid and invalid weights are both possible.
+        CS5532_PoiseWeight();  
+        CS5532_Poise2Result();         
                 
         //Idle here if no command from master board asking me to go on.
         //Combination algorithm will decide whether magnet should 
@@ -544,27 +534,25 @@ void motor_magnet_action()
         // These 2 registers may be changed by RS485 masters through UART.
         WSM_Flag = MM_ADD_MATERIAL;
         while(RS485._global.flag_goon == 0){
-           //MYDEAD(0x400);
+           // 
+           MYDEAD(0x2000);            
            // test conditions of breaking out of this "while" loop.
            if(RS485._global.flag_enable != ENABLE_ON){
               WSM_Flag = MM_ADD_MATERIAL; //break if extra command is coming 
-              LED_FLASH(LED_D8);
               return;
            }
-           //we can activate magnet here to add material to the upper bucket.
-           // for example: update weight
+           // Update weight periodically
            CS5532_PoiseWeight();  
            CS5532_Poise2Result();            
            // and we can start magnet to feed material to upper bucket.          
            magnet_add_material();
-           
+           Feed_Watchdog(); // feed watch dog in case that we exceed the timeout limit.                    
         }    
         
         // Get command from masterboard/PC to go on (add material)
         //WSM_Flag = MM_ADD_MATERIAL;                  
         //invalidate weight result.
-        RS485._global.Mtrl_Weight_gram = 0xffff;                 
-        LED_ON(PIN_AD);
+        RS485._global.Mtrl_Weight_gram = INVALID_DATA;                 
         return;
      }              
 }                     
@@ -580,8 +568,8 @@ void Init_Vars(void)
      RS485._global.flag_reset = 0;  
      RS485._global.flag_goon = 0;  
      RS485._global.flag_release = 0;          
-     RS485._global.Mtrl_Weight_gram = 0xffff;                    
-     //RS485._global.NumOfDataToBePgmed = 0;
+     RS485._global.Mtrl_Weight_gram = INVALID_DATA;                    
+     RS485._global.NumOfDataToBePgmed = 0;
      RS485._global.status = 0; 
      RS485._global.cs_status = 0;
      RS485._global.hw_status = 0; 
@@ -601,13 +589,13 @@ void Init_Vars(void)
 // This subroutine initializes and writes default system parameters into EEPROM 
 // when software detects that parameters in EEPROM is invalid(RAW BOARD).
 /*******************************************************************************/
-#define ROM_DATA_VALID_FLAG 0xAA
- void Init_EEPROM_Para()
+#define ROM_DATA_VALID_FLAG 0xAA   
+#define EN_EEPROM_PROG_BIT 0x8
+
+void Init_EEPROM_Para()
  {  
-   LED_ON(LED_D7);
-   RS485._flash.addr = 5;
+   RS485._flash.addr = 1;
    // mannual initializing Flash variables before EEPROM data is ready.
-   RS485._flash.revision = FIRMWARE_REV;
    // only wordrate is valid for CS5530: 0x3 -> 12.5bps
    RS485._flash.cs_gain_wordrate = 0x3;   
    // Intialize RS485 baudrate to 115200 (0x0)
@@ -633,19 +621,53 @@ void Init_Vars(void)
    RS485._flash.cs_poise[4] = 0xED47;
    RS485._flash.Poise_Weight_gram[4] = 500;
    // Motor & Magnet settings
-   RS485._flash.magnet_freq = 9;
-   RS485._flash.magnet_amp = 50; 
-   RS485._flash.magnet_time = 1; 
+   //RS485._flash.magnet_freq = 9;
+   RS485._flash.magnet_amp = 25; 
+   RS485._flash.magnet_time = 10; 
    RS485._flash.motor_speed = 1;
-   RS485._flash.delay_f = 20;
-   RS485._flash.delay_w = 20;
-   RS485._flash.delay_s = 20;
+   RS485._flash.delay_f = 10;
+   RS485._flash.delay_w = 10;
+   RS485._flash.delay_s = 10;
    RS485._flash.open_s  = 10;
    RS485._flash.open_w  = 10; 
-   RS485._flash.rom_para_valid = ROM_DATA_VALID_FLAG; 
-   RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH); 
- }
 
+#ifdef _BOARD_TYPE_IS_VIBRATE_
+   RS485._flash.addr = 0xb;
+   RS485._flash.board = BOARD_TYPE_VIBRATE;
+#endif
+   
+   //backup key parameters
+   RS485._flash.addr_backup = RS485._flash.addr;
+   RS485._flash.board_backup = RS485._flash.board;
+   
+   RS485._flash.rom_para_valid = ROM_DATA_VALID_FLAG; 
+   RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
+   
+   RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;
+ }
+/*******************************************************************************/
+//
+/*******************************************************************************/
+void Validate_EEPROM_Data()
+{
+   u8 invalid_flag = 0;
+   // check whether "addr" "board" "RS485" data in EEPROM is valid   
+   if(RS485._flash.baudrate > 4)
+   { RS485._flash.baudrate = 0; invalid_flag = 0xff;}
+      
+   if((RS485._flash.addr > 16) && (RS485._flash.addr_backup < 16))
+   {  RS485._flash.addr = RS485._flash.addr_backup; invalid_flag = 0xff; }
+      
+   if((RS485._flash.board != BOARD_TYPE_WEIGHT) && (RS485._flash.board != BOARD_TYPE_VIBRATE))
+       if((RS485._flash.board_backup == BOARD_TYPE_WEIGHT) || (RS485._flash.board_backup == BOARD_TYPE_VIBRATE))
+       {  RS485._flash.board = RS485._flash.board_backup; invalid_flag = 0xff;}
+    
+    if(invalid_flag) 
+    {  RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
+       RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;
+    } 
+
+}
 /*******************************************************************************/
 //                    Initialize CS5530
 // CS5530 is not 100% code compatible with CS5532 in configuration.
@@ -670,7 +692,7 @@ void init_cs5532(void)
    // MEGA8 is configured to stay in reset state for 64ms (fuse bit) after power up.
    // sleepms(20);  
    //Initialize CS5532. Try 3 times max. 
-   LED_OFF(LED_D8);
+   //LED_OFF(LED_D8);
    for(i=3;i>0;i--)
       if(CS5532_Init() == RESET_VALID)
       {  //Bit[3:0] are word rate.         
@@ -692,9 +714,14 @@ void init_cs5532(void)
          //Important note: from now on, CS5532/CS5530 won't accept commands
          //you need to stop cont converison before issue command to CS5532.         
          // turn on indicator for CS5530
-         LED_ON(LED_D8); 
+         //LED_ON(LED_D8); 
          break;
-      }            
+      }
+     if(i) // initialized successfully,
+        RS485._global.cs_status = 0;
+     else
+        RS485._global.cs_status |= 0x4 ; // flag bit2 
+     
 }
 /*****************************************************************************/
 //
@@ -702,20 +729,12 @@ void init_cs5532(void)
 #ifdef _TEST_MOTOR_MAGNET_  
     void Test_Motor_Magnet_Loop(); 
 #endif   
-#ifdef _AD_CALIBRATION_
-    void Factory_Calibration();
-#endif
+
 /*****************************************************************************/
 //                      Main function entry here
 /*****************************************************************************/
 void main(void)
 {   
-#ifdef _TEST_MOTOR_MAGNET_
-   u8 i;                    
-#endif
-#ifdef _DISP_AD_OUT_
-   u8 Convtemp[4];
-#endif 
    u8 flag_turn_off_watchdog;  
    /********************************************************************/
    //               System Initialization
@@ -728,19 +747,21 @@ void main(void)
    vInitEeprom();        
    // Initialize System global variables (read from EEPROM)
    bReadDataFromEeprom(EEPROM_RS485ADDR,(u8*)&RS485._flash, sizeof(S_FLASH));
+   // Initialize Global Variable: 
+   // "Init_Vars()" has to be placed after "bReadDataFromEeprom()" because
+   // RS485._flash.cs_zero is involved. 
+   Init_Vars();
+      
    // Write default system parameters into EEPROM if EEPROM data is invalid.
 #ifdef _FORCE_INIT_EEPROM_  
    RS485._flash.rom_para_valid = ~ROM_DATA_VALID_FLAG;
 #endif
+   // Raw EEPROM
    if(RS485._flash.rom_para_valid != ROM_DATA_VALID_FLAG)  
        Init_EEPROM_Para(); 
    else
-       RS485._global.NumOfDataToBePgmed = 0;
-   
-   // Initialize Global Variable
-   // removed initialization of RS485._global.NumOfDataToBePgmed from Init_Vars
-   // otherwise EEPROM won't be programmed.
-   Init_Vars();
+       Validate_EEPROM_Data();   //
+
    // Initialize UART, 8 data, 1 stop, even parity. Boardrate is set based on
    // EEPROM parameters.                   
    UART_Init(); 
@@ -753,45 +774,6 @@ void main(void)
    #asm("sei")                        
    
    /*************************************************************************/ 
-   // CS5530/Stepping Motor/Magnet Test/Debug code.
-   // Wont' be compiled in production revision.
-   /*************************************************************************/        
-#ifdef _DISP_AD_OUT_ 
-   while(1)
-   {
-      putchar(RS485._flash.addr);
-      sleepms(UART_DELAY);
-      putchar(RS485._flash.board);
-      sleepms(UART_DELAY); 
-      CS5532_ReadADC(Convtemp);   
-      if ((Convtemp[0] != 0) || (Convtemp[1] != 0))
-      {  LED_FLASH(LED_D8);
-         sleepms(UART_DELAY);
-         putchar(Convtemp[0]);   
-         sleepms(UART_DELAY);
-         putchar(Convtemp[1]);   
-         sleepms(UART_DELAY);
-         putchar(Convtemp[2]);   
-         sleepms(UART_DELAY);
-         putchar(Convtemp[3]);
-         sleepms(UART_DELAY);  
-      }
-      //Test_Motor_Magnet_Loop();
-      LED_FLASH(LED_D7);            
-   }
-#endif
-
-#ifdef _TEST_MOTOR_MAGNET_
-   //Infinite loop, action sequence: 
-   Test_Motor_Magnet_Loop();
-#endif              
-
-#ifdef _AD_CALIBRATION_
-   Factory_Calibration(); 
-   RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
-#endif
-
-   /*************************************************************************/ 
    // Raw board check
    /*************************************************************************/       
    //if RS485 addr is invalid(new board), Use default addr: 0x1
@@ -800,22 +782,25 @@ void main(void)
    myaddr = RS485._flash.addr;         
    /*************************************************************************/ 
    //                          Task State Machine
-   /*************************************************************************/         
+   /*************************************************************************/          
    while(1) 
    {                       
-       LED_ON(PIN_RUN);  //LED_D6, if it flashes, WDT reset happens
+       /************************************************************/
+       
+       MYDEAD(0x400);  //LED_D6, if it flashes, WDT reset happens
+
        /************************************************************/
        // Feed watch dog to avoid reset.
        // Timeout limit is set to 1 sec
        /************************************************************/                                            
-       Feed_Watchdog();                         
+        Feed_Watchdog();                         
        /************************************************************/
        // Reset node on reset command from master board.
        /************************************************************/
        if(RS485._global.flag_reset == 1)
        { /*Trapped for Watch-Dog Reset*/
           RS485._global.flag_reset = 0;
-          while(1);
+          //while(1);
        }       
        /************************************************************/
        // program all configuration settings into EEPROM  
@@ -829,58 +814,57 @@ void main(void)
                                                                             (u8*)&RS485._flash + sizeof(S_FLASH) - RS485._global.NumOfDataToBePgmed, 
                                                                             RS485._global.NumOfDataToBePgmed);        
           continue;
-       }
+       } //*/
+       else
+         RS485._global.test_mode_reg1 &= 0xF7;   // disable EEPROM programming
        /************************************************************/
        // Test Mode(test_mode_reg1): when set,
        // Bit 7: force to use the first poise value.
-       // Bit 6: change RS485 address, test_mode_reg2 is the target.
-       // Bit 5: change board type, test_mode_reg2 is the target.
-       // Bit 4: don't use motor sensors. 
-       // Bit 3: turn off Watchdog timer.
+       // Bit 6: don't use motor sensors. 
+       // Bit 5: turn off Watchdog timer.
+       // Bit 4: display AD output (cs_material) in PC.       
+       //
+       // Test Mode(test_mode_reg2): when set:
+       // Bit[7:6] = 10, Bit[5:0]as new RS485 addr.
+       // Bit[7:6] = 01, Bit[5:0]as new Board Type.
        // See "define.h" for details.                                 
        /************************************************************/       
-       if(CHANGE_RS485_ADDR)
+      /*if(CHANGE_RS485_ADDR)
        {
-            sleepms(50); //make sure reg2 data is updated.
-            RS485._flash.addr = RS485._global.test_mode_reg2;        
-            myaddr = RS485._global.test_mode_reg2;
+            RS485._flash.addr = RS485._global.test_mode_reg2 & 0x3f;        
+            myaddr = RS485._flash.addr;
             bWriteData2Eeprom_c(EEPROM_RS485ADDR, myaddr); 
-            RS485._global.test_mode_reg1 &= 0b10111111;
-            LED_FLASH(LED_D6);
+            RS485._global.test_mode_reg2=0;
             continue; 
        }
        if(CHANGE_BOARD_TYPE)
        {
-            sleepms(50);
-            RS485._flash.board = RS485._global.test_mode_reg2;        
+            RS485._flash.board = RS485._global.test_mode_reg2 & 0x3f;        
             bWriteData2Eeprom_c(EEPROM_RS485ADDR+1, RS485._flash.board);
-            RS485._global.test_mode_reg1 &= 0b11011111;  
-            LED_FLASH(LED_D6);
+            RS485._global.test_mode_reg2 = 0;  
             continue;
-       }
+       }  
+       /*
        if(TURN_OFF_WATCHDOG)
        {
            flag_turn_off_watchdog = 1;        
-           LED_FLASH(LED_D6);
            continue;
-       }                                 
+       } //*/  // some boards flash LED_D6, bug here???                               
        /************************************************************/
        // if board is vibrator, check weight & vibrate repeatly.
        // Won't execute other code segment below ("continue"). 
+       // note: current mechnism design doesn't support weight measuring
        /************************************************************/
-       if((RS485._flash.board & BOARD_TYPE_MASK) == BOARD_TYPE_VIBRATE){
-          if(!Magnet_Is_Running()){ 
-              // Delay before magnet is stablized and check weight.
-              sleepms(RS485._flash.delay_f<<3); // to be checked: watchdog timer
-              Feed_Watchdog(); // feed watch dog in case that we exceed the timeout limit.
-              CS5532_PoiseWeight(); 
-              CS5532_Poise2Result();
-              if(RS485._global.flag_enable == ENABLE_ON)
-                 // Start magnet again. 
-                 E_Magnet_Driver(RS485._flash.magnet_time);
+       /* if((RS485._flash.board & BOARD_TYPE_MASK) == BOARD_TYPE_VIBRATE) {
+          if(RS485._global.flag_goon)
+          { 
+             while (Magnet_Is_Running());
+             
+             E_Magnet_Driver(RS485._flash.magnet_time);
+             RS485._global.flag_goon = 0;
           }
           continue;
-       }       
+       } //*/      
        /************************************************************/
        // Magnet/Motor actions. 
        // State range ENABLE_OFF< WSM_Flag <ENABLE_ON: mannual operation. 
@@ -892,7 +876,7 @@ void main(void)
           //if there is ongoing motor_magnet action, allow it to complete this cycle.
           while(WSM_Flag != MM_ADD_MATERIAL)
      	     motor_magnet_action();                
-          RS485._global.Mtrl_Weight_gram = 0xffff;
+          RS485._global.Mtrl_Weight_gram = INVALID_DATA;
           //if there is release request pending, release material. 
           while(RS485._global.flag_release)	  
              release_material();                    
@@ -964,15 +948,18 @@ void main(void)
        /************************************************************/
        if(RS485._global.flag_release){ 
 	  //invalidate weight when doing material release actions.
-	  RS485._global.Mtrl_Weight_gram = 0xffff; 
+	  RS485._global.Mtrl_Weight_gram = INVALID_DATA; 
 	  release_material(); 
 	  //add material during idle/wait period of release state machine
-	  // to improve system speed.
+	  // to improve system speed. The 2 subrountines are state machines and 
+	  // they can run in parallel.
 	  magnet_add_material();   
 	  continue;
        } 
        else{            
     	  // weight measurement is embedded at the end of motor_magnet_action().
+    	  // if no go on command received, code won't break out of motor_magnet_action().
+    	  // motor_magnet_action() will continuously output weight values.
     	  motor_magnet_action();
        	  continue;
        }              

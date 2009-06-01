@@ -2,14 +2,16 @@
 #include "define.h"
 
 //delay after close signal is detected
-#define SHIFT_PULSE_INCNUM            10
-#define SHIFT_PULSE_DECNUM            10              
+#define SHIFT_PULSE_INCNUM            2
+#define SHIFT_PULSE_DECNUM            2              
 
 /*****************************************************************************/
 //                       Hardware Related definition
 /*****************************************************************************/
 #define MOTORS_CLOSED   PIND.3 == 1
 #define MOTORW_CLOSED   PIND.2 == 1      
+#define TRIG_TRIAC()    PORTB.1 = 1 
+#define TRIG_CMPLT()    PORTB.1 = 0
                                                           
 #define MAGNET_PULSE_PORT	PORTB.1
 #define ENABLE_MOTOR_W          PORTC.0 = 1
@@ -22,6 +24,12 @@
 
 flash u8 MOTOR_FREQ[]={CYCLE_2_3,CYCLE_2_6,CYCLE_3_0,CYCLE_3_3,CYCLE_3_6,CYCLE_4_0,CYCLE_4_5,CYCLE_5_0,CYCLE_6_0,CYCLE_7_0};        
 
+
+#define SET_BY_ACINT 1
+#define SET_BY_TMR1 2
+#define ONE_PLS_CMPLT 3
+
+u8 Timer1_flag;  
 /*****************************************************************************/
 //  Generate a clock pulse to move stepping motor forward a step
 /*****************************************************************************/
@@ -32,54 +40,89 @@ void Motor_One_Step()
      MOTOR_CLOCK_PIN = 0;
   for(i=20;i>0;i--)
      MOTOR_CLOCK_PIN = 1; 
-} 
+}
+ 
+/*****************************************************************************/
+//              Analog Comparator interrupt service routine 
+// Interrupt when AC power supply cross zero (voltage)
+// As a method to control magnet magtitude (power supply), timer is started 
+// to delay for a certain before turns on Triac to drive magnet.
+// Triac automatically turns off when 220V AC power supply 
+//
+//     *  *
+//   *      *
+//  *-------|-*-----------*
+//  |       | | *        *|
+//  |       | |    *  *   |
+// ZC(Int)  | |ZC         |ZC(interrupt)
+//  |       | |
+//  |------>| |           
+//  | Delay | |
+//  |       | |
+//       -->| |<-- Triac On
+//  |       | |
+//          |<---- Trigger Triac on   
+//
+//  ZC: Zero Cross
+/*****************************************************************************/
+//#define MAX_TRIAC_ANGEL  (65535-(181-13)*6) //181-13  // minus 13 based on actual offset
+#define COUNTER_BASE (65535-(181-13)*6) 
+#define AMP_ADJUST 25
+// 176: Max triac ON range: 0 ~ 165 degree. 0.87ms Triac ON time.
+// 181: Max triac ON range: 0 ~ 170 degree. 0.55ms Triac ON time 
+// 186: Max triac ON range: 0 ~ 175 degree. 0.3ms Triac ON time 
+interrupt [ANA_COMP] void ana_comp_isr(void)
+{
+  u16 temp; 
+  if(RS485._magnet.pulse_num) 
+      RS485._magnet.pulse_num--; 
+  else
+  {  ACSR &= 0xF7;  // disable AC interrupt
+     TIMSK &= 0xFB; // disable timer1 OV interrupt.
+     Timer1_flag = ONE_PLS_CMPLT;  
+     TRIG_CMPLT(); //  shut down triac.
+     return;
+  }
+         
+  if(Timer1_flag == ONE_PLS_CMPLT)
+  { 
+    // Timers starts on system power up. Timer 1 is started now. 
+    // So OV1 flag has already been set. 
+    // Clear Timer1 over-flow flag residuals: TOV1, bit 2.
+    // There was once a bug: TOV1 is not cleared, therefore after quit from 
+    // "ana_comp_isr", "timer1_ovf_isr" is quickly serviced.  
+    TIFR |= 0x4;
+    // Start Timer1 to delay a time before turning on Triac. 
+    temp =  RS485._flash.magnet_amp + AMP_ADJUST; 
+    TCNT1 = COUNTER_BASE + temp<<3;
+    //TCNT1 = 65535 - 6 * (MAX_TRIAC_ANGEL - RS485._flash.magnet_amp); 
+    // Enable Timer1 overflow interrupt.  
+    TIMSK |= 0x4;
+    // flag to indicate timer is set by Analog comparator interruption.
+    Timer1_flag = SET_BY_ACINT;  
+  }     
+}
 
 /*****************************************************************************/
 //                     Timer 1 interrupt service routine
 // Timer 1 overflow interrupt service routine.
-// Timer 1 is used to generate pulse to drive electrical magnet.
-// In every cycle, MAGNET_PULSE_PORT (PB.1) outputs 9.6K PWM pulses in first
-// half cycle and keep low in the second half cycle. 
+// Timer 1 is used to when triac should be triggered.
 /*****************************************************************************/
-#define MIN_AMP 10
-#define MAX_AMP 85
-#define HIGH_PULSE_NUM 3
 interrupt [TIM1_OVF] void timer1_ovf_isr(void)
-{  
-  //static u16 n=0; 
-  static u8 full_power_pulse_num;     
-  if(RS485._magnet.pulse_num)
-  {  
-     RS485._magnet.pulse_num--;       
-     full_power_pulse_num++;
-     if(full_power_pulse_num < HIGH_PULSE_NUM)
-        OCR1AL = MAX_AMP;
-     else
-        OCR1AL=(RS485._flash.magnet_amp + MIN_AMP);
-     /*n++;
-     if ((n >= RS485._magnet.half_period) && (n < 2*RS485._magnet.half_period))
-     {  
-        //Disconnect PWM output from OC1A pin
-        TCCR1A = 0x00;
-        MAGNET_PULSE_PORT = 0;                          
-     }
-     if(n >= 2*RS485._magnet.half_period)
-     {  TCCR1A = 0x80;
-        n=0;
-     } //*/ 
-  }
-  else
-  {  
-     // Disable Timer 1 interrupt
-     TIMSK &= 0xFB;               
-     // Disconnect PWM output from OC1A pin
-     // Power off electrical magnet to save power     
-     TCCR1A = 0x00;
-     MAGNET_PULSE_PORT = 0;    
-     // reset pulse 
-     full_power_pulse_num = 0;
-     //n = 0;
-  } //*/
+{        
+   if(Timer1_flag == SET_BY_ACINT)
+   { TRIG_TRIAC();
+     TCNT1 = 65500; // 0.31ms. Triac trigger pulse width is 0.31ms 
+     Timer1_flag = SET_BY_TMR1;
+     //return;
+   }
+   else
+   //if(Timer1_flag == SET_BY_TMR1)
+   {  TRIG_CMPLT();            
+      Timer1_flag = ONE_PLS_CMPLT;
+      TIMSK &= 0xFB; // disable timer1 OV interrupt.
+   }       
+
 }
 
 /*****************************************************************************/
@@ -103,12 +146,14 @@ interrupt [TIM1_OVF] void timer1_ovf_isr(void)
 #define CLEAR   0x0
 #define POWER_FLAG 0x1
 #define POWERON 0b01000000
-#define POWEROFF 00
+#define POWEROFF 00    
+
+#define RETURN_TO_SENSOR ((RS485._motor.pulse_num>SHIFT_PULSE_INCNUM) && (RS485._motor.pulse_num < 50))
 
 interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 {
   static u8 motor_close_happened;
-  // Does the motor still needs more pulse (1 cycle completes?)? 
+  // Does the motor still need more pulse (1 cycle completes?)? 
   // Will use a TP807 sensor to detect whether more pulses are needed or not
   if (RS485._motor.pulse_num)
   {                    
@@ -138,11 +183,12 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
           // close half cycle: keep power off = moving toward sensor = need to adjust pulse number. 
           if((RS485._motor.phase & 0x40 ) == 0)
           {   if(RS485._motor.mode == 'W')
-              {  if((RS485._motor.pulse_num > SHIFT_PULSE_INCNUM) && (MOTORW_CLOSED))
+              {  
+                 if((RETURN_TO_SENSOR) && (MOTORW_CLOSED))
                      RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
               }
               if(RS485._motor.mode == 'S')
-              {  if((RS485._motor.pulse_num > SHIFT_PULSE_INCNUM) && (MOTORS_CLOSED))
+              {  if((RETURN_TO_SENSOR) && (MOTORS_CLOSED))
                      RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
               }
               if((MOTORW_CLOSED)||(MOTORS_CLOSED))
@@ -153,7 +199,7 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
   // NO MORE PULSES.
   else // DEBUG INFORMATION IN STATUS REGISTER
   {  
-      if(ENABLE_MOTOR_SENSORS)
+      /*if(ENABLE_MOTOR_SENSORS)
       {
           if(RS485._motor.phase && CLOSURE_DETECTED) // if bit 7 is set. 
           {  if(RS485._motor.mode == 'S')
@@ -167,7 +213,7 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
              if(RS485._motor.mode == 'W')
                 RS485._global.hw_status |= 0x2;      
           } 
-      }           
+      } //*/          
       // No more pulse needed. If bit 6 of phase (power on/off flag) 
       // is not set, power off motor driver after rotation completes.
       if((RS485._motor.phase & 0x40 ) == 0)
@@ -179,50 +225,27 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 
 /*****************************************************************************/
 //                    Electrical magnet driver
-// Define E_magnet working time, unity is 100ms
+// Define E_magnet working time, unity is 20ms
 // Usage: E_Magnet_Driver(u16 arg)
-//  
 /*****************************************************************************/
-#define PWM_BASE_FREQ 7200           // source frequency is 7200HZ, MCLK/1024
-#define PULSE_NUM_IN_100MS 5         // 36HZ pulse, 3.6 pulses in 100ms
-#define PWM_BASE_FREQ_DIV 118        // 36HZ = 7200/(2*PWM_BASE_FREQ_DIV)
-#define MAGNET_LOW_END_FREQ 1
-#define MAGNET_HIGH_END_FREQ 80
-/*****************************************************************************/
-void E_Magnet_Driver(u16 m_hundred_ms)
+#define MAX_AMP 75
+void E_Magnet_Driver(u16 pls_num)
 {                                            
-   // Filter invalid magnet frequency settings, valid range is 1HZ~60HZ
-   if(RS485._flash.magnet_freq < MAGNET_LOW_END_FREQ)
-        return;
-   if(RS485._flash.magnet_freq > MAGNET_HIGH_END_FREQ)
-        return; 
    // Max amplitude is 85% duty based on experiment.OCR1A/ICR1 is pulse duty   
-   if(RS485._flash.magnet_amp > (MAX_AMP - MIN_AMP))
-      RS485._flash.magnet_amp = (MAX_AMP - MIN_AMP);      
-  
-   // calculate total pulse needed based on 9600HZ interupt freq.
-   RS485._magnet.pulse_num = (u32)m_hundred_ms * PULSE_NUM_IN_100MS + HIGH_PULSE_NUM;   
-   // Set Magnet frequency
-   //RS485._magnet.half_period = (PWM_BASE_FREQ/2) / RS485._flash.magnet_freq;
-
-   //////////////////////////////////////////////////////////////////////////
-   // BUILD POWER SUPPLY (PWM Switching Regulator Tech.) and SETUP Amplitude
-   // ICR is used to set PWM base frequency: 921600/(2*48)=9600HZ.
-   // 921600 is the Timer1 clock freq defined in Init_Timers()
-   // This PWM pulse is used to build power suply for Magnet.
-   // Set OC1A PWM pulse duty. Power supply amp can be changed by adjusting
-   // PWM pulse duty. Note that OCR1A should not exceed ICR setting,
-   // "OCR1A = ICR1" means 100% duty, or max power supply amplitude.
-   //////////////////////////////////////////////////////////////////////////
-   ICR1H=0x00;
-   ICR1L= PWM_BASE_FREQ_DIV - RS485._flash.magnet_freq *2;
-   // Set power supply amplitude
-   OCR1AH=0x00;
-   OCR1AL=(RS485._flash.magnet_amp + MIN_AMP);   
-   //connect OC1A to PB1 pin.
-   TCCR1A = 0x80;
-   // Enable Timer1 overflow interrupt.  
-   TIMSK |= 0x4;    
+   if(RS485._flash.magnet_amp > MAX_AMP)
+      RS485._flash.magnet_amp = MAX_AMP; 
+        
+   // Magnet will work for pls_num * 20ms.
+   RS485._magnet.pulse_num = pls_num;   
+   
+   // initialize Timer flag.
+   Timer1_flag = ONE_PLS_CMPLT;   
+   // Clear AC interrupt flag, ACSR4 (ACI), either cleared by HW when int is serviced
+   // or by writing "1" to ACI. There was once a bug. Also AC int is disabled, ACI
+   // is set every 20ms (50HZ). so when interrupt is enabled again. interrupt is quickly
+   // serviced. Actually interrupt should be serviced only when AC power supply crosses zero.
+   // Enable Analog Comparator interrupt.     
+   ACSR=0x5B;  
 }
 
 /*****************************************************************************/
@@ -268,18 +291,14 @@ void Motor_Driver(u8 MotorMode,u8 pulsenum,u8 powerdown)
        case 'S':
 	 DISABLE_MOTOR_W;	
 	 ENABLE_MOTOR_S; 
-	 break;
-       case 'B':
-         ENABLE_MOTOR_W;
-         ENABLE_MOTOR_S;
-         break;       
+	 break;      
        default:
          DISABLE_MOTOR_W; 
          DISABLE_MOTOR_S;
          break;
    }   
    // Stepping motor driver needs 40us max to wake up from power saving mode.
-   for(i=255;i>0;i--);
+   for(i=128;i>0;i--);
              
    // Define Timer0 interrupt frequency           
    TCNT0 = MOTOR_FREQ[RS485._flash.motor_speed];    
