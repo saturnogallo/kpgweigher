@@ -11,32 +11,34 @@
 #ifdef _TEST_MOTOR_MAGNET_
 void Test_Motor_Magnet_Loop()
 {
+   u8 i;
    // Motor & Magnet settings
-   RS485._flash.magnet_freq = 9;
-   RS485._flash.magnet_amp = 50; 
+   RS485._flash.magnet_freq = 1;
+   RS485._flash.magnet_amp = 90; 
    RS485._flash.magnet_time = 1; 
    RS485._flash.motor_speed = 1;
    sleepms(1000);
    // Test Motor & Magnet                       
    while(1)
    {                         
-      while(Motor_Is_Running()) ;
+      /*while(Motor_Is_Running()) ;
       RS485._flash.motor_speed = 1;
-      Motor_Driver('W',MOTOR_ONE_CYCLE_WITH_SENSOR,POWER_OFF_AFTER_ROTATION);
+      Motor_Driver('W',MOTOR_ONE_CYCLE_WITH_SENSOR,POWER_OFF_AFTER_ROTATION);      
       LED_ON(LED_D7);
-      sleepms(500);   //*/
+      sleepms(500);   
       LED_OFF(LED_D7);
       while(Motor_Is_Running()) ;
       RS485._flash.motor_speed = 1; 
       Motor_Driver('S',MOTOR_ONE_CYCLE_WITH_SENSOR,POWER_OFF_AFTER_ROTATION);
       LED_ON(LED_D8);
-      sleepms(500);    //*/         
+      sleepms(500);             
       LED_OFF(LED_D8);
-      LED_ON(PIN_RUN);
-      E_Magnet_Driver(1);
+      LED_ON(PIN_RUN);//*/  
+      E_Magnet_Driver(4);
       while(Magnet_Is_Running());
-      //sleepms(1000);
-      LED_ON(PIN_RUN);//*/
+      //sleepms(22); 
+      LED_FLASH(PIN_RUN);//*/ 
+      
    }
 } 
 #endif

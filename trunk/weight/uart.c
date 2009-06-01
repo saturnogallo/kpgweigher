@@ -18,11 +18,11 @@ u8 volatile tx_rd_index;
 u8 volatile tx_counter;
 
 //#ifndef _OLD_FASHION_CMD_PROCESS_
-//u8 volatile rx_buffer[RX_BUFFER_SIZE];
+u8 volatile rx_buffer[RX_BUFFER_SIZE];
 // define index for Receiver
-//u8 volatile rx_wr_index;
-//u8 volatile rx_rd_index;
-//u8 volatile rx_counter;
+u8 volatile rx_wr_index;
+u8 volatile rx_rd_index;
+u8 volatile rx_counter;
 //#endif
 
 // This flag is set on USART Receiver buffer overflow
@@ -54,9 +54,10 @@ interrupt [USART_RXC] void usart_rx_isr(void)
        cm_pushc(data,0);
        //hw_status &=0xEF;
 //#else       
-//       rx_buffer[rx_wr_index++]= data;
-//       rx_wr_index %= RX_BUFFER_SIZE;
-//       rx_counter++;
+      // rx_buffer[rx_wr_index++]= data;
+      // if(rx_wr_index >= RX_BUFFER_SIZE)
+      //    rx_wr_index=0;
+      // rx_counter++;
 //#endif    
    }      
    //else
@@ -130,9 +131,9 @@ void UART_Init(void)
     tx_rd_index=0;
     tx_counter=0;
 //#ifndef _OLD_FASHION_CMD_PROCESS_
-//    rx_wr_index=0;
-//    rx_rd_index=0;
-//    rx_counter=0;
+    rx_wr_index=0;
+    rx_rd_index=0;
+    rx_counter=0;
 //#endif    
     
  // USART initialization

@@ -427,36 +427,41 @@ u8 CS5532_ReadADC(u8 *ConvDataBuf)
 //  re-edited by Xianghua - Apr 10 2008
 /******************************************************************/  
 #define DATA_NUM 2
-#define DIVIDED_BY_DATA_NUM 1
-#define AVERAGE_NUM 8                         
+#define DIVIDED_BY_DATA_NUM 1                   
 //fill data buffer and return average.
 u16 DataBuf[DATA_NUM];
 u8 Buf_Is_Empty = 0;
 
-/***********************************/
-// fill data buffer and get average
-/***********************************/
+/********************************************************************/
+// fill data buffer and get average 
+// return AD_BUSY if A/D conversion is not completed yet.
+// return AD_OVER_FLOW if A/D conversion overflow happens.
+// otherwise return average of multiple AD samples.
+/********************************************************************/
 u16 FillDatBuf()
 {
    u32 sum;
    u16 average;
    u8 ConvTempbuf[4], k; 
    k = 0;
-   while(k < DATA_NUM)
-   {
-      // could be trapped into a infinite loop here??
-      if (CS5532_ReadADC(ConvTempbuf) != SUCCESSFUL)                      
-         continue; 
-         
+   
+    //get multiple (DATA_NUM) samples.
+   while(k < DATA_NUM) {      
+      if(CS5532_ReadADC(ConvTempbuf) != SUCCESSFUL)                      
+          return(AD_BUSY);
       //LSB byte of the 32 bits is monitor byte, 
-      if (ConvTempbuf[3] != 0)  // overflow
-         RS485._global.cs_status |= 0x8; 
-      else   //valid data
-      {  RS485._global.cs_status &= 0xF7; 
-         sum = ConvTempbuf[0];            
-         DataBuf[k++] = (sum << 8) + ConvTempbuf[1];   
+      if (ConvTempbuf[3] != 0) { 
+          RS485._global.cs_status |= 0x8; 
+          return(AD_OVER_FLOW);
       }
-   }          
+      else {  
+         RS485._global.cs_status &= 0xF7; 
+         sum = ConvTempbuf[0];            
+         DataBuf[k++] = (sum << 8) + ConvTempbuf[1];
+      }
+   }
+   
+   // average of all samples.          
    sum = 0;
    for(k=0; k< DATA_NUM; k++)
       sum += DataBuf[k];
@@ -465,57 +470,57 @@ u16 FillDatBuf()
    return(average);
 } 
 
-/****************************************/
-// software filter on material weight
+/****************************************/     
+// software filter on material weight   
+// 
+
 /****************************************/
 #define SKIP_N_SAMPLES 3
+#define AVERAGE_NUM 8  //average buffer size
+
 void CS5532_PoiseWeight()
 {       
    static u16 AverageBuf[AVERAGE_NUM]; 
    static u8 wait_to_be_stablized;     
    u16 up,dn;
-   u8 flag,j,range; 
-   
-   range = RS485._flash.cs_Filter_option & 0xF;                                               
-   
-   if(Buf_Is_Empty == 0)
-   {
-      //fill the data buffer with conversion result.
-      for(j=0; j< AVERAGE_NUM; j++)
+   u8 flag,j,range;    
+   range = RS485._flash.cs_Filter_option & 0xF;
+                                                  
+   //check whether delay (skip samples) is needed before A/D output is stablized.
+   if(wait_to_be_stablized > 0){   
+        RS485._global.cs_mtrl = FILTER_ONGOING; // invalid data 
+        wait_to_be_stablized--; // delay counter decreases
+        return;
+   }         
+   //sample more data at the first time.
+   if(Buf_Is_Empty == 0){ 
+      for(j=0; j< AVERAGE_NUM; j++){
          AverageBuf[j] = FillDatBuf();
-      //////flag that buffer is not empty any more./////
+         if((AverageBuf[j] == AD_BUSY) || (AverageBuf[j] == AD_OVER_FLOW)) {
+           RS485._global.cs_mtrl = AverageBuf[j]; // invalid data 
+           return;
+         }
+      }
       Buf_Is_Empty = 1;  
-   }
-     
-   //shift in the buffer to only save latest 4 average data.
+   }     
+   //shift in the buffer to only save latest AVERAGE_NUM average data.
    for(j=0;j<AVERAGE_NUM-1;j++)
       AverageBuf[j] = AverageBuf[j+1];
    AverageBuf[AVERAGE_NUM-1] = FillDatBuf();
+   if((AverageBuf[AVERAGE_NUM-1] == AD_BUSY) || (AverageBuf[AVERAGE_NUM-1] == AD_OVER_FLOW)) {
+      RS485._global.cs_mtrl = AverageBuf[AVERAGE_NUM-1]; // invalidate "cs_mtrl"
+      return;
+   }
+      
+   // start to filter
    flag = PASS;  
    up = AverageBuf[AVERAGE_NUM-1] + (AverageBuf[AVERAGE_NUM-1] >> 6);
    dn = AverageBuf[AVERAGE_NUM-1] - (AverageBuf[AVERAGE_NUM-1] >> 6);         
 
-#ifdef _ENABLE_MORE_FILTER_OPTIONS_
-   //Filter option #0: Perform "average+clamp" filter
-    if ((RS485._flash.cs_Filter_option & 0xF0) == 0) 
-   {              
-      for(j=0; j<DATA_NUM; j++)
-      {             
-         if((DataBuf[j] > up) || (DataBuf[j] < dn))
-         {  flag = FAIL; 
-            // weight is not stable, skip next n samples.
-            wait_to_be_stablized = ((RS485._flash.cs_Filter_option & 0xF) << SKIP_N_SAMPLES) + 1;
-            break; 
-         } 
-      }
-   } 
-#endif   
    //Filter option #1: Perform "average+Forcast" filter
-   if ((RS485._flash.cs_Filter_option & 0xF0) == 0x10)
-   {
+   if ((RS485._flash.cs_Filter_option & 0xF0) == 0x10){
       for(j=0; j<AVERAGE_NUM-1; j++)     
-         if((AverageBuf[j] > up) || (AverageBuf[j] < dn))       
-         {   
+         if((AverageBuf[j] > up) || (AverageBuf[j] < dn)){   
             flag = FAIL;
             // weight is not stable, skip next n samples.
             wait_to_be_stablized = ((RS485._flash.cs_Filter_option & 0xF) << SKIP_N_SAMPLES) + 1;
@@ -524,33 +529,10 @@ void CS5532_PoiseWeight()
    }
    // add other options:
      
-     
-   // handle fail/pass
-   if(flag == PASS)    // data is not stable, try again     
-   {   
-      if(wait_to_be_stablized > 0)
-      {   RS485._global.cs_mtrl =0xffff; // invalid data 
-          wait_to_be_stablized--; // skip 1 samples
-      }
-      else             
-         RS485._global.cs_mtrl = AverageBuf[AVERAGE_NUM-1]; 
-   }
+   if(flag == PASS)                 
+      RS485._global.cs_mtrl = AverageBuf[AVERAGE_NUM-1]; 
    else
-      RS485._global.cs_mtrl =0xffff; // invalid data
-   
-#ifdef _DISP_POST_FILTER_DATA_
-   //print higher byte
-   LED_FLASH(AD);
-   j= RS485._global.cs_mtrl >> 8;    
-   sleepms(UART_DELAY);
-   putchar(j);   
-   sleepms(UART_DELAY);
-   j = RS485._global.cs_mtrl & 0xFF;
-   putchar(j);   
-   sleepms(UART_DELAY);     
-   putchar('D');   
-   sleepms(UART_DELAY);
-#endif
+      RS485._global.cs_mtrl = FILTER_ONGOING; // invalidate "cs_mtrl"
                     
 }                                                                   
 
@@ -580,12 +562,16 @@ void CS5532_Poise2Result()
    u32 temp1,temp3, temp4;
    u16 delta, min_delta;
    u8 i;             
+#ifdef _FORCE_CONSTANT_WEIGHT_ 
+   RS485._global.Mtrl_Weight_gram = 0xfff1;
+   return;   
+#endif
 
    // check if error happened in CS5532_PoiseWeight()
-   if(RS485._global.cs_mtrl == 0xffff)
-   { // result is invalid. this special data tells master board that
-     // weight data it gets is invalid, try again later.
-     RS485._global.Mtrl_Weight_gram =  0xffff;                
+   if(RS485._global.cs_mtrl > MAX_VALID_DATA)
+   { // result is invalid. 
+     // pass fail code to variable Weight_gram, which will be read by master board.
+     RS485._global.Mtrl_Weight_gram =  RS485._global.cs_mtrl;                
      return;      
    }       
   
@@ -607,7 +593,7 @@ void CS5532_Poise2Result()
       delta = RS485._global.old_cs_zero - RS485._flash.cs_zero; 
       for(i=0;i<5;i++)
          RS485._flash.cs_poise[i] -= delta;   
-   }   //*/
+   }   
    RS485._global.old_cs_zero = RS485._flash.cs_zero;   
    
    /***************************************************************/
@@ -642,21 +628,18 @@ void CS5532_Poise2Result()
    {
       temp4 =  temp3/temp2;
       RS485._global.Mtrl_Weight_gram = (temp4 >> 6);
+      if(RS485._global.Mtrl_Weight_gram==0xffff)
+          RS485._global.Mtrl_Weight_gram= OVERWEIGHT;
       RS485._global.Mtrl_Weight_decimal = temp4 & 0x3F;
    }   
    else
-      RS485._global.Mtrl_Weight_gram =  0xfffe; // indicate bad calibration                     
-   
+      RS485._global.Mtrl_Weight_gram =  DIV_ERROR; // indicate bad calibration                     
+   // master board won't find this node if Mtrl_Weight_gram is always 0xffff.
+   // Bad calibartion data will make Mtrl_Weight_gram always bad.
+   // so we set Mtrl_Weight_gram to a different data to indicate calibration error.
    /***************************************************************/                      
-#ifdef _DISP_MATERIAL_WEIGHT_
-   sleepms(UART_DELAY);
-   putchar('W');
-   sleepms(UART_DELAY);
-   putchar(RS485._global.Mtrl_Weight_gram >> 8);
-   sleepms(UART_DELAY);
-   putchar(RS485._global.Mtrl_Weight_gram & 0xFF);
-   sleepms(UART_DELAY);
-   putchar(RS485._global.Mtrl_Weight_decimal);
-#endif
+   // if bit2 of test_mode_reg1 is set, AD output is sent to master board / PC.
+   if(DISPLAY_AD_RAW_DATA)
+        RS485._global.Mtrl_Weight_gram =  RS485._global.cs_mtrl;
    return;
 }

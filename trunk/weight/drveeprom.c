@@ -64,6 +64,9 @@ u8 bWriteData2Eeprom_c(u16 wAddress, u8 bVal)
 { 
     if(fgEepromBufFull()) 
         return RET_BUSY; 
+    // add for EEPROM protection
+    //if(!EN_EEPROM_WRITE)
+    //   return RET_SUCCESS;
 
     // full file buffer if buffer is not full yet
     #asm("cli");     // disable all interrupt

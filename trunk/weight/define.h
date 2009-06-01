@@ -2,16 +2,12 @@
 #define _DEFINE_H_
 
 //My compile switches here: enabled when uncommented
-//#define _TEST_MOTOR_MAGNET_   //uncommented to test motor and magnet.
 #define _50HZ_FILTER_           //50HZ AC power supply. uncommented if 60HZ.
 //#define _SENSOR_ENABLED_        //uncommented to enable stepping motor sensors
 #define _DISABLE_WATCHDOG_    //uncommented to disable watchdog
-//#define _DISP_POST_FILTER_DATA_  //uncommented to display CS5530 post-filter(software) output
-//#define _DISP_MATERIAL_WEIGHT_
-//#define _DISPLAY_EEPROM_DATA_       
-//#define _DISP_AD_OUT_
-//#define _FORCE_INIT_EEPROM_  // force to initialize EEPROM
-//#define _AD_CALIBRATION_ // factory calibration.
+//#define _FORCE_INIT_EEPROM_  // force to initialize EEPROM.
+//#define _FORCE_CONSTANT_WEIGHT_    
+//#define _BOARD_TYPE_IS_VIBRATE_
 
 #define i32 	long int
 #define i16 	int
@@ -30,6 +26,15 @@
 #define CS5532_SETUP_ERR 0x1
 #define CS5532_OFFSET_CAL_ERR 0x2
 #define CS5532_GAIN_CAL_ERR 0x3
+
+// AD conversion indicators
+#define INVALID_DATA 0xfffe   // Adding material to lower bucket or releasing material.
+#define AD_BUSY 0xfffd
+#define AD_OVER_FLOW 0xfffc                     //65532
+#define FILTER_ONGOING 0xfffb 
+#define DIV_ERROR 0xfffa                         //65530
+#define OVERWEIGHT 0xfff9 
+#define MAX_VALID_DATA 0xfff0
 
 // 定义还有多少数据需要被写入EEPROM。
 #define NUM_OF_DATA_TO_BE_PGMED 0xFF
@@ -50,7 +55,8 @@ void sleeps(u16);
 #define LED_D7            PORTB.7        // LED D7
 #define LED_D8            PORTD.6        // LED D8
 #define LED_D6            PORTD.5        // LED D6
-     
+
+    
 #define LED_ON(x)         x = 0
 #define LED_OFF(x)        x = 1
 #define LED_FLASH(x)      x = ~x
@@ -211,9 +217,10 @@ typedef struct {
 	u8	open_w;	   
 	
 	// Reserved for Future Use
-	u8      revision;
-	u8      rom_para_valid;
-	u16     reserved2;
+	u8      check_sum;
+	u8      rom_para_valid; 
+	u8      addr_backup;
+	u8      board_backup;
 
 } S_FLASH;                
 
@@ -242,7 +249,7 @@ typedef struct {
         // AD status polled by master board for error check, when set:
         // bit 0 -> cs5530 offset cal fail. This bit won't be used in production(keep 0).
         // bit 1 -> cs5530 gain cal fail. This bit won't be used in production(keep 0). 
-        // bit 2 -> cs5532 setup fail. This bit
+        // bit 2 -> cs5532 initialization fail.
         // bit 3 -> cs5530 conversion overflow (invalid readout)  
         // bit 4 -> cs5530 output-to-gram calculaton error, "Mtrl_Weight_gram" invalid. 
         // bit 7:5 -> reserved for future use. keep 0.
@@ -310,8 +317,8 @@ typedef struct {
 
 typedef struct  { //status of magnet
       // define pulse numbers to drive the electrical magnet.
-      u32 pulse_num;  //u16 changed to u32
-      //u16 duty; 
+      u16 pulse_num;  //u16 changed to u32
+      u16 reserved; 
       u16 half_period;
 }S_MAGNET;
 
@@ -361,10 +368,15 @@ extern u8 debug_mode;
 #define TEST_BIT5               0b00100000
 #define TEST_BIT6               0b01000000
 #define TEST_BIT7               0b10000000
+#define TEST_BITS_76            0b11000000
 
 #define ENABLE_MULTI_POISES  (RS485._global.test_mode_reg1 & TEST_BIT7) == 0
-#define CHANGE_RS485_ADDR    (RS485._global.test_mode_reg1 & TEST_BIT6) == 1
-#define CHANGE_BOARD_TYPE    (RS485._global.test_mode_reg1 & TEST_BIT5) == 1
-#define ENABLE_MOTOR_SENSORS (RS485._global.test_mode_reg1 & TEST_BIT4) == 0
-#define TURN_OFF_WATCHDOG    (RS485._global.test_mode_reg1 & TEST_BIT3) == 1 
+#define ENABLE_MOTOR_SENSORS (RS485._global.test_mode_reg1 & TEST_BIT6) == 0
+#define TURN_OFF_WATCHDOG    (RS485._global.test_mode_reg1 & TEST_BIT5) == 1  
+#define DISPLAY_AD_RAW_DATA  (RS485._global.test_mode_reg1 & TEST_BIT4) == 1
+#define EN_EEPROM_WRITE      (RS485._global.test_mode_reg1 & TEST_BIT3) == 1
+
+#define CHANGE_RS485_ADDR    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x80
+#define CHANGE_BOARD_TYPE    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x40
+
 #endif

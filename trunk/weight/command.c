@@ -85,6 +85,8 @@ void cm_ack(u8 port)
         prints(outfrm[port].databuf, outfrm[port].datalen, port);
    //print out check_sum byte
    prints(&outfrm[port].cksum,1,port);
+   // LED to indicate command ack.
+   LED_FLASH(LED_D8);
 }
 /****************************************************************************/
 //                          Command Receiver
@@ -95,7 +97,6 @@ void cm_ack(u8 port)
 
 void cm_pushc(u8 c,u8 port)
 {
-      PORTD.5 = ~PORTD.5; //debug        
       if(RFlag[port] == RF_CKSUM)                       //wait until it is process
                 return;
       if(RFlag[port] == RF_DATABUF)               {     //checksum found
