@@ -15,10 +15,11 @@ void Init_Port()
     DDRA=0x00;
 
  // Port B initialization
- // Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=Out 
+ // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=Out 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=1 
+ // Use PORTB[7:4] as LED output, 0 -> LED ON
     PORTB=0x01;
-    DDRB=0x01;
+    DDRB=0xF1;
 
  // Port C initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=Out Func2=Out Func1=Out Func0=Out 
@@ -29,6 +30,7 @@ void Init_Port()
  // Port D initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T 
+  // Use PORTD[7:6] as LED output, 0 -> LED ON
     PORTD=0x00;
     DDRD=0xF0;
 

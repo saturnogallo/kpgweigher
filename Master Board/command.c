@@ -44,6 +44,13 @@ void sleepms(u16 ms)
                         ;
         }
 }            
+/*******************************************************************************/
+// PC read data from a node specified by arg1 addr. 
+// Arg2: starting register address of data to be read out. 
+// Arg3: How many bytes to be read starting from reg address defined by arg2.
+// arg4: define message will be send out through which port of 16C554.
+// function cm_ack() calculates checksum and sends out a complete message frame.
+/*******************************************************************************/
 void pc_query(u8 addr, u8 regid, u8 size, u8 port)
 {                          
         u8 j;
@@ -57,7 +64,13 @@ void pc_query(u8 addr, u8 regid, u8 size, u8 port)
         }                           
         cm_ack(port);
 }                    
-//query several bytes('size' bytes starting from 'regid') from addr, 
+/*******************************************************************************/
+// Master board reads data from a specified node.
+// Arg1: node adress
+// Arg2: starting address of data to be read from said node.
+// Arg3: how many data to be read
+// Arg4: from which port of 16C554 message will be sent out.
+/*******************************************************************************/
 void cm_query(u8 addr, u8 regid, u8 size, u8 port)
 {                          
         u8 j;
@@ -147,6 +160,9 @@ void cm_ack(u8 port)
    if(outfrm[port].datalen > 0)
         prints(outfrm[port].databuf, outfrm[port].datalen, port);
    prints((u8*)&(outfrm[port].cksum),1,port);
+   
+   // LED to indicate command out.
+   LED_FLASH(LED_ACK);
 }
 /****************************************************************************/
 //                     RS485 Frame Analysis 
@@ -157,14 +173,23 @@ void cm_ack(u8 port)
 extern u8 debug_mode;
 void cm_pushc(u8 c,u8 port)
 {
+                        //LED to indicate communication status
+                        if(port == SPORTPC)
+                                LED_FLASH(LED_PC);
+                                
+                        // LED logic ends
+                        
       if(RFlag[port] == RF_CKSUM)                       //wait until it is processed
                 return;
       if(RFlag[port] == RF_DATABUF)               {     //checksum found
                 infrm[port].cksum = c;
                 if(((checksum((u8*)(&infrm[port]),6)+checksum(infrm[port].databuf,infrm[port].datalen)) & 0xff) == c){
                         RFlag[port] = RF_CKSUM;
+
+                        
                         cm_process(port);
-                        RFlag[port] = RF_IDLE;
+                        RFlag[port] = RF_IDLE;                       
+                        
                         return;
                 }                                                
       }
@@ -262,20 +287,24 @@ void parse_sys_frm(u8* ptr, u8 port)
 	u8 *tptr;
         if(infrm[port].cmd == 'W'){   //write environment by bytes
                 j = 0;
-                while(j < infrm[port].datalen){
+                while(j < infrm[port].datalen){  
+                /*
                         if(infrm[port].databuf[j] == RWait[port]){
                               RWait[port] = R_NOWAIT;  
                         }
+                */
                         *(ptr+infrm[port].databuf[j]) = infrm[port].databuf[j+1];
                         j = j+2;
                 }                              
         }
         if(infrm[port].cmd == 'X'){   //write environment by words
                 j = 0;
-                while(j < infrm[port].datalen){                   
+                while(j < infrm[port].datalen){  
+                        /*                 
                         if(infrm[port].databuf[j] == RWait[port]){
                               RWait[port] = R_NOWAIT;  
-                        }
+                        }        
+                        */
                         *(ptr+infrm[port].databuf[j]) = infrm[port].databuf[j+1];
                         *(ptr+1+infrm[port].databuf[j]) = infrm[port].databuf[j+2];                        
                         j = j+3;

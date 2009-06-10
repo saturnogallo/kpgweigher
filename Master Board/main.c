@@ -39,14 +39,17 @@ flash u8 n2m_map[NREG_SIZE_TOTAL] = {0           ,1           ,MREG_INVALID,MREG
                                      MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,
                                      MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID}; 
 
-extern u8 RWait[]; //regid that program is waiting for on each port
+//regid to indicate port is waiting for data
+extern u8 RWait[]; 
 
 u8 true_val = 1;
 u8 false_val = 0;
 
-static u8 port_node[SPORT_TOTAL];		//current search node address on each port
-static u16 port_timeout[SPORT_TOTAL];	//current timeout count on each port
-   
+//current search node address on each port
+static u8 port_node[SPORT_TOTAL];	
+// Current timeout limit for each port
+static u16 port_timeout[SPORT_TOTAL];	
+//"has_node" indicates which port/group this node belongs to   
 static u8 has_node = 0; //indicate of distribution of node on each group and port
 static u16 loopcnt = 0; //tick of main loop
 //handle forward of command and some reg read command
@@ -74,18 +77,36 @@ SYSTEM system;                                       // 系统参数设置
 #define SUCCEED	1
 #define FAILED  0
 
-//pretending to be pc and send query of byte(regid) to nodeid until it is sent out or timeout
-u8 pc_readb_until_return(u8 regid, u8 nodeid){
-        u16 timeout;
-		checkforward_up();
-        pc_query(RS485_Node[nodeid].addr, regid, 1, RS485_Node[nodeid].uart_port);
-        timeout = 0x400; //1024
+/**************************************************************************************/
+// Pretending to be pc and send query of byte(regid) to nodeid until it is sent out or 
+// timeout
+/**************************************************************************************/
+u8 pc_readb_until_return(u8 regid, u8 nodeid)
+{
+    u16 timeout;
+    checkforward_up();
+    pc_query(RS485_Node[nodeid].addr, regid, 1, RS485_Node[nodeid].uart_port);
+    //wait until time out or acknowledgement is received.
+    timeout = 0x400; //1024
         while((FB_in_up == FB_out_up) && (timeout != 0)){
                 timeout--;     //wait for reply or time out   
-         }       
-        return (timeout > 0)? SUCCEED : FAILED;
+        }
+    return (timeout > 0)? SUCCEED : FAILED;
+}         
+u8 pc_readb_until_return2(u8 regid, u8 nodeid)
+{
+    u16 timeout;
+    checkforward_up();
+    pc_query(vibrator[nodeid].addr, regid, 1, vibrator[nodeid].uart_port);
+    //wait until time out or acknowledgement is received.
+    timeout = 0x400; //1024
+    while((FB_in_up == FB_out_up) && (timeout != 0))
+        timeout--;     //wait for reply or time out   
+    return (timeout > 0)? SUCCEED : FAILED;
 }
-//query byte (regid) on port until it returns or timeout
+/**************************************************************************************/
+//query byte (regid) on port until it returns or timeout                                
+/**************************************************************************************/
 u8 readb_until_return(u8 port, u8 regid, u8 nodeid){
         u16 timeout;
         RWait[port] = regid;
@@ -119,26 +140,26 @@ void regroup_node()
                 RS485_Node[i].board_property = BOARD_TYPE_WEIGHT | BOARD_GROUP_A;
         }
         if((RS485_Node[i].board_property & BOARD_TYPE_MASK ) == BOARD_TYPE_VIBRATE){//如果是主振机节点：移动到主振机参数区
-                vibrator[system.vibrator_num].status			=	RS485_Node[i].status;
-	        	vibrator[system.vibrator_num].addr				=	RS485_Node[i].addr;
-				vibrator[system.vibrator_num].board_property	=	RS485_Node[i].board_property;
-				vibrator[system.vibrator_num].uart_port 		= 	RS485_Node[i].uart_port;
-				RS485_Node[i].board_property 					= 	BOARD_TYPE_INVALID|BOARD_GROUP_NONE;
-			   	RS485_Node[i].addr = 0x79;
-				system.vibrator_num++;
-				continue;            
+                vibrator[system.vibrator_num].status = RS485_Node[i].status;
+	        vibrator[system.vibrator_num].addr = RS485_Node[i].addr;
+                vibrator[system.vibrator_num].board_property = RS485_Node[i].board_property;
+		vibrator[system.vibrator_num].uart_port = RS485_Node[i].uart_port;
+		RS485_Node[i].board_property = BOARD_TYPE_INVALID|BOARD_GROUP_NONE;
+	   	RS485_Node[i].addr = 0x79;
+		system.vibrator_num++;
+		continue;            
         }
         if((RS485_Node[i].board_property & BOARD_TYPE_MASK) == BOARD_TYPE_WEIGHT){  //如果是称重板  
                 if(i != system.node_num){     //no more action for just in place case. otherwise exchange it with the item in place                        
-       		   		RS485_Node[system.node_num].status			=	RS485_Node[i].status;
-				   	RS485_Node[system.node_num].addr			=	RS485_Node[i].addr;
-		   			RS485_Node[system.node_num].board_property	=	RS485_Node[i].board_property;
-		   			RS485_Node[system.node_num].uart_port 		= 	RS485_Node[i].uart_port;
-		   			RS485_Node[i].board_property 				= 	BOARD_TYPE_INVALID|BOARD_GROUP_NONE;
-			   		RS485_Node[i].addr = 0x79;
+       		   		RS485_Node[system.node_num].status = RS485_Node[i].status;
+			   	RS485_Node[system.node_num].addr = RS485_Node[i].addr;
+	   			RS485_Node[system.node_num].board_property = RS485_Node[i].board_property;
+	   			RS485_Node[system.node_num].uart_port = RS485_Node[i].uart_port;
+	   			RS485_Node[i].board_property = BOARD_TYPE_INVALID|BOARD_GROUP_NONE;
+		   		RS485_Node[i].addr = 0x79;
                 }
-				system.node_num++;  
-				continue;
+		system.node_num++;  
+		continue;
         }                
     }                                                                  
 }                  
@@ -180,17 +201,17 @@ void init_var()
     for(i=0; i<MAX_NODE_NUM; i++)
     {
     	system.vibrator_num = 0;
-	    system.node_num = 0;
-		RS485_Node[i].addr=0x79;                     		// invalid RS485 address
-		RS485_Node[i].board_property = BOARD_TYPE_INVALID | BOARD_GROUP_NONE;       // invalid Board
-		RS485_Node[i].fail_counter = 0;             	// how many time the node failed to be selected
+	system.node_num = 0;
+	RS485_Node[i].addr=0x79;                     		// invalid RS485 address
+	RS485_Node[i].board_property = BOARD_TYPE_INVALID | BOARD_GROUP_NONE;       // invalid Board
+	RS485_Node[i].fail_counter = 0;             	// how many time the node failed to be selected
     }	
     for(i=0; i<MAX_VIBR_NUM; i++)
     {
-		vibrator[i].addr=0x80;                     // RS485 address beyond the max_node_num
-		vibrator[i].board_property = BOARD_TYPE_INVALID | BOARD_GROUP_NONE; // General Purpose Board
-		vibrator[i].fail_counter = 0;             // how many time the node failed to be selected
-	}
+	vibrator[i].addr=0x80;                     // RS485 address beyond the max_node_num
+	vibrator[i].board_property = BOARD_TYPE_INVALID | BOARD_GROUP_NONE; // General Purpose Board
+	vibrator[i].fail_counter = 0;             // how many time the node failed to be selected
+    }
 }
 void find_nodes(void)
 {
@@ -203,15 +224,15 @@ void find_nodes(void)
     {   
         RS485_Node[i].Mtrl_Weight_gram = 0xffff;
         RS485_Node[i].Mtrl_Weight_decimal = 0;
-		RS485_Node[i].addr=i+1;                     	// RS485 address starting from 1
-		RS485_Node[i].board_property = BOARD_TYPE_INVALID | BOARD_GROUP_NONE;       // invalid Board
-		RS485_Node[i].fail_counter = 0;             	// how many time the node failed to be selected
+        RS485_Node[i].addr=i+1;                     	// RS485 address starting from 1
+	RS485_Node[i].board_property = BOARD_TYPE_INVALID | BOARD_GROUP_NONE;       // invalid Board
+	RS485_Node[i].fail_counter = 0;             	// how many time the node failed to be selected
     }
     for(i=0; i<MAX_VIBR_NUM; i++)
     {
-		vibrator[i].addr=0x80;                     
-		vibrator[i].board_property = BOARD_TYPE_INVALID | BOARD_GROUP_NONE; // General Purpose Board
-		vibrator[i].fail_counter = 0;             
+	vibrator[i].addr=0x80;                     
+	vibrator[i].board_property = BOARD_TYPE_INVALID | BOARD_GROUP_NONE; // General Purpose Board
+	vibrator[i].fail_counter = 0;             
     }
     
     // start to inqury RS485 nodes. Initilize node number first    
@@ -242,7 +263,7 @@ void find_nodes(void)
 /**************************************************************************************/
 void cmd_loop(u8 grp){     
        u8 i;            
-       idle_process();
+       idle_process();                                   
        if(is_cmd_flag(system.flag_stop_machine[grp])){   //停止节点命令   
            for(i=0;i<system.node_num;i++){  
               if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp)	//not including missing board
@@ -263,7 +284,8 @@ void cmd_loop(u8 grp){
        if(is_cmd_flag(system.flag_goon[grp])){   // 继续节点命令    
            for(i=0;i<system.node_num;i++){  
               if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp){	//not including missing board
-                        if((system.running[grp]) && (system.target_weight[grp] > (3*RS485_Node[i].Mtrl_Weight_gram))){	//running and not exceed 1/3 of total
+//                        if(system.running[grp] && (RS485_Node[i].Mtrl_Weight_gram < (system.target_weight[grp]>>2+system.target_weight[grp]>>3))){	//running 0.25+0.125 = 0.375 near 30%
+                        if(system.running[grp]){	//running 0.25+0.125 = 0.375 near 30%
 	                                set_cmd(NREG_GOON,i);   //overweight case is handled by pc side
                         }                                                              
                         RS485_Node[i].Mtrl_Weight_gram = 0xffff; //clear the weight for next search.                                
@@ -275,26 +297,47 @@ void cmd_loop(u8 grp){
        }     
 
        if(is_cmd_flag(system.flag_start_machine[grp]))
-       {   // 发送命令启动节点         
+       {   // 发送命令启动节点              
 		   if(system.flag_start_machine[grp] == CMD_START_SEARCH)	//research all the nodes
 		   {	
 				   init_var();
 				   find_nodes();
+				   system.flag_start_machine[grp] = STATE_BEIDLE;
 				   return;
 		   }
-           for(i=0;i<system.node_num;i++){  
-              if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp){ //not including missing board
-                      set_cmd(NREG_ENABLE,i);     //enable = 1                      
-              }
-           }             
-           for(i=0;i<system.vibrator_num;i++){  
-               if((vibrator[i].board_property & BOARD_GROUP_MASK) == grp)	//not including missing board
-                      vset_cmd(NREG_ENABLE,i);    //enable = 1
-           }             
-           system.running[grp] = 1;
-           cm_report_b(MY_ADDR, (u8)((u8*)&system.running[grp]-(u8*)&system), 1, (u8*)&system.running[grp], SPORTPC);                                 
-           system.flag_start_machine[grp] = STATE_DONE_OK; //set the flag that the cmd has been done
-           return;
+		   if(system.flag_start_machine[grp] == CMD_RESET_16C554)
+		   {
+	                Init_554();                                          
+
+		        system.flag_start_machine[grp] = STATE_BEIDLE;
+       	                cm_report_b(MY_ADDR, (u8)((u8*)&system.flag_start_machine[grp]-(u8*)&system), 1, (u8*)&system.flag_start_machine[grp], SPORTPC); 
+		        return;
+		   }           
+  		   if(system.flag_start_machine[grp] == CMD_REBOOT_ME)
+  		   {              
+  		        for(i=0;i<100;i++)
+  		        {                           
+  		                putchar('.');
+  		                sleepms(100);
+  		        }
+  		        #asm("jmp 0x7C00");
+  		   }                                          
+		   if(system.flag_start_machine[grp] == CMD_START_MACHINE)
+		   {		   
+                        for(i=0;i<system.node_num;i++){  
+                                if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp){ //not including missing board
+                                      set_cmd(NREG_ENABLE,i);     //enable = 1                      
+                                }
+                        }             
+                        for(i=0;i<system.vibrator_num;i++){  
+                                if((vibrator[i].board_property & BOARD_GROUP_MASK) == grp)	//not including missing board
+                                      vset_cmd(NREG_ENABLE,i);    //enable = 1
+                        }             
+                        system.running[grp] = 1;
+                        cm_report_b(MY_ADDR, (u8)((u8*)&system.running[grp]-(u8*)&system), 1, (u8*)&system.running[grp], SPORTPC);                                 
+                        system.flag_start_machine[grp] = STATE_DONE_OK; //set the flag that the cmd has been done
+                        return;
+                    }
        } 
 }
 //one round of gathering weight
@@ -303,19 +346,19 @@ void search_loop(int grp)
        u8 i,port;
        idle_process();
        if(system.flag_search[grp] == STATE_BEIDLE){   //is idle , means trigger another round of weight gathering   
-           if((loopcnt%2 == 0) || system.running[grp]){	//take half chance to collect the weight
+           if(loopcnt%2 == 0){	//take half chance to collect the weight
                  for(i=0;i<system.node_num;i++){  
                         if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){   //including missing board
                            RS485_Node[i].Mtrl_Weight_gram = 0xffff;     //clear the weight to unavailable 
                         }
                 }
-                system.flag_search[grp] = 1; //start to gather weight from node 1. flag_search will store the board_id we are searching for now 
+                system.flag_search[grp] = 1; //start to gather weight from node 1 (position in array, not address). flag_search will store the board_id we are searching from now on
            }
            return;                        
        }
-       if((system.flag_search[grp] > STATE_BEIDLE) && (system.flag_search[grp] < STATE_DONE_OK)){ //during search of some board
+       if((system.flag_search[grp] >=1) && (system.flag_search[grp] <= system.node_num)){ //during search of some board
            for(i=0;i<system.node_num;i++){             //search whether all the data has been collected.    
-		      if((RS485_Node[i].board_property & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT)		
+		  if((RS485_Node[i].board_property & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT)		
 			      continue;
            	  if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) != grp) //not in this group //check the missing board too
 	      		  continue;
@@ -324,19 +367,52 @@ void search_loop(int grp)
 			      return;
               if(RS485_Node[i].Mtrl_Weight_gram != 0xffff)	//weight has been got
 		      	  continue;
-              if(0 == (RS485_Node[i].board_property & BOARD_MISSING_BIT)){ //not missing board
-                      RWait[port] = NREG_STATUS;
-                      port_timeout[port] = 0x1000;    
-		      		  cm_query(RS485_Node[i].addr,NREG_WEIGHT,4,port); //old command is send_query_l(REG_WEIGHT,i);                
-				      system.flag_search[grp] = RS485_Node[i].addr;
-				      return;
-		      }else{
-				      RS485_Node[i].fail_counter = 10;
-                      cm_query(RS485_Node[i].addr,NREG_BOARD,1,port);
-					  sleepms(200);
+	      port_node[port] = i;
+              RWait[port] = NREG_STATUS;
+              port_timeout[port] = 0x512;    
+	      cm_query(RS485_Node[i].addr,NREG_WEIGHT,4,port); //old command is send_query_l(REG_WEIGHT,i);                
+	      system.flag_search[grp] = i+1;
+	      return;
+           }                        
+		   //all weight has been queried   
+           port = 0;
+           for(i=0;i<system.node_num;i++){  
+              if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){ //including the missing board
+                   if((RS485_Node[i].Mtrl_Weight_gram == MY_INVALID_DATA) || 
+                        (RS485_Node[i].Mtrl_Weight_gram == AD_INVALID_DATA) || 
+                        (RS485_Node[i].Mtrl_Weight_gram == AD_BUSY) || 
+                        (RS485_Node[i].Mtrl_Weight_gram == AD_FILTER))
+                   {                                   
+                        RS485_Node[i].Mtrl_Weight_gram = 0xffff;
+                        port = port | 0x01;
+                   } else                   {
+                        port = port | 0x10; 
+                   }
               }
+           }                     
+           if(port == 0x01)          //all data are invalid
+           {             
+                Init_554();
+                 for(i=0;i<system.node_num;i++){  
+                        if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){   //including missing board
+                           RS485_Node[i].Mtrl_Weight_gram = 0xffff;     //clear the weight to unavailable 
+                        }
+                }
+                system.flag_search[grp] = 1;                          
+                return;
            }
-		   //all weight has been queried 
+           if(port == 0x11)     //got something and failed something
+           {
+                 for(i=0;i<system.node_num;i++){  
+                        if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){   //including missing board
+                           RS485_Node[i].Mtrl_Weight_gram = 0xffff;     //clear the weight to unavailable 
+                        }
+                }
+                system.flag_search[grp] = 1;                          
+                return;
+           }           
+           
+           //all data are valid
            for(i=0;i<system.node_num;i++){  
               if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){ //including the missing board
                    if((loopcnt%10 == 0)){     //weigh_gram, weigh_decimal, status, cs_status, hw_status will be reported.     
@@ -346,7 +422,7 @@ void search_loop(int grp)
                    }
                    idle_process();
               }
-           } 
+           }                           
            system.flag_search[grp] = STATE_DONE_OK;                          
        }
 }
@@ -354,39 +430,41 @@ void search_loop(int grp)
 void port_loop(u8 port)
 {                                
        u8 i;                          
-
        i=port_node[port]; //current querying node id;          
        if(RS485_Node[i].uart_port != port) //node not on this port
-		       return;
-       if(RWait[port] != R_NOWAIT){ //still waiting some command (ex: weight)
+		       return;                                    
+       if(RWait[port] == R_NOWAIT){ //not waiting any command (ex: weight)
+               if(port_timeout[port] == 0)
+                        return;
+                //get response in time    
+                /*
+				   if(RS485_Node[i].fail_counter >= 10) //missing node
+				   {
+				   	//missing board founded again
+				   	if(system.running[RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT])
+			  	        {
+		                		set_cmd(NREG_ENABLE,i);    //enable = 1
+					}else{
+                				unset_cmd(NREG_ENABLE,i);    //enable = 0
+				   	}
+				   }
+                */
+		RS485_Node[i].fail_counter = 0;
+		port_timeout[port] = 0;
+       }else{    
                if(port_timeout[port] != 0){  //tick the timeout count
                        port_timeout[port]--;
                	       return;
-               }
-		       //time out, so increment the fail_count and move to the next node;
-               if(RS485_Node[i].fail_counter < 4){
-					   ++RS485_Node[i].fail_counter;
-			   }else{
-                       RS485_Node[i].board_property |= BOARD_MISSING_BIT;
-               }
+               }                            
+	       //time out, so increment the fail_count and move to the next node;
+//               if(RS485_Node[i].fail_counter++ <){ 
+//			++RS485_Node[i].fail_counter;         
+//			sleepms(200);
+//               }else{
+                        RS485_Node[i].Mtrl_Weight_gram = MY_INVALID_DATA; //mark with an invalid weight
+//                        RS485_Node[i].fail_counter = 0;
+//               }
                RWait[port] = R_NOWAIT;     
-       }else{
-               if(port_timeout[port] != 0){  //get return in time
-			       port_timeout[port] = 0;
-				   if(RS485_Node[i].fail_counter != 10) //not missing node
-				   {
-				       RS485_Node[i].fail_counter = 0;
-					   return;
-				   }
-				   //missing board founded again
-				   if(system.running[RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT])
-				   {
-                		set_cmd(NREG_ENABLE,i);    //enable = 1
-				   }else{
-                		unset_cmd(NREG_ENABLE,i);    //enable = 0
-				   }
-				   RS485_Node[i].fail_counter = 0;
-	       		}
        }
 }                 
 void report_loop(){  
@@ -398,7 +476,19 @@ void report_loop(){
                         cm_report_b(MY_ADDR, i, 1, ((u8*)&system) + i, SPORTPC);           
                 }                           
                 system.flag_report = STATE_DONE_OK;
-       }else{
+       }else{                      
+                for(i=0;i<system.vibrator_num;i++){  //search through vibrator board
+                         if(vibrator[i].addr == system.flag_report){  
+                                for(j=0; j< (NREG_SIZE_TOTAL);j++){
+                                        if(pc_readb_until_return2(j,i)){
+                                                idle_process();                                                       
+                                        };
+                                        sleepms(100); //why we need this delay?
+                                }
+                                system.flag_report = STATE_DONE_OK;
+                                return;
+                         }
+                }               
                 for(i=0;i<system.node_num;i++){  
                          if(RS485_Node[i].addr == system.flag_report){  
                                 for(j=0; j< (NREG_SIZE_TOTAL);j++){
@@ -421,6 +511,7 @@ void report_loop(){
 void main(void)
 {
     
+    u16 tick = 0;
     system.flag_report = MY_ADDR;                //will be set to STATE_DONE_OK once node search is done.
     // RS485 Node    
     init_var();	//init data structure
@@ -441,7 +532,14 @@ void main(void)
     // not sure if RS485 nodes are ready to accept cmd, 
     // Master board delays for some time here. otherwise first several cmds
     // may be lost.    
-    sleepms(800); //wait until all the node is ready after power up
+    // intialize LED. 
+    PORTB.7=1;
+    PORTB.6=1;
+    PORTB.5=1;
+    PORTB.4=1;
+    PORTD.7=1;
+    PORTD.6=0; 
+    sleepms(800); //wait until all the node is ready after power up    
     find_nodes(); //query regroup all nodes;
     system.flag_report = STATE_DONE_OK;	//search action is done
                           
@@ -467,7 +565,15 @@ void main(void)
        
        if(has_node & 0x08)                    {cmd_loop(BOARD_GROUP_D); search_loop(BOARD_GROUP_D);};
        if(has_node & 0x80)                    port_loop(SPORTD);                            
-       idle_process();
+       idle_process(); 
+       
+       // LED to indicate code is running. 
+       if(++tick>2000)
+       {
+         LED_FLASH(LED_RUN);
+         tick=0;
+       }
+       // LED logic ends.
     }
 }      
 /*******************************************/

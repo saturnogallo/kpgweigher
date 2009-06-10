@@ -13,7 +13,13 @@
 
 //#define RUN	           PORTD.7;
 #define LED_ON(addr)       addr=0;
-#define LED_OFF(addr)      addr=1;
+#define LED_OFF(addr)      addr=1;  
+#define LED_FLASH(addr)    addr=~addr;
+#define LED_RUN            PORTB.7
+#define LED_PC             PORTB.6
+#define LED_NODE           PORTB.5
+#define LED_ACK            PORTB.4
+
 //define RS485 node parameter structure 
 #define MAX_NODE_NUM       36               
 #define MAX_VIBR_NUM       4
@@ -27,12 +33,8 @@ typedef struct
   u8  Mtrl_Weight_decimal; //4
   u8  status;         //5 status of current node.    
   u8  cs_status;      //6
-  u8  hw_status;      //7
-
-
- 
+  u8  hw_status;      //7    
   u8  uart_port;     // node connected to which port of 16C554(A/B/C/D)
-  
   u8  fail_counter;   // how many times this node hasn't been selected
 } NODE;
 
@@ -124,18 +126,25 @@ typedef struct  {
 #define STATE_BEIDLE            0
 #define STATE_DONE_FAIL         0xfe
 #define STATE_DONE_OK           0xfd
+#define CMD_START_MACHINE	0x01
 #define CMD_START_SEARCH	0x02
+#define CMD_RESET_16C554        0x03            
+#define CMD_REBOOT_ME           0x04
 #define BOARD_TYPE_MASK         0xf0                          
 #define BOARD_TYPE_VIBRATE     	0x00
 #define BOARD_TYPE_WEIGHT       0x10
 #define BOARD_TYPE_INVALID      0xf0 
 
+#define MY_INVALID_DATA    0xfff1                                                      
+#define AD_INVALID_DATA    0xfffe
+#define AD_BUSY            0xfffd
+#define AD_FILTER          0xfffb
 #define BOARD_GROUP_MASK        0x0f
 #define BOARD_GROUP_MASK_SHORT  0x07
 #define BOARD_GROUP_A           0x00
 #define BOARD_GROUP_B           0x01
 #define BOARD_GROUP_C           0x02
 #define BOARD_GROUP_D           0x03
-#define BOARD_MISSING_BIT       0x08
+#define BOARD_MISSING_BIT       0x00	//disable the missing bit now
 #define BOARD_GROUP_NONE	0x0f
 #endif
