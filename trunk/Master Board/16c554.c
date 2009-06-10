@@ -30,7 +30,7 @@
 // LCR.7 must be cleared to 0 when accessing RBR/THR/IER
 // LCR.7 must be set to 1 when accessing divisor latch
 #define LCR_DATA 0b00011011   // Even Parity 8 data bit, 1 stop bit
-#define DLL_DATA 0x4          // 115200bps: DLL = 0x4, 57600bps: DLL= 0x8
+#define DLL_DATA 0x4          // 115200bps: DLL = 0x4, 57600bps: DLL= 0x8, 38400 0xC
 #define DLM_DATA 0x0
 #define MCR_DATA 0b00001000
 
@@ -39,7 +39,8 @@
 /********************************************************************************/
 interrupt [EXT_INT4] void ext_int4_isr(void)
 {
-   u8 rdata;
+   u8 rdata;     
+   LED_FLASH(LED_NODE);
    switch(UC_554A_IIR & 0xF)
    { 
       case 0xC:                         // character time out. RBR read to clear interrupt
@@ -47,14 +48,12 @@ interrupt [EXT_INT4] void ext_int4_isr(void)
           rdata = UC_554A_RBR;        // read data from receiver FIFO. RBR read to clear int          
           cm_pushc(rdata,SPORTA);
           return;
-      case 0x1:                         // none interrupt
-      case 0x2:                         // Transmitter Hold Register Empty
-      case 0x0:                         // Modem status
-      case 0x6:                         // Receiver line status interrupt: OE/PE/FE/BI.
-          rdata = UC_554A_LSR;        // read LSR to clear interrupt. dummy read
+
       default:
-          return;
-   }   
+          break;
+   }           
+   
+   rdata = UC_554A_LSR;        // read LSR to clear interrupt. dummy read     
 }
 /********************************************************************************/
 //               TLC16C554 UART PORT B Interrupt Subroutine
@@ -62,7 +61,8 @@ interrupt [EXT_INT4] void ext_int4_isr(void)
 // External Interrupt 5 service routine
 interrupt [EXT_INT5] void ext_int5_isr(void)
 {
-   u8 rdata;
+   u8 rdata;           
+   LED_FLASH(LED_NODE);
    switch(UC_554B_IIR & 0xF)
    { 
       case 0xC:                         // character time out. RBR read to clear interrupt
@@ -70,14 +70,11 @@ interrupt [EXT_INT5] void ext_int5_isr(void)
           rdata = UC_554B_RBR;        // read data from receiver FIFO. RBR read to clear int          
           cm_pushc(rdata,SPORTB);
           return;
-      case 0x1:                         // none interrupt
-      case 0x2:                         // Transmitter Hold Register Empty
-      case 0x0:                         // Modem status
-      case 0x6:                         // Receiver line status interrupt: OE/PE/FE/BI.
-          rdata = UC_554B_LSR;        // read LSR to clear interrupt. dummy read
+
       default:
-          return;
-   }   
+          break;
+   }                   
+   rdata = UC_554B_LSR;        // read LSR to clear interrupt. dummy read     
 }
 /********************************************************************************/
 //               TLC16C554 UART PORT C Interrupt Subroutine
@@ -86,6 +83,7 @@ interrupt [EXT_INT5] void ext_int5_isr(void)
 interrupt [EXT_INT6] void ext_int6_isr(void)
 {
    u8 rdata;
+      LED_FLASH(LED_NODE);
    switch(UC_554C_IIR & 0xF)
    { 
       case 0xC:                         // character time out. RBR read to clear interrupt
@@ -93,14 +91,12 @@ interrupt [EXT_INT6] void ext_int6_isr(void)
           rdata = UC_554C_RBR;        // read data from receiver FIFO. RBR read to clear int          
           cm_pushc(rdata,SPORTC);
           return;
-      case 0x1:                         // none interrupt
-      case 0x2:                         // Transmitter Hold Register Empty
-      case 0x0:                         // Modem status
-      case 0x6:                         // Receiver line status interrupt: OE/PE/FE/BI.
-          rdata = UC_554C_LSR;        // read LSR to clear interrupt. dummy read
+
       default:
-          return;
-   }   
+          break;
+   }                   
+
+   rdata = UC_554C_LSR;        // read LSR to clear interrupt. dummy read     
 }
 
 /********************************************************************************/
@@ -110,6 +106,7 @@ interrupt [EXT_INT6] void ext_int6_isr(void)
 interrupt [EXT_INT7] void ext_int7_isr(void)
 {
    u8 rdata;
+      LED_FLASH(LED_NODE);
    switch(UC_554D_IIR & 0xF)
    { 
       case 0xC:                         // character time out. RBR read to clear interrupt
@@ -117,14 +114,12 @@ interrupt [EXT_INT7] void ext_int7_isr(void)
           rdata = UC_554D_RBR;        // read data from receiver FIFO. RBR read to clear int          
           cm_pushc(rdata,SPORTD);
           return;
-      case 0x1:                         // none interrupt
-      case 0x2:                         // Transmitter Hold Register Empty
-      case 0x0:                         // Modem status
-      case 0x6:                         // Receiver line status interrupt: OE/PE/FE/BI.
-          rdata = UC_554D_LSR;          // read LSR to clear interrupt. dummy read
+
       default:
-          return;
-   }   
+          break;
+   }                   
+
+   rdata = UC_554D_LSR;        // read LSR to clear interrupt. dummy read     
 }
 
 /********************************************************************************/

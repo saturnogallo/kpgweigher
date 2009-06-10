@@ -184,8 +184,8 @@ void Init_UART()
       UCSR0B=0xD8;
       UCSR0C=0x06;
       UBRR0H=0x00;
-      UBRR0L=0x5F;      //9600    
-//    UBRR0L=0x7;       //115200
+//    UBRR0L=0x17;      //38400    
+      UBRR0L=0x7;       //115200
 
    // USART1 initialization
    // Communication Parameters: 8 Data, 1 Stop, No Parity
@@ -197,8 +197,8 @@ void Init_UART()
       UCSR1B=0xD8;
       UCSR1C=0x06;
       UBRR1H=0x00;
-      UBRR1L=0x5F;       //9600
-//    UBRR1L=0x7;       //115200
+      //UBRR1L=0x17;       //38400
+      UBRR1L=0x7;       //115200
       
    // Initialize buffer variables
       tx_wr_index0 = 0;
