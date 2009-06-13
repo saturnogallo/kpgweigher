@@ -38,9 +38,15 @@ interrupt [USART0_RXC] void usart0_rx_isr(void)
    //read status and data
    status=UCSR0A;
    data=UDR0; 
-  
+#ifdef USE_COM0  
+   LED_FLASH(LED_PC); //LED to indicate communication status
+   if(RFlagPC == RF_CKSUM)
+        return;    
+   cm_pushPC(data);
+#else
    d_putchar(data);
    debug(data);   
+#endif
 }
 
 /*********************************************************************************/
@@ -68,8 +74,15 @@ interrupt [USART1_RXC] void usart1_rx_isr(void)
    //read status and data
    status=UCSR1A;
    data=UDR1; 
-  
-   cm_pushc(data,SPORTPC);
+#ifdef USE_COM0
+   d_putchar(data);
+   debug(data);   
+#else
+   LED_FLASH(LED_PC); //LED to indicate communication status
+   if(RFlagPC == RF_CKSUM)
+        return;    
+   cm_pushPC(data);
+#endif
 }
 
 /*********************************************************************************/
@@ -184,8 +197,8 @@ void Init_UART()
       UCSR0B=0xD8;
       UCSR0C=0x06;
       UBRR0H=0x00;
-//    UBRR0L=0x17;      //38400    
-      UBRR0L=0x7;       //115200
+      
+      UBRR0L=BAUD_TO_USE;
 
    // USART1 initialization
    // Communication Parameters: 8 Data, 1 Stop, No Parity
@@ -197,8 +210,7 @@ void Init_UART()
       UCSR1B=0xD8;
       UCSR1C=0x06;
       UBRR1H=0x00;
-      //UBRR1L=0x17;       //38400
-      UBRR1L=0x7;       //115200
+      UBRR1L=BAUD_TO_USE;
       
    // Initialize buffer variables
       tx_wr_index0 = 0;

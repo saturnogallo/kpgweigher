@@ -73,5 +73,10 @@
 extern void Reset_554(void);
 extern void Init_554(void);
 void prints(u8*, u8, char);
-
+                                
+extern u8 RFlagA;
+extern u8 RFlagB;
+extern u8 RFlagC;
+extern u8 RFlagD;
+extern u8 RFlagPC;
 #endif

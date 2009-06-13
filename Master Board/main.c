@@ -28,7 +28,7 @@ Data Stack size     : 1024
 #include "16c554.h"
 #include "global.h"
 #include "command.h"
-
+static u16 rst554count = 0;
 //master board reg_addr = n2m_map[ node_reg_addr]
 flash u8 n2m_map[NREG_SIZE_TOTAL] = {0           ,1           ,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,
                                      MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,MREG_INVALID,
@@ -53,9 +53,7 @@ static u16 port_timeout[SPORT_TOTAL];
 static u8 has_node = 0; //indicate of distribution of node on each group and port
 static u16 loopcnt = 0; //tick of main loop
 //handle forward of command and some reg read command
-#define idle_process()                           checkforward_up(); \
-                                                 checkforward_dn(); \
-                                                 handle_pending_read();
+
 //examine the flag A is a cmd flag or state flag
 #define is_cmd_flag(A)  (A != STATE_BEIDLE) && (A != STATE_DONE_FAIL) && (A != STATE_DONE_OK)
 /**************************************************************************************/
@@ -84,24 +82,33 @@ SYSTEM system;                                       // 系统参数设置
 u8 pc_readb_until_return(u8 regid, u8 nodeid)
 {
     u16 timeout;
-    checkforward_up();
     pc_query(RS485_Node[nodeid].addr, regid, 1, RS485_Node[nodeid].uart_port);
+    nodeid = RS485_Node[nodeid].uart_port;
     //wait until time out or acknowledgement is received.
     timeout = 0x400; //1024
-        while((FB_in_up == FB_out_up) && (timeout != 0)){
-                timeout--;     //wait for reply or time out   
-        }
+    
+    RWait[nodeid] = regid;
+    while((RWait[nodeid] != R_NOWAIT) && (timeout != 0)){
+        cm_process();
+        timeout--;     //wait for reply or time out   
+    }                   
+    RWait[nodeid] = R_NOWAIT;
     return (timeout > 0)? SUCCEED : FAILED;
 }         
 u8 pc_readb_until_return2(u8 regid, u8 nodeid)
 {
     u16 timeout;
-    checkforward_up();
     pc_query(vibrator[nodeid].addr, regid, 1, vibrator[nodeid].uart_port);
+    nodeid = vibrator[nodeid].uart_port;
+    RWait[nodeid] = regid;
     //wait until time out or acknowledgement is received.
     timeout = 0x400; //1024
-    while((FB_in_up == FB_out_up) && (timeout != 0))
+
+    while((RWait[nodeid] != R_NOWAIT) && (timeout != 0)){
+        cm_process();
         timeout--;     //wait for reply or time out   
+    }            
+    RWait[nodeid] = R_NOWAIT;
     return (timeout > 0)? SUCCEED : FAILED;
 }
 /**************************************************************************************/
@@ -113,6 +120,7 @@ u8 readb_until_return(u8 port, u8 regid, u8 nodeid){
         cm_query(RS485_Node[nodeid].addr,regid,1,RS485_Node[nodeid].uart_port);//old one is send_query_b(regid,nodeid);
         timeout = 0x400; //1024
         while((RWait[port] == regid) && (timeout != 0)){
+                cm_process();
                 timeout--;     //wait for reply or time out 
         }       
         RWait[port] = R_NOWAIT;                   
@@ -190,7 +198,7 @@ void init_var()
         system.running[i] = 0;
     }
     for(i=SPORTA; i <= SPORTD;i++){
-        port_node[i] = 0;								//port node id that is waiting
+        port_node[i] = 0xff;								//port node id that is waiting
         port_timeout[i] = 0;        					//port timeout count
         system.flag_goon[i] = STATE_DONE_OK;  			//flag to sent go on command
         system.flag_start_machine[i] = STATE_DONE_OK;   //Flag to start machine.
@@ -263,7 +271,7 @@ void find_nodes(void)
 /**************************************************************************************/
 void cmd_loop(u8 grp){     
        u8 i;            
-       idle_process();                                   
+       cm_process();                                   
        if(is_cmd_flag(system.flag_stop_machine[grp])){   //停止节点命令   
            for(i=0;i<system.node_num;i++){  
               if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp)	//not including missing board
@@ -289,7 +297,8 @@ void cmd_loop(u8 grp){
 	                                set_cmd(NREG_GOON,i);   //overweight case is handled by pc side
                         }                                                              
                         RS485_Node[i].Mtrl_Weight_gram = 0xffff; //clear the weight for next search.                                
-              }
+              	        cm_process();
+              }          
            }                                         
            system.flag_goon[grp] = STATE_DONE_OK; //set the flag that the cmd has been done                      
            system.flag_search[grp] = STATE_BEIDLE; //trigger another round of weight gathering
@@ -344,35 +353,36 @@ void cmd_loop(u8 grp){
 void search_loop(int grp)
 {
        u8 i,port;
-       idle_process();
+       cm_process();
        if(system.flag_search[grp] == STATE_BEIDLE){   //is idle , means trigger another round of weight gathering   
-           if(loopcnt%2 == 0){	//take half chance to collect the weight
-                 for(i=0;i<system.node_num;i++){  
-                        if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){   //including missing board
-                           RS485_Node[i].Mtrl_Weight_gram = 0xffff;     //clear the weight to unavailable 
-                        }
-                }
-                system.flag_search[grp] = 1; //start to gather weight from node 1 (position in array, not address). flag_search will store the board_id we are searching from now on
+           if(loopcnt%2 == 1){	//take half chance to collect the weight
+                return;
            }
-           return;                        
+           for(i=0;i<system.node_num;i++){  
+                if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){   //including missing board
+                     RS485_Node[i].Mtrl_Weight_gram = 0xffff;     //clear the weight to unavailable 
+                }
+           }
+           system.flag_search[grp] = 1; //start to gather weight from node 1 (position in array, not address). flag_search will store the board_id we are searching from now on
        }
-       if((system.flag_search[grp] >=1) && (system.flag_search[grp] <= system.node_num)){ //during search of some board
+       if((system.flag_search[grp] >=1) && (system.flag_search[grp] < STATE_DONE_OK)){ //during search of some board
            for(i=0;i<system.node_num;i++){             //search whether all the data has been collected.    
-		  if((RS485_Node[i].board_property & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT)		
-			      continue;
-           	  if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) != grp) //not in this group //check the missing board too
-	      		  continue;
-		      port = RS485_Node[i].uart_port;
-		      if(RWait[port] != R_NOWAIT) //still waiting
-			      return;
-              if(RS485_Node[i].Mtrl_Weight_gram != 0xffff)	//weight has been got
-		      	  continue;
-	      port_node[port] = i;
-              RWait[port] = NREG_STATUS;
-              port_timeout[port] = 0x512;    
-	      cm_query(RS485_Node[i].addr,NREG_WEIGHT,4,port); //old command is send_query_l(REG_WEIGHT,i);                
-	      system.flag_search[grp] = i+1;
-	      return;
+		if((RS485_Node[i].board_property & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT)		
+		     continue;
+           	if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) != grp) //not in this group //check the missing board too
+	      	     continue;
+		port = RS485_Node[i].uart_port;
+		if(RWait[port] != R_NOWAIT) //still waiting
+		     return;
+                if(RS485_Node[i].Mtrl_Weight_gram != 0xffff)	//weight has been got
+		     continue;
+	        port_node[port] = i;
+                RWait[port] = NREG_STATUS;
+                port_timeout[port] = 0x512;    
+	        cm_query(RS485_Node[i].addr,NREG_WEIGHT,4,port); //old command is send_query_l(REG_WEIGHT,i);                
+	        system.flag_search[grp] = RS485_Node[i].addr; 
+	        cm_process();
+	        return;
            }                        
 		   //all weight has been queried   
            port = 0;
@@ -391,8 +401,14 @@ void search_loop(int grp)
               }
            }                     
            if(port == 0x01)          //all data are invalid
-           {             
-                Init_554();
+           {     
+                if(rst554count++ > 20)
+                {
+                        rst554count = 0;
+                        LED_FLASH(LED_RST554);   
+                        Init_554();           
+                }
+                
                  for(i=0;i<system.node_num;i++){  
                         if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){   //including missing board
                            RS485_Node[i].Mtrl_Weight_gram = 0xffff;     //clear the weight to unavailable 
@@ -420,19 +436,22 @@ void search_loop(int grp)
                    }else{ //just weight and status is reported.
 			cm_report_b(RS485_Node[i].addr, NREG_WEIGHT, 4, (u8*)&RS485_Node[i].Mtrl_Weight_gram, SPORTPC);                                   
                    }
-                   idle_process();
+                   cm_process();
               }
-           }                           
+           }                      
            system.flag_search[grp] = STATE_DONE_OK;                          
        }
 }
 //just hand the timeout case on port waiting
 void port_loop(u8 port)
 {                                
-       u8 i;                          
+       u8 i;          
+                       
        i=port_node[port]; //current querying node id;          
+       if(i == 0xff)
+                return;
        if(RS485_Node[i].uart_port != port) //node not on this port
-		       return;                                    
+                return;                                    
        if(RWait[port] == R_NOWAIT){ //not waiting any command (ex: weight)
                if(port_timeout[port] == 0)
                         return;
@@ -450,7 +469,7 @@ void port_loop(u8 port)
 				   }
                 */
 		RS485_Node[i].fail_counter = 0;
-		port_timeout[port] = 0;
+		port_timeout[port] = 0; 
        }else{    
                if(port_timeout[port] != 0){  //tick the timeout count
                        port_timeout[port]--;
@@ -465,12 +484,13 @@ void port_loop(u8 port)
 //                        RS485_Node[i].fail_counter = 0;
 //               }
                RWait[port] = R_NOWAIT;     
-       }
+       }                                  
+       port_node[port] = 0xff;
 }                 
 void report_loop(){  
        u8 i,j;
        
-       idle_process();
+       cm_process();
        if(system.flag_report == MY_ADDR){ //report system board information
                 for(i=0;i<sizeof(system);i++){ 
                         cm_report_b(MY_ADDR, i, 1, ((u8*)&system) + i, SPORTPC);           
@@ -481,7 +501,7 @@ void report_loop(){
                          if(vibrator[i].addr == system.flag_report){  
                                 for(j=0; j< (NREG_SIZE_TOTAL);j++){
                                         if(pc_readb_until_return2(j,i)){
-                                                idle_process();                                                       
+                                                cm_process();                                                       
                                         };
                                         sleepms(100); //why we need this delay?
                                 }
@@ -493,7 +513,7 @@ void report_loop(){
                          if(RS485_Node[i].addr == system.flag_report){  
                                 for(j=0; j< (NREG_SIZE_TOTAL);j++){
                                         if(pc_readb_until_return(j,i)){
-                                                idle_process();                                                       
+                                                cm_process();                                                       
                                         };
                                         sleepms(100); //why we need this delay?
                                 }
@@ -514,7 +534,14 @@ void main(void)
     u16 tick = 0;
     system.flag_report = MY_ADDR;                //will be set to STATE_DONE_OK once node search is done.
     // RS485 Node    
-    init_var();	//init data structure
+    init_var();	//init data structure 
+    //init IO bin
+    use_infrmBin(A);    
+    use_infrmBin(B);    
+    use_infrmBin(C);    
+    use_infrmBin(D);    
+    use_infrmBin(PC);
+    
     // System Initialization
     Init_Port();
     Init_Timers();
@@ -546,31 +573,38 @@ void main(void)
          
     //loop of each group;
     while(1)
-    {  
+    {
+ //       if(system.flag_search[0] == STATE_DONE_OK)
+ //	                system.flag_goon[0] = 1;
+      
 	if(loopcnt & 0x8000)	    
+	{
 		loopcnt = 0;
+	}
        loopcnt++;
        if(is_cmd_flag(system.flag_report))//report command = board id (1..36 or 0xff will be valid)
            report_loop(); //doing report
                                            
 
-       if(has_node & 0x01)                    {cmd_loop(BOARD_GROUP_A); search_loop(BOARD_GROUP_A);};
+       if(has_node & 0x01)                    {search_loop(BOARD_GROUP_A);cmd_loop(BOARD_GROUP_A);};
        if(has_node & 0x10)                    port_loop(SPORTA);
 
-       if(has_node & 0x02)                    {cmd_loop(BOARD_GROUP_B); search_loop(BOARD_GROUP_B);};
+       if(has_node & 0x02)                    {search_loop(BOARD_GROUP_B);cmd_loop(BOARD_GROUP_B);};
        if(has_node & 0x20)                    port_loop(SPORTB);       
 
-       if(has_node & 0x04)                    {cmd_loop(BOARD_GROUP_C); search_loop(BOARD_GROUP_C);};             
+       if(has_node & 0x04)                    {search_loop(BOARD_GROUP_C);cmd_loop(BOARD_GROUP_C);};             
        if(has_node & 0x40)                    port_loop(SPORTC);       
-       
-       if(has_node & 0x08)                    {cmd_loop(BOARD_GROUP_D); search_loop(BOARD_GROUP_D);};
-       if(has_node & 0x80)                    port_loop(SPORTD);                            
-       idle_process(); 
+
+       if(has_node & 0x08)                    {search_loop(BOARD_GROUP_D);cmd_loop(BOARD_GROUP_D);};
+       if(has_node & 0x80)                    port_loop(SPORTD);
+
+
+       cm_process(); 
        
        // LED to indicate code is running. 
        if(++tick>2000)
        {
-         LED_FLASH(LED_RUN);
+         LED_FLASH(LED_RUN);       
          tick=0;
        }
        // LED logic ends.
@@ -687,7 +721,7 @@ void debug_getc(u8 data){
                 dtval = ishexchar(data);
                 if(dtval != 0xff){
                         d_putchar((dtvah << 4)|dtval);
-                        cm_pushc((dtvah << 4)|dtval,SPORTPC);
+                        cm_pushPC((dtvah << 4)|dtval);
                 }
                 dtpos = 0;
         }        

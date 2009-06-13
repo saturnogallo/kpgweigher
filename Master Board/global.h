@@ -12,13 +12,29 @@
 #define NULL 0x0
 
 //#define RUN	           PORTD.7;
+
 #define LED_ON(addr)       addr=0;
 #define LED_OFF(addr)      addr=1;  
 #define LED_FLASH(addr)    addr=~addr;
 #define LED_RUN            PORTB.7
 #define LED_PC             PORTB.6
 #define LED_NODE           PORTB.5
-#define LED_ACK            PORTB.4
+#define LED_RST554         PORTB.4
+                     
+#define RF_IDLE         0
+#define RF_HEAD1        1
+#define RF_HEAD2        2
+#define RF_ADDRFROM     3
+#define RF_ADDRTO       4
+#define RF_CMD          5
+#define RF_DATALEN      6
+#define RF_DATABUF      7
+#define RF_CKSUM        8
+
+#define USE_COM0
+// USART Baud rate: 115200 (0x7), 57600 (0xF) 38400 (0x17)
+// USART Baud rate: 19200 (2F) 9600(0x5F)
+#define BAUD_TO_USE     0x7
 
 //define RS485 node parameter structure 
 #define MAX_NODE_NUM       36               
@@ -99,7 +115,16 @@ typedef struct {
         u8      datalen;
         u8      databuf[CM_OUTBUF_MAX];
         u8      cksum;
-}CM_OUTFRAME;
+}CM_OUTFRAME;           
+#define FRM_POS_HEAD1   0
+#define FRM_POS_HEAD2   1
+#define FRM_POS_FROM    2
+#define FRM_POS_TO      3
+#define FRM_POS_CMD     4
+#define FRM_POS_DLEN    5
+#define FRM_POS_DBUF    6
+#define FRM_POS_CKSUM   22
+
 #define NULL_OUTBUF {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 
 typedef struct  {
