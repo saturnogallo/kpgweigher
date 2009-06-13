@@ -259,7 +259,10 @@ void collect_reading(){
 			continue;
 		}
 		if(STATE_DONE_OK != ret_search)	//still searching
+		{
+			Sleep(100);
 			continue;
+		}
 			
 		update_node(i); //update the display of flash
 		if(Sysboard.running[i]) {
@@ -272,8 +275,13 @@ void collect_reading(){
 			while(Calculation3(i) == 0){
 				printf("there is 3 box  match\n");
 			}
-			set_sysflagb((u8*)&Sysboard.flag_goon[i],1,1);	//set goon flag
-			wait_until_idle_sysflagb(reg_goon,TWOFRM_DURATION);
+			set_sysflagb(reg_goon,1,1);	//set goon flag
+			while(1){
+				u8 ret = get_sysflag(reg_goon);
+				if(ret == STATE_DONE_OK || ret == STATE_DONE_FAIL)
+					break;
+				Sleep(TWOFRM_DURATION);
+			}
 		}else{
 			set_sysflagb(reg_search,STATE_BEIDLE);
 		}
