@@ -66,7 +66,7 @@ void check_serial()
 			  cm_pushc(sendBuf[i]); //parse command
 		  }
 	  }else{
-		  Sleep(10);
+		  Sleep(1);
 	  }
 	}
 //send str to flash
@@ -217,7 +217,7 @@ int flash_cmd_handler(){
 		answer_flash(_T("status:_root.glb_status:downnode"));		
 		int addr=atoi(ExtractString(cmdparm));
 		if(addr != 0xff){
-			if((Sysboard.running[(RS485_Node[addr].board & BOARD_GROUP_MASK)])	||
+			if((Sysboard.running[(RS485_Node[addr].board & BOARD_GROUP_MASK)] > BOARD_GROUP_D)	||
 				(addr >= MAX_NODE_NUM) ||
 				(RS485_Node[addr].board == (BOARD_TYPE_INVALID|BOARD_GROUP_NONE))){
 				answer_flash(_T("status:_root.glb_status:node_invalid"));
@@ -346,7 +346,7 @@ int flash_cmd_handler(){
 		WriteProfile("LASTCONFIG",item,nxml);
 
 		setnodexml(0xff,nxml);
-		nxml.Format("<node magnet_freq='%i' magnet_amp='%i' />",getxmlint("main_freq",cmdparm),getxmlint("main_amp",cmdparm));
+		nxml.Format("<node magnet_time='%i' magnet_amp='%i' />",getxmlint("main_freq",cmdparm),getxmlint("main_amp",cmdparm));
 
 		item.Format("lastvib%i",group);
 		WriteProfile("LASTCONFIG",item,nxml);
