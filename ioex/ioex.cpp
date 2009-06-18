@@ -279,7 +279,7 @@ int flash_cmd_handler(){
 		if(0 == localtime_s(&t_now,&t))
 		{
 
-			s_endtime.Format(_T("%i-%02i-%02i %02i:%02i:%02i"),t_now.tm_year,t_now.tm_mon,t_now.tm_mday,t_now.tm_hour,t_now.tm_min,t_now.tm_sec);
+			s_endtime.Format(_T("%i-%02i-%02i %02i:%02i:%02i"),1900+t_now.tm_year,t_now.tm_mon,t_now.tm_mday,t_now.tm_hour,t_now.tm_min,t_now.tm_sec);
 			CString srecord;
 			if (g_wcount > 0)
 			{
