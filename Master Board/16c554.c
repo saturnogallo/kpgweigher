@@ -28,7 +28,7 @@
 
 
 #define FCR_DATA 0b00000111   // FIFO trigger level: 1 byte
-#define IER_DATA 0b00000101
+#define IER_DATA 0b00000001
 // LCR.7 must be cleared to 0 when accessing RBR/THR/IER
 // LCR.7 must be set to 1 when accessing divisor latch
 #define LCR_DATA 0b00011011   // Even Parity 8 data bit, 1 stop bit
@@ -45,6 +45,8 @@ interrupt [EXT_INT4] void ext_int4_isr(void)
    switch(UC_554A_IIR & 0xF)
    { 
       case 0xC:                         // character time out. RBR read to clear interrupt
+          rdata = UC_554D_RBR;        // read data from receiver FIFO. RBR read to clear int          
+          break;
       case 0x4:                         // Receiver data available or trigger level reached
           rdata = UC_554A_RBR;        // read data from receiver FIFO. RBR read to clear int          
           if(RFlagA == RF_CKSUM)
@@ -69,6 +71,8 @@ interrupt [EXT_INT5] void ext_int5_isr(void)
    switch(UC_554B_IIR & 0xF)
    { 
       case 0xC:                         // character time out. RBR read to clear interrupt
+          rdata = UC_554D_RBR;        // read data from receiver FIFO. RBR read to clear int          
+          break;
       case 0x4:                         // Receiver data available or trigger level reached
           rdata = UC_554B_RBR;        // read data from receiver FIFO. RBR read to clear int          
           if(RFlagB == RF_CKSUM)
@@ -92,6 +96,8 @@ interrupt [EXT_INT6] void ext_int6_isr(void)
    switch(UC_554C_IIR & 0xF)
    { 
       case 0xC:                         // character time out. RBR read to clear interrupt
+          rdata = UC_554D_RBR;        // read data from receiver FIFO. RBR read to clear int          
+          break;
       case 0x4:                         // Receiver data available or trigger level reached
           rdata = UC_554C_RBR;        // read data from receiver FIFO. RBR read to clear int          
           if(RFlagC == RF_CKSUM)
@@ -116,7 +122,9 @@ interrupt [EXT_INT7] void ext_int7_isr(void)
 
    switch(UC_554D_IIR & 0xF)
    { 
-      case 0xC:                         // character time out. RBR read to clear interrupt
+      case 0xC:                         // character time out. RBR read to clear interrupt            
+          rdata = UC_554D_RBR;        // read data from receiver FIFO. RBR read to clear int          
+          break;
       case 0x4:                         // Receiver data available or trigger level reached
           rdata = UC_554D_RBR;        // read data from receiver FIFO. RBR read to clear int          
           if(RFlagD == RF_CKSUM)
@@ -314,9 +322,10 @@ void prints(u8 *str, u8 length, char uart_port)
        case SPORTPC:
            while(len-- > 0){
 #ifdef USE_COM0           
+                d_putchar(*str++);            
+#endif
+#ifdef USE_COM1
                 putchar(*str++);          
-#else
-                d_putchar(*str++);          
 #endif                
            }
        default:

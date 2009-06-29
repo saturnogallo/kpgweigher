@@ -352,7 +352,8 @@ void cmd_loop(u8 grp){
 //one round of gathering weight
 void search_loop(int grp)
 {
-       u8 i,port;
+       u8 i,port;   
+       u8 status;
        cm_process();
        if(system.flag_search[grp] == STATE_BEIDLE){   //is idle , means trigger another round of weight gathering   
            if(loopcnt%2 == 1){	//take half chance to collect the weight
@@ -402,11 +403,13 @@ void search_loop(int grp)
            }                     
            if(port == 0x01)          //all data are invalid
            {     
-                if(rst554count++ > 20)
+                if(rst554count++ > 3)
                 {
                         rst554count = 0;
                         LED_FLASH(LED_RST554);   
-                        Init_554();           
+//                      Init_554();          
+                        status = UC_554D_LSR;
+                        status = UC_554D_MSR;
                 }
                 
                  for(i=0;i<system.node_num;i++){  

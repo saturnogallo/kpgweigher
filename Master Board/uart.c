@@ -43,7 +43,8 @@ interrupt [USART0_RXC] void usart0_rx_isr(void)
    if(RFlagPC == RF_CKSUM)
         return;    
    cm_pushPC(data);
-#else
+#endif
+#ifdef USE_COM1
    d_putchar(data);
    debug(data);   
 #endif
@@ -58,8 +59,8 @@ interrupt [USART0_TXC] void usart0_tx_isr(void)
 if (tx_counter0)
    {
    --tx_counter0;
-   UDR0=tx_buffer0[tx_rd_index0];
-   if (++tx_rd_index0 == TX_BUFFER_SIZE0) tx_rd_index0=0;
+   UDR0=tx_buffer0[tx_rd_index0++];
+   tx_rd_index0 =tx_rd_index0 & 0x7f;
    };
 }
 
@@ -77,7 +78,8 @@ interrupt [USART1_RXC] void usart1_rx_isr(void)
 #ifdef USE_COM0
    d_putchar(data);
    debug(data);   
-#else
+#endif
+#ifdef USE_COM1
    LED_FLASH(LED_PC); //LED to indicate communication status
    if(RFlagPC == RF_CKSUM)
         return;    
@@ -94,8 +96,8 @@ interrupt [USART1_TXC] void usart1_tx_isr(void)
 if (tx_counter1)
    {
    --tx_counter1;
-   UDR1=tx_buffer1[tx_rd_index1];
-   if (++tx_rd_index1 == TX_BUFFER_SIZE1) tx_rd_index1=0;
+   UDR1=tx_buffer1[tx_rd_index1++];
+   tx_rd_index1=tx_rd_index1 & 0x7f;
    };
 }
 
@@ -105,8 +107,8 @@ while (tx_counter0 == TX_BUFFER_SIZE0);
 #asm("cli")
 if (tx_counter0 || ((UCSR0A & DATA_REGISTER_EMPTY)==0))
    {
-   tx_buffer0[tx_wr_index0]=c;
-   if (++tx_wr_index0 == TX_BUFFER_SIZE0) tx_wr_index0=0;
+   tx_buffer0[tx_wr_index0++]=c;
+   tx_wr_index0 = tx_wr_index0 & 0x7f;
    ++tx_counter0;
    }
 else
@@ -120,8 +122,8 @@ while (tx_counter1 == TX_BUFFER_SIZE1);
 #asm("cli")
 if (tx_counter1 || ((UCSR1A & DATA_REGISTER_EMPTY)==0))
    {
-   tx_buffer1[tx_wr_index1]=c;
-   if (++tx_wr_index1 == TX_BUFFER_SIZE1) tx_wr_index1=0;
+   tx_buffer1[tx_wr_index1++]=c;
+   tx_wr_index1 = tx_wr_index1 & 0x7f;
    ++tx_counter1;
    }
 else
