@@ -6,6 +6,7 @@
 /**************************************************************************************/
 //                          组合称重算法（部分组合）            
 /**************************************************************************************/
+
 #define chk_cond(A)      if((RS485_Node[A].board & BOARD_GROUP_MASK) != grp)    continue;\
 						 if((RS485_Node[A].board & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT)    continue;\
                          if(RS485_Node[A].Mtrl_Weight_gram > 0xfff0)              continue;            
@@ -15,11 +16,21 @@
 #define go_on(A)         if(App_Node[A].fail_counter < 200) {\
 								App_Node[A].fail_counter++;\
 						 }else{ \
+								hitme(A);\
 								RS485_Node[A].Mtrl_Weight_gram = ~0;\
 								RS485_Node[A].flag_release = 1;	\
 								App_Node[A].fail_counter = 0; \
 								write_nodereg_b(A,flag_release);\
 						}
+
+void hitme(int i)
+{
+	
+	i = i+1;
+
+}
+
+
 
 #define get_weight(A)	 RS485_Node[A].Mtrl_Weight_gram
 #define WEIGHT_OVER      1
@@ -32,6 +43,7 @@ u8 pids[MAX_COMBINATION];
 #define sys_target_weight(grp)		(double)Sysboard.gw_target[grp]			//(*(grp+(u16*)&Sysboard.gw_target1))
 #define sys_offset_up_limit(grp)	(double)Sysboard.gw_uvar[grp]			//(*(grp+(u16*)&Sysboard.gw_uvar1))
 #define sys_offset_lo_limit(grp)	(double)Sysboard.gw_dvar[grp]			//(*(grp+(u16*)&Sysboard.gw_dvar1))
+
 inline u8  check_weight(double sum, u16 grp)
 {
 	  sum = sum;
@@ -41,6 +53,16 @@ inline u8  check_weight(double sum, u16 grp)
               return ((sys_target_weight(grp) - sum) < sys_offset_lo_limit(grp)) ? WEIGHT_MATCH : WEIGHT_LOWER;
       }
 }
+
+void goonall(u8 grp)
+{
+	u8 a;
+	for(a=0; a<MAX_NODE_NUM-0; a++){     chk_cond(a);
+	go_on(a);
+	}
+
+}
+
 u8 Calculation1(u8 grp)
 {                      
       u8 a, oflag; 
@@ -59,7 +81,6 @@ u8 Calculation1(u8 grp)
                            report_pack(1);
                            return 0;
               }
-			  go_on(a);    
       }        
       return 1;
 }
@@ -86,9 +107,6 @@ u8 Calculation2(u8 grp)
 
                            return 0;
               }
-			  go_on(a);                           
-			  go_on(b);                           
-
       }}
       return 1;      
 }
@@ -122,10 +140,6 @@ u8 Calculation3(u8 grp)
 
                            return 0;
               }
-			  go_on(a);                           
-			  go_on(b);                           
-			  go_on(c);                           
-
       }}}      
       return 1;
 }
@@ -159,11 +173,6 @@ u8 Calculation4(u8 grp)
 
                            return 0;
               }
-			  go_on(a);                           
-			  go_on(b);                           
-			  go_on(c);                           
-			  go_on(d);                                                                                  
-
       }}}} 
       return 1;
 }
@@ -199,12 +208,6 @@ u8 Calculation5(u8 grp)
                            report_pack(5);
                            return 0;
               }
-			  go_on(a);                           
-			  go_on(b);                           
-			  go_on(c);                           
-			  go_on(d);                                                                                  
-			  go_on(e);        
-
       }}}}} 
       return 1;
 }

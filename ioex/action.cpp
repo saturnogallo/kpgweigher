@@ -275,6 +275,7 @@ void collect_reading(){
 			while(Calculation3(i) == 0){
 				printf("there is 3 box  match\n");
 			}
+			goonall(i);
 			set_sysflagb(reg_goon,1,1);	//set goon flag
 			while(1){
 				u8 ret = get_sysflag(reg_goon);
@@ -486,7 +487,7 @@ void init_vars()
 				s2l_map[j/8] = i;
 			}
 			if(sys_reg_size[pos] == 16){
-				s2l_map[j/8] = i;
+					s2l_map[j/8] = i;
 				s2l_map[1+j/8] = i+1;
 			}
 			if(sys_reg_size[pos] == 32){
