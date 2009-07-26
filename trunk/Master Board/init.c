@@ -30,7 +30,8 @@ void Init_Port()
  // Port D initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T 
-  // Use PORTD[7:6] as LED output, 0 -> LED ON
+ // Use PORTD[7:6] as LED output, 0 -> LED ON 
+ // PORTD.0 is set as input of external interrupt 0 (see interrupt.c)
     PORTD=0x00;
     DDRD=0xF0;
 
@@ -57,14 +58,14 @@ void Init_Port()
 //                              Initialize Timers
 /**************************************************************************************/
 void Init_Timers()
-{
+{ 
  // Timer/Counter 0 initialization
  // Clock source: System Clock
- // Clock value: Timer 0 Stopped
+ // Clock value: 14.400 kHz
  // Mode: Normal top=FFh
  // OC0 output: Disconnected
     ASSR=0x00;
-    TCCR0=0x00;
+    TCCR0=0x07;
     TCNT0=0x00;
     OCR0=0x00;
 
@@ -132,7 +133,7 @@ void Init_Timers()
     OCR3CL=0x00; 
 
  // Timer(s)/Counter(s) Interrupt(s) initialization
-    TIMSK=0x04;
+    TIMSK=0x05;
     ETIMSK=0x00;     
 }               
 

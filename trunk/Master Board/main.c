@@ -352,8 +352,7 @@ void cmd_loop(u8 grp){
 //one round of gathering weight
 void search_loop(int grp)
 {
-       u8 i,port;   
-       u8 status;
+       u8 i,port;
        cm_process();
        if(system.flag_search[grp] == STATE_BEIDLE){   //is idle , means trigger another round of weight gathering   
            if(loopcnt%2 == 1){	//take half chance to collect the weight
