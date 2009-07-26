@@ -60,7 +60,7 @@ if (tx_counter0)
    {
    --tx_counter0;
    UDR0=tx_buffer0[tx_rd_index0++];
-   tx_rd_index0 =tx_rd_index0 & 0x7f;
+   tx_rd_index0 =tx_rd_index0 & (TX_BUFFER_SIZE0-1);
    };
 }
 
@@ -97,7 +97,7 @@ if (tx_counter1)
    {
    --tx_counter1;
    UDR1=tx_buffer1[tx_rd_index1++];
-   tx_rd_index1=tx_rd_index1 & 0x7f;
+   tx_rd_index1=tx_rd_index1 & (TX_BUFFER_SIZE1-1);
    };
 }
 
@@ -108,7 +108,7 @@ while (tx_counter0 == TX_BUFFER_SIZE0);
 if (tx_counter0 || ((UCSR0A & DATA_REGISTER_EMPTY)==0))
    {
    tx_buffer0[tx_wr_index0++]=c;
-   tx_wr_index0 = tx_wr_index0 & 0x7f;
+   tx_wr_index0 = tx_wr_index0 & (TX_BUFFER_SIZE0-1);
    ++tx_counter0;
    }
 else
@@ -123,7 +123,7 @@ while (tx_counter1 == TX_BUFFER_SIZE1);
 if (tx_counter1 || ((UCSR1A & DATA_REGISTER_EMPTY)==0))
    {
    tx_buffer1[tx_wr_index1++]=c;
-   tx_wr_index1 = tx_wr_index1 & 0x7f;
+   tx_wr_index1 = tx_wr_index1 & (TX_BUFFER_SIZE1-1);
    ++tx_counter1;
    }
 else
