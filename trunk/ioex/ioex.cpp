@@ -406,9 +406,9 @@ int flash_cmd_handler(){
 			}
 			parmstr = ExtractString(cmdparm);
 			for(int i=0;i < MAX_NODE_NUM;i++){
-				if((RS485_Node[i].board & BOARD_TYPE_MASK != BOARD_TYPE_WEIGHT))
+				if(((RS485_Node[i].board & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT))
 					continue;
-				if((RS485_Node[i].board & BOARD_GROUP_MASK == BOARD_GROUP_NONE))
+				if(((RS485_Node[i].board & BOARD_GROUP_MASK) == BOARD_GROUP_NONE))
 					continue;
 				if((RS485_Node[i].board & BOARD_GROUP_MASK) == (RS485_Node[addr].board & BOARD_GROUP_MASK))
 				{

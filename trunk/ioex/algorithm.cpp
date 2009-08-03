@@ -40,9 +40,9 @@ void hitme(int i)
 #define MAX_COMBINATION  5
 u8 pids[MAX_COMBINATION];                       
 
-#define sys_target_weight(grp)		(double)Sysboard.gw_target[grp]			//(*(grp+(u16*)&Sysboard.gw_target1))
-#define sys_offset_up_limit(grp)	(double)Sysboard.gw_uvar[grp]			//(*(grp+(u16*)&Sysboard.gw_uvar1))
-#define sys_offset_lo_limit(grp)	(double)Sysboard.gw_dvar[grp]			//(*(grp+(u16*)&Sysboard.gw_dvar1))
+#define sys_target_weight(grp)		((double)Sysboard.gw_target[grp]/10.0)
+#define sys_offset_up_limit(grp)	((double)Sysboard.gw_uvar[grp]/10.0)
+#define sys_offset_lo_limit(grp)	((double)Sysboard.gw_dvar[grp]/10.0)
 
 inline u8  check_weight(double sum, u16 grp)
 {

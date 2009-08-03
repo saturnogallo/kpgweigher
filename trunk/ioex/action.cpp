@@ -260,7 +260,7 @@ void collect_reading(){
 		}
 		if(STATE_DONE_OK != ret_search)	//still searching
 		{
-			Sleep(100);
+			Sleep(60);
 			continue;
 		}
 			
@@ -268,13 +268,25 @@ void collect_reading(){
 		if(Sysboard.running[i]) {
 			while(Calculation5(i) == 0){
 				printf("there is 5 box  match\n");
+				Sleep(10);
 			}
 			while(Calculation4(i) == 0){
 				printf("there is 4 box  match\n");
+				Sleep(10);
 			}
 			while(Calculation3(i) == 0){
 				printf("there is 3 box  match\n");
+				Sleep(10);
 			}
+			while(Calculation2(i) == 0){
+				printf("there is 2 box  match\n");
+				Sleep(10);
+			}
+			while(Calculation1(i) == 0){
+				printf("there is 1 box  match\n");
+				Sleep(10);
+			}
+
 			goonall(i);
 			set_sysflagb(reg_goon,1,1);	//set goon flag
 			while(1){
