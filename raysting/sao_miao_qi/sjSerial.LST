@@ -1,0 +1,116 @@
+C51 COMPILER V7.01  SJSERIAL                                                               09/09/2007 16:45:55 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SJSERIAL
+OBJECT MODULE PLACED IN sjSerial.OBJ
+COMPILER INVOKED BY: c:\GreenTools\Keil\C51\BIN\C51.EXE sjSerial.c ROM(SMALL) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjSerial.h"
+   2          #include "sjDefine.h"
+   3          //#include "reg52.h"
+   4          #include <stdio.h>
+   5          
+   6          BYTE spbuf[SP_BUFFER_MAX];      ///< serial port fifo buffer
+   7          static BYTE *spHead,*spTail;    ///< buffer head and tailst
+   8          static BYTE spSFlag;///<serial port flag for send use
+   9          
+  10          //const for SerialPort Status
+  11          #define SPBUSY  0xd6    
+  12          #define SPIDLE  0xd8
+  13          
+  14          
+  15          /**
+  16          *       @brief Set Initially for all serial port(under construction)
+  17          *       
+  18          *       Serial port format will be set identically
+  19          */
+  20          void sjSerialInit()
+  21          {
+  22   1              spHead=spbuf;
+  23   1              spTail=spbuf;
+  24   1              spSFlag=SPIDLE;
+  25   1      }
+  26          
+  27          /********************************
+  28          *       Add the byte recieved to the 
+  29          *       Tail of the buffer
+  30          ********************************/
+  31          void sjSerialHandler(void) interrupt 4 using 2
+  32          {
+  33   1              //just handle serial interrupt 1
+  34   1              if(TI)
+  35   1              {
+  36   2                      TI = 0;
+  37   2                      spSFlag = SPIDLE;       
+  38   2              }
+  39   1              if(RI)
+  40   1              {
+  41   2                      *spTail = SBUF;
+  42   2                      spTail = spTail+1;
+  43   2                      if(spTail == (spbuf+SP_BUFFER_MAX))
+  44   2                              spTail = spbuf;
+  45   2                      RI = 0;
+  46   2              }
+  47   1      }
+  48          
+  49          /**
+  50          *       @return TRUE when data availabel ,FALSE while not
+  51          */
+  52          BOOL sjSerialIsDataWaiting()
+  53          {
+  54   1              if(spHead == spTail)
+  55   1                      return FALSE;
+C51 COMPILER V7.01  SJSERIAL                                                               09/09/2007 16:45:55 PAGE 2   
+
+  56   1              else 
+  57   1                      return TRUE;
+  58   1      }
+  59          /**
+  60          *       Send One Byte on Serial port , (under construction)
+  61          *       and return with no wait for send finished
+  62          *       @param udata the Byte to send
+  63          *       @param PortID serial port to use
+  64          */
+  65          void sjSerialSendByte(BYTE udata)
+  66          {
+  67   1              spSFlag=SPBUSY;
+  68   1              //Send the udata
+  69   1              SBUF = udata;
+  70   1              tbit_1 = 0;
+  71   1              while(spSFlag == SPBUSY)        
+  72   1                      ;
+  73   1              tbit_1 = 1;
+  74   1      }
+  75          /**
+  76          *       Wait One Byte until that appeared,
+  77          *       it perform read byte function at the same time
+  78          *       @param PortID serial port to use
+  79          *       @return Byte we received
+  80          */
+  81          BYTE sjSerialWaitForOneByte()
+  82          {
+  83   1              BYTE udata;
+  84   1              while(spHead == spTail) 
+  85   1                      ;
+  86   1              udata = *spHead;
+  87   1              spHead = spHead+1;
+  88   1              if(spHead == (spbuf+SP_BUFFER_MAX))
+  89   1                      spHead = spbuf;
+  90   1              return udata;
+  91   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    219    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     23    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

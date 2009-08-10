@@ -1,0 +1,106 @@
+C51 COMPILER V6.23a  GPIBIFC                                                               03/03/2003 19:37:35 PAGE 1   
+
+
+C51 COMPILER V6.23a, COMPILATION OF MODULE GPIBIFC
+OBJECT MODULE PLACED IN gpibifc.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE gpibifc.h ROM(SMALL) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #ifndef GPIBIFC_H
+   2          #define GPIBIFC_H
+   3          #include "reg51.h"
+   4          
+   5          //define const on ioport
+   6          #define BDATA P1
+   7          
+   8          sbit CTLPE=     P0^1;
+   9          sbit CTLTE=     P0^2;
+  10          sbit CTLDC=     P0^3;
+  11          
+  12          sbit BREN =     P2^0;
+  13          sbit BIFC =             P2^1;
+  14          sbit BNDAC=             P2^2;
+  15          sbit BNRFD=             P2^3;
+  16          sbit BDAV =             P2^4;
+  17          sbit BEOI =             P2^5;
+  18          sbit BATN =             P2^6;
+  19          sbit BSRQ =             P2^7;
+  20          
+  21          //define the const
+  22          #define BYTE    unsigned char
+  23          #define BOOL    BYTE
+  24          #define TRUE    1
+  25          #define FALSE   0
+  26          #define HIGH    0
+  27          #define LOW             1
+  28          
+  29          #define SPBUSY  0xd6
+  30          #define SPIDLE  0xd8
+  31          
+  32          
+  33          //the format of the command is
+  34          //send sequence:BMARK CMDTYPE DATALENGTH DATA1 DATA2 .... EMARK
+  35          //reply sequence:BMARK STATUS DATA1 DATA2 .....EMARK BMARK 
+  36          //                              (EMARK appeared in DATAi will be replaced with EMARK EMARK)
+  37          
+  38          //defines for SP command format
+  39          //recieve part
+  40          #define BMARK   0x5A
+  41          #define EMARK   0xA5
+  42          #define GPINIT  0x11
+  43          #define GPWRT   0x22
+  44          #define GPRD    0x33
+  45          #define GPIFC   0x44
+  46          #define GPEOL   0x55
+  47          #define GPDCLR  0x66
+  48          #define GPLLO   0x77
+  49          #define GPLOCAL 0x88
+  50          #define GPREN   0x99
+  51          #define GPTRIG  0xaa
+  52          //send part
+  53          #define ESTATUS 0x11    //error occur
+  54          #define OSTATUS 0x22    //finished ok
+  55          
+C51 COMPILER V6.23a  GPIBIFC                                                               03/03/2003 19:37:35 PAGE 2   
+
+  56          //define prepare mode
+  57          #define DSEND   0
+  58          #define DREAD   1
+  59          #define CSEND   2
+  60          #define CREAD   3
+  61          #define MSEND   4
+  62          #define MREAD   5
+  63          
+  64          //define GPIB command Msg
+  65          #define MSG_LLO 0x11    //local lockout
+  66          #define MSG_DCL 0x14    //device clear
+  67          #define MSG_PPU 0x15    //pararell quest unconfig
+  68          #define MSG_SPE 0x18    //serial quest enable
+  69          #define MSG_SPD 0x19    //serial quest disable
+  70          #define MSG_SDC 0x04    //selected device clear
+  71          #define MSG_GTL 0x01    //go to local
+  72          #define MSG_GET 0x08    //group execute trigger
+  73          #define MSG_PPC 0x05    //pararell quest configure
+  74          #define MSG_TCT 0x39    //transfer controller
+  75          #define MSG_UNL 0x3F    //un listen
+  76          #define MSG_UNT 0x5F    //un talk
+  77          #define MSG_PPD 0x70    //pararell quest disable
+  78          
+  79          #define MSG_CR  0x0A
+  80          #define MSG_LF  0x0d
+  81          #endif
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

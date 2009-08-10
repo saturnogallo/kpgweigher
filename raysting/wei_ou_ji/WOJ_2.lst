@@ -1,0 +1,776 @@
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE WOJ_2
+OBJECT MODULE PLACED IN .\WOJ_2.obj
+COMPILER INVOKED BY: c:\GreenTools\Keil\C51\BIN\C51.EXE D:\My Documents\woj2\WOJ_2.C BROWSE DEBUG OBJECTEXTEND PRINT(.\W
+                    -OJ_2.lst) OBJECT(.\WOJ_2.obj)
+
+stmt level    source
+
+   1              #include <stc51.h>
+   2                  #include <stdio.h>
+   3                  #include <intrins.h>
+   4                  #define uchar unsigned char
+   5                  #define uint unsigned int
+   6                  #define ulong unsigned long
+   7          
+   8              sbit dat= P1^7;   //定义数据线164
+   9              sbit clk= P1^6;   //定义时钟端164
+  10              sbit sclk= P1^0;  //串行时钟端
+  11              sbit sdata= P1^1;   //串行数据线
+  12              sbit drdy= P1^2;    //逻辑输出端
+  13                  sbit a0= P1^3;      //地址输入端
+  14              sbit rfs= P1^4;    //同步接受端
+  15              sbit tfs= P1^5;    //同步传输端
+  16            
+  17          
+  18              sbit SER= P3^7;  //595数据端
+  19              sbit SRCLK=P3^5; //串行数据端 
+  20                  sbit RCK= P3^6;  //数据输出端 
+  21                  sbit KG= P3^4;    //输出使能 
+  22          
+  23              sbit E_CLK =P2^3;//clock input                    同步时钟输入端
+  24              sbit RW_SID=P2^2;//data input/output            串行数据输入、输出端//
+  25              sbit RS_CS =P2^1;//chip select                    片选端//
+  26              sbit PSB   =P2^4;//serial mode select            串口模式
+  27              sbit RST   =P2^0;     
+  28              
+  29          
+  30              uchar cr1,cr2,cr3,cr4;
+  31              
+  32                  bit  error; //错误标志位
+  33            
+  34              uchar keykeep;  //按键保持记忆
+  35              uchar dw;       //档位寄存
+  36              bit   Autod;     //自动档标志，1自动，0手动
+  37              bit   career;   //速度标记，1快速，0慢速
+  38              bit   reverse;  //电流换向标志，1正向，0反向 
+  39              ulong de;       //测量数据全局变量传递
+  40            
+  41              bit  ct;    //效准状态判断，1为当前效准、0为当前测量
+  42              bit  cr;    //清零状态判断，1为清零状态、0为当前测量
+  43          
+  44              uchar quantifier;   //量程选择 0、2V ;1、200mV;2、20mv;3、单极2V;4、单极200mv;5、单极20mv
+  45              uchar CH;           //通道选择
+  46              uchar code rrc[]={0xdd,0x50,0x9b,0xd3,0x56,0xc7,0xcf,0xd0,0xdf,0xd6}; //LED显示
+  47            
+  48              uchar code tune[6]={0,0,0,0,0,0};     //调整数据
+  49             // float code diagraph[]={0.671184,0.537451,0.537671,0.429600};//分度量化0.537037,0.268512
+  50              ulong code control[3]={0x03e304,0x03e334,0x03e31c}; //控制寄存器设定0x03e314
+  51              uchar code jdq1[]={0xff,0x80,0x80,0x40,0x20,0x10,0x08,0x04,0x02};//档位控制
+  52              uchar code jdq2[]={0x80,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40};
+  53                  uchar code jdq3[]={0xff,0x80,0x80,0x40,0x20,0x10,0x08,0x04,0x02};//档位控制
+  54              uchar code jdq4[]={0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40};
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 2   
+
+  55           //  ulong xdata DA[5];
+  56           //  ulong DT[5]; 
+  57              long  xdata ZL[6];       //增量计算，0为低;5为高   
+  58              uint  xdata LZ[6];
+  59              cy();
+  60              quantifier_with(float decimal );
+  61              with();
+  62            
+  63                  ulong code Sector[10][4]={
+  64                                            {0x8000,0x8001,0x8002,0x8003},
+  65                                                                    {0x8200,0x8201,0x8202,0x8203},
+  66                                                                    {0x8400,0x8401,0x8402,0x8403},
+  67                                                                    {0x8600,0x8601,0x8602,0x8603},
+  68                                                                    {0x8800,0x8801,0x8802,0x8803},
+  69                                                                    {0x8a00,0x8a01,0x8a02,0x8a03},
+  70                                        {0x8c00,0x8c01,0x8c02,0x8c03},
+  71                                                                    {0x8e00,0x8e01,0x8e02,0x8e03},
+  72                                                                    {0x9000,0x9001,0x9002,0x9003},
+  73                                                                    {0x9200,0x9201,0x9202,0x9203},
+  74                                                                    };
+  75                  ulong code Sector1[10][4]={
+  76                                            {0xa000,0xa001,0xa002,0xa003},
+  77                                                                    {0xa200,0xa201,0xa202,0xa203},
+  78                                                                    {0xa400,0xa401,0xa402,0xa403},
+  79                                                                    {0xa600,0xa601,0xa602,0xa603},
+  80                                                                    {0xa800,0xa801,0xa802,0xa803},
+  81                                                                    {0xaa00,0xaa01,0xaa02,0xaa03},
+  82                                        {0xac00,0xac01,0xac02,0xac03},
+  83                                                                    {0xae00,0xae01,0xae02,0xae03},
+  84                                                                    {0xa000,0xa001,0xa002,0xa003},
+  85                                                                    {0xa200,0xa201,0xa202,0xa203},
+  86                                                                    };
+  87          
+  88          
+  89          extern void SectorErase(uint sector_addr);      // 扇区擦除
+  90          extern uchar byte_read(uint byte_addr);         // byte读
+  91          extern void byte_write(uint byte_addr, uchar original_data);    // byte写
+  92          extern uchar byte_write_verify(uint byte_addr, uchar original_data);// byte写并校验
+  93          extern uchar ArrayWrite(uint begin_addr, uint len, uchar code *array);  // byte数组写并校验
+  94          extern void ArrayRead(uint begin_addr, uchar len);              // 读出, 保存在Ttotal[]中
+  95          
+  96          
+  97          /* --------------- 命令定义 --------------- */
+  98          #define RdCommand               0x01    /* 字节读       */
+  99          #define PrgCommand              0x02    /* 字节写       */
+ 100          #define EraseCommand    0x03    /* 扇区擦除 */
+ 101          
+ 102          /* 定义常量 */
+ 103          #define Error   1
+ 104          #define Ok      0
+ 105          
+ 106          /* 定义Flash对应于20MHz晶振系统的操作等待时间 */
+ 107          /* 时钟倍频时WaitTime用 0x00*/
+ 108          
+ 109          #define WaitTime        0x01
+ 110          
+ 111          /* ------------- 定义扇区大小 ------------- */
+ 112          #define PerSector               512
+ 113          
+ 114          extern uchar Ttotal[];
+ 115          
+ 116          
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 3   
+
+ 117          
+ 118          /* ================ 打开 ISP,IAP 功能 ================= */
+ 119          void ISP_IAP_enable(void)
+ 120          {
+ 121   1              EA      =       0;                                                      /* 关中断               */
+ 122   1              ISP_CONTR =     ISP_CONTR & 0x18;       /* 0001,1000    */
+ 123   1              ISP_CONTR =     ISP_CONTR | WaitTime;   /* 写入硬件延时 */
+ 124   1              ISP_CONTR =     ISP_CONTR | 0x80;       /* ISPEN=1              */
+ 125   1      }
+ 126          
+ 127          /* =============== 关闭 ISP,IAP 功能 ================== */
+ 128          void ISP_IAP_disable(void)
+ 129          {
+ 130   1              ISP_CONTR       =       ISP_CONTR & 0x7f;       /* ISPEN = 0 */
+ 131   1              ISP_TRIG        =       0x00;
+ 132   1              EA                      =   1;                  /* 开中断 */
+ 133   1      }
+ 134          /* ================ 公用的触发代码 ==================== */
+ 135          void ISPgoon(void)
+ 136          {
+ 137   1              ISP_IAP_enable();                       /* 打开 ISP,IAP 功能    */
+ 138   1              ISP_TRIG        =       0x46;           /* 触发ISP_IAP命令字节1 */
+ 139   1              ISP_TRIG        =       0xb9;           /* 触发ISP_IAP命令字节2 */
+ 140   1              _nop_();
+ 141   1      }
+ 142          /* ==================== 字节读 ======================== */
+ 143          uchar byte_read(uint byte_addr)
+ 144          {   
+ 145   1              ISP_ADDRH = (uchar)(byte_addr >> 8);    /* 地址赋值     */
+ 146   1              ISP_ADDRL = (uchar)(byte_addr & 0x00ff);
+ 147   1      
+ 148   1              ISP_CMD   = ISP_CMD     & 0xf8;                 /* 清除低3位    */
+ 149   1              ISP_CMD   = ISP_CMD     | RdCommand;    /* 写入读命令   */
+ 150   1      
+ 151   1              ISPgoon();                                                      /* 触发执行             */
+ 152   1              ISP_IAP_disable();                              /* 关闭ISP,IAP功能      */
+ 153   1      
+ 154   1              return (ISP_DATA);                              /* 返回读到的数据       */
+ 155   1      }
+ 156          
+ 157          /* ================== 扇区擦除 ======================== */
+ 158          void SectorErase(uint sector_addr)
+ 159          {
+ 160   1              uint iSectorAddr;
+ 161   1              iSectorAddr = (sector_addr & 0xfe00); /* 取扇区地址 */
+ 162   1              ISP_ADDRH = (uchar)(iSectorAddr >> 8);
+ 163   1              ISP_ADDRL = 0x00;
+ 164   1      
+ 165   1              ISP_CMD = ISP_CMD & 0xf8;                       /* 清空低3位    */
+ 166   1              ISP_CMD = ISP_CMD | EraseCommand;       /* 擦除命令3    */
+ 167   1      
+ 168   1              ISPgoon();                                                      /* 触发执行             */
+ 169   1              ISP_IAP_disable();                              /* 关闭ISP,IAP功能      */
+ 170   1      
+ 171   1      }
+ 172          
+ 173          
+ 174          /* ==================== 字节写 ======================== */
+ 175          void byte_write(uint byte_addr, uchar original_data)
+ 176          {
+ 177   1          
+ 178   1              ISP_ADDRH =     (uchar)(byte_addr >> 8);        /* 取地址       */
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 4   
+
+ 179   1              ISP_ADDRL =     (uchar)(byte_addr & 0x00ff);
+ 180   1      
+ 181   1              ISP_CMD  = ISP_CMD & 0xf8;                              /* 清低3位      */
+ 182   1              ISP_CMD  = ISP_CMD | PrgCommand;                /* 写命令2      */
+ 183   1              ISP_DATA = original_data;                       /* 写入数据准备 */
+ 184   1      
+ 185   1              ISPgoon();                                                      /* 触发执行             */
+ 186   1              ISP_IAP_disable();                                      /* 关闭IAP功能  */
+ 187   1      }
+ 188          
+ 189          
+ 190          
+ 191             void delay(unsigned int n) 
+ 192          {
+ 193   1        unsigned int i;
+ 194   1        for(i=0; i<n; i++) {;}
+ 195   1      }
+ 196           
+ 197           /*------------------------*/
+ 198              void wait(uint j)
+ 199              {
+ 200   1           uint i,x;     for(i=0;i<j;i++)
+ 201   1              {
+ 202   2               for(x=0;x<200;x++)  
+ 203   2                 ;
+ 204   2                } 
+ 205   1           }
+ 206          /***********写164***************/
+ 207               void d164(uchar n)   //74164串行移位一个数
+ 208                  {
+ 209   1               uchar i=0;
+ 210   1               uchar c=rrc[n];
+ 211   1               do{  
+ 212   2                   if(c&0x01)     
+ 213   2                              dat=1;
+ 214   2                          else
+ 215   2                                              dat=0;
+ 216   2                           c>>=1;        //数组tabel中的第N个数向右移动一位
+ 217   2                   clk=0;            //下降沿将数据写入164，拉高时钟端停止，再拉低等待下一次写入
+ 218   2                   clk=1;
+ 219   2                   clk=0;
+ 220   2                   i++;
+ 221   2                  }
+ 222   1              while(i<8);
+ 223   1                   c=0;
+ 224   1              }
+ 225          
+ 226              /*------------------------*/
+ 227             void d595(uchar n)   //74164串行移位一个数
+ 228                  {
+ 229   1               uchar i=0;
+ 230   1               uchar val=jdq1[n];
+ 231   1               for (i=0;i<8;i++)
+ 232   1                {
+ 233   2               
+ 234   2                SRCLK=0;
+ 235   2                SER=(bit)(val&0x01);
+ 236   2                val=val>>1;
+ 237   2              
+ 238   2                SRCLK=1;
+ 239   2                 } 
+ 240   1              val=jdq2[n];
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 5   
+
+ 241   1              for (i=0;i<8;i++)
+ 242   1                {
+ 243   2               
+ 244   2                SRCLK=0;
+ 245   2                SER=(bit)(val&0x01);
+ 246   2                val=val>>1;
+ 247   2              
+ 248   2                SRCLK=1;
+ 249   2                 } 
+ 250   1              RCK =0;
+ 251   1              _nop_();
+ 252   1              _nop_();
+ 253   1              RCK =1;
+ 254   1              KG=0;
+ 255   1              wait(15);
+ 256   1              KG=1; 
+ 257   1            
+ 258   1              }
+ 259          
+ 260                     void dd595(uchar n)   //74164串行移位一个数
+ 261                  {
+ 262   1               uchar i=0;
+ 263   1               uchar val=jdq3[n];
+ 264   1               for (i=0;i<8;i++)
+ 265   1                {
+ 266   2               
+ 267   2                SRCLK=0;
+ 268   2                SER=(bit)(val&0x01);
+ 269   2                val=val>>1;
+ 270   2              
+ 271   2                SRCLK=1;
+ 272   2                 } 
+ 273   1              val=jdq4[n];
+ 274   1              for (i=0;i<8;i++)
+ 275   1                {
+ 276   2               
+ 277   2                SRCLK=0;
+ 278   2                SER=(bit)(val&0x01);
+ 279   2                val=val>>1;
+ 280   2              
+ 281   2                SRCLK=1;
+ 282   2                 } 
+ 283   1              RCK =0;
+ 284   1              _nop_();
+ 285   1              _nop_();
+ 286   1              RCK =1;
+ 287   1              KG=0;
+ 288   1              wait(15);
+ 289   1              KG=1; 
+ 290   1            
+ 291   1              }
+ 292           /**************写7710***********************/
+ 293                  void write(ulong j)
+ 294                     {  
+ 295   1              uint i;
+ 296   1              sclk=0;
+ 297   1              tfs=0;
+ 298   1                      rfs=1;
+ 299   1                  a0=0;
+ 300   1                      for(i=0;i<25;i++)
+ 301   1                       {
+ 302   2                        sclk=0;
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 6   
+
+ 303   2                        _nop_();
+ 304   2                  
+ 305   2                    sclk=1;
+ 306   2                          sdata=j&1;
+ 307   2                        _nop_();
+ 308   2                        
+ 309   2                        j=(j>>=1);
+ 310   2                        }
+ 311   1               tfs=1;       
+ 312   1                }
+ 313          /*--------校准和回路零位----------*/
+ 314          
+ 315          collate()
+ 316          {
+ 317   1      
+ 318   1        
+ 319   1        if(ct==1)
+ 320   1         { 
+ 321   2        
+ 322   2           with();
+ 323   2           ZL[dw-1]=de-LZ[dw-1];
+ 324   2           SectorErase(Sector[dw-1][2]); 
+ 325   2               byte_write(Sector[dw-1][0],ZL[dw-1]&0xff);
+ 326   2               byte_write(Sector[dw-1][1],ZL[dw-1]>>8&0xff);
+ 327   2               byte_write(Sector[dw-1][2],ZL[dw-1]>>16&0xff);
+ 328   2               byte_write(Sector[dw-1][3],ZL[dw-1]>>24&0xff);
+ 329   2           wait(1000);
+ 330   2           wait(1000);
+ 331   2               ct=0;
+ 332   2          }
+ 333   1      }
+ 334          clear()
+ 335            {
+ 336   1       
+ 337   1         if(cr==1)
+ 338   1         { 
+ 339   2         cr=0;
+ 340   2         with();
+ 341   2         LZ[dw-1]=de;
+ 342   2         SectorErase(Sector1[dw-1][2]); 
+ 343   2         byte_write(Sector1[dw-1][0],LZ[dw-1]&0xff);
+ 344   2         byte_write(Sector1[dw-1][1],LZ[dw-1]>>8&0xff);
+ 345   2         wait(1000);
+ 346   2         wait(1000);
+ 347   2         }
+ 348   1         
+ 349   1         }
+ 350          /*------按键后继电器切换和7710的写入------*/
+ 351          zt(uchar zt)
+ 352          {
+ 353   1       if(zt==0)
+ 354   1         write(control[2]);
+ 355   1       else if (zt==1||zt==2||zt==3||zt==4)
+ 356   1         write(control[1]);
+ 357   1       else if(zt==5||zt==6||zt==7||zt==8||zt==9)
+ 358   1         write(control[0]);
+ 359   1       else 
+ 360   1         error=1;
+ 361   1       d595(0);
+ 362   1       wait(1000);
+ 363   1       d595(zt);
+ 364   1       dd595(0);
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 7   
+
+ 365   1       wait(1000);
+ 366   1       dd595(zt);
+ 367   1      
+ 368   1      }
+ 369              
+ 370          /*---------键盘处理-----------*/  
+ 371          keysetdisposal()
+ 372          {
+ 373   1        switch (keykeep)
+ 374   1         {  case 1 :
+ 375   2             zt(0);
+ 376   2             break;
+ 377   2            case 2 :
+ 378   2                 zt(1);
+ 379   2             break;
+ 380   2            case 3 :
+ 381   2                 zt(2);
+ 382   2             break;
+ 383   2            case 4 :
+ 384   2                 zt(3);
+ 385   2             break;
+ 386   2                case 5 :
+ 387   2             zt(4);
+ 388   2             break;
+ 389   2            case 6 :
+ 390   2                 zt(5);
+ 391   2             break;
+ 392   2                case 7 :
+ 393   2                 zt(6);
+ 394   2             break;
+ 395   2            case 8 :
+ 396   2                 zt(7);
+ 397   2             break;
+ 398   2                case 9 :
+ 399   2                 zt(8);
+ 400   2             break;
+ 401   2            case 10 :
+ 402   2                 zt(9);
+ 403   2             break;
+ 404   2                case 11 :
+ 405   2             break;
+ 406   2            case 12 :
+ 407   2             break;
+ 408   2                case 13 :
+ 409   2             break;
+ 410   2            case 14 :
+ 411   2             break;
+ 412   2                case 15 :
+ 413   2             break;
+ 414   2            default:
+ 415   2                 keykeep=0;
+ 416   2                 break;
+ 417   2           }    
+ 418   1      
+ 419   1      
+ 420   1         
+ 421   1           
+ 422   1      
+ 423   1      
+ 424   1      }
+ 425          /*------------------------*/
+ 426          keyset()
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 8   
+
+ 427           {
+ 428   1        uchar keykp;
+ 429   1        if(keykeep!=0)
+ 430   1         {
+ 431   2           if((0x0f&P0)==0x0f)
+ 432   2             keysetdisposal();
+ 433   2          }
+ 434   1        if((0x0f&P0)!=0x0f)
+ 435   1          {         keykp=0x0f&~P0; 
+ 436   2           //  wait(10);
+ 437   2             if(keykp==(0x0f&~P0))
+ 438   2               {keykeep=keykp;
+ 439   3                keykp=0;}
+ 440   2            }
+ 441   1        }
+ 442          /*---------------------*/
+ 443          
+ 444          
+ 445          
+ 446               display1()
+ 447                  {
+ 448   1                        uchar d1,d2,d3,d4,d5,d6,d7;
+ 449   1                    signed long de1;
+ 450   1                
+ 451   1                de1=de;
+ 452   1                if(de1>0)
+ 453   1                  {
+ 454   2                if(de1>29000000)
+ 455   2                 {
+ 456   3                   display(0x80,0xb3,0xac);
+*** WARNING C206 IN LINE 456 OF D:\MY DOCUMENTS\WOJ2\WOJ_2.C: 'display': missing function-prototype
+*** ERROR C267 IN LINE 456 OF D:\MY DOCUMENTS\WOJ2\WOJ_2.C: 'display': requires ANSI-style prototype
+ 457   3                    
+ 458   3                   display(0x90,0xa1,0xa0);
+ 459   3                   display(0x91,0xa1,0xa0);
+ 460   3                   display(0x92,0xa1,0xa0);
+ 461   3                   display(0x93,0xa1,0xa0);
+ 462   3                   display(0x94,0xa1,0xa0);
+ 463   3                   display(0x95,0xa1,0xa0);
+ 464   3                   display(0x96,0xa1,0xa0);
+ 465   3                   display(0x97,0xa1,0xa0);
+ 466   3                   
+ 467   3                  
+ 468   3                  }
+ 469   2                else if(de1<=29000000)
+ 470   2                {
+ 471   3                
+ 472   3                display(0x80,0xa1,0xa0); 
+ 473   3                        if(de1<0)
+ 474   3                        de1=10;
+ 475   3                        else
+ 476   3                          ;
+ 477   3                d1=de1/0x989680;
+ 478   3                        d2=(de1%0x989680)/0xf4240;
+ 479   3                        d3=((de1%0xf989680)%0xf4240)/0x186a0;
+ 480   3                        d4=(((de1%0xf989680)%0xf4240)%0x186a0)/0x2710;
+ 481   3                        d5=((((de1%0x989680)%0xf4240)%0x186a0)%0x2710)/0x3e8;
+ 482   3                        d6=(((((de1%0x989680)%0xf4240)%0x186a0)%0x2710)%0x3e8)/0x64;
+ 483   3                d7=((((((de1%0x989680)%0xf4240)%0x186a0)%0x2710)%0x3e8)%0x64)/10;
+ 484   3                        
+ 485   3                if(dw==1||dw==4)
+ 486   3                 {
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 9   
+
+ 487   4                  display(0x90,0xa3,0xb0+d1);
+ 488   4                  display(0x91,0xa3,0xb0+d2);
+ 489   4                  display(0x92,0xa3,0xae);
+ 490   4                  display(0x93,0xa3,0xb0+d3);
+ 491   4                  display(0x94,0xa3,0xb0+d4);
+ 492   4                  display(0x95,0xa3,0xb0+d5);
+ 493   4                  display(0x96,0xa3,0xb0+d6);
+ 494   4                  display(0x97,0xa3,0xb0+d7);
+ 495   4                  
+ 496   4                  }
+ 497   3                 else if(dw==2||dw==5)
+ 498   3                  {
+ 499   4                  display(0x90,0xa3,0xb0+d1);
+ 500   4                  display(0x91,0xa3,0xb0+d2);
+ 501   4                  display(0x92,0xa3,0xb0+d3);
+ 502   4                  display(0x93,0xa3,0xae);
+ 503   4                  display(0x94,0xa3,0xb0+d4);
+ 504   4                  display(0x95,0xa3,0xb0+d5);
+ 505   4                  display(0x96,0xa3,0xb0+d6);
+ 506   4                  display(0x97,0xa3,0xb0+d7);
+ 507   4                  
+ 508   4                   }
+ 509   3                 else if(dw==3||dw==6)
+ 510   3                  {
+ 511   4                  display(0x90,0xa3,0xb0+d1);
+ 512   4                  display(0x91,0xa3,0xae);
+ 513   4                  display(0x92,0xa3,0xb0+d2);
+ 514   4                  display(0x93,0xa3,0xb0+d3);
+ 515   4                  display(0x94,0xa3,0xb0+d4);
+ 516   4                  display(0x95,0xa3,0xb0+d5);
+ 517   4                  display(0x96,0xa3,0xb0+d6);
+ 518   4                  display(0x97,0xa3,0xb0+d7);
+ 519   4                   }
+ 520   3                 else 
+ 521   3                   ;
+ 522   3                 if(dw==1||dw==2)
+ 523   3                   display(0x85,0xa3,0xed);
+ 524   3                   else if(dw==3||dw==3||dw==5)
+ 525   3                    display(0x85,0xa1,0xa0);
+ 526   3                     else if(dw==6)
+ 527   3                      display(0x85,0xa3,0xcb);   
+ 528   3                  }
+ 529   2                
+ 530   2                 
+ 531   2                 else  
+ 532   2                   ;
+ 533   2                  }
+ 534   1          /*       else if(de1<0) 
+ 535   1                 { display(0x90,0xa1,0xa0);
+ 536   1                   display(0x91,0xa1,0xa0);
+ 537   1                   display(0x92,0xa1,0xa0);
+ 538   1                   display(0x93,0xa1,0xa0);
+ 539   1                   display(0x94,0xa1,0xa0);
+ 540   1                   display(0x95,0xa1,0xa0);
+ 541   1                   display(0x96,0xa1,0xa0);
+ 542   1                   display(0x97,0xa1,0xa0); }
+ 543   1                 else  
+ 544   1                   ;  */
+ 545   1                 if(career==1)
+ 546   1                   {display(0x99,0xa2,0xf1);
+ 547   2                    }
+ 548   1                 else
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 10  
+
+ 549   1                   {display(0x99,0xa2,0xf2);}
+ 550   1                  
+ 551   1                 }
+ 552                   read7710()
+ 553                     {
+ 554   1                  uint j;
+ 555   1              sclk=0;
+ 556   1                      a0=1;
+ 557   1                      tfs=1;
+ 558   1                      rfs=1;
+ 559   1                      sdata=1;
+ 560   1              RD:     
+ 561   1                          de=0;
+ 562   1                          if(drdy==0)
+ 563   1                             { rfs=0 ;
+ 564   2                       for(j=0;j<0x18;j++)
+ 565   2                                   {sclk=0;
+ 566   3                                        _nop_();
+ 567   3                                        sclk=1;
+ 568   3                                        _nop_();
+ 569   3                                    de=de|sdata;
+ 570   3                                        sclk=0;
+ 571   3                                    de<<=1;
+ 572   3                                        
+ 573   3                                          if (drdy==1)
+ 574   3                                               j=0x18;
+ 575   3                                   }
+ 576   2                               
+ 577   2                     }
+ 578   1                              else 
+ 579   1                    goto RD;
+ 580   1               }
+ 581             void yanshi(void)
+ 582                     {
+ 583   1                  ulong i;
+ 584   1                      for(i=0;i<1;i++)
+ 585   1                        
+ 586   1                        ;
+ 587   1              }
+ 588          
+ 589               with()
+ 590                       {
+ 591   1                        uchar i;
+ 592   1                        ulong dx1,d0,d1,d2,d3,d4,d5;
+ 593   1                        dx1=0;
+ 594   1                        for(i=0;i<2;i++)
+ 595   1                        {
+ 596   2                 read7710();
+ 597   2                 d0=de;
+ 598   2                         read7710();
+ 599   2                         d1=de;
+ 600   2                 read7710();
+ 601   2                 d2=de;
+ 602   2                         read7710();
+ 603   2                         d3=de;
+ 604   2                         read7710();
+ 605   2                 d4=de;
+ 606   2                         read7710();
+ 607   2                         d5=de;
+ 608   2                 if(d0<d1)
+ 609   2                                d0=d1;
+ 610   2                        if(d0<d2)
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 11  
+
+ 611   2                                d0=d2;
+ 612   2                        if(d0<d3)
+ 613   2                                d0=d3;
+ 614   2                        if(d0<d4)
+ 615   2                                d0=d4;
+ 616   2                        if(d0<d5)
+ 617   2                            d0=d5;
+ 618   2                        if(d1>d2)
+ 619   2                                d1=d2;
+ 620   2                        if(d1>d3)
+ 621   2                                d1=d3;
+ 622   2                        if(d1>d4)
+ 623   2                                d1=d4;
+ 624   2                        if(d1<d5)
+ 625   2                                d1=d5;
+ 626   2                         de=d2+d3+d4+d5;
+ 627   2                         dx1=dx1+de;
+ 628   2                         }
+ 629   1                       de=dx1/8;
+ 630   1                 }
+ 631               quantifier_with(float decimal )     
+ 632                {
+ 633   1               
+ 634   1              if(de>16777216)
+ 635   1                   de=de-16777216;
+ 636   1                      else
+ 637   1               de=16777216-de;          
+ 638   1                        de=(de-LZ[dw-1])/decimal;
+ 639   1                        
+ 640   1              display1(); 
+ 641   1                 }
+ 642             qh()
+ 643              {
+ 644   1          
+ 645   1          if(de<1000000)
+ 646   1               { 
+ 647   2                 if(dw!=1)
+ 648   2                 dw=dw-1;
+ 649   2                 d595(0);
+ 650   2                 wait(15);
+ 651   2                 
+ 652   2                 d595(dw);
+ 653   2                }
+ 654   1          else if(de>20000000)
+ 655   1               { 
+ 656   2                 if(dw!=6)
+ 657   2                 dw=dw+1;
+ 658   2                 d595(0);
+ 659   2                 wait(15);
+ 660   2                 
+ 661   2                 d595(dw);
+ 662   2                 }
+ 663   1            
+ 664   1          else
+ 665   1            ;
+ 666   1         }
+ 667          /*------------------------------*/
+ 668          
+ 669          
+ 670          
+ 671          /*------------------------------*/
+ 672          cy()
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 12  
+
+ 673            {
+ 674   1         float ctd;//,cd1;
+ 675   1        // uchar cr11,cr22,cr33,cr44;
+ 676   1        // ulong f1,f2,f3,f4;
+ 677   1        // cr11=cr1;cr22=cr2;cr33=cr3;cr44=cr4;
+ 678   1      
+ 679   1         if(ct==0)
+ 680   1         {
+ 681   2         if(career==1)
+ 682   2           { read7710(); 
+ 683   3            }
+ 684   2           
+ 685   2          else
+ 686   2           with(); 
+ 687   2         if(dw==2||dw==3||dw==4||dw==5||dw==6)
+ 688   2          {
+ 689   3          ZL[dw-1]=byte_read(Sector[dw-1][3])*16777216+byte_read(Sector[dw-1][2])*65535+byte_read(Sector[dw-1][1
+             -])*256+byte_read(Sector[dw-1][0]);
+ 690   3          write(0x03e334);
+ 691   3          ctd=0.0000001*ZL[dw-1];
+*** ERROR C193 IN LINE 691 OF D:\MY DOCUMENTS\WOJ2\WOJ_2.C: '*': bad operand type
+ 692   3          quantifier_with(ctd);
+ 693   3           }
+ 694   2            else if(dw==1)
+ 695   2            { write(0x03e31c);
+ 696   3                  ZL[dw-1]=byte_read(Sector[dw-1][3])*16777216+byte_read(Sector[dw-1][2])*65535+byte_read(Sector[dw-1][
+             -1])*256+byte_read(Sector[dw-1][0]);
+ 697   3              ctd=0.0000001*ZL[dw-1];
+*** ERROR C193 IN LINE 697 OF D:\MY DOCUMENTS\WOJ2\WOJ_2.C: '*': bad operand type
+ 698   3                  quantifier_with(ctd);
+ 699   3             }
+ 700   2             else
+ 701   2               ;
+ 702   2         
+ 703   2         }
+ 704   1        display(0x9c,0xb2,0xe2);
+ 705   1        }
+ 706          
+ 707             main( )
+ 708               {
+ 709   1              
+ 710   1           RST=1;
+ 711   1           PSB=0; 
+ 712   1           RS_CS=1; 
+ 713   1           initlcm();
+ 714   1           SendCMD(0x81);//1000,0001 设定DDRAM 7位地址000，0001到地址计数器AC
+ 715   1           SendDat(0x33);
+ 716   1           SendDat(0x42);
+ 717   1           SendDat(0x43);
+ 718   1           SendDat(0x44);
+ 719   1           SendCMD(0x00);
+ 720   1           d595(0); 
+ 721   1          
+ 722   1           write(0x03e334);
+ 723   1           display(0x86,0xa6,0xb8);
+ 724   1           display(0x98,0xcb,0xd9);
+ 725   1                    
+ 726   1         do{
+ 727   2            
+ 728   2             cy();       //测量状态调用
+ 729   2             keyset(); 
+ 730   2                
+C51 COMPILER V7.01  WOJ_2                                                                  05/22/2008 15:31:04 PAGE 13  
+
+ 731   2                 }
+ 732   1                while(1);
+ 733   1            }
+ 734               
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  3 ERROR(S)

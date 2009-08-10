@@ -1,0 +1,111 @@
+C51 COMPILER V7.01  UART_HW1                                                               06/29/2008 11:48:12 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE UART_HW1
+OBJECT MODULE PLACED IN uart_hw1.OBJ
+COMPILER INVOKED BY: c:\GreenTools\Keil\C51\BIN\C51.EXE uart_hw1.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "lib.h"
+   2          
+   3          //const for SerialPort Status
+   4          #define SP_BUSY                 0xd6    
+   5          #define SP_IDLE                 0xd8
+   6          #define SP_NOINIT               0xda
+   7          
+   8          u8 spbuf[SP_BUFFER_MAX];        ///< serial port fifo buffer
+   9          u8 *spHead;
+  10          u8 *spTail;     ///< buffer head and tail
+  11          u8 spSFlag;///<serial port flag for send use
+  12          
+  13          /**
+  14          *       @brief Set Initially for all serial port(under construction)
+  15          *       
+  16          *       Serial port format will be set identically
+  17          */
+  18          void HW1SerialInit()
+  19          {
+  20   1              spHead=spbuf;
+  21   1              spTail=spbuf;
+  22   1              spSFlag=SP_IDLE;
+  23   1      }
+  24          
+  25          /********************************
+  26          *       Add the byte recieved to the 
+  27          *       Tail of the buffer
+  28          ********************************/
+  29          void HW1SerialInterrupt(void) interrupt 4 using 2
+  30          {
+  31   1              //just handle serial interrupt 4
+  32   1              if(TI){
+  33   2                      TI = 0;
+  34   2                      spSFlag = SP_IDLE;      
+  35   2              }
+  36   1              if(RI){
+  37   2                      *spTail = SBUF;
+  38   2                      spTail = spTail+1;
+  39   2                      if(spTail == (spbuf+SP_BUFFER_MAX))
+  40   2                              spTail = spbuf;
+  41   2                      RI = 0;
+  42   2              }
+  43   1      }
+  44          
+  45          /**
+  46          *       @return TRUE when data available ,FALSE while not
+  47          */
+  48          BOOL HW1SerialDataWaiting()
+  49          {
+  50   1              if(spHead == spTail)
+  51   1                      return FALSE;
+  52   1              else 
+  53   1                      return TRUE;
+  54   1      }
+  55          /**
+C51 COMPILER V7.01  UART_HW1                                                               06/29/2008 11:48:12 PAGE 2   
+
+  56          *       Send One Byte on Serial port , (under construction)
+  57          *       and return with no wait for send finished
+  58          *       @param udata the Byte to send
+  59          *       @param PortID serial port to use
+  60          */
+  61          void HW1SerialSendByte(BYTE udata)
+  62          {
+  63   1              spSFlag=SP_BUSY;
+  64   1              SBUF = udata;
+  65   1              while(spSFlag == SP_BUSY)       
+  66   1                      ;
+  67   1      }
+  68          /**
+  69          *       Wait One Byte until that appeared,
+  70          *       it perform read byte function at the same time
+  71          *       @param PortID serial port to use
+  72          *       @return Byte we received
+  73          */
+  74          u8 HW1SerialWaitForOneByte(void)
+  75          {
+  76   1              u8 dat;
+  77   1              if(spHead == spTail)    {
+  78   2                      while(FALSE == HW1SerialDataWaiting())
+  79   2                              ;
+  80   2              }
+  81   1              dat = *spHead;
+  82   1              spHead = spHead + 1;
+  83   1              if(spHead == (spbuf+SP_BUFFER_MAX))
+  84   1                      spHead = spbuf;
+  85   1              return dat;
+  86   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    223    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     13    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,210 @@
+C51 COMPILER V7.01  3310A                                                                  06/21/2008 16:21:47 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE 3310A
+OBJECT MODULE PLACED IN 3310A.OBJ
+COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE 3310A.C BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          //端口说明：
+   2          //*****
+   3          //P1口为键盘口
+   4          //P1.0为自动键
+   5          //P1.1为手动键
+   6          //P1.2为档位一
+   7          //P1.3为档位二
+   8          //P1.4为档位三
+   9          //P1.5为档位四
+  10          //P1.6为档位五
+  11          //P1.6为档位六
+  12          //******
+  13          //P2.1为检测溢出信号
+  14          //P2.0为检测欠量程信号
+  15          //*****
+  16          //P0.2为164清零信号
+  17          //P0.1为164脉冲信号
+  18          //P0.0为164数据信号
+  19          
+  20              #include <reg52.h>
+  21                  #include <stdio.h>
+  22                  #include <intrins.h>
+  23                  #define uchar unsigned char
+  24                  #define uint unsigned int
+  25                  #define ulong unsigned long
+  26                  sbit dat= P0^0;   //定义数据线
+  27              sbit clk= P0^1;   //定义时钟端
+  28                  sbit clr= P0^2;   //清零端
+  29              sbit J0= P1^0;   
+  30              sbit J1= P1^1;   
+  31                  sbit J3= P1^2;   
+  32              sbit J4= P1^3;   
+  33              sbit J5= P1^4;   
+  34                  sbit J6= P1^5;   
+  35              sbit J7= P1^6;   
+  36              sbit J8= P1^7;   
+  37                  sbit YC= P2^1;  
+  38              sbit QL= P2^0;
+  39          
+  40              uchar  anjianbaochi;//按键保持记忆  
+  41              uchar  daout;//数据输出
+  42              uchar  outjiance;//输出检测
+  43              uchar  zdbz;//自动档标志位
+  44              uchar  zdbaochi;
+  45              uchar  anjianbz;
+  46              uchar  aj;
+  47              uint  ys;
+  48              uchar code jdq[]={0x60,0x50,0x48,0x44,0x42,0x41,0x01,0x00}; // 0x20,0x10,0x08,0x04,0x02,0x01,0x41,0x00
+  49              uchar code xsdw[]={0x48,0x88,0x24,0x44,0x84,0x22,0x42,0x00};// 0xb8,0x78,0xd4,0xb4,0x74,0xd2,0xb2,0x00
+  50          void wait(uint j)
+  51            {
+  52   1         uint i;
+  53   1         for(i=0;i<j;i++)
+  54   1            ;
+  55   1         }
+C51 COMPILER V7.01  3310A                                                                  06/21/2008 16:21:47 PAGE 2   
+
+  56          void d164()   //74164串行移位一个数
+  57             {
+  58   1               uchar i=0,ajbc,c;
+  59   1               ajbc=anjianbaochi;
+  60   1               c=jdq[ajbc];
+  61   1               
+  62   1               do{  
+  63   2                   if(c&0x01)     
+  64   2                              dat=1;
+  65   2                          else
+  66   2                                              dat=0;
+  67   2                           c>>=1;        //数组tabel中的第N个数向右移动一位
+  68   2                   clk=0;            //下降沿将数据写入164，拉高时钟端停止，再拉低等待下一次写入
+  69   2                   clk=1;
+  70   2                   clk=0;
+  71   2                   i++;
+  72   2                  }
+  73   1              while(i<8);
+  74   1                     i=0;
+  75   1                     c=xsdw[ajbc];
+  76   1                 if(zdbz==0xff)
+  77   1                   c=c|0x01; 
+  78   1                   
+  79   1              do{  
+  80   2                   if(c&0x01)     
+  81   2                              dat=1;
+  82   2                          else
+  83   2                                              dat=0;
+  84   2                           c>>=1;        //数组tabel中的第N个数向右移动一位
+  85   2                   clk=0;            //下降沿将数据写入164，拉高时钟端停止，再拉低等待下一次写入
+  86   2                   clk=1;
+  87   2                   clk=0;
+  88   2                   i++;
+  89   2                  }
+  90   1              while(i<8);
+  91   1              }
+  92             
+  93          void keydsp()
+  94            {
+  95   1         uchar aj;
+  96   1         anjianbaochi=~anjianbaochi;
+  97   1         aj=anjianbaochi;
+  98   1         if(anjianbaochi==1)
+  99   1           { zdbz=0xff;
+ 100   2             anjianbaochi=0;
+ 101   2             d164();}
+ 102   1          else
+ 103   1           { 
+ 104   2           zdbz=0;
+ 105   2            if(anjianbaochi==2)
+ 106   2              {  anjianbaochi=0;
+ 107   3                 d164();}
+ 108   2            else if(anjianbaochi==4)
+ 109   2              {  anjianbaochi=1;
+ 110   3                 d164();} 
+ 111   2            else if(anjianbaochi==8)
+ 112   2              {  anjianbaochi=2;
+ 113   3                 d164(); }
+ 114   2            else if(anjianbaochi==16)
+ 115   2              {  anjianbaochi=3;
+ 116   3                 d164(); }
+ 117   2            else if(anjianbaochi==32)
+C51 COMPILER V7.01  3310A                                                                  06/21/2008 16:21:47 PAGE 3   
+
+ 118   2              {  anjianbaochi=4;
+ 119   3                 d164(); }
+ 120   2            else if(anjianbaochi==64)
+ 121   2              {  anjianbaochi=5;
+ 122   3                 d164(); }
+ 123   2            else if(anjianbaochi==128)
+ 124   2              {  anjianbaochi=6;
+ 125   3                 d164(); }
+ 126   2             else
+ 127   2               ;
+ 128   2            
+ 129   2         
+ 130   2            }
+ 131   1         } 
+ 132          void key(void)
+ 133             {
+ 134   1       
+ 135   1          if(anjianbz!=0)
+ 136   1            {
+ 137   2             if(P1==0xff)
+ 138   2               keydsp();
+ 139   2               anjianbz=0;
+ 140   2             }
+ 141   1           if(P1!=0xff)
+ 142   1             {
+ 143   2             wait(2);
+ 144   2             if(P1!=0xff)
+ 145   2                anjianbaochi=P1;
+ 146   2                anjianbz=0xff;
+ 147   2             }
+ 148   1           
+ 149   1         }
+ 150          void jiance(void)
+ 151             {
+ 152   1          ys=0;
+ 153   1          if(zdbz==0xff)
+ 154   1           {
+ 155   2          
+ 156   2            if(YC==1)
+ 157   2              {if(anjianbaochi!=0)
+ 158   3               { anjianbaochi=anjianbaochi-1; 
+ 159   4                d164();}
+ 160   3                }
+ 161   2            if(QL==1)
+ 162   2               {if(anjianbaochi!=6)
+ 163   3                {anjianbaochi=anjianbaochi+1;  
+ 164   4                d164();} 
+ 165   3                }
+ 166   2             
+ 167   2            }
+ 168   1          }
+ 169          void main()
+ 170             {
+ 171   1          zdbz=0xff;
+ 172   1          while(1)
+ 173   1          {
+ 174   2          key();
+ 175   2          if(ys>0x3ff0)
+ 176   2            {jiance();}
+ 177   2           ys++;
+ 178   2          }
+ 179   1         }
+C51 COMPILER V7.01  3310A                                                                  06/21/2008 16:21:47 PAGE 4   
+
+ 180              
+ 181              
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    296    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      9       1
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
