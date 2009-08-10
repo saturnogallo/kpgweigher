@@ -58,8 +58,8 @@
    
 // *************************************************************************
 
-// PC interface (2 bytes): 
-//    Mode:     BIT7 = 1: with shakehands,    BIT7 = 0; No shakehands
+// PC interface (use command start reg and offset_low_limit only): 
+//    Mode:     BIT[7] 1: with shakehands    0: No shakehands 
 //    IF1:      BIT[6:5] 00: fixed low 
 //                       01: rising edge  
 //                       10: falling edge
@@ -78,19 +78,7 @@
 #include <mega64.h>
 #include "global.h"
 
-#define INTF_PLS_WIDTH 30 
-#define MAX_SVS_NUM 3 
-#define SVS_CMPLT 0xff 
-
-// Hardware related 
-#define TOGGLE_OR1 PORTF ^= 0x1
-#define TOGGLE_OF1 PORTF ^= 0x2  
-#define MASK_TMR0()  TIMSK &= 0xFE  
-#define START_TMR0() TIMSK |= 0x1
-#define CLR_TOV0()  TIFR |= 0x1     // write "1" to TOV0 bit. 
-#define Set_10ms_Tick() TCNT0 = 122 /*10ms interrupt*/
-#define TMR0_Is_Enabled() (TIMSK & 0x1)  // bit 0 TOIE0
-
+u16 packer_config=0;                           
 extern SYSTEM system;     // 系统参数设置
 typedef struct {
    volatile u8 pack_reqs_pending; /*flag to indicate whether there is any pending reuqests from packer*/                              
@@ -183,7 +171,7 @@ void Init_interface()
 {   
    u8 i;
    DDRF |= 0x3 ;  /* set PORTF[1:0] as output */      
-   switch(system.target_weight[0] & 0x18) /*set initial states for OR1/OF1*/
+   switch(CONFIG_REG & PACKER_OF_MASK) /*set initial states for OR1/OF1*/
    {
       case 0x0:    // low to enable  
       case 0x8:
@@ -200,7 +188,7 @@ void Init_interface()
    /* Settings for IF1, use External interrupt 0*/
    /* PORTD.0 has been set as input in Init_Port() */
    /* Make sure Ex_Int4~7 (used by 16C554) is included */   
-   switch(system.target_weight[0] & 0x60) /* IF1 */
+   switch(CONFIG_REG & PACKER_IF_MASK) /* IF1 */
    {        
       case 0x00:
           EICRA=0x00; /*interrupt triggered by low level*/
@@ -239,7 +227,7 @@ void Init_interface()
 /******************************************************************************************************/
 // return 0x0 if packing machine is ready to receive another feeding. return 0xff if busy
 /******************************************************************************************************/
-#define INTF_MODE_SHAKEHANDS  (system.target_weight[0] & 0xff7f)
+#define INTF_MODE_SHAKEHANDS  (CONFIG_REG & 0xff7f)
 
 u8 Packer_Is_Busy()
 {  
@@ -259,7 +247,7 @@ u8 Packer_Is_Busy()
 /******************************************************************************************************/
 void Tell_Packer_Weigher_Rdy()
 {  
-   switch(system.target_weight[0] & 0x18)
+   switch(CONFIG_REG & PACKER_OF_MASK)
    {
       case 0x0:    // low to enable  
       case 0x8:
@@ -282,7 +270,7 @@ void Tell_Packer_Weigher_Rdy()
 /******************************************************************************************************/
 void Tell_Packer_Release_Done()
 {
-   switch(system.target_weight[0] & 0x18)
+   switch(CONFIG_REG & PACKER_OF_MASK)
    {
       case 0x0:    // low to enable  
       case 0x8:

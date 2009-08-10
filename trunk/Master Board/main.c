@@ -269,6 +269,7 @@ void find_nodes(void)
 /**************************************************************************************/
 //                              Main Function Loop
 /**************************************************************************************/
+extern u16 packer_config;
 void cmd_loop(u8 grp){     
        u8 i;            
        cm_process();                                   
@@ -306,7 +307,45 @@ void cmd_loop(u8 grp){
        }     
 
        if(is_cmd_flag(system.flag_start_machine[grp]))
-       {   // 发送命令启动节点              
+       {   // 发送命令启动节点  
+            if(system.flag_start_machine[grp] == CMD_PACKER_INIT)	//download setting of packer
+            {    //parameter should be stored in system.offset_up_limit[grp];
+                packer_config = system.offset_up_limit[grp];
+                Init_interface();
+		        system.flag_start_machine[grp] = STATE_BEIDLE;
+			    return;
+            }                                                    
+            if(system.flag_start_machine[grp] == CMD_PACKER_BUSY)	//query status of packer busy
+            {    
+		        system.flag_start_machine[grp] = (Packer_Is_Busy() == 0x0) ? STATE_DONE_OK : STATE_BEIDLE;
+			    return;
+            }                                                    
+
+            if(system.flag_start_machine[grp] == CMD_PACKER_AVAILABLE)	//query status of packer busy
+            {                                    
+                Tell_Packer_Weigher_Rdy();
+                if(NEED_HANDSHAKE)
+                {
+                    while(Packer_Is_Busy())
+                        ;
+                }
+		        system.flag_start_machine[grp] = STATE_BEIDLE;
+			    return;
+            }                   
+
+            if(system.flag_start_machine[grp] == CMD_PACKER_DONE)	//query status of packer busy
+            {                                    
+                Tell_Packer_Release_Done();
+		        system.flag_start_machine[grp] = STATE_BEIDLE;
+			    return;
+            }                   
+            if(system.flag_start_machine[grp] == CMD_PACKER_AVAILABLE)	//query status of packer busy
+            {                                    
+                Tell_Packer_Weigher_Rdy();
+		        system.flag_start_machine[grp] = STATE_BEIDLE;
+			    return;
+            }                   
+                                                                        
 		   if(system.flag_start_machine[grp] == CMD_START_SEARCH)	//research all the nodes
 		   {	
 				   init_var();
@@ -407,8 +446,9 @@ void search_loop(int grp)
                         rst554count = 0;
                         LED_FLASH(LED_RST554);   
 //                      Init_554();          
-                        status = UC_554D_LSR;
-                        status = UC_554D_MSR;
+                        port = UC_554D_LSR;
+                        port = UC_554D_MSR;
+                        port = 0x01;
                 }
                 
                  for(i=0;i<system.node_num;i++){  

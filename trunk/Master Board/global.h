@@ -151,19 +151,24 @@ typedef struct  {
 #define STATE_BEIDLE            0
 #define STATE_DONE_FAIL         0xfe
 #define STATE_DONE_OK           0xfd
-#define CMD_START_MACHINE	0x01
-#define CMD_START_SEARCH	0x02
+#define CMD_START_MACHINE	    0x01
+#define CMD_START_SEARCH	    0x02
 #define CMD_RESET_16C554        0x03            
-#define CMD_REBOOT_ME           0x04
+#define CMD_REBOOT_ME           0x04  
+#define CMD_PACKER_BUSY         0x05    //check until the packer is busy or not, IDLE means busy, PASS means free
+#define CMD_PACKER_INIT         0x06    //init the packer
+#define CMD_PACKER_AVAILABLE    0x07    //combination available
+#define CMD_PACKER_DONE         0x08    //release is done
+
 #define BOARD_TYPE_MASK         0xf0                          
 #define BOARD_TYPE_VIBRATE     	0x00
 #define BOARD_TYPE_WEIGHT       0x10
 #define BOARD_TYPE_INVALID      0xf0 
 
-#define MY_INVALID_DATA    0xfff1                                                      
-#define AD_INVALID_DATA    0xfffe
-#define AD_BUSY            0xfffd
-#define AD_FILTER          0xfffb
+#define MY_INVALID_DATA         0xfff1                                                      
+#define AD_INVALID_DATA         0xfffe
+#define AD_BUSY                 0xfffd
+#define AD_FILTER               0xfffb
 #define BOARD_GROUP_MASK        0x0f
 #define BOARD_GROUP_MASK_SHORT  0x07
 #define BOARD_GROUP_A           0x00
@@ -171,5 +176,30 @@ typedef struct  {
 #define BOARD_GROUP_C           0x02
 #define BOARD_GROUP_D           0x03
 #define BOARD_MISSING_BIT       0x00	//disable the missing bit now
-#define BOARD_GROUP_NONE	0x0f
+#define BOARD_GROUP_NONE	0x0f          
+               
+
+#define INTF_PLS_WIDTH 30 
+#define MAX_SVS_NUM 3 
+#define SVS_CMPLT 0xff 
+#define PACKER_OF_MASK      0x0018
+#define PACKER_IF_MASK      0x0060
+#define NEED_HANDSHAKE      packer_config & 0x0080
+
+#define CONFIG_REG      packer_config
+// Hardware related 
+#define TOGGLE_OR1 PORTF ^= 0x1
+#define TOGGLE_OF1 PORTF ^= 0x2  
+#define MASK_TMR0()  TIMSK &= 0xFE  
+#define START_TMR0() TIMSK |= 0x1
+#define CLR_TOV0()  TIFR |= 0x1     // write "1" to TOV0 bit. 
+#define Set_10ms_Tick() TCNT0 = 122 /*10ms interrupt*/
+#define TMR0_Is_Enabled() (TIMSK & 0x1)  // bit 0 TOIE0
+               
+//packer related function
+void Init_interface();
+u8 Packer_Is_Busy();
+void Tell_Packer_Weigher_Rdy();
+void Tell_Packer_Release_Done();
+extern u16 packer_config;
 #endif
