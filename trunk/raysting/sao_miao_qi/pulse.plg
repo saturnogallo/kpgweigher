@@ -1,0 +1,19 @@
+<html>
+<body>
+<pre>
+<h1>µVision2 Build Log</h1>
+<h2>Project:</h2>
+C:\Documents and Settings\jsong7\My Documents\My Projects\RTestV3p0\AD\Documents\pulse\pulse.uv2
+Project File Date:  02/07/2006
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling pulse.c...
+linking...
+Program Size: data=37.0 xdata=0 code=378
+"pulse" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+compiling pulse.c...
+linking...
+Program Size: data=37.0 xdata=0 code=378
+"pulse" - 0 Error(s), 0 Warning(s).

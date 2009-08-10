@@ -1,0 +1,4 @@
+"gpibifc.obj",
+"gpibifc.obj" 
+TO "Rtest" 
+CODE( 0X0000-0X0FFF )

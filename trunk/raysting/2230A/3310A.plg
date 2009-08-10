@@ -1,0 +1,21 @@
+<html>
+<body>
+<pre>
+<h1>µVision2 Build Log</h1>
+<h2>Project:</h2>
+F:\RTestAll\SubProj\3310A\3310A.uv2
+Project File Date:  03/25/2008
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling 3310A.C...
+linking...
+Program Size: data=19.0 xdata=0 code=327
+creating hex file from "3310A"...
+"3310A" - 0 Error(s), 0 Warning(s).
+Build target 'Target 1'
+compiling 3310A.C...
+linking...
+Program Size: data=19.0 xdata=0 code=327
+creating hex file from "3310A"...
+"3310A" - 0 Error(s), 0 Warning(s).

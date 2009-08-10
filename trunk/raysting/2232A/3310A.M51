@@ -1,0 +1,257 @@
+BL51 BANKED LINKER/LOCATER V5.01                                                        06/21/2008  17:54:55  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V5.01, INVOKED BY:
+F:\GREENTOOLS\KEIL\C51\BIN\BL51.EXE 3310A.obj TO 3310A RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  3310A.obj (3310A)
+  F:\GREENTOOLS\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  3310A (3310A)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0009H     UNIT         ?DT?3310A
+            DATA    0011H     0001H     UNIT         _DATA_GROUP_
+            IDATA   0012H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     005BH     UNIT         ?PR?KEYDSP?3310A
+            CODE    005EH     0051H     UNIT         ?PR?D164?3310A
+            CODE    00AFH     0027H     UNIT         ?PR?KEY?3310A
+            CODE    00D6H     0025H     UNIT         ?PR?JIANCE?3310A
+            CODE    00FBH     001EH     UNIT         ?PR?MAIN?3310A
+            CODE    0119H     0012H     UNIT         ?PR?_WAIT?3310A
+            CODE    012BH     0010H     UNIT         ?CO?3310A
+            CODE    013BH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   3310A (3310A)
+
+
+SEGMENT                          DATA_GROUP 
+  +--> CALLED SEGMENT          START    LENGTH
+----------------------------------------------
+?C_C51STARTUP                  -----    -----
+  +--> ?PR?MAIN?3310A
+
+?PR?MAIN?3310A                 -----    -----
+  +--> ?PR?KEY?3310A
+  +--> ?PR?JIANCE?3310A
+
+?PR?KEY?3310A                  -----    -----
+  +--> ?PR?KEYDSP?3310A
+  +--> ?PR?_WAIT?3310A
+
+?PR?KEYDSP?3310A               0011H    0001H
+  +--> ?PR?D164?3310A
+
+?PR?D164?3310A                 -----    -----
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/21/2008  17:54:55  PAGE 2
+
+
+  +--> ?CO?3310A
+
+?PR?JIANCE?3310A               -----    -----
+  +--> ?PR?D164?3310A
+
+
+
+SYMBOL TABLE OF MODULE:  3310A (3310A)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        3310A
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  C:005EH         PUBLIC        d164
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  D:00A8H         PUBLIC        IE
+  C:0003H         PUBLIC        keydsp
+  C:0119H         PUBLIC        _wait
+  D:00B8H         PUBLIC        IP
+  B:00A0H.1       PUBLIC        YC
+  B:00A0H.0       PUBLIC        QL
+  D:0008H         PUBLIC        daout
+  C:00FBH         PUBLIC        main
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  B:0080H.0       PUBLIC        dat
+  B:0080H.1       PUBLIC        clk
+  D:0009H         PUBLIC        zdbz
+  C:0133H         PUBLIC        jdq
+  C:012BH         PUBLIC        xsdw
+  D:000AH         PUBLIC        outjiance
+  D:000BH         PUBLIC        zdbaochi
+  C:00AFH         PUBLIC        key
+  D:000CH         PUBLIC        aj
+  D:000DH         PUBLIC        anjianbz
+  D:000EH         PUBLIC        anjianbaochi
+  D:00C8H         PUBLIC        T2CON
+  D:000FH         PUBLIC        ys
+  C:00D6H         PUBLIC        jiance
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          _WAIT
+  D:0006H         SYMBOL        j
+  -------         DO            
+  D:0004H         SYMBOL        i
+  -------         ENDDO         
+  C:0119H         LINE#         56
+  C:0119H         LINE#         57
+  C:0119H         LINE#         59
+  C:012AH         LINE#         61
+  -------         ENDPROC       _WAIT
+  -------         PROC          D164
+  -------         DO            
+  D:0007H         SYMBOL        i
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/21/2008  17:54:55  PAGE 3
+
+
+  D:0006H         SYMBOL        ajbc
+  D:0005H         SYMBOL        c
+  -------         ENDDO         
+  C:005EH         LINE#         62
+  C:005EH         LINE#         63
+  C:005EH         LINE#         64
+  C:0060H         LINE#         65
+  C:0062H         LINE#         66
+  C:0068H         LINE#         68
+  C:0068H         LINE#         69
+  C:006CH         LINE#         70
+  C:0070H         LINE#         72
+  C:0072H         LINE#         73
+  C:0076H         LINE#         74
+  C:0078H         LINE#         75
+  C:007AH         LINE#         76
+  C:007CH         LINE#         77
+  C:007DH         LINE#         78
+  C:007DH         LINE#         79
+  C:0083H         LINE#         80
+  C:0085H         LINE#         81
+  C:008BH         LINE#         82
+  C:0090H         LINE#         83
+  C:0093H         LINE#         85
+  C:0093H         LINE#         86
+  C:0097H         LINE#         87
+  C:009BH         LINE#         89
+  C:009DH         LINE#         90
+  C:00A1H         LINE#         91
+  C:00A3H         LINE#         92
+  C:00A5H         LINE#         93
+  C:00A7H         LINE#         94
+  C:00A8H         LINE#         95
+  C:00A8H         LINE#         96
+  C:00AEH         LINE#         97
+  -------         ENDPROC       D164
+  -------         PROC          KEYDSP
+  -------         DO            
+  D:0011H         SYMBOL        aj
+  -------         ENDDO         
+  C:0003H         LINE#         99
+  C:0003H         LINE#         100
+  C:0003H         LINE#         102
+  C:0006H         LINE#         103
+  C:0009H         LINE#         104
+  C:000EH         LINE#         105
+  C:0011H         LINE#         106
+  C:0011H         LINE#         107
+  C:0013H         LINE#         109
+  C:0013H         LINE#         110
+  C:0016H         LINE#         111
+  C:001BH         LINE#         112
+  C:001EH         LINE#         113
+  C:0020H         LINE#         114
+  C:0025H         LINE#         115
+  C:0028H         LINE#         116
+  C:002AH         LINE#         117
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/21/2008  17:54:55  PAGE 4
+
+
+  C:002FH         LINE#         118
+  C:0032H         LINE#         119
+  C:0034H         LINE#         120
+  C:0039H         LINE#         121
+  C:003CH         LINE#         122
+  C:003EH         LINE#         123
+  C:0043H         LINE#         124
+  C:0046H         LINE#         125
+  C:0048H         LINE#         126
+  C:004DH         LINE#         127
+  C:0050H         LINE#         128
+  C:0052H         LINE#         129
+  C:0057H         LINE#         130
+  C:005AH         LINE#         131
+  C:005DH         LINE#         136
+  C:005DH         LINE#         137
+  -------         ENDPROC       KEYDSP
+  -------         PROC          KEY
+  C:00AFH         LINE#         138
+  C:00AFH         LINE#         139
+  C:00AFH         LINE#         141
+  C:00B3H         LINE#         142
+  C:00B3H         LINE#         143
+  C:00B8H         LINE#         144
+  C:00BBH         LINE#         145
+  C:00BEH         LINE#         146
+  C:00BEH         LINE#         147
+  C:00C3H         LINE#         148
+  C:00C3H         LINE#         149
+  C:00CAH         LINE#         150
+  C:00CFH         LINE#         151
+  C:00D2H         LINE#         152
+  C:00D5H         LINE#         153
+  C:00D5H         LINE#         155
+  -------         ENDPROC       KEY
+  -------         PROC          JIANCE
+  C:00D6H         LINE#         156
+  C:00D6H         LINE#         157
+  C:00D6H         LINE#         158
+  C:00DBH         LINE#         159
+  C:00E0H         LINE#         160
+  C:00E0H         LINE#         162
+  C:00E3H         LINE#         163
+  C:00E7H         LINE#         164
+  C:00E9H         LINE#         165
+  C:00ECH         LINE#         166
+  C:00ECH         LINE#         167
+  C:00EFH         LINE#         168
+  C:00F5H         LINE#         169
+  C:00F7H         LINE#         170
+  C:00FAH         LINE#         171
+  C:00FAH         LINE#         173
+  C:00FAH         LINE#         174
+  -------         ENDPROC       JIANCE
+  -------         PROC          MAIN
+  C:00FBH         LINE#         175
+  C:00FBH         LINE#         176
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/21/2008  17:54:55  PAGE 5
+
+
+  C:00FBH         LINE#         178
+  C:00FEH         LINE#         179
+  C:00FEH         LINE#         180
+  C:00FEH         LINE#         181
+  C:0101H         LINE#         182
+  C:010CH         LINE#         183
+  C:010FH         LINE#         184
+  C:0117H         LINE#         185
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        3310A
+
+Program Size: data=19.0 xdata=0 code=327
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

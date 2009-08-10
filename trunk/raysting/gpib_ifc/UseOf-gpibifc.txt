@@ -1,0 +1,49 @@
+//2S WAIT FOR ERROR
+//the format of the command is
+//send sequence:BMARK CMDTYPE DATALENGTH DATA1 DATA2 .... EMARK BMARK
+//             : char  char    char1char2					char
+//reply sequence:BMARK STATUS DATA1 DATA2 .....EMARK BMARK
+//				: char  char   					char  char
+//				(EMARK appeared in DATAi will be replaced with EMARK EMARK)
+
+#define BMARK 	0xfa
+#define EMARK   0xf5
+
+//set gribaddr and eoimode
+//[mlaaddr,eoimode]
+#define GPINIT 	'i'	
+//send the string to the gpibaddr defined device
+//data sequence: [raddr data1 data2 ... datan](no eol)
+#define GPWRT	'w'
+//get the str from the grip device
+//data sequence: [raddr]
+//reply sequence: [data1 data2 .. datan status] 
+#define GPRD	'r'
+//clear the GPIB interface bus
+//[]
+#define GPIFC	'f'
+
+//#define GPEOL   'e'
+//clear the device[]
+#define GPDCLR  'c'
+
+//Local Lock out device front panel of all[]
+#define GPLLO   'o'
+//make device go local
+#define GPLOCAL 'l'
+make the device on gpibaddr under remote control []
+#define GPREN	'r'
+//	send GET command to device
+//	data sequence: [raddr]
+#define GPTRIG	't'
+
+//send part (failed finished)
+#define RFAIL 	'f'
+#define RFINI 	'o'
+
+//eoimode define
+//mode: '0' <CR><LF>,'1' <LF><CR> ,'2' <LF> '3',<CR>
+#define EOICRLF	'0'
+#define EOILFCR '1'
+#define EOILFOL	'2'
+#define EOICROL '3'

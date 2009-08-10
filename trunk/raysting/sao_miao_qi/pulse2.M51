@@ -1,0 +1,564 @@
+BL51 BANKED LINKER/LOCATER V5.01                                                        09/09/2007  16:45:56  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V5.01, INVOKED BY:
+C:\GREENTOOLS\KEIL\C51\BIN\BL51.EXE pulse.obj, sjSerial.obj TO pulse2 RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  pulse.obj (PULSE)
+  sjSerial.obj (SJSERIAL)
+  C:\GREENTOOLS\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\GREENTOOLS\KEIL\C51\LIB\C51S.LIB (?C?CLDPTR)
+  C:\GREENTOOLS\KEIL\C51\LIB\C51S.LIB (?C?CSTPTR)
+  C:\GREENTOOLS\KEIL\C51\LIB\C51S.LIB (?C_INIT)
+
+
+LINK MAP OF MODULE:  pulse2 (PULSE)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0005H     UNIT         _DATA_GROUP_
+                    000DH     0003H                  *** GAP ***
+            REG     0010H     0008H     ABSOLUTE     "REG BANK 2"
+            DATA    0018H     0024H     UNIT         ?DT?PULSE
+            DATA    003CH     0017H     UNIT         ?DT?SJSERIAL
+            IDATA   0053H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+                    0003H     0008H                  *** GAP ***
+            CODE    000BH     0002H     ABSOLUTE     
+            CODE    000DH     0016H     INBLOCK      ?PR?SJSERIALINIT?SJSERIAL
+            CODE    0023H     0002H     ABSOLUTE     
+            CODE    0025H     00CCH     INBLOCK      ?PR?MAIN?PULSE
+            CODE    00F1H     008CH     UNIT         ?C_C51STARTUP
+            CODE    017DH     0051H     INBLOCK      ?PR?SJSERIALHANDLER?SJSERIAL
+            CODE    01CEH     0048H     INBLOCK      ?PR?_SWIACTION2?PULSE
+            CODE    0216H     0047H     INBLOCK      ?PR?SJSERIALWAITFORONEBYTE?SJSERIAL
+            CODE    025DH     0044H     INBLOCK      ?PR?__SWI_DELAY?PULSE
+            CODE    02A1H     0040H     INBLOCK      ?PR?TIMER0?PULSE
+            CODE    02E1H     003CH     UNIT         ?CO?PULSE
+            CODE    031DH     0033H     INBLOCK      ?PR?_TX_BYTE2?PULSE
+            CODE    0350H     002FH     INBLOCK      ?PR?_PKBD_KEYID?PULSE
+            CODE    037FH     002BH     UNIT         ?C?LIB_CODE
+            CODE    03AAH     0029H     INBLOCK      ?PR?LEDUPDATE?PULSE
+            CODE    03D3H     0028H     INBLOCK      ?PR?SWIRESET?PULSE
+            CODE    03FBH     0023H     INBLOCK      ?PR?PKEYBOARD_UPDATE?PULSE
+            CODE    041EH     001DH     INBLOCK      ?PR?SJSERIALISDATAWAITING?SJSERIAL
+            CODE    043BH     001AH     INBLOCK      ?PR?_SWIACTION?PULSE
+            CODE    0455H     001AH     INBLOCK      ?PR?INITIATE_TIMER?PULSE
+            CODE    046FH     0014H     INBLOCK      ?PR?_PKBD_CHECK?PULSE
+            CODE    0483H     0010H     INBLOCK      ?PR?_SJSERIALSENDBYTE?SJSERIAL
+            CODE    0493H     000AH     UNIT         ?C_INITSEG
+
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 2
+
+
+
+
+OVERLAY MAP OF MODULE:   pulse2 (PULSE)
+
+
+SEGMENT                                       DATA_GROUP 
+  +--> CALLED SEGMENT                       START    LENGTH
+-----------------------------------------------------------
+?PR?TIMER0?PULSE                            -----    -----
+  +--> ?PR?PKEYBOARD_UPDATE?PULSE
+
+?PR?PKEYBOARD_UPDATE?PULSE                  -----    -----
+  +--> ?PR?_PKBD_CHECK?PULSE
+  +--> ?PR?_PKBD_KEYID?PULSE
+
+*** NEW ROOT ***************************************************
+
+?C_C51STARTUP                               -----    -----
+  +--> ?PR?MAIN?PULSE
+  +--> ?C_INITSEG
+
+?PR?MAIN?PULSE                              0008H    0003H
+  +--> ?PR?SJSERIALINIT?SJSERIAL
+  +--> ?PR?INITIATE_TIMER?PULSE
+  +--> ?PR?SWIRESET?PULSE
+  +--> ?PR?LEDUPDATE?PULSE
+  +--> ?PR?SJSERIALISDATAWAITING?SJSERIAL
+  +--> ?PR?SJSERIALWAITFORONEBYTE?SJSERIAL
+  +--> ?PR?_SJSERIALSENDBYTE?SJSERIAL
+  +--> ?PR?_TX_BYTE2?PULSE
+  +--> ?PR?_SWIACTION?PULSE
+
+?PR?SWIRESET?PULSE                          -----    -----
+  +--> ?CO?PULSE
+  +--> ?PR?_SWIACTION2?PULSE
+
+?PR?_SWIACTION2?PULSE                       -----    -----
+  +--> ?CO?PULSE
+  +--> ?PR?__SWI_DELAY?PULSE
+
+?PR?__SWI_DELAY?PULSE                       -----    -----
+  +--> ?CO?PULSE
+
+?PR?_TX_BYTE2?PULSE                         000BH    0002H
+  +--> ?PR?_SJSERIALSENDBYTE?SJSERIAL
+
+?PR?_SWIACTION?PULSE                        000BH    0001H
+  +--> ?PR?_SWIACTION2?PULSE
+
+
+
+SYMBOL TABLE OF MODULE:  pulse2 (PULSE)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        PULSE
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 3
+
+
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:001AH         PUBLIC        gkeyid
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  B:00A8H.7       PUBLIC        EA
+  C:028CH         PUBLIC        __swi_delay
+  D:00A8H         PUBLIC        IE
+  B:00B0H.7       PUBLIC        EKEY10
+  C:031DH         PUBLIC        _tx_byte2
+  C:043BH         PUBLIC        _swiAction
+  D:00B8H         PUBLIC        IP
+  C:03AAH         PUBLIC        ledUpdate
+  C:0025H         PUBLIC        main
+  C:03FBH         PUBLIC        pkeyboard_update
+  D:0087H         PUBLIC        PCON
+  D:0098H         PUBLIC        SCON
+  D:0089H         PUBLIC        TMOD
+  D:0088H         PUBLIC        TCON
+  C:02E1H         PUBLIC        tbl
+  D:001BH         PUBLIC        lastID
+  C:01CEH         PUBLIC        _swiAction2
+  B:00A8H.1       PUBLIC        ET0
+  D:008CH         PUBLIC        TH0
+  D:008DH         PUBLIC        TH1
+  D:008AH         PUBLIC        TL0
+  C:02A1H         PUBLIC        timer0
+  C:0309H         PUBLIC        matchtbl
+  B:0088H.4       PUBLIC        TR0
+  B:0088H.6       PUBLIC        TR1
+  C:03D3H         PUBLIC        swiReset
+  C:0455H         PUBLIC        initiate_timer
+  C:046FH         PUBLIC        _pkbd_check
+  D:00C8H         PUBLIC        T2CON
+  D:001CH         PUBLIC        statustbl
+  C:02E9H         PUBLIC        inittbl
+  D:00D0H         PUBLIC        PSW
+  C:0350H         PUBLIC        _pkbd_keyid
+  -------         PROC          PKEYBOARD_UPDATE
+  -------         DO            
+  D:0018H         SYMBOL        processed
+  D:0019H         SYMBOL        pkey_delay
+  -------         ENDDO         
+  C:03FBH         LINE#         59
+  C:03FBH         LINE#         60
+  C:03FBH         LINE#         64
+  C:0400H         LINE#         65
+  C:0400H         LINE#         66
+  C:0402H         LINE#         67
+  C:0404H         LINE#         68
+  C:0407H         LINE#         69
+  C:0407H         LINE#         71
+  C:0409H         LINE#         72
+  C:0414H         LINE#         73
+  C:0414H         LINE#         75
+  C:0416H         LINE#         76
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 4
+
+
+  C:0419H         LINE#         77
+  C:041BH         LINE#         78
+  C:041BH         LINE#         79
+  C:041DH         LINE#         80
+  -------         ENDPROC       PKEYBOARD_UPDATE
+  -------         PROC          L?0076
+  -------         ENDPROC       L?0076
+  -------         PROC          __SWI_DELAY
+  D:0007H         SYMBOL        dl1
+  D:0005H         SYMBOL        dl2
+  -------         DO            
+  D:0006H         SYMBOL        i
+  D:0004H         SYMBOL        j
+  -------         ENDDO         
+  C:028CH         LINE#         110
+  C:028CH         LINE#         111
+  C:028CH         LINE#         113
+  C:0293H         LINE#         114
+  C:02A0H         LINE#         116
+  -------         ENDPROC       __SWI_DELAY
+  -------         PROC          _SWIACTION
+  D:000BH         SYMBOL        SwiID
+  C:043BH         LINE#         120
+  C:043DH         LINE#         121
+  C:043DH         LINE#         122
+  C:0443H         LINE#         124
+  C:044CH         LINE#         127
+  C:0450H         LINE#         128
+  C:0454H         LINE#         129
+  -------         ENDPROC       _SWIACTION
+  -------         PROC          _SWIACTION2
+  D:0003H         SYMBOL        SwiID
+  -------         DO            
+  D:0007H         SYMBOL        i
+  -------         ENDDO         
+  C:01CEH         LINE#         130
+  C:01D0H         LINE#         131
+  C:01D0H         LINE#         134
+  C:01D6H         LINE#         137
+  C:01E1H         LINE#         141
+  C:01EAH         LINE#         142
+  C:01EBH         LINE#         144
+  C:01EBH         LINE#         145
+  C:01EBH         LINE#         146
+  C:01EBH         LINE#         147
+  C:01EEH         LINE#         149
+  C:01F0H         LINE#         152
+  C:01F2H         LINE#         153
+  C:01F2H         LINE#         154
+  C:01FAH         LINE#         155
+  C:01FAH         LINE#         156
+  C:01FEH         LINE#         157
+  C:0203H         LINE#         159
+  C:0209H         LINE#         160
+  C:0211H         LINE#         161
+  C:0212H         LINE#         163
+  C:0212H         LINE#         164
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 5
+
+
+  C:0212H         LINE#         165
+  C:0212H         LINE#         166
+  C:0215H         LINE#         168
+  -------         ENDPROC       _SWIACTION2
+  -------         PROC          SWIRESET
+  -------         DO            
+  D:0002H         SYMBOL        i
+  -------         ENDDO         
+  C:03D3H         LINE#         170
+  C:03D3H         LINE#         171
+  C:03D3H         LINE#         173
+  C:03D5H         LINE#         174
+  C:03D5H         LINE#         175
+  C:03E1H         LINE#         176
+  C:03EAH         LINE#         177
+  C:03EAH         LINE#         178
+  C:03EFH         LINE#         179
+  C:03F3H         LINE#         180
+  C:03F3H         LINE#         181
+  C:03F7H         LINE#         182
+  C:03FAH         LINE#         183
+  -------         ENDPROC       SWIRESET
+  -------         PROC          TIMER0
+  -------         DO            
+  D:0007H         SYMBOL        m_key
+  -------         ENDDO         
+  C:02A1H         LINE#         186
+  C:02BEH         LINE#         189
+  C:02C0H         LINE#         190
+  C:02C4H         LINE#         191
+  C:02C4H         LINE#         192
+  C:02C6H         LINE#         194
+  C:02C6H         LINE#         195
+  -------         ENDPROC       TIMER0
+  -------         PROC          _PKBD_CHECK
+  -------         DO            
+  D:0007H         SYMBOL        port
+  -------         ENDDO         
+  C:046FH         LINE#         200
+  C:046FH         LINE#         201
+  C:046FH         LINE#         203
+  C:0473H         LINE#         204
+  C:0477H         LINE#         205
+  C:047AH         LINE#         206
+  C:047DH         LINE#         207
+  C:0480H         LINE#         209
+  C:0482H         LINE#         210
+  -------         ENDPROC       _PKBD_CHECK
+  -------         PROC          _PKBD_KEYID
+  -------         DO            
+  D:0007H         SYMBOL        pkey_id
+  D:0006H         SYMBOL        port
+  D:0005H         SYMBOL        i
+  -------         ENDDO         
+  C:0350H         LINE#         215
+  C:0350H         LINE#         216
+  C:0350H         LINE#         217
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 6
+
+
+  C:0352H         LINE#         221
+  C:035FH         LINE#         222
+  C:0362H         LINE#         223
+  C:0364H         LINE#         225
+  C:0366H         LINE#         226
+  C:0366H         LINE#         227
+  C:036EH         LINE#         228
+  C:036EH         LINE#         229
+  C:0375H         LINE#         230
+  C:0378H         LINE#         231
+  C:037CH         LINE#         232
+  C:037EH         LINE#         233
+  -------         ENDPROC       _PKBD_KEYID
+  -------         PROC          _TX_BYTE2
+  D:0007H         SYMBOL        a
+  -------         DO            
+  D:000BH         SYMBOL        h
+  D:000CH         SYMBOL        l
+  -------         ENDDO         
+  C:031DH         LINE#         234
+  C:031DH         LINE#         235
+  C:031DH         LINE#         237
+  C:0326H         LINE#         238
+  C:032BH         LINE#         239
+  C:0334H         LINE#         240
+  C:0338H         LINE#         242
+  C:033DH         LINE#         244
+  C:0346H         LINE#         245
+  C:034AH         LINE#         247
+  C:034FH         LINE#         249
+  -------         ENDPROC       _TX_BYTE2
+  -------         PROC          INITIATE_TIMER
+  C:0455H         LINE#         251
+  C:0455H         LINE#         252
+  C:0455H         LINE#         255
+  C:0458H         LINE#         256
+  C:045BH         LINE#         260
+  C:045EH         LINE#         263
+  C:0461H         LINE#         264
+  C:0463H         LINE#         266
+  C:0466H         LINE#         267
+  C:0468H         LINE#         269
+  C:046AH         LINE#         270
+  C:046CH         LINE#         271
+  C:046EH         LINE#         272
+  -------         ENDPROC       INITIATE_TIMER
+  -------         PROC          LEDUPDATE
+  -------         DO            
+  D:0007H         SYMBOL        _p2
+  D:0005H         SYMBOL        i
+  D:0006H         SYMBOL        j
+  -------         ENDDO         
+  C:03AAH         LINE#         274
+  C:03AAH         LINE#         275
+  C:03AAH         LINE#         278
+  C:03ACH         LINE#         279
+  C:03AEH         LINE#         280
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 7
+
+
+  C:03AFH         LINE#         281
+  C:03AFH         LINE#         282
+  C:03B8H         LINE#         283
+  C:03B8H         LINE#         284
+  C:03BCH         LINE#         285
+  C:03BCH         LINE#         287
+  C:03BFH         LINE#         288
+  C:03C3H         LINE#         289
+  C:03C5H         LINE#         291
+  C:03C5H         LINE#         292
+  C:03C6H         LINE#         293
+  C:03CAH         LINE#         295
+  C:03CDH         LINE#         296
+  C:03D0H         LINE#         297
+  C:03D2H         LINE#         300
+  -------         ENDPROC       LEDUPDATE
+  -------         PROC          MAIN
+  -------         DO            
+  D:0008H         SYMBOL        bHFound
+  D:0009H         SYMBOL        inchar
+  D:000AH         SYMBOL        sid
+  -------         ENDDO         
+  C:0025H         LINE#         306
+  C:0025H         LINE#         307
+  C:0025H         LINE#         312
+  C:0028H         LINE#         313
+  C:002AH         LINE#         315
+  C:002CH         LINE#         316
+  C:002EH         LINE#         317
+  C:0030H         LINE#         318
+  C:0033H         LINE#         320
+  C:0036H         LINE#         331
+  C:0039H         LINE#         332
+  C:003CH         LINE#         333
+  C:003FH         LINE#         334
+  C:003FH         LINE#         335
+  C:003FH         LINE#         336
+  C:0046H         LINE#         337
+  C:0046H         LINE#         338
+  C:004AH         LINE#         339
+  C:004EH         LINE#         340
+  C:004EH         LINE#         341
+  C:0051H         LINE#         342
+  C:0057H         LINE#         343
+  C:0057H         LINE#         344
+  C:005AH         LINE#         345
+  C:005CH         LINE#         346
+  C:005CH         LINE#         347
+  C:005CH         LINE#         348
+  C:0061H         LINE#         349
+  C:0061H         LINE#         350
+  C:0064H         LINE#         351
+  C:0066H         LINE#         352
+  C:0066H         LINE#         353
+  C:0066H         LINE#         354
+  C:006CH         LINE#         355
+  C:006CH         LINE#         356
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 8
+
+
+  C:0076H         LINE#         357
+  C:0076H         LINE#         358
+  C:0076H         LINE#         359
+  C:0078H         LINE#         360
+  C:007AH         LINE#         361
+  C:007AH         LINE#         362
+  C:007DH         LINE#         363
+  C:0083H         LINE#         365
+  C:0087H         LINE#         366
+  C:008BH         LINE#         367
+  C:0097H         LINE#         368
+  C:009AH         LINE#         369
+  C:009AH         LINE#         370
+  C:00A4H         LINE#         371
+  C:00A4H         LINE#         372
+  C:00AEH         LINE#         373
+  C:00B7H         LINE#         374
+  C:00BBH         LINE#         375
+  C:00BDH         LINE#         392
+  C:00BDH         LINE#         394
+  C:00BDH         LINE#         395
+  C:00C4H         LINE#         396
+  C:00CCH         LINE#         398
+  C:00D2H         LINE#         399
+  C:00D9H         LINE#         400
+  C:00D9H         LINE#         401
+  C:00DDH         LINE#         402
+  C:00DFH         LINE#         403
+  C:00DFH         LINE#         404
+  C:00DFH         LINE#         405
+  C:00DFH         LINE#         406
+  C:00DFH         LINE#         407
+  C:00E6H         LINE#         408
+  C:00E6H         LINE#         410
+  C:00EAH         LINE#         411
+  C:00ECH         LINE#         413
+  C:00EFH         LINE#         419
+  C:00EFH         LINE#         420
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        PULSE
+
+  -------         MODULE        SJSERIAL
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0090H         PUBLIC        P1
+  D:00B0H         PUBLIC        P3
+  C:017DH         PUBLIC        sjSerialHandler
+  D:00A8H         PUBLIC        IE
+  D:00B8H         PUBLIC        IP
+  B:0098H.0       PUBLIC        RI
+  B:0098H.1       PUBLIC        TI
+  D:003CH         PUBLIC        spbuf
+  D:0099H         PUBLIC        SBUF
+  D:004CH         SYMBOL        spSFlag
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  C:0216H         PUBLIC        sjSerialWaitForOneByte
+  C:0483H         PUBLIC        _sjSerialSendByte
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 9
+
+
+  B:00B0H.4       PUBLIC        tbit_1
+  C:041EH         PUBLIC        sjSerialIsDataWaiting
+  D:004DH         SYMBOL        spHead
+  C:000DH         PUBLIC        sjSerialInit
+  D:00C8H         PUBLIC        T2CON
+  D:0050H         SYMBOL        spTail
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          SJSERIALINIT
+  C:000DH         LINE#         20
+  C:000DH         LINE#         21
+  C:000DH         LINE#         22
+  C:0016H         LINE#         23
+  C:001FH         LINE#         24
+  C:0022H         LINE#         25
+  -------         ENDPROC       SJSERIALINIT
+  -------         PROC          SJSERIALHANDLER
+  C:017DH         LINE#         31
+  C:0188H         LINE#         34
+  C:018BH         LINE#         35
+  C:018BH         LINE#         36
+  C:018DH         LINE#         37
+  C:0190H         LINE#         38
+  C:0190H         LINE#         39
+  C:0193H         LINE#         40
+  C:0193H         LINE#         41
+  C:019DH         LINE#         42
+  C:01A8H         LINE#         43
+  C:01BBH         LINE#         44
+  C:01C3H         LINE#         45
+  C:01C5H         LINE#         46
+  C:01C5H         LINE#         47
+  -------         ENDPROC       SJSERIALHANDLER
+  -------         PROC          SJSERIALISDATAWAITING
+  C:041EH         LINE#         52
+  C:041EH         LINE#         53
+  C:041EH         LINE#         54
+  C:0436H         LINE#         55
+  C:0438H         LINE#         57
+  C:043AH         LINE#         58
+  -------         ENDPROC       SJSERIALISDATAWAITING
+  -------         PROC          _SJSERIALSENDBYTE
+  D:0007H         SYMBOL        udata
+  C:0483H         LINE#         65
+  C:0483H         LINE#         66
+  C:0483H         LINE#         67
+  C:0486H         LINE#         69
+  C:0488H         LINE#         70
+  C:048AH         LINE#         71
+  C:0490H         LINE#         73
+  C:0492H         LINE#         74
+  -------         ENDPROC       _SJSERIALSENDBYTE
+  -------         PROC          SJSERIALWAITFORONEBYTE
+  -------         DO            
+  D:0007H         SYMBOL        udata
+  -------         ENDDO         
+  C:0216H         LINE#         81
+  C:0216H         LINE#         82
+BL51 BANKED LINKER/LOCATER V5.01                                                      09/09/2007  16:45:56  PAGE 10
+
+
+  C:0216H         LINE#         84
+  C:022EH         LINE#         86
+  C:0237H         LINE#         87
+  C:0242H         LINE#         88
+  C:0254H         LINE#         89
+  C:025CH         LINE#         90
+  C:025CH         LINE#         91
+  -------         ENDPROC       SJSERIALWAITFORONEBYTE
+  -------         ENDMOD        SJSERIAL
+
+  -------         MODULE        ?C?CLDPTR
+  C:037FH         PUBLIC        ?C?CLDPTR
+  -------         ENDMOD        ?C?CLDPTR
+
+  -------         MODULE        ?C?CSTPTR
+  C:0398H         PUBLIC        ?C?CSTPTR
+  -------         ENDMOD        ?C?CSTPTR
+
+Program Size: data=81.0 xdata=0 code=1173
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

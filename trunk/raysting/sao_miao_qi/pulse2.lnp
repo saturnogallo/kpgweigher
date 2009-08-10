@@ -1,0 +1,4 @@
+"pulse.obj",
+"sjSerial.obj" 
+TO "pulse2" 
+RAMSIZE(256) 

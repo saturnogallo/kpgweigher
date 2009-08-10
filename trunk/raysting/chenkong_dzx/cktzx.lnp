@@ -1,0 +1,5 @@
+"lib.obj",
+"main.obj",
+"uart_hw1.obj" 
+TO "cktzx" 
+RAMSIZE(256) 

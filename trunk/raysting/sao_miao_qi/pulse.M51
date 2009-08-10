@@ -1,0 +1,96 @@
+BL51 BANKED LINKER/LOCATER V5.01                                                        02/07/2006  09:30:00  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V5.01, INVOKED BY:
+C:\GREENTOOLS\KEIL\C51\BIN\BL51.EXE pulse.obj TO pulse RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  pulse.obj (PULSE)
+  C:\GREENTOOLS\KEIL\C51\LIB\C51S.LIB (?C_STARTUP)
+  C:\GREENTOOLS\KEIL\C51\LIB\C51S.LIB (?C?COPY)
+
+
+LINK MAP OF MODULE:  pulse (PULSE)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     001CH     UNIT         _DATA_GROUP_
+            IDATA   0024H     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     00F6H     UNIT         ?C?LIB_CODE
+            CODE    00F9H     005AH     UNIT         ?PR?MAIN?PULSE
+            CODE    0153H     001BH     UNIT         ?CO?PULSE
+            CODE    016EH     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   pulse (PULSE)
+
+
+SEGMENT                          DATA_GROUP 
+  +--> CALLED SEGMENT          START    LENGTH
+----------------------------------------------
+?C_C51STARTUP                  -----    -----
+  +--> ?PR?MAIN?PULSE
+
+?PR?MAIN?PULSE                 0008H    001CH
+  +--> ?CO?PULSE
+
+
+
+SYMBOL TABLE OF MODULE:  pulse (PULSE)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        PULSE
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  D:0080H         PUBLIC        P0
+  D:00A0H         PUBLIC        P2
+  C:00F9H         PUBLIC        main
+  C:0153H         SYMBOL        _?ix1000
+BL51 BANKED LINKER/LOCATER V5.01                                                      02/07/2006  09:30:00  PAGE 2
+
+
+  C:015EH         SYMBOL        _?ix1001
+  C:0166H         SYMBOL        _?ix1002
+  -------         PROC          MAIN
+  -------         DO            
+  D:0008H         SYMBOL        led_code
+  D:0013H         SYMBOL        led_sel
+  D:0014H         SYMBOL        led_out
+  D:001CH         SYMBOL        led_sel_code
+  -------         ENDDO         
+  C:00F9H         LINE#         4
+  C:00F9H         LINE#         5
+  C:00F9H         LINE#         7
+  C:010CH         LINE#         8
+  C:010FH         LINE#         9
+  C:0120H         LINE#         10
+  C:0133H         LINE#         13
+  C:0133H         LINE#         14
+  C:0133H         LINE#         16
+  C:013AH         LINE#         17
+  C:013EH         LINE#         19
+  C:0141H         LINE#         20
+  C:0149H         LINE#         21
+  C:0151H         LINE#         24
+  -------         ENDPROC       MAIN
+  -------         ENDMOD        PULSE
+
+  -------         MODULE        ?C?COPY
+  C:00D3H         PUBLIC        ?C?COPY
+  -------         ENDMOD        ?C?COPY
+
+Program Size: data=37.0 xdata=0 code=378
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
