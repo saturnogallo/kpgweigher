@@ -1,0 +1,79 @@
+C51 COMPILER V7.01  UTILI                                                                  08/13/2009 20:46:42 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE UTILI
+OBJECT MODULE PLACED IN utili.OBJ
+COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE utili.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "utili.h"
+   2          
+   3          
+   4          /*---------------延时子程序----------------*/
+   5          void delay (uint us) 
+   6          {
+   7   1              while(us--);
+   8   1      }
+   9          void delay1 (uint ms) 
+  10          {
+  11   1              int i,j;
+  12   1              for(i=0;i<ms;i++)
+  13   1              for(j=0;j<1000;j++)
+  14   1                      ;
+  15   1                      \
+  16          }
+  17          //计算字符串长度
+  18          uchar strlen(uchar *s)
+  19          {
+  20   1              uchar len = 0;
+  21   1              while(*s++) len ++;
+  22   1              
+  23   1              return len;
+  24   1      }
+  25          double buf2double()             
+  26          {
+  27   1              double tmp = 0.0;
+  28   1              uchar i = 0;
+  29   1              uchar pos = 0;
+  30   1              for(i=0;i<rdata.pos_len;i++)
+  31   1              {
+  32   2                      if(rdata.tempbuf[i] != KEY_DOT)
+  33   2                              tmp = tmp * 10.0+(rdata.tempbuf[i] - '0');
+  34   2                      else
+  35   2                              pos = rdata.pos_len - i - 1;
+  36   2              }
+  37   1              while(pos > 0)
+  38   1              {
+  39   2                      tmp = tmp / 10.0;
+  40   2                      pos--;
+  41   2              }
+  42   1              return tmp;
+  43   1      }
+  44          int buf2byte()      //convert rdata.tempbuf to byte (00-99)
+  45          {
+  46   1              int tmp = 0;
+  47   1              uchar i;
+  48   1              for(i=0;i<rdata.pos_len;i++)
+  49   1              {
+  50   2                      tmp = tmp * 10+(rdata.tempbuf[i] - '0');
+  51   2              }
+  52   1              return tmp;
+  53   1      }
+  54          
+
+C51 COMPILER V7.01  UTILI                                                                  08/13/2009 20:46:42 PAGE 2   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    279    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       9
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

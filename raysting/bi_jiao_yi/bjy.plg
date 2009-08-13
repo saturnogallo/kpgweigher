@@ -1,0 +1,110 @@
+<html>
+<body>
+<pre>
+<h1>µVision2 Build Log</h1>
+<h2>Project:</h2>
+F:\GoogleCode\g_lxhbucket\raysting\bi_jiao_yi\bjy.uv2
+Project File Date:  08/13/2009
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling eeprom.c...
+compiling font.c...
+font.h(4): error C318: can't open file 'typedef.h'
+FONT.H(8): error C141: syntax error near 'uchar'
+FONT.H(8): error C129: missing ';' before 'Index'
+compiling key.c...
+utili.h(4): error C318: can't open file 'typedef.h'
+UTILI.H(6): error C141: syntax error near 'us', expected ')'
+UTILI.H(7): error C141: syntax error near 'ms', expected ')'
+UTILI.H(8): error C129: missing ';' before 'strlen'
+key.h(4): error C318: can't open file 'typedef.h'
+compiling lcd.c...
+lcd.h(4): error C318: can't open file 'typedef.h'
+LCD.H(58): error C141: syntax error near 'autowr', expected ')'
+LCD.H(59): error C129: missing ';' before 'LCD_BusyStatus'
+font.h(4): error C318: can't open file 'typedef.h'
+compiling main.c...
+lcd.h(4): error C318: can't open file 'typedef.h'
+LCD.H(58): error C141: syntax error near 'autowr', expected ')'
+LCD.H(59): error C129: missing ';' before 'LCD_BusyStatus'
+key.h(4): error C318: can't open file 'typedef.h'
+utili.h(4): error C318: can't open file 'typedef.h'
+main.c(6): error C318: can't open file 'menu.h'
+main.c(8): error C318: can't open file 'mnuart.h'
+eeprom.h(4): error C318: can't open file 'typedef.h'
+compiling state.c...
+lcd.h(4): error C318: can't open file 'typedef.h'
+LCD.H(58): error C141: syntax error near 'autowr', expected ')'
+LCD.H(59): error C129: missing ';' before 'LCD_BusyStatus'
+key.h(4): error C318: can't open file 'typedef.h'
+utili.h(4): error C318: can't open file 'typedef.h'
+state.c(4): error C318: can't open file 'menu.h'
+eeprom.h(4): error C318: can't open file 'typedef.h'
+compiling utili.c...
+utili.h(4): error C318: can't open file 'typedef.h'
+UTILI.H(6): error C141: syntax error near 'us', expected ')'
+UTILI.H(7): error C141: syntax error near 'ms', expected ')'
+UTILI.H(8): error C129: missing ';' before 'strlen'
+Target not created
+Build target 'Target 1'
+compiling eeprom.c...
+compiling font.c...
+compiling key.c...
+compiling lcd.c...
+compiling main.c...
+main.c(6): error C318: can't open file 'menu.h'
+main.c(8): error C318: can't open file 'mnuart.h'
+compiling state.c...
+state.c(4): error C318: can't open file 'menu.h'
+STATE.C(139): error C193: '==': bad operand type
+compiling utili.c...
+Target not created
+Build target 'Target 1'
+compiling eeprom.c...
+compiling font.c...
+compiling key.c...
+compiling lcd.c...
+compiling main.c...
+compiling state.c...
+state.c(4): error C318: can't open file 'menu.h'
+STATE.C(139): error C193: '==': bad operand type
+compiling utili.c...
+Target not created
+Build target 'Target 1'
+compiling eeprom.c...
+compiling font.c...
+compiling key.c...
+compiling lcd.c...
+compiling main.c...
+compiling state.c...
+compiling utili.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_KEY_DEBUG?KEY
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_SHOWCURSOR?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_HIDECURSOR?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_REVERSERECT?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_LINEH?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_LINEV?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_LINEXX?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_PRINTHZ12?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?CO?LCD
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY1?UTILI
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_STRLEN?UTILI
+*** ERROR L107: ADDRESS SPACE OVERFLOW
+    SPACE:   DATA    
+    SEGMENT: _DATA_GROUP_
+    LENGTH:  0029H
+Program Size: data=158.2 xdata=10 code=18765
+Target not created

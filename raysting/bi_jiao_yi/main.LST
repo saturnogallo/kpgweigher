@@ -1,0 +1,444 @@
+C51 COMPILER V7.01  MAIN                                                                   08/13/2009 20:46:42 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          //#include <t89c51rd2.h>
+   2          #include "stc51.h"
+   3          #include "lcd.h"
+   4          #include "key.h"
+   5          #include "utili.h"
+   6          #include "stdio.h"
+   7          #include "eeprom.h"
+   8          RUNDATA rdata;
+   9          char buf[20];
+  10          uchar key;
+  11          
+  12          double lastrx = -1;
+  13          void analog_timer()     interrupt 1 using 1
+  14          {
+  15   1              Key_Scan();
+  16   1      }
+  17          
+  18          void            State_Update();
+  19          void State_Display()
+  20          {
+  21   1              EA = 0;
+  22   1              if(rdata.StateId == PG_MAIN){
+  23   2                      LCD_Cls();
+  24   2                      State_Update();
+  25   2              }
+  26   1              if(rdata.StateId == PG_MENU1){
+  27   2                      LCD_Cls();
+  28   2                      LCD_PrintHz16(2,  2, "1.设定标准电阻");
+  29   2                      LCD_PrintHz16(120,2, "2.设定换向时间");
+  30   2                      LCD_PrintHz16(2,  23,"3.RS232");
+  31   2                      LCD_PrintHz16(120,23,"4.设定采样速度");
+  32   2                      LCD_PrintHz16(2,  46,"5.关于");
+  33   2                      LCD_PrintHz16(120,  46,"6.退出");
+  34   2              }
+  35   1              if(rdata.StateId == PG_SETRS){
+  36   2                      LCD_Cls();
+  37   2                      LCD_PrintHz16(2,  2, "当前标准电阻值:");
+  38   2                      LCD_PrintHz16(2,22,  "   输入新阻值:");
+  39   2      
+  40   2                      sprintf(buf,"%.4f",rdata.Rs);
+  41   2                      LCD_Print6X8(120,10,buf);
+  42   2                      State_Update();
+  43   2              }
+  44   1              if(rdata.StateId == PG_SETDELAY){
+  45   2                      LCD_Cls();
+  46   2                      LCD_PrintHz16(2,  12, "当前换向时间(秒):");
+  47   2                      sprintf(buf,"%i",(int)0 + rdata.Delay);
+  48   2                      LCD_Print6X8(140,17,buf);
+  49   2                      LCD_PrintHz16(2,32,  "  输入新设定(秒):");
+  50   2                      State_Update();
+  51   2              }
+  52   1              if(rdata.StateId == PG_SETRATE){
+  53   2                      LCD_Cls();
+  54   2                      LCD_PrintHz16(12,  12, "当前采样速度:");
+  55   2                      sprintf(buf,"%i",(int)0 + rdata.Samplerate);
+C51 COMPILER V7.01  MAIN                                                                   08/13/2009 20:46:42 PAGE 2   
+
+  56   2                      LCD_Print6X8(120,20,buf);
+  57   2                      LCD_PrintHz16(12,32,  "  输入新速度:");
+  58   2                      State_Update();
+  59   2              }
+  60   1              if(rdata.StateId == PG_HELP){
+  61   2                      LCD_Cls();
+  62   2                      LCD_PrintHz16(60, 18, "兰斯汀仪表研究所");
+  63   2                      LCD_Print8X16(40, 40, "www.raysting.com.cn");
+  64   2              }
+  65   1              if(rdata.StateId == PG_SET232){
+  66   2                      LCD_Cls();
+  67   2                      if(rdata.pos_len != 0)
+  68   2                              LCD_PrintHz16(2,   2, " 1. 关闭");
+  69   2                      else
+  70   2                              LCD_PrintHz16(2,   2, "*1. 关闭");
+  71   2                      if(rdata.pos_len != 1)
+  72   2                              LCD_Print8X16(120,  2, " 2. 2400");
+  73   2                      else
+  74   2                              LCD_Print8X16(120,  2, "*2. 2400");
+  75   2      
+  76   2                      if(rdata.pos_len != 2)
+  77   2                              LCD_Print8X16(2,    24," 3. 4800");
+  78   2                      else
+  79   2                              LCD_Print8X16(2,    24,"*3. 4800");
+  80   2                      if(rdata.pos_len != 3)
+  81   2                              LCD_Print8X16(120,  24," 4. 9600");
+  82   2                      else
+  83   2                              LCD_Print8X16(120,  24,"*4. 9600");
+  84   2                      
+  85   2                      if(rdata.pos_len != 4)
+  86   2                              LCD_Print8X16(2,    48," 5. 12800");
+  87   2                      else
+  88   2                              LCD_Print8X16(2,    48,"*5. 12800");
+  89   2      
+  90   2              }
+  91   1      
+  92   1              EA = 1;
+  93   1      }
+  94          void State_Update()
+  95          {
+  96   1              EA = 0;
+  97   1              if(rdata.StateId == PG_MAIN){
+  98   2                      sprintf(buf,"Is= ");
+  99   2                      sprintf(buf+4,"%.3f",rdata.Is);
+ 100   2                      sprintf(buf+9," A");
+ 101   2                      LCD_Print6X8(11,1,buf);
+ 102   2      
+ 103   2                      sprintf(buf,"Ix= ");
+ 104   2                      sprintf(buf+4,"%.3f",rdata.Ix);
+ 105   2                      sprintf(buf+9," A");
+ 106   2                      LCD_Print6X8(130,1,buf);
+ 107   2      
+ 108   2                      sprintf(buf,"Rs= ");
+ 109   2                      sprintf(buf+4,"%.6f",rdata.Rs);
+ 110   2                      sprintf(buf+12," ");
+ 111   2                      LCD_Print6X8(11,54,buf);
+ 112   2      
+ 113   2                      sprintf(buf,"Rx= ");
+ 114   2                      sprintf(buf+4,"%.6f",lastrx*1000);
+ 115   2                      sprintf(buf+12," ");
+ 116   2                      LCD_Print6X8(130,54,buf);
+ 117   2      
+C51 COMPILER V7.01  MAIN                                                                   08/13/2009 20:46:42 PAGE 3   
+
+ 118   2                      LCD_ClsBlock(10,20,10+24*8,52);
+ 119   2                      sprintf(buf,"%.6f",rdata.Rx*1000.0);
+ 120   2                      sprintf(buf+8," ");
+ 121   2                      LCD_Print24X32(10,18,buf);
+ 122   2                      LCD_Print8X16(205,34,"m");
+ 123   2                      LCD_PrintHz16(216,34,"Ω");
+ 124   2              }
+ 125   1              if(rdata.StateId == PG_SETRS){
+ 126   2                      LCD_Print8X16(120,24,"        ");
+ 127   2                      rdata.tempbuf[rdata.pos_len] = 0;
+ 128   2                      LCD_Print8X16(120,24,rdata.tempbuf);
+ 129   2              }
+ 130   1              if(rdata.StateId == PG_SETDELAY){
+ 131   2                      LCD_Print8X16(140,34,"        ");
+ 132   2                      rdata.tempbuf[rdata.pos_len] = 0;
+ 133   2                      LCD_Print8X16(140,34,rdata.tempbuf);
+ 134   2              }
+ 135   1              if(rdata.StateId == PG_SETRATE){
+ 136   2                      LCD_Print8X16(120,34,"        ");
+ 137   2                      rdata.tempbuf[rdata.pos_len] = 0;
+ 138   2                      LCD_Print8X16(120,34,rdata.tempbuf);
+ 139   2              }
+ 140   1              if(rdata.StateId == PG_SET232){
+ 141   2                      State_Display();
+ 142   2              }
+ 143   1              if(rdata.StateId == PG_HELP){
+ 144   2              }
+ 145   1              if(rdata.StateId == PG_MENU1){
+ 146   2              }
+ 147   1      
+ 148   1              EA = 1;
+ 149   1      }
+ 150          sbit SPI_CK = P3^5;
+ 151          sbit SPI_DI1 = P3^4;
+ 152          sbit SPI_DI2 = P0^5;
+ 153          sbit SPI_DO = P3^3;
+ 154          #define SM_WDELAY       100
+ 155          #define SM_RDELAY       100
+ 156          #define SM_RDELAY2      10
+ 157          void   sm_write(uchar   value)  
+ 158          {  
+ 159   1              uchar   no;  
+ 160   1             
+ 161   1              for(no=0;no<8;no++) {  
+ 162   2                     SPI_CK = 1;      
+ 163   2                       
+ 164   2                      if   ((value &0x80)==0x80)  
+ 165   2                        SPI_DO = 1;  
+ 166   2                      else  
+ 167   2                            SPI_DO = 0;  
+ 168   2                       delay(SM_WDELAY);   
+ 169   2                   SPI_CK = 0;    
+ 170   2                       value   =   (value <<1);  
+ 171   2                      delay(SM_WDELAY);
+ 172   2              }
+ 173   1              SPI_CK = 1;
+ 174   1      }  
+ 175          
+ 176          uchar xdata ch1buf[5];
+ 177          uchar xdata ch2buf[5];
+ 178          
+ 179          void sm_read(uchar pos)
+C51 COMPILER V7.01  MAIN                                                                   08/13/2009 20:46:42 PAGE 4   
+
+ 180          {  
+ 181   1              uchar   no,value1,value2;  
+ 182   1         
+ 183   1              for (no=0;no<8;no++)    {                                                                  
+ 184   2                        SPI_CK = 1;  
+ 185   2                        delay(SM_RDELAY);               
+ 186   2                value1   =   (value1   <<1);  
+ 187   2                        value2   =   (value2   <<1);  
+ 188   2                SPI_CK = 0;  
+ 189   2                        delay(SM_RDELAY2);
+ 190   2                        if (SPI_DI1 == 1)  
+ 191   2                      value1  |=0x01;  
+ 192   2                        else  
+ 193   2                              value1  &=~0x01;  
+ 194   2      
+ 195   2                        if (SPI_DI2 == 1)  
+ 196   2                      value2  |=0x01;  
+ 197   2                        else  
+ 198   2                              value2  &=~0x01;  
+ 199   2              }
+ 200   1              SPI_CK = 1;
+ 201   1              ch1buf[pos] = value1;
+ 202   1              ch2buf[pos] = value2;
+ 203   1       }  
+ 204          sbit sca_clk = P0^7;
+ 205          sbit sca_dat = P0^6;
+ 206          void display_scale()   //74164串行移位一个数
+ 207          {
+ 208   1               uchar i=0;
+ 209   1                       uchar c= 0;
+ 210   1                       switch(rdata.Ratio)
+ 211   1                       {
+ 212   2                              case KEY_SCA10:  c = 0x11;break;
+ 213   2                              case KEY_SCA100: c = 0x22;break;
+ 214   2                              case KEY_SCA1K:  c = 0x44;break;
+ 215   2                              case KEY_SCA10K: c = 0x88;break;
+ 216   2                              default:
+ 217   2                                      return;
+ 218   2                       }
+ 219   1      
+ 220   1               do{  
+ 221   2                   if(c&0x01)     
+ 222   2                       sca_dat=1;
+ 223   2                   else
+ 224   2                                       sca_dat=0;
+ 225   2                           c>>=1;        //数组tabel中的第N个数向右移动一位
+ 226   2                               _nop_(); _nop_();
+ 227   2                   sca_clk=0;            //下降沿将数据写入164，拉高时钟端停止，再拉低等待下一次写入
+ 228   2                   _nop_(); _nop_();
+ 229   2                               sca_clk=1;
+ 230   2                                _nop_(); _nop_();
+ 231   2                   sca_clk=0;
+ 232   2                                _nop_(); _nop_();
+ 233   2                   i++;
+ 234   2                  }
+ 235   1              while(i<8);
+ 236   1      }
+ 237          
+ 238          
+ 239          #define HEAD_MARK       0xcc    //header mark
+ 240          #define CMD_READ        0x01    //read data
+ 241          ulong ch1val,ch2val;
+C51 COMPILER V7.01  MAIN                                                                   08/13/2009 20:46:42 PAGE 5   
+
+ 242          uchar collect_data()
+ 243          {
+ 244   1                              sm_write(HEAD_MARK);
+ 245   1                              sm_write(CMD_READ);
+ 246   1                              sm_read(0);
+ 247   1                              sm_read(1);
+ 248   1                              sm_read(2);
+ 249   1                              sm_read(3);
+ 250   1                              sm_read(4);
+ 251   1      //                      if((ch1buf[4] == (ch1buf[0]+ch1buf[1]+ch1buf[2]+ch1buf[3])) &&(ch2buf[4] == (ch2buf[0]+ch2buf[1]+ch2b
+             -uf[2]+ch2buf[3])))
+ 252   1      //                      if((ch1buf[4] == (ch1buf[0]+ch1buf[1]+ch1buf[2]+ch1buf[3])))
+ 253   1                              if(1)
+ 254   1                              {
+ 255   2      
+ 256   2              ch1val = 0;
+ 257   2              ch1val = ch1val + ch1buf[0];    ch1val <<= 8;
+ 258   2              ch1val = ch1val + ch1buf[1];    ch1val <<= 8;
+ 259   2              ch1val = ch1val + ch1buf[2];    ch1val <<= 8;
+ 260   2              ch1val = ch1val + ch1buf[3];    ch1val <<= 8;
+ 261   2      
+ 262   2              if(ch1val == 0)
+ 263   2                      ch1val = 9.9;
+ 264   2              ch2val = 0;
+ 265   2              ch2val = ch2val + ch2buf[0];    ch2val <<= 8;
+ 266   2              ch2val = ch2val + ch2buf[1];    ch2val <<= 8;
+ 267   2              ch2val = ch2val + ch2buf[2];    ch2val <<= 8;
+ 268   2              ch2val = ch2val + ch2buf[3];    ch2val <<= 8;
+ 269   2              if(ch2val == 0)
+ 270   2                      ch2val = 8.8;
+ 271   2      
+ 272   2                                      return 1;
+ 273   2                              }else{
+ 274   2                                      return 0;
+ 275   2                              }
+ 276   1      
+ 277   1      }
+ 278          #define ONESEC  1282
+ 279          sbit KTT=P3^7;
+ 280          void main()
+ 281          {
+ 282   1              uchar i,pos;
+ 283   1              double chs,chx;
+ 284   1              int j;
+ 285   1              KTT = 0;
+ 286   1              LCD_Init();
+ 287   1              Key_Init();
+ 288   1              State_Init();   
+ 289   1      
+ 290   1              //set serial port parameter (clock 11.0592M)
+ 291   1              //9600 baut rate 8 data non parity and 1 stop.
+ 292   1              SCON = 0x70;
+ 293   1              PCON = 0x00;
+ 294   1      
+ 295   1              //timer count
+ 296   1              TH1 = 0xfd;
+ 297   1              TH0 = 0xd8;
+ 298   1              TL0 = 0xf0;
+ 299   1              //use timer 1 to be serial
+ 300   1              //use timer 0 too
+ 301   1              TMOD = 0x22;
+ 302   1              TR1 = 1; //start timer 1
+C51 COMPILER V7.01  MAIN                                                                   08/13/2009 20:46:42 PAGE 6   
+
+ 303   1              TR0 = 1; //start timer 0
+ 304   1              ET1 = 0;
+ 305   1              ES = 1;
+ 306   1              PS = 1;
+ 307   1              EA = 1;
+ 308   1              ET0 = 1;
+ 309   1              
+ 310   1              i = SPI_DI1; //set to input
+ 311   1              i = SPI_DI2; //set to input
+ 312   1      
+ 313   1              key = KEY_INVALID;
+ 314   1               while(1)
+ 315   1               { 
+ 316   2                      if(key != KEY_INVALID)
+ 317   2                      {
+ 318   3                              if((key == KEY_SCA10)||(key == KEY_SCA100)||(key == KEY_SCA1K)||(key == KEY_SCA10K))
+ 319   3                              {
+ 320   4                                      rdata.Ratio = key;
+ 321   4                                      display_scale();
+ 322   4                                      SaveToEEPROM();
+ 323   4                              }else{
+ 324   4      
+ 325   4                                      i = rdata.StateId;
+ 326   4                                      pos = rdata.pos_len;
+ 327   4                                      State_Change(key);
+ 328   4                                      
+ 329   4                                      if(i != rdata.StateId){ 
+ 330   5                                              State_Display();
+ 331   5                                      }else{
+ 332   5                                          if((pos != rdata.pos_len) || (key == KEY_UP) | (key == KEY_DN))
+ 333   5                                                      State_Update();
+ 334   5                                      }
+ 335   4                              }
+ 336   3                              key = KEY_INVALID;
+ 337   3                      }else{
+ 338   3                              if(rdata.StateId != PG_MAIN) //配置页不处理数据
+ 339   3                               continue;      
+ 340   3                              if(j > 0)
+ 341   3                              {
+ 342   4                                      j--;
+ 343   4                                      continue;
+ 344   4                              }else{
+ 345   4                                      KTT = 0;
+ 346   4                              }
+ 347   3                              if(rdata.delay_cnt != 0)
+ 348   3                              {
+ 349   4                                      rdata.delay_cnt = rdata.delay_cnt-1;
+ 350   4                                      sprintf(buf,"%is",(int)0+rdata.delay_cnt);
+ 351   4                                      LCD_Print6X8(208, 22, "    ");
+ 352   4                                      LCD_Print6X8(208, 22, buf);
+ 353   4      
+ 354   4                                      j = ONESEC;
+ 355   4                                      continue;
+ 356   4                              }
+ 357   3                              //发送帧头
+ 358   3                              //读串口数据
+ 359   3                              if(0 == collect_data())
+ 360   3                              {
+ 361   4                                              rdata.delay_cnt = 1;
+ 362   4                                              j = ONESEC;
+ 363   4                                              continue;
+ 364   4                              }
+C51 COMPILER V7.01  MAIN                                                                   08/13/2009 20:46:42 PAGE 7   
+
+ 365   3      
+ 366   3      
+ 367   3                              chs = ch1val/2560000000.0;
+ 368   3                              chx = ch2val/2560000000.0;
+ 369   3      
+ 370   3                              rdata.Is = chs / rdata.Rs;
+ 371   3                              switch(rdata.Ratio)
+ 372   3                              {
+ 373   4                              case KEY_SCA10:
+ 374   4                                      rdata.Rx = chx  / (rdata.Is * 10.0);
+ 375   4                                      rdata.Ix = rdata.Is * 10.0;
+ 376   4                                      break;
+ 377   4                              case KEY_SCA100:
+ 378   4                                      rdata.Rx = chx  / (rdata.Is * 100.0);
+ 379   4                                      rdata.Ix = rdata.Is * 100.0;
+ 380   4                                      break;
+ 381   4                              case KEY_SCA1K:
+ 382   4                                      rdata.Rx = chx  / (rdata.Is * 1000.0);
+ 383   4                                      rdata.Ix = rdata.Is * 1000.0;
+ 384   4                                      break;
+ 385   4                              case KEY_SCA10K:
+ 386   4                                      rdata.Rx = chx  / (rdata.Is * 10000.0);
+ 387   4                                      rdata.Ix = rdata.Is * 10000.0;
+ 388   4                                      break;
+ 389   4                              default:
+ 390   4                                      break;
+ 391   4                              }
+ 392   3                              if(lastrx > 0)
+ 393   3                              {
+ 394   4                                      rdata.Rx = (rdata.Rx + lastrx)/2;
+ 395   4                                      lastrx = rdata.Rx*2 - lastrx;
+ 396   4                              }else{
+ 397   4                                      lastrx= rdata.Rx;
+ 398   4                              }
+ 399   3      
+ 400   3                              State_Update();
+ 401   3                              //turn switch and set delay
+ 402   3                              KTT = 1;
+ 403   3                              rdata.delay_cnt = rdata.Delay;
+ 404   3                              j = ONESEC;
+ 405   3      
+ 406   3                      }
+ 407   2              }       
+ 408   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2549    ----
+   CONSTANT SIZE    =    357    ----
+   XDATA SIZE       =     10    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     64      18
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
