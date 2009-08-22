@@ -1,0 +1,9 @@
+"eeprom.obj",
+"font.obj",
+"key.obj",
+"lcd.obj",
+"main.obj",
+"state.obj",
+"utili.obj" 
+TO "bjy" 
+RAMSIZE(256) 

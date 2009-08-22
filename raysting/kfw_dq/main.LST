@@ -1,0 +1,358 @@
+C51 COMPILER V7.01  MAIN                                                                   08/21/2009 20:36:18 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          //#include <t89c51rd2.h>
+   2          #include "stc51.h"
+   3          #include "utili.h"
+   4          #include "lcd.h"
+   5          #include "key.h"
+   6          #include "stdio.h"
+   7          #include "eeprom.h"
+   8          RUNDATA rdata;
+   9          xdata char buf[20];
+  10          uchar key;
+  11          
+  12          double lastrx = -1;
+  13          void analog_timer()     interrupt 1 using 1
+  14          {
+  15   1              Key_Scan();
+  16   1      }
+  17          
+  18          void State_Update();
+  19          void State_Display()
+  20          {
+  21   1              EA = 0;
+  22   1              if(rdata.StateId == PG_MSG_RZERO)
+  23   1              {
+  24   2                      LCD_Cls();
+  25   2                      LCD_PrintHz16(20,  10, "正在扣除残余电阻...");
+  26   2              }
+  27   1              if(rdata.StateId == PG_MSG_VZERO)
+  28   1              {
+  29   2                      LCD_Cls();
+  30   2                      LCD_PrintHz16(20,  10, "正在进行扣零操作...");
+  31   2              }
+  32   1      
+  33   1              if(rdata.StateId == PG_MAIN){
+  34   2                      LCD_Cls();
+  35   2                      if(rdata.Current == 0)
+  36   2                              sprintf(buf,"Ix= 1XA");
+  37   2                      if(rdata.Current == 1)
+  38   2                              sprintf(buf,"Ix= 1X0.707A");
+  39   2                      if(rdata.Current == 2)
+  40   2                              sprintf(buf,"Ix= 1X1.414A");
+  41   2      
+  42   2                      LCD_Print6X8(11,1,buf);
+  43   2      
+  44   2                      if(rdata.Range == RANGE_20m)
+  45   2                              sprintf(buf," 20mΩ(量程)");
+  46   2                      if(rdata.Range == RANGE_200m)
+  47   2                              sprintf(buf,"200mΩ(量程)");
+  48   2                      if(rdata.Range == RANGE_2)
+  49   2                              sprintf(buf,"   2Ω(量程)");
+  50   2                      if(rdata.Range == RANGE_20)
+  51   2                              sprintf(buf,"  20Ω(量程)");
+  52   2                      if(rdata.Range == RANGE_200)
+  53   2                              sprintf(buf," 200Ω(量程)");
+  54   2                      if(rdata.Range == RANGE_2k)
+  55   2                              sprintf(buf,"  2kΩ(量程)");
+C51 COMPILER V7.01  MAIN                                                                   08/21/2009 20:36:18 PAGE 2   
+
+  56   2                      if(rdata.Range == RANGE_20k)
+  57   2                              sprintf(buf," 20kΩ(量程)");
+  58   2                      if(rdata.Range == RANGE_200k)
+  59   2                              sprintf(buf,"200kΩ(量程)");
+  60   2                      if(rdata.Range == RANGE_2M)
+  61   2                              sprintf(buf,"  2MΩ(量程)");
+  62   2                      if(rdata.Range == RANGE_20M)
+  63   2                              sprintf(buf,"  20MΩ(量程)");
+  64   2      
+  65   2                      LCD_Print6X8(120,1,buf);
+  66   2      
+  67   2                      sprintf(buf,"P= %.4fΩ",rdata.Pvalue);
+  68   2                      LCD_Print6X8(11,54,buf);
+  69   2      
+  70   2                      sprintf(buf,"T= %.1f℃",rdata.Temp);
+  71   2                      LCD_Print6X8(120,54,buf);
+  72   2                      
+  73   2                      State_Update();
+  74   2              }
+  75   1              if(rdata.StateId == PG_MENU1){
+  76   2                      LCD_Cls();
+  77   2                      LCD_PrintHz16(2,  2, " 1.量程选择");
+  78   2                      LCD_PrintHz16(120,2, " 2.校准电阻");
+  79   2                      LCD_PrintHz16(2,  23," 3.执行校零");
+  80   2                      LCD_PrintHz16(120,23," 4.电阻率设定");
+  81   2                      LCD_PrintHz16(2,  46," 5.串口设定");
+  82   2                      LCD_PrintHz16(120,46," 6.使用帮助");
+  83   2                      State_Update();
+  84   2              }
+  85   1              if(rdata.StateId == PG_RANGE){
+  86   2                      LCD_Cls();
+  87   2                      LCD_PrintHz16(2,  2,   "请选择新的量程:   单位Ω");
+  88   2                      LCD_Print6X8(2  , 23, " 0. 20m");
+  89   2                      LCD_Print6X8(52 , 23, " 1. 200m");
+  90   2                      LCD_Print6X8(102, 23, " 2. 2");
+  91   2                      LCD_Print6X8(152 ,23, " 3. 20");
+  92   2                      LCD_Print6X8(202 ,23, " 4. 200");
+  93   2                      LCD_Print6X8(2  , 34, " 5. 2k");
+  94   2                      LCD_Print6X8(52 , 34, " 6. 20k");
+  95   2                      LCD_Print6X8(102, 34, " 7. 200k");
+  96   2                      LCD_Print6X8(152 ,34, " 8. 2M");
+  97   2                      LCD_Print6X8(202 ,34, " 9. 20M");
+  98   2                      State_Update();
+  99   2              }
+ 100   1              if(rdata.StateId == PG_CALISET){
+ 101   2                      LCD_Cls();
+ 102   2                      LCD_PrintHz16(2,  2, "当前标准电阻值:");
+ 103   2                      LCD_PrintHz16(2,22,  "   输入新阻值:");
+ 104   2      
+ 105   2                      State_Update();
+ 106   2              }
+ 107   1              if(rdata.StateId == PG_PSET){
+ 108   2                      LCD_Cls();
+ 109   2                      LCD_PrintHz16(2,   2,"电阻率参数:");
+ 110   2                      LCD_PrintHz16(120, 2,"1.导线长度");
+ 111   2                      LCD_PrintHz16(2,  22,"2.方截面宽度");
+ 112   2                      LCD_PrintHz16(120,22,"3.方截面高度");
+ 113   2                      LCD_PrintHz16(2,  42,"4.圆截面半径");
+ 114   2                      LCD_PrintHz16(120,42,"5.不计算电阻率");
+ 115   2                      State_Update();
+ 116   2              }
+ 117   1              if(rdata.StateId == PG_SET232){
+C51 COMPILER V7.01  MAIN                                                                   08/21/2009 20:36:18 PAGE 3   
+
+ 118   2                      LCD_Cls();
+ 119   2                      LCD_PrintHz16(12,   2, "波特率设定:");
+ 120   2                      LCD_PrintHz16(12,   22," 1. 关闭串口");
+ 121   2                      LCD_PrintHz16(12,   42," 2. 2400");
+ 122   2                      LCD_PrintHz16(120,  42," 3. 9000");
+ 123   2                      State_Update();
+ 124   2              }
+ 125   1              if(rdata.StateId == PG_HELP_ADDR){
+ 126   2                      LCD_Cls();
+ 127   2                      LCD_PrintHz16(60, 2,  "兰斯汀仪表研究所");
+ 128   2                      LCD_Print8X16(40, 20, "www.raysting.com.cn");
+ 129   2                      LCD_Print8X16(40, 40, "raysting@126.com");
+ 130   2              }
+ 131   1              if(rdata.StateId == PG_HELP_PREC){
+ 132   2                      LCD_Cls();
+ 133   2                      LCD_PrintHz16(60, 18, "产品描述");
+ 134   2                      LCD_Print8X16(40, 40, "www.raysting.com.cn");
+ 135   2              }
+ 136   1              if(rdata.StateId == PG_HELP_SET){
+ 137   2                      LCD_Cls();
+ 138   2                      LCD_PrintHz16(60, 18,  "产品设置");
+ 139   2                      LCD_Print8X16(40, 40, "www.raysting.com.cn");
+ 140   2              }
+ 141   1              EA = 1;
+ 142   1      }
+ 143          void State_Update()
+ 144          {
+ 145   1              EA = 0;
+ 146   1              if(rdata.StateId == PG_MAIN){
+ 147   2                      LCD_ClsBlock(10,20,10+24*8,52);
+ 148   2                      sprintf(buf,"%.4f",rdata.Rx);
+ 149   2                      sprintf(buf+8," ");
+ 150   2                      LCD_Print24X32(10,18,buf);
+ 151   2                      //LCD_Print8X16(205,34,"m");
+ 152   2                      LCD_PrintHz16(216,34,"Ω");
+ 153   2              }
+ 154   1              if(rdata.StateId == PG_MENU1){
+ 155   2                      LCD_PrintHz16(2,   2," ");
+ 156   2                      LCD_PrintHz16(120, 2," ");
+ 157   2                      LCD_PrintHz16(2,  23," ");
+ 158   2                      LCD_PrintHz16(120,23," ");
+ 159   2                      LCD_PrintHz16(2,  46," ");
+ 160   2                      LCD_PrintHz16(120,46," ");
+ 161   2                      if(rdata.pos_len == 1)
+ 162   2                              LCD_PrintHz16(2,   2,"*");
+ 163   2                      if(rdata.pos_len == 2)
+ 164   2                              LCD_PrintHz16(120, 2,"*");
+ 165   2                      if(rdata.pos_len == 3)
+ 166   2                              LCD_PrintHz16(2,  23,"*");
+ 167   2                      if(rdata.pos_len == 4)
+ 168   2                              LCD_PrintHz16(120,23,"*");
+ 169   2                      if(rdata.pos_len == 5)
+ 170   2                              LCD_PrintHz16(2,  46,"*");
+ 171   2                      if(rdata.pos_len == 6)
+ 172   2                              LCD_PrintHz16(120,46,"*");
+ 173   2              }
+ 174   1              if(rdata.StateId == PG_RANGE){
+ 175   2                      LCD_Print6X8(2  , 23, " ");
+ 176   2                      LCD_Print6X8(52 , 23, " ");
+ 177   2                      LCD_Print6X8(102, 23, " ");
+ 178   2                      LCD_Print6X8(152 ,23, " ");
+ 179   2                      LCD_Print6X8(202 ,23, " ");
+C51 COMPILER V7.01  MAIN                                                                   08/21/2009 20:36:18 PAGE 4   
+
+ 180   2                      LCD_Print6X8(2  , 34, " ");
+ 181   2                      LCD_Print6X8(52 , 34, " ");
+ 182   2                      LCD_Print6X8(102, 34, " ");
+ 183   2                      LCD_Print6X8(152 ,34, " ");
+ 184   2                      LCD_Print6X8(202 ,34, " ");
+ 185   2      
+ 186   2                      if(rdata.pos_len == 1)
+ 187   2                              LCD_Print6X8(2  , 23, "*");
+ 188   2                      if(rdata.pos_len == 2)
+ 189   2                              LCD_Print6X8(52 , 23, "*");
+ 190   2                      if(rdata.pos_len == 3)
+ 191   2                              LCD_Print6X8(102, 23, "*");
+ 192   2                      if(rdata.pos_len == 4)
+ 193   2                              LCD_Print6X8(152 ,23, "*");
+ 194   2                      if(rdata.pos_len == 5)
+ 195   2                              LCD_Print6X8(202 ,23, "*");
+ 196   2                      if(rdata.pos_len == 6)
+ 197   2                              LCD_Print6X8(2  , 34, "*");
+ 198   2                      if(rdata.pos_len == 7)
+ 199   2                              LCD_Print6X8(52 , 34, "*");
+ 200   2                      if(rdata.pos_len == 8)
+ 201   2                              LCD_Print6X8(102, 34, "*");
+ 202   2                      if(rdata.pos_len == 9)
+ 203   2                              LCD_Print6X8(152 ,34, "*");
+ 204   2                      if(rdata.pos_len == 10)
+ 205   2                              LCD_Print6X8(202 ,34, "*");
+ 206   2              }
+ 207   1              if(rdata.StateId == PG_CALISET){
+ 208   2                      LCD_Print8X16(120,34,"        ");
+ 209   2                      sprintf(buf,"%.4f",rdata.Rcali[rdata.Range]);
+ 210   2                      LCD_Print6X8(120,10,buf);
+ 211   2              }
+ 212   1              if(rdata.StateId == PG_PSET){
+ 213   2              }
+ 214   1              if(rdata.StateId == PG_SET232){
+ 215   2                      LCD_PrintHz16(12,   22," ");
+ 216   2                      LCD_PrintHz16(12,   42," ");
+ 217   2                      LCD_PrintHz16(120,  42," ");
+ 218   2                      if(rdata.Baudrate == 0)
+ 219   2                              LCD_PrintHz16(12,   22,"*");
+ 220   2                      if(rdata.Baudrate == 1)
+ 221   2                              LCD_PrintHz16(12,   42,"*");
+ 222   2                      if(rdata.Baudrate == 2)
+ 223   2                              LCD_PrintHz16(120,  42,"*");
+ 224   2              }
+ 225   1              EA = 1;
+ 226   1      }
+ 227          
+ 228          
+ 229          
+ 230          ulong ch1val,ch2val;
+*** WARNING C231 IN LINE 230 OF MAIN.C: 'ch1val': redefinition
+*** WARNING C231 IN LINE 230 OF MAIN.C: 'ch2val': redefinition
+ 231          #define ONESEC  1282
+ 232          sbit KTT=P3^7;
+ 233          void main()
+ 234          {
+ 235   1              uchar i,pos;
+ 236   1              double chs,chx;
+ 237   1              int j;
+ 238   1              KTT = 0;
+ 239   1              LCD_Init();
+C51 COMPILER V7.01  MAIN                                                                   08/21/2009 20:36:18 PAGE 5   
+
+ 240   1              Key_Init();
+ 241   1              State_Init();   
+ 242   1      
+ 243   1              //set serial port parameter (clock 11.0592M)
+ 244   1              //9600 baut rate 8 data non parity and 1 stop.
+ 245   1              SCON = 0x70;
+ 246   1              PCON = 0x00;
+ 247   1      
+ 248   1              //timer count
+ 249   1              TH1 = 0xfd;
+ 250   1              TH0 = 0xd8;
+ 251   1              TL0 = 0xf0;
+ 252   1              //use timer 1 to be serial
+ 253   1              //use timer 0 too
+ 254   1              TMOD = 0x22;
+ 255   1              TR1 = 1; //start timer 1
+ 256   1              TR0 = 1; //start timer 0
+ 257   1              ET1 = 0;
+ 258   1              ES = 1;
+ 259   1              PS = 1;
+ 260   1              EA = 1;
+ 261   1              ET0 = 1;
+ 262   1              
+ 263   1              sm_Init();
+ 264   1      
+ 265   1              key = KEY_INVALID;
+ 266   1               while(1)
+ 267   1               { 
+ 268   2                      if(key != KEY_INVALID)
+ 269   2                      {
+ 270   3                              if((key == KEY_BTN1)||(key == KEY_BTN2)||(key == KEY_BTN3)||(key == KEY_BTN4))
+ 271   3                              {
+ 272   4                                      if(key == KEY_BTN1) //auto range or not
+ 273   4                                      {
+ 274   5                                              rdata.Rauto = (rdata.Rauto == AUTO_OFF) ? AUTO_ON : AUTO_OFF;
+ 275   5                                              display_buttons(key,rdata.Rauto);
+ 276   5                                      }
+ 277   4                                      if(key == KEY_BTN2) //auto ktt or not
+ 278   4                                      {
+ 279   5                                              rdata.Rktt = (rdata.Rktt == KTT_OFF) ? KTT_ON : KTT_OFF;
+ 280   5                                              display_buttons(key,rdata.Rktt);
+ 281   5                                      }
+ 282   4                                      if(key == KEY_BTN3) //current change
+ 283   4                                      {
+ 284   5                                              display_buttons(key,1); //start to switch the current
+ 285   5                                              rdata.Current++;
+ 286   5                                              if(rdata.Current > CURRENT_SQRT0P5)
+ 287   5                                                      rdata.Current = CURRENT_1; 
+ 288   5                                              //TODO switch the current
+ 289   5                                              display_buttons(key,0);
+ 290   5                                      }
+ 291   4                                      if(key == KEY_BTN4) //remove zero
+ 292   4                                      {
+ 293   5                                              display_buttons(key,1); //start to remove zero
+ 294   5                                              rdata.R0 = rdata.Rx;
+ 295   5                                              display_buttons(key,0);
+ 296   5                                      }
+ 297   4                                      SaveToEEPROM();
+ 298   4                              }else{
+ 299   4                                      i = rdata.StateId;
+ 300   4                                      pos = rdata.pos_len;
+ 301   4                                      State_Change(key);
+C51 COMPILER V7.01  MAIN                                                                   08/21/2009 20:36:18 PAGE 6   
+
+ 302   4                                      
+ 303   4                                      if(i != rdata.StateId){ 
+ 304   5                                              State_Display();
+ 305   5                                      }else{
+ 306   5                                          if((pos != rdata.pos_len) || (key == KEY_UP) || (key == KEY_DN))
+ 307   5                                                      State_Update();
+ 308   5                                      }
+ 309   4                              }
+ 310   3                              key = KEY_INVALID;
+ 311   3                      }else{
+ 312   3                              if(rdata.StateId != PG_MAIN) //配置页不处理数据
+ 313   3                                       continue;      
+ 314   3                              if(j > 0)
+ 315   3                              {
+ 316   4                                      j--;
+ 317   4                                      continue;
+ 318   4                              }
+ 319   3                      }
+ 320   2              }       
+ 321   1      }
+*** WARNING C280 IN LINE 236 OF MAIN.C: 'chs': unreferenced local variable
+*** WARNING C280 IN LINE 236 OF MAIN.C: 'chx': unreferenced local variable
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2110    ----
+   CONSTANT SIZE    =    645    ----
+   XDATA SIZE       =     20    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =    111      12
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  4 WARNING(S),  0 ERROR(S)

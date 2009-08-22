@@ -1,0 +1,185 @@
+C51 COMPILER V7.01  UTILI                                                                  08/21/2009 20:36:18 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE UTILI
+OBJECT MODULE PLACED IN utili.OBJ
+COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE utili.c BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "utili.h"
+   2          #include "stc51.h"
+   3          sbit SPI_CK = P3^5;
+   4          sbit SPI_DI1 = P3^4;
+   5          sbit SPI_DI2 = P0^5;
+   6          sbit SPI_DO = P3^3;
+   7          
+   8          /*---------------延时子程序----------------*/
+   9          void delay (uint us) 
+  10          {
+  11   1              while(us--);
+  12   1      }
+  13          void delay1 (uint ms) 
+  14          {
+  15   1              int i,j;
+  16   1              for(i=0;i<ms;i++)
+  17   1              for(j=0;j<1000;j++)
+  18   1                      ;
+  19   1                      \
+  20          }
+  21          //计算字符串长度
+  22          uchar strlen(uchar *s)
+  23          {
+  24   1              uchar len = 0;
+  25   1              while(*s++) len ++;
+  26   1              
+  27   1              return len;
+  28   1      }
+  29          double buf2double()             
+  30          {
+  31   1              double tmp = 0.0;
+  32   1              uchar i = 0;
+  33   1              uchar pos = 0;
+  34   1              for(i=0;i<rdata.pos_len;i++)
+  35   1              {
+  36   2                      if(rdata.tempbuf[i] != KEY_DOT)
+  37   2                              tmp = tmp * 10.0+(rdata.tempbuf[i] - '0');
+  38   2                      else
+  39   2                              pos = rdata.pos_len - i - 1;
+  40   2              }
+  41   1              while(pos > 0)
+  42   1              {
+  43   2                      tmp = tmp / 10.0;
+  44   2                      pos--;
+  45   2              }
+  46   1              return tmp;
+  47   1      }
+  48          int buf2byte()      //convert rdata.tempbuf to byte (00-99)
+  49          {
+  50   1              int tmp = 0;
+  51   1              uchar i;
+  52   1              for(i=0;i<rdata.pos_len;i++)
+  53   1              {
+  54   2                      tmp = tmp * 10+(rdata.tempbuf[i] - '0');
+  55   2              }
+C51 COMPILER V7.01  UTILI                                                                  08/21/2009 20:36:18 PAGE 2   
+
+  56   1              return tmp;
+  57   1      }
+  58          
+  59          //MY SPI Related function 
+  60          uchar xdata ch1buf[5];
+  61          uchar xdata ch2buf[5];
+  62          #define SM_WDELAY       100
+  63          #define SM_RDELAY       100
+  64          #define SM_RDELAY2      10
+  65          #define HEAD_MARK       0xcc    //header mark
+  66          void sm_Init()
+  67          {       
+  68   1              uchar i;
+  69   1              i = SPI_DI1; //set to input
+  70   1              i = SPI_DI2; //set to input
+  71   1      }
+  72          void   sm_write(uchar   value)  
+  73          {  
+  74   1              uchar   no;  
+  75   1             
+  76   1              for(no=0;no<8;no++) {  
+  77   2                     SPI_CK = 1;      
+  78   2                       
+  79   2                      if   ((value &0x80)==0x80)  
+  80   2                        SPI_DO = 1;  
+  81   2                      else  
+  82   2                            SPI_DO = 0;  
+  83   2                       delay(SM_WDELAY);   
+  84   2                   SPI_CK = 0;    
+  85   2                       value   =   (value <<1);  
+  86   2                      delay(SM_WDELAY);
+  87   2              }
+  88   1              SPI_CK = 1;
+  89   1      }  
+  90          void sm_read(uchar pos,uchar ch)
+  91          {  
+  92   1              uchar   no,value1,value2;  
+  93   1         
+  94   1              for (no=0;no<8;no++)    { 
+  95   2                        SPI_CK = 1;  
+  96   2                        delay(SM_RDELAY);             
+  97   2                        if( ch & HASCH1)
+  98   2                                value1   =   (value1   <<1);  
+  99   2                        if( ch & HASCH2)
+ 100   2                                value2   =   (value2   <<1);  
+ 101   2                        SPI_CK = 0;  
+ 102   2                        delay(SM_RDELAY2);
+ 103   2                        if( ch & HASCH1){
+ 104   3                                if (SPI_DI1 == 1)  
+ 105   3                                      value1  |=0x01;  
+ 106   3                                else  
+ 107   3                                      value1  &=~0x01;  
+ 108   3                        }
+ 109   2                        if( ch & HASCH2) {
+ 110   3                                if (SPI_DI2 == 1)  
+ 111   3                                      value2  |=0x01;  
+ 112   3                                else  
+ 113   3                                      value2  &=~0x01;  
+ 114   3                        }
+ 115   2              }
+ 116   1              SPI_CK = 1;
+ 117   1              if( ch & HASCH1)
+C51 COMPILER V7.01  UTILI                                                                  08/21/2009 20:36:18 PAGE 3   
+
+ 118   1                      ch1buf[pos] = value1;
+ 119   1              if( ch & HASCH2)
+ 120   1                      ch2buf[pos] = value2;
+ 121   1       }  
+ 122          
+ 123          uchar collect_long(uchar cmd,uchar ch)
+ 124          {
+ 125   1              sm_write(HEAD_MARK);
+ 126   1              sm_write(cmd);
+ 127   1              sm_read(0,ch);
+ 128   1              sm_read(1,ch);
+ 129   1              sm_read(2,ch);
+ 130   1              sm_read(3,ch);
+ 131   1              sm_read(4,ch);
+ 132   1                              
+ 133   1              if((~ch1buf[4] == (ch1buf[0]+ch1buf[1]+ch1buf[2]+ch1buf[3])) && (ch & HASCH1))
+ 134   1              {
+ 135   2                      ch1val = 0;
+ 136   2                      ch1val = ch1val + ch1buf[0];    ch1val <<= 8;
+ 137   2                      ch1val = ch1val + ch1buf[1];    ch1val <<= 8;
+ 138   2                      ch1val = ch1val + ch1buf[2];    ch1val <<= 8;
+ 139   2                      ch1val = ch1val + ch1buf[3];    ch1val <<= 8;
+ 140   2              }else{
+ 141   2                      return 0;
+ 142   2              }
+ 143   1              if((~ch2buf[4] == (ch2buf[0]+ch2buf[1]+ch2buf[2]+ch2buf[3])) && (ch & HASCH2))
+ 144   1              {
+ 145   2                      ch2val = 0;
+ 146   2                      ch2val = ch2val + ch2buf[0];    ch2val <<= 8;
+ 147   2                      ch2val = ch2val + ch2buf[1];    ch2val <<= 8;
+ 148   2                      ch2val = ch2val + ch2buf[2];    ch2val <<= 8;
+ 149   2                      ch2val = ch2val + ch2buf[3];    ch2val <<= 8;
+ 150   2              
+ 151   2              }else{
+ 152   2                      return 0;
+ 153   2              }
+ 154   1              return 1;
+ 155   1      
+ 156   1      }
+ 157          
+ 158          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1004    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     10    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----      11
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
