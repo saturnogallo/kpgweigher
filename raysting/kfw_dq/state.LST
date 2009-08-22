@@ -1,9 +1,9 @@
-C51 COMPILER V7.01  STATE                                                                  08/21/2009 20:36:18 PAGE 1   
+C51 COMPILER V7.01  STATE                                                                  08/22/2009 16:21:18 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE STATE
 OBJECT MODULE PLACED IN state.OBJ
-COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE state.c BROWSE DEBUG OBJECTEXTEND
+COMPILER INVOKED BY: c:\GreenTools\Keil\C51\BIN\C51.EXE state.c LARGE BROWSE DEBUG OBJECTEXTEND
 
 stmt level    source
 
@@ -11,332 +11,379 @@ stmt level    source
    2          #include "key.h"
    3          #include "utili.h"
    4          #include "eeprom.h"
-   5          
-   6          extern void State_Display();
-   7          extern ulong code Sector[10][4];
-   8          
-   9          #define RS_SECTBASE             Sector[0][0]    //[0]
-  10          
-  11          void LoadFromEEPROM()
-  12          {
-  13   1              int i = RS_SECTBASE;
-  14   1              uchar* arr = (uchar*)&rdata;
-  15   1      
-  16   1              for(i=0;i<sizeof(RUNDATA);i++)
-  17   1              {
-  18   2                      *arr++ = byte_read(i++);
-  19   2              }
-  20   1      }
-  21          void SaveToEEPROM()
-  22          {
-  23   1              int i = RS_SECTBASE;
-  24   1              uchar* arr = (uchar*)&rdata;
-  25   1              SectorErase(RS_SECTBASE);
-  26   1      
-  27   1              for(i=0;i<sizeof(RUNDATA);i++)
-  28   1              {
-  29   2                      byte_write(i++,*arr++);
-  30   2              }
-  31   1      }
-  32          void State_Init()
-  33          {
-  34   1              rdata.StateId = PG_MAIN;
-  35   1              rdata.pos_len = 0;
-  36   1              rdata.Delay = 10;
-  37   1              rdata.delay_cnt = rdata.Delay << DELAY_MULTIPLE;
-  38   1      
-  39   1              rdata.R0 = 0.0;
-  40   1              rdata.Rs1 = 20000000;
-  41   1              rdata.Rcali[RANGE_20m] = 0.02;  
-  42   1              rdata.Rcali[RANGE_200m] = 0.2;          
-  43   1              rdata.Rcali[RANGE_2] = 2;
-  44   1              rdata.Rcali[RANGE_20] = 20;
-  45   1              rdata.Rcali[RANGE_200] = 200;
-  46   1              rdata.Rcali[RANGE_2k] = 2000;
-  47   1              rdata.Rcali[RANGE_20k] = 20000;
-  48   1              rdata.Rcali[RANGE_200k] = 200000;
-  49   1              rdata.Rcali[RANGE_2M] = 2000000;
-  50   1              rdata.Rcali[RANGE_20M] = 20000000;
-  51   1      
-  52   1              rdata.Pheight = rdata.Pwidth = rdata.Pradius = 1;
-  53   1              rdata.Rauto = AUTO_OFF;
-  54   1              rdata.Rktt = KTT_OFF;
-  55   1              rdata.Ptype = PSET_NONE;
-C51 COMPILER V7.01  STATE                                                                  08/21/2009 20:36:18 PAGE 2   
+   5          #include "stdio.h"
+   6          
+   7          extern void State_Display();
+   8          extern ulong code Sector[10][4];
+   9          
+  10          #define RS_SECTBASE             Sector[0][0]    //[0]
+  11          
+  12          void LoadFromEEPROM()
+  13          {
+  14   1              int i = RS_SECTBASE;
+  15   1              uchar* arr = (uchar*)&rdata;
+  16   1      
+  17   1              for(i=0;i<sizeof(RUNDATA);i++)
+  18   1              {
+  19   2                      *arr++ = byte_read(i++);
+  20   2              }
+  21   1      }
+  22          void SaveToEEPROM()
+  23          {
+  24   1              int i = RS_SECTBASE;
+  25   1              uchar* arr = (uchar*)&rdata;
+  26   1              SectorErase(RS_SECTBASE);
+  27   1      
+  28   1              for(i=0;i<sizeof(RUNDATA);i++)
+  29   1              {
+  30   2                      byte_write(i++,*arr++);
+  31   2              }
+  32   1      }
+  33          void State_Init()
+  34          {
+  35   1              rdata.StateId = PG_MAIN;
+  36   1              rdata.pos_len = 0;
+  37   1              rdata.Delay = 10;
+  38   1              rdata.delay_cnt = rdata.Delay << DELAY_MULTIPLE;
+  39   1      
+  40   1              rdata.R0 = 0.0;
+  41   1              rdata.Rs1 = 20000000;
+  42   1              rdata.Rcali[RANGE_20m] = 0.02;  
+  43   1              rdata.Rcali[RANGE_200m] = 0.2;          
+  44   1              rdata.Rcali[RANGE_2] = 2;
+  45   1              rdata.Rcali[RANGE_20] = 20;
+  46   1              rdata.Rcali[RANGE_200] = 200;
+  47   1              rdata.Rcali[RANGE_2k] = 2000;
+  48   1              rdata.Rcali[RANGE_20k] = 20000;
+  49   1              rdata.Rcali[RANGE_200k] = 200000;
+  50   1              rdata.Rcali[RANGE_2M] = 2000000;
+  51   1              rdata.Rcali[RANGE_20M] = 20000000;
+  52   1      
+  53   1              rdata.Pheight = rdata.Pwidth = rdata.Pradius = 1;
+  54   1              rdata.Rauto = AUTO_OFF;
+  55   1              rdata.Rktt = KTT_OFF;
+C51 COMPILER V7.01  STATE                                                                  08/22/2009 16:21:18 PAGE 2   
 
-  56   1      
-  57   1              rdata.Temp = 25;
-  58   1              rdata.Range = RANGE_20M;
-  59   1              rdata.Baudrate = 0;
-  60   1              rdata.Current = CURRENT_1;
-  61   1      
-  62   1              LoadFromEEPROM();
-  63   1              display_buttons(KEY_BTN1,rdata.Rauto);
-  64   1              display_buttons(KEY_BTN2,rdata.Rktt);
-  65   1              State_Display();
-  66   1      }
-  67          
-  68          void State_Change(uchar key)
-  69          {
-  70   1              if(rdata.StateId == PG_MAIN) {
-  71   2                      if(key == KEY_TAB){ //show menu
-  72   3                              rdata.StateId = PG_MENU1;
-  73   3                              rdata.pos_len = PG_RANGE; // set the first option of menu
-  74   3                      }
-  75   2                      return;
-  76   2              }
-  77   1              if(rdata.StateId == PG_MENU1) {
-  78   2                      switch(key)
-  79   2                      {
-  80   3                      case  KEY_NUM1: 
-  81   3                              rdata.StateId = PG_RANGE;
-  82   3                              rdata.pos_len = rdata.Range;
-  83   3                              return;
-  84   3      
-  85   3                      case  KEY_NUM2: 
-  86   3                              rdata.StateId = PG_CALISET;
-  87   3                              rdata.pos_len = rdata.Rcali[rdata.Range];
-  88   3                              return;
-  89   3      
-  90   3                      case  KEY_NUM3: 
-  91   3                              rdata.StateId = PG_RZERO;
-  92   3                              rdata.pos_len = 0;
+  56   1              rdata.Plength = 1;
+  57   1              rdata.Ptype = PSET_NONE;
+  58   1              rdata.Pvalue = 1;
+  59   1              rdata.Temp = 25;
+  60   1              rdata.Range = RANGE_20M;
+  61   1              rdata.Baudrate = 0;
+  62   1              rdata.Current = CURRENT_1;
+  63   1              sprintf(rdata.tempbuf,"       ");
+  64   1      //      LoadFromEEPROM();
+  65   1              display_buttons(KEY_BTN1,rdata.Rauto);
+  66   1              display_buttons(KEY_BTN2,rdata.Rktt);
+  67   1              State_Display();
+  68   1      }
+  69          
+  70          void State_Change(uchar key)
+  71          {
+  72   1              if(rdata.StateId == PG_MAIN) {
+  73   2                      if(key == KEY_TAB){ //show menu
+  74   3                              rdata.StateId = PG_MENU1;
+  75   3                              rdata.pos_len = PG_RANGE; // set the first option of menu
+  76   3                      }
+  77   2                      return;
+  78   2              }
+  79   1              if(rdata.StateId == PG_MENU1) {
+  80   2                      if(key == KEY_OK)
+  81   2                              key = rdata.pos_len + KEY_NUM1;
+  82   2                      switch(key)
+  83   2                      {
+  84   3                      case  KEY_NUM1: 
+  85   3                              rdata.StateId = PG_RANGE;
+  86   3                              rdata.pos_len = rdata.Range;
+  87   3                              return;
+  88   3      
+  89   3                      case  KEY_NUM2: 
+  90   3                              rdata.StateId = PG_CALISET;
+  91   3                              rdata.pos_len = 0;
+  92   3                              sprintf(rdata.tempbuf,"       ");
   93   3                              return;
   94   3      
-  95   3                      case  KEY_NUM4: 
-  96   3                              rdata.StateId = PG_PSET;
-  97   3                              rdata.pos_len = rdata.Ptype;
+  95   3                      case  KEY_NUM3: 
+  96   3                              rdata.StateId = PG_MSG_RZERO;
+  97   3                              rdata.pos_len = 0;
   98   3                              return;
   99   3      
- 100   3                      case  KEY_NUM5: 
- 101   3                              rdata.StateId = PG_SET232;
- 102   3                              rdata.pos_len = rdata.Baudrate;
+ 100   3                      case  KEY_NUM4: 
+ 101   3                              rdata.StateId = PG_PSET;
+ 102   3                              rdata.pos_len = 0;
  103   3                              return;
  104   3      
- 105   3                      case  KEY_NUM6:
- 106   3                              rdata.StateId = PG_HELP;
- 107   3                              rdata.pos_len = 0;
+ 105   3                      case  KEY_NUM5: 
+ 106   3                              rdata.StateId = PG_SET232;
+ 107   3                              rdata.pos_len = rdata.Baudrate;
  108   3                              return;
- 109   3                              
- 110   3                      case  KEY_DN:
- 111   3                              if(rdata.pos_len == PG_HELP)
- 112   3                                      rdata.pos_len = PG_RANGE;
- 113   3                              else if(rdata.pos_len == PG_PSET)
- 114   3                                      rdata.pos_len = PG_SET232;
- 115   3                              else
- 116   3                                      rdata.pos_len++;
- 117   3                              return;
-C51 COMPILER V7.01  STATE                                                                  08/21/2009 20:36:18 PAGE 3   
+ 109   3      
+ 110   3                      case  KEY_NUM6:
+ 111   3                              rdata.StateId = PG_HELP;
+ 112   3                              rdata.pos_len = 0;
+ 113   3                              return;
+ 114   3                              
+ 115   3                      case  KEY_DN:
+ 116   3                              if(rdata.pos_len == 5){
+ 117   4                                              rdata.pos_len =0 ;
+C51 COMPILER V7.01  STATE                                                                  08/22/2009 16:21:18 PAGE 3   
 
- 118   3                      case  KEY_UP:
- 119   3                              if(rdata.pos_len == PG_RANGE)
- 120   3                                      rdata.pos_len = PG_HELP;
- 121   3                              else if(rdata.pos_len == PG_SET232)
- 122   3                                      rdata.pos_len = PG_PSET;
- 123   3                              else
- 124   3                                      rdata.pos_len--;
- 125   3                              return;
- 126   3                      default:
- 127   3                              break;
- 128   3                      }
- 129   2                      rdata.StateId = PG_MAIN;
- 130   2                      rdata.pos_len = 0;
- 131   2                      return;
- 132   2              }
- 133   1              if(rdata.StateId == PG_MENU2) {
+ 118   4                              }else{
+ 119   4                                      rdata.pos_len++;
+ 120   4                              }
+ 121   3                              return;
+ 122   3                      case  KEY_UP:
+ 123   3                              if(rdata.pos_len == 0){
+ 124   4                                      rdata.pos_len = 5;
+ 125   4                              }else{
+ 126   4                                      rdata.pos_len--;
+ 127   4                              }
+ 128   3                              return;
+ 129   3                      default:
+ 130   3                              ;
+ 131   3                      }
+ 132   2                      rdata.StateId = PG_MAIN;
+ 133   2                      rdata.pos_len = 0;
  134   2                      return;
  135   2              }
- 136   1              if(rdata.StateId == PG_RANGE)  {
- 137   2                      if(key == KEY_UP) {
- 138   3                              if(rdata.pos_len >= RANGE_20M)
- 139   3                                      rdata.pos_len = RANGE_20m;
- 140   3                              else
- 141   3                                      rdata.pos_len++;
- 142   3                              return;
- 143   3                      }
- 144   2                      if(key == KEY_DN) {
- 145   3                              if(rdata.pos_len == RANGE_20m)
- 146   3                                      rdata.pos_len = RANGE_20M;
- 147   3                              else
- 148   3                                      rdata.pos_len--;
- 149   3                              return;
- 150   3                      }
- 151   2      
- 152   2                      if((key >= KEY_NUM0) && (key <= KEY_NUM9)){
- 153   3                              rdata.pos_len = RANGE_20m + key - KEY_NUM0;
- 154   3                              key = KEY_OK;
- 155   3                      }
- 156   2                      if((key == KEY_OK) || (key == KEY_TAB))
- 157   2                      {
- 158   3                              if(key == KEY_OK)
- 159   3                              {
- 160   4                                      rdata.Range = rdata.pos_len;
- 161   4                                      SaveToEEPROM();
- 162   4                              }
- 163   3                              rdata.pos_len = rdata.StateId;
- 164   3                              rdata.StateId = PG_MENU1;
- 165   3                              return;
- 166   3                      }
- 167   2                      if(key == KEY_CE) {
- 168   3                              rdata.pos_len = rdata.Range;
+ 136   1              if(rdata.StateId == PG_MENU2) {
+ 137   2                      return;
+ 138   2              }
+ 139   1              if(rdata.StateId == PG_RANGE)  {
+ 140   2                      if(key == KEY_UP) {
+ 141   3                              if(rdata.pos_len >= RANGE_20M)
+ 142   3                                      rdata.pos_len = RANGE_20m;
+ 143   3                              else
+ 144   3                                      rdata.pos_len++;
+ 145   3                              return;
+ 146   3                      }
+ 147   2                      if(key == KEY_DN) {
+ 148   3                              if(rdata.pos_len == RANGE_20m)
+ 149   3                                      rdata.pos_len = RANGE_20M;
+ 150   3                              else
+ 151   3                                      rdata.pos_len--;
+ 152   3                              return;
+ 153   3                      }
+ 154   2      
+ 155   2                      if((key >= KEY_NUM0) && (key <= KEY_NUM9)){
+ 156   3                              rdata.pos_len = RANGE_20m + key - KEY_NUM0;
+ 157   3                              key = KEY_OK;
+ 158   3                      }
+ 159   2                      if((key == KEY_OK) || (key == KEY_TAB))
+ 160   2                      {
+ 161   3                              if(key == KEY_OK)
+ 162   3                              {
+ 163   4                                      rdata.Range = rdata.pos_len;
+ 164   4                                      SaveToEEPROM();
+ 165   4                              }
+ 166   3                              rdata.pos_len = rdata.StateId;
+ 167   3                              rdata.StateId = PG_MENU1;
+ 168   3                              return;
  169   3                      }
- 170   2                      return;
- 171   2              }
- 172   1              if(rdata.StateId == PG_CALISET) { //input new calibration value
- 173   2                      if((key >= KEY_NUM0) && (key <= KEY_DOT)) {
- 174   3                              if(rdata.pos_len < 8){
- 175   4                                      rdata.tempbuf[rdata.pos_len] = key;
- 176   4                                      rdata.pos_len++;
- 177   4                              }
- 178   3                              return;
- 179   3                      }
-C51 COMPILER V7.01  STATE                                                                  08/21/2009 20:36:18 PAGE 4   
+ 170   2                      if(key == KEY_CE) {
+ 171   3                              rdata.pos_len = rdata.Range;
+ 172   3                      }
+ 173   2                      return;
+ 174   2              }
+ 175   1              if(rdata.StateId == PG_CALISET) { //input new calibration value
+ 176   2                      if(((key >= KEY_NUM0) && (key <= KEY_NUM9)) || (key == KEY_DOT)) {
+ 177   3                              if(rdata.pos_len < 8){
+ 178   4                                      rdata.tempbuf[rdata.pos_len] = key;
+ 179   4                                      rdata.pos_len++;
+C51 COMPILER V7.01  STATE                                                                  08/22/2009 16:21:18 PAGE 4   
 
- 180   2                      if((key == KEY_OK) || (key == KEY_TAB))
- 181   2                      {
- 182   3                              if((key == KEY_OK) && (rdata.pos_len > 0))
- 183   3                              {
- 184   4                                      rdata.Rcali[rdata.Range] = buf2double();
- 185   4                                      SaveToEEPROM();
- 186   4                                      //conduct calibration here
- 187   4                              }
- 188   3                              rdata.pos_len = rdata.StateId;
- 189   3                              rdata.StateId = PG_MENU1;
- 190   3                              return;
- 191   3                      }
- 192   2                      if(key == KEY_CE) {
- 193   3                              rdata.pos_len = 0;
- 194   3                              return;
- 195   3                      }
- 196   2                      return;
- 197   2              }
- 198   1              if(rdata.StateId == PG_SET232) { //list box with None,2400,9600
- 199   2                      if(key == KEY_UP) {
- 200   3                              if(rdata.pos_len >= BAUDRATE_NONE)
- 201   3                                      rdata.pos_len = 0;
- 202   3                              else
- 203   3                                      rdata.pos_len++;
- 204   3                              return;
- 205   3                      }
- 206   2                      if(key == KEY_DN) {
- 207   3                              if(rdata.pos_len == BAUDRATE_NONE)
- 208   3                                      rdata.pos_len = BAUDRATE_9600;
- 209   3                              else
- 210   3                                      rdata.pos_len--;
- 211   3                              return;
- 212   3                      }
- 213   2      
- 214   2                      if((key >= KEY_NUM1) && (key <= KEY_NUM3)){
- 215   3                              rdata.pos_len = BAUDRATE_NONE + key - KEY_NUM1;
- 216   3                              key = KEY_OK;
- 217   3                      }
- 218   2                      if((key == KEY_OK) || (key == KEY_TAB))
- 219   2                      {
- 220   3                              if(key == KEY_OK)
- 221   3                              {
- 222   4                                      rdata.Baudrate = rdata.pos_len;
- 223   4                                      SaveToEEPROM();
- 224   4                              }
- 225   3                              rdata.pos_len = rdata.StateId;
- 226   3                              rdata.StateId = PG_MENU1;
- 227   3                              return;
- 228   3                      }
- 229   2                      if(key == KEY_CE) {
- 230   3                              rdata.pos_len = rdata.Baudrate;                                         
+ 180   4                              }
+ 181   3                              return;
+ 182   3                      }
+ 183   2                      if((key == KEY_OK) || (key == KEY_TAB))
+ 184   2                      {
+ 185   3                              if((key == KEY_OK) && (rdata.pos_len > 0))
+ 186   3                              {
+ 187   4                                      rdata.Rcali[rdata.Range] = buf2double();
+ 188   4                                      SaveToEEPROM();
+ 189   4                                      //conduct calibration here
+ 190   4                              }
+ 191   3                              rdata.pos_len = rdata.StateId;
+ 192   3                              rdata.StateId = PG_MENU1;
+ 193   3                              return;
+ 194   3                      }
+ 195   2                      if(key == KEY_CE) {
+ 196   3                              rdata.pos_len = 0;
+ 197   3                              return;
+ 198   3                      }
+ 199   2                      return;
+ 200   2              }
+ 201   1              if(rdata.StateId == PG_SET232) { //list box with None,2400,9600
+ 202   2                      if(key == KEY_UP) {
+ 203   3                              if(rdata.pos_len >= BAUDRATE_NONE)
+ 204   3                                      rdata.pos_len = 0;
+ 205   3                              else
+ 206   3                                      rdata.pos_len++;
+ 207   3                              return;
+ 208   3                      }
+ 209   2                      if(key == KEY_DN) {
+ 210   3                              if(rdata.pos_len == BAUDRATE_NONE)
+ 211   3                                      rdata.pos_len = BAUDRATE_9600;
+ 212   3                              else
+ 213   3                                      rdata.pos_len--;
+ 214   3                              return;
+ 215   3                      }
+ 216   2      
+ 217   2                      if((key >= KEY_NUM1) && (key <= KEY_NUM3)){
+ 218   3                              rdata.pos_len = BAUDRATE_NONE + key - KEY_NUM1;
+ 219   3                              key = KEY_OK;
+ 220   3                      }
+ 221   2                      if((key == KEY_OK) || (key == KEY_TAB))
+ 222   2                      {
+ 223   3                              if(key == KEY_OK)
+ 224   3                              {
+ 225   4                                      rdata.Baudrate = rdata.pos_len;
+ 226   4                                      SaveToEEPROM();
+ 227   4                              }
+ 228   3                              rdata.pos_len = rdata.StateId;
+ 229   3                              rdata.StateId = PG_MENU1;
+ 230   3                              return;
  231   3                      }
- 232   2                      return;
- 233   2              }
- 234   1              if(rdata.StateId == PG_RZERO) {
- 235   2                      //trigger the zero process
- 236   2                      return;
- 237   2              }
- 238   1              if(rdata.StateId == PG_HELP) {
- 239   2                      if((key <= KEY_NUM1) && (key <= KEY_NUM3))
- 240   2                      {
- 241   3                              rdata.StateId = PG_HELP_PREC + key - KEY_NUM1;
-C51 COMPILER V7.01  STATE                                                                  08/21/2009 20:36:18 PAGE 5   
+ 232   2                      if(key == KEY_CE) {
+ 233   3                              rdata.pos_len = rdata.Baudrate;                                         
+ 234   3                      }
+ 235   2                      return;
+ 236   2              }
+ 237   1              if(rdata.StateId == PG_RZERO) {
+ 238   2                      //trigger the zero process
+ 239   2                      return;
+ 240   2              }
+ 241   1              if(rdata.StateId == PG_HELP) {
+C51 COMPILER V7.01  STATE                                                                  08/22/2009 16:21:18 PAGE 5   
 
- 242   3                              return;
- 243   3                      }
- 244   2                      rdata.pos_len = rdata.StateId;
- 245   2                      rdata.StateId = PG_MENU1;
- 246   2                      return;
- 247   2              }
- 248   1              if((rdata.StateId >= PG_HELP_PREC) || (rdata.StateId <= PG_HELP_SET)) {
- 249   2                      rdata.pos_len = rdata.StateId;
- 250   2                      if(key == KEY_TAB)
- 251   2                              rdata.StateId = PG_MENU1;
- 252   2                      else
- 253   2                              rdata.StateId = PG_HELP;
- 254   2                      return;
- 255   2              }
- 256   1      
- 257   1              if(rdata.StateId == PG_PSET) {
- 258   2                      if((key >= KEY_NUM1) && (key <= KEY_NUM3))
- 259   2                      {
- 260   3                              rdata.StateId = PG_PSET_R + key - KEY_NUM1;
- 261   3                              return;
- 262   3                      }
- 263   2                      if(key == KEY_NUM4)
- 264   2                              rdata.Ptype = PSET_NONE;
- 265   2                      rdata.pos_len = rdata.StateId;
- 266   2                      rdata.StateId = PG_MENU1;
- 267   2                      return;
- 268   2              }
- 269   1              if((rdata.StateId >= PG_PSET_R) && (rdata.StateId <= PG_PSET_H)) {
- 270   2                      if((key >= KEY_NUM0) && (key <= KEY_DOT)) {
- 271   3                              if(rdata.pos_len < 8){
- 272   4                                      rdata.tempbuf[rdata.pos_len] = key;
- 273   4                                      rdata.pos_len++;
- 274   4                              }
- 275   3                              return;
- 276   3                      }
+ 242   2                      if((key >= KEY_NUM1) && (key <= KEY_NUM3))
+ 243   2                      {
+ 244   3                              if(key == KEY_NUM1)
+ 245   3                                      rdata.StateId = PG_HELP_PREC;
+ 246   3                              if(key == KEY_NUM2)
+ 247   3                                      rdata.StateId = PG_HELP_ADDR;
+ 248   3                              if(key == KEY_NUM3)
+ 249   3                                      rdata.StateId = PG_HELP_SET;
+ 250   3      
+ 251   3                              return;
+ 252   3      
+ 253   3                      }
+ 254   2                      rdata.pos_len = rdata.StateId;
+ 255   2                      rdata.StateId = PG_MENU1;
+ 256   2                      return;
+ 257   2              }
+ 258   1      
+ 259   1              if(rdata.StateId == PG_PSET) {
+ 260   2                      if(key == KEY_UP)
+ 261   2                      {
+ 262   3                              if(rdata.pos_len >= 4)
+ 263   3                                      rdata.pos_len = 0;
+ 264   3                              else
+ 265   3                                      rdata.pos_len++;
+ 266   3                              return;
+ 267   3                      }
+ 268   2                      if(key == KEY_DN)
+ 269   2                      {
+ 270   3                              if(rdata.pos_len == 0)
+ 271   3                                      rdata.pos_len = 4;
+ 272   3                              else
+ 273   3                                      rdata.pos_len--;
+ 274   3                              return;
+ 275   3                      }
+ 276   2      
  277   2                      if(key == KEY_OK)
- 278   2                      {
- 279   3                              if(rdata.pos_len > 0)
- 280   3                              {
- 281   4                                      if(rdata.StateId == PG_PSET_W){
- 282   5                                              rdata.Ptype = PSET_SQUARE;
- 283   5                                              rdata.Pwidth = buf2double();
- 284   5                                      }
- 285   4                                      if(rdata.StateId == PG_PSET_H){
- 286   5                                              rdata.Ptype = PSET_SQUARE;
- 287   5                                              rdata.Pheight = buf2double();
- 288   5                                      }
- 289   4                                      if(rdata.StateId == PG_PSET_R){
- 290   5                                              rdata.Ptype = PSET_RADIUS;
- 291   5                                              rdata.Pradius = buf2double();
- 292   5                                      }
- 293   4                                      SaveToEEPROM();
- 294   4                              }
- 295   3                              rdata.pos_len = rdata.StateId;
- 296   3                              rdata.StateId = PG_PSET;
- 297   3                              return;
- 298   3                      }
- 299   2                      if(key == KEY_TAB)
- 300   2                      {
- 301   3                              rdata.pos_len = rdata.StateId;
- 302   3                              rdata.StateId = PG_MENU1;
- 303   3                              return;
-C51 COMPILER V7.01  STATE                                                                  08/21/2009 20:36:18 PAGE 6   
+ 278   2                              key = KEY_NUM1 + rdata.pos_len;
+ 279   2      
+ 280   2                      if((key >= KEY_NUM1) && (key <= KEY_NUM3))
+ 281   2                      {
+ 282   3                              if(key == KEY_NUM1)
+ 283   3                                      rdata.StateId = PG_PSET_L;
+ 284   3                              if(key == KEY_NUM2)
+ 285   3                                      rdata.StateId = PG_PSET_W;
+ 286   3                              if(key == KEY_NUM3)
+ 287   3                                      rdata.StateId = PG_PSET_H;
+ 288   3                              if(key == KEY_NUM4)
+ 289   3                                      rdata.StateId = PG_PSET_R;
+ 290   3      
+ 291   3                              rdata.pos_len = 0;
+ 292   3                              sprintf(rdata.tempbuf,"       ");
+ 293   3                              return;
+ 294   3                      }
+ 295   2                      if(key == KEY_NUM5)
+ 296   2                              rdata.Ptype = PSET_NONE;
+ 297   2                      rdata.pos_len = rdata.StateId;
+ 298   2                      rdata.StateId = PG_MENU1;
+ 299   2                      return;
+ 300   2              }
+ 301   1              if((rdata.StateId >= PG_PSET_L) && (rdata.StateId <= PG_PSET_H)) {
+ 302   2                      if(((key >= KEY_NUM0) && (key <= KEY_NUM9)) || (key == KEY_DOT)) {
+ 303   3                              if(rdata.pos_len < 8){
+C51 COMPILER V7.01  STATE                                                                  08/22/2009 16:21:18 PAGE 6   
 
- 304   3                      }
- 305   2                      if(key == KEY_CE) {
- 306   3                              rdata.pos_len = 0;
+ 304   4                                      rdata.tempbuf[rdata.pos_len] = key;
+ 305   4                                      rdata.pos_len++;
+ 306   4                              }
  307   3                              return;
  308   3                      }
- 309   2                      return;
- 310   2              }       
- 311   1              return;
- 312   1      }
+ 309   2                      if(key == KEY_OK)
+ 310   2                      {
+ 311   3                              if(rdata.pos_len > 0)
+ 312   3                              {
+ 313   4                                      if(rdata.StateId == PG_PSET_L){
+ 314   5                                              rdata.Plength = buf2double();
+ 315   5                                      }
+ 316   4                                      if(rdata.StateId == PG_PSET_W){
+ 317   5                                              rdata.Ptype = PSET_SQUARE;
+ 318   5                                              rdata.Pwidth = buf2double();
+ 319   5                                      }
+ 320   4                                      if(rdata.StateId == PG_PSET_H){
+ 321   5                                              rdata.Ptype = PSET_SQUARE;
+ 322   5                                              rdata.Pheight = buf2double();
+ 323   5                                      }
+ 324   4                                      if(rdata.StateId == PG_PSET_R){
+ 325   5                                              rdata.Ptype = PSET_RADIUS;
+ 326   5                                              rdata.Pradius = buf2double();
+ 327   5                                      }
+ 328   4                                      SaveToEEPROM();
+ 329   4                              }
+ 330   3                              rdata.pos_len = rdata.StateId;
+ 331   3                              rdata.StateId = PG_PSET;
+ 332   3                              return;
+ 333   3                      }
+ 334   2                      if(key == KEY_TAB)
+ 335   2                      {
+ 336   3                              rdata.pos_len = rdata.StateId;
+ 337   3                              rdata.StateId = PG_MENU1;
+ 338   3                              return;
+ 339   3                      }
+ 340   2                      if(key == KEY_CE) {
+ 341   3                              rdata.pos_len = 0;
+ 342   3                              rdata.StateId = PG_PSET;
+ 343   3                              return;
+ 344   3                      }
+ 345   2                      return;
+ 346   2              }       
+ 347   1              if((rdata.StateId >= PG_HELP_ADDR) && (rdata.StateId <= PG_HELP_SET)) {
+ 348   2                      rdata.pos_len = rdata.StateId;
+ 349   2                      if(key == KEY_TAB)
+ 350   2                              rdata.StateId = PG_MENU1;
+ 351   2                      else
+ 352   2                              rdata.StateId = PG_HELP;
+ 353   2                      return;
+ 354   2              }
+ 355   1      
+ 356   1              return;
+ 357   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1112    ----
-   CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =   ----    ----
+   CODE SIZE        =   1566    ----
+   CONSTANT SIZE    =      8    ----
+   XDATA SIZE       =   ----      11
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----      11
+   DATA SIZE        =   ----    ----
+C51 COMPILER V7.01  STATE                                                                  08/22/2009 16:21:18 PAGE 7   
+
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

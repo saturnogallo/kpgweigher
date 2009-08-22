@@ -1,9 +1,9 @@
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 1   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE LCD
 OBJECT MODULE PLACED IN lcd.OBJ
-COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE lcd.c BROWSE DEBUG OBJECTEXTEND
+COMPILER INVOKED BY: c:\GreenTools\Keil\C51\BIN\C51.EXE lcd.c LARGE BROWSE DEBUG OBJECTEXTEND
 
 stmt level    source
 
@@ -62,7 +62,7 @@ stmt level    source
   53                  0x38, /* 00   000 */
   54                  0x44, /* 0 000 00 */
   55                  0x04, /* 00000 00 */
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 2   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 2   
 
   56                  0x08, /* 0000 000 */
   57                  0x10, /* 000 0000 */
@@ -126,7 +126,7 @@ stmt level    source
  115                  /* 55 0x37 '7' */
  116                  0x00, /* 00000000 */
  117                  0x00, /* 00000000 */
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 3   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 3   
 
  118                  0x7c, /* 0     00 */
  119                  0x04, /* 00000 00 */
@@ -190,7 +190,7 @@ stmt level    source
  177                  0x00, /* 00000000 */
  178                  0x00, /* 00000000 */
  179                  0x00, /* 00000000 */
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 4   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 4   
 
  180                  0x00, /* 00000000 */
  181          };
@@ -254,7 +254,7 @@ stmt level    source
  239          */
  240          /*------------写命令或数据到LCD--------------*/
  241          void LCD_Write1 (uchar dat,uchar comm)       //写一个数据和一个命令
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 5   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 5   
 
  242          {
  243   1              LCD_Data(dat);
@@ -318,7 +318,7 @@ stmt level    source
  301          void LCD_Comm (uchar comm)       //写命令
  302          {
  303   1              LCD_CE = 0;
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 6   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 6   
 
  304   1              LCD_Busy (0);
  305   1              LCD_CD=1;
@@ -382,7 +382,7 @@ stmt level    source
  363          
  364          void LCD_ClsBlock(uchar x1,uchar y1,uchar x2,uchar y2)
  365          {
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 7   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 7   
 
  366   1              uint addr;
  367   1              uchar h,w;
@@ -446,7 +446,7 @@ stmt level    source
  425          /*      点亮一点        */
  426          
  427          void LCD_Putpixel(uchar x,uchar y) 
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 8   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 8   
 
  428          {
  429   1              uchar b;
@@ -510,7 +510,7 @@ stmt level    source
  487                          LCD_PutImg(x,y,1,11,Num_Tab + (*s - '0') * 11);
  488                          
  489                          x = x + 8;
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 9   
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 9   
 
  490                          
  491                          s++;
@@ -574,7 +574,7 @@ stmt level    source
  549                  uchar c1,c2;
  550                  //低4位
  551                  c1 = hex & 0x0f;        //lo
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 10  
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 10  
 
  552                  //高4位
  553                  c2 = (hex >> 4) & 0x0f; //hi
@@ -638,7 +638,7 @@ stmt level    source
  611                  }
  612                  LCD_Comm(0xb2);
  613          }
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 11  
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 11  
 
  614          void LCD_TextPrintWord(uchar x,uchar y,uint16 n,uchar start) 
  615          {
@@ -702,7 +702,7 @@ stmt level    source
  673                  {                                       //画线输出
  674                          LCD_Putpixel(uRow,uCol);                        //画点
  675                          xerr += delta_x ;
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 12  
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 12  
 
  676                          yerr += delta_y ;
  677                          
@@ -766,7 +766,7 @@ stmt level    source
  735          {
  736   1              int i = 0;
  737   1      
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 13  
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 13  
 
  738   1              while(HZK12[i].Index[0] != 0)
  739   1              {
@@ -830,7 +830,7 @@ stmt level    source
  797   3                              x += 8;
  798   3                      }
  799   2                      else if( c1 > 0x80)
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 14  
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 14  
 
  800   2                      {
  801   3                              //汉字
@@ -894,7 +894,7 @@ stmt level    source
  859   2                      {
  860   3                              LCD_PutImg(x,y+16,1,16,ASC8x16[*s]);    //-
  861   3                              x += 8;
-C51 COMPILER V7.01  LCD                                                                    08/21/2009 20:36:18 PAGE 15  
+C51 COMPILER V7.01  LCD                                                                    08/22/2009 16:21:18 PAGE 15  
 
  862   3                      }
  863   2                      s ++;
@@ -903,11 +903,11 @@ stmt level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1655    ----
+   CODE SIZE        =   2010    ----
    CONSTANT SIZE    =    149    ----
-   XDATA SIZE       =   ----    ----
+   XDATA SIZE       =   ----      63
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----      72
+   DATA SIZE        =   ----      10
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

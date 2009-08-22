@@ -1,9 +1,9 @@
-C51 COMPILER V7.01  UTILI                                                                  08/21/2009 20:36:18 PAGE 1   
+C51 COMPILER V7.01  UTILI                                                                  08/22/2009 16:21:18 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE UTILI
 OBJECT MODULE PLACED IN utili.OBJ
-COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE utili.c BROWSE DEBUG OBJECTEXTEND
+COMPILER INVOKED BY: c:\GreenTools\Keil\C51\BIN\C51.EXE utili.c LARGE BROWSE DEBUG OBJECTEXTEND
 
 stmt level    source
 
@@ -62,7 +62,7 @@ stmt level    source
   53   1              {
   54   2                      tmp = tmp * 10+(rdata.tempbuf[i] - '0');
   55   2              }
-C51 COMPILER V7.01  UTILI                                                                  08/21/2009 20:36:18 PAGE 2   
+C51 COMPILER V7.01  UTILI                                                                  08/22/2009 16:21:18 PAGE 2   
 
   56   1              return tmp;
   57   1      }
@@ -126,7 +126,7 @@ stmt level    source
  115   2              }
  116   1              SPI_CK = 1;
  117   1              if( ch & HASCH1)
-C51 COMPILER V7.01  UTILI                                                                  08/21/2009 20:36:18 PAGE 3   
+C51 COMPILER V7.01  UTILI                                                                  08/22/2009 16:21:18 PAGE 3   
 
  118   1                      ch1buf[pos] = value1;
  119   1              if( ch & HASCH2)
@@ -172,11 +172,11 @@ stmt level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1004    ----
+   CODE SIZE        =   1281    ----
    CONSTANT SIZE    =   ----    ----
-   XDATA SIZE       =     10    ----
+   XDATA SIZE       =     10      13
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----      11
+   DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

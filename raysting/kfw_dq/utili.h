@@ -41,14 +41,15 @@ uchar strlen(uchar *s);
 #define PG_CALISET		5
 #define PG_RZERO		6
 #define PG_PSET			7
-#define PG_PSET_R		8
-#define PG_PSET_W		9
-#define PG_PSET_H		10
-#define PG_SET232		11
-#define PG_HELP			12
-#define PG_HELP_PREC	13
+#define PG_PSET_L		8
+#define PG_PSET_R		9
+#define PG_PSET_W		10
+#define PG_PSET_H		11
+#define PG_SET232		12
+#define PG_HELP			13
 #define PG_HELP_ADDR	14
-#define PG_HELP_SET		15
+#define PG_HELP_PREC	15
+#define PG_HELP_SET		16
 #define PG_MSG_RZERO	200
 #define PG_MSG_VZERO	201
 
@@ -97,7 +98,7 @@ typedef struct _RUNDATA
 
 	double  Temp;	  //temperature
 	double  Pvalue;	  //p value
-	double  Plenght;  //parameter for P caculation
+	double  Plength;  //parameter for P caculation
 	double  Pradius;  //parameter for P caculation
 	double  Pwidth;   //parameter for P caculation
 	double  Pheight;  //parameter for P caculation

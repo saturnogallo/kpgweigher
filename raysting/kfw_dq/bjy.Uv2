@@ -30,12 +30,12 @@ Options 1,0,0  // Target 'Target 1'
  EnvLib ()
  EnvReg (ÿAtmelWM\)
  OrgReg (ÿAtmelWM\)
- TgStat=11
+ TgStat=0
  OutDir (.\)
  OutName (bjy)
  GenApp=1
  GenLib=0
- GenHex=0
+ GenHex=1
  Debug=1
  Browse=1
  LstDir (.\)
@@ -44,7 +44,7 @@ Options 1,0,0  // Target 'Target 1'
  RunUsr 0 0 <>
  RunUsr 1 0 <>
  SVCSID <>
- MODEL5=0
+ MODEL5=2
  RTOS5=0
  ROMSZ5=2
  DHOLD5=0
@@ -52,7 +52,7 @@ Options 1,0,0  // Target 'Target 1'
  T51FL=624
  CBANKS5=0
  XBANKS5=0
- RCB51 { 0,0,0,0,0,0,0,0,0 }
+ RCB51 { 0,0,0,0,0,0,0,1,0 }
  RXB51 { 0,0,0,0,0,0,0,0,0 }
  OCM51 { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }
  OCR51 { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 }

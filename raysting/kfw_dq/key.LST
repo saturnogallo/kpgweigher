@@ -1,9 +1,9 @@
-C51 COMPILER V7.01  KEY                                                                    08/21/2009 20:36:18 PAGE 1   
+C51 COMPILER V7.01  KEY                                                                    08/22/2009 16:21:18 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE KEY
 OBJECT MODULE PLACED IN key.OBJ
-COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE key.c BROWSE DEBUG OBJECTEXTEND
+COMPILER INVOKED BY: c:\GreenTools\Keil\C51\BIN\C51.EXE key.c LARGE BROWSE DEBUG OBJECTEXTEND
 
 stmt level    source
 
@@ -62,7 +62,7 @@ stmt level    source
   53   5            case 0xde:{keykeep=KEY_NUM8;break;}
   54   5            case 0xee:{keykeep=KEY_NUM7;break;}
   55   5            default:
-C51 COMPILER V7.01  KEY                                                                    08/21/2009 20:36:18 PAGE 2   
+C51 COMPILER V7.01  KEY                                                                    08/22/2009 16:21:18 PAGE 2   
 
   56   5      
   57   5                 break;
@@ -126,7 +126,7 @@ stmt level    source
  115   2                              {
  116   3                                      KEYBJ2 = 0;
  117   3                                      P1 = 0x0f;l9=0;  
-C51 COMPILER V7.01  KEY                                                                    08/21/2009 20:36:18 PAGE 3   
+C51 COMPILER V7.01  KEY                                                                    08/22/2009 16:21:18 PAGE 3   
 
  118   3                                      return;
  119   3                              }
@@ -190,17 +190,17 @@ stmt level    source
  177   2                   i++;
  178   2                  }
  179   1              while(i<8);
-C51 COMPILER V7.01  KEY                                                                    08/21/2009 20:36:18 PAGE 4   
+C51 COMPILER V7.01  KEY                                                                    08/22/2009 16:21:18 PAGE 4   
 
  180   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    521    ----
+   CODE SIZE        =    654    ----
    CONSTANT SIZE    =     16    ----
-   XDATA SIZE       =   ----    ----
+   XDATA SIZE       =      3       5
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      3       5
+   DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =      1    ----
 END OF MODULE INFORMATION.
