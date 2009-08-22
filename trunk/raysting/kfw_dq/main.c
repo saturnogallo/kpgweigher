@@ -23,11 +23,17 @@ void State_Display()
 	{
 		LCD_Cls();
 		LCD_PrintHz16(20,  10, "正在扣除残余电阻...");
+		rdata.StateId = PG_MAIN;
+		EA = 1;
+		return;
 	}
 	if(rdata.StateId == PG_MSG_VZERO)
 	{
 		LCD_Cls();
 		LCD_PrintHz16(20,  10, "正在进行扣零操作...");
+		rdata.StateId = PG_MAIN;
+		EA = 1;
+		return;
 	}
 
 	if(rdata.StateId == PG_MAIN){
@@ -42,35 +48,39 @@ void State_Display()
 		LCD_Print6X8(11,1,buf);
 
 		if(rdata.Range == RANGE_20m)
-			sprintf(buf," 20mΩ(量程)");
+			sprintf(buf," 20m");
 		if(rdata.Range == RANGE_200m)
-			sprintf(buf,"200mΩ(量程)");
+			sprintf(buf,"200m");
 		if(rdata.Range == RANGE_2)
-			sprintf(buf,"   2Ω(量程)");
+			sprintf(buf,"   2");
 		if(rdata.Range == RANGE_20)
-			sprintf(buf,"  20Ω(量程)");
+			sprintf(buf,"  20");
 		if(rdata.Range == RANGE_200)
-			sprintf(buf," 200Ω(量程)");
+			sprintf(buf," 200");
 		if(rdata.Range == RANGE_2k)
-			sprintf(buf,"  2kΩ(量程)");
+			sprintf(buf,"  2k");
 		if(rdata.Range == RANGE_20k)
-			sprintf(buf," 20kΩ(量程)");
+			sprintf(buf," 20k");
 		if(rdata.Range == RANGE_200k)
-			sprintf(buf,"200kΩ(量程)");
+			sprintf(buf,"200k");
 		if(rdata.Range == RANGE_2M)
-			sprintf(buf,"  2MΩ(量程)");
+			sprintf(buf,"  2M");
 		if(rdata.Range == RANGE_20M)
-			sprintf(buf,"  20MΩ(量程)");
+			sprintf(buf," 20M");
 
 		LCD_Print6X8(120,1,buf);
+//		LCD_PrintHz16(150,1,"Ω(量程)");
 
-		sprintf(buf,"P= %.4fΩ",rdata.Pvalue);
+		sprintf(buf,"P= %.4f",rdata.Pvalue);
 		LCD_Print6X8(11,54,buf);
+//		LCD_PrintHz16(61,54,"Ω");
 
-		sprintf(buf,"T= %.1f℃",rdata.Temp);
+		sprintf(buf,"T= %.1f",rdata.Temp);
 		LCD_Print6X8(120,54,buf);
 		
 		State_Update();
+		EA = 1;
+		return;
 	}
 	if(rdata.StateId == PG_MENU1){
 		LCD_Cls();
@@ -81,38 +91,100 @@ void State_Display()
 		LCD_PrintHz16(2,  46," 5.串口设定");
 		LCD_PrintHz16(120,46," 6.使用帮助");
 		State_Update();
+		EA = 1;
+		return;
+
 	}
 	if(rdata.StateId == PG_RANGE){
 		LCD_Cls();
 		LCD_PrintHz16(2,  2,   "请选择新的量程:   单位Ω");
-		LCD_Print6X8(2  , 23, " 0. 20m");
-		LCD_Print6X8(52 , 23, " 1. 200m");
-		LCD_Print6X8(102, 23, " 2. 2");
-		LCD_Print6X8(152 ,23, " 3. 20");
-		LCD_Print6X8(202 ,23, " 4. 200");
-		LCD_Print6X8(2  , 34, " 5. 2k");
-		LCD_Print6X8(52 , 34, " 6. 20k");
-		LCD_Print6X8(102, 34, " 7. 200k");
-		LCD_Print6X8(152 ,34, " 8. 2M");
-		LCD_Print6X8(202 ,34, " 9. 20M");
+		LCD_Print6X8(2  , 25, " 0:20m");
+		LCD_Print6X8(62 , 25, " 1:200m");
+		LCD_Print6X8(122, 25, " 2:2");
+		LCD_Print6X8(182 ,25, " 3:20");
+		LCD_Print6X8(2 ,  36, " 4:200");
+		LCD_Print6X8(62  ,36, " 5:2k");
+		LCD_Print6X8(122 ,36, " 6:20k");
+		LCD_Print6X8(182, 36, " 7:200k");
+		LCD_Print6X8(2 ,  47, " 8:2M");
+		LCD_Print6X8(62 , 47, " 9:20M");
 		State_Update();
+		EA = 1;
+		return;
+
 	}
 	if(rdata.StateId == PG_CALISET){
 		LCD_Cls();
 		LCD_PrintHz16(2,  2, "当前标准电阻值:");
 		LCD_PrintHz16(2,22,  "   输入新阻值:");
+		sprintf(buf,"%.4f",rdata.Rcali[rdata.Range]);
+		LCD_Print8X16(120,10,buf);
+		State_Update();
+		EA = 1;
+		return;
+
+	}
+	if(rdata.StateId == PG_PSET_L){
+		LCD_Cls();
+		LCD_PrintHz16(2,  2, "当前导线长度:");
+		LCD_PrintHz16(2,22,  "   输入新长度:");
+		sprintf(buf,"%.4f",rdata.Plength);
+		LCD_Print8X16(120,10,buf);
 
 		State_Update();
+		EA = 1;
+		return;
+
 	}
+
+	if(rdata.StateId == PG_PSET_R){
+		LCD_Cls();
+		LCD_PrintHz16(2,  2, "当前圆截面半径:");
+		LCD_PrintHz16(2,22,  "   输入新半径:");
+		sprintf(buf,"%.4f",rdata.Pradius);
+		LCD_Print8X16(120,10,buf);
+
+		State_Update();
+		EA = 1;
+		return;
+
+	}
+	if(rdata.StateId == PG_PSET_W){
+		LCD_Cls();
+		LCD_PrintHz16(2,  2, "当前方截面宽度:");
+		LCD_PrintHz16(2,22,  "   输入新宽度:");
+		sprintf(buf,"%.4f",rdata.Pwidth);
+		LCD_Print8X16(120,10,buf);
+
+		State_Update();
+		EA = 1;
+		return;
+
+	}
+	if(rdata.StateId == PG_PSET_H){
+		LCD_Cls();
+		LCD_PrintHz16(2,  2, "当前方截面高度:");
+		LCD_PrintHz16(2,22,  "   输入新高度:");
+		sprintf(buf,"%.4f",rdata.Pheight);
+		LCD_Print8X16(120,10,buf);
+
+		State_Update();
+		EA = 1;
+		return;
+
+	}
+
 	if(rdata.StateId == PG_PSET){
 		LCD_Cls();
-		LCD_PrintHz16(2,   2,"电阻率参数:");
-		LCD_PrintHz16(120, 2,"1.导线长度");
-		LCD_PrintHz16(2,  22,"2.方截面宽度");
-		LCD_PrintHz16(120,22,"3.方截面高度");
-		LCD_PrintHz16(2,  42,"4.圆截面半径");
-		LCD_PrintHz16(120,42,"5.不计算电阻率");
+		LCD_PrintHz16(2,   2," 电阻率参数:");
+		LCD_PrintHz16(110, 2," 1.导线长度");
+		LCD_PrintHz16(2,  22," 2.方截面宽度");
+		LCD_PrintHz16(110,22," 3.方截面高度");
+		LCD_PrintHz16(2,  42," 4.圆截面半径");
+		LCD_PrintHz16(110,42," 5.不计算电阻率");
 		State_Update();
+		EA = 1;
+		return;
 	}
 	if(rdata.StateId == PG_SET232){
 		LCD_Cls();
@@ -121,22 +193,43 @@ void State_Display()
 		LCD_PrintHz16(12,   42," 2. 2400");
 		LCD_PrintHz16(120,  42," 3. 9000");
 		State_Update();
+		EA = 1;
+		return;
+
+	}
+	if(rdata.StateId == PG_HELP){
+		LCD_Cls();
+		LCD_PrintHz16(40, 2,  "1.精度说明");
+		LCD_PrintHz16(40, 20, "2.联系地址");
+		LCD_PrintHz16(40, 40, "3.使用设置");
+		EA = 1;
+		return;
+
 	}
 	if(rdata.StateId == PG_HELP_ADDR){
 		LCD_Cls();
 		LCD_PrintHz16(60, 2,  "兰斯汀仪表研究所");
 		LCD_Print8X16(40, 20, "www.raysting.com.cn");
 		LCD_Print8X16(40, 40, "raysting@126.com");
+		EA = 1;
+		return;
+
 	}
 	if(rdata.StateId == PG_HELP_PREC){
 		LCD_Cls();
 		LCD_PrintHz16(60, 18, "产品描述");
 		LCD_Print8X16(40, 40, "www.raysting.com.cn");
+		EA = 1;
+		return;
+
 	}
 	if(rdata.StateId == PG_HELP_SET){
 		LCD_Cls();
 		LCD_PrintHz16(60, 18,  "产品设置");
 		LCD_Print8X16(40, 40, "www.raysting.com.cn");
+		EA = 1;
+		return;
+
 	}
 	EA = 1;
 }
@@ -152,75 +245,135 @@ void State_Update()
 		LCD_PrintHz16(216,34,"Ω");
 	}
 	if(rdata.StateId == PG_MENU1){
-		LCD_PrintHz16(2,   2," ");
-		LCD_PrintHz16(120, 2," ");
-		LCD_PrintHz16(2,  23," ");
-		LCD_PrintHz16(120,23," ");
-		LCD_PrintHz16(2,  46," ");
-		LCD_PrintHz16(120,46," ");
+
+		if(rdata.pos_len == 0)
+			LCD_Print6X8(2,   2,"*");
+		else
+			LCD_Print6X8(2,   2," ");
 		if(rdata.pos_len == 1)
-			LCD_PrintHz16(2,   2,"*");
+			LCD_Print6X8(120, 2,"*");
+		else
+			LCD_Print6X8(120, 2," ");
 		if(rdata.pos_len == 2)
-			LCD_PrintHz16(120, 2,"*");
+			LCD_Print6X8(2,  23,"*");
+		else
+		    LCD_Print6X8(2,  23," ");
 		if(rdata.pos_len == 3)
-			LCD_PrintHz16(2,  23,"*");
+			LCD_Print6X8(120,23,"*");
+		else
+			LCD_Print6X8(120,23," ");
 		if(rdata.pos_len == 4)
-			LCD_PrintHz16(120,23,"*");
+			LCD_Print6X8(2,  46,"*");
+		else
+			LCD_Print6X8(2,  46," ");
 		if(rdata.pos_len == 5)
-			LCD_PrintHz16(2,  46,"*");
-		if(rdata.pos_len == 6)
-			LCD_PrintHz16(120,46,"*");
+			LCD_Print6X8(120,46,"*");
+		else
+			LCD_Print6X8(120,46," ");
+
 	}
 	if(rdata.StateId == PG_RANGE){
-		LCD_Print6X8(2  , 23, " ");
-		LCD_Print6X8(52 , 23, " ");
-		LCD_Print6X8(102, 23, " ");
-		LCD_Print6X8(152 ,23, " ");
-		LCD_Print6X8(202 ,23, " ");
-		LCD_Print6X8(2  , 34, " ");
-		LCD_Print6X8(52 , 34, " ");
-		LCD_Print6X8(102, 34, " ");
-		LCD_Print6X8(152 ,34, " ");
-		LCD_Print6X8(202 ,34, " ");
+		if(rdata.pos_len == 0)
+			LCD_Print6X8(2  , 25, "*");
+		else
+			LCD_Print6X8(2  , 25, " ");
 
 		if(rdata.pos_len == 1)
-			LCD_Print6X8(2  , 23, "*");
+			LCD_Print6X8(62  , 25, "*");
+		else
+			LCD_Print6X8(62  , 25, " ");
 		if(rdata.pos_len == 2)
-			LCD_Print6X8(52 , 23, "*");
+			LCD_Print6X8(122 , 25, "*");
+		else
+			LCD_Print6X8(122 , 25, " ");
 		if(rdata.pos_len == 3)
-			LCD_Print6X8(102, 23, "*");
+			LCD_Print6X8(182, 25, "*");
+		else
+			LCD_Print6X8(182, 25, " ");
 		if(rdata.pos_len == 4)
-			LCD_Print6X8(152 ,23, "*");
+			LCD_Print6X8(2 ,36, "*");
+		else
+			LCD_Print6X8(2 ,36, " ");
 		if(rdata.pos_len == 5)
-			LCD_Print6X8(202 ,23, "*");
+			LCD_Print6X8(62 ,36, "*");
+		else
+			LCD_Print6X8(62 ,36, " ");
 		if(rdata.pos_len == 6)
-			LCD_Print6X8(2  , 34, "*");
+			LCD_Print6X8(122  , 36, "*");
+		else
+			LCD_Print6X8(122  , 36, " ");
 		if(rdata.pos_len == 7)
-			LCD_Print6X8(52 , 34, "*");
+			LCD_Print6X8(182 , 36, "*");
+		else
+			LCD_Print6X8(182 , 36, " ");
 		if(rdata.pos_len == 8)
-			LCD_Print6X8(102, 34, "*");
+			LCD_Print6X8(2, 47, "*");
+		else
+			LCD_Print6X8(2, 47, " ");
 		if(rdata.pos_len == 9)
-			LCD_Print6X8(152 ,34, "*");
-		if(rdata.pos_len == 10)
-			LCD_Print6X8(202 ,34, "*");
+			LCD_Print6X8(62 ,47, "*");
+		else
+			LCD_Print6X8(62 ,47, " ");
+
+
 	}
 	if(rdata.StateId == PG_CALISET){
-		LCD_Print8X16(120,34,"        ");
-		sprintf(buf,"%.4f",rdata.Rcali[rdata.Range]);
-		LCD_Print6X8(120,10,buf);
+		LCD_Print6X8(120,34,"        ");
+		LCD_Print6X8(120,34,rdata.tempbuf);
+	}
+	if(rdata.StateId == PG_PSET_R){
+		LCD_Print6X8(120,34,"        ");
+		LCD_Print6X8(120,34,rdata.tempbuf);
+	}
+	if(rdata.StateId == PG_PSET_L){
+		LCD_Print6X8(120,34,"        ");
+		LCD_Print6X8(120,34,rdata.tempbuf);
+	}
+
+	if(rdata.StateId == PG_PSET_W){
+		LCD_Print6X8(120,34,"        ");
+		LCD_Print6X8(120,34,rdata.tempbuf);
+	}
+	if(rdata.StateId == PG_PSET_H){
+		LCD_Print6X8(120,34,"        ");
+		LCD_Print6X8(120,34,rdata.tempbuf);
 	}
 	if(rdata.StateId == PG_PSET){
-	}
+		if(rdata.pos_len == 0)
+			LCD_Print6X8(110,   2,"*");
+		else
+			LCD_Print6X8(110,   2," ");
+		if(rdata.pos_len == 1)
+			LCD_Print6X8(2,   22,"*");
+		else
+			LCD_Print6X8(2,   22," ");
+		if(rdata.pos_len == 2)
+			LCD_Print6X8(110,   22,"*");
+		else
+			LCD_Print6X8(110,  22," ");
+		if(rdata.pos_len == 3)
+			LCD_Print6X8(2,   42,"*");
+		else
+			LCD_Print6X8(2,   42," ");
+		if(rdata.pos_len == 4)
+			LCD_Print6X8(110,   42,"*");
+		else
+			LCD_Print6X8(110,   42," ");
+
+			}
 	if(rdata.StateId == PG_SET232){
-		LCD_PrintHz16(12,   22," ");
-		LCD_PrintHz16(12,   42," ");
-		LCD_PrintHz16(120,  42," ");
-		if(rdata.Baudrate == 0)
-			LCD_PrintHz16(12,   22,"*");
-		if(rdata.Baudrate == 1)
-			LCD_PrintHz16(12,   42,"*");
-		if(rdata.Baudrate == 2)
-			LCD_PrintHz16(120,  42,"*");
+		if(rdata.pos_len == 0)
+			LCD_Print6X8(12,   22,"*");
+		else
+			LCD_Print6X8(12,   22," ");
+		if(rdata.pos_len == 1)
+			LCD_Print6X8(12,   42,"*");
+		else
+			LCD_Print6X8(12,   42," ");
+		if(rdata.pos_len == 2)
+			LCD_Print6X8(120,  42,"*");
+		else
+			LCD_Print6X8(120,  42," ");
 	}
 	EA = 1;
 }
@@ -287,6 +440,7 @@ void main()
 						rdata.Current = CURRENT_1; 
 					//TODO switch the current
 					display_buttons(key,0);
+
 				}
 				if(key == KEY_BTN4) //remove zero
 				{
@@ -295,6 +449,7 @@ void main()
 					display_buttons(key,0);
 				}
 				SaveToEEPROM();
+				State_Display();
 			}else{
 		 		i = rdata.StateId;
 				pos = rdata.pos_len;
@@ -303,7 +458,7 @@ void main()
 				if(i != rdata.StateId){ 
 					State_Display();
 				}else{
-				    if((pos != rdata.pos_len) || (key == KEY_UP) || (key == KEY_DN))
+				    //if((pos != rdata.pos_len) || (key == KEY_UP) || (key == KEY_DN))
 						State_Update();
 				}
 			}

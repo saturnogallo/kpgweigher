@@ -2,6 +2,7 @@
 #include "key.h"
 #include "utili.h"
 #include "eeprom.h"
+#include "stdio.h"
 
 extern void State_Display();
 extern ulong code Sector[10][4];
@@ -52,14 +53,15 @@ void State_Init()
 	rdata.Pheight = rdata.Pwidth = rdata.Pradius = 1;
 	rdata.Rauto = AUTO_OFF;
 	rdata.Rktt = KTT_OFF;
+	rdata.Plength = 1;
 	rdata.Ptype = PSET_NONE;
-
+	rdata.Pvalue = 1;
 	rdata.Temp = 25;
 	rdata.Range = RANGE_20M;
 	rdata.Baudrate = 0;
 	rdata.Current = CURRENT_1;
-
-	LoadFromEEPROM();
+	sprintf(rdata.tempbuf,"       ");
+//	LoadFromEEPROM();
 	display_buttons(KEY_BTN1,rdata.Rauto);
 	display_buttons(KEY_BTN2,rdata.Rktt);
 	State_Display();
@@ -75,6 +77,8 @@ void State_Change(uchar key)
 		return;
 	}
 	if(rdata.StateId == PG_MENU1) {
+		if(key == KEY_OK)
+			key = rdata.pos_len + KEY_NUM1;
 		switch(key)
 		{
 		case  KEY_NUM1: 
@@ -84,17 +88,18 @@ void State_Change(uchar key)
 
 		case  KEY_NUM2: 
 			rdata.StateId = PG_CALISET;
-			rdata.pos_len = rdata.Rcali[rdata.Range];
+			rdata.pos_len = 0;
+			sprintf(rdata.tempbuf,"       ");
 			return;
 
 		case  KEY_NUM3: 
-			rdata.StateId = PG_RZERO;
+			rdata.StateId = PG_MSG_RZERO;
 			rdata.pos_len = 0;
 			return;
 
 		case  KEY_NUM4: 
 			rdata.StateId = PG_PSET;
-			rdata.pos_len = rdata.Ptype;
+			rdata.pos_len = 0;
 			return;
 
 		case  KEY_NUM5: 
@@ -108,23 +113,21 @@ void State_Change(uchar key)
 			return;
 			
 		case  KEY_DN:
-			if(rdata.pos_len == PG_HELP)
-				rdata.pos_len = PG_RANGE;
-			else if(rdata.pos_len == PG_PSET)
-				rdata.pos_len = PG_SET232;
-			else
+			if(rdata.pos_len == 5){
+					rdata.pos_len =0 ;
+			}else{
 				rdata.pos_len++;
+			}
 			return;
 		case  KEY_UP:
-			if(rdata.pos_len == PG_RANGE)
-				rdata.pos_len = PG_HELP;
-			else if(rdata.pos_len == PG_SET232)
-				rdata.pos_len = PG_PSET;
-			else
+			if(rdata.pos_len == 0){
+				rdata.pos_len = 5;
+			}else{
 				rdata.pos_len--;
+			}
 			return;
 		default:
-			break;
+			;
 		}
 		rdata.StateId = PG_MAIN;
 		rdata.pos_len = 0;
@@ -170,7 +173,7 @@ void State_Change(uchar key)
 		return;
 	}
 	if(rdata.StateId == PG_CALISET) { //input new calibration value
-		if((key >= KEY_NUM0) && (key <= KEY_DOT)) {
+		if(((key >= KEY_NUM0) && (key <= KEY_NUM9)) || (key == KEY_DOT)) {
 			if(rdata.pos_len < 8){
 				rdata.tempbuf[rdata.pos_len] = key;
 				rdata.pos_len++;
@@ -236,38 +239,67 @@ void State_Change(uchar key)
 		return;
 	}
 	if(rdata.StateId == PG_HELP) {
-		if((key <= KEY_NUM1) && (key <= KEY_NUM3))
+		if((key >= KEY_NUM1) && (key <= KEY_NUM3))
 		{
-			rdata.StateId = PG_HELP_PREC + key - KEY_NUM1;
+			if(key == KEY_NUM1)
+				rdata.StateId = PG_HELP_PREC;
+			if(key == KEY_NUM2)
+				rdata.StateId = PG_HELP_ADDR;
+			if(key == KEY_NUM3)
+				rdata.StateId = PG_HELP_SET;
+
 			return;
+
 		}
 		rdata.pos_len = rdata.StateId;
 		rdata.StateId = PG_MENU1;
 		return;
 	}
-	if((rdata.StateId >= PG_HELP_PREC) || (rdata.StateId <= PG_HELP_SET)) {
-		rdata.pos_len = rdata.StateId;
-		if(key == KEY_TAB)
-			rdata.StateId = PG_MENU1;
-		else
-			rdata.StateId = PG_HELP;
-		return;
-	}
 
 	if(rdata.StateId == PG_PSET) {
-		if((key >= KEY_NUM1) && (key <= KEY_NUM3))
+		if(key == KEY_UP)
 		{
-			rdata.StateId = PG_PSET_R + key - KEY_NUM1;
+			if(rdata.pos_len >= 4)
+				rdata.pos_len = 0;
+			else
+				rdata.pos_len++;
 			return;
 		}
-		if(key == KEY_NUM4)
+		if(key == KEY_DN)
+		{
+			if(rdata.pos_len == 0)
+				rdata.pos_len = 4;
+			else
+				rdata.pos_len--;
+			return;
+		}
+
+		if(key == KEY_OK)
+			key = KEY_NUM1 + rdata.pos_len;
+
+		if((key >= KEY_NUM1) && (key <= KEY_NUM3))
+		{
+			if(key == KEY_NUM1)
+				rdata.StateId = PG_PSET_L;
+			if(key == KEY_NUM2)
+				rdata.StateId = PG_PSET_W;
+			if(key == KEY_NUM3)
+				rdata.StateId = PG_PSET_H;
+			if(key == KEY_NUM4)
+				rdata.StateId = PG_PSET_R;
+
+			rdata.pos_len = 0;
+			sprintf(rdata.tempbuf,"       ");
+			return;
+		}
+		if(key == KEY_NUM5)
 			rdata.Ptype = PSET_NONE;
 		rdata.pos_len = rdata.StateId;
 		rdata.StateId = PG_MENU1;
 		return;
 	}
-	if((rdata.StateId >= PG_PSET_R) && (rdata.StateId <= PG_PSET_H)) {
-		if((key >= KEY_NUM0) && (key <= KEY_DOT)) {
+	if((rdata.StateId >= PG_PSET_L) && (rdata.StateId <= PG_PSET_H)) {
+		if(((key >= KEY_NUM0) && (key <= KEY_NUM9)) || (key == KEY_DOT)) {
 			if(rdata.pos_len < 8){
 				rdata.tempbuf[rdata.pos_len] = key;
 				rdata.pos_len++;
@@ -278,6 +310,9 @@ void State_Change(uchar key)
 		{
 			if(rdata.pos_len > 0)
 			{
+				if(rdata.StateId == PG_PSET_L){
+					rdata.Plength = buf2double();
+				}
 				if(rdata.StateId == PG_PSET_W){
 					rdata.Ptype = PSET_SQUARE;
 					rdata.Pwidth = buf2double();
@@ -304,9 +339,19 @@ void State_Change(uchar key)
 		}
 		if(key == KEY_CE) {
 			rdata.pos_len = 0;
+			rdata.StateId = PG_PSET;
 			return;
 		}
 		return;
 	}	
+	if((rdata.StateId >= PG_HELP_ADDR) && (rdata.StateId <= PG_HELP_SET)) {
+		rdata.pos_len = rdata.StateId;
+		if(key == KEY_TAB)
+			rdata.StateId = PG_MENU1;
+		else
+			rdata.StateId = PG_HELP;
+		return;
+	}
+
 	return;
 }

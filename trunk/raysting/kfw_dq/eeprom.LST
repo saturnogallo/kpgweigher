@@ -1,9 +1,9 @@
-C51 COMPILER V7.01  EEPROM                                                                 08/21/2009 20:36:18 PAGE 1   
+C51 COMPILER V7.01  EEPROM                                                                 08/22/2009 16:21:18 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE EEPROM
 OBJECT MODULE PLACED IN eeprom.OBJ
-COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE eeprom.c BROWSE DEBUG OBJECTEXTEND
+COMPILER INVOKED BY: c:\GreenTools\Keil\C51\BIN\C51.EXE eeprom.c LARGE BROWSE DEBUG OBJECTEXTEND
 
 stmt level    source
 
@@ -62,7 +62,7 @@ stmt level    source
   53   1              ISP_CONTR =     ISP_CONTR | 0x80;       /* ISPEN=1      */
   54   1      }
   55                           /* = ¹Ø±Õ ISP,IAP ¹¦ÄÜ = */
-C51 COMPILER V7.01  EEPROM                                                                 08/21/2009 20:36:18 PAGE 2   
+C51 COMPILER V7.01  EEPROM                                                                 08/22/2009 16:21:18 PAGE 2   
 
   56          void ISP_IAP_disable(void)
   57          {
@@ -123,10 +123,10 @@ stmt level    source
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    100    ----
+   CODE SIZE        =    106    ----
    CONSTANT SIZE    =    160    ----
    XDATA SIZE       =   ----    ----
-C51 COMPILER V7.01  EEPROM                                                                 08/21/2009 20:36:18 PAGE 3   
+C51 COMPILER V7.01  EEPROM                                                                 08/22/2009 16:21:18 PAGE 3   
 
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
