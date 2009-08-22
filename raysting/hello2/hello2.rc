@@ -1,0 +1,584 @@
+//Microsoft eMbedded Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+#include "newres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_HELLO2_DIALOG DIALOG DISCARDABLE  0, 0, 273, 164
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE
+EXSTYLE WS_EX_STATICEDGE | WS_EX_APPWINDOW | 0x80000000L
+FONT 8, "System"
+BEGIN
+    PUSHBUTTON      "X",IDC_BUTTON2,261,154,11,9,0,WS_EX_CLIENTEDGE
+    DEFPUSHBUTTON   "运行",IDC_BTN_RUN,197,15,28,15,0,WS_EX_DLGMODALFRAME
+    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,0,0,273,12
+    LISTBOX         IDC_LIST3,0,31,45,132,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    NOT WS_BORDER | WS_TABSTOP,WS_EX_DLGMODALFRAME
+    LTEXT           "通道配置",IDC_STATIC,3,19,51,13
+    LTEXT           "次",IDC_STATIC,262,18,10,12
+    EDITTEXT        IDC_RUNCOUNT,229,16,20,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ARROWKEYS,251,16,8,12,WS_EX_STATICEDGE
+    LTEXT           "静态",IDC_RUN_GRAPH,45,31,173,132,SS_NOTIFY
+    LISTBOX         IDC_LIST4,221,32,46,122,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP,WS_EX_TRANSPARENT
+    LTEXT           "配置通道后点击""运行""后测量",IDC_MAIN_STATUS,75,19,112,
+                    10
+END
+
+IDD_RUNITEM DIALOG DISCARDABLE  0, 0, 271, 119
+STYLE WS_POPUP
+BEGIN
+END
+
+IDD_SYSTEM2_CFG DIALOG DISCARDABLE  0, 0, 263, 105
+STYLE WS_POPUP
+FONT 8, "System"
+BEGIN
+    LISTBOX         IDC_SYS_LIST,4,14,42,71,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "+",IDC_BUTTON3,6,88,10,8
+    LTEXT           "1欧姆",IDC_STATIC,60,12,30,12
+    EDITTEXT        IDC_1ohm,93,11,46,12,ES_AUTOHSCROLL
+    LTEXT           "10欧姆",IDC_STATIC,60,27,30,12
+    EDITTEXT        IDC_10OHM,93,26,46,12,ES_AUTOHSCROLL
+    LTEXT           "100欧姆",IDC_STATIC,60,42,31,12
+    EDITTEXT        IDC_100OHM,93,41,46,12,ES_AUTOHSCROLL
+    LTEXT           "1K欧姆",IDC_STATIC,60,57,29,12
+    EDITTEXT        IDC_1KOHM,93,55,46,12,ES_AUTOHSCROLL
+    LTEXT           "10K欧姆",IDC_STATIC,60,72,30,8
+    EDITTEXT        IDC_10kohm,93,71,46,12,ES_AUTOHSCROLL
+    LTEXT           "α(*1e-6)",IDC_STATIC,146,0,34,8
+    LTEXT           "-β(*1e-6)",IDC_STATIC,180,0,49,8
+    EDITTEXT        IDC_ALPHA1,145,11,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BETA1,181,11,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ALPHA10,145,26,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BETA10,181,26,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ALPHA100,145,41,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BETA100,181,41,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ALPHA1K,145,56,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BETA1K,181,56,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_ALPHA10K,145,71,31,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_BETA10K,181,71,31,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "校准内标准",IDC_SYS_CALIB_1ohm,217,10,42,12
+    PUSHBUTTON      "校准内标准",IDC_SYS_CALIB_10ohm,217,25,42,12
+    PUSHBUTTON      "校准内标准",IDC_SYS_CALIB_100ohm,217,40,42,12
+    PUSHBUTTON      "校准内标准",IDC_SYS_CALIB_1k,218,55,42,12
+    PUSHBUTTON      "校准内标准",IDC_SYS_CALIB_10kohm,217,70,42,12
+    LTEXT           "当前温度",IDC_STATIC,51,88,37,9
+    EDITTEXT        IDC_TEMPNOW,93,85,41,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "修改",IDC_BUTTON1,200,84,40,13
+    PUSHBUTTON      "退出",IDCANCEL,153,95,22,12,NOT WS_VISIBLE
+    GROUPBOX        "标准电阻方案",IDC_STATIC,2,2,260,100
+END
+
+IDD_PROBE2_CFG DIALOG DISCARDABLE  0, 0, 264, 106
+STYLE WS_POPUP
+FONT 8, "System"
+BEGIN
+    LISTBOX         IDC_PRB_LIST,8,15,41,75,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "+",IDC_BUTTON3,8,93,10,8
+    PUSHBUTTON      "编辑系数",IDC_SETCOEF,168,11,38,13
+    LTEXT           "序列号",IDC_STATIC,67,13,26,12
+    EDITTEXT        IDC_PRB_SERIAL,98,11,47,12,ES_AUTOHSCROLL
+    LTEXT           "参考电流",IDC_STATIC,57,32,34,9
+    COMBOBOX        IDC_PRB_RCURR,98,30,46,95,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_TABSTOP
+    LTEXT           "标准电阻",IDC_STATIC,57,51,34,9
+    COMBOBOX        IDC_PRB_REFERENCE,98,49,46,95,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_TABSTOP
+    EDITTEXT        IDC_PRB_COEF,211,11,46,12,ES_AUTOHSCROLL | ES_READONLY
+    CONTROL         "倍功率",IDC_PRB_SQRTCURR,"Button",BS_AUTOCHECKBOX | 
+                    BS_RIGHTBUTTON | WS_TABSTOP,170,31,51,11
+    CONTROL         "三线补偿",IDC_PRB_3WIRE,"Button",BS_AUTOCHECKBOX | 
+                    BS_RIGHTBUTTON | WS_TABSTOP,169,50,51,11
+    LTEXT           "转换方法",IDC_STATIC,56,70,34,9
+    COMBOBOX        IDC_PRB_CONVERT,97,69,48,95,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_TABSTOP
+    PUSHBUTTON      "修改",IDC_BUTTON1,138,87,53,15
+    PUSHBUTTON      "退出",IDCANCEL,212,90,50,14,NOT WS_VISIBLE
+    GROUPBOX        "探头参数方案",IDC_STATIC,3,3,259,101
+END
+
+IDD_FILTER2_CFG DIALOG DISCARDABLE  0, 0, 260, 105
+STYLE WS_POPUP
+FONT 8, "System"
+BEGIN
+    LISTBOX         IDC_FLT_LIST,5,14,39,69,LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "+",IDC_BUTTON3,7,85,10,8
+    LTEXT           "阈值",IDC_STATIC,68,16,38,12
+    EDITTEXT        IDC_FLT_THRESH,107,14,52,12,ES_AUTOHSCROLL
+    LTEXT           "采样间隔",IDC_STATIC,67,38,36,12
+    EDITTEXT        IDC_FLT_INTERVAL,107,35,52,12,ES_AUTOHSCROLL
+    LTEXT           "响应时间",IDC_STATIC,67,60,36,12
+    EDITTEXT        IDC_FLT_RESPONSE,107,57,52,12,ES_AUTOHSCROLL
+    LTEXT           "积分时间",IDC_STATIC,164,17,34,9
+    EDITTEXT        IDC_FLT_INTEGRAL,203,14,49,12,ES_AUTOHSCROLL
+    LTEXT           "平均算法",IDC_STATIC,163,39,34,9
+    COMBOBOX        IDC_FLT_CBAVG,203,36,49,45,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "测量速度",IDC_STATIC,163,58,36,11
+    COMBOBOX        IDC_FLT_SPEED,202,57,50,48,CBS_DROPDOWNLIST | 
+                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "修改",IDC_BUTTON1,128,79,53,14
+    PUSHBUTTON      "退出",IDCANCEL,207,84,50,14,NOT WS_VISIBLE
+    GROUPBOX        "滤波参数方案",IDC_STATIC,3,2,254,95
+END
+
+IDD_RITEMP_CFG DIALOG DISCARDABLE  0, 0, 271, 16
+STYLE WS_POPUP | WS_BORDER
+FONT 10, "System"
+BEGIN
+    LTEXT           "探头",IDC_STATIC,22,4,17,9
+    COMBOBOX        IDC_PROBE_ID,42,2,45,45,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "滤波器",IDC_STATIC,90,4,28,8
+    COMBOBOX        IDC_FILTER_ID,120,2,46,45,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "标准设置",IDC_STATIC,170,4,34,9
+    COMBOBOX        IDC_SYSTEM_ID,208,2,45,45,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "℃",IDC_TEMPBTN,0,0,20,16
+    PUSHBUTTON      "X",IDC_BUTTON5,255,1,15,14,0,WS_EX_CLIENTEDGE
+END
+
+IDD_RIRESI_CFG DIALOG DISCARDABLE  0, 0, 271, 16
+STYLE WS_POPUP | WS_BORDER
+FONT 10, "System"
+BEGIN
+    LTEXT           "探头",IDC_STATIC,22,4,17,9
+    COMBOBOX        IDC_PROBE_ID,41,2,45,45,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "滤波器",IDC_STATIC,89,4,28,8
+    COMBOBOX        IDC_FILTER_ID,119,2,46,45,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "标准设置",IDC_STATIC,168,4,34,9
+    COMBOBOX        IDC_SYSTEM_ID,206,2,45,45,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Ω",IDC_TEMPBTN,0,0,20,16
+    PUSHBUTTON      "X",IDC_BUTTON5,253,1,15,13,0,WS_EX_CLIENTEDGE
+END
+
+IDD_RICACU_CFG DIALOG DISCARDABLE  0, 0, 271, 16
+STYLE WS_POPUP | WS_BORDER
+FONT 10, "System"
+BEGIN
+    LTEXT           "数据1",IDC_STATIC,24,4,22,9
+    COMBOBOX        IDC_OP1,51,2,65,45,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_OP,122,2,22,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "数据2",IDC_STATIC,150,4,23,9
+    COMBOBOX        IDC_OP2,177,2,70,45,CBS_DROPDOWNLIST | CBS_AUTOHSCROLL | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "+/-",IDC_TEMPBTN,0,0,20,16
+    PUSHBUTTON      "X",IDC_BUTTON5,252,1,17,15,0,WS_EX_CLIENTEDGE
+END
+
+IDD_MEMDIALOG DIALOG DISCARDABLE  0, 0, 273, 102
+STYLE WS_POPUP
+BEGIN
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_SMALLICON | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_SORTASCENDING | 
+                    LVS_NOLABELWRAP | LVS_AUTOARRANGE | LVS_NOCOLUMNHEADER | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,7,22,260,78
+    LTEXT           "标签",IDC_STATIC,9,6,18,9
+    EDITTEXT        IDC_MEMLABEL,35,4,48,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "添加",IDC_MEMADD,188,4,22,10
+    LTEXT           "数值",IDC_STATIC,100,5,25,9
+    EDITTEXT        IDC_MEMVALUE,129,4,48,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "删除",IDC_MEMDEL,219,4,22,10
+END
+
+IDD_KEYDIALOG DIALOG DISCARDABLE  0, 0, 282, 55
+STYLE WS_POPUP
+FONT 8, "System"
+BEGIN
+    CONTROL         "Tab1",IDC_KEYTAB,"SysTabControl32",TCS_BUTTONS | 
+                    TCS_MULTILINE,1,2,277,44
+    PUSHBUTTON      "0",IDC_BTNUM0,57,2,27,21
+    PUSHBUTTON      "1",IDC_BUTTON7,86,2,27,21
+    PUSHBUTTON      "2",IDC_BUTTON8,115,2,27,21
+    PUSHBUTTON      "3",IDC_BUTTON9,144,2,27,21
+    PUSHBUTTON      "4",IDC_BUTTON10,173,2,27,21
+    PUSHBUTTON      "5",IDC_BUTTON11,57,22,27,21
+    PUSHBUTTON      "6",IDC_BUTTON12,86,22,27,21
+    PUSHBUTTON      "7",IDC_BUTTON13,115,22,27,21
+    PUSHBUTTON      "8",IDC_BUTTON14,143,22,27,21
+    PUSHBUTTON      "9",IDC_BUTTON15,173,22,27,21
+    PUSHBUTTON      "-",IDC_BUTTON16,202,22,27,21
+    PUSHBUTTON      ".",IDC_BUTTON17,202,2,27,21
+    PUSHBUTTON      "字母键盘",IDC_BUTTON2,19,3,33,11
+    PUSHBUTTON      "DEL",IDC_BUTTON18,231,22,27,21
+    PUSHBUTTON      "BACK",IDC_BUTTON19,231,2,27,21
+END
+
+IDD_RUN_CFG DIALOG DISCARDABLE  0, 0, 267, 81
+STYLE WS_POPUP | WS_BORDER
+BEGIN
+    CONTROL         "Tab1",IDC_TIMESTAB,"SysTabControl32",TCS_BUTTONS,16,20,
+                    241,50
+    RTEXT           "1",IDC_TIMES,50,2,15,9
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_ARROWKEYS,68,2,9,
+                    10
+    LTEXT           "次",IDC_STATIC,83,3,10,9
+    LTEXT           "测量次数",IDC_STATIC,17,3,36,9
+END
+
+IDD_COEF_DIALOG DIALOG DISCARDABLE  0, 0, 273, 105
+STYLE WS_POPUP
+FONT 8, "System"
+BEGIN
+    LTEXT           "Static",IDC_STATIC_COEFA,11,65,25,10
+    EDITTEXT        IDC_ACOEF,39,63,56,12,ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_STATIC_COEFB,11,78,25,10
+    EDITTEXT        IDC_BCOEF,39,75,56,12,ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_STATIC_COEFC,11,90,25,10
+    EDITTEXT        IDC_CCOEF,39,89,56,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "修改",IDC_COEFMODIFY,104,62,32,12
+    PUSHBUTTON      "退出",IDC_COEFQUIT,104,88,32,12
+    CONTROL         "0～660.323℃",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,9,8,57,13
+    CONTROL         "0～419.527℃",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,74,
+                    7,59,13
+    CONTROL         "0～231.928℃",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,9,
+                    19,60,13
+    CONTROL         "0～156.5985℃",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,
+                    74,19,64,13
+    CONTROL         "0～29.7646℃",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,9,
+                    31,65,13
+    CONTROL         "0～-189.8344℃",IDC_RADIO7,"Button",BS_AUTORADIOBUTTON,
+                    74,31,67,13
+    CONTROL         "-38.8344～29.7646℃",IDC_RADIO6,"Button",
+                    BS_AUTORADIOBUTTON,9,42,89,11
+    LTEXT           "水三相点Rtp",IDC_STATICTP,150,9,50,9
+    EDITTEXT        IDC_TPEDIT,205,6,61,12,ES_AUTOHSCROLL
+    LTEXT           "铝凝固点Wal",IDC_STATICAL,150,19,50,9
+    EDITTEXT        IDC_ALEDIT,205,18,61,12,ES_AUTOHSCROLL
+    LTEXT           "锌凝固点Wzn",IDC_STATICZN,150,32,50,9
+    EDITTEXT        IDC_ZNEDIT,205,30,61,12,ES_AUTOHSCROLL
+    LTEXT           "锡凝固点Wsn",IDC_STATICSN,150,43,50,9
+    EDITTEXT        IDC_SNEDIT,205,42,61,12,ES_AUTOHSCROLL
+    LTEXT           "铟凝固点Win",IDC_STATICIN,150,56,50,9
+    EDITTEXT        IDC_INEDIT,205,54,61,12,ES_AUTOHSCROLL
+    LTEXT           "镓熔点Wga",IDC_STATICGA,150,68,50,9
+    EDITTEXT        IDC_GAEDIT,205,66,61,12,ES_AUTOHSCROLL
+    LTEXT           "汞三相点Whg",IDC_STATICHG,150,80,50,9
+    EDITTEXT        IDC_HGEDIT,205,78,61,12,ES_AUTOHSCROLL
+    LTEXT           "氩三相点War",IDC_STATICAR,150,92,50,9
+    EDITTEXT        IDC_AREDIT,205,90,61,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "转换<=",IDC_WTOCOEF,104,75,32,12
+    GROUPBOX        "温区",IDC_STATIC,3,0,140,54
+    GROUPBOX        "系数",IDC_STATIC,3,56,140,48
+    GROUPBOX        "三相点值",IDC_STATIC,144,0,126,104
+END
+
+IDD_RITHMO_CFG DIALOG DISCARDABLE  0, 0, 271, 16
+STYLE WS_POPUP | WS_BORDER
+BEGIN
+    PUSHBUTTON      "mV",IDC_THMONOW,0,0,20,16
+    PUSHBUTTON      "X",IDC_BUTTON5,253,1,15,13,0,WS_EX_CLIENTEDGE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO MOVEABLE PURE 
+BEGIN
+    IDD_HELLO2_DIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 163
+    END
+
+    IDD_SYSTEM2_CFG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 262
+    END
+
+    IDD_PROBE2_CFG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 262
+        BOTTOMMARGIN, 104
+    END
+
+    IDD_FILTER2_CFG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 257
+        BOTTOMMARGIN, 104
+    END
+
+    IDD_RIRESI_CFG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 15
+    END
+
+    IDD_RICACU_CFG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 270
+    END
+
+    IDD_KEYDIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 53
+    END
+
+    IDD_RUN_CFG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 14
+    END
+
+    IDD_COEF_DIALOG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 104
+    END
+
+    IDD_RITHMO_CFG, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 15
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_PROBE2_CFG DLGINIT
+BEGIN
+    IDC_PRB_RCURR, 0x403, 20, 0
+0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0031, 0x0030, 0x006d, 0x0041, 
+0x0000, 
+    IDC_PRB_RCURR, 0x403, 22, 0
+0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0033, 0x006d, 
+0x0041, 0x0000, 
+    IDC_PRB_RCURR, 0x403, 22, 0
+0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0020, 0x0031, 0x006d, 
+0x0041, 0x0000, 
+    IDC_PRB_RCURR, 0x403, 20, 0
+0x0020, 0x0020, 0x0020, 0x0020, 0x0030, 0x002e, 0x0031, 0x006d, 0x0041, 
+0x0000, 
+    IDC_PRB_RCURR, 0x403, 18, 0
+0x0020, 0x0020, 0x0030, 0x002e, 0x0030, 0x0031, 0x006d, 0x0041, 0x0000, 
+
+    IDC_PRB_RCURR, 0x403, 16, 0
+0x0030, 0x002e, 0x0030, 0x0030, 0x0035, 0x006d, 0x0041, 0x0000, 
+    IDC_PRB_RCURR, 0x403, 16, 0
+0x0030, 0x002e, 0x0030, 0x0030, 0x0032, 0x006d, 0x0041, 0x0000, 
+    IDC_PRB_REFERENCE, 0x403, 16, 0
+0x0031, 0x0020, 0x0020, 0x0020, 0x0020, 0x6b27, 0x59c6, 0x0000, 
+    IDC_PRB_REFERENCE, 0x403, 14, 0
+0x0031, 0x0030, 0x0020, 0x0020, 0x6b27, 0x59c6, 0x0000, 
+    IDC_PRB_REFERENCE, 0x403, 12, 0
+0x0031, 0x0030, 0x0030, 0x6b27, 0x59c6, 0x0000, 
+    IDC_PRB_REFERENCE, 0x403, 14, 0
+0x0031, 0x004b, 0x0020, 0x0020, 0x6b27, 0x59c6, 0x0000, 
+    IDC_PRB_REFERENCE, 0x403, 12, 0
+0x0031, 0x0030, 0x004b, 0x6b27, 0x59c6, 0x0000, 
+    IDC_PRB_CONVERT, 0x403, 14, 0
+0x0049, 0x0054, 0x0053, 0x002d, 0x0039, 0x0030, 0x0000, 
+    0
+END
+
+IDD_FILTER2_CFG DLGINIT
+BEGIN
+    IDC_FLT_CBAVG, 0x403, 10, 0
+0x79fb, 0x52a8, 0x5e73, 0x5747, 0x0000, 
+    IDC_FLT_CBAVG, 0x403, 10, 0
+0x6307, 0x6570, 0x5e73, 0x5747, 0x0000, 
+    IDC_FLT_SPEED, 0x403, 6, 0
+0x5feb, 0x901f, 0x0000, 
+    IDC_FLT_SPEED, 0x403, 6, 0
+0x6162, 0x901f, 0x0000, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_SYSMENU MENU DISCARDABLE 
+BEGIN
+    POPUP ""
+    BEGIN
+        MENUITEM "滤波参数设置",                ID_32771
+        MENUITEM "电阻标准设置",                ID_32772
+    END
+END
+
+IDR_SELPROBE MENU DISCARDABLE 
+BEGIN
+    POPUP "hello"
+    BEGIN
+        MENUITEM "item0",                       ID_Menu
+        MENUITEM "item1",                       ID_HELLO_ITEM1
+    END
+END
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "#include ""newres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\hello2.rc2""  // non-Microsoft eMbedded Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#include ""wceres.rc""         // WCE-specific components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\hello2.ico"
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "Windows XP Dual Bundled build C-Centric Single User\0"
+            VALUE "FileDescription", "hello2 WCE MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "raysting\0"
+            VALUE "LegalCopyright", "Copyright ?2007\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "hello2.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "热电耦测试仪\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\hello2.rc2"  // non-Microsoft eMbedded Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#include "wceres.rc"         // WCE-specific components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
