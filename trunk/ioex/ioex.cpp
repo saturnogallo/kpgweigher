@@ -178,6 +178,10 @@ int flash_cmd_handler(){
 #endif
 	}
 	//just update the content of the node
+	if(cmdid == "initpacker")
+	{
+		//TODO
+	}
 	if(cmdid == "search"){	//search node:	search:addr			return  display:saddr:nodexml
 		CString saddr;
 		saddr = ExtractString(cmdparm);
@@ -498,6 +502,16 @@ int flash_cmd_handler(){
 		default:
 			break;
 		}
+	}
+	if(cmdid == "initpacker") //format initpacker:grp:configint
+	{
+		CString sgrp = ExtractString(cmdparm);
+		CString toxml;
+		sgrp.Trim("abcdefghijklmnopqrstuvwxyz_");
+
+		toxml.Format("<opt offset_up_limit[%i]='%i' flag_start_machine[%i]='%i'/>",atoi(sgrp),atoi(cmdparm),atoi(sgrp),CMD_PACKER_INIT);
+		setnodexml(0xff,toxml);
+		Sleep(toxml.GetLength()*10);
 	}
 	if(cmdid == "his_query") //format his_query:start day:end day
 	{

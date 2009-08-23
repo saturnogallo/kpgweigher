@@ -12,6 +12,7 @@ extern CString sAppPath;
 #define STATE_BEIDLE		0
 #define STATE_DONE_OK		0xfd
 #define STATE_DONE_FAIL		0xfe
+
 //size of each reg
 const u8	node_reg_size[] = {8,8,8,16,16,16,16,16,16,16,16,16,16,16,16,16,8,8,8,8,8,16,8,8,8,8,8,8,8,16,16,16,8,8,8,8,32,32,16,8,8,8,8,8,8,8,8,8,8,8,32,16};
 const u8	sys_reg_size[] = {16,16,16,16,16,16,16,16,16,16,16,16,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
@@ -301,6 +302,19 @@ void collect_reading(){
 		Sleep(TWOFRM_DURATION);
 		//wait_until_idle_sysflagb(reg_search);
 	}
+}
+//wait until packer is available
+void wait_packer(u8 grp)
+{
+	u8 *reg_start = (u8*)&Sysboard.flag_start_machine[grp];
+	set_sysflagb(reg_start,CMD_PACKER_AVAILABLE);
+	wait_until_idle_sysflagb(reg_start,100);
+}
+void drop_packer(u8 grp)
+{
+	u8 *reg_start = (u8*)&Sysboard.flag_start_machine[grp];
+	set_sysflagb(reg_start,CMD_PACKER_DONE);
+	wait_until_idle_sysflagb(reg_start,100);
 }
 //get node property setting from flash UI then send it to the board here
 //this function just set one node property

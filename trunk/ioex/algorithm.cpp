@@ -31,7 +31,6 @@ void hitme(int i)
 }
 
 
-
 #define get_weight(A)	 RS485_Node[A].Mtrl_Weight_gram
 #define WEIGHT_OVER      1
 #define WEIGHT_LOWER     0
@@ -53,7 +52,6 @@ inline u8  check_weight(double sum, u16 grp)
               return ((sys_target_weight(grp) - sum) < sys_offset_lo_limit(grp)) ? WEIGHT_MATCH : WEIGHT_LOWER;
       }
 }
-
 void goonall(u8 grp)
 {
 	u8 a;
@@ -75,9 +73,10 @@ u8 Calculation1(u8 grp)
                         
               oflag = check_weight(weight_sum,grp);
               if(oflag == WEIGHT_MATCH){ //组合成功                                   
+						   wait_packer(grp);
                            do_release(a);
-
                            pids[0] = RS485_Node[a].addr;
+						   drop_packer(grp);
                            report_pack(1);
                            return 0;
               }
@@ -98,11 +97,13 @@ u8 Calculation2(u8 grp)
                            get_weight(b);
                         
               oflag = check_weight(weight_sum,grp);
-              if(oflag == WEIGHT_MATCH){ //组合成功                                   
+              if(oflag == WEIGHT_MATCH){ //组合成功 
+						   wait_packer(grp);
                            do_release(a);
                            do_release(b);                           
                            pids[0] = RS485_Node[a].addr;
                            pids[1] = RS485_Node[b].addr;
+						   drop_packer(grp);
                            report_pack(2);
 
                            return 0;
@@ -128,7 +129,8 @@ u8 Calculation3(u8 grp)
 						   get_weight(c);
                       
               oflag = check_weight(weight_sum,grp);
-              if(oflag == WEIGHT_MATCH){ //组合成功                                   
+              if(oflag == WEIGHT_MATCH){ //组合成功  
+				           wait_packer(grp);
                            do_release(a);
                            do_release(b);                           
                            do_release(c);                           
@@ -136,6 +138,7 @@ u8 Calculation3(u8 grp)
                            pids[0] = RS485_Node[a].addr;
                            pids[1] = RS485_Node[b].addr;
                            pids[2] = RS485_Node[c].addr;
+						   drop_packer(grp);
                            report_pack(3);
 
                            return 0;
@@ -160,7 +163,8 @@ u8 Calculation4(u8 grp)
 						   get_weight(d);
 
               oflag = check_weight(weight_sum,grp);
-              if(oflag == WEIGHT_MATCH){ //组合成功                                   
+              if(oflag == WEIGHT_MATCH){ //组合成功  
+				           wait_packer(grp);
                            do_release(a);
                            do_release(b);
                            do_release(c);
@@ -169,6 +173,7 @@ u8 Calculation4(u8 grp)
                            pids[1] = RS485_Node[b].addr; 
                            pids[2] = RS485_Node[c].addr;
                            pids[3] = RS485_Node[d].addr;
+						   drop_packer(grp);
                            report_pack(4);
 
                            return 0;
@@ -194,7 +199,8 @@ u8 Calculation5(u8 grp)
 						   get_weight(d) + \
 						   get_weight(e);                          
               oflag = check_weight(weight_sum,grp);
-              if(oflag == WEIGHT_MATCH){ //组合成功                                   
+              if(oflag == WEIGHT_MATCH){ //组合成功   
+				           wait_packer(grp);
                            do_release(a);
                            do_release(b);
                            do_release(c);
@@ -205,6 +211,7 @@ u8 Calculation5(u8 grp)
                            pids[2] = RS485_Node[c].addr;
                            pids[3] = RS485_Node[d].addr;
                            pids[4] = RS485_Node[e].addr;
+						   drop_packer(grp);
                            report_pack(5);
                            return 0;
               }
