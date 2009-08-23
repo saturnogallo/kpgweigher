@@ -333,19 +333,12 @@ void cmd_loop(u8 grp){
 			    return;
             }                   
 
-            if(system.flag_start_machine[grp] == CMD_PACKER_DONE)	//query status of packer busy
+            if(system.flag_start_machine[grp] == CMD_PACKER_DONE)	//material release is done
             {                                    
                 Tell_Packer_Release_Done();
 		        system.flag_start_machine[grp] = STATE_BEIDLE;
 			    return;
             }                   
-            if(system.flag_start_machine[grp] == CMD_PACKER_AVAILABLE)	//query status of packer busy
-            {                                    
-                Tell_Packer_Weigher_Rdy();
-		        system.flag_start_machine[grp] = STATE_BEIDLE;
-			    return;
-            }                   
-                                                                        
 		   if(system.flag_start_machine[grp] == CMD_START_SEARCH)	//research all the nodes
 		   {	
 				   init_var();
