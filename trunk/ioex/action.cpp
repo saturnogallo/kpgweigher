@@ -439,7 +439,7 @@ void report_pack(u8 num){
 	CString ret;
 	g_wcount++;
 	g_wtotal += sum;
-	ret.Format(_T("release:0:<comb group='%i' weight='%i' speed='%i' %s/>\n"),group, sum,timelist.GetSize(),pack);
+	ret.Format(_T("release:0:<comb group='%i' weight='%.1f' speed='%i' %s/>\n"),group, sum,timelist.GetSize(),pack);
 	//it should be recorded
 	if(sLog.GetCount() > 500)
 	{

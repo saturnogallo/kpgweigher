@@ -155,6 +155,38 @@ int flash_cmd_handler(){
 		setnodexml(0xff,ReadProfile("LASTCONFIG","lastweight1"));
 		setnodexml(0xff,ReadProfile("LASTCONFIG","lastweight2"));
 		setnodexml(0xff,ReadProfile("LASTCONFIG","lastweight3"));
+		CString toxml;
+		CString packercfg;
+		
+		packercfg = ReadProfile("LASTCONFIG","lastpacker0");
+		toxml.Format("<opt offset_up_limit[0]='%i' flag_start_machine[0]='%i'/>",atoi(packercfg),CMD_PACKER_INIT);
+		setnodexml(0xff,toxml);		
+		Sleep(toxml.GetLength()*10);
+		toxml.Format(_T("%i:%i"),256*int(atoi(packercfg)/256),atoi(packercfg) % 256);
+		answer_flash(_T("updatepacker:0:")+toxml);
+
+		packercfg = ReadProfile("LASTCONFIG","lastpacker1");
+		toxml.Format("<opt offset_up_limit[1]='%i' flag_start_machine[1]='%i'/>",atoi(packercfg),CMD_PACKER_INIT);
+		setnodexml(0xff,toxml);		
+		Sleep(toxml.GetLength()*10);
+		toxml.Format(_T("%i:%i"),256*int(atoi(packercfg)/256),atoi(packercfg) % 256);
+		answer_flash(_T("updatepacker:1:")+toxml);
+
+
+		packercfg = ReadProfile("LASTCONFIG","lastpacker2");
+		toxml.Format("<opt offset_up_limit[2]='%i' flag_start_machine[2]='%i'/>",atoi(packercfg),CMD_PACKER_INIT);
+		setnodexml(0xff,toxml);		
+		Sleep(toxml.GetLength()*10);
+		toxml.Format(_T("%i:%i"),256*int(atoi(packercfg)/256),atoi(packercfg) % 256);
+		answer_flash(_T("updatepacker:2:")+toxml);
+
+		packercfg = ReadProfile("LASTCONFIG","lastpacker3");
+		toxml.Format("<opt offset_up_limit[3]='%i' flag_start_machine[3]='%i'/>",atoi(packercfg),CMD_PACKER_INIT);
+		setnodexml(0xff,toxml);		
+		Sleep(toxml.GetLength()*10);
+		toxml.Format(_T("%i:%i"),256*int(atoi(packercfg)/256),atoi(packercfg) % 256);
+		answer_flash(_T("updatepacker:3:")+toxml);
+
 		for(int addr=1;addr<MAX_NODE_NUM;addr++){
 			if((RS485_Node[addr].board & BOARD_TYPE_MASK) != BOARD_TYPE_INVALID){
 				if((RS485_Node[addr].board & BOARD_TYPE_MASK) == BOARD_TYPE_WEIGHT) 
@@ -178,10 +210,6 @@ int flash_cmd_handler(){
 #endif
 	}
 	//just update the content of the node
-	if(cmdid == "initpacker")
-	{
-		//TODO
-	}
 	if(cmdid == "search"){	//search node:	search:addr			return  display:saddr:nodexml
 		CString saddr;
 		saddr = ExtractString(cmdparm);
@@ -503,15 +531,19 @@ int flash_cmd_handler(){
 			break;
 		}
 	}
-	if(cmdid == "initpacker") //format initpacker:grp:configint
+	if(cmdid == "initpacker") //format initpacker:grp:configint:delayint
 	{
 		CString sgrp = ExtractString(cmdparm);
+		CString trigtype = ExtractString(cmdparm);
 		CString toxml;
 		sgrp.Trim("abcdefghijklmnopqrstuvwxyz_");
 
-		toxml.Format("<opt offset_up_limit[%i]='%i' flag_start_machine[%i]='%i'/>",atoi(sgrp),atoi(cmdparm),atoi(sgrp),CMD_PACKER_INIT);
+		toxml.Format("<opt offset_up_limit[%i]='%i' flag_start_machine[%i]='%i'/>",atoi(sgrp),atoi(trigtype)+atoi(cmdparm),atoi(sgrp),CMD_PACKER_INIT);
 		setnodexml(0xff,toxml);
 		Sleep(toxml.GetLength()*10);
+		answer_flash(_T("updatepacker:")+sgrp+_T(":")+trigtype+_T(":")+cmdparm);
+		toxml.Format(_T("%i"),atoi(trigtype)+atoi(cmdparm));
+		WriteProfile("LASTCONFIG","lastpacker"+sgrp,toxml);
 	}
 	if(cmdid == "his_query") //format his_query:start day:end day
 	{
