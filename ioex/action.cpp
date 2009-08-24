@@ -420,7 +420,7 @@ void report_pack(u8 num){
 			break;
 		}
 	}
-	int sum=0;
+	double sum=0;
 	CString pack;
 	int group = 0;
 	for(int i=0;i<num;i++)
@@ -430,7 +430,7 @@ void report_pack(u8 num){
 				CString a;
 				a.Format(_T("bkset%i='%i' "),RS485_Node[j].addr,RS485_Node[j].Mtrl_Weight_gram);
 				pack = pack + a;
-				sum += RS485_Node[j].Mtrl_Weight_gram;
+				sum += (RS485_Node[j].Mtrl_Weight_gram + RS485_Node[j].Mtrl_Weight_decimal/64.0);
 				RS485_Node[j].Mtrl_Weight_gram = ~0;
 				group = RS485_Node[j].board & BOARD_GROUP_MASK;
 			}
