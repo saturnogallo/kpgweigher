@@ -41,15 +41,19 @@ u8 flag_turn_off_watchdog;
 
 /*****************************************************************************/
 // TASK list of state machine used in main function
-// This can be understand as different commands
+// This can be understand as different commands    
+// Master board sets NREG_ENABLE to "1" to start machine. Procedure main()here 
+// will set "flag_enable" to ENABLE_ON if flag_enable == ENABLE_START_MACHINE. 
 /*****************************************************************************/
-#define ENABLE_OFF              0     // stop machine.
-#define ENABLE_START_MACHINE    1     // for mannual manipulation.
-#define ENABLE_INIT_AD          2
-#define ENABLE_TURNS            3
-#define ENABLE_TURNW            4
-#define ENABLE_VIBRATE          5
-#define ENABLE_ON               6     // machine is fully running now.
+#define ENABLE_OFF              0    // stop machine.
+#define ENABLE_START_MACHINE    1    // for mannual manipulation. 
+#define ENABLE_INIT_AD          2    // initialize AD
+#define ENABLE_TURNS            3    // rotate upper motor
+#define ENABLE_TURNW            4    // rotate lower motor
+#define ENABLE_VIBRATE          5    // start vibrator  
+#define ENABLE_RESET_WEIGHT     7    // reset current weight to 0     
+#define ENABLE_ON               80   // machine is fully running now.
+
 u8 myaddr;
 
 /*****************************************************************************/
@@ -520,18 +524,19 @@ void motor_magnet_action()
 
         // Code below is for condition "ENABLE_ON", when machine is working 
         // in automatic mode.
-        // get weight
+        // Set flag to inform master board new weight is being calculated
         RS485._global.flag_goon = 0;
-        RS485._global.Mtrl_Weight_gram = INVALID_DATA ;  // forbid master board from reading data before available
+        RS485._global.Mtrl_Weight_gram = INVALID_DATA ;  
         // Read Weight: valid and invalid weights are both possible.
         CS5532_PoiseWeight();  
         CS5532_Poise2Result();         
                 
-        //Idle here if no command from master board asking me to go on.
-        //Combination algorithm will decide whether magnet should 
-        //give more material. 2 conditions to break out of this loop:  
+        // Idle here if no command from master board asking me to go on.
+        // Combination algorithm will decide whether magnet should 
+        // give more material. 2 conditions to break out of this loop:  
         // flag_goon = 1 or flag_enable not equal to ENABLE_ON any more.
-        // These 2 registers may be changed by RS485 masters through UART.
+        // These 2 registers may be changed by RS485 masters through UART. 
+        // Add a third branch so that flag release command can also break the infinite loop. 11/13/2009
         WSM_Flag = MM_ADD_MATERIAL;
         while(RS485._global.flag_goon == 0){
            // 
@@ -541,6 +546,8 @@ void motor_magnet_action()
               WSM_Flag = MM_ADD_MATERIAL; //break if extra command is coming 
               return;
            }
+           if(RS485._global.flag_release) return; // release command pending for service
+                
            // Update weight periodically
            CS5532_PoiseWeight();  
            CS5532_Poise2Result();            
@@ -648,6 +655,7 @@ void Init_EEPROM_Para()
 /*******************************************************************************/
 //
 /*******************************************************************************/
+#define MAX_RS485_ADDR 16
 void Validate_EEPROM_Data()
 {
    u8 invalid_flag = 0;
@@ -655,12 +663,21 @@ void Validate_EEPROM_Data()
    if(RS485._flash.baudrate > 4)
    { RS485._flash.baudrate = 0; invalid_flag = 0xff;}
       
-   if((RS485._flash.addr > 16) && (RS485._flash.addr_backup < 16))
-   {  RS485._flash.addr = RS485._flash.addr_backup; invalid_flag = 0xff; }
+   if((RS485._flash.addr > MAX_RS485_ADDR) || (RS485._flash.addr < 1))
+     if ((RS485._flash.addr_backup < MAX_RS485_ADDR) && (RS485._flash.addr_backup>0))
+        {  RS485._flash.addr = RS485._flash.addr_backup; invalid_flag = 0xff; }
+   
+   if ((RS485._flash.addr_backup > MAX_RS485_ADDR) || (RS485._flash.addr_backup < 1))
+     if((RS485._flash.addr >0) && (RS485._flash.addr < MAX_RS485_ADDR) )
+        {  RS485._flash.addr_backup =RS485._flash.addr; invalid_flag = 0xff; }   
       
    if((RS485._flash.board != BOARD_TYPE_WEIGHT) && (RS485._flash.board != BOARD_TYPE_VIBRATE))
        if((RS485._flash.board_backup == BOARD_TYPE_WEIGHT) || (RS485._flash.board_backup == BOARD_TYPE_VIBRATE))
        {  RS485._flash.board = RS485._flash.board_backup; invalid_flag = 0xff;}
+
+   if((RS485._flash.board_backup != BOARD_TYPE_WEIGHT) && (RS485._flash.board_backup != BOARD_TYPE_VIBRATE))
+       if((RS485._flash.board == BOARD_TYPE_WEIGHT) || (RS485._flash.board == BOARD_TYPE_VIBRATE))
+       {  RS485._flash.board_backup = RS485._flash.board; invalid_flag = 0xff;}      
     
     if(invalid_flag) 
     {  RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
@@ -735,6 +752,7 @@ void init_cs5532(void)
 /*****************************************************************************/
 void main(void)
 {   
+   u8 num_of_entries;
    u8 flag_turn_off_watchdog;  
    /********************************************************************/
    //               System Initialization
@@ -914,6 +932,18 @@ void main(void)
 		E_Magnet_Driver(RS485._flash.magnet_time); 
                 while(Magnet_Is_Running()) ;		                                        
                 RS485._global.flag_enable = ENABLE_OFF; 
+                break;
+             case ENABLE_RESET_WEIGHT:
+                // wait until valid "cs_material" is available or timeout
+                for(num_of_entries = 100; num_of_entries>0; num_of_entries--)
+                {   CS5532_PoiseWeight();
+                    if(RS485._global.cs_mtrl<MAX_VALID_DATA) 
+                        break; // break on getting valid data
+                }
+                // regard current AD out as zero gram
+                if(num_of_entries)
+                    RS485._flash.cs_zero = RS485._global.cs_mtrl;
+                RS485._global.flag_enable = ENABLE_OFF;
                 break;
              default:
                 break;                                                      
