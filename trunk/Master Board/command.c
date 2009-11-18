@@ -284,10 +284,24 @@ void parse_sys_frm(u8* ptr, u8 *infrm)
         }
 }
 
+/**********************************************************************************************************/
+//
+//  Process command when a complete frame has been received.
+//  RFlagPC/RFlagA/RFlagB/RFlagC/RFlagD are status flags of port PC,A,B,C and D respectively.
+//  Only to process when checksum byte (last byte) received.  
+//  For example, (RFlagPC == RF_CKSUM) means a complete frame has been received at PORT PC (RS232).
+//  Subroutines called: 
+//      parse_sys_frm(), read or write local register on master board.
+//      cm_forward(), command is to access remote register on node board, forward it to node board.
+//
+/**********************************************************************************************************/
 void cm_process()   //process command from nodes
 {       
         u8 i;
         u8 *infrm;
+        /****************************************************************/
+        // A complete frame has been received at PORT PC
+        /****************************************************************/
         if(RFlagPC == RF_CKSUM)
         {             
                 infrm = infrmPC;
@@ -296,13 +310,19 @@ void cm_process()   //process command from nodes
                 }else{
                         use_infrmBin(PC);
                 }        
-                RFlagPC = RF_IDLE;
-                if(((checksum(infrm,6)+checksum(infrm+FRM_POS_DBUF,*(infrm+FRM_POS_DLEN))) & 0xff) == *(infrm+FRM_POS_CKSUM)){   //cksum ok
+                //reset port status flag to idle after receiving a complete frame
+                RFlagPC = RF_IDLE; 
+
+                //If checksum is correct, no error occured. Start to parse frame
+                if(((checksum(infrm,6)+checksum(infrm+FRM_POS_DBUF,*(infrm+FRM_POS_DLEN))) & 0xff) == *(infrm+FRM_POS_CKSUM))
+                {  
+                        // command is to me (accesssing local register)
                         if(*(infrm+FRM_POS_TO) == MY_ADDR){ 
                                 parse_sys_frm((u8*)&system,infrm);   
                                 return;
                         }        
-                        //forward command 
+                        
+                        //otherwise, forward command to nodes or vibrators.
                         for(i=0;i<system.node_num;i++){ //search the node
                                 if(*(infrm+FRM_POS_TO) == RS485_Node[i].addr){   
                                         cm_forward(infrm,RS485_Node[i].uart_port);
@@ -318,6 +338,9 @@ void cm_process()   //process command from nodes
                 }           
                 return;
         }             
+         /****************************************************************/
+        // A complete frame has been received at PORT A
+        /****************************************************************/       
         if(RFlagA == RF_CKSUM)
         {             
                 infrm = infrmA;
@@ -351,6 +374,9 @@ void cm_process()   //process command from nodes
                 }           
                 return;
         }       
+        /****************************************************************/
+        // A complete frame has been received at PORT B
+        /****************************************************************/
         if(RFlagB == RF_CKSUM)
         {             
                 infrm = infrmB;
@@ -384,7 +410,9 @@ void cm_process()   //process command from nodes
                 }           
                 return;
         }        
-
+        /****************************************************************/
+        // A complete frame has been received at PORT C
+        /****************************************************************/
         if(RFlagC == RF_CKSUM)
         {             
                 infrm = infrmC;
@@ -418,6 +446,9 @@ void cm_process()   //process command from nodes
                 }           
                 return;
         }        
+        /****************************************************************/
+        // A complete frame has been received at PORT D
+        /****************************************************************/
         if(RFlagD == RF_CKSUM)
         {             
                 infrm = infrmD;
@@ -456,8 +487,12 @@ void cm_process()   //process command from nodes
          
 }
 
-
-
+/**********************************************************************************************************/
+//
+//  Frame receiving state machine (FRSM) called by UART interrupt. 
+//  This subroutine is called every time when a byte has been received by UART.
+//
+/**********************************************************************************************************/
 void cm_pushPC(u8 c)
 {
                       
@@ -513,6 +548,12 @@ void cm_pushPC(u8 c)
       RFlagPC = RF_IDLE;
 }
 
+/**********************************************************************************************************/
+//
+//  Frame receiving state machine (FRSM) called by PORT A UART interrupt. 
+//  This subroutine is called every time when a byte has been received by UART.
+//
+/**********************************************************************************************************/
 void cm_pushA(u8 c)
 {
       if(RFlagA == RF_DATABUF)               {     //checksum found
@@ -567,6 +608,12 @@ void cm_pushA(u8 c)
       RFlagA = RF_IDLE;
 }
 
+/**********************************************************************************************************/
+//
+//  Frame receiving state machine (FRSM) called by PORT B UART interrupt. 
+//  This subroutine is called every time when a byte has been received by UART.
+//
+/**********************************************************************************************************/
 void cm_pushB(u8 c)
 {
       if(RFlagB == RF_DATABUF)               {     //checksum found
@@ -621,6 +668,12 @@ void cm_pushB(u8 c)
       RFlagB = RF_IDLE;
 }
 
+/**********************************************************************************************************/
+//
+//  Frame receiving state machine (FRSM) called by PORT C UART interrupt. 
+//  This subroutine is called every time when a byte has been received by UART.
+//
+/**********************************************************************************************************/
 void cm_pushC(u8 c)
 {
       if(RFlagC == RF_DATABUF)               {     //checksum found
@@ -675,6 +728,12 @@ void cm_pushC(u8 c)
       RFlagC = RF_IDLE;
 }
 
+/**********************************************************************************************************/
+//
+//  Frame receiving state machine (FRSM) called by PORT D UART interrupt. 
+//  This subroutine is called every time when a byte has been received by UART.
+//
+/**********************************************************************************************************/
 void cm_pushD(u8 c)
 {
 

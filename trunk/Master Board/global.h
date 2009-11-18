@@ -9,6 +9,8 @@
 #define u16    unsigned int
 #define u8     unsigned char
 
+//#define TEST_SERIAL_PORTS //test if com0/com1 is in good condition
+
 #define NULL 0x0
 
 //#define RUN	           PORTD.7;
@@ -31,7 +33,7 @@
 #define RF_DATABUF      7
 #define RF_CKSUM        8
 
-#define USE_COM0
+#define USE_COM1
 // USART Baud rate: 115200 (0x7), 57600 (0xF) 38400 (0x17)
 // USART Baud rate: 19200 (2F) 9600(0x5F)
 #define BAUD_TO_USE     0x7
@@ -72,19 +74,19 @@ extern flash u8 n2m_map[NREG_SIZE_TOTAL];
 //define system struct
 typedef struct
 { //status from pc
-  u16 target_weight[MAX_VIBR_NUM];          //0 	// system target weight of goods  
-  u16 offset_up_limit[MAX_VIBR_NUM];        //8 	// offset upper limit
-  u16 offset_lo_limit[MAX_VIBR_NUM];        //16 	// offset lower limit
-  u8 flag_goon[MAX_VIBR_NUM];		    //24	
+  volatile u16 target_weight[MAX_VIBR_NUM];          //0 	// system target weight of goods  
+  volatile u16 offset_up_limit[MAX_VIBR_NUM];        //8 	// offset upper limit
+  volatile u16 offset_lo_limit[MAX_VIBR_NUM];        //16 	// offset lower limit
+  volatile u8 flag_goon[MAX_VIBR_NUM];		    //24	
   //summary of system
-  u8 node_num;                 		    //28	// how many weight node (head) in this system
-  u8 vibrator_num;             		    //29	// number of Vibrator detected in the system
-  u8 running[MAX_VIBR_NUM];		    //30	
+  volatile u8 node_num;                 		    //28	// how many weight node (head) in this system
+  volatile u8 vibrator_num;             		    //29	// number of Vibrator detected in the system
+  volatile u8 running[MAX_VIBR_NUM];		    //30	
   //command register
-  u8 flag_start_machine[MAX_VIBR_NUM];       //34 // Set when starting machine command is received.
-  u8 flag_stop_machine[MAX_VIBR_NUM];        //38
-  u8 flag_search[MAX_VIBR_NUM];		     //42
-  u8 flag_report;			     //46
+  volatile u8 flag_start_machine[MAX_VIBR_NUM];       //34 // Set when starting machine command is received.
+  volatile u8 flag_stop_machine[MAX_VIBR_NUM];        //38
+  volatile u8 flag_search[MAX_VIBR_NUM];		     //42
+  volatile u8 flag_report;			     //46
 }SYSTEM;
 
 extern u8 true_val;

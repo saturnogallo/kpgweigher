@@ -127,12 +127,15 @@ u8 readb_until_return(u8 port, u8 regid, u8 nodeid){
         return (timeout > 0)? SUCCEED : FAILED;
 }
 
+
+/**************************************************************************************/
 ////////////////////////////////////////////
 //      board init related function.
 ////////////////////////////////////////////
 //regroup the identified nodes	, 
 //all the nodes will stay in RS485_Node[i] after search
 //we need to move them to vibrator or put into the RS485_Node[i] , by index (fill the first n position) while not by address
+/**************************************************************************************/
 void regroup_node()
 {          
     u8 i;      
@@ -172,7 +175,10 @@ void regroup_node()
     }                                                                  
 }                  
 
-//just send query command to all the node from 1 to MAX_NODE_NUM during identification process
+/**************************************************************************************/
+// just send query command to all the node from 1 to MAX_NODE_NUM during identification
+// process
+/**************************************************************************************/
 void query_port(u8 port)
 {          
     u8 i;                                               
@@ -186,7 +192,9 @@ void query_port(u8 port)
         }
     }
 } 
+/**************************************************************************************/
 //just set the target and offset and running variables
+/**************************************************************************************/
 void init_var()
 {                          
     u8 i;
@@ -221,7 +229,9 @@ void init_var()
 	vibrator[i].fail_counter = 0;             // how many time the node failed to be selected
     }
 }
+/**************************************************************************************/
 void find_nodes(void)
+/**************************************************************************************/
 {
     u8 i;
     system.vibrator_num = MAX_VIBR_NUM;                  // how many vibrator node (head) in this system
@@ -271,9 +281,12 @@ void find_nodes(void)
 /**************************************************************************************/
 extern u16 packer_config;
 void cmd_loop(u8 grp){     
-       u8 i;            
+       u8 i;  
        cm_process();                                   
-       if(is_cmd_flag(system.flag_stop_machine[grp])){   //停止节点命令   
+       /**************************************************************************************/
+       // Command to stop nodes.
+       /**************************************************************************************/
+       if(is_cmd_flag(system.flag_stop_machine[grp])){   
            for(i=0;i<system.node_num;i++){  
               if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp)	//not including missing board
                 unset_cmd(NREG_ENABLE,i);    //enable = 0
@@ -290,37 +303,57 @@ void cmd_loop(u8 grp){
            system.flag_stop_machine[grp] = STATE_DONE_OK;    //set the flag that the cmd has been done           
            return;   
        }
-       if(is_cmd_flag(system.flag_goon[grp])){   // 继续节点命令    
+       
+       /**************************************************************************************/
+       // command to go on nodes (feed or release)
+       // if single bucket weight is greater than 1/16 of target weight(unit: 0.1 gram), don't feed (go on) 
+       // anymore. If an overweight bucket receiving a combination release command, it will also
+       // need "go-on" command to release, ioex will send goon command directly to that node.
+       /**************************************************************************************/       
+       if(is_cmd_flag(system.flag_goon[grp])){   // go on command   
            for(i=0;i<system.node_num;i++){  
-              if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp){	//not including missing board
-//                        if(system.running[grp] && (RS485_Node[i].Mtrl_Weight_gram < (system.target_weight[grp]>>2+system.target_weight[grp]>>3))){	//running 0.25+0.125 = 0.375 near 30%
-                        if(system.running[grp]){	//running 0.25+0.125 = 0.375 near 30%
-	                                set_cmd(NREG_GOON,i);   //overweight case is handled by pc side
-                        }                                                              
-                        RS485_Node[i].Mtrl_Weight_gram = 0xffff; //clear the weight for next search.                                
-              	        cm_process();
+              if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp)
+              {     
+                  //if(system.running[grp] && (RS485_Node[i].Mtrl_Weight_gram < system.target_weight[grp]>>4) ) { 
+                  //if(system.running[grp] && (RS485_Node[i].Mtrl_Weight_gram < (system.target_weight[grp]>>2+system.target_weight[grp]>>3))){	//running 0.25+0.125 = 0.375 near 30%
+                  //    set_cmd(NREG_GOON,i);   //overweight case is handled by pc side
+                  //}                                                              
+                  RS485_Node[i].Mtrl_Weight_gram = 0xffff; //clear the weight for next search.                                
+                  cm_process();
               }          
            }                                         
            system.flag_goon[grp] = STATE_DONE_OK; //set the flag that the cmd has been done                      
            system.flag_search[grp] = STATE_BEIDLE; //trigger another round of weight gathering
            return;
        }     
-
+       /**************************************************************************************/
+       // command to start machine 
+       /**************************************************************************************/        
        if(is_cmd_flag(system.flag_start_machine[grp]))
-       {   // 发送命令启动节点  
+       {                         
+            /******************************************************/
+            // CMD_PACKER_INIT
+            /******************************************************/
             if(system.flag_start_machine[grp] == CMD_PACKER_INIT)	//download setting of packer
             {    //parameter should be stored in system.offset_up_limit[grp];
                 packer_config = system.offset_up_limit[grp];
+                //packer_config = 0xa8; // IR OR/OF rising edge, with handshake
                 Init_interface();
 		        system.flag_start_machine[grp] = STATE_BEIDLE;
 			    return;
             }                                                    
+
+            /******************************************************/
+            //
+            /******************************************************/
             if(system.flag_start_machine[grp] == CMD_PACKER_BUSY)	//query status of packer busy
             {    
 		        system.flag_start_machine[grp] = (Packer_Is_Busy() == 0x0) ? STATE_DONE_OK : STATE_BEIDLE;
 			    return;
             }                                                    
-
+            /******************************************************/
+            // CMD_PACKER_AVAILABLE
+            /******************************************************/
             if(system.flag_start_machine[grp] == CMD_PACKER_AVAILABLE)	//query status of packer busy
             {                                    
                 Tell_Packer_Weigher_Rdy();
@@ -333,38 +366,56 @@ void cmd_loop(u8 grp){
 			    return;
             }                   
 
+            /******************************************************/
+            // CMD_PACKER_DONE
+            /******************************************************/
             if(system.flag_start_machine[grp] == CMD_PACKER_DONE)	//material release is done
             {                                    
                 Tell_Packer_Release_Done();
 		        system.flag_start_machine[grp] = STATE_BEIDLE;
 			    return;
-            }                   
-		   if(system.flag_start_machine[grp] == CMD_START_SEARCH)	//research all the nodes
-		   {	
-				   init_var();
-				   find_nodes();
-				   system.flag_start_machine[grp] = STATE_BEIDLE;
-				   return;
-		   }
-		   if(system.flag_start_machine[grp] == CMD_RESET_16C554)
-		   {
-	                Init_554();                                          
+            } //*/                   
 
+            /******************************************************/
+            // CMD_START_SEARCH
+            /******************************************************/		  
+            if(system.flag_start_machine[grp] == CMD_START_SEARCH)	//research all the nodes
+            {	
+			   init_var();
+			   find_nodes();
+			   system.flag_start_machine[grp] = STATE_BEIDLE;
+			   return;
+            }
+
+            /******************************************************/
+            // CMD_RESET_16C554
+            /******************************************************/
+            if(system.flag_start_machine[grp] == CMD_RESET_16C554)
+            {
+	                Init_554();                                          
 		        system.flag_start_machine[grp] = STATE_BEIDLE;
        	                cm_report_b(MY_ADDR, (u8)((u8*)&system.flag_start_machine[grp]-(u8*)&system), 1, (u8*)&system.flag_start_machine[grp], SPORTPC); 
 		        return;
-		   }           
-  		   if(system.flag_start_machine[grp] == CMD_REBOOT_ME)
-  		   {              
+            }           
+
+            /******************************************************/
+            // CMD_REBOOT_ME
+            /******************************************************/
+            if(system.flag_start_machine[grp] == CMD_REBOOT_ME)
+            {              
   		        for(i=0;i<100;i++)
   		        {                           
   		                putchar('.');
   		                sleepms(100);
   		        }
   		        #asm("jmp 0x7C00");
-  		   }                                          
-		   if(system.flag_start_machine[grp] == CMD_START_MACHINE)
-		   {		   
+            }                                          
+
+            /******************************************************/
+            // CCMD_START_MACHINE
+            /******************************************************/
+            if(system.flag_start_machine[grp] == CMD_START_MACHINE)
+            {		   
                         for(i=0;i<system.node_num;i++){  
                                 if((RS485_Node[i].board_property & BOARD_GROUP_MASK) == grp){ //not including missing board
                                       set_cmd(NREG_ENABLE,i);     //enable = 1                      
@@ -378,14 +429,19 @@ void cmd_loop(u8 grp){
                         cm_report_b(MY_ADDR, (u8)((u8*)&system.running[grp]-(u8*)&system), 1, (u8*)&system.running[grp], SPORTPC);                                 
                         system.flag_start_machine[grp] = STATE_DONE_OK; //set the flag that the cmd has been done
                         return;
-                    }
+            }
        } 
 }
-//one round of gathering weight
+/**************************************************************************************/
+//one round of gathering weight                                                         
+/**************************************************************************************/
 void search_loop(int grp)
 {
        u8 i,port;
        cm_process();
+       /***********************************************************************/
+       //
+       /***********************************************************************/
        if(system.flag_search[grp] == STATE_BEIDLE){   //is idle , means trigger another round of weight gathering   
            if(loopcnt%2 == 1){	//take half chance to collect the weight
                 return;
@@ -397,6 +453,10 @@ void search_loop(int grp)
            }
            system.flag_search[grp] = 1; //start to gather weight from node 1 (position in array, not address). flag_search will store the board_id we are searching from now on
        }
+       /***********************************************************************/
+       // Multi entries here: query one node every entry. 
+       // Eventually all nodes will be queried.
+       /***********************************************************************/
        if((system.flag_search[grp] >=1) && (system.flag_search[grp] < STATE_DONE_OK)){ //during search of some board
            for(i=0;i<system.node_num;i++){             //search whether all the data has been collected.    
 		if((RS485_Node[i].board_property & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT)		
@@ -416,7 +476,9 @@ void search_loop(int grp)
 	        cm_process();
 	        return;
            }                        
-		   //all weight has been queried   
+	   /***********************************************************************/
+	   // The following will be executed only when all weight has been queried   
+	   /***********************************************************************/
            port = 0;
            for(i=0;i<system.node_num;i++){  
               if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){ //including the missing board
@@ -431,8 +493,11 @@ void search_loop(int grp)
                         port = port | 0x10; 
                    }
               }
-           }                     
-           if(port == 0x01)          //all data are invalid
+           }
+           /***********************************************************************/
+           // check data validation flag, 0x01: all data are invalid
+           /***********************************************************************/                     
+           if(port == 0x01)          
            {     
                 if(rst554count++ > 3)
                 {
@@ -452,7 +517,10 @@ void search_loop(int grp)
                 system.flag_search[grp] = 1;                          
                 return;
            }
-           if(port == 0x11)     //got something and failed something
+           /***********************************************************************/
+           // check data validation flag. 0x11: got something and failed something
+           /***********************************************************************/
+           if(port == 0x11)     
            {
                  for(i=0;i<system.node_num;i++){  
                         if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){   //including missing board
@@ -463,7 +531,9 @@ void search_loop(int grp)
                 return;
            }           
            
-           //all data are valid
+           /***********************************************************************/
+           // The following will be executed only when all data are valid                                                     
+           /***********************************************************************/
            for(i=0;i<system.node_num;i++){  
               if((RS485_Node[i].board_property & BOARD_GROUP_MASK_SHORT) == grp){ //including the missing board
                    if((loopcnt%10 == 0)){     //weigh_gram, weigh_decimal, status, cs_status, hw_status will be reported.     
@@ -477,7 +547,9 @@ void search_loop(int grp)
            system.flag_search[grp] = STATE_DONE_OK;                          
        }
 }
+/**************************************************************************************/
 //just hand the timeout case on port waiting
+/**************************************************************************************/
 void port_loop(u8 port)
 {                                
        u8 i;          
@@ -522,6 +594,9 @@ void port_loop(u8 port)
        }                                  
        port_node[port] = 0xff;
 }                 
+/**************************************************************************************/
+//
+/**************************************************************************************/
 void report_loop(){  
        u8 i,j;
        
@@ -562,7 +637,9 @@ void report_loop(){
        }
 }
 
-
+/**************************************************************************************/
+//
+/**************************************************************************************/
 void main(void)
 {
     
@@ -604,7 +681,10 @@ void main(void)
     sleepms(800); //wait until all the node is ready after power up    
     find_nodes(); //query regroup all nodes;
     system.flag_report = STATE_DONE_OK;	//search action is done
-                          
+    
+    //intialize packer interface
+    packer_config = 0x28; // 0xa8 IR OR/OF rising edge, with handshake
+    Init_interface();                      
          
     //loop of each group;
     while(1)
@@ -641,6 +721,16 @@ void main(void)
        {
          LED_FLASH(LED_RUN);       
          tick=0;
+#ifdef TEST_SERIAL_PORTS
+         putchar('C');
+         putchar('O');
+         putchar('M');
+         putchar('1');
+         d_putchar('C');
+         d_putchar('O');
+         d_putchar('M');
+         d_putchar('0');
+#endif         
        }
        // LED logic ends.
     }
@@ -744,6 +834,9 @@ void push_debug(u8 data)
         d_putstr("M:disable node\r\nN:enable node\r\nQ:query nodes\r\nG:go on\r\nP:report node 24\r\nO:goon group 0\r\nH:search group0");
 
 }
+/**************************************************************************************/
+//
+/**************************************************************************************/
 void debug_getc(u8 data){
         static u8 dtpos = 0;
         static u8 dtval = 0;
@@ -760,7 +853,11 @@ void debug_getc(u8 data){
                 }
                 dtpos = 0;
         }        
-}                                    
+} 
+
+/**************************************************************************************/
+//
+/**************************************************************************************/                                   
 void debug(u8 data){               
                 if((data>= 'G') && (data <='Z')){    
                         push_debug(data);       
