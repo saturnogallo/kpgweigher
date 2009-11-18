@@ -154,14 +154,14 @@ typedef struct  {
 typedef struct {
         // RS485 address, 0x0 is broadcasting address.
         // valid address range 1~36, wherein address 1~3 are reserved for spare board. 
-        u8      addr;           
+        volatile u8      addr;           
         // Board Function: WEIGHT_MOTOR_VIBRATION or WEIGHT_VIBRATION (the top one)
         // Valid type, 0x0~0x15. Default to "0" (WEIGHT_MOTOR_VIBRATION).
         // Bit 0 of "hw_status" will be set if type invalid.
-        u8      board;           
+        volatile u8      board;           
         // RS485 Baudrate between nodes and master board,0x0(115200bps) ~ 0x4(9600bps)
         // default to "0" 
-        u8      baudrate;       
+        volatile u8      baudrate;       
         
         /**************************************************************/
         
@@ -171,56 +171,56 @@ typedef struct {
         // poise data (saved in EEPROM). 5 at most. Data will be used in CS5532_Poise2Result(). 
         // code is 
         // not ready yet. 
-        u16     Poise_Weight_gram[5];     
+        volatile u16     Poise_Weight_gram[5];     
         // CS5530 conversion of poise.  to get higher accuracy, we need to 
         // have more than 1 
-        u16     cs_poise[5];
+        volatile u16     cs_poise[5];
         // CS5530 conversion when no material is in.
-        u16     cs_zero;                    
+        volatile u16     cs_zero;                    
         // target weight(unity: gram) of each node. pre-set by master board
         // user can set it with PC software.  
-        u16     target_weight;
+        volatile u16     target_weight;
         // max offset allowed from target(unity: g), pre-set by master board   
-        u16     offset_up;    
+        volatile u16     offset_up;    
         
         /**************************************************************/             
 
         // AD filter options: bit[3:0] filter modes, bit[6:4], buf length.
         // bit 7 = 0, Reserved for Future Use. Default to 0. 
-        u8      cs_Filter_option;         
+        volatile u8      cs_Filter_option;         
         // Bit[6:4]: gain opt, bit[3:0]: word_rate opt, Bit7=0, RFU.
         // Default to 0x3
-        u8      cs_gain_wordrate;
+        volatile u8      cs_gain_wordrate;
         
         /**************************************************************/
         
         // motor speed options: 0~9, default to 0.
-        u8      motor_speed;
+        volatile u8      motor_speed;
         // magnet frequency 0~10, default to 9.   
-        u8      magnet_freq;
+        volatile u8      magnet_freq;
         // magnet amp: 0~75, default to 50.
-        u8      magnet_amp;
+        volatile u8      magnet_amp;
         // magnet working time, default to 1. unity: 100ms. 
-        u16     magnet_time;
+        volatile u16     magnet_time;
 
         /**************************************************************/
         
         // Viberation fill delay
-        u8      delay_f;	
+        volatile u8      delay_f;	
         // Weight bucket delay
-        u8      delay_w;	
+        volatile u8      delay_w;	
         // Suspend bucket delay
-        u8      delay_s;	
+        volatile u8      delay_s;	
 	// Delay for feeding pool (top bucket) motor
-	u8	open_s;		 
+	volatile u8	open_s;		 
 	// Delay for weighing pool (bottom bucket) motor
-	u8	open_w;	   
+	volatile u8	open_w;	   
 	
 	// Reserved for Future Use
-	u8      check_sum;
-	u8      rom_para_valid; 
-	u8      addr_backup;
-	u8      board_backup;
+	volatile u8      check_sum;
+	volatile u8      rom_para_valid; 
+	volatile u8      addr_backup;
+	volatile u8      board_backup;
 
 } S_FLASH;                
 
@@ -234,17 +234,17 @@ typedef struct {
         //   Poise_Weight_gram            (cs_poise - cs_zero)
         
         // CS5530 output with material in bucket.
-        u16     cs_mtrl;
+        volatile u16     cs_mtrl;
         
         // polled by master board, 
         // Please display 2 decimal digts on PC software.
-        u16     Mtrl_Weight_gram;       // integar part        
-        u8      Mtrl_Weight_decimal;    // decimal part: LSB: (1/64)g
+        volatile u16     Mtrl_Weight_gram;       // integar part        
+        volatile u8      Mtrl_Weight_decimal;    // decimal part: LSB: (1/64)g
                 
         
         // status of state machine. polled by master board.
         // Originally defined by sojo, no changes. May be polled by master board as needed
-        u8      status;
+        volatile u8      status;
         
         // AD status polled by master board for error check, when set:
         // bit 0 -> cs5530 offset cal fail. This bit won't be used in production(keep 0).
@@ -254,7 +254,7 @@ typedef struct {
         // bit 4 -> cs5530 output-to-gram calculaton error, "Mtrl_Weight_gram" invalid. 
         // bit 7:5 -> reserved for future use. keep 0.
         // maybe polled by master board as needed.
-        u8      cs_status; 
+        volatile u8      cs_status; 
         
         // hardware status, when set:
         // bit 0: -> motor_s action fail
@@ -264,15 +264,15 @@ typedef struct {
         // bit 4: -> UART/Frame error.
         // bit 7:5-> reserved for future use.   keep 0.
         // maybe polled by master board as needed.        
-        u8      hw_status; 
+        volatile u8      hw_status; 
         
         /**************************************************************/
         // CS5530 system calbrition data. Originally saved into EEPROM during 
         // factory calibriation. Data will be download to CS5530 everytime after 
         // system powerup. Master board won't overwrite them.
         // master board need to do nothing regarding these 2 registers. 
-        u32     cs_sys_gain_cal_data;
-        u32     cs_sys_offset_cal_data;
+        volatile u32     cs_sys_gain_cal_data;
+        volatile u32     cs_sys_offset_cal_data;
         
         // Reserved for Future Use.
         // This variable is first initalized from EEPROM (equal to cs_zero)
@@ -284,24 +284,24 @@ typedef struct {
         // Clicking button "Write_to_EEPROM" will save new data into EEPROM.
         // After node powerup, "old_cs_zero" will be initialzed equal to cs_zero value in EEPROM.
         
-        u16     old_cs_zero;  // initially it is variable "reserved3"; 
+        volatile u16     old_cs_zero;  // initially it is variable "reserved3"; 
         
         /**************************************************************/
         // Control bytes from Master Board. only write is needed
-        u8      NumOfDataToBePgmed;
-        u8      flag_reset;        
-        u8      flag_enable;
-        u8      flag_disable;
-        u8      flag_release; 
-        u8      flag_goon;        
+        volatile u8      NumOfDataToBePgmed;
+        volatile u8      flag_reset;        
+        volatile u8      flag_enable;
+        volatile u8      flag_disable;
+        volatile u8      flag_release; 
+        volatile u8      flag_goon;        
         // please provide me with 2 input boxes in PC software so that I can change test_mode_reg1/reg2 value.
         // my software with check data of these registers to switch ON/OFF a certain functions accordingly.        
         // it is useful especially when debugging raw boards.
         // I haven't got the code up in my software. Will do so later.
         // For example, I would like to use these registers this way: 
         // test_mode_reg1: when bit 0 set, use default data instead of EEPROM data.
-        u8      test_mode_reg1;         
-        u8      test_mode_reg2;        
+        volatile u8      test_mode_reg1;         
+        volatile u8      test_mode_reg2;        
        /**************************************************************/
 }S_GLOBAL;                      
 
@@ -310,16 +310,16 @@ typedef struct {
       //status of motor
       // Motor working mode, 
       // 'N': Motor 1 and 2 stop. 'B': Both Motor 1 and 2 work,'W': Weighing Motor(1) works.'S': Storing Motor works.
-      i8 mode;
-      u8 phase;       // Motor phase index --- cycling: Motor[Motor_Phase]
-      u8 pulse_num;   // Number of interrupted raised during the time   
+      volatile i8 mode;
+      volatile u8 phase;       // Motor phase index --- cycling: Motor[Motor_Phase]
+      volatile u8 pulse_num;   // Number of interrupted raised during the time   
 }S_MOTOR;                 
 
 typedef struct  { //status of magnet
       // define pulse numbers to drive the electrical magnet.
-      u16 pulse_num;  //u16 changed to u32
-      u16 reserved; 
-      u16 half_period;
+      volatile u16 pulse_num;  //u16 changed to u32
+      volatile u16 reserved; 
+      volatile u16 half_period;
 }S_MAGNET;
 
 typedef struct {
