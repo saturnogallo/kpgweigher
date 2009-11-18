@@ -68,7 +68,9 @@
 //                       01: rising edge  
 //                       10: falling edge
 //                       11: fixed high
-//    Reserved: BIT[2:0]
+//    Mem:      Bit[2]   1:  pending
+//                       0:  no pending
+//    Reserved: BIT[1:0] 
 //    
 //    OFDLY:    BIT[15:8] delay, unity 10ms     
 //  
@@ -153,9 +155,11 @@ void Kickoff_Timer0(u8 svs_num, u8 svs_time)
    // test if timer0 has already been enabled
    if(!TMR0_Is_Enabled())  
    { 
+     #asm("cli");
      CLR_TOV0();      /*clear interrupt flag*/
      Set_10ms_Tick(); /*10ms interrupt*/
      START_TMR0();
+     #asm("sei");
    }
 }
 
@@ -227,7 +231,7 @@ void Init_interface()
 /******************************************************************************************************/
 // return 0x0 if packing machine is ready to receive another feeding. return 0xff if busy
 /******************************************************************************************************/
-#define INTF_MODE_SHAKEHANDS  (CONFIG_REG & 0xff7f)
+#define INTF_MODE_SHAKEHANDS  (CONFIG_REG & 0x80)
 
 u8 Packer_Is_Busy()
 {  
