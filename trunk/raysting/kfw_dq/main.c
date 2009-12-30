@@ -5,14 +5,73 @@
 #include "key.h"
 #include "stdio.h"
 #include "eeprom.h"
+
+
+const double code DATA_OVER[10] = {0.02,0.2,2,20,200,2000,20000,200000,2000000,20000000};
+const double code DATA_UNDER[10] = {0,0.02,0.2,2,20,200,2000,20000,200000,2000000};
 RUNDATA rdata;
 xdata char buf[20];
 uchar key;
+#define SPIDLE	0
+#define SPBUSY	1
+extern long ltemp;
+uchar 	spSFlag=SPIDLE;
+void DBG(uchar a)
+{ 
+	spSFlag = SPBUSY;
+	SBUF=a;
+	while(spSFlag == SPBUSY)
+		;
+}
 
 double lastrx = -1;
-void analog_timer()	interrupt 1 using 1
+void analog_timer()	interrupt 1
 {
 	Key_Scan();
+}
+
+extern uchar xdata ch1buf[5];
+uchar rcv_pos;
+uchar ktt_pos = 0; //0 means positive,1 means negative
+
+void initiate_timer(void)
+{
+   //set serial port parameter (clock 11.0592M)
+   //9600 baut rate 8 data non parity and 1 stop.
+   SCON = 0x70;
+   PCON = 0x00;
+
+   //use timer 1 to be serial
+   //timer count
+   TH1 = 0xfd;
+
+   //use timer 0 to be heart beat
+   TH0 = -4608/256;   // 4608 , 4608/(11.0592M/12) = 0.005s = 5ms
+   TL0 = -4608%256;
+
+   TMOD = 0x21;
+   TR1 = 1;
+
+   ET0=1;
+   EA=1;
+   TR0 = 1;
+}
+
+
+void SerialHandler(void) interrupt 4 using 2
+{
+	//just handle serial interrupt 1
+	if(TI)
+	{
+		TI = 0;
+		spSFlag = SPIDLE;
+	}
+	if(RI)
+	{
+		RI = 0;
+		if(rcv_pos < 5)
+			ch1buf[rcv_pos++] = SBUF;
+	}
 }
 
 void State_Update();
@@ -38,16 +97,16 @@ void State_Display()
 
 	if(rdata.StateId == PG_MAIN){
 		LCD_Cls();
-		if(rdata.Current == 0)
+		if(rdata.Current == CURRENT_1)
 			sprintf(buf,"Ix= 1XA");
-		if(rdata.Current == 1)
+		if(rdata.Current == CURRENT_SQRT0P5)
 			sprintf(buf,"Ix= 1X0.707A");
-		if(rdata.Current == 2)
+		if(rdata.Current == CURRENT_SQRT2)
 			sprintf(buf,"Ix= 1X1.414A");
 
 		LCD_Print6X8(11,1,buf);
 
-		if(rdata.Range == RANGE_20m)
+		if(rdata.Range == RANGE_20mo)
 			sprintf(buf," 20m");
 		if(rdata.Range == RANGE_200m)
 			sprintf(buf,"200m");
@@ -117,7 +176,7 @@ void State_Display()
 		LCD_Cls();
 		LCD_PrintHz16(2,  2, "当前标准电阻值:");
 		LCD_PrintHz16(2,22,  "   输入新阻值:");
-		sprintf(buf,"%.4f",rdata.Rcali[rdata.Range]);
+		sprintf(buf,"%.4f",rdata.Rx);
 		LCD_Print8X16(120,10,buf);
 		State_Update();
 		EA = 1;
@@ -378,43 +437,47 @@ void State_Update()
 	EA = 1;
 }
 
+void display_caculate()
+{
+	if(rdata.Rs1 > 0)
+		rdata.Rx = (rdata.Rx1-rdata.R0)/rdata.Rs1;
+	else
+		rdata.Rx = -1;
+	if(rdata.Ptype == PSET_NONE)	
+		rdata.Pvalue = 0;
+	if(rdata.Ptype == PSET_RADIUS)	
+		rdata.Pvalue = rdata.Rx*PI*rdata.Pradius*rdata.Pradius/(rdata.Plength*(1+(4.0*(rdata.Temp-20)/1000.0)));
+	if(rdata.Ptype == PSET_SQUARE)	
+		rdata.Pvalue = rdata.Rx*PI*rdata.Pwidth*rdata.Pheight/(rdata.Plength*(1+(4.0*(rdata.Temp-20)/1000.0)));
+}
 
-
-ulong ch1val,ch2val;
+double ch1val,ch2val;
 #define ONESEC	1282
+
+
+uchar meas_state;
+
 sbit KTT=P3^7;
 void main()
 {
 	uchar i,pos;
-	double chs,chx;
 	int j;
 	KTT = 0;
+
 	LCD_Init();
 	Key_Init();
 	State_Init();	
+	rcv_pos = 0;
 
-	//set serial port parameter (clock 11.0592M)
-	//9600 baut rate 8 data non parity and 1 stop.
-	SCON = 0x70;
-	PCON = 0x00;
+	IE = 0;//close int
+    /* Initiate timer */
+    initiate_timer();
 
-	//timer count
-	TH1 = 0xfd;
-	TH0 = 0xd8;
-	TL0 = 0xf0;
-	//use timer 1 to be serial
-	//use timer 0 too
-	TMOD = 0x22;
-	TR1 = 1; //start timer 1
-	TR0 = 1; //start timer 0
-	ET1 = 0;
-	ES = 1;
-	PS = 1;
-	EA = 1;
-	ET0 = 1;
-	
 	sm_Init();
 
+	IE = 0x92;//enable serial int and timer0 interrupt
+	
+	DBG('?');
 	key = KEY_INVALID;
 	 while(1)
 	 { 
@@ -436,11 +499,10 @@ void main()
 				{
 					display_buttons(key,1); //start to switch the current
 					rdata.Current++;
-				        if(rdata.Current > CURRENT_SQRT0P5)
-						rdata.Current = CURRENT_1; 
-					//TODO switch the current
+			        if(rdata.Current > CURRENT_MAX)
+						rdata.Current = CURRENT_MIN; 
+					DBG(CMD_CURR_BASE+rdata.Current);
 					display_buttons(key,0);
-
 				}
 				if(key == KEY_BTN4) //remove zero
 				{
@@ -466,11 +528,67 @@ void main()
 	  	}else{
 			if(rdata.StateId != PG_MAIN) //配置页不处理数据
 			         continue;	
-			if(j > 0)
+			if(rcv_pos >= 5)
 			{
+//				if((uchar)(ch1buf[0]+ch1buf[1]+ch1buf[2]+ch1buf[3]+ch1buf[4]) != 0){
+//					rcv_pos = 0;
+//					return;
+//				}
+				ltemp = 0;
+				ltemp = ltemp + ch1buf[0];	ltemp <<= 8;
+				ltemp = ltemp + ch1buf[1];	ltemp <<= 8;
+				ltemp = ltemp + ch1buf[2];	ltemp <<= 8;
+				ltemp = ltemp + ch1buf[3];	ltemp <<= 8;
+				
+				ch1val = (double)ltemp*rdata.Rcali[rdata.Range];
+				rcv_pos = 0;
+				//自动切换量程, 
+				if(rdata.Rauto == AUTO_ON)
+				{
+					if(ch1val > DATA_OVER[rdata.Range])
+					{
+						if(rdata.Range < RANGE_20M)
+						{
+							rdata.Range++;
+							DBG(CMD_RANGE_BASE+rdata.Range);
+							State_Display();
+						}
+						return;	
+					}
+					if(ch1val < DATA_UNDER[rdata.Range])
+					{
+						if(rdata.Range > RANGE_20mo)
+						{
+							rdata.Range--;
+							DBG(CMD_RANGE_BASE+rdata.Range);
+							State_Display();
+						}
+						return;
+					}
+				}
+				if(rdata.Rktt == KTT_OFF)
+				{
+					rdata.Rx1 = (double)ch1val;
+				}else{
+					rdata.Rx1 = ((double)ch1val + (double)ch2val)/2.0;
+					ch2val = ch1val;
+					DBG(ktt_pos + CMD_KTT_BASE);
+					ktt_pos = 1-ktt_pos;
+				}
+				//convert the data
+				display_caculate();
+				//update LCD
+				State_Update();
+			}
+			if(j > 0)
+			{	//each reading cost 120 counts
 				j--;
 				continue;
 			}
+			j = 32000; 
+			rcv_pos = 0;
+			DBG(CMD_QUERY);
 		}
 	}	
 }
+

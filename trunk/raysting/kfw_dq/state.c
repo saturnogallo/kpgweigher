@@ -4,19 +4,22 @@
 #include "eeprom.h"
 #include "stdio.h"
 
+
 extern void State_Display();
 extern ulong code Sector[10][4];
 
 #define RS_SECTBASE		Sector[0][0]	//[0]
 
+extern uchar rcv_pos;
+long ltemp;
 void LoadFromEEPROM()
 {
 	int i = RS_SECTBASE;
 	uchar* arr = (uchar*)&rdata;
 
-	for(i=0;i<sizeof(RUNDATA);i++)
+	for(i=RS_SECTBASE;i<(RS_SECTBASE+sizeof(RUNDATA));i++)
 	{
-		*arr++ = byte_read(i++);
+		*arr++ = byte_read(i);
 	}
 }
 void SaveToEEPROM()
@@ -25,9 +28,9 @@ void SaveToEEPROM()
 	uchar* arr = (uchar*)&rdata;
 	SectorErase(RS_SECTBASE);
 
-	for(i=0;i<sizeof(RUNDATA);i++)
+	for(i=RS_SECTBASE;i<(RS_SECTBASE+sizeof(RUNDATA));i++)
 	{
-		byte_write(i++,*arr++);
+		byte_write(i,*arr++);
 	}
 }
 void State_Init()
@@ -38,17 +41,17 @@ void State_Init()
 	rdata.delay_cnt = rdata.Delay << DELAY_MULTIPLE;
 
 	rdata.R0 = 0.0;
-	rdata.Rs1 = 20000000;
-	rdata.Rcali[RANGE_20m] = 0.02;	
-	rdata.Rcali[RANGE_200m] = 0.2;		
-	rdata.Rcali[RANGE_2] = 2;
-	rdata.Rcali[RANGE_20] = 20;
-	rdata.Rcali[RANGE_200] = 200;
-	rdata.Rcali[RANGE_2k] = 2000;
-	rdata.Rcali[RANGE_20k] = 20000;
-	rdata.Rcali[RANGE_200k] = 200000;
-	rdata.Rcali[RANGE_2M] = 2000000;
-	rdata.Rcali[RANGE_20M] = 20000000;
+	rdata.Rs1 = 1;
+	rdata.Rcali[RANGE_20mo] = 1;	
+	rdata.Rcali[RANGE_200m] = 1;		
+	rdata.Rcali[RANGE_2] = 1;
+	rdata.Rcali[RANGE_20] = 1;
+	rdata.Rcali[RANGE_200] = 1;
+	rdata.Rcali[RANGE_2k] = 1;
+	rdata.Rcali[RANGE_20k] = 1;
+	rdata.Rcali[RANGE_200k] = 1;
+	rdata.Rcali[RANGE_2M] = 1;
+	rdata.Rcali[RANGE_20M] = 1;
 
 	rdata.Pheight = rdata.Pwidth = rdata.Pradius = 1;
 	rdata.Rauto = AUTO_OFF;
@@ -61,7 +64,8 @@ void State_Init()
 	rdata.Baudrate = 0;
 	rdata.Current = CURRENT_1;
 	sprintf(rdata.tempbuf,"       ");
-//	LoadFromEEPROM();
+	SaveToEEPROM();
+	LoadFromEEPROM();
 	display_buttons(KEY_BTN1,rdata.Rauto);
 	display_buttons(KEY_BTN2,rdata.Rktt);
 	State_Display();
@@ -139,13 +143,13 @@ void State_Change(uchar key)
 	if(rdata.StateId == PG_RANGE)  {
 		if(key == KEY_UP) {
 			if(rdata.pos_len >= RANGE_20M)
-				rdata.pos_len = RANGE_20m;
+				rdata.pos_len = RANGE_20mo;
 			else
 				rdata.pos_len++;
 			return;
 		}
 		if(key == KEY_DN) {
-			if(rdata.pos_len == RANGE_20m)
+			if(rdata.pos_len == RANGE_20mo)
 				rdata.pos_len = RANGE_20M;
 			else
 				rdata.pos_len--;
@@ -153,7 +157,7 @@ void State_Change(uchar key)
 		}
 
 		if((key >= KEY_NUM0) && (key <= KEY_NUM9)){
-			rdata.pos_len = RANGE_20m + key - KEY_NUM0;
+			rdata.pos_len = RANGE_20mo + key - KEY_NUM0;
 			key = KEY_OK;
 		}
 		if((key == KEY_OK) || (key == KEY_TAB))
@@ -161,6 +165,7 @@ void State_Change(uchar key)
 			if(key == KEY_OK)
 			{
 				rdata.Range = rdata.pos_len;
+				DBG(CMD_RANGE_BASE+rdata.Range);
 				SaveToEEPROM();
 			}
 			rdata.pos_len = rdata.StateId;
@@ -184,9 +189,28 @@ void State_Change(uchar key)
 		{
 			if((key == KEY_OK) && (rdata.pos_len > 0))
 			{
-				rdata.Rcali[rdata.Range] = buf2double();
-				SaveToEEPROM();
 				//conduct calibration here
+				while(1)
+				{
+					rcv_pos = 0;
+					DBG(CMD_QUERY);
+					while(rcv_pos <5)
+						;
+				//	if((uchar)(ch1buf[0]+ch1buf[1]+ch1buf[2]+ch1buf[3]+ch1buf[4]) != 0)
+				//		continue;
+					ltemp = 0;
+					ltemp = ltemp + ch1buf[0];	ltemp <<= 8;
+					ltemp = ltemp + ch1buf[1];	ltemp <<= 8;
+					ltemp = ltemp + ch1buf[2];	ltemp <<= 8;
+					ltemp = ltemp + ch1buf[3];	ltemp <<= 8;
+					
+					ch1val = (double)ltemp;
+					rdata.Rcali[rdata.Range] = buf2double()/(double)ch1val;
+					SaveToEEPROM();
+					rcv_pos = 0;
+					break;
+				}
+				
 			}
 			rdata.pos_len = rdata.StateId;
 			rdata.StateId = PG_MENU1;

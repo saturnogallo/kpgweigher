@@ -63,9 +63,11 @@ uchar strlen(uchar *s);
 #define PSET_RADIUS		1
 #define PSET_SQUARE		2
 
-#define CURRENT_1		0
-#define CURRENT_SQRT2	1
-#define CURRENT_SQRT0P5	2
+#define CURRENT_MIN		0
+#define CURRENT_SQRT0P5	0
+#define CURRENT_1		1
+#define CURRENT_SQRT2	2
+#define CURRENT_MAX		2
 
 #define AUTO_OFF		0
 #define AUTO_ON			1
@@ -82,8 +84,9 @@ uchar strlen(uchar *s);
 #define RANGE_20		3
 #define RANGE_2			2
 #define RANGE_200m		1
-#define RANGE_20m		0
+#define RANGE_20mo		0
 
+#define PI	3.14159
 #define BAUDRATE_NONE		0
 #define BAUDRATE_2400		1
 #define BAUDRATE_9600		2
@@ -129,10 +132,24 @@ void LCD_Print8X16(uchar x, uchar y,uchar *s);
 #define CMD_READ	0x01	//read data
 extern uchar xdata ch1buf[5];
 extern uchar xdata ch2buf[5];
-extern long ch1val,ch2val;
+extern double ch1val,ch2val;
 
-uchar collect_long(uchar cmd,uchar ch);
+
 void sm_Init();
 void sm_read(uchar pos,uchar ch);
 void sm_write(uchar value);
+
+#define CMD_QUERY 		0xA0	//5 bytes will be returned.
+
+#define CMD_KTT_BASE	0xC1
+#define CMD_KTT_POS		0xC1
+#define CMD_KTT_NEG		0xC2
+
+#define CMD_CURR_BASE	0xC3	//C3: 0.707; C4: 1; C5: 1.414
+
+#define CMD_RANGE_BASE	0x01	//01: 20mo, ...
+
+
+
+extern void DBG(uchar);
 #endif
