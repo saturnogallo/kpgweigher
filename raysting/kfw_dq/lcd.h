@@ -80,7 +80,7 @@ void LCD_HideCursor(void) ;
 void LCD_LineH(uchar y) ;
 void LCD_LineV(uchar x,uchar y1,uchar y2) ;
 void LCD_LineXX(uchar x1,uchar x2,uchar y);
-//void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2);
+void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2);
 //void LCD_Line(uchar x0,uchar y0,uchar x1,uchar y1) ;
 void LCD_PutImg(uchar x,uchar y,uchar w,uchar h,uchar *img) ;
 //void LCD_PrintNumStr(uchar x,uchar y,uchar *s) ;

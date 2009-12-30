@@ -63,8 +63,8 @@ void State_Init()
 	rdata.Range = RANGE_20M;
 	rdata.Baudrate = 0;
 	rdata.Current = CURRENT_1;
-	sprintf(rdata.tempbuf,"       ");
-	SaveToEEPROM();
+	sprintf(rdata.tempbuf,"         ");
+//	SaveToEEPROM();
 	LoadFromEEPROM();
 	display_buttons(KEY_BTN1,rdata.Rauto);
 	display_buttons(KEY_BTN2,rdata.Rktt);
@@ -93,7 +93,7 @@ void State_Change(uchar key)
 		case  KEY_NUM2: 
 			rdata.StateId = PG_CALISET;
 			rdata.pos_len = 0;
-			sprintf(rdata.tempbuf,"       ");
+			sprintf(rdata.tempbuf,"        ");
 			return;
 
 		case  KEY_NUM3: 
@@ -106,28 +106,53 @@ void State_Change(uchar key)
 			rdata.pos_len = 0;
 			return;
 
-		case  KEY_NUM5: 
-			rdata.StateId = PG_SET232;
-			rdata.pos_len = rdata.Baudrate;
-			return;
-
-		case  KEY_NUM6:
+		case  KEY_NUM5:
 			rdata.StateId = PG_HELP;
 			rdata.pos_len = 0;
 			return;
 			
 		case  KEY_DN:
-			if(rdata.pos_len == 5){
-					rdata.pos_len =0 ;
-			}else{
-				rdata.pos_len++;
+			if(rdata.pos_len == PG_HELP){
+					rdata.pos_len =PG_RANGE;
+					return;
+			}
+			if(rdata.pos_len == PG_RANGE){
+					rdata.pos_len =PG_CALISET ;
+					return;
+			}
+			if(rdata.pos_len == PG_CALISET){
+					rdata.pos_len =PG_MSG_RZERO ;
+					return;
+			}
+			if(rdata.pos_len == PG_MSG_RZERO){
+					rdata.pos_len =PG_PSET ;
+					return;
+			}
+			if(rdata.pos_len == PG_PSET){
+					rdata.pos_len =PG_HELP ;
+					return;
 			}
 			return;
 		case  KEY_UP:
-			if(rdata.pos_len == 0){
-				rdata.pos_len = 5;
-			}else{
-				rdata.pos_len--;
+			if(rdata.pos_len == PG_RANGE){
+					rdata.pos_len =PG_HELP;
+					return;
+			}
+			if(rdata.pos_len == PG_CALISET){
+					rdata.pos_len = PG_RANGE ;
+					return;
+			}
+			if(rdata.pos_len == PG_MSG_RZERO){
+					rdata.pos_len = PG_CALISET;
+					return;
+			}
+			if(rdata.pos_len == PG_PSET){
+					rdata.pos_len = PG_MSG_RZERO ;
+					return;
+			}
+			if(rdata.pos_len == PG_HELP){
+					rdata.pos_len = PG_PSET;
+					return;
 			}
 			return;
 		default:
@@ -160,7 +185,7 @@ void State_Change(uchar key)
 			rdata.pos_len = RANGE_20mo + key - KEY_NUM0;
 			key = KEY_OK;
 		}
-		if((key == KEY_OK) || (key == KEY_TAB))
+		if((key == KEY_OK) || (key == KEY_TAB)||(key == KEY_CE))
 		{
 			if(key == KEY_OK)
 			{
@@ -172,9 +197,6 @@ void State_Change(uchar key)
 			rdata.StateId = PG_MENU1;
 			return;
 		}
-		if(key == KEY_CE) {
-			rdata.pos_len = rdata.Range;
-		}
 		return;
 	}
 	if(rdata.StateId == PG_CALISET) { //input new calibration value
@@ -185,7 +207,7 @@ void State_Change(uchar key)
 			}
 			return;
 		}
-		if((key == KEY_OK) || (key == KEY_TAB))
+		if((key == KEY_OK) || (key == KEY_TAB)||(key == KEY_CE))
 		{
 			if((key == KEY_OK) && (rdata.pos_len > 0))
 			{
@@ -202,7 +224,7 @@ void State_Change(uchar key)
 					ltemp = ltemp + ch1buf[0];	ltemp <<= 8;
 					ltemp = ltemp + ch1buf[1];	ltemp <<= 8;
 					ltemp = ltemp + ch1buf[2];	ltemp <<= 8;
-					ltemp = ltemp + ch1buf[3];	ltemp <<= 8;
+					ltemp = ltemp + ch1buf[3];
 					
 					ch1val = (double)ltemp;
 					rdata.Rcali[rdata.Range] = buf2double()/(double)ch1val;
@@ -210,14 +232,9 @@ void State_Change(uchar key)
 					rcv_pos = 0;
 					break;
 				}
-				
 			}
 			rdata.pos_len = rdata.StateId;
 			rdata.StateId = PG_MENU1;
-			return;
-		}
-		if(key == KEY_CE) {
-			rdata.pos_len = 0;
 			return;
 		}
 		return;
@@ -281,7 +298,7 @@ void State_Change(uchar key)
 	}
 
 	if(rdata.StateId == PG_PSET) {
-		if(key == KEY_UP)
+		if(key == KEY_DN)
 		{
 			if(rdata.pos_len >= 4)
 				rdata.pos_len = 0;
@@ -289,7 +306,7 @@ void State_Change(uchar key)
 				rdata.pos_len++;
 			return;
 		}
-		if(key == KEY_DN)
+		if(key == KEY_UP)
 		{
 			if(rdata.pos_len == 0)
 				rdata.pos_len = 4;
@@ -313,7 +330,7 @@ void State_Change(uchar key)
 				rdata.StateId = PG_PSET_R;
 
 			rdata.pos_len = 0;
-			sprintf(rdata.tempbuf,"       ");
+			sprintf(rdata.tempbuf,"         ");
 			return;
 		}
 		if(key == KEY_NUM5)
