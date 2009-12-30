@@ -51,24 +51,12 @@ sbit ACC7=   ACC^7;
 
     ulong dd;  
    	ulong de;           //测量数据全局变量传递
-	ulong xz;           //校准数据寄存
-    uchar quantifier;   //量程选择 0、2V ;1、200mV;2、20mv;3、单极2V;4、单极200mv;5、单极20mv
-    uchar CH;           //通道选择
+
     uchar code rrc[]={0xfc,0x60,0xda,0xf2,0x66,0xb6,0xbe,0xe0,0xfe,0xe6,
                       
                       0x03,0x62,0xda,0xf2,0x66,0xb6,0xbe,0xe0,0xfe,0xe6,
                       0xfd,0x61,0xdB,0xf2,0x66,0xb6,0xbe,0xe0,0xfe,0xe6,}; //LED显示
-    uint code tune[3]={0,0,980};     //调整数据
-   // float code diagraph[4]={1,1,1};
-    ulong code control[3]={0x09C51c,0x09C534,0x09Cb04};//{0xBE51c,0xBE534,0xBE504}; 
-
-
-
-    ulong code Sector[2][4]={
-	                       {0x8000,0x8001,0x8002,0x8003},
-			               {0x8200,0x8201,0x8202,0x8203},
-						   }   ;
-
+ 
 
 
 
@@ -182,13 +170,7 @@ void delay(unsigned int n)
             }
         while(i<8);
         }
-void send_char_com(uchar ch) 
-{  
-SBUF=ch; 
- 
-while (TI== 0 );  
-TI= 0 ;  
-}  
+
      display()
         {
 		  uchar d1,d2,d3,d4,d5,d6,d7;
@@ -216,42 +198,8 @@ TI= 0 ;
 //********************************
  read7710()
 	   {
-	    uint j;
-        sclk=0;
-		a0=1;
-		tfs=1;
-		rfs=1;
-		sdata=1;
-       
-		 
-	RD:	
-		    de=0;
- 		    if(drdy==0)
-		       { rfs=0 ;
-                 for(j=0;j<0x18;j++)
-			     {sclk=0;
-                 _nop_();
-				  _nop_();
-                 _nop_();
-                 _nop_();
-				  sclk=1;
-				  _nop_();
-                  _nop_();
-                 _nop_();
-                 _nop_();
-			      de=de|sdata;
-				  sclk=0;
-			      de<<=1;
-				  
-				    if (drdy==1)
-					 j=0x18;
-			     }
-			 
-               }
-			else 
-              goto RD;
-    
- 
+//result should be stored in de.
+
 	 }
 //************************
    void yanshi(void)
@@ -261,164 +209,7 @@ TI= 0 ;
 		  
 		  ;
         }
-	void write(ulong j)
-	   {  
-        uint i;
-        sclk=0;
-     	tfs=0;
-		rfs=1;
-	    a0=0;
-		for(i=0;i<25;i++)
-		 {
-		  sclk=0;
-		  _nop_();
-	     _nop_();
-   	      sclk=1;
-		    sdata=j&1;
-		  _nop_();
-		  _nop_();
-		  j=(j>>=1);
-		  }
-         tfs=1;       
-	  }
 
-/*****************数据处理***********************/
- with()
-
-{
-
-   char count,i,j;
-   ulong value_buf[N];
-   ulong  sum=0,temp;
-   for  (count=0;count<N;count++)
-   {
-	   read7710();
-      value_buf[count] = de;
-      delay(2);
-   }
-   for (j=0;j<N-1;j++)
-   {
-      for (i=0;i<N-j;i++)
-      {
-         if ( value_buf[i]>value_buf[i+1] )
-         {
-            temp = value_buf[i];
-            value_buf[i] = value_buf[i+1]; 
-             value_buf[i+1] = temp;
-         }
-      }
-   }
-   for(count=1;count<N-1;count++)
-     {  sum += value_buf[count];	 }
-  de=sum/(N-2);
-}
-
-
-/************************************/	   
-     quantifier_with()//,uint dd )     
-      {
-	    
-	    float de2;
-		 if(de>16777216)
-	    { de=de-16777216;
-        }
-	   	else
-        { de=16777216-de;//+down;
-        }
-          de2=xz*0.0000001;
-		  de2=de/de2;
-
-          de=de2;
-	   }
-
-
-
-/***************电路零位*********************/
-WLCL()
-{
-jdq2=0;
-jdq1=1;
-delay(60000); delay(60000);
-write(0x09C501);
-delay(60000);delay(60000);
-jdq1=0;
-jdq2=1;
-delay(60000);delay(60000);
-//write(control[quantifier]);
-jdq2=0;
-}
-/******************电路校准*******************/
-DLXZ()
-{
- with(); //数据采集处理
- if(de>16777216)
-	    { de=de-16777216;
-        }
-	   	else
-        { de=16777216-de;
-        }
-     SectorErase(Sector[0][0]); 
-     byte_write(Sector[0][0],de&0xff); 
-     byte_write(Sector[0][1],de>>8&0xff);
-     byte_write(Sector[0][2],de>>16&0xff);
-     byte_write(Sector[0][3],de>>24&0xff);
-	  display();
- xz=de;
-
-}
-
-/******************按键监测********************/
-key()
-{
- if(key_tl==0)
- {
-  WLCL() ;
- 
-
- }
-   if(key_xz==0)
- {
-  DLXZ() ;
- 
- }
-
-}
-
-
-/***********发送一个字符***********************
-void PSendChar(unsigned char inch)
-{
-
-unsigned char ii;
-
-ii=0;
-
-F_TM=0;
-BT_SND=0; //start bit
-TIMER0_ENABLE; //启动
-while(!F_TM);
-
-while(ii<8)
-{
-if(inch&1)
-{
-BT_SND=1;
-}
-else
-{
-BT_SND=0;
-}
-F_TM=0;
-while(!F_TM);
-ii++;
-inch>>=1;
-}
-BT_SND=1;
-F_TM=0;
-while(!F_TM);
-
-TIMER0_DISABLE; //停止timer
-}
 
 /************用串口往外发4个字节**************/
 void ComOutStr()
@@ -544,43 +335,28 @@ void int_0() interrupt 0 using 3
 	EA=1; 
 }
 //*******************************************/
-main( )
-     {
-	 
-   		uchar sj1,sj2;
-		busstate = BUS_IDLE;
-        jdq2=1;jdq1=0;
-		delay(20000);
-		xz=byte_read(Sector[0][3])*16777216+byte_read(Sector[0][2])*65536+byte_read(Sector[0][1])*256+byte_read(Sector[0][0]);
-        jdq1=0;jdq2=0;
-		P0=0XFF;
-       	de=0; 
-        quantifier=2;
-        display();    
-    	write(control[quantifier]);
-		WLCL();	//电路零位
-    SCON = 0x50; //串口方式1,允许接收
-    TMOD = 0x20; //定时器1定时方式2
-    TH1 = 0xe8;
-    TL1 = 0xe8;
-    PCON = 0x80; //波特率加倍控制,SMOD位
-    TI = 1;
+void main( )
+{
+	busstate = BUS_IDLE;
+	delay(20000);
+
+   	de=0; 
+    display();    
+    SCON = 0x70; 
+	PCON = 0x00;
+    TMOD = 0x21; 
+   //use timer 1 to be serial timer count
+    TH1 = 0xfd;
+
     TR1 = 1; //启动定时器
 	INIT_W1();
- //    INT_TO(); 
  
-   do{
-      	
-        with(); //数据采集处理 
-        quantifier_with(); //数据调整
+    do{
         display(); //显示	   
+     	 dd=de;
 
-	  	 dd=de;
-
-		//ComOutStr();
-		key();
 
         }
  	  while(1);
-      }
+}
      
