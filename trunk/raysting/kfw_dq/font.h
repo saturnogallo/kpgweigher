@@ -26,7 +26,7 @@ typedef struct typFNT_GB12		// 汉字字模数据结构
 extern FNT_GB12 code HZK12[];
 extern FNT_GB16 code HZK16[];
 extern uchar code ASC8x16[256][16];
-extern uchar code Font24X32[12][96];
+extern uchar code Font24X32[13][96];
 extern uchar code font6x8[][8];
 
 #endif

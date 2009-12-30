@@ -14,7 +14,7 @@ xdata char buf[20];
 uchar key;
 #define SPIDLE	0
 #define SPBUSY	1
-extern long ltemp;
+extern unsigned long ltemp;
 uchar 	spSFlag=SPIDLE;
 void DBG(uchar a)
 { 
@@ -68,9 +68,12 @@ void SerialHandler(void) interrupt 4 using 2
 	}
 	if(RI)
 	{
-		RI = 0;
 		if(rcv_pos < 5)
-			ch1buf[rcv_pos++] = SBUF;
+		{
+			ch1buf[rcv_pos] = SBUF;
+			rcv_pos++;
+		}
+		RI = 0;
 	}
 }
 
@@ -98,13 +101,12 @@ void State_Display()
 	if(rdata.StateId == PG_MAIN){
 		LCD_Cls();
 		if(rdata.Current == CURRENT_1)
-			sprintf(buf,"Ix= 1XA");
+			LCD_Print6X8(11,1,"Ix= x1");
 		if(rdata.Current == CURRENT_SQRT0P5)
-			sprintf(buf,"Ix= 1X0.707A");
+			LCD_Print6X8(11,1,"Ix= x@");
 		if(rdata.Current == CURRENT_SQRT2)
-			sprintf(buf,"Ix= 1X1.414A");
+			LCD_Print6X8(11,1,"Ix= x%@");
 
-		LCD_Print6X8(11,1,buf);
 
 		if(rdata.Range == RANGE_20mo)
 			sprintf(buf," 20m");
@@ -127,16 +129,32 @@ void State_Display()
 		if(rdata.Range == RANGE_20M)
 			sprintf(buf," 20M");
 
-		LCD_Print6X8(120,1,buf);
-//		LCD_PrintHz16(150,1,"Ω(量程)");
+		LCD_Print6X8(100,1,"Range=");
+		LCD_Print6X8(150,1,buf);
 
-		sprintf(buf,"P= %.4f",rdata.Pvalue);
+		if(rdata.Rktt == KTT_OFF)
+			LCD_Print6X8(220,54,"  ");
+		else
+			LCD_Print6X8(220,54,"^");
+
+		if(rdata.Ptype == PSET_RADIUS)
+			sprintf(buf,"$r= %.4f",rdata.Pvalue);
+		if(rdata.Ptype == PSET_NONE)
+			sprintf(buf,"          ",rdata.Pvalue);
+		if(rdata.Ptype == PSET_SQUARE)
+			sprintf(buf,"$s= %.4f",rdata.Pvalue);
+
+		buf[BUF_MAX-1] = '\0';
 		LCD_Print6X8(11,54,buf);
-//		LCD_PrintHz16(61,54,"Ω");
 
-		sprintf(buf,"T= %.1f",rdata.Temp);
-		LCD_Print6X8(120,54,buf);
+
+		sprintf(buf,"T= %.1f[",rdata.Temp);
+		LCD_Print6X8(100,54,buf);
 		
+		if(rdata.Rauto == AUTO_OFF)
+			LCD_Print6X8(200,1,"    ");
+		else
+			LCD_Print6X8(200,1,"auto");
 		State_Update();
 		EA = 1;
 		return;
@@ -147,8 +165,7 @@ void State_Display()
 		LCD_PrintHz16(120,2, " 2.校准电阻");
 		LCD_PrintHz16(2,  23," 3.执行校零");
 		LCD_PrintHz16(120,23," 4.电阻率设定");
-		LCD_PrintHz16(2,  46," 5.串口设定");
-		LCD_PrintHz16(120,46," 6.使用帮助");
+		LCD_PrintHz16(2,  46," 5.使用帮助");
 		State_Update();
 		EA = 1;
 		return;
@@ -156,17 +173,37 @@ void State_Display()
 	}
 	if(rdata.StateId == PG_RANGE){
 		LCD_Cls();
-		LCD_PrintHz16(2,  2,   "请选择新的量程:   单位Ω");
-		LCD_Print6X8(2  , 25, " 0:20m");
-		LCD_Print6X8(62 , 25, " 1:200m");
-		LCD_Print6X8(122, 25, " 2:2");
-		LCD_Print6X8(182 ,25, " 3:20");
-		LCD_Print6X8(2 ,  36, " 4:200");
-		LCD_Print6X8(62  ,36, " 5:2k");
-		LCD_Print6X8(122 ,36, " 6:20k");
-		LCD_Print6X8(182, 36, " 7:200k");
-		LCD_Print6X8(2 ,  47, " 8:2M");
-		LCD_Print6X8(62 , 47, " 9:20M");
+		LCD_PrintHz16(2,  2,   "请选择新的量程: 单位Ω");
+		LCD_Print6X8(2  , 25, " 0)20m");
+
+
+		LCD_Print6X8(62 , 25, " 1)200m");
+
+
+		LCD_Print6X8(122, 25, " 2)2");
+
+
+		LCD_Print6X8(182 ,25, " 3)20");
+
+
+		LCD_Print6X8(2 ,  36, " 4)200");
+
+
+		LCD_Print6X8(62  ,36, " 5)2k");
+
+
+		LCD_Print6X8(122 ,36, " 6)20k");
+
+
+		LCD_Print6X8(182, 36, " 7)200k");
+
+
+		LCD_Print6X8(2 ,  47, " 8)2M");
+
+
+		LCD_Print6X8(62 , 47, " 9)20M");
+
+
 		State_Update();
 		EA = 1;
 		return;
@@ -175,9 +212,12 @@ void State_Display()
 	if(rdata.StateId == PG_CALISET){
 		LCD_Cls();
 		LCD_PrintHz16(2,  2, "当前标准电阻值:");
-		LCD_PrintHz16(2,22,  "   输入新阻值:");
+		LCD_PrintHz16(2,22,  "  输入新阻值:");
+
 		sprintf(buf,"%.4f",rdata.Rx);
-		LCD_Print8X16(120,10,buf);
+		LCD_Print8X16(128,2,buf);
+		LCD_Rectange(120,22,120+8*11,40);
+		LCD_PrintHz16(120+8*12,24,  "Ω");
 		State_Update();
 		EA = 1;
 		return;
@@ -186,10 +226,12 @@ void State_Display()
 	if(rdata.StateId == PG_PSET_L){
 		LCD_Cls();
 		LCD_PrintHz16(2,  2, "当前导线长度:");
-		LCD_PrintHz16(2,22,  "   输入新长度:");
-		sprintf(buf,"%.4f",rdata.Plength);
-		LCD_Print8X16(120,10,buf);
+		LCD_PrintHz16(2,22,  " 输入新长度:");
 
+		sprintf(buf,"%.4f",rdata.Plength);
+		LCD_Print8X16(120,4,buf);
+		LCD_Rectange(120-8,22,120+8*10,40);
+		LCD_PrintHz16(120+8*11,24,"m");
 		State_Update();
 		EA = 1;
 		return;
@@ -199,10 +241,12 @@ void State_Display()
 	if(rdata.StateId == PG_PSET_R){
 		LCD_Cls();
 		LCD_PrintHz16(2,  2, "当前圆截面半径:");
-		LCD_PrintHz16(2,22,  "   输入新半径:");
+		LCD_PrintHz16(2,22,  "  输入新半径:");
+		
 		sprintf(buf,"%.4f",rdata.Pradius);
-		LCD_Print8X16(120,10,buf);
-
+		LCD_Print8X16(128,4,buf);
+		LCD_Rectange(120,22,120+8*11,40);
+		LCD_PrintHz16(120+8*12,24,"cm");
 		State_Update();
 		EA = 1;
 		return;
@@ -211,10 +255,11 @@ void State_Display()
 	if(rdata.StateId == PG_PSET_W){
 		LCD_Cls();
 		LCD_PrintHz16(2,  2, "当前方截面宽度:");
-		LCD_PrintHz16(2,22,  "   输入新宽度:");
+		LCD_PrintHz16(2,22,  "  输入新宽度:");
 		sprintf(buf,"%.4f",rdata.Pwidth);
-		LCD_Print8X16(120,10,buf);
-
+		LCD_Print8X16(128,4,buf);
+		LCD_Rectange(120,22,120+8*11,40);
+		LCD_PrintHz16(120+8*12,24,"cm");
 		State_Update();
 		EA = 1;
 		return;
@@ -225,22 +270,22 @@ void State_Display()
 		LCD_PrintHz16(2,  2, "当前方截面高度:");
 		LCD_PrintHz16(2,22,  "   输入新高度:");
 		sprintf(buf,"%.4f",rdata.Pheight);
-		LCD_Print8X16(120,10,buf);
-
+		LCD_Print8X16(128,4,buf);
+		LCD_Rectange(120,22,120+8*11,40);
+		LCD_PrintHz16(120+8*12,24,"cm");
 		State_Update();
 		EA = 1;
 		return;
-
 	}
 
 	if(rdata.StateId == PG_PSET){
 		LCD_Cls();
 		LCD_PrintHz16(2,   2," 电阻率参数:");
-		LCD_PrintHz16(110, 2," 1.导线长度");
+		LCD_PrintHz16(118, 2," 1.导线长度");
 		LCD_PrintHz16(2,  22," 2.方截面宽度");
-		LCD_PrintHz16(110,22," 3.方截面高度");
+		LCD_PrintHz16(118,22," 3.方截面高度");
 		LCD_PrintHz16(2,  42," 4.圆截面半径");
-		LCD_PrintHz16(110,42," 5.不计算电阻率");
+		LCD_PrintHz16(118,42," 5.不计算电阻率");
 		State_Update();
 		EA = 1;
 		return;
@@ -248,9 +293,9 @@ void State_Display()
 	if(rdata.StateId == PG_SET232){
 		LCD_Cls();
 		LCD_PrintHz16(12,   2, "波特率设定:");
-		LCD_PrintHz16(12,   22," 1. 关闭串口");
-		LCD_PrintHz16(12,   42," 2. 2400");
-		LCD_PrintHz16(120,  42," 3. 9000");
+		LCD_PrintHz16(12,   22," 1.关闭串口");
+		LCD_PrintHz16(12,   42," 2.2400");
+		LCD_PrintHz16(120,  42," 3.9000");
 		State_Update();
 		EA = 1;
 		return;
@@ -258,7 +303,7 @@ void State_Display()
 	}
 	if(rdata.StateId == PG_HELP){
 		LCD_Cls();
-		LCD_PrintHz16(40, 2,  "1.精度说明");
+		LCD_PrintHz16(40, 2,  "1.产品描述");
 		LCD_PrintHz16(40, 20, "2.联系地址");
 		LCD_PrintHz16(40, 40, "3.使用设置");
 		EA = 1;
@@ -292,6 +337,24 @@ void State_Display()
 	}
 	EA = 1;
 }
+char myhi(uchar a)
+{
+	uchar b = a&0xf0;
+	b = b >>4;
+	if( b < 0x0a)
+		return '0'+b;
+	else
+		return 'A'+b-0x0a;
+}
+char mylow(uchar a)
+{
+	uchar b = a&0x0f;
+	if( b < 0x0a)
+		return '0'+b;
+	else
+		return 'A'+b-0x0a;
+}
+
 void State_Update()
 {
 	EA = 0;
@@ -300,139 +363,134 @@ void State_Update()
 		sprintf(buf,"%.4f",rdata.Rx);
 		sprintf(buf+8," ");
 		LCD_Print24X32(10,18,buf);
-		//LCD_Print8X16(205,34,"m");
+
 		LCD_PrintHz16(216,34,"Ω");
 	}
 	if(rdata.StateId == PG_MENU1){
 
-		if(rdata.pos_len == 0)
-			LCD_Print6X8(2,   2,"*");
+		if(rdata.pos_len == PG_RANGE)
+			LCD_PrintHz16(2,   2,"※");
 		else
-			LCD_Print6X8(2,   2," ");
-		if(rdata.pos_len == 1)
-			LCD_Print6X8(120, 2,"*");
+			LCD_PrintHz16(2,   2," ");
+		if(rdata.pos_len == PG_CALISET)
+			LCD_PrintHz16(120, 2,"※");
 		else
-			LCD_Print6X8(120, 2," ");
-		if(rdata.pos_len == 2)
-			LCD_Print6X8(2,  23,"*");
+			LCD_PrintHz16(120, 2," ");
+		if(rdata.pos_len == PG_MSG_RZERO)
+			LCD_PrintHz16(2,  23,"※");
 		else
-		    LCD_Print6X8(2,  23," ");
-		if(rdata.pos_len == 3)
-			LCD_Print6X8(120,23,"*");
+		    LCD_PrintHz16(2,  23," ");
+		if(rdata.pos_len == PG_PSET)
+			LCD_PrintHz16(120,23,"※");
 		else
-			LCD_Print6X8(120,23," ");
-		if(rdata.pos_len == 4)
-			LCD_Print6X8(2,  46,"*");
+			LCD_PrintHz16(120,23," ");
+		if(rdata.pos_len == PG_HELP)
+			LCD_PrintHz16(2,  46,"※");
 		else
-			LCD_Print6X8(2,  46," ");
-		if(rdata.pos_len == 5)
-			LCD_Print6X8(120,46,"*");
-		else
-			LCD_Print6X8(120,46," ");
-
+			LCD_PrintHz16(2,  46," ");
 	}
 	if(rdata.StateId == PG_RANGE){
 		if(rdata.pos_len == 0)
-			LCD_Print6X8(2  , 25, "*");
+			LCD_Print8X16(3  , 21, "*");
 		else
-			LCD_Print6X8(2  , 25, " ");
+			LCD_Print8X16(3  , 21, " ");
 
 		if(rdata.pos_len == 1)
-			LCD_Print6X8(62  , 25, "*");
+			LCD_Print8X16(63  , 21, "*");
 		else
-			LCD_Print6X8(62  , 25, " ");
+			LCD_Print8X16(63  , 21, " ");
 		if(rdata.pos_len == 2)
-			LCD_Print6X8(122 , 25, "*");
+			LCD_Print8X16(123 , 21, "*");
 		else
-			LCD_Print6X8(122 , 25, " ");
+			LCD_Print8X16(123 , 21, " ");
 		if(rdata.pos_len == 3)
-			LCD_Print6X8(182, 25, "*");
+			LCD_Print8X16(183, 21, "*");
 		else
-			LCD_Print6X8(182, 25, " ");
+			LCD_Print8X16(183, 21, " ");
 		if(rdata.pos_len == 4)
-			LCD_Print6X8(2 ,36, "*");
+			LCD_Print8X16(3 ,32, "*");
 		else
-			LCD_Print6X8(2 ,36, " ");
+			LCD_Print8X16(3 ,32, " ");
 		if(rdata.pos_len == 5)
-			LCD_Print6X8(62 ,36, "*");
+			LCD_Print8X16(63 ,32, "*");
 		else
-			LCD_Print6X8(62 ,36, " ");
+			LCD_Print8X16(63 ,32, " ");
 		if(rdata.pos_len == 6)
-			LCD_Print6X8(122  , 36, "*");
+			LCD_Print8X16(123  , 32, "*");
 		else
-			LCD_Print6X8(122  , 36, " ");
+			LCD_Print8X16(123  , 32, " ");
 		if(rdata.pos_len == 7)
-			LCD_Print6X8(182 , 36, "*");
+			LCD_Print8X16(183 , 32, "*");
 		else
-			LCD_Print6X8(182 , 36, " ");
+			LCD_Print8X16(183 , 32, " ");
 		if(rdata.pos_len == 8)
-			LCD_Print6X8(2, 47, "*");
+			LCD_Print8X16(3, 43, "*");
 		else
-			LCD_Print6X8(2, 47, " ");
+			LCD_Print8X16(3, 43, " ");
 		if(rdata.pos_len == 9)
-			LCD_Print6X8(62 ,47, "*");
+			LCD_Print8X16(63 ,43, "*");
 		else
-			LCD_Print6X8(62 ,47, " ");
+			LCD_Print8X16(63 ,43, " ");
 
 
 	}
 	if(rdata.StateId == PG_CALISET){
-		LCD_Print6X8(120,34,"        ");
-		LCD_Print6X8(120,34,rdata.tempbuf);
+		LCD_Print8X16(128,24,"        ");
+		LCD_Print8X16(128,24,rdata.tempbuf);
 	}
 	if(rdata.StateId == PG_PSET_R){
-		LCD_Print6X8(120,34,"        ");
-		LCD_Print6X8(120,34,rdata.tempbuf);
+		LCD_Print8X16(128,24,"        ");
+		LCD_Print8X16(128,24,rdata.tempbuf);
 	}
 	if(rdata.StateId == PG_PSET_L){
-		LCD_Print6X8(120,34,"        ");
-		LCD_Print6X8(120,34,rdata.tempbuf);
+		LCD_Print8X16(120,24,"        ");
+		LCD_Print8X16(120,24,rdata.tempbuf);
 	}
 
 	if(rdata.StateId == PG_PSET_W){
-		LCD_Print6X8(120,34,"        ");
-		LCD_Print6X8(120,34,rdata.tempbuf);
+		LCD_Print8X16(128,24,"        ");
+		LCD_Print8X16(128,24,rdata.tempbuf);
 	}
 	if(rdata.StateId == PG_PSET_H){
-		LCD_Print6X8(120,34,"        ");
-		LCD_Print6X8(120,34,rdata.tempbuf);
+		LCD_Print8X16(128,24,"        ");
+		LCD_Print8X16(128,24,rdata.tempbuf);
 	}
 	if(rdata.StateId == PG_PSET){
 		if(rdata.pos_len == 0)
-			LCD_Print6X8(110,   2,"*");
+			LCD_PrintHz16(118,   2,"※");
 		else
-			LCD_Print6X8(110,   2," ");
+			LCD_PrintHz16(118,   2," ");
 		if(rdata.pos_len == 1)
-			LCD_Print6X8(2,   22,"*");
+			LCD_PrintHz16(2,   22,"※");
 		else
-			LCD_Print6X8(2,   22," ");
+			LCD_PrintHz16(2,   22," ");
 		if(rdata.pos_len == 2)
-			LCD_Print6X8(110,   22,"*");
+			LCD_PrintHz16(118,   22,"※");
 		else
-			LCD_Print6X8(110,  22," ");
+			LCD_PrintHz16(118,  22," ");
 		if(rdata.pos_len == 3)
-			LCD_Print6X8(2,   42,"*");
+			LCD_PrintHz16(2,   42,"※");
 		else
-			LCD_Print6X8(2,   42," ");
+			LCD_PrintHz16(2,   42," ");
 		if(rdata.pos_len == 4)
-			LCD_Print6X8(110,   42,"*");
+			LCD_PrintHz16(118,   42,"※");
 		else
-			LCD_Print6X8(110,   42," ");
+			LCD_PrintHz16(118,   42," ");
 
 			}
 	if(rdata.StateId == PG_SET232){
 		if(rdata.pos_len == 0)
-			LCD_Print6X8(12,   22,"*");
+			LCD_Print8X16(16,   22,"*");
 		else
-			LCD_Print6X8(12,   22," ");
+			LCD_Print8X16(16,   22," ");
 		if(rdata.pos_len == 1)
-			LCD_Print6X8(12,   42,"*");
+			LCD_Print8X16(16,   42,"*");
 		else
-			LCD_Print6X8(12,   42," ");
+			LCD_Print8X16(16,   42," ");
 		if(rdata.pos_len == 2)
-			LCD_Print6X8(120,  42,"*");
+			LCD_Print8X16(124,  42,"*");
 		else
-			LCD_Print6X8(120,  42," ");
+			LCD_Print8X16(124,  42," ");
 	}
 	EA = 1;
 }
@@ -462,6 +520,9 @@ void main()
 {
 	uchar i,pos;
 	int j;
+
+
+
 	KTT = 0;
 
 	LCD_Init();
@@ -491,8 +552,11 @@ void main()
 				}
 				if(key == KEY_BTN2) //auto ktt or not
 				{
-					rdata.Rktt = (rdata.Rktt == KTT_OFF) ? KTT_ON : KTT_OFF;
-					display_buttons(key,rdata.Rktt);
+					if(rdata.Range < RANGE_2k)
+					{
+						rdata.Rktt = (rdata.Rktt == KTT_OFF) ? KTT_ON : KTT_OFF;
+						display_buttons(key,rdata.Rktt);
+					}
 				}
 				if(key == KEY_BTN3) //current change
 				{
@@ -533,15 +597,30 @@ void main()
 //					rcv_pos = 0;
 //					return;
 //				}
+
 				ltemp = 0;
+				
 				ltemp = ltemp + ch1buf[0];	ltemp <<= 8;
 				ltemp = ltemp + ch1buf[1];	ltemp <<= 8;
 				ltemp = ltemp + ch1buf[2];	ltemp <<= 8;
-				ltemp = ltemp + ch1buf[3];	ltemp <<= 8;
+				ltemp = ltemp + ch1buf[3];	
 				
-				ch1val = (double)ltemp*rdata.Rcali[rdata.Range];
+				if(rdata.Range >= RANGE_2k)
+					ch1val = (double)ltemp*rdata.Rcali[rdata.Range];
+				else{
+					if(ltemp > 16777216)
+					{
+						ltemp = ltemp - 16777216;
+						ch1val = (double)ltemp;
+					}else{
+						ltemp = 16777216 - ltemp;
+						ch1val = -1.0*(double)ltemp;
+					}
+				}
+
 				rcv_pos = 0;
-				//自动切换量程, 
+				rdata.Rx = ch1val;
+
 				if(rdata.Rauto == AUTO_ON)
 				{
 					if(ch1val > DATA_OVER[rdata.Range])

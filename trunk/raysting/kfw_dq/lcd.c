@@ -720,7 +720,7 @@ void LCD_LineXX(uchar x1,uchar x2,uchar y)
 		LCD_Putpixel(i,y);		
 	}
 }
-/*
+
 void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2)
 {
 	LCD_LineXX(x1,x2,y1);
@@ -729,7 +729,7 @@ void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2)
 	LCD_LineV(x2,y1,y2);
 }
 
-*/
+
 
 FNT_GB12 code *GetHzk12(uchar c1,uchar c2)
 {
@@ -794,7 +794,9 @@ void LCD_PrintHz16(uchar x,uchar y,uchar *s)
 		c1 = *s++;
 		if(c1 == ' ')
 		{
-			x += 8;
+			LCD_PutImg(x,y,1,16,ASC8x16[' ']);
+			LCD_PutImg(x+8,y,1,16,ASC8x16[' ']);
+			x += 16;
 		}
 		else if( c1 > 0x80)
 		{
@@ -855,9 +857,14 @@ void LCD_Print24X32(uchar x, uchar y,uchar *s)
 		{
 			x += 8;
 		}
+		else if( *s == '-')
+		{
+			LCD_PutImg(x,y,3,32,Font24X32[12]);
+			x += 24;
+		}
 		else
 		{
-			LCD_PutImg(x,y+16,1,16,ASC8x16[*s]);	//-
+			LCD_PutImg(x,y+16,1,16,ASC8x16[*s]);	//
 			x += 8;
 		}
 		s ++;

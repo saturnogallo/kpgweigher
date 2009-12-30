@@ -53,7 +53,7 @@ uchar strlen(uchar *s);
 #define PG_MSG_RZERO	200
 #define PG_MSG_VZERO	201
 
-#define BUF_MAX		8
+#define BUF_MAX		10
 
 #define DELAY_MULTIPLE	10
 #define DELAY_MASK		0x000003ff
