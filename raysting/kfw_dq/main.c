@@ -477,7 +477,6 @@ void main()
 
 	IE = 0x92;//enable serial int and timer0 interrupt
 	
-	DBG('?');
 	key = KEY_INVALID;
 	 while(1)
 	 { 
