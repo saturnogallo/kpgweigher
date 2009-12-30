@@ -120,39 +120,5 @@ void sm_read(uchar pos,uchar ch)
 		ch2buf[pos] = value2;
  }  
 
-uchar collect_long(uchar cmd,uchar ch)
-{
-	sm_write(HEAD_MARK);
-	sm_write(cmd);
-	sm_read(0,ch);
-	sm_read(1,ch);
-	sm_read(2,ch);
-	sm_read(3,ch);
-	sm_read(4,ch);
-			
-	if((~ch1buf[4] == (ch1buf[0]+ch1buf[1]+ch1buf[2]+ch1buf[3])) && (ch & HASCH1))
-	{
-		ch1val = 0;
-		ch1val = ch1val + ch1buf[0];	ch1val <<= 8;
-		ch1val = ch1val + ch1buf[1];	ch1val <<= 8;
-		ch1val = ch1val + ch1buf[2];	ch1val <<= 8;
-		ch1val = ch1val + ch1buf[3];	ch1val <<= 8;
-	}else{
-		return 0;
-	}
-	if((~ch2buf[4] == (ch2buf[0]+ch2buf[1]+ch2buf[2]+ch2buf[3])) && (ch & HASCH2))
-	{
-		ch2val = 0;
-		ch2val = ch2val + ch2buf[0];	ch2val <<= 8;
-		ch2val = ch2val + ch2buf[1];	ch2val <<= 8;
-		ch2val = ch2val + ch2buf[2];	ch2val <<= 8;
-		ch2val = ch2val + ch2buf[3];	ch2val <<= 8;
-	
-	}else{
-		return 0;
-	}
-	return 1;
-
-}
 
 

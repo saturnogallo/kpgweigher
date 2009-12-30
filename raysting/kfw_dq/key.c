@@ -67,10 +67,10 @@ void decode_key()
      {
      switch(P1)
         {          //µÚÎåÐÐ
-        case 0xf7:{keykeep=KEY_BTN1; break;}
-        case 0xfb:{keykeep=KEY_BTN2;break;}
-        case 0xfd:{keykeep=KEY_BTN3; break;}
-        case 0xfe:{keykeep=KEY_BTN4;break;}
+        case 0xf7:{keykeep=KEY_BTN4; break;}
+        case 0xfb:{keykeep=KEY_BTN3;break;}
+        case 0xfd:{keykeep=KEY_BTN2; break;}
+        case 0xfe:{keykeep=KEY_BTN1;break;}
 	    default:
 	    break;
 	    }	
