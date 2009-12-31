@@ -370,11 +370,13 @@ extern u8 debug_mode;
 #define TEST_BIT7               0b10000000
 #define TEST_BITS_76            0b11000000
 
-#define ENABLE_MULTI_POISES  (RS485._global.test_mode_reg1 & TEST_BIT7) == 0
-#define ENABLE_MOTOR_SENSORS (RS485._global.test_mode_reg1 & TEST_BIT6) == 0
-#define TURN_OFF_WATCHDOG    (RS485._global.test_mode_reg1 & TEST_BIT5) == 1  
-#define DISPLAY_AD_RAW_DATA  (RS485._global.test_mode_reg1 & TEST_BIT4) == 1
-#define EN_EEPROM_WRITE      (RS485._global.test_mode_reg1 & TEST_BIT3) == 1
+#define ENABLE_MULTI_POISES    (RS485._global.test_mode_reg1 & TEST_BIT7) == 0
+#define ENABLE_MOTOR_SENSORS   (RS485._global.test_mode_reg1 & TEST_BIT6) == 0
+#define TURN_OFF_WATCHDOG      (RS485._global.test_mode_reg1 & TEST_BIT5) == 1  
+#define DISPLAY_AD_RAW_DATA    (RS485._global.test_mode_reg1 & TEST_BIT4) == 1
+#define EN_EEPROM_WRITE        (RS485._global.test_mode_reg1 & TEST_BIT3) == 1
+#define EN_RUNTIME_ZERO_ADJUST (RS485._global.test_mode_reg1 & TEST_BIT2) == 1
+#define EN_RUNTIME_MAGNET_ADJ  (RS485._global.test_mode_reg1 & TEST_BIT1) == 1
 
 #define CHANGE_RS485_ADDR    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x80
 #define CHANGE_BOARD_TYPE    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x40

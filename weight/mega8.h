@@ -120,5 +120,11 @@ sfrb SREG=0x3f;
 
 #define SPIF 7
 
+// define timer overflow mask bit
+#define TOV2 6
+#define TOV1 2
+#define TOV0 0
+
+
 #endif
 
