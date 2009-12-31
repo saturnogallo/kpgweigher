@@ -12,6 +12,8 @@
 //#define TEST_SERIAL_PORTS //test if com0/com1 is in good condition
 
 #define NULL 0x0
+#define FALSE 0
+#define TRUE  1
 
 //#define RUN	           PORTD.7;
 
@@ -153,8 +155,9 @@ typedef struct  {
 #define STATE_BEIDLE            0
 #define STATE_DONE_FAIL         0xfe
 #define STATE_DONE_OK           0xfd
-#define CMD_START_MACHINE	    0x01
-#define CMD_START_SEARCH	    0x02
+#define STATE_BUSY              0xfc
+#define CMD_START_MACHINE	0x01
+#define CMD_START_SEARCH	0x02
 #define CMD_RESET_16C554        0x03            
 #define CMD_REBOOT_ME           0x04  
 #define CMD_PACKER_BUSY         0x05    //check until the packer is busy or not, IDLE means busy, PASS means free
@@ -182,21 +185,29 @@ typedef struct  {
                
 
 #define INTF_PLS_WIDTH 30 
-#define MAX_SVS_NUM 3 
+#define MAX_SVS_NUM 8 
 #define SVS_CMPLT 0xff 
 #define PACKER_OF_MASK      0x0018
 #define PACKER_IF_MASK      0x0060
 #define NEED_HANDSHAKE      packer_config & 0x0080
+#define ASYN_IF_MASK        0x0002
+#define INIT_MASK           0x0001
 
 #define CONFIG_REG      packer_config
-// Hardware related 
-#define TOGGLE_OR1 PORTF ^= 0x1
-#define TOGGLE_OF1 PORTF ^= 0x2  
-#define MASK_TMR0()  TIMSK &= 0xFE  
-#define START_TMR0() TIMSK |= 0x1
-#define CLR_TOV0()  TIFR |= 0x1     // write "1" to TOV0 bit. 
-#define Set_10ms_Tick() TCNT0 = 122 /*10ms interrupt*/
+// Hardware related
+#define PORT_OR1 0                                /* PORTF.0 */
+#define PORT_OF1 1                                /* PORTF.1 */
+#define PORT_FR  2                                /* PORTF.2 */
+
+#define TOGGLE_OR1 PORTF ^= 0x1                   /* PORTF.0 */
+#define TOGGLE_OF1 PORTF ^= 0x2                   /* PORTF.1 */
+#define TOGGLE_OFR1 PORTF ^= 0x4                  /* PORTF.2 */
+#define MASK_TMR0_INT()  TIMSK &= 0xFE  
+#define ENABLE_TMR0_INT() TIMSK |= 0x1
+#define CLR_TOV0()  TIFR |= 0x1                   /* write "1" to clear TOV0 bit */
+#define Set_10ms_Tick() TCNT0 = 122               /* 10ms interrupt */
 #define TMR0_Is_Enabled() (TIMSK & 0x1)  // bit 0 TOIE0
+
                
 //packer related function
 void Init_interface();

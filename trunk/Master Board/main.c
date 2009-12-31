@@ -76,6 +76,24 @@ SYSTEM system;                                       // 系统参数设置
 #define FAILED  0
 
 /**************************************************************************************/
+//                               Watchdog
+// Enable watchdog timer. 
+// Timeout limit WDTCR[2:0]: 
+// 000 - 16.3ms    001 - 32.5ms    010 - 65ms    011 - 0.13s
+// 100 - 0.26ms    101 - 0.52s     110 - 1.0s    111 - 2.1s  
+/**************************************************************************************/
+#define WDCE 4
+#define WDE 3
+void Turn_on_Watchdog()
+{ 
+  #asm("cli")
+  #asm("wdr") // reset watchdog timer to avoid timeout reset
+  WDTCR |= (1<<WDCE) | (1<<WDE); // set WDCE and WDE bit
+  WDTCR = 0x08; // turn on watch dog timer: WDE = 1, WDP = 000, 16.3ms.
+  #asm("sei") // Enable global interrupt.
+}
+
+/**************************************************************************************/
 // Pretending to be pc and send query of byte(regid) to nodeid until it is sent out or 
 // timeout
 /**************************************************************************************/
@@ -337,10 +355,9 @@ void cmd_loop(u8 grp){
             if(system.flag_start_machine[grp] == CMD_PACKER_INIT)	//download setting of packer
             {    //parameter should be stored in system.offset_up_limit[grp];
                 packer_config = system.offset_up_limit[grp];
-                //packer_config = 0xa8; // IR OR/OF rising edge, with handshake
                 Init_interface();
-		        system.flag_start_machine[grp] = STATE_BEIDLE;
-			    return;
+                system.flag_start_machine[grp] = STATE_BEIDLE;
+                return;
             }                                                    
 
             /******************************************************/
@@ -348,8 +365,8 @@ void cmd_loop(u8 grp){
             /******************************************************/
             if(system.flag_start_machine[grp] == CMD_PACKER_BUSY)	//query status of packer busy
             {    
-		        system.flag_start_machine[grp] = (Packer_Is_Busy() == 0x0) ? STATE_DONE_OK : STATE_BEIDLE;
-			    return;
+                system.flag_start_machine[grp] = (Packer_Is_Busy() == 0x0) ? STATE_DONE_OK : STATE_BEIDLE;
+                return;
             }                                                    
             /******************************************************/
             // CMD_PACKER_AVAILABLE
@@ -357,13 +374,12 @@ void cmd_loop(u8 grp){
             if(system.flag_start_machine[grp] == CMD_PACKER_AVAILABLE)	//query status of packer busy
             {                                    
                 Tell_Packer_Weigher_Rdy();
-                if(NEED_HANDSHAKE)
-                {
-                    while(Packer_Is_Busy())
-                        ;
+                if((NEED_HANDSHAKE) && Packer_Is_Busy())
+                {   system.flag_start_machine[grp] = STATE_BUSY;
                 }
-		        system.flag_start_machine[grp] = STATE_BEIDLE;
-			    return;
+                else                       
+                       system.flag_start_machine[grp] = STATE_BEIDLE;
+                return;
             }                   
 
             /******************************************************/
@@ -372,8 +388,8 @@ void cmd_loop(u8 grp){
             if(system.flag_start_machine[grp] == CMD_PACKER_DONE)	//material release is done
             {                                    
                 Tell_Packer_Release_Done();
-		        system.flag_start_machine[grp] = STATE_BEIDLE;
-			    return;
+                system.flag_start_machine[grp] = STATE_BEIDLE;
+                return;
             } //*/                   
 
             /******************************************************/
@@ -402,13 +418,9 @@ void cmd_loop(u8 grp){
             // CMD_REBOOT_ME
             /******************************************************/
             if(system.flag_start_machine[grp] == CMD_REBOOT_ME)
-            {              
-  		        for(i=0;i<100;i++)
-  		        {                           
-  		                putchar('.');
-  		                sleepms(100);
-  		        }
-  		        #asm("jmp 0x7C00");
+            {             
+               Turn_on_Watchdog();
+               while(1);   /* wait for watchdog reset */                 		        
             }                                          
 
             /******************************************************/
@@ -683,8 +695,8 @@ void main(void)
     system.flag_report = STATE_DONE_OK;	//search action is done
     
     //intialize packer interface
-    packer_config = 0x28; // 0xa8 IR OR/OF rising edge, with handshake
-    Init_interface();                      
+    packer_config = 0xc2; // 0xa8 IR OR/OF falling edge, with handshake, mem
+    Init_interface(); 
          
     //loop of each group;
     while(1)
@@ -719,7 +731,7 @@ void main(void)
        // LED to indicate code is running. 
        if(++tick>2000)
        {
-         LED_FLASH(LED_RUN);       
+         //LED_FLASH(LED_RUN);       
          tick=0;
 #ifdef TEST_SERIAL_PORTS
          putchar('C');

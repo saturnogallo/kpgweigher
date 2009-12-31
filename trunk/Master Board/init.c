@@ -31,7 +31,7 @@ void Init_Port()
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T 
  // Use PORTD[7:6] as LED output, 0 -> LED ON 
- // PORTD.0 is set as input of external interrupt 0 (see interrupt.c)
+ // PORTD.0-1 are set as input of external interrupt 0/1 (see interrupt.c)
     PORTD=0x00;
     DDRD=0xF0;
 
