@@ -2,6 +2,7 @@
 //  Interface with packing machines
 //  OR1(PORTF.0): OUT_READY, output to indicate at least one combination is available.
 //  OF1(PORTF.1): OUT_Feed_Done, output to request packing machine to pack
+//  FR1(PORTF.2): force release output to indicate current release is force release. 
 //  IF1(PORTD.0): IN_Feed_Request. Request weigher to feed 
 //  Note: PORTD.0 is external interrupt input 0
 
@@ -57,21 +58,32 @@
 
    
 // *************************************************************************
-
+// 1 10 10 0 1 0
 // PC interface (use command start reg and offset_low_limit only): 
 //    Mode:     BIT[7] 1: with shakehands    0: No shakehands 
-//    IF1:      BIT[6:5] 00: fixed low 
-//                       01: rising edge  
-//                       10: falling edge
-//                       11: fixed high
-//    OR1/OF1:  BIT[4:3] 00: fixed low 
-//                       01: rising edge  
-//                       10: falling edge
-//                       11: fixed high
-//    Mem:      Bit[2]   1:  pending
+//
+//    IF1/IF2:  BIT[6:5] 00: low level trigger
+//                       01: rising edge trigger 
+//                       10: falling edge trigger
+//                       11: high level trigger
+//
+//    OR1/OF1   BIT[4:3] 00: low level true
+//                       01: negative pulse true
+//                       10: positvie pulse true
+//    FR/OF2             11: high level true
+//
+//    Mem:      BIT[2]   1:  pending
 //                       0:  no pending
-//    Reserved: BIT[1:0] 
-//    
+//
+//    Asyn_IF:  BIT[1]   1:  Save feed request if weigher is not ready. 
+//                           Packer doesn't need to send IF request again.
+//                       0:  Ingore feed request if weigher is not ready.
+//                           Packer has to request again later.
+//
+//    Init:     BIT[0]   0:  weigher intiates handshake (first send) 
+//                       1:  wait for packer to intiate handshake.
+//
+//    MULTI_FD: BIT[10:8]:   continuously feed multi (1~8) times every request from packer.
 //    OFDLY:    BIT[15:8] delay, unity 10ms     
 //  
 //    
@@ -81,32 +93,76 @@
 #include "global.h"
 
 u16 packer_config=0;                           
-extern SYSTEM system;     // 系统参数设置
+
+extern SYSTEM system;
+
 typedef struct {
-   volatile u8 pack_reqs_pending; /*flag to indicate whether there is any pending reuqests from packer*/                              
-   volatile u8 Tmr0_Svs[MAX_SVS_NUM];         /*Service 0 provided by Timer 0 */
-   volatile u8 Tmr0_Svs_cmplt[MAX_SVS_NUM]; /*Service completion status*/
+   volatile u8 pack_reqs_pending;             /* flag to indicate whether there is any 
+                                                 pending reuqests from packer */                              
+   volatile u8 Tmr0_Svs[MAX_SVS_NUM];         /* Service 0 provided by Timer 0 */
+   volatile u8 Tmr0_Svs_Status;               /* Service completion status*/ 
+   u8 weigher_is_ready;                        /* weigher is available */
+   u8 max_feed_counter;                        /* recorde how many times feed has been done */
+   u8 feed_counter;                            /* recorde how many times feed has been done */
 }INTERFACE;
 
 INTERFACE Intf; 
 
 /******************************************************************************************************/
-// External Interrupt 0 service routine
+// External Interrupt 0 service routine: feed request from packer 
+// return status whether packer is requesting feeding.
 /******************************************************************************************************/
 interrupt [EXT_INT0] void ext_int0_isr(void)
 {
-   //clear interrupt flag
-   //是否需要防抖动处理？
+   /* clear interrupt flag,write "1" to bit 0. */
+   EIFR |= 0x1; 
+   //filter
+
+   /* Set flag to indicate a request from packer is pending. */
+   if(CONFIG_REG & ASYN_IF_MASK){       
+      if(Intf.pack_reqs_pending == FALSE)
+         Intf.pack_reqs_pending = TRUE;           /* non-zero: pack request pending*/
+   }else{                                        /* feed is set synchronized with IF singal*/
+      if(!Intf.weigher_is_ready)
+         Intf.pack_reqs_pending = FALSE;          /* ignore feed request */ 
+      else
+         Intf.pack_reqs_pending = TRUE;           /* pack request pending */
+   }
    
-   // Set flag to indicate a request from packer is pending. 
-   //Intf.pack_reqs_pending = 0xff;   
-   if(Intf.pack_reqs_pending < 0xff)
-        Intf.pack_reqs_pending++;     /*non-zero means pack request pending*/
-      
+   /* On receive response from packer, test if we need to toggle "OF" signal */
+   switch(CONFIG_REG & PACKER_OF_MASK)
+   {
+      case 0x0:                                   /* low to enable */      
+          PORTF |= (1<<PORT_OF1);                 /* assert low until packer response */              
+          break;
+      case 0x8:                                   /* negative pulse to enable */ 
+          break;                                  /* no need. handled by timer0_ovf_isr */
+      case 0x10:                                  /* positive pulse to enable */
+          break;                                  /* no need. handled by timer0_ovf_isr */
+      case 0x18:                                  /* high to enable */
+          PORTF &= (~(1<<PORT_OF1));              /* assert high until packer response */
+          break;
+      default: 
+          break;         
+   } 
+   
+   Intf.feed_counter = 0;                         /* reset feed counter */
+         
+   LED_FLASH(LED_RUN);//debug
+}
+
+/******************************************************************************************************/
+// External Interrupt 1 service routine: request from packer, reserved for future use
+/******************************************************************************************************/
+interrupt [EXT_INT1] void ext_int1_isr(void)
+{
+   /* mask interrupt 1, subjected to change */
+   TIMSK &= 0xFD; 
 }
 
 /******************************************************************************************************/
 // Timer 0 overflow interrupt service routine.
+// Interrupt every 10 ms to generate timer services. Max 8 services are supported. 
 /******************************************************************************************************/
 interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 {
@@ -114,82 +170,129 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
    /*clear interrupt flag*/
    CLR_TOV0(); 
    
-   Set_10ms_Tick(); /*10ms interrupt*/
+   Set_10ms_Tick();                            /* 10ms interrupt */
    
-   if (Intf.Tmr0_Svs[0])    // pulse width not reached
+   /* Timer 0, service 0 */   
+   if (Intf.Tmr0_Svs[0])                       /* service 0: pulse width not reached */
        Intf.Tmr0_Svs[0]--; 
-   else if (!Intf.Tmr0_Svs_cmplt[0]) //pulse width reached, not toggled yet.
-   {     TOGGLE_OR1;     // pluse width timeout
-         Intf.Tmr0_Svs_cmplt[0] = SVS_CMPLT;
+   else if (Intf.Tmr0_Svs_Status & 0x1)        /* 1: pulse not toggled yet */
+   {     TOGGLE_OR1;                           /* complete output ready pulse */
+         Intf.Tmr0_Svs_Status &= 0xFE;         /* 0: completion flag */
    }
-   
-   if (Intf.Tmr0_Svs[1])   // pulse width not reached 
+
+   /* Timer 0, service 1 */   
+   if (Intf.Tmr0_Svs[1])                       /* service 1: pulse width not reached */
        Intf.Tmr0_Svs[1]--; 
-   else if (!Intf.Tmr0_Svs_cmplt[1])  //pulse width reached, not toggled yet.
-   {     TOGGLE_OF1;     // pluse width timeout
-         Intf.Tmr0_Svs_cmplt[1] = SVS_CMPLT;
+   else if (Intf.Tmr0_Svs_Status & 0x2)        /* 1: pulse not toggled yet */
+   {     TOGGLE_OF1;                           /* complete output feed pulse */
+         Intf.Tmr0_Svs_Status &= 0xFD;         /* 0: completion flag */
    }
-   
-   /*Disable timer 0 interrupt on service completion*/
-   if(Intf.Tmr0_Svs_cmplt[0] && Intf.Tmr0_Svs_cmplt[1])
-        MASK_TMR0(); 
+
+   /* Timer 0, service 2 */   
+   if (Intf.Tmr0_Svs[2])                       /* service 2: pulse width not reached */
+       Intf.Tmr0_Svs[2]--; 
+   else if (Intf.Tmr0_Svs_Status & 0x4)        /* 1: pulse not toggled yet */
+   {     TOGGLE_OFR1;                          /* complete output force release pulse */
+         Intf.Tmr0_Svs_Status &= 0xFB;         /* 0: completion flag */
+   }
+   /* add service 3 - 7 below*/
+
+   /* Disable timer 0 interrupt on service completion*/
+   if (!(Intf.Tmr0_Svs_Status & ((1<<MAX_SVS_NUM)-1)))
+      MASK_TMR0_INT();
+
+   /* IMPORTANT NOTE: user need to clear interrupt flag first before re-enable TMR again 
+      to prevent residual interrupt flag. */
 }
 
 /******************************************************************************************************/
-// Kick off Timer 0 
+// Kick off Timer 0 services
 /******************************************************************************************************/
 void Kickoff_Timer0(u8 svs_num, u8 svs_time)
 {    
    switch (svs_num)
-   { case 0:
+   { case 0:                                      /* service 0: OR1 pulse width */
         Intf.Tmr0_Svs[0] = svs_time;
-        Intf.Tmr0_Svs_cmplt[0] = 0;  // set timer service completion status to false
+        Intf.Tmr0_Svs_Status |= 0x1;              /* set service completion status, 1: not completed */
         break;
-     case 1:
+     case 1:                                      /* service 1: OF1 pulse width */
         Intf.Tmr0_Svs[1] = svs_time;
-        Intf.Tmr0_Svs_cmplt[1] = 0; 
+        Intf.Tmr0_Svs_Status |= 0x2; 
+        break;
+     case 2:                                      /* service 2: FR1 pulse width */
+        Intf.Tmr0_Svs[2] = svs_time;
+        Intf.Tmr0_Svs_Status |= 0x4; 
+        break;
+     case 3:                                      /* add other services */
+        Intf.Tmr0_Svs[3] = svs_time;
+        Intf.Tmr0_Svs_Status |= 0x8; 
+        break;
+	 case 4:
+        Intf.Tmr0_Svs[4] = svs_time;
+        Intf.Tmr0_Svs_Status |= 0x10; 
+        break;
+     case 5:
+        Intf.Tmr0_Svs[5] = svs_time;
+        Intf.Tmr0_Svs_Status |= 0x20; 
+        break;
+     case 6:
+        Intf.Tmr0_Svs[6] = svs_time;
+        Intf.Tmr0_Svs_Status |= 0x40; 
+        break;
+     case 7:
+        Intf.Tmr0_Svs[7] = svs_time;
+        Intf.Tmr0_Svs_Status |= 0x80; 
         break;
      default:
         break;   
    }
-   // test if timer0 has already been enabled
+
+   /* test if timer0 has already been enabled */
    if(!TMR0_Is_Enabled())  
    { 
      #asm("cli");
-     CLR_TOV0();      /*clear interrupt flag*/
-     Set_10ms_Tick(); /*10ms interrupt*/
-     START_TMR0();
+     CLR_TOV0();                                  /* clear residual flag before enabling interrupt*/
+     Set_10ms_Tick();                             /* 10ms interrupt */
+     ENABLE_TMR0_INT();                           /* enable timer 0 overflow interrupt */
      #asm("sei");
    }
+   /* If there is already a service in progress, 
+   service time for succeedors will be shorter than
+   specified, by one interrupt period (ie 10ms) max */
 }
 
 /******************************************************************************************************/
 // Initialize interface pins
 // This procedure should be called after PC download interface settings to masterboard 
 // Hardware Abstract
-// INTF1_MTRL_RDY PORTF.0  INTF1_FEED_DONE PORTF.1  INTF1_FEED_REQ PORTD.0 
+// INTF1_MTRL_RDY PORTF.0|INTF1_FEED_DONE PORTF.1|INTF1_FORCE_RELEASE PORTF.2|INTF1_FEED_REQ PORTD.0 
 
-// use target_weight register as variable interface with PC
+// use offset_up_limit register as variable interface with PC
 /******************************************************************************************************/
 void Init_interface()
 {   
    u8 i;
-   DDRF |= 0x3 ;  /* set PORTF[1:0] as output */      
-   switch(CONFIG_REG & PACKER_OF_MASK) /*set initial states for OR1/OF1*/
+   /* set initial states for outputs: OR1/OF1/FR1 */
+   DDRF |= 0xF;                                   /* set PORTF[4:0] as output */      
+   switch(CONFIG_REG & PACKER_OF_MASK)            
    {
-      case 0x0:    // low to enable  
+      case 0x0:                                   /* low or negative pulse to enable */
       case 0x8:
-          PORTF |= 0x3;   //so,initialize to high 
+          PORTF |= 0x0F;                          /* so,initialize to high */
           break;
       case 0x10:
-      case 0x18:   // high to enable
-          PORTF &= 0xFC; // so, initialize to low
+      case 0x18:                                  /* high or positive pulse to enable */
+          PORTF &= 0xF0;                          /* so, initialize to low */
           break;
       default: 
-          break;         
+          break;                                                            
+
    }
    
-   /* Settings for IF1, use External interrupt 0*/
+   Intf.max_feed_counter = 1 + ((CONFIG_REG & 0x0700) >> 8); 
+   //Intf.max_feed_counter = 2; 
+   Intf.feed_counter = 0;
+   /* Settings for IF1/IF2, use External interrupt 0*/
    /* PORTD.0 has been set as input in Init_Port() */
    /* Make sure Ex_Int4~7 (used by 16C554) is included */   
    switch(CONFIG_REG & PACKER_IF_MASK) /* IF1 */
@@ -197,20 +300,20 @@ void Init_interface()
       case 0x00:
           EICRA=0x00; /*interrupt triggered by low level*/
           EICRB=0xFF;
-          EIMSK=0xF1;
-          EIFR=0xF1;
+          EIMSK=0xF3;
+          EIFR=0xF3;
           break;
       case 0x20:
-          EICRA=0x03; /*interrupt triggered by rising edge*/
+          EICRA=0x0F; /*interrupt triggered by rising edge*/
           EICRB=0xFF;
-          EIMSK=0xF1;
-          EIFR=0xF1;         
+          EIMSK=0xF3;
+          EIFR=0xF3;         
           break;
       case 0x40:
-          EICRA=0x02; /*interrupt triggered by falling edge*/
+          EICRA=0x0A; /*interrupt triggered by falling edge*/
           EICRB=0xFF;
-          EIMSK=0xF1;
-          EIFR=0xF1;          
+          EIMSK=0xF3;
+          EIFR=0xF3;          
           break;
       default:
           EICRA=0x00; 
@@ -221,11 +324,15 @@ void Init_interface()
    }         
    
    /*Initialize interface variables*/
-   Intf.pack_reqs_pending = 0;  /* no pending requests from packing machine */
+   if(CONFIG_REG & INIT_MASK)
+      Intf.pack_reqs_pending = FALSE;            /* packer to send first, wait for request */
+   else
+      Intf.pack_reqs_pending = TRUE;             /* Weigher to send first */   
+   Intf.Tmr0_Svs_Status = 0;                     /* all services completed */
+   Intf.weigher_is_ready = 0;                    /* initialize weigher status */
    for (i=0; i <MAX_SVS_NUM; i++)
-   {     Intf.Tmr0_Svs[i] = 0;   /* Reset services provided by Timer 0 */   
-         Intf.Tmr0_Svs_cmplt[i] = SVS_CMPLT; /*all services completed*/
-   }
+      Intf.Tmr0_Svs[i] = 0;                      /* Reset timer services (pulse width) */   
+   
 }
 
 /******************************************************************************************************/
@@ -237,58 +344,75 @@ u8 Packer_Is_Busy()
 {  
     /* if in shakehands mode and no requests from packer is pending.*/
     /* variable "pack_reqs_pending" is set by ISR, it is declared as volatile type.*/
-    if((INTF_MODE_SHAKEHANDS) && (!Intf.pack_reqs_pending))
-        return 0xff;             
+    if((INTF_MODE_SHAKEHANDS) && (!Intf.pack_reqs_pending)) 
+       return 0xff;
     else
        return 0x0; 
 }
  
-
 /******************************************************************************************************/
 // When combination is available, call this function to inform packer that weigher is ready to release
 // material 
-// Output: Pulse, 
+// Output: negative or positive pulse, 
+// this signal is to connect collector bucket
 /******************************************************************************************************/
 void Tell_Packer_Weigher_Rdy()
 {  
    switch(CONFIG_REG & PACKER_OF_MASK)
    {
-      case 0x0:    // low to enable  
+      case 0x0:                                   /* low to enable */
       case 0x8:
-          PORTF &= 0xFE; // OR1(PORTF.0) = 0
+          PORTF &= (~(1<<PORT_OR1));              /* OR1(PORTF.0) = 0 */
           break;
       case 0x10:
-      case 0x18:   // high to enable
-          PORTF |= 0x1; //OR1 (PORTF.0) = 1;
+      case 0x18:                                  /* high to enable */
+          PORTF |= (1<<PORT_OR1);                 /* OR1 (PORTF.0) = 1 */
           break;
       default: 
           break;         
    }
-   //start timer to generate output pulse.
-   Kickoff_Timer0(0, INTF_PLS_WIDTH);   
+   Intf.weigher_is_ready = TRUE;                  /* flag to inform interrupt 0 */
+   Kickoff_Timer0(0, INTF_PLS_WIDTH);             /* start timer to generate pulse OR1. */   
 }
 
 /******************************************************************************************************/
 // Inform packer that weigher has completed release of material       
-// pulse
+// In some applications, material is packed after multiple feeds. Therefore packer will acknowledge
+// to weigher only when weigher has sent release_done signals for n times. 
+// Variable "feed_counter" is used to track whether weigher needs to await acknowledge signal from 
+// packer.
 /******************************************************************************************************/
 void Tell_Packer_Release_Done()
 {
+   
+   Intf.weigher_is_ready = FALSE;                 /* flag to inform interrupt 0 */      
+   Intf.feed_counter++;                           /* feed time increased by 1 */
+   if(Intf.feed_counter < Intf.max_feed_counter)  /* multi feed not completed yet */
+     Intf.pack_reqs_pending = TRUE;               /* so we ignore acknowledge signal from packer */
+   else
+   {  Intf.pack_reqs_pending = FALSE;              /* Now need to await packer's feedback to continue. */   
+      Intf.feed_counter = 0; 
+   }
+   
    switch(CONFIG_REG & PACKER_OF_MASK)
    {
-      case 0x0:    // low to enable  
-      case 0x8:
-          PORTF &=0xFD; //OF1(PORTF.1) = 0
+      case 0x0:                                   /* low to enable */      
+          PORTF &= (~(1<<PORT_OF1));              /* assert low until packer response */              
+          break;
+      case 0x8:                                   /* negative pulse to enable */
+          PORTF &= (~(1<<PORT_OF1));              /* assert low first */
+          Kickoff_Timer0(1, INTF_PLS_WIDTH);      /* back to high when timeout*/
           break;
       case 0x10:
-      case 0x18:   // high to enable
-          PORTF |=0x2; //OF1(PORTF.1) = 1
+          PORTF |= (1<<PORT_OF1);                 /* assert high first */
+          Kickoff_Timer0(1, INTF_PLS_WIDTH);      /* back to low when timeout*/
+          break;
+      case 0x18:                                  /* high to enable */
+          PORTF |= (1<<PORT_OF1);                 /* assert high until packer response */
           break;
       default: 
           break;         
    } 
-   
-   //start timer to generate output pulse.
-   Kickoff_Timer0(1, INTF_PLS_WIDTH);      
-   Intf.pack_reqs_pending = 0; /* clear pending request status, no requests pending */
+
 }
+                       
