@@ -3,7 +3,40 @@
 <pre>
 <h1>µVision2 Build Log</h1>
 <h2>Project:</h2>
-C:\Documents and Settings\sojo\×ÀÃæ\091220\dq.uv2
+D:\SONGJ\kpgweigher\raysting\kfw_dq\subbrd\dq.uv2
 Project File Date:  03/20/2010
 
 <h2>Output:</h2>
+Build target 'Target 1'
+compiling main.c...
+compiling AD7710.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?INT_0?MAIN
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY?AD7710
+Program Size: data=9.0 xdata=110 code=3370
+creating hex file from "dq"...
+"dq" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+compiling main.c...
+compiling AD7710.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?INT_0?MAIN
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY?AD7710
+Program Size: data=9.0 xdata=110 code=3370
+creating hex file from "dq"...
+"dq" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+compiling main.c...
+compiling AD7710.c...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?INT_0?MAIN
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAY?AD7710
+Program Size: data=9.0 xdata=110 code=3370
+creating hex file from "dq"...
+"dq" - 0 Error(s), 2 Warning(s).
