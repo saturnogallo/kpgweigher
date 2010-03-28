@@ -557,13 +557,12 @@ uchar get_voltage()
 	if(ch1buf[6] >= 3)
 		rdata.Current = ch1buf[6] -3;
 
-	if(ltemp > 16777216)
+	if(ltemp < 0x1000000)
 	{
-		ltemp = ltemp - 16777216;
-		ch1val = -1.0*(double)ltemp;
+		ch1val = 1.0*(double)ltemp;
 	}else{
-		ltemp = 16777216 - ltemp;
-		ch1val = -1.0*(double)ltemp;
+		ltemp = 0x2000000 - ltemp;
+		ch1val = 1.0*(double)ltemp;
 	}
 	//get voltage
 	if(ch1buf[4] == 0) //2V

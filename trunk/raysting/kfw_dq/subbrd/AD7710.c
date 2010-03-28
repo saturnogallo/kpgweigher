@@ -75,10 +75,10 @@ sbit rfs= P1^4;    //同步接受端
        uchar  xdata da[5];
 
   
-ulong code syscfg[] = {	(MD_SELF_CAL)+(PGA_1) +(CH_0)+(PD_NORMAL)+(WL_24)+(IO_OFF)+(BO_OFF)+(BU_UNIPOLAR)+1984,
+ulong code syscfg[] = {	(MD_SELF_CAL)+(PGA_1) +(CH_0)+(PD_NORMAL)+(WL_24)+(IO_OFF)+(BO_OFF)+(BU_BIPOLAR)+1984,
 						(MD_SELF_CAL)+(PGA_8) +(CH_0)+(PD_NORMAL)+(WL_24)+(IO_OFF)+(BO_OFF)+(BU_BIPOLAR)+1984,
 						(MD_SELF_CAL)+(PGA_64)+(CH_0)+(PD_NORMAL)+(WL_24)+(IO_OFF)+(BO_OFF)+(BU_BIPOLAR)+1984,
-                        (MD_SYS_OFFSET)+(PGA_1)+(CH_0)+(PD_NORMAL)+(WL_24)+(IO_OFF)+(BO_OFF)+(BU_UNIPOLAR)+1984,
+                        (MD_SYS_OFFSET)+(PGA_1)+(CH_0)+(PD_NORMAL)+(WL_24)+(IO_OFF)+(BO_OFF)+(BU_BIPOLAR)+1984,
                         (MD_SYS_OFFSET)+(PGA_8) +(CH_0)+(PD_NORMAL)+(WL_24)+(IO_OFF)+(BO_OFF)+(BU_BIPOLAR)+1984,
 						(MD_SYS_OFFSET)+(PGA_64)+(CH_0)+(PD_NORMAL)+(WL_24)+(IO_OFF)+(BO_OFF)+(BU_BIPOLAR)+1984,
                          };//0x03e304,0x03e334,0x03e31c};
