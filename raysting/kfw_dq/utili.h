@@ -11,7 +11,8 @@
 void delay (uint us) ;
 void delay1 (uint ms);
 uchar strlen(uchar *s);
- 
+char lowc(uchar x);
+char highc(uchar x);
 #define KEY_INVALID '-'													  
 #define KEY_NUM0	'0'
 #define KEY_NUM1	'1'
@@ -51,7 +52,6 @@ uchar strlen(uchar *s);
 #define PG_HELP_PREC	15
 #define PG_HELP_SET		16
 #define PG_MSG_RZERO	200
-#define PG_MSG_VZERO	201
 
 #define BUF_MAX		10
 
@@ -75,16 +75,17 @@ uchar strlen(uchar *s);
 #define KTT_OFF			0
 #define KTT_ON			1
 
-#define RANGE_20M		9
-#define RANGE_2M		8
-#define RANGE_200k		7
-#define RANGE_20k		6
-#define RANGE_2k		5
-#define RANGE_200		4
-#define RANGE_20		3
-#define RANGE_2			2
-#define RANGE_200m		1
-#define RANGE_20mo		0
+#define RANGE_200k		9
+#define RANGE_20k		8
+#define RANGE_2k		7
+#define RANGE_200		6
+#define RANGE_20		5
+#define RANGE_2			4
+#define RANGE_200m		3
+#define RANGE_20mo		2
+#define RANGE_2mo		1
+#define RANGE_200u		0
+
 
 #define PI	3.14159
 #define BAUDRATE_NONE		0
@@ -130,8 +131,8 @@ int buf2byte();
 void LCD_Print8X16(uchar x, uchar y,uchar *s);
 
 #define CMD_READ	0x01	//read data
-extern uchar xdata ch1buf[5];
-extern uchar xdata ch2buf[5];
+extern uchar xdata ch1buf[8];
+extern uchar xdata ch2buf[8];
 extern double ch1val,ch2val;
 
 
@@ -152,4 +153,9 @@ void sm_write(uchar value);
 
 
 extern void DBG(uchar);
+
+extern void Init_18b20();
+extern void get_18b20();
+
+extern uchar get_voltage();
 #endif

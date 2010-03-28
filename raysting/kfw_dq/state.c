@@ -12,9 +12,10 @@ extern ulong code Sector[10][4];
 
 extern uchar rcv_pos;
 long ltemp;
+
 void LoadFromEEPROM()
 {
-	int i = RS_SECTBASE;
+	uint i = RS_SECTBASE;
 	uchar* arr = (uchar*)&rdata;
 
 	for(i=RS_SECTBASE;i<(RS_SECTBASE+sizeof(RUNDATA));i++)
@@ -24,15 +25,17 @@ void LoadFromEEPROM()
 }
 void SaveToEEPROM()
 {
-	int i = RS_SECTBASE;
+	uint i = RS_SECTBASE;
 	uchar* arr = (uchar*)&rdata;
-	SectorErase(RS_SECTBASE);
+	SectorErase(Sector[0][0]);
 
 	for(i=RS_SECTBASE;i<(RS_SECTBASE+sizeof(RUNDATA));i++)
 	{
 		byte_write(i,*arr++);
 	}
 }
+extern void decode_key();
+extern uchar keykeep;
 void State_Init()
 {
 	rdata.StateId = PG_MAIN;
@@ -42,16 +45,18 @@ void State_Init()
 
 	rdata.R0 = 0.0;
 	rdata.Rs1 = 1;
-	rdata.Rcali[RANGE_20mo] = 1;	
-	rdata.Rcali[RANGE_200m] = 1;		
-	rdata.Rcali[RANGE_2] = 1;
-	rdata.Rcali[RANGE_20] = 1;
-	rdata.Rcali[RANGE_200] = 1;
+
+	rdata.Rcali[RANGE_200u] = 20000;
+	rdata.Rcali[RANGE_2mo] = 10000;
+	rdata.Rcali[RANGE_20mo] = 1000;	
+	rdata.Rcali[RANGE_200m] = 1000;		
+	rdata.Rcali[RANGE_2] = 100;
+	rdata.Rcali[RANGE_20] = 10;
+	rdata.Rcali[RANGE_200] = 10;
 	rdata.Rcali[RANGE_2k] = 1;
 	rdata.Rcali[RANGE_20k] = 1;
 	rdata.Rcali[RANGE_200k] = 1;
-	rdata.Rcali[RANGE_2M] = 1;
-	rdata.Rcali[RANGE_20M] = 1;
+
 
 	rdata.Pheight = rdata.Pwidth = rdata.Pradius = 1;
 	rdata.Rauto = AUTO_OFF;
@@ -60,14 +65,18 @@ void State_Init()
 	rdata.Ptype = PSET_NONE;
 	rdata.Pvalue = 1;
 	rdata.Temp = 25;
-	rdata.Range = RANGE_20M;
+	rdata.Range = RANGE_200k;
 	rdata.Baudrate = 0;
 	rdata.Current = CURRENT_1;
 	sprintf(rdata.tempbuf,"         ");
-//	SaveToEEPROM();
-	LoadFromEEPROM();
+	decode_key();
+//	if(keykeep == KEY_OK)
+//		SaveToEEPROM();
+//	LoadFromEEPROM();
 	display_buttons(KEY_BTN1,rdata.Rauto);
 	display_buttons(KEY_BTN2,rdata.Rktt);
+	rdata.StateId = PG_MAIN;
+	rdata.pos_len = 0;
 	State_Display();
 }
 
@@ -167,22 +176,22 @@ void State_Change(uchar key)
 	}
 	if(rdata.StateId == PG_RANGE)  {
 		if(key == KEY_UP) {
-			if(rdata.pos_len >= RANGE_20M)
-				rdata.pos_len = RANGE_20mo;
+			if(rdata.pos_len >= RANGE_200k)
+				rdata.pos_len = RANGE_200u;
 			else
 				rdata.pos_len++;
 			return;
 		}
 		if(key == KEY_DN) {
-			if(rdata.pos_len == RANGE_20mo)
-				rdata.pos_len = RANGE_20M;
+			if(rdata.pos_len == RANGE_200u)
+				rdata.pos_len = RANGE_200k;
 			else
 				rdata.pos_len--;
 			return;
 		}
 
 		if((key >= KEY_NUM0) && (key <= KEY_NUM9)){
-			rdata.pos_len = RANGE_20mo + key - KEY_NUM0;
+			rdata.pos_len = RANGE_200u + key - KEY_NUM0;
 			key = KEY_OK;
 		}
 		if((key == KEY_OK) || (key == KEY_TAB)||(key == KEY_CE))
@@ -216,18 +225,12 @@ void State_Change(uchar key)
 				{
 					rcv_pos = 0;
 					DBG(CMD_QUERY);
-					while(rcv_pos <5)
+					while(rcv_pos <8)
 						;
-				//	if((uchar)(ch1buf[0]+ch1buf[1]+ch1buf[2]+ch1buf[3]+ch1buf[4]) != 0)
-				//		continue;
-					ltemp = 0;
-					ltemp = ltemp + ch1buf[0];	ltemp <<= 8;
-					ltemp = ltemp + ch1buf[1];	ltemp <<= 8;
-					ltemp = ltemp + ch1buf[2];	ltemp <<= 8;
-					ltemp = ltemp + ch1buf[3];
+					if(get_voltage() == 0)
+						continue;
 					
-					ch1val = (double)ltemp;
-					rdata.Rcali[rdata.Range] = buf2double()/(double)ch1val;
+					rdata.Rcali[rdata.Range] = ch1val/buf2double();
 					SaveToEEPROM();
 					rcv_pos = 0;
 					break;
@@ -318,23 +321,36 @@ void State_Change(uchar key)
 		if(key == KEY_OK)
 			key = KEY_NUM1 + rdata.pos_len;
 
-		if((key >= KEY_NUM1) && (key <= KEY_NUM3))
+		if((key >= KEY_NUM1) && (key <= KEY_NUM4))
 		{
 			if(key == KEY_NUM1)
 				rdata.StateId = PG_PSET_L;
 			if(key == KEY_NUM2)
+			{
 				rdata.StateId = PG_PSET_W;
+				rdata.Ptype = PSET_SQUARE;
+			}
 			if(key == KEY_NUM3)
+			{
 				rdata.StateId = PG_PSET_H;
+				rdata.Ptype = PSET_SQUARE;
+			}
 			if(key == KEY_NUM4)
+			{
 				rdata.StateId = PG_PSET_R;
+				rdata.Ptype = PSET_RADIUS;
+			}
 
 			rdata.pos_len = 0;
 			sprintf(rdata.tempbuf,"         ");
 			return;
 		}
 		if(key == KEY_NUM5)
+		{
 			rdata.Ptype = PSET_NONE;
+			rdata.pos_len = 0;
+			return;
+		}
 		rdata.pos_len = rdata.StateId;
 		rdata.StateId = PG_MENU1;
 		return;

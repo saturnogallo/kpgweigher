@@ -1,21 +1,21 @@
-    #include <stc51.h>
-	#include <stdio.h>
-	#include <intrins.h>
-	#include <MATH.H>
-	#include "utili.h"
-	#include "key.h"
-	#define uchar unsigned char
-	#define uint unsigned int
-	#define ulong unsigned long
-	#define KEYTIMEOUT	1
+#include <stc51.h>
+#include <stdio.h>
+#include <intrins.h>
+#include <MATH.H>
+#include "utili.h"
+#include "key.h"
+#define uchar unsigned char
+#define uint unsigned int
+#define ulong unsigned long
+#define KEYTIMEOUT	1
 
-    sbit l9= P3^6;   //定义时钟端164
+sbit l9= P3^6;   //定义时钟端164
 
-	bit  KEYBJ2	;	//KEY_DOWN event
-    uchar keykeep;
-	uint  keycount;	//delay counter
+bit  KEYBJ2	;	//KEY_DOWN event
+uchar keykeep;
+uint  keycount;	//delay counter
 
-	sbit kbit = P3^2; //key int
+sbit kbit = P3^2; //key int
 extern uchar key;
 void decode_key()
 {
