@@ -4,6 +4,7 @@
 "lcd.obj",
 "main.obj",
 "state.obj",
-"utili.obj" 
+"utili.obj",
+"18B20.obj" 
 TO "bjy" 
 RAMSIZE(256) 

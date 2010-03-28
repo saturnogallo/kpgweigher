@@ -1,0 +1,4 @@
+"main.obj",
+"AD7710.obj" 
+TO "dq" 
+RAMSIZE(256) 

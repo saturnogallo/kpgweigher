@@ -16,7 +16,24 @@ void delay1 (uint ms)
   	for(i=0;i<ms;i++)
   	for(j=0;j<1000;j++)
   		;
-		\
+		
+}
+char lowc(uchar x)
+{
+	x = x&0x0f;
+	if(x > 0x09)
+		return 'A'+x-0x0a;
+	else
+		return '0'+x;
+}
+char highc(uchar x)
+{
+
+	x = x>>4;
+	if(x > 0x09)
+		return 'A'+x-0x0a;
+	else
+		return '0'+x;
 }
 //¼ÆËã×Ö·û´®³¤¶È
 uchar strlen(uchar *s)
@@ -57,8 +74,8 @@ int buf2byte()	    //convert rdata.tempbuf to byte (00-99)
 }
 
 //MY SPI Related function 
-uchar xdata ch1buf[5];
-uchar xdata ch2buf[5];
+uchar xdata ch1buf[8];
+uchar xdata ch2buf[8];
 #define SM_WDELAY	100
 #define SM_RDELAY	100
 #define SM_RDELAY2	10
