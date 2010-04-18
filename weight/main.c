@@ -34,9 +34,9 @@ Data Stack size     : 256
 
 #define CS5532_WORD_RATE WORD_RATE_12P5SPS        /* CS5530 conversion speed */
 #define ZERO_ADJUSTMENT_INTREVAL 200              /* reset weight every 200 releases */
-#define MAX_RS485_ADDR 16
 
 NODE_CONFIG RS485;                                /* structure of node */
+
 u8 myaddr;                                        /* rs485 addr of current node */
 u16 pre_feed_weight, weight_increment;            /* initial weight before adding material*/  
 u16 release_times = ZERO_ADJUSTMENT_INTREVAL;     /* how many times node has been released */
@@ -67,17 +67,18 @@ u8 flag_turn_off_watchdog;
 //bit timeoutflag;
 #define DELAY1_END timerlen[0]==0  
 #define DELAY2_END timerlen[1]==0 
-#define DELAY3_END timerlen[2]==0 
-u16 timerlen[3] = {0,0,0};
+#define DELAY3_END timerlen[2]==0
+u16 timerlen[4] = {0,0,0,0};
 
 interrupt [TIM2_OVF] void timer2_ovf_isr(void)
 {
   TCNT2=0xB8;            // 7.2KHZ input,interrupt frequency is set to 100HZ (10ms timer)
   // if timerlen != 0, at least 1 timer service is ongoing.
-  if(timerlen[0] || timerlen[1] || timerlen[2]){
+  if(timerlen[0] || timerlen[1] || timerlen[2] || timerlen[3]){
     if(timerlen[0]>0)   timerlen[0]--;
     if(timerlen[1]>0)   timerlen[1]--;
-    if(timerlen[2]>0)   timerlen[2]--;
+    if(timerlen[2]>0)   timerlen[2]--; 
+    if(timerlen[3]>0)   timerlen[3]--;     
   }else{
     TIMSK &= 0xbf;       // mask Timer2 overflow interrupt
   } 
@@ -381,7 +382,7 @@ void release_material()
 // and "magnet_time"are adjusted accordingly.
 // This subroutine is enabled by Bit 1 of test_mode_reg1 (EN_RUNTIME_MAGNET_ADJ)
 /*******************************************************************************/
-  
+
 /*******************************************************************************
 //                  Magnet State Machine
 // magnet_add_material()is called during the idle/delay period
@@ -468,7 +469,7 @@ u8 magnet_add_material()
     /**************************************************************/    
      if(WSM_Flag == MM_WAIT_ADDEND){  
        // delay before motor action if magnet stops
-       if(!Magnet_Is_Running()){
+       if((!Magnet_Is_Running()) || (Magnet_Is_Running()== 0xffff)){
          if(RS485._flash.delay_f > 0){
             timerlen[1] = RS485._flash.delay_f; /* start timer2, timerlen[1] as the counter.*/
             TCNT2=0xB8;                         /* 10ms interrupt */
@@ -712,7 +713,7 @@ void Init_EEPROM_Para()
    RS485._flash.board = BOARD_TYPE_WEIGHT;
    // Weight Calibration settings
    RS485._flash.target_weight = 100;
-   RS485._flash.offset_up = 25;
+   //RS485._flash.offset_up = 25; // changed to addr_copy1/board_copy1
    RS485._flash.cs_zero = 0xBCE4;
    RS485._flash.cs_poise[0] = 0xC1B8;
    RS485._flash.Poise_Weight_gram[0] = 50;
@@ -726,9 +727,9 @@ void Init_EEPROM_Para()
    RS485._flash.Poise_Weight_gram[4] = 500;
    // Motor & Magnet settings
    //RS485._flash.magnet_freq = 9;
-   RS485._flash.magnet_amp = 25; 
+   RS485._flash.magnet_amp = 55; 
    RS485._flash.magnet_time = 10; 
-   RS485._flash.motor_speed = 1;
+   RS485._flash.motor_speed = 2;
    RS485._flash.delay_f = 10;
    RS485._flash.delay_w = 10;
    RS485._flash.delay_s = 10;
@@ -741,9 +742,12 @@ void Init_EEPROM_Para()
 #endif
    
    //backup key parameters
-   RS485._flash.addr_backup = RS485._flash.addr;
-   RS485._flash.board_backup = RS485._flash.board;
+   RS485._flash.addr_copy1 = RS485._flash.addr;
+   RS485._flash.addr_copy2 = RS485._flash.addr;
    
+   RS485._flash.board_copy1 = RS485._flash.board;
+   RS485._flash.board_copy2 = RS485._flash.board;
+            
    RS485._flash.rom_para_valid = ROM_DATA_VALID_FLAG; 
    RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
    
@@ -758,25 +762,24 @@ void Validate_EEPROM_Data()
    // check whether "addr" "board" "RS485" data in EEPROM is valid   
    if(RS485._flash.baudrate > 4)
    { RS485._flash.baudrate = 0; invalid_flag = 0xff;}
-      
-   if((RS485._flash.addr > MAX_RS485_ADDR) || (RS485._flash.addr < 1))
-     if ((RS485._flash.addr_backup < MAX_RS485_ADDR) && (RS485._flash.addr_backup>0))
-        {  RS485._flash.addr = RS485._flash.addr_backup; invalid_flag = 0xff; }
    
-   if ((RS485._flash.addr_backup > MAX_RS485_ADDR) || (RS485._flash.addr_backup < 1))
-     if((RS485._flash.addr >0) && (RS485._flash.addr < MAX_RS485_ADDR) )
-        {  RS485._flash.addr_backup =RS485._flash.addr; invalid_flag = 0xff; }   
-      
-   if((RS485._flash.board != BOARD_TYPE_WEIGHT) && (RS485._flash.board != BOARD_TYPE_VIBRATE))
-       if((RS485._flash.board_backup == BOARD_TYPE_WEIGHT) || (RS485._flash.board_backup == BOARD_TYPE_VIBRATE))
-       {  RS485._flash.board = RS485._flash.board_backup; invalid_flag = 0xff;}
-
-   if((RS485._flash.board_backup != BOARD_TYPE_WEIGHT) && (RS485._flash.board_backup != BOARD_TYPE_VIBRATE))
-       if((RS485._flash.board == BOARD_TYPE_WEIGHT) || (RS485._flash.board == BOARD_TYPE_VIBRATE))
-       {  RS485._flash.board_backup = RS485._flash.board; invalid_flag = 0xff;}      
-   if((RS485._flash.addr < 11) && (RS485._flash.board != BOARD_TYPE_WEIGHT))
-       {RS485._flash.board = BOARD_TYPE_WEIGHT; RS485._flash.board_backup=BOARD_TYPE_WEIGHT; invalid_flag=0xff;}
-    
+   // There is an issue that first 2 bytes (addr/board) written to EEPROM are liable to be alternated. 
+   // As a workaround, we save 2 copies in other locations. If there are 2 copies equal, the other one has to be 
+   // equal to them. 
+   if((RS485._flash.addr_copy1 == RS485._flash.addr_copy2) && (RS485._flash.addr != RS485._flash.addr_copy1))
+   {  RS485._flash.addr = RS485._flash.addr_copy1; invalid_flag = 0xff;}
+   if((RS485._flash.addr_copy1 == RS485._flash.addr) && (RS485._flash.addr_copy2 != RS485._flash.addr_copy1))
+   {   RS485._flash.addr_copy2 = RS485._flash.addr_copy1; invalid_flag = 0xff;}
+   if((RS485._flash.addr_copy2 == RS485._flash.addr) && (RS485._flash.addr_copy1 != RS485._flash.addr_copy2))
+   {   RS485._flash.addr_copy1 = RS485._flash.addr_copy2; invalid_flag = 0xff;}
+   
+   if((RS485._flash.board_copy1 == RS485._flash.board_copy2) && (RS485._flash.board != RS485._flash.board_copy1))
+   {   RS485._flash.board = RS485._flash.board_copy1;  invalid_flag = 0xff; }
+   if((RS485._flash.board_copy1 == RS485._flash.board) && (RS485._flash.board_copy2 != RS485._flash.board_copy1))
+   {   RS485._flash.board_copy2 = RS485._flash.board_copy1;  invalid_flag = 0xff;}
+   if((RS485._flash.board_copy2 == RS485._flash.board) && (RS485._flash.board_copy1 != RS485._flash.board_copy2))
+   {   RS485._flash.board_copy1 = RS485._flash.board_copy2;  invalid_flag = 0xff;}
+                
     if(invalid_flag) 
     {  RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
        RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;
@@ -890,14 +893,71 @@ void main(void)
    PORTC.5 = 1;
    // initialize golbal interrupt.
    #asm("sei")                        
-   
+
    /*************************************************************************/ 
    // Raw board check
    /*************************************************************************/       
-   //if RS485 addr is invalid(new board), Use default addr: 0x1
-   if((RS485._flash.addr == 0) || (RS485._flash.addr >= 38))
-        RS485._flash.addr = 1;        
+   //if RS485 addr is invalid(new board), Use default addr: 0x30
+   if((RS485._flash.addr == 0) || (RS485._flash.addr > MAX_RS485_ADDR))
+        RS485._flash.addr = MAX_RS485_ADDR;        
    myaddr = RS485._flash.addr;         
+
+   /*************************************************************************/ 
+   // Test motor and magnet
+   /*************************************************************************/ 
+#ifdef _TEST_MOTOR_MAGNET_
+   Test_Motor_Magnet_Loop();
+#endif
+
+#ifdef _TEST_MAGNET_
+  sleepms(5000);
+   LED_OFF(LED_D6);
+   LED_OFF(LED_D7);
+   LED_OFF(LED_D8);
+  while(1)
+  {
+   while(Magnet_Is_Running())
+   {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
+          break; 
+   }
+   LED_ON(LED_D6);
+   RS485._flash.magnet_time = 60;
+   RS485._flash.magnet_amp = 45;
+   E_Magnet_Driver(RS485._flash.magnet_time); 
+   while(Magnet_Is_Running())
+   {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
+          break; 
+   }
+   LED_OFF(LED_D6); 
+   
+   sleepms(1000);
+   
+   LED_ON(LED_D7);
+   RS485._flash.magnet_time = 60;
+   RS485._flash.magnet_amp = 55;
+   E_Magnet_Driver(RS485._flash.magnet_time); 
+   while(Magnet_Is_Running())
+   {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
+          break; 
+   }
+   LED_OFF(LED_D7);
+
+   sleepms(1000);
+
+   LED_ON(LED_D8);
+   RS485._flash.magnet_time = 60;
+   RS485._flash.magnet_amp = 65;
+   E_Magnet_Driver(RS485._flash.magnet_time); 
+   while(Magnet_Is_Running())
+   {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
+          break; 
+   }
+   LED_OFF(LED_D8);
+   
+   sleepms(1000);
+      
+  }
+#endif
    /*************************************************************************/ 
    //                          Task State Machine
    /*************************************************************************/          
@@ -927,7 +987,12 @@ void main(void)
           
           /*Trapped for Watch-Dog Reset*/
           while(1);
-       }       
+       }
+       /************************************************************/
+       // Runtime Diagnose on addr, board and baudrate
+       /************************************************************/       
+        Validate_EEPROM_Data(); 
+        myaddr = RS485._flash.addr;         
        /************************************************************/
        // program all configuration settings into EEPROM  
        // program will not go down unless program job down.
@@ -940,7 +1005,8 @@ void main(void)
                                                                (u8*)&RS485._flash + sizeof(S_FLASH) - RS485._global.NumOfDataToBePgmed, 
                                                                RS485._global.NumOfDataToBePgmed);        
           continue;
-       }else
+       }
+       else
           RS485._global.test_mode_reg1 &= 0xF7;   /* disable EEPROM programming*/
        /************************************************************/
        // Test Mode(test_mode_reg1): when set,
@@ -954,20 +1020,29 @@ void main(void)
        // Bit[7:6] = 01, Bit[5:0]as new Board Type.
        // See "define.h" for details.                                 
        /************************************************************/       
-      /*if(CHANGE_RS485_ADDR)
+      if((CHANGE_RS485_ADDR) && (RS485._global.test_mode_reg2>0) && (RS485._global.test_mode_reg2 < MAX_RS485_ADDR))
        {
             RS485._flash.addr = RS485._global.test_mode_reg2 & 0x3f;        
+            RS485._flash.addr_copy1 = RS485._flash.addr;
+            RS485._flash.addr_copy2 = RS485._flash.addr;            
             myaddr = RS485._flash.addr;
-            bWriteData2Eeprom_c(EEPROM_RS485ADDR, myaddr); 
+            RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
+            RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;            
             RS485._global.test_mode_reg2=0;
             continue; 
        }
        if(CHANGE_BOARD_TYPE)
        {
-            RS485._flash.board = RS485._global.test_mode_reg2 & 0x3f;        
-            bWriteData2Eeprom_c(EEPROM_RS485ADDR+1, RS485._flash.board);
+         if((RS485._global.test_mode_reg2 == BOARD_TYPE_WEIGHT) || (RS485._global.test_mode_reg2 == BOARD_TYPE_VIBRATE) || 
+            (RS485._global.test_mode_reg2 == BOARD_TYPE_MOTOR))
+         {  RS485._flash.board = RS485._global.test_mode_reg2; 
+            RS485._flash.board_copy1 = RS485._flash.board;
+            RS485._flash.board_copy2 = RS485._flash.board;       
+            RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
+            RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;  
             RS485._global.test_mode_reg2 = 0;  
-            continue;
+         }
+         continue;
        }  
        /*
        if(TURN_OFF_WATCHDOG)
@@ -1020,9 +1095,15 @@ void main(void)
                 RS485._global.flag_enable = ENABLE_OFF;                                             
                 break;
              case ENABLE_VIBRATE:
-                while(Magnet_Is_Running()) ;
+                while(Magnet_Is_Running())
+                {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
+                       break; 
+                }
                 E_Magnet_Driver(RS485._flash.magnet_time); 
-                while(Magnet_Is_Running()) ;		                                        
+                while(Magnet_Is_Running())
+                {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
+                       break; 
+                }		                                        
                 RS485._global.flag_enable = ENABLE_OFF; 
                 break;
              case ENABLE_RESET_WEIGHT:
