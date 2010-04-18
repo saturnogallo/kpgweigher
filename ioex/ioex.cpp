@@ -16,25 +16,25 @@ CSerial serial;
 
 using namespace std;
 
-NODE_CONFIG RS485_Node[MAX_NODE_NUM];
-APP_NODE_CONFIG App_Node[MAX_NODE_NUM];
-SYSTEM_BOARD Sysboard;
+NODE_CONFIG RS485_Node[MAX_NODE_NUM];  
+APP_NODE_CONFIG App_Node[MAX_NODE_NUM]; // application related.
+SYSTEM_BOARD Sysboard;  //system
 
 CString sAppPath;
 CString sLogPath;
 CStringArray sLog;
 
 CString s_starttime,s_endtime,s_type("Default");
-double g_wtotal;
-int g_wcount;
+double g_wtotal;  // total weight
+int g_wcount; // total pack numbers
 int glb_debug = 1;
 
 SOCKET sockConn;
 DWORD  dwThreadId;  
 HANDLE  hThread;  
-CString flash_cmd("");
+CString flash_cmd("");  // cmd from flash. 
 
-CString SjGetAppDirectory()
+CString SjGetAppDirectory()  // get exe path
 {
 	CString sAppFolder;
 	char szPath[MAX_PATH];
@@ -47,7 +47,7 @@ CString SjGetAppDirectory()
 
 //loop of serial parser , just call cm_pushc to update the register
 static char sendBuf[1500];
-void check_serial()
+void check_serial()   
 {
 	static char h;
 	static char l;
@@ -77,7 +77,7 @@ void answer_flash(CString str){
 	send(sockConn,(LPCTSTR)str,str.GetLength(),0);
 	send(sockConn,&a,1,0);
 }
-CString ExtractString(CString &parm)
+CString ExtractString(CString &parm)    // A:B:C format from flash
 {
 	CString ret;
 	if(parm.Find(":") < 0){
@@ -88,9 +88,11 @@ CString ExtractString(CString &parm)
 	parm.Delete(0,ret.GetLength() + 1);
 	return ret;
 }
+/*********************************************************************************************************************/
 //big handler here:)
 //command format	cmdid:parm1:parm2...
 //return command will be in the same format;
+/*********************************************************************************************************************/
 int flash_cmd_handler(){
 	CString stemp;
 	CString cmdid,cmdparm;
@@ -209,7 +211,11 @@ int flash_cmd_handler(){
 		//Sysboard.node_num = oldnum;
 #endif
 	}
+<<<<<<< .mine
+
+=======
 	//just update the content of the node
+>>>>>>> .r47
 	if(cmdid == "search"){	//search node:	search:addr			return  display:saddr:nodexml
 		CString saddr;
 		saddr = ExtractString(cmdparm);
@@ -537,10 +543,22 @@ int flash_cmd_handler(){
 		CString trigtype = ExtractString(cmdparm);
 		CString toxml;
 		sgrp.Trim("abcdefghijklmnopqrstuvwxyz_");
+		u16 packer_config = atoi(cmdparm);
 
+<<<<<<< .mine
+		//toxml.Format("<opt offset_up_limit[%i]='%i' flag_start_machine[%i]='%i'/>",atoi(sgrp),atoi(cmdparm),atoi(sgrp),CMD_PACKER_INIT);
+		//setnodexml(0xff,toxml);
+		//Sleep(toxml.GetLength()*10);
+		
+		printf("*****************************************************************\n");
+		printf("packer configuration setting: CONFIG_REG = %x \n", packer_config);
+		printf("*****************************************************************\n");
+		init_packer_interface(0,packer_config);
+=======
 		toxml.Format("<opt offset_up_limit[%i]='%i' flag_start_machine[%i]='%i'/>",atoi(sgrp),atoi(trigtype)+atoi(cmdparm),atoi(sgrp),CMD_PACKER_INIT);
 		setnodexml(0xff,toxml);
 		Sleep(toxml.GetLength()*10);
+>>>>>>> .r47
 		answer_flash(_T("updatepacker:")+sgrp+_T(":")+trigtype+_T(":")+cmdparm);
 		toxml.Format(_T("%i"),atoi(trigtype)+atoi(cmdparm));
 		WriteProfile("LASTCONFIG","lastpacker"+sgrp,toxml);
@@ -557,7 +575,9 @@ int flash_cmd_handler(){
 	}
 	return 1;
 }
+/*********************************************************************************************************************/
 //loop of handler with flash UI,  just call cmd_handler
+/*********************************************************************************************************************/
 DWORD  WINAPI  AnswerThread(LPVOID  lparam){
 	  static char recvBuf[1000];
 	  CString str("");
@@ -581,11 +601,13 @@ DWORD  WINAPI  AnswerThread(LPVOID  lparam){
 	  sockConn = SOCKET_ERROR;
 	  return 0;
 }
-
+/*********************************************************************************************************************/
+// IOEX main entry
+/*********************************************************************************************************************/
 int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 {
 	int nRetCode = 0;
-
+    bool init_done = 0; 
 	xmlfilter(_T("<node  addr='9' board='16' baudrate='0' Poise_Weight_gram0='50' Poise_Weight_gram1='100' Poise_Weight_gram2='200' Poise_Weight_gram3='300' Poise_Weight_gram4='500' cs_poise0='36227' cs_poise1='37571' cs_poise2='40262' cs_poise3='42948' cs_poise4='48330' cs_zero='34882' target_weight='100' offset_up='25' cs_Filter_option='18' cs_gain_wordrate='3' motor_speed='1' magnet_freq='9' magnet_amp='60' magnet_time='2' delay_f='20' delay_w='20' delay_s='20' open_s='10' open_w='10' revision='0' reserved1='170' reserved2='255' cs_mtrl='35136' Mtrl_Weight_gram='9' Mtrl_Weight_decimal='23' status='0' cs_status='0' hw_status='0' cs_sys_gain_cal_data='0' cs_sys_offset_cal_data='0' reserved3='34882' NumOfDataToBePgmed='0' flag_reset='0' flag_enable='0' flag_disable='0' flag_release='0' flag_goon='0' test_mode_reg1='0' test_mode_reg2='0' mode='0' phase='0' motor_pulse_num='0' mag_pulse_num='0' half_period='0' />"));
 	// initialize MFC and print and error on failure
 	if (!AfxWinInit(::GetModuleHandle(NULL), NULL, ::GetCommandLine(), 0))
@@ -670,7 +692,13 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 		{
 			Sleep(1);	//handle flash command
 		}
-
+        /* if packer was not initialized AND system is running */
+		//if( (!init_done) && (Sysboard.running[0]) )  
+		/*if (!init_done)
+		{  init_packer_interface(0); // to be changed to variable "grp"
+		   init_done = 1; 
+		   printf("packer 0 interface initialization completed \n");
+		}*/
 		collect_reading(); //collect the reading of the bucket periodically
   }
   //¹Ø±Õ´®¿Ú
