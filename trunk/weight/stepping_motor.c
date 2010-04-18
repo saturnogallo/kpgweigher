@@ -1,5 +1,5 @@
-#include <MEGA8.h>  
-#include "define.h"
+#include "MEGA8.h"
+#include "define.h" 
 
 //delay after close signal is detected
 #define SHIFT_PULSE_INCNUM            2
@@ -199,7 +199,7 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
   // NO MORE PULSES.
   else // DEBUG INFORMATION IN STATUS REGISTER
   {  
-      /*if(ENABLE_MOTOR_SENSORS)
+      if(ENABLE_MOTOR_SENSORS)
       {
           if(RS485._motor.phase && CLOSURE_DETECTED) // if bit 7 is set. 
           {  if(RS485._motor.mode == 'S')
@@ -318,8 +318,61 @@ u8 Motor_Is_Running()
 /*****************************************************************************/
 // Get magnet status, return pules number left.
 // if data returned is zero, magnet already stopped.
-/*****************************************************************************/ 
+//
+// All the nodes share the same AC_cross_zero signal as the input to their embeded 
+// Analog comparator. The Analog compartor interrupts when cross_zero is detected.
+// Every analog compartor interrupt, magnet pulse number "RS485._magnet.pulse_num"
+// decrease by one. If board has no AC_cross_zero signal connected to it's analog 
+// comparator, no interrupt will happen. Therefore "RS485._magnet.pulse_num" never
+// returns to zero. Subroutine Magnet_Is_Running()return TRUE when 
+// "RS485._magnet.pulse_num" >0, So in the case mentioned above, Magnet_Is_Running()
+// always returns TRUE. That will be a problem.
+// We need to set a timeout limit (>20ms for 50HZ AC). If "RS485._magnet.pulse_num"
+// >0 and doesn't decrease when timeout, something wrong happened with magnet driver,
+// we should set flag to indicate "magnet_dead".
+/*******************************************************************************/
+extern u16 timerlen[4]; 
+#define SET_MAGNET_ERROR_BIT RS485._global.hw_status |= 0x4
+#define CLEAR_MAGNET_ERROR_BIT  RS485._global.hw_status &= 0xFB
 u16 Magnet_Is_Running()
-{
+{ 
+  static u8 timer_set_already;
+  static u16 last_pulse_num;  
+  /* if pulse_num goes to zero, magnet stops running */
+  if(RS485._magnet.pulse_num == 0)
+  {  timer_set_already = 0;           /* clear flag anyway*/
+     last_pulse_num = 0;
+     CLEAR_MAGNET_ERROR_BIT;  
+     return 0; 
+  } 
+
+  /* magnet is running, we have to set a limit to avoid infinite waiting */ 
+  if(!timer_set_already)               /* timeout not set yet, set it*/
+  {  
+     timerlen[3] = 4;                  /* set timer2 to 4*10ms */
+     TCNT2=0xB8;                       /* 10ms timer tick */
+
+     TIFR |= (1<<TOV2);                /* clear overflow flag */
+
+     TIMSK |= 0x40;                    /* enable TMR2 overflow interrupt.*/
+     timer_set_already = 0xff;         /* set flag */
+     last_pulse_num = RS485._magnet.pulse_num; 
+     CLEAR_MAGNET_ERROR_BIT;
+     return(RS485._magnet.pulse_num); 
+  }
+
+  /* magnet is running, and we have kicked off a timer */  
+  if(timerlen[3] ==0)                  /* time expires */
+  { if(last_pulse_num == RS485._magnet.pulse_num)
+    {  
+       RS485._magnet.pulse_num = 0;    /* error happened, stop magnet pulses */ 
+       SET_MAGNET_ERROR_BIT;
+       return 0xffff;                  /* pulse num didn't decrease within 40ms, error*/
+    }
+    else
+       return RS485._magnet.pulse_num; /* looks normal*/
+  }
+  
+  /* magnet is running, and timer haven't expired yet, too early to make a conclusion */
   return(RS485._magnet.pulse_num);
 }

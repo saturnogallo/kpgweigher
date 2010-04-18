@@ -8,6 +8,8 @@
 //#define _FORCE_INIT_EEPROM_  // force to initialize EEPROM.
 //#define _FORCE_CONSTANT_WEIGHT_    
 //#define _BOARD_TYPE_IS_VIBRATE_
+//#define _TEST_MOTOR_MAGNET_
+//#define _TEST_MAGNET_
 
 #define i32 	long int
 #define i16 	int
@@ -16,6 +18,7 @@
 #define u16 	unsigned int
 #define u8	unsigned char
 
+#define MAX_RS485_ADDR 32
 #define FIRMWARE_REV 0x00
 #define NULL 0x0
 #define PASS 0x0        
@@ -83,7 +86,7 @@ void sleeps(u16);
 
 //define motor pulse numbers
 #define MOTOR_ONE_CYCLE_WITH_SENSOR 230 
-#define MOTOR_ONE_CYCLE_NO_SENSOR 200         
+#define MOTOR_ONE_CYCLE_NO_SENSOR 245 //originally 200        
 #define MOTOR_SHIFT_CYCLE_OPEN 100
 #define HALF_CYCLE_CLOSE_WITH_SENSOR 130
 #define HALF_CYCLE_CLOSE_NO_SENSOR 100
@@ -181,7 +184,9 @@ typedef struct {
         // user can set it with PC software.  
         volatile u16     target_weight;
         // max offset allowed from target(unity: g), pre-set by master board   
-        volatile u16     offset_up;    
+        //volatile u16     offset_up;     changed to 2 u8 words (addr_copy1, board_copy1)
+        volatile u8 addr_copy1;
+        volatile u8 board_copy1;
         
         /**************************************************************/             
 
@@ -219,10 +224,10 @@ typedef struct {
 	// Reserved for Future Use
 	volatile u8      check_sum;
 	volatile u8      rom_para_valid; 
-	volatile u8      addr_backup;
-	volatile u8      board_backup;
+	volatile u8      addr_copy2;
+	volatile u8      board_copy2;
 
-} S_FLASH;                
+} S_FLASH;
 
 typedef struct {
         
@@ -351,6 +356,7 @@ extern u8 debug_mode;
 #define BOARD_TYPE_MASK         0xf0                          
 #define BOARD_TYPE_VIBRATE      0x00
 #define BOARD_TYPE_WEIGHT       0x10
+#define BOARD_TYPE_MOTOR        0x20
 #define BOARD_TYPE_INVALID      0xf0    
 
 #define BOARD_GROUP_MASK        0x0f
@@ -376,7 +382,7 @@ extern u8 debug_mode;
 #define DISPLAY_AD_RAW_DATA    (RS485._global.test_mode_reg1 & TEST_BIT4) == 1
 #define EN_EEPROM_WRITE        (RS485._global.test_mode_reg1 & TEST_BIT3) == 1
 #define EN_RUNTIME_ZERO_ADJUST (RS485._global.test_mode_reg1 & TEST_BIT2) == 1
-#define EN_RUNTIME_MAGNET_ADJ  (RS485._global.test_mode_reg1 & TEST_BIT1) == 1
+#define EN_RUNTIME_MAGNET_ADJ  (RS485._global.test_mode_reg1 & TEST_BIT1) == 1   
 
 #define CHANGE_RS485_ADDR    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x80
 #define CHANGE_BOARD_TYPE    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x40

@@ -40,6 +40,7 @@ static u8 volatile _bEepromBufNs;
 interrupt [EE_RDY] void vIvEeReady(void) 
 { 
     if(!fgEepromBufEmpty()){ 
+        while(EECR & (1<<EEWE));  /* wait for last write to complete */
         EEAR = _sEepromBuf[_bEepromBufRdPtr].wAddress; 
         EEDR = _sEepromBuf[_bEepromBufRdPtr].bVal; 
         EECR |= (1<<EEMWE); 
