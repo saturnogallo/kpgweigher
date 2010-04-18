@@ -10,8 +10,9 @@
 
 
 #define dbgprint	printf
-#define MAX_NODE_NUM 37 //the first one is ignored.               
+#define MAX_NODE_NUM 17 //the first one is ignored.               
 #define MAX_VIBR_NUM 4
+#define MASTER_VIBR_ADDR 11  //RS485 addr of vibrator board is 11.
 
 #define BOARD_TYPE_MASK         0xf0                          
 #define BOARD_TYPE_VIBRATE     	0x00
@@ -26,6 +27,20 @@
 #define BOARD_GROUP_C           0x02
 #define BOARD_GROUP_D           0x03
 #define BOARD_GROUP_NONE	0x07
+
+/*************************************************************************************************************/
+// RS485._global.flag_enable
+#define ENABLE_OFF              0     // stop machine.
+#define ENABLE_START_MACHINE    1     // for mannual manipulation.
+#define ENABLE_INIT_AD          2
+#define ENABLE_TURNS            3
+#define ENABLE_TURNW            4
+#define ENABLE_VIBRATE          5
+#define ENABLE_RESET_WEIGHT		7     // calibrate weight to zero.
+#define ENABLE_ON               80    // machine is fully running now.
+
+#define NREG_ENABLE 65
+/*************************************************************************************************************/
 
 void answer(CString str);
 void query_serial();
@@ -113,14 +128,15 @@ typedef struct {
         // Suspend bucket delay
         u8      delay_s;//38	
 		// Delay for feeding pool (top bucket) motor
-		u8	open_s;//39	 
+		u8		open_s;//39	 
 		// Delay for weighing pool (bottom bucket) motor
-		u8	open_w;//40	   
+		u8		open_w;//40	   
 	
 		// Reserved for Future Use
-		u8  revision;//41
-		u8  reserved1;//42
-		u16 reserved2;//43
+		u8  check_sum;//41
+		u8  rom_para_valid;//42
+		u8  backup_addr;//43
+		u8  backup_board;//44
         u16 cs_mtrl;//45
         /**************************************************************/
         // the followings are read only to master board.
@@ -163,7 +179,7 @@ typedef struct {
         u32     cs_sys_offset_cal_data;//57
         
         // RFU
-        u16     reserved3;   //61
+        u16     old_cs_zero;   //61
         
         /**************************************************************/
         // Control bytes from Master Board.
@@ -203,14 +219,14 @@ typedef struct {
 							ADDR_TO_NAME(board);\
 							ADDR_TO_NAME(baudrate);\
 							ADDR_TO_NAME(Poise_Weight_gram[0]);\
-							ADDR_TO_NAME(cs_poise[0]);\
 							ADDR_TO_NAME(Poise_Weight_gram[1]);\
-							ADDR_TO_NAME(cs_poise[1]);\
 							ADDR_TO_NAME(Poise_Weight_gram[2]);\
-							ADDR_TO_NAME(cs_poise[2]);\
 							ADDR_TO_NAME(Poise_Weight_gram[3]);\
-							ADDR_TO_NAME(cs_poise[3]);\
 							ADDR_TO_NAME(Poise_Weight_gram[4]);\
+							ADDR_TO_NAME(cs_poise[0]);\
+							ADDR_TO_NAME(cs_poise[1]);\
+							ADDR_TO_NAME(cs_poise[2]);\
+							ADDR_TO_NAME(cs_poise[3]);\
 							ADDR_TO_NAME(cs_poise[4]);\
 							ADDR_TO_NAME(cs_zero);\
 							ADDR_TO_NAME(target_weight);\
@@ -226,9 +242,10 @@ typedef struct {
 							ADDR_TO_NAME(delay_s);\
 							ADDR_TO_NAME(open_s);\
 							ADDR_TO_NAME(open_w);\
-							ADDR_TO_NAME(revision);\
-							ADDR_TO_NAME(reserved1);\
-							ADDR_TO_NAME(reserved2);\
+							ADDR_TO_NAME(check_sum);\
+							ADDR_TO_NAME(rom_para_valid);\
+							ADDR_TO_NAME(backup_addr);\
+							ADDR_TO_NAME(backup_board);\
 							ADDR_TO_NAME(cs_mtrl);\
 							ADDR_TO_NAME(Mtrl_Weight_gram);\
 							ADDR_TO_NAME(Mtrl_Weight_decimal);\
@@ -237,7 +254,7 @@ typedef struct {
 							ADDR_TO_NAME(hw_status);\
 							ADDR_TO_NAME(cs_sys_gain_cal_data);\
 							ADDR_TO_NAME(cs_sys_offset_cal_data);\
-							ADDR_TO_NAME(reserved3);\
+							ADDR_TO_NAME(old_cs_zero);\
 							ADDR_TO_NAME(NumOfDataToBePgmed);\
 							ADDR_TO_NAME(flag_reset);\
 							ADDR_TO_NAME(flag_enable);\
@@ -251,8 +268,7 @@ typedef struct {
 							ADDR_TO_NAME(motor_pulse_num);\
 							ADDR_TO_NAME(mag_pulse_num);\
 							ADDR_TO_NAME(half_period);
-
-
+/* SYSTEM_BOARD should be consistent with array "sys_reg_size[]" defined in action.cpp */
 typedef struct
 { //status from pc
 	u16 gw_target[MAX_VIBR_NUM];//0
@@ -262,10 +278,15 @@ typedef struct
 	u8  node_num;               //28  // how many weight node in this system
 	u8  vibrator_num;           //29  // number of Vibrator detected in the system
 	u8  running[MAX_VIBR_NUM];  //30
-	u8  flag_start_machine[MAX_VIBR_NUM]; //34       // Set when starting machine command is received.
+	u8  flag_start_machine[MAX_VIBR_NUM]; //34   Set when starting machine command is received.
 	u8  flag_stop_machine[MAX_VIBR_NUM];  //38
 	u8  flag_search[MAX_VIBR_NUM];        //42
 	u8  flag_report;					  //46
+	u8  reserved1;                        //47  -- aligned
+	u16 packer_config1;                   //48  -- word aligned
+    u16 packer_config2;                   //50      
+    u16 reserved2;                        //52
+    u16 reserved3;                        //54
 }SYSTEM_BOARD;
 
 //check whether the address matches to some Sysboard's name
@@ -281,7 +302,12 @@ typedef struct
 							GRP_A2N_SET(flag_search);\
 							A2N_SET(node_num);\
 							A2N_SET(vibrator_num);\
-							A2N_SET(flag_report);
+							A2N_SET(flag_report);\
+							A2N_SET(reserved1);\
+							A2N_SET(packer_config1);\
+							A2N_SET(packer_config2);\
+							A2N_SET(reserved2);\
+							A2N_SET(reserved3);
 
 extern NODE_CONFIG RS485_Node[MAX_NODE_NUM];
 extern APP_NODE_CONFIG App_Node[MAX_NODE_NUM];
