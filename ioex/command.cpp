@@ -32,6 +32,10 @@ CM_OUTFRAME  outfrm = {0xfe,0x68,0,0,0,0,NULL_OUTBUF,0};
 extern u8 *glb_address;
 extern u8 glb_hit;
 
+extern u8 *node_reg;			// node register address
+extern u8 node_reg_answered;	// indicator: 1: node reg data received.
+
+
 u16 checksum(u8 *buf, u8 size){
         u8 sum = 0;
         while(size-- > 0){
@@ -41,6 +45,12 @@ u16 checksum(u8 *buf, u8 size){
         return sum;
 }        
 
+/*************************************************************************************************************/
+//
+// Go through all names in node register name table, if address offset of a name is equal to variable "id",
+// name is found.  para 1 : node address, para 2: register offset in node register structure.
+//
+/*************************************************************************************************************/
 const TCHAR* addr2name(u8 addr,u8 id)
 {
 	if(addr == 0xff){ //from sysboard
@@ -51,7 +61,11 @@ const TCHAR* addr2name(u8 addr,u8 id)
 	return _T("N/A");
 }
 extern int glb_debug;
-//handle infrm.cmd (only W and X is required)
+/*************************************************************************************************************/
+//
+// Handle infrm.cmd (only W and X is required)
+//
+/*************************************************************************************************************/
 void parse_frame(u8* ptr)
 {
         u8 j,offset;
@@ -64,13 +78,16 @@ void parse_frame(u8* ptr)
 						offset = n2l_map[infrm.databuf[j]];
 					if(offset == 0xff)
 					{
-						printf("unknow W pos\n");
+						printf("unknown W pos\n");
 						return;
 					}
 					
                     *(ptr+offset) = infrm.databuf[j+1];
 					if(((ptr+offset)	== glb_address) && (glb_hit == 0) && (infrm.addr_from == 0xff))
 						glb_hit = 1;
+					if(((ptr+offset)	== node_reg) && (node_reg_answered == 0) && (infrm.addr_from < MAX_NODE_NUM))
+						node_reg_answered = 1;
+
 					if(glb_debug == 1)
 						printf("(0x%02x)get 0x%02x as 0x%02x (%s)\n",infrm.addr_from,infrm.databuf[j],infrm.databuf[j+1],addr2name(infrm.addr_from,offset));
 	                j = j+2;
@@ -102,7 +119,10 @@ void parse_frame(u8* ptr)
                 }                              
         }
 }
-
+/*************************************************************************************************************/
+//
+//
+/*************************************************************************************************************/
 void cm_process(){
 	int i;
     if(infrm.addr_to == 0x00)
@@ -112,14 +132,16 @@ void cm_process(){
 			}else{//from node
        		     for(i=0;i<MAX_NODE_NUM;i++){ //search the node
 					 if(infrm.addr_from == RS485_Node[i].addr){
-                       	 	parse_frame((u8*)&RS485_Node[i]);
-                       	 	break;
+                       	 	parse_frame((u8*)&RS485_Node[i]);                       	 	
+							break;
                    	}
 				 }   
 				 if(i >= MAX_NODE_NUM)
 					 dbgprint("unmatched command\n");
 			}
-	}else{
+	}
+	else
+	{
 		printf("addr error\n");
 	}
 }
@@ -136,25 +158,35 @@ void cm_ack()
    serial.SendData((u8*)&(outfrm.cksum),1);
 }
 
+/*************************************************************************************************************/
+//
+//	Write data (size defined by "size") to register (defined by "regid") in node board whose addr is "addr"
+//  regid: byte address offset (local)  offset: byte address offset (node/master board)
+//
+/*************************************************************************************************************/
 void cm_write(u8 addr, u8 regid, u8 size, u8 *dat)
 {
-        u8 j,offset;
+    u8 j,offset;
 	if(addr == 0xff){
 		offset = l2s_map[regid];
 	}else{
 		offset = l2n_map[regid];
 	}
+	// array l2s_map[] and l2n_map[] have been set to 0xff during intialization
+	// if no such register in node or master board.
 	if(offset == 0xff)
 		return;
 
-        outfrm.addr_from = 0x00;
-		outfrm.addr_to = addr;
-		outfrm.cmd = 'W';
-        outfrm.datalen = 2*size;
-        j = 0;
+    // fill output frame.
+	outfrm.addr_from = 0x00;
+	outfrm.addr_to = addr;
+	outfrm.cmd = 'W';
+    outfrm.datalen = 2*size;
+    j = 0;
 	while(j < 2*size){
 		outfrm.databuf[j++] = offset++;
-       		outfrm.databuf[j++] = *dat;
+       	outfrm.databuf[j++] = *dat;
+		// get name based on reg id (byte offset in NODE_CONFIG structure)
 		CString name = addr2name(addr,regid);
 		if((name.Find("flag_report") < 0))//(name.Find("flag_search") < 0) && (name.Find("flag_goon") < 0))
 			printf("(0x%02x)set (%s) to 0x%02x\n",addr,addr2name(addr,regid++),*dat++);
@@ -165,6 +197,12 @@ void cm_write(u8 addr, u8 regid, u8 size, u8 *dat)
 	}
         cm_ack();
 }
+/*************************************************************************************************************/
+//
+//	Read register (defined by regid) from node or master board (defined by addr)
+//  regid: byte address offset (local)  offset: byte address offset (node/master board)
+//
+/*************************************************************************************************************/
 void cm_query(u8 addr, u8 regid, u8 size)
 {                          
     u8 j,offset;
@@ -181,13 +219,18 @@ void cm_query(u8 addr, u8 regid, u8 size)
 	if(offset == 0xff)
 		return;
 
-    j = 0;
+	j = 0;
     while(j < size){
         outfrm.databuf[j++] = offset++;
-    }                           
-    cm_ack();
+    }	
+	cm_ack();
 }                    
 
+/*************************************************************************************************************/
+//
+// Serial port receiving state machine.
+//
+/*************************************************************************************************************/
 void cm_pushc(u8 c)
 {
       if(RFlag == RF_CKSUM)                       //wait until it is processed
