@@ -9,22 +9,133 @@
 
 
 extern CString sAppPath;
-#define STATE_BEIDLE		0
-#define STATE_DONE_OK		0xfd
-#define STATE_DONE_FAIL		0xfe
 
-//size of each reg
-const u8	node_reg_size[] = {8,8,8,16,16,16,16,16,16,16,16,16,16,16,16,16,8,8,8,8,8,16,8,8,8,8,8,8,8,16,16,16,8,8,8,8,32,32,16,8,8,8,8,8,8,8,8,8,8,8,32,16};
-const u8	sys_reg_size[] = {16,16,16,16,16,16,16,16,16,16,16,16,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+/*************************************************************************************************************/
+//size of each reg in node or master board 
+/*************************************************************************************************************/
+// addr(u8), board_id(u8), baudrate(u8), Poise_Weight_gram[5](u16)
+// cs_poise[5](u16), cs_zero(u16),  target_weight(u16), offset_up(u16)
+// cs_Filter_option(u8), cs_gain_wordrate(u8), motor_speed(u8), magnet_freq(u8),magnet_amp(u8), magnet_time(u16)
+// delay_f(u8), delay_w(u8), delay_s(u8),open_s(u8), open_w(u8)
+// check_sum(u8), rom_para_valid(u8),backup_addr(u8),backup_board(u8)
+// cs_mtrl(u16), Mtrl_Weight_gram(u16), Mtrl_Weight_decimal(u8),status(u8), cs_status(u8), hw_status(u8)
+// cs_sys_gain_cal_data(u32), s_sys_offset_cal_data(u32), old_cs_zero(u16),NumOfDataToBePgmed(u8),flag_reset(u8)
+// flag_enable(u8),flag_disable(u8),flag_release(u8), flag_goon(u8),test_mode_reg1(u8), test_mode_reg2(u8)
+// mode(u8),phase(u8),motor_pulse_num(u8),magnet_pulsenum(u32), magnet_halfcycle(u16)
+const u8	node_reg_size[] = 
+{8,8,8,16,16,16,16,16,\
+16,16,16,16,16,16,16,16, \
+8,8,8,8,8,16,\
+8,8,8,8,8, \
+8,8,8,8,\
+16,16,8,8,8,8,\
+32,32,16,8,8,\
+8,8,8,8,8,8,\
+8,8,8,32,16};
+
+/********************************************************************************************************************/
+// "sys_reg_size" should be consistent with structure "SYSTEM_BOARD"defined in "ioex.h"
+/* typedef struct
+{ //status from pc
+	u16 gw_target[MAX_VIBR_NUM];//0
+	u16 gw_uvar[MAX_VIBR_NUM];  //8
+	u16 gw_dvar[MAX_VIBR_NUM];  //16
+	u8  flag_goon[MAX_VIBR_NUM];//24
+	u8  node_num;               //28  // how many weight node in this system
+	u8  vibrator_num;           //29  // number of Vibrator detected in the system
+	u8  running[MAX_VIBR_NUM];  //30
+	u8  flag_start_machine[MAX_VIBR_NUM]; //34   Set when starting machine command is received.
+	u8  flag_stop_machine[MAX_VIBR_NUM];  //38
+	u8  flag_search[MAX_VIBR_NUM];        //42
+	u8  flag_report;					  //46
+	u8  reserved1;                        //47  -- aligned
+	u16 packer_config1;                   //48  -- word aligned
+    u16 packer_config2;                   //50      
+    u16 reserved2;                        //52
+    u16 reserved3;                        //54
+}SYSTEM_BOARD;*/
+
+const u8	sys_reg_size[] = {16,16,16,16,\
+16,16,16,16,\
+16,16,16,16,\
+8,8,8,8,\
+8,\
+8,\
+8,8,8,8,\
+8,8,8,8,\
+8,8,8,8,\
+8,8,8,8,\
+8,\
+8,\
+16,16,16,16};
+
+/********************************************************************************************************************/
+
 u8	l2n_map[sizeof(NODE_CONFIG)]; //local address to node address map
 u8	n2l_map[sizeof(NODE_CONFIG)]; //node address to local address map
 u8	l2s_map[sizeof(SYSTEM_BOARD)];//local address to system address map
 u8	s2l_map[sizeof(SYSTEM_BOARD)];//system address to local address map
 
 u8 *glb_address=0;
-u8 glb_hit=0;
+u8 glb_hit=0;                 ///indicator 1: get answer from master board 
+
+/*************************************************************************************************************/
+// The following 2 global variables are used for data sharing between get_node_reg() and parse_frame()
+// which is called by check_serial() indirectly.
+// "*node_reg" points to a register in a node. "node_reg_answered" indicates whether answer has been received
+// by serial port or not, 0: still waiting, 1: received.
+/*************************************************************************************************************/
+u8 *node_reg=0;				// node register address
+u8 node_reg_answered=0;		// indicator: 1: node reg data received.
+
+
 extern SOCKET sockConn;
-//query the sys flag and wait until we got result
+/*************************************************************************************************************/
+//
+// This subroutine read node registers and wait until data is returned or timeout.
+// Subroutine called : read_nodereg_b(id,name)
+// Data returned: data in register flag_goon or flag_release.
+// These 2 registers are reset to "0" when goon or release command is served. 
+/*************************************************************************************************************/
+#define QUERY_TIMEOUT 0xff
+#define QUERY_SOCKET_ERR 0xfe
+
+u8 get_node_reg(u8 node_id, u8 *reg)
+{   
+	u16 timeout=2048;
+	u16 count = 0 ;
+	node_reg = reg;
+	node_reg_answered = 0;
+	//send query command to node:
+	cm_query(RS485_Node[node_id].addr, (u8)(reg-(u8*)&RS485_Node[node_id]), sizeof(u8));
+	Sleep(TWOFRM_DURATION);
+	while(node_reg_answered == 0){
+		if((count++ % 211) == 210){
+			//send the query for every 211*10 ms
+			cm_query(RS485_Node[node_id].addr, (u8)(reg-(u8*)&RS485_Node[node_id]), sizeof(u8)); 
+			printf("query RS485_Node[%d] reg again\n",node_id);
+		}
+		check_serial();
+		if(timeout == count){
+			printf("get RS485_Node[%d] reg timeout\n",node_id);
+			count = 0;
+			return QUERY_TIMEOUT;  
+		}
+		if(sockConn == SOCKET_ERROR)	//flash connection is closed
+		{
+			printf("socket error(location: get_node_reg())\n");
+			node_reg_answered = 1;
+			return QUERY_SOCKET_ERR;
+		}
+		Sleep(TICK_DURATION);
+	}
+	return *reg;
+}
+/*************************************************************************************************************/
+//
+// query the sys flag and wait until we got result
+//
+/*************************************************************************************************************/
 u8 get_sysflag(u8 *address,u16 timeout=1024)
 {
 	u16 count = 0 ;
@@ -44,7 +155,7 @@ u8 get_sysflag(u8 *address,u16 timeout=1024)
 		}
 		if(sockConn == SOCKET_ERROR)	//flash connection is closed
 		{
-			printf("socket error");
+			printf("socket error\n");
 			glb_hit = 1;
 			break;
 		}
@@ -62,7 +173,7 @@ bool set_sysflagb(u8 *address, u8 target, u16 timeout=1024)
 	return true;
 }
 //query and wait until the sysflag is state_idle
-void wait_until_idle_sysflagb(u8 *reg, int timeout)
+u8 wait_until_idle_sysflagb(u8 *reg, int timeout)
 {
 	u8 ret = get_sysflag(reg);
 	while(1){
@@ -77,6 +188,9 @@ void wait_until_idle_sysflagb(u8 *reg, int timeout)
 		if(ret == STATE_BEIDLE){
 			break;
 		}
+		if(ret == STATE_BUSY){
+			break;
+		}
 		if(sockConn == SOCKET_ERROR)	//flash connection is closed
 		{
 			printf("socket error\n");
@@ -84,6 +198,7 @@ void wait_until_idle_sysflagb(u8 *reg, int timeout)
 		}
 		ret = get_sysflag(reg);
 	}
+	return(ret);
 }
 //set the flag_report to addr, so that main board will report the node
 bool search_node(u8 addr)
@@ -189,11 +304,14 @@ CString getnodexml(u8 addr){
 	str.Remove('[');	str.Remove(']');
 	return str+" />";
 }
-//does the group has at least one node?
+/***************************************************************************************************************/
+//does the group has at least one node? 
+/***************************************************************************************************************/
 bool group_hasnode(u8 grp)
 {
 		for(int j=0;j<MAX_NODE_NUM;j++){
-			if((RS485_Node[j].board & BOARD_TYPE_MASK) != BOARD_TYPE_INVALID){
+			//if((RS485_Node[j].board & BOARD_TYPE_MASK) != BOARD_TYPE_INVALID){
+            if(((RS485_Node[j].board & BOARD_TYPE_MASK) == BOARD_TYPE_WEIGHT) ||((RS485_Node[j].board & BOARD_TYPE_MASK) == BOARD_TYPE_VIBRATE)){
 				if((RS485_Node[j].board & BOARD_GROUP_MASK) == grp){
 					return true;
 				}
@@ -240,12 +358,26 @@ bool second6_pass()
 	}
 	return  false;
 }
-//todo
+/*************************************************************************************************************/
+//
+// Algorithm to do combinations and release
+//
+/*************************************************************************************************************/
+
+#define RELEASE_DONE 0
+extern u8 node2release[]; // addr of node to be released
+
 void collect_reading(){
-	for(int i=0;i<4;i++){
+	u8 prev_release_done;
+	u8 j;
+	static bool weight_bucket_cleaned[MAX_NODE_NUM];
+	
+	for(int i=0;i<MAX_VIBR_NUM;i++)
+	{
 		u8 *reg_search = (u8*)&Sysboard.flag_search[i];
 		u8 *reg_goon = (u8*)&Sysboard.flag_goon[i];	
-
+		u8 node_to_query =MAX_NODE_NUM+1;
+		
 		if(!group_hasnode(i))	//without node in this group
 			continue;
 
@@ -266,59 +398,197 @@ void collect_reading(){
 		}
 			
 		update_node(i); //update the display of flash
-		if(Sysboard.running[i]) {
-			while(Calculation5(i) == 0){
-				printf("there is 5 box  match\n");
-				Sleep(10);
-			}
-			while(Calculation4(i) == 0){
-				printf("there is 4 box  match\n");
-				Sleep(10);
-			}
-			while(Calculation3(i) == 0){
-				printf("there is 3 box  match\n");
-				Sleep(10);
-			}
-			while(Calculation2(i) == 0){
-				printf("there is 2 box  match\n");
-				Sleep(10);
-			}
-			while(Calculation1(i) == 0){
-				printf("there is 1 box  match\n");
-				Sleep(10);
-			}
 
-			goonall(i);
-			set_sysflagb(reg_goon,1,1);	//set goon flag
-			while(1){
-				u8 ret = get_sysflag(reg_goon);
-				if(ret == STATE_DONE_OK || ret == STATE_DONE_FAIL)
-					break;
-				Sleep(TWOFRM_DURATION);
-			}
-		}else{
+		//clear_weight_to_zero();
+		//turn_upper_bucket();
+		//run combinational algorithm
+
+		if(Sysboard.running[i]) 
+		{			
+			/***************************************************************************************************************/
+			// First to send release command to clean lower bucket. Node firmware will adjust weight to zero on completion 
+			// of release. 
+			/*for(j=0;j<10;j++)
+			{
+			    // Check node propery
+			    if((RS485_Node[j].board & BOARD_GROUP_MASK) != i) continue;
+			    if((RS485_Node[j].board & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT) continue;
+                //if(RS485_Node[j].Mtrl_Weight_gram > 0xfff0) continue; 
+			    if(weight_bucket_cleaned[j]) continue;
+			    // weight bucket has not been cleaned. send release command.
+			    printf("sending release command to node %d, grp =%d\n", j, i);
+			    RS485_Node[j].flag_release = 1;
+			    write_nodereg_b(j,flag_release);
+			    weight_bucket_cleaned[j] = 1; // set "cleaned" flag.
+			    Sleep(500);
+				return;
+				//if(get_node_reg(j, &(RS485_Node[j].flag_release))) return;
+			    
+			}		
+			printf("going to algorithm, i= %d\n", i);	*/	
+			/***************************************************************************************************************/
+			// poll flag_release reg: 0: release action is done. We need to poll release flag from 5 nodes 
+			// max, but here only sample the first node to be released.
+			if(get_node_reg(node2release[0], &(RS485_Node[node2release[0]].flag_release))) 
+				prev_release_done = 0; 
+			else
+				prev_release_done = 1;
+
+			// if previous release request has been served by nodes, start next combination
+			// Need to make sure IOEX gets updated weight value after previous release or set flag to prevent 
+			// out-of-dated weight from participating new calculations. This is done by subroutine report_pack() in 
+			// CalculationX(), which invalidates weight after release. 
+			if(prev_release_done)
+				if(Calculation5(i) == 0) { prev_release_done = 0; Sleep(10);}
+			if(prev_release_done)
+				if(Calculation4(i) == 0) { prev_release_done = 0; Sleep(10);}
+			if(prev_release_done)
+				if(Calculation3(i) == 0) { prev_release_done = 0; Sleep(10);}
+			if(prev_release_done)
+				if(Calculation2(i) == 0) { prev_release_done = 0; Sleep(10);}
+			if(prev_release_done)
+				if(Calculation1(i) == 0) { prev_release_done = 0; Sleep(10);}
+			/***************************************************************************************************************/ 
+			if(prev_release_done) 
+			{    
+				/*****************************************************************************************/
+				printf("No combination this cycle, feed bucket again...\n");
+				// if no successful combination, feed lower bucket to generate new weight for next cycle 
+				for(j=0;j<MAX_NODE_NUM;j++)
+				{	 // Check node propery
+					 if((RS485_Node[j].board & BOARD_GROUP_MASK) != i) continue;
+					 if((RS485_Node[j].board & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT) continue;
+                     if(RS485_Node[j].Mtrl_Weight_gram > 0xfff0) continue; 
+					// Don't feed is current weight is > 1/3 of target ( unity of system.gw_target is 0.1g)
+					if(RS485_Node[j].Mtrl_Weight_gram < Sysboard.gw_target[i]/32)
+					{   RS485_Node[j].flag_goon = 1;
+				        write_nodereg_b(j,flag_goon);
+						node_to_query = j;
+				    }
+					Sleep(TWOFRM_DURATION);
+				}
+				/*****************************************************************************************/
+				// If no node gets goon command, try to find nodes with low weight. Then issue goon command
+				// to add material to those nodes. 
+				if(node_to_query > MAX_NODE_NUM)
+				{  
+					for(j=0;j<MAX_NODE_NUM;j++)
+					{	 // Check node propery
+					     if((RS485_Node[j].board & BOARD_GROUP_MASK) != i) continue;
+					     if((RS485_Node[j].board & BOARD_TYPE_MASK) != BOARD_TYPE_WEIGHT) continue;
+                         if(RS485_Node[j].Mtrl_Weight_gram > 0xfff0) continue; 
+					     // Don't feed is current weight is > 10/16 of target ( unity of system.gw_target is 0.1g)
+					     if(RS485_Node[j].Mtrl_Weight_gram < Sysboard.gw_target[i]/16)
+					     {   RS485_Node[j].flag_goon = 1;
+				             write_nodereg_b(j,flag_goon);
+						     node_to_query = j;
+				         }
+					     Sleep(TWOFRM_DURATION);
+				    }
+				}
+			    /*****************************************************************************************/
+				//set reg_goon register, master board trigger new round of weight search.
+				set_sysflagb(reg_goon,1,1);	//set goon flag
+				while(1){
+					u8 ret = get_sysflag(reg_goon);
+					if(ret == STATE_DONE_OK || ret == STATE_DONE_FAIL)
+						break;
+					Sleep(TWOFRM_DURATION);
+				}
+                /*****************************************************************************************/
+				// Wait for the last issued go_on command to be completed.
+				// node will reset flag_goon once command is serveed
+				if(node_to_query < MAX_NODE_NUM)
+				{  // start master vibrator
+				   master_vibrator();				 
+				   for(j=0;j<3;j++) /* try max 3 times, the delay should be enough for a node to complete goon command*/
+				   {   Sleep(100);
+				       printf("waiting for node (addr = %d) to complete goon command...\n", RS485_Node[node_to_query].addr );
+					   if(!get_node_reg(node_to_query, &(RS485_Node[node_to_query].flag_goon)))
+						   break; /* break if node has already complete goon command*/
+				   }
+				}
+				// update fail counter for each node
+				goonall(i);
+			} /* end of if(prev_release_done) */
+            /***************************************************************************************************************/ 
+		} /* end of if(Sysboard.running[i]) */
+		else{
 			set_sysflagb(reg_search,STATE_BEIDLE);
-		}
+		} 
+		
 		Sleep(TWOFRM_DURATION);
 		//wait_until_idle_sysflagb(reg_search);
 	}
 }
+/******************************************************************************************************/
 //wait until packer is available
-void wait_packer(u8 grp)
+/******************************************************************************************************/
+u8 check_packer(u8 grp)
 {
 	u8 *reg_start = (u8*)&Sysboard.flag_start_machine[grp];
 	set_sysflagb(reg_start,CMD_PACKER_AVAILABLE);
-	wait_until_idle_sysflagb(reg_start,100);
+	return(wait_until_idle_sysflagb(reg_start,100));
 }
+
+/******************************************************************************************************/
+/* tell packer release is done*/
+/******************************************************************************************************/
 void drop_packer(u8 grp)
 {
 	u8 *reg_start = (u8*)&Sysboard.flag_start_machine[grp];
 	set_sysflagb(reg_start,CMD_PACKER_DONE);
 	wait_until_idle_sysflagb(reg_start,100);
 }
+/******************************************************************************************************/
+// 1 10 01 1 1 1
+// PC interface (use command start reg and offset_low_limit only): 
+//    Mode:     BIT[7] 1: with shakehands    0: No shakehands 
+//
+//    IF1/IF2:  BIT[6:5] 00: low level trigger
+//                       01: rising edge trigger 
+//                       10: falling edge trigger
+//                       11: high level trigger
+//
+//    OR1/OF1   BIT[4:3] 00: low level true
+//                       01: negative pulse true
+//                       10: positvie pulse true
+//    FR/OF2             11: high level true
+//
+//    Mem:      BIT[2]   1:  pending
+//                       0:  no pending
+//
+//    Asyn_IF:  BIT[1]   1:  Save feed request if weigher is not ready. 
+//                           Packer doesn't need to send IF request again.
+//                       0:  Ingore feed request if weigher is not ready.
+//                           Packer has to request again later.
+//
+//    Init:     BIT[0]   0:  wait for packer to intiate handshake. 
+//                       1:  weigher intiates handshake (first send)
+//
+//    MULTI_FD: BIT[10:8]:   continuously feed multi (1~8) times every request from packer.
+//    OFDLY:    BIT[15:11] delay, unity 200 ms     
+//  
+/******************************************************************************************************/
+/* initialize interface with packer*/
+void init_packer_interface(u8 grp, u16 config)
+{  
+   /* packer interface settings 0xc2: output low, 0xCA: negative pulse, 0xCB: packer to initiate */
+   //Sysboard.gw_uvar[grp] = config; 
+   //write_sysreg_w(gw_uvar);
+   Sysboard.packer_config1 = config; 
+   write_sysreg_w(packer_config1);
+
+   u8 *reg_start = (u8*)&Sysboard.flag_start_machine[grp];
+   set_sysflagb(reg_start,CMD_PACKER_INIT);
+   wait_until_idle_sysflagb(reg_start,100);   
+
+}
+/*********************************************************************************************************************/
 //get node property setting from flash UI then send it to the board here
 //this function just set one node property
 //str : <node name1='value1|' name2='value2' name3='value3&'>
+/*********************************************************************************************************************/
 void setnodeproperty(int id, CString str, CString sfind, u8 regid,u8* dat, u8 size)
 {
 	sfind = sfind+CString("='");
@@ -364,7 +634,9 @@ void setnodeproperty(int id, CString str, CString sfind, u8 regid,u8* dat, u8 si
 
 }
 
+/*********************************************************************************************************************/
 //get the node or sys setting from flash UI and send them all to node or sys board
+/*********************************************************************************************************************/
 void setnodexml(int id, CString str){
 	int j;
 	if(id == 0xff){ //system board node
@@ -399,8 +671,10 @@ void setnodexml(int id, CString str){
 		j++;
 	}
 }
+/*********************************************************************************************************************/
 //caculate the average packs in past 60 seconds and send it to flash UI
 //with command release_0<...
+/*********************************************************************************************************************/
 extern u8 pids[];
 static CArray<time_t, time_t> timelist;
 extern CStringArray sLog;
@@ -430,7 +704,7 @@ void report_pack(u8 num){
 				CString a;
 				a.Format(_T("bkset%i='%i' "),RS485_Node[j].addr,RS485_Node[j].Mtrl_Weight_gram);
 				pack = pack + a;
-				sum += (RS485_Node[j].Mtrl_Weight_gram + RS485_Node[j].Mtrl_Weight_decimal/64.0);
+				sum += (RS485_Node[j].Mtrl_Weight_gram+RS485_Node[j].Mtrl_Weight_decimal/64.0);
 				RS485_Node[j].Mtrl_Weight_gram = ~0;
 				group = RS485_Node[j].board & BOARD_GROUP_MASK;
 			}
@@ -457,29 +731,41 @@ void report_pack(u8 num){
 	sLog.Add(ret);
 	answer_flash(ret);
 }
+/*************************************************************************************************************/
+//
+/*************************************************************************************************************/
 void init_vars()
 {
 	memset(&Sysboard,0,sizeof(SYSTEM_BOARD));
 	int i,j,pos;
+	//initialize RS485_Node[]: clear all field, set addr, reset fail_counter, set board property as invalid
+	//and not grouped.
 	for(i=0;i<MAX_NODE_NUM;i++){
 		memset(&RS485_Node[i],0,sizeof(NODE_CONFIG));
 		RS485_Node[i].addr = i;
 		App_Node[i].fail_counter = 0;
 		RS485_Node[i].board = (BOARD_TYPE_INVALID|BOARD_GROUP_NONE);
 	}
+	
 	//generating a map from local to node and node to local
 	j=0;
 	pos = 0;
+	// first initialze all bytes in "RS485_Node" to 0xff.
+	// 0xff means: no such a register
 	for(i=0;i<sizeof(NODE_CONFIG);i++)
 	{
 		l2n_map[i] = 0xff;
 		n2l_map[i] = 0xff;
 	}
+	// "i" : local byte address offset.
 	for(i=0;i<sizeof(NODE_CONFIG);i++)
 	{
+		// if one register is found with local reg address equal to i.
 		if(_T("N/A") != CString(addr2name(0,i)))
 		{
+			// register address in node firmware is byte.
 			l2n_map[i] = j/8; //u8 case
+			// 
 			if(node_reg_size[pos] == 8){
 				n2l_map[j/8] = i;
 			}
@@ -527,7 +813,9 @@ void init_vars()
 		}
 	}
 }
-//todo
+/*************************************************************************************************************/
+//
+/*************************************************************************************************************/
 void init_sys_regs()
 {
 	for(int i=0;i<MAX_VIBR_NUM;i++){
