@@ -299,10 +299,16 @@ void find_nodes(void)
 /**************************************************************************************/
 extern u16 packer_config;
 void cmd_loop(u8 grp){     
-       u8 i;  
+       u8 i; 
+       static u8 signal_to_packer_pending;                 
        cm_process();                                   
        /**************************************************************************************/
        // Command to stop nodes.
+       // if we receive a stop_machine command, we need to make sure the following is well handled
+       // before we stop the machine:
+       // (1) In the case of multiple-release-single-pack mode, if we haven't complete packer feeding
+       //     tasks, we need to complete all the release actions (one cycle) and send out release-done
+       //     signal before stopping the machine.        
        /**************************************************************************************/
        if(is_cmd_flag(system.flag_stop_machine[grp])){   
            for(i=0;i<system.node_num;i++){  
@@ -353,8 +359,8 @@ void cmd_loop(u8 grp){
             // CMD_PACKER_INIT
             /******************************************************/
             if(system.flag_start_machine[grp] == CMD_PACKER_INIT)	//download setting of packer
-            {    //parameter should be stored in system.offset_up_limit[grp];
-                packer_config = system.offset_up_limit[grp];
+            {    //parameter is stored in system.packer_config1
+                packer_config = system.packer_config1; 
                 Init_interface();
                 system.flag_start_machine[grp] = STATE_BEIDLE;
                 return;
@@ -384,12 +390,27 @@ void cmd_loop(u8 grp){
 
             /******************************************************/
             // CMD_PACKER_DONE
+            // sometimes we need to delay for a while before sending out
+            // release_done signal to packer. We kickoff timer 0 service 7 in 
+            // Tell_Packer_Release_Done() for the delay to expire. 
+            // IOEX (PC side) only send CMD_PACKER_DONE once and then wait until 
+            // system.flag_start_machine[grp] = STATE_BEIDLE.
+            // So we add a control switch "signal_to_packer_pending" to 
+            // force Tell_Packer_Release_Done() to run until delay expires AND
+            // release_done signal is sent. By doing this way, the advantage is we
+            // don't need to stay in Tell_Packer_Release_Done().
             /******************************************************/
-            if(system.flag_start_machine[grp] == CMD_PACKER_DONE)	//material release is done
-            {                                    
-                Tell_Packer_Release_Done();
-                system.flag_start_machine[grp] = STATE_BEIDLE;
-                return;
+            if((system.flag_start_machine[grp] == CMD_PACKER_DONE)|| signal_to_packer_pending)	//material release is done
+            {   
+               if(Tell_Packer_Release_Done())  /* need delay*/
+               {   system.flag_start_machine[grp] = STATE_BUSY; 
+                   signal_to_packer_pending = 0xff;
+               }
+               else
+               {   system.flag_start_machine[grp] = STATE_BEIDLE;  
+                   signal_to_packer_pending = 0;
+               }                             
+               return;
             } //*/                   
 
             /******************************************************/
@@ -695,7 +716,7 @@ void main(void)
     system.flag_report = STATE_DONE_OK;	//search action is done
     
     //intialize packer interface
-    packer_config = 0xc2; // 0xa8 IR OR/OF falling edge, with handshake, mem
+    packer_config = 0x00; // 0xa8 IR OR/OF falling edge, with handshake, mem
     Init_interface(); 
          
     //loop of each group;
