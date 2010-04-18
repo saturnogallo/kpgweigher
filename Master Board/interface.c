@@ -72,19 +72,20 @@
 //                       10: positvie pulse true
 //    FR/OF2             11: high level true
 //
-//    Mem:      BIT[2]   1:  pending
-//                       0:  no pending
+//    DLY:      BIT[2]   1:  add delay for material to drop into packer 
+//                           before sending release_done signal to packer.
+//                       0:  no delay
 //
 //    Asyn_IF:  BIT[1]   1:  Save feed request if weigher is not ready. 
 //                           Packer doesn't need to send IF request again.
 //                       0:  Ingore feed request if weigher is not ready.
 //                           Packer has to request again later.
 //
-//    Init:     BIT[0]   0:  weigher intiates handshake (first send) 
-//                       1:  wait for packer to intiate handshake.
+//    Init:     BIT[0]   0:  wait for packer to intiate handshake. 
+//                       1:  weigher intiates handshake (first send)
 //
 //    MULTI_FD: BIT[10:8]:   continuously feed multi (1~8) times every request from packer.
-//    OFDLY:    BIT[15:8] delay, unity 10ms     
+//    OFDLY:    BIT[15:11]:  delay, unity 200ms
 //  
 //    
 /******************************************************************************************************/
@@ -99,7 +100,7 @@ extern SYSTEM system;
 typedef struct {
    volatile u8 pack_reqs_pending;             /* flag to indicate whether there is any 
                                                  pending reuqests from packer */                              
-   volatile u8 Tmr0_Svs[MAX_SVS_NUM];         /* Service 0 provided by Timer 0 */
+   volatile u16 Tmr0_Svs[MAX_SVS_NUM];         /* Service 0 provided by Timer 0 */
    volatile u8 Tmr0_Svs_Status;               /* Service completion status*/ 
    u8 weigher_is_ready;                        /* weigher is available */
    u8 max_feed_counter;                        /* recorde how many times feed has been done */
@@ -107,7 +108,8 @@ typedef struct {
 }INTERFACE;
 
 INTERFACE Intf; 
-
+u8 new_request;
+u8 multi_feed_inprogress;
 /******************************************************************************************************/
 // External Interrupt 0 service routine: feed request from packer 
 // return status whether packer is requesting feeding.
@@ -130,21 +132,35 @@ interrupt [EXT_INT0] void ext_int0_isr(void)
    }
    
    /* On receive response from packer, test if we need to toggle "OF" signal */
-   switch(CONFIG_REG & PACKER_OF_MASK)
+ /*  switch(CONFIG_REG & PACKER_OF_MASK)
    {
       case 0x0:                                   /* low to enable */      
           PORTF |= (1<<PORT_OF1);                 /* assert low until packer response */              
+      //    break;
+     // case 0x8:                                   /* negative pulse to enable */ 
+     //     break;                                  /* no need. handled by timer0_ovf_isr */
+     // case 0x10:                                  /* positive pulse to enable */
+     //     break;                                  /* no need. handled by timer0_ovf_isr */
+     // case 0x18:                                  /* high to enable */
+     //     PORTF &= (~(1<<PORT_OF1));              /* assert high until packer response */
+      //    break;
+     // default: 
+     //     break;         
+  // } 
+   /* if current input is set to level, the input signal has been deasserted */
+   switch(CONFIG_REG & PACKER_IF_MASK)
+   {
+      case 0x0: /* low level */
+          PORTF |= (1<<PORT_OF1);                 /* assert low until packer response */ 
+          new_request = TRUE;
           break;
-      case 0x8:                                   /* negative pulse to enable */ 
-          break;                                  /* no need. handled by timer0_ovf_isr */
-      case 0x10:                                  /* positive pulse to enable */
-          break;                                  /* no need. handled by timer0_ovf_isr */
-      case 0x18:                                  /* high to enable */
+      case 0x60: /* high level */
           PORTF &= (~(1<<PORT_OF1));              /* assert high until packer response */
+          new_request = TRUE;
           break;
-      default: 
-          break;         
-   } 
+      default:
+         break;
+   }
    
    Intf.feed_counter = 0;                         /* reset feed counter */
          
@@ -196,6 +212,13 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
          Intf.Tmr0_Svs_Status &= 0xFB;         /* 0: completion flag */
    }
    /* add service 3 - 7 below*/
+   /* Timer 0, service 7 */   
+   if (Intf.Tmr0_Svs[7])                       /* service 2: pulse width not reached */
+       Intf.Tmr0_Svs[7]--; 
+   else if (Intf.Tmr0_Svs_Status & 0x80)       /* 1: signal not sent yet */
+   {     
+       Intf.Tmr0_Svs_Status &= 0x7F;           /* 0: completion flag */       
+   }
 
    /* Disable timer 0 interrupt on service completion*/
    if (!(Intf.Tmr0_Svs_Status & ((1<<MAX_SVS_NUM)-1)))
@@ -208,7 +231,7 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 /******************************************************************************************************/
 // Kick off Timer 0 services
 /******************************************************************************************************/
-void Kickoff_Timer0(u8 svs_num, u8 svs_time)
+void Kickoff_Timer0(u8 svs_num, u16 svs_time)
 {    
    switch (svs_num)
    { case 0:                                      /* service 0: OR1 pulse width */
@@ -227,7 +250,7 @@ void Kickoff_Timer0(u8 svs_num, u8 svs_time)
         Intf.Tmr0_Svs[3] = svs_time;
         Intf.Tmr0_Svs_Status |= 0x8; 
         break;
-	 case 4:
+     case 4:
         Intf.Tmr0_Svs[4] = svs_time;
         Intf.Tmr0_Svs_Status |= 0x10; 
         break;
@@ -240,7 +263,7 @@ void Kickoff_Timer0(u8 svs_num, u8 svs_time)
         Intf.Tmr0_Svs_Status |= 0x40; 
         break;
      case 7:
-        Intf.Tmr0_Svs[7] = svs_time;
+        Intf.Tmr0_Svs[7] = svs_time;              
         Intf.Tmr0_Svs_Status |= 0x80; 
         break;
      default:
@@ -268,10 +291,20 @@ void Kickoff_Timer0(u8 svs_num, u8 svs_time)
 // INTF1_MTRL_RDY PORTF.0|INTF1_FEED_DONE PORTF.1|INTF1_FORCE_RELEASE PORTF.2|INTF1_FEED_REQ PORTD.0 
 
 // use offset_up_limit register as variable interface with PC
+// If level trigger rather than edge trigger, use polling instead of interrupt.
 /******************************************************************************************************/
 void Init_interface()
 {   
    u8 i;
+   /* We need first to check if we are in handshake mode, if not, we will disable interrupt */
+   if(!INTF_MODE_SHAKEHANDS)
+   {
+      EICRA=0x00; 
+      EICRB=0xFF;
+      EIMSK=0xF0;
+      EIFR=0xF0;
+      return;
+   }
    /* set initial states for outputs: OR1/OF1/FR1 */
    DDRF |= 0xF;                                   /* set PORTF[4:0] as output */      
    switch(CONFIG_REG & PACKER_OF_MASK)            
@@ -297,18 +330,20 @@ void Init_interface()
    /* Make sure Ex_Int4~7 (used by 16C554) is included */   
    switch(CONFIG_REG & PACKER_IF_MASK) /* IF1 */
    {        
-      case 0x00:
-          EICRA=0x00; /*interrupt triggered by low level*/
-          EICRB=0xFF;
-          EIMSK=0xF3;
-          EIFR=0xF3;
-          break;
+      case 0x00:      /* low level valid, use rising edge to detect end of request */
+          PORTD.0=0;  /* set as input */
+          PORTD.1=0;  /* set as input */
+          new_request = TRUE;
       case 0x20:
           EICRA=0x0F; /*interrupt triggered by rising edge*/
           EICRB=0xFF;
           EIMSK=0xF3;
           EIFR=0xF3;         
           break;
+      case 0x60:      /* high level valid, use falling edge to detect end of request */
+          PORTD.0=0;  /* set as input */
+          PORTD.1=0;  /* set as input */
+          new_request = TRUE;
       case 0x40:
           EICRA=0x0A; /*interrupt triggered by falling edge*/
           EICRB=0xFF;
@@ -325,9 +360,10 @@ void Init_interface()
    
    /*Initialize interface variables*/
    if(CONFIG_REG & INIT_MASK)
-      Intf.pack_reqs_pending = FALSE;            /* packer to send first, wait for request */
+      Intf.pack_reqs_pending = TRUE;             /* Weigher to send first */
    else
-      Intf.pack_reqs_pending = TRUE;             /* Weigher to send first */   
+      Intf.pack_reqs_pending = FALSE;            /* packer to send first, wait for request */ 
+      
    Intf.Tmr0_Svs_Status = 0;                     /* all services completed */
    Intf.weigher_is_ready = 0;                    /* initialize weigher status */
    for (i=0; i <MAX_SVS_NUM; i++)
@@ -338,16 +374,36 @@ void Init_interface()
 /******************************************************************************************************/
 // return 0x0 if packing machine is ready to receive another feeding. return 0xff if busy
 /******************************************************************************************************/
-#define INTF_MODE_SHAKEHANDS  (CONFIG_REG & 0x80)
-
 u8 Packer_Is_Busy()
 {  
     /* if in shakehands mode and no requests from packer is pending.*/
     /* variable "pack_reqs_pending" is set by ISR, it is declared as volatile type.*/
-    if((INTF_MODE_SHAKEHANDS) && (!Intf.pack_reqs_pending)) 
-       return 0xff;
+    if(INTF_MODE_SHAKEHANDS) {
+       if(multi_feed_inprogress)   /**/
+          return 0x0;
+          
+       if (((CONFIG_REG & PACKER_IF_MASK) == 0x00) && (PIND.0 = 0 ))   /* low valid */
+         if(new_request)    /* last flag has been cleared. detected by ISR */
+         {  new_request = FALSE;
+            return 0x0;
+         }
+         else
+            return 0xff;
+            
+       if (((CONFIG_REG & PACKER_IF_MASK) == 0x60) && (PIND.0 = 1 ))   /* high valid */
+         if(new_request){
+           new_request = FALSE;
+           return 0x0;  
+         }
+         else
+           return 0xff;
+
+       /* request detected by interrupt */           
+       if(!Intf.pack_reqs_pending)
+         return 0xff; 
+    }
     else
-       return 0x0; 
+       return 0x0;
 }
  
 /******************************************************************************************************/
@@ -382,18 +438,10 @@ void Tell_Packer_Weigher_Rdy()
 // Variable "feed_counter" is used to track whether weigher needs to await acknowledge signal from 
 // packer.
 /******************************************************************************************************/
-void Tell_Packer_Release_Done()
-{
-   
-   Intf.weigher_is_ready = FALSE;                 /* flag to inform interrupt 0 */      
-   Intf.feed_counter++;                           /* feed time increased by 1 */
-   if(Intf.feed_counter < Intf.max_feed_counter)  /* multi feed not completed yet */
-     Intf.pack_reqs_pending = TRUE;               /* so we ignore acknowledge signal from packer */
-   else
-   {  Intf.pack_reqs_pending = FALSE;              /* Now need to await packer's feedback to continue. */   
-      Intf.feed_counter = 0; 
-   }
-   
+//  send out release_done signal to packer
+/**************************************************/
+void send_packer_release_signal()
+{  
    switch(CONFIG_REG & PACKER_OF_MASK)
    {
       case 0x0:                                   /* low to enable */      
@@ -413,6 +461,61 @@ void Tell_Packer_Release_Done()
       default: 
           break;         
    } 
+}
+/***************************************************************/
+// Tell packer material is release, packer can start to pack now.
+// There is a time between multi-head-weigher release material and
+// material drops into packer. So we allow user to set a delay here.
+// In the case of single-release-single-pack and multi-release-single-pack
+// mode, it is good enough to add the delay after last release and
+// before sending out release_done signal to packer.
+// To avoid waiting in this subroutine,  TMR0_SVS7 status bit is
+// checked to decide whether we should go into this subroutine. 
+// Accordingly cmd_loop() in main.c periodically call this subroutine
+// and complete remaining actions in it if delay expires.
+/***************************************************************/
+u8 Tell_Packer_Release_Done()
+{
+   u16 signal_delay;
+   static u8 signal_not_sent_yet;
+      
+   if(Intf.Tmr0_Svs_Status & 0x80)                 /* Tmr0_svs7(delay) is ongoing */
+      return 0xff;                                 /* return and check again later*/           
+   else if(signal_not_sent_yet)                    /* delay expires, and we do have signal to sent*/
+   {
+       send_packer_release_signal();               /* send packer release done signal*/   
+       signal_not_sent_yet = 0;                    /* clear flag */
+       return 0;                                   /* signal sent to packer, return (task done!) */
+   }
+   
+   /* send out release_done signal or kick off timer to send signal later */  
+   Intf.weigher_is_ready = FALSE;                  /* we are responding and completing this cycle, so clear flag for next cycle */      
+   Intf.feed_counter++;                            /* how many times weigher has feed packer in this cycle */
+   if(Intf.feed_counter < Intf.max_feed_counter)   /* packer needs more before it starts to pack */
+   {  Intf.pack_reqs_pending = TRUE;               /* so we don't have to wait for acknowledge signal from packer to proceed */
+      new_request = TRUE;                          /* workaround for level input */
+      multi_feed_inprogress = TRUE;              
+      send_packer_release_signal();                /* send packer release done signal*/
+      return 0;                                    /* task done, return */
+   }
+   else                                            /* last feed, already gave packer what it claims */
+   {  Intf.pack_reqs_pending = FALSE;              /* Now need to await packer's feedback to continue. */   
+      new_request = FALSE;
+      multi_feed_inprogress = FALSE;
+      Intf.feed_counter = 0;                       /* reset counter */
 
+      if((CONFIG_REG & SIGNAL_DELAY_MASK)&&(CONFIG_REG & 0xF800)) /* add delay between releaseing material and sending out signal?  */
+      {   
+         signal_delay = (CONFIG_REG & 0xF800)>>11;  /* 5 most significant bits:  get delay time */         
+         signal_delay = signal_delay * 20;          /* X 20 */
+         Kickoff_Timer0(7,signal_delay);            /* kickoff timer service 7 to start a delay, unit: 20*10ms */ 
+         signal_not_sent_yet = 0xff;                /* we haven't sent release_done signal to packer yet */
+         return(0xff);                              /* return 0xff to tell caller we have something to do in the future.*/
+      }
+      else
+      {   send_packer_release_signal();             /* send packer release done signal*/         
+      }
+   }
+   return 0;
 }
                        

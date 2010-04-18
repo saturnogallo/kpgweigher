@@ -76,19 +76,24 @@ extern flash u8 n2m_map[NREG_SIZE_TOTAL];
 //define system struct
 typedef struct
 { //status from pc
-  volatile u16 target_weight[MAX_VIBR_NUM];          //0 	// system target weight of goods  
-  volatile u16 offset_up_limit[MAX_VIBR_NUM];        //8 	// offset upper limit
-  volatile u16 offset_lo_limit[MAX_VIBR_NUM];        //16 	// offset lower limit
-  volatile u8 flag_goon[MAX_VIBR_NUM];		    //24	
+  u16 target_weight[MAX_VIBR_NUM];          //0 	// system target weight of goods  
+  u16 offset_up_limit[MAX_VIBR_NUM];        //8 	// offset upper limit
+  u16 offset_lo_limit[MAX_VIBR_NUM];        //16 	// offset lower limit
+  u8 flag_goon[MAX_VIBR_NUM];		    //24	
   //summary of system
-  volatile u8 node_num;                 		    //28	// how many weight node (head) in this system
-  volatile u8 vibrator_num;             		    //29	// number of Vibrator detected in the system
-  volatile u8 running[MAX_VIBR_NUM];		    //30	
+  u8 node_num;                 		    //28	// how many weight node (head) in this system
+  u8 vibrator_num;             		    //29	// number of Vibrator detected in the system
+  u8 running[MAX_VIBR_NUM];		    //30	
   //command register
-  volatile u8 flag_start_machine[MAX_VIBR_NUM];       //34 // Set when starting machine command is received.
-  volatile u8 flag_stop_machine[MAX_VIBR_NUM];        //38
-  volatile u8 flag_search[MAX_VIBR_NUM];		     //42
-  volatile u8 flag_report;			     //46
+  u8 flag_start_machine[MAX_VIBR_NUM];       //34 // Set when starting machine command is received.
+  u8 flag_stop_machine[MAX_VIBR_NUM];        //38
+  u8 flag_search[MAX_VIBR_NUM];		     //42
+  u8 flag_report;			     //46
+  u8  reserved1;                             //47  -- aligned
+  u16 packer_config1;                        //48  -- word aligned
+  u16 packer_config2;                        //50      
+  u16 reserved2;                             //52
+  u16 reserved3;                             //54
 }SYSTEM;
 
 extern u8 true_val;
@@ -189,9 +194,11 @@ typedef struct  {
 #define SVS_CMPLT 0xff 
 #define PACKER_OF_MASK      0x0018
 #define PACKER_IF_MASK      0x0060
-#define NEED_HANDSHAKE      packer_config & 0x0080
+#define NEED_HANDSHAKE      (packer_config & 0x0080)
 #define ASYN_IF_MASK        0x0002
-#define INIT_MASK           0x0001
+#define INIT_MASK           0x0001 
+#define SIGNAL_DELAY_MASK   0x0004
+#define INTF_MODE_SHAKEHANDS  (CONFIG_REG & 0x80)
 
 #define CONFIG_REG      packer_config
 // Hardware related
@@ -209,10 +216,10 @@ typedef struct  {
 #define TMR0_Is_Enabled() (TIMSK & 0x1)  // bit 0 TOIE0
 
                
-//packer related function
+//packer related function     
 void Init_interface();
 u8 Packer_Is_Busy();
 void Tell_Packer_Weigher_Rdy();
-void Tell_Packer_Release_Done();
+u8 Tell_Packer_Release_Done();
 extern u16 packer_config;
 #endif
