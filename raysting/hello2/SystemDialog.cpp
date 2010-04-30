@@ -272,7 +272,7 @@ void CSystemDialog::DoSysCalib(CString func,UINT BTNID)
 		::Sleep(1000);
 	}
 
-	bt->SetWindowText(_T("校准"));
+	bt->SetWindowText(_T("校准内标准"));
 	bt->EnableWindow(TRUE);
 
 	SYSTEMCFG tp;
