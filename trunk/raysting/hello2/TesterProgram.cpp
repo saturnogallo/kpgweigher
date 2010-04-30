@@ -192,7 +192,7 @@ bool CTesterProgram::StepProgram()
 	if(lock)
 		return false;
 	lock = true;
-	mystate = _T("step");
+	mystate = _T("");
 	do{
 		CString line = ExtractString2(m_fun,_T("\n"));
 		if((line.GetLength() > 1) && (line[0] == '[') && (line.Find(',') > 0) )
