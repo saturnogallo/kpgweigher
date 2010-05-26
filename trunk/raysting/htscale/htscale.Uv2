@@ -28,7 +28,7 @@ Options 1,0,0  // Target 'Target 1'
  EnvLib ()
  EnvReg ()
  OrgReg ()
- TgStat=9
+ TgStat=0
  OutDir (.\)
  OutName (htscale)
  GenApp=1

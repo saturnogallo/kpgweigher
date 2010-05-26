@@ -3,14 +3,16 @@
 /*
 	LED definition
 */
-#define SEG_A 0x01
-#define SEG_B 0x02
-#define SEG_C 0x04
-#define SEG_D 0x08
-#define SEG_E 0x10
-#define SEG_F 0x20
-#define SEG_G 0x40
-#define SEG_H 0x80
+#define SEG_A 0x1000
+#define SEG_B 0x2000
+#define SEG_C 0x4000
+#define SEG_D 0x0800
+#define SEG_E 0x0400
+#define SEG_F 0x0100
+#define SEG_G 0x0200
+#define SEG_DP	0x8000
+#define SEG_CM	0x0000
+#define SEG_ID	0x0080
 
 #define NUM_0 SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F
 #define NUM_1 SEG_B|SEG_C
@@ -30,13 +32,13 @@
 #define CHAR_e CHAR_E
 #define CHAR_f CHAR_F 
 #define CHAR_g NUM_9
-#define CHAR_h CHAR_H
+#define CHAR_h CHAR_BLANK
 #define CHAR_i NUM_1
 #define CHAR_j CHAR_BLANK
 #define CHAR_k CHAR_BLANK
 #define CHAR_l CHAR_L 
 #define CHAR_m CHAR_BLANK
-#define CHAR_n SEG_B|SEG_C|SEG_E|SEG_F|SEG_H
+#define CHAR_n SEG_B|SEG_C|SEG_E|SEG_F
 #define CHAR_o SEG_C|SEG_D|SEG_E|SEG_G
 #define CHAR_p CHAR_P
 #define CHAR_q CHAR_BLANK
@@ -83,74 +85,76 @@ typedef union _PTSEGS
 {
 	u16	dat;
 	struct {
-		u8 lseg; //seg1 to seg8
 		u8 hseg; //seg9 to seg16
+		u8 lseg; //seg1 to seg8
 	}C0;
 }PTSEGS;
 
 #define LED_NUMBER	6
 
-PTSEGS LED_DIGITALS[LED_NUMBER];
+static PTSEGS LED_DIGITALS[LED_NUMBER];
 //DP: digital point
 //CM: comma point
 //ID: indicate point
-#define LED_DP_ON(x)        ((LED_DIGITALS[x].C0.lseg) | 0x80)
-#define LED_CM_ON(x)        ((LED_DIGITALS[x].C0.lseg) | 0x80)
-#define LED_ID_ON(x)        ((LED_DIGITALS[x].C0.lseg) | 0x80)
+#define LED_DP_ON(x)        (LED_DIGITALS[x].dat |= SEG_DP)
+#define LED_CM_ON(x)        (LED_DIGITALS[x].dat |= SEG_CM)
+#define LED_ID_ON(x)        (LED_DIGITALS[x].dat |= SEG_ID)
 
 const u16 code LED_DIGI_CODE[] = {NUM_0,NUM_1,NUM_2,NUM_3,NUM_4,NUM_5,NUM_6,NUM_7,NUM_8,NUM_9};
-const u16 code LED_LCHAR_CODE[] = {CHAR_A,CHAR_B,CHAR_C,CHAR_D,CHAR_E,CHAR_F,CHAR_G,CHAR_H,CHAR_I,\
+const u16 code LED_UCHAR_CODE[] = {CHAR_A,CHAR_B,CHAR_C,CHAR_D,CHAR_E,CHAR_F,CHAR_G,CHAR_H,CHAR_I,\
 								   CHAR_J,CHAR_K,CHAR_L,CHAR_M,CHAR_N,CHAR_O,CHAR_P,CHAR_Q,CHAR_R,\
 								   CHAR_S,CHAR_T,CHAR_U,CHAR_V,CHAR_W,CHAR_X,CHAR_Y,CHAR_Z};
-const u16 code LED_UCHAR_CODE[] = {CHAR_a,CHAR_b,CHAR_c,CHAR_d,CHAR_e,CHAR_f,CHAR_g,CHAR_h,CHAR_i,\
+const u16 code LED_LCHAR_CODE[] = {CHAR_a,CHAR_b,CHAR_c,CHAR_d,CHAR_e,CHAR_f,CHAR_g,CHAR_h,CHAR_i,\
 								   CHAR_j,CHAR_k,CHAR_l,CHAR_m,CHAR_n,CHAR_o,CHAR_p,CHAR_q,CHAR_r,\
 								   CHAR_s,CHAR_t,CHAR_u,CHAR_v,CHAR_w,CHAR_x,CHAR_y,CHAR_z};
-void	Led_print(u8 *str,u8 size)
+
+void	PT6312_Print(u8 *str,u8 size)
 {
 	u8 i;
+
 	if(size > LED_NUMBER)
 		return;
-	if((*str) == '.')
-		return;
-	for(i=(LED_NUMBER-size);i<LED_NUMBER;i++){
+	for(i=(LED_NUMBER-size);i<LED_NUMBER;i++,str++){
+		if(*str == '\0')
+			return;
 		if(((*str) <= '9') && ((*str) >= '0'))
 		{
-			LED_DIGITALS[i] = LED_DIGI_CODE[(*str -'0')];
+			LED_DIGITALS[i].dat = LED_DIGI_CODE[((*str) -(u8)('0'))];
 			continue;
 		}
 		if(((*str) <= 'Z') && ((*str) >= 'A'))
 		{
-			LED_DIGITALS[i] = LED_UCHAR_CODE[(*str -'0')];
+			LED_DIGITALS[i].dat = LED_UCHAR_CODE[(*str -'A')];
 			continue;
 		}
 		if(((*str) <= 'z') && ((*str) >= 'a'))
 		{
-			LED_DIGITALS[i] = LED_UCHAR_CODE[(*str -'0')];
+			LED_DIGITALS[i].dat = LED_LCHAR_CODE[(*str -'a')];
 			continue;
 		}
 
 		switch(*str){
 
-			case '.':  
+			case '.':
+  		    		i--;
 					LED_DP_ON(i); 
-					i--;
 					break;
 			case ',':  
-					LED_CM_ON(i); 
 					i--;
+					LED_CM_ON(i); 
 					break;
 			case '^':
-					LED_ID_ON(i);
 					i--;
+					LED_ID_ON(i);
 					break;
 			case ' ':
-					LED_DIGITALS[i] = CHAR_BLANK;
+					LED_DIGITALS[i].dat = CHAR_BLANK;
 					break;
 			
 			default: 
 					break;
 			}
-		str++;
+		
 	}
 }
 
@@ -406,6 +410,8 @@ void PT6312_WriteLED( u8 dat )
 }
 
 
+
+
 // 读取键盘
 u32 PT6312_ReadKey()
 {
@@ -430,48 +436,42 @@ u32 PT6312_ReadKey()
     return key;
 }
 
-
-// 清空缓冲区
 void PT6312_Refresh()
 {
     u8 i = 0;
-	u8 *pt = (u8*)LED_DIGITALS;
-    for( i = 0; i <= 0x15; i++ )
+	
+    for( i = 0; i < LED_NUMBER; i++ )
     {
-        // SEG1-SEG16 全为0
-        _WriteData( i, *pt++ ); 
-    }
+		_WriteData(2*i,   LED_DIGITALS[i].C0.lseg);		
+		_WriteData(2*i+1, LED_DIGITALS[i].C0.hseg);
+  	}
 }
 
+char lowc(u8 x)
+{
+	x = x&0x0f;
+	if(x > 0x09)
+		return 'A'+x-0x0a;
+	else
+		return '0'+x;
+}
+char highc(u8 x)
+{
+
+	x = x>>4;
+	if(x > 0x09)
+		return 'A'+x-0x0a;
+	else
+		return '0'+x;
+}
 // 测试PT6312的程序
 void PT6312_Test()
 {
-    u8 i     = 0;
-    u8 j        = 0;
-    u32 key    = 0;
-    
+  
     // 初始化
     PT6312_Init();    
 
-        
-    
-    while(1)
-    {
 
-        // 读取键盘
-        key = PT6312_ReadKey();
-        
-        // 显示键盘值
-        j = 0;
-        for( i = 0; i < 8; i++,j+=2 )
-        {
-            _WriteData( j, LED_DP_OFF( key%10) );
-            key = key /10;
-            if( key == 0 )
-                break;
-        }    
-    }
-    
 }
 
 
