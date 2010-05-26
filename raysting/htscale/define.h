@@ -33,12 +33,33 @@ typedef unsigned char BYTE;
 /*
 	PT related function
 */
+#define KEY_A	0x100000
+#define KEY_B	0x200000
+#define KEY_C	0x400000
+#define KEY_D	0x800000
+
+#define KEY_E	0x10000
+#define KEY_F	0x20000
+#define KEY_G	0x40000
+#define KEY_H	0x80000
+
+#define KEY_I	0x1000
+#define KEY_J	0x2000
+#define KEY_K	0x4000
+#define KEY_L	0x8000
+
+#define KEY_M	0x100
+#define KEY_N	0x200
+#define KEY_O	0x400
+#define KEY_P	0x800
 // 测试PT6312的程序
 // 初始化PT6312
 void PT6312_Init();
 
 // 清空缓冲区
-void PT6312_Clear();
+void PT6312_Refresh();
+
+void PT6312_Print(u8 *buf, u8 size);
 
 // 写入LED数据
 void PT6312_WriteLED( u8 dat );
@@ -48,22 +69,22 @@ u32 PT6312_ReadKey();
 
 void PT6312_Test();
 
+char highc(u8 x);
+char lowc(u8 x);
 /*
 	ds1302 related constant
 */
-#define DS1302_RSTART	0x80
-#define DS1302_WSTART	0x81
-#define DS1302_DATALEN	7
 
-sbit DS1302_RST = P1^3;//mcu pin 43
-sbit DS1302_IO = P1^2;//mcu pin 42
-sbit DS1302_SCLK = P1^1;//mcu pin 41
+sbit T_CLK = P1^1; /*实时时钟时钟线引脚 */
+sbit T_IO = P1^2; /*实时时钟数据线引脚 */
+sbit T_RST = P1^3; /*实时时钟复位线引脚 */
 
 
 
-void ds1302_get(u8 addr,u8 *p, u8 n);
+void ds1302_init();
 
-
+void ds1302_get(u8 ucCurtime[]);
+void ds1302_set(u8 ucCurtime[]);
 /*
 	eeprom constants
 */
