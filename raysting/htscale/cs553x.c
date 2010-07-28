@@ -8,8 +8,8 @@
 
 //根据实际情况定义
 sbit SDI5532 = P2^1;
-sbit SDO5532 = P2^2;
-sbit CLK5532 = P2^3;
+sbit SDO5532 = P1^4;
+sbit CLK5532 = P1^5;
 sbit CS5532 = P2^0;
 #define CS_SET	
 #define CS_CLR	
@@ -24,23 +24,30 @@ struct{
           u8 high;
           u8 mid;
           u8 low;
-         }
-RegDat;
+}RegDat;
 
-//The CS5532-ASZ comm define
-#define RegRead  0x08
-#define RegWrite 0x00
+#define CMD_R_OFFSET	0x09
+#define CMD_W_OFFSET	0x01
+#define CMD_R_GAIN		0x0A
+#define CMD_W_GAIN		0x02
+#define CMD_R_CONF		0x0B
+#define CMD_W_CONF		0x03
+#define CMD_SINGLEC	 	0x80
+#define CMD_CONTINC 	0xC0
+#define CMD_CALI_OFFSET	0x85
+#define CMD_CALI_GAIN	0x86
+#define CMD_SYNC		0xff
+#define CMD_SYNC0		0xf0
+#define NULL			0x00
+#define CMD_R_DATA		0x08
+#define CMD_W_REG		0x00
 
-//=== Offset Register ===
-#define OffsetRS 0x09
+//command reg 8bit, ADC data reg 32bit
+//=== Offset Register 32 bit===
+//=== Gain Register 32 bit===
 
-//=== Gain Register ===
-#define GainRS 0x0a
 
-//=== Configuration Register ===
-#define ConfigWrite 0x03  //write config
-#define ConfigRead  0x0b  //read config
-
+//==bit definition of Configuration ===
 #define PSS 	0x80       //Power Save Select
 #define PDW 	0x40       //Power Down Mode
 #define RS     	0x20       //Reset System
@@ -72,8 +79,6 @@ RegDat;
 #define Gain64 	  0x30
 
 //=== Converter mode ===
-#define SingleC 0x80
-#define ContinC 0xC0
 #define Setup1 0x00
 #define Setup2 0x08
 #define Setup3 0x10
@@ -91,12 +96,12 @@ static void _SendByte(u8 Dat)
     for(i=8;i>0;i--)
     {
         SDI5532=(bit)(Dat & 0x80);
+	    _nop_();_nop_();
+        _nop_();_nop_();
         CLK5532=1;
         _nop_();_nop_();
         _nop_();_nop_();
         CLK5532=0;
-        _nop_();_nop_();
-        _nop_();_nop_();
         Dat = Dat<<1;
     }
     SDI5532 = 1;
@@ -113,13 +118,24 @@ static void _WriteReg(u8 command,u8 low,u8 mid,u8 high,u8 top)
     _SendByte(top);
     CS_CLR;
 }
-
+//Receive CS5532's Register from CS5532 to MCU
+void _ReadReg(u8 command)
+{
+    CS_SET;
+    _SendByte(command);
+    RegDat.top = _ReceiveByte();
+    RegDat.high = _ReceiveByte();
+    RegDat.mid = _ReceiveByte();
+    RegDat.low = _ReceiveByte();
+    CS_CLR;
+}
 //The data(8bit) form CS5532 to MCU
 static u8 _ReceiveByte(void)
 {
     u8 i;
 	u8 dat;
     dat=0;
+	CLK5532=0;
     for(i=8;i>0;i--)
     {
        dat=dat<<1;
@@ -137,6 +153,7 @@ static u8 _ReceiveByte(void)
 
 //Receive ADC signal data from CS5532 to MCU
 //single convert
+//Data conversion cycle
 void ReadSADC5532(u8 command)
 {
     CS_SET;
@@ -168,32 +185,9 @@ void ReadMADC5532(u8 command)
     CS_CLR;
 }
 
-//Receive CS5532's Register from CS5532 to MCU
-void _ReadReg(u8 command)
-{
-    CS_SET;
-    _SendByte(command);
-    RegDat.top = _ReceiveByte();
-    RegDat.high = _ReceiveByte();
-    RegDat.mid = _ReceiveByte();
-    RegDat.low = _ReceiveByte();
-    CS_CLR;
-}
 
-void Adjust5532(u8 command)
-{
-    CS_SET;
-    _SendByte(command);
-    do{
-		_nop_();
-	}while(SDO5532!=0);
-    _SendByte(0x0a);
-    RegDat.top = _ReceiveByte();
-    RegDat.high = _ReceiveByte();
-    RegDat.mid = _ReceiveByte();
-    RegDat.low = _ReceiveByte();
-    CS_CLR;
-}
+
+
 
 //The initialization CS5532
 void Init5532(void)
