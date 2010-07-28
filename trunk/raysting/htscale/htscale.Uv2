@@ -6,10 +6,10 @@ Target (Target 1), 0x0000 // Tools: 'MCS-51'
 Group (Source Group 1)
 
 File 1,1,<.\main.c><main.c>
-File 1,1,<.\cs553x.c><cs553x.c>
 File 1,1,<.\ds1302.c><ds1302.c>
 File 1,1,<.\pt6312.c><pt6312.c>
 File 1,1,<.\eeprom.c><eeprom.c>
+File 1,1,<.\cs5532.c><cs5532.c>
 
 
 Options 1,0,0  // Target 'Target 1'

@@ -141,6 +141,7 @@ sfr P4M1 = 0xB3; //                                                             
 //                                      7      6         5         4      3     2     1     0     Reset Value
 sfr P4SW = 0xBB; //Port-4 switch	    -   LVD_P4.6  ALE_P4.5  NA_P4.4   -     -     -     -	    x000,xxxx
 
+
 sfr P5   = 0xC8; //8 bitPort5           -     -       -      -    P5.3  P5.2  P5.1  P5.0    xxxx,1111
 sfr P5M0 = 0xCA; //                                                                         0000,0000
 sfr P5M1 = 0xC9; //                                                                         0000,0000

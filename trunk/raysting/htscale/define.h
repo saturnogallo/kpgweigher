@@ -85,6 +85,103 @@ void ds1302_init();
 
 void ds1302_get(u8 ucCurtime[]);
 void ds1302_set(u8 ucCurtime[]);
+
+/*
+	CS5532 definition
+*/
+#define B_GRP1		0x00
+
+#define	B_WRITE		0x00
+#define B_READ		0x08
+
+#define B_CH1		0x00
+#define B_CH2		0x10
+#define B_CH		B_CH2
+
+#define B_OFFSET	1
+#define B_GAIN		2
+#define B_CONF		3
+#define B_SETUP		5
+
+#define B_GRP2		0x80
+
+#define B_SADC		0x00
+#define B_MADC		0x40
+
+#define B_SETUP1	0x00
+#define B_SETUP2	0x08
+#define B_SETUP3	0x10
+#define B_SETUP4	0x18
+#define B_SETUP5	0x20
+#define B_SETUP6	0x28
+#define B_SETUP7	0x30
+#define B_SETUP8	0x38
+
+#define B_NORMAL_CONV		0x00
+#define	B_SELF_OFFSET_CAL	0x01
+#define B_SELF_GAIN_CAL		0x02
+#define B_SYS_OFFSET_CAL	0x05
+#define B_SYS_GAIN_CAL		0x06
+
+#define CMD_WRITE_CFG_REG 0x3
+#define CMD_READ_CFG_REG 0xB
+
+#define CMD_READ_ALL_OFFSET_CAL 0x49
+#define CMD_WRITE_ALL_OFFSET_CAL 0x41
+
+#define CMD_READ_ALL_GAIN_CAL 0x4A
+#define CMD_WRITE_ALL_GAIN_CAL 0x42
+
+#define CMD_READ_ALL_SETUP_REG 0x4D
+#define CMD_WRITE_ALL_SETUP_REG 0x45
+
+#define CMD_STOP_CONT_CONV 0xFF
+
+
+#define TIMEOUTERR 0xff
+#define SUCCESSFUL 0x00  
+#define CAL_TIMEOUT_LIMIT 4000
+
+#define RESET_VALID 0x10000000	//configure register after reset
+//CS5532 Gain settings
+#define GAINX1 	0
+#define GAINX2 	1
+#define GAINX4 	2
+#define GAINX8 	3
+#define GAINX16 4
+#define GAINX32 5
+#define GAINX64 6
+
+//CS5532 Word rate settings
+#define WORD_RATE_100SPS 	0x0
+#define WORD_RATE_50SPS 	0x1
+#define WORD_RATE_25SPS 	0x2
+#define WORD_RATE_12P5SPS 	0x3
+#define WORD_RATE_6P25SPS 	0x4
+#define WORD_RATE_3200SPS 	0x8
+#define WORD_RATE_1600SPS 	0x9
+#define WORD_RATE_800SPS 	0xA
+#define WORD_RATE_400SPS 	0xB
+#define WORD_RATE_200SPS 	0xC
+
+#define B_UNIPOLAR	1
+#define B_BIPOLAR	0
+
+#define B_LATCH		0x00
+
+#define B_NODELAY	0
+#define B_DELAY		1	//delay before conversion
+
+#define B_NOOCD		0
+#define B_OCD		1	//output 300nA for open circuit detect
+
+#define B_OG_CH1	00	//offset gain register selection
+#define B_OG_CH2	01
+#define B_OG_CH3	10
+#define B_OG_CH4	11
+
+u8 init_cs5532(u16);
+u32 read_cs5532(void);
 /*
 	eeprom constants
 */
@@ -99,9 +196,8 @@ void ds1302_set(u8 ucCurtime[]);
 //#define ENABLE_ISP 0x87 //系统工作时钟<1MHz 时，对IAP_CONTR 寄存器设置此值
 
 #define DATA_FLASH_START_ADDRESS 0x00  //STC5Axx 系列 EEPROM 测试起始地址
-
-INT8U Byte_Read(INT16U add);              //读一字节，调用前需打开IAP 功能
-void Byte_Program(INT16U add, INT8U ch);  //字节编程，调用前需打开IAP 功能
+void eeprom_write(u16 add, u8 *buf, u8 size);
+void eeprom_read(u16 add, u8 *buf, u8 size);
 void Sector_Erase(INT16U add);            //擦除扇区
 void IAP_Disable();                       //关闭IAP 功能
 void Delay();
