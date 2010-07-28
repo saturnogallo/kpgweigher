@@ -1,0 +1,20 @@
+﻿<Window x:Class="ioex_cs.BottomWnd"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="BottomWnd" Height="365" Width="657" Topmost="True" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+    <Grid>
+        <Button Height="29" Margin="253,0,250,0" Name="btn_return" Click="btn_return_Click" VerticalAlignment="Bottom">return</Button>
+        <TextBox Height="30" HorizontalAlignment="Left" Margin="199,77.5,0,0" MaxLength="50" Name="intf_lb_input_fmt" VerticalAlignment="Top" Width="83.75" />
+        <Label Content="{DynamicResource intf_lb_input_fmt}" Height="26.25" HorizontalAlignment="Left" Margin="70,78.75,0,0" Name="intf_lb_input_fmt_label" VerticalAlignment="Top" Width="120" />
+        <CheckBox Content="{DynamicResource intf_ckb_mem}" Height="26.25" Margin="291.976,91.396,296.774,0" Name="intf_ckb_mem" VerticalAlignment="Top" />
+        <CheckBox Content="{DynamicResource intf_handshake}" Height="30" HorizontalAlignment="Left" Margin="80,0,0,62" Name="intf_handshake" VerticalAlignment="Bottom" Width="110" />
+        <TextBox Height="30" HorizontalAlignment="Left" Margin="199,112.5,0,0" MaxLength="50" Name="intf_lb_output_fmt" VerticalAlignment="Top" Width="83.75" />
+        <Label Content="{DynamicResource intf_lb_output_fmt}" Height="26.25" HorizontalAlignment="Left" Margin="70,115,0,0" Name="intf_lb_output_fmt_label" VerticalAlignment="Top" Width="120" />
+        <TextBox Height="30" HorizontalAlignment="Left" Margin="199,0,0,108.25" MaxLength="50" Name="intf_ckb_delay" VerticalAlignment="Bottom" Width="83.75" />
+        <Label Content="{DynamicResource intf_ckb_delay}" Height="26.25" HorizontalAlignment="Left" Margin="70,0,0,112" Name="intf_ckb_delay_label" VerticalAlignment="Bottom" Width="130" />
+        <TextBox HorizontalAlignment="Left" Margin="199,148.75,0,148.25" MaxLength="50" Name="intf_lb_feed_times" Width="83.75" />
+        <Label Content="{DynamicResource intf_lb_feed_times}" HorizontalAlignment="Left" Margin="70,152.5,0,148.25" Name="intf_lb_feed_times_label" Width="120" />
+        <Rectangle Margin="39,20,26,62" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" />
+        <Label Background="#FFEEF2FB" Content="{DynamicResource packsetting}" FontSize="24" Height="40" HorizontalAlignment="Left" Margin="55,0,0,0" Name="label11" VerticalAlignment="Top" Width="176.25" />
+    </Grid>
+</Window>

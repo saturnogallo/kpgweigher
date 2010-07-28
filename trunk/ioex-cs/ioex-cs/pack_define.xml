@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<NodeDefine>
+  <pack>
+    <target>100.0</target>
+    <upper_var>10</upper_var>
+    <lower_var>10</lower_var>
+  </pack>
+</NodeDefine>
