@@ -1,0 +1,91 @@
+﻿<Window x:Class="ioex_cs.LogonWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:CorLib="clr-namespace:System;assembly=mscorlib"
+    Title="Logon" Height="768" Width="1024" Topmost="True" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+
+    <Window.Resources>
+        <Style x:Key ="ButtonStyle" TargetType = "{x:Type Button}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="16"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="Arial"/>
+            <Setter Property = "BitmapEffect">
+                <Setter.Value>
+                    <DropShadowBitmapEffect Color="Black" Opacity="0.5" />    
+                </Setter.Value>
+            </Setter>
+         </Style>
+        <Style x:Key ="ListStyle" TargetType = "{x:Type ComboBox}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "150"/>
+            <Setter Property = "FontSize" Value="14"/>
+            <Setter Property = "BorderBrush" Value="DarkGoldenrod"/>
+            <Setter Property = "BorderThickness" Value="1"/>
+            <Setter Property = "Opacity" Value="0.5"/>
+            <Setter Property = "FontFamily" Value="Arial"/>
+            <Setter Property = "BitmapEffect">
+                <Setter.Value>
+                    <DropShadowBitmapEffect Color="Beige" Opacity="0.5" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key ="InputStyle" TargetType = "{x:Type TextBox}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "MaxLines" Value = "1"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "150"/>
+            <Setter Property = "FontSize" Value="14"/>
+            <Setter Property = "BorderBrush" Value="DarkGoldenrod"/>
+            <Setter Property = "BorderThickness" Value="1"/>
+            <Setter Property = "Opacity" Value="0.5"/>
+            <Setter Property = "FontFamily" Value="Arial"/>
+            <Setter Property = "BitmapEffect">
+                <Setter.Value>
+                    <DropShadowBitmapEffect Color="Beige" Opacity="0.5" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key ="PwdStyle" TargetType = "{x:Type PasswordBox}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "150"/>
+            <Setter Property = "FontSize" Value="14"/>
+            <Setter Property = "BorderBrush" Value="DarkGoldenrod"/>
+            <Setter Property = "BorderThickness" Value="1"/>
+            <Setter Property = "Opacity" Value="0.5"/>
+            <Setter Property = "FontFamily" Value="Arial"/>
+            <Setter Property = "BitmapEffect">
+                <Setter.Value>
+                    <DropShadowBitmapEffect Color="Beige" Opacity="0.5" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Rectangle Margin="57.267,13.635,51.813,162.711" StrokeThickness="0">
+            <Rectangle.Fill>
+                <ImageBrush ImageSource="C:\\Debug\\zh-CN.jpg" />
+            </Rectangle.Fill>
+        </Rectangle>
+        <Button Content="{DynamicResource login}" Style="{StaticResource ButtonStyle}" Margin="382.5,0,0,25.452" Name="btn_submit" VerticalAlignment="Bottom" HorizontalAlignment="Left" Click="btn_submit_Click" Height="30" Width="100">
+        </Button>
+        <Button Content="{DynamicResource help}" Style="{StaticResource ButtonStyle}" Margin="0,0,321.25,25.452" Name="btn_help" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="btn_help_Click" Height="30" Width="100">
+        </Button>
+
+        <ComboBox Style="{StaticResource ListStyle}" Margin="450.148,0,401.852,121.803" Name="usr_input" VerticalAlignment="Bottom" Height="30" Background="Beige"/>
+        
+        <Label Height="27.27" Content="{DynamicResource account}" Margin="337.5,0,0,121.803" Name="usr_label" VerticalAlignment="Bottom" Width="89.082" FontSize="16" HorizontalAlignment="Left"></Label>
+        <PasswordBox Style="{StaticResource PwdStyle}" Margin="338.148,0,289.852,72.717" Name="pwd_input" VerticalAlignment="Bottom" Height="30" GotFocus="pwd_input_GotFocus" />
+        <Label Height="30.906" Content="{DynamicResource password}" HorizontalAlignment="Left" Margin="337.5,0,0,71.811" Name="label1" VerticalAlignment="Bottom" Width="96.354" FontSize="16"/>
+
+    </Grid>
+    
+</Window>
