@@ -7,6 +7,7 @@
 #include "window.h"
 #include "scanner.h"
 #include "math.h"
+#include "wendu.h"
 RUNDATA rdata;
 SYSDATA sdata;
 PRBDATA	prbdata;
@@ -102,7 +103,10 @@ uchar nextwin = 0;
 void calculate_temp(ch)
 {
 	//todo get temperature;
-	rdata.temperature[ch-1] = 0;
+	if(prbdata.type[ch-1] && PRBTYPE_BIT)
+		rdata.temperature[ch-1] = GetThmoVolt(rdata.reading[ch-1],prbdata.type[ch-1]);
+	else
+		rdata.temperature[ch-1] = MValueToTValue(rdata.reading[ch-1],prbdata.type[ch-1]);
 }
 double get_reading(uchar ch)
 {
