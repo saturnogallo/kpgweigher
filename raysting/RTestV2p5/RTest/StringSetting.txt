@@ -1,0 +1,74 @@
+//navmeter command define
+0:GetValue
+1:Setup Remote Control
+2:Init Device
+3:Exit Command
+4:Zero Check
+5:Config 1 --auto
+6:config 2 --0.01
+7:config 3 --0.1
+8:config 4 --1
+9:config 5 --10
+10:config 6 --100
+basecmd define  //port to the hardware
+
+//condition define
+
+[if,ifpos,ifval]
+YSIN 	   单向测量   
+NSIN 	   双向测量
+YRAN 	   钠伏计量程   ifpos :0－6 	 	  
+NRAN	   钠伏计量程   ifpos :0－6
+YRLS       最低盘阻值 0.01ohm-100Kohm  ifpos :0-6
+NRLS       最低盘阻值 0.01ohm-100Kohm  ifpos :0-6
+YBRN	   使用外标准 ifpos :0-6
+NBRN	   使用外标准 ifpos :0-6
+YVAL 	   原始测量值 ifpos : ifval
+NVAL       原始测量值 ifpos : ifval
+YRST	   计算结果值 ifpos : ifval
+NRST	   计算结果值 ifpos : ifval
+YSCA	   低阻值R0的范围 ifpos:1,2,3  1:0.001 2:0.01 3:0.1
+NSCA       低阻值R0的范围 ifpos:1,2,3  1:0.001 2:0.01 3:0.1
+YRES	   重测
+NRES	   非重测
+V:  测得的电压值（已求平均）
+Z:  可用来保留计算结果
+R:(0-6)   :标准电阻的阻值（内，外，已加温度系数）
+
+
+
+//switch define
+FHP(0-6),FHN(0-6)  :关闭  H 开关 (P,+ N,-) 断开
+OHP(0-6),OHN(0-6)  :打开  H 开关 (P,+ N,-) 连通
+OHX1,OHX2,OKN(1-6),OKI(1-4),OFX1,OSET
+FHX1,FHX2,FKN(1-6),FKI(1-4),FFX1,FSET
+PKTT,NKTT: 电流正，电流负 (未扩展)
+
+
+//command define
+[l,check] [e,check] [l,test] [e,test ];开始和结束某一步骤
+[m,MSG] :显示信息
+[s,SWI1,SWI2,...];控制开关，swi定义如上
+[t,ID];测量一个数据（次数由参数定义），并存结果到V[ID]
+[j,MARK];如果条件满足，跳到MARK行
+[r,VB,VE,MARK] ;当RetestID<VB,或RetestID>VE时，跳到MARK行（j：重测值的ID）
+[c,if,if_value,LEFT,lpos,OP,RIGHT,rpos,abs,ID];LEFT OP RIGHT (V,Z,R)
+,结果保存到VAR,abs=1,使用绝对值
+[a,msg,MARK];以msg询问，如答案为否，则跳到MARK行.
+[n,ID];使用纳伏计命令，navmeter ID定义见上
+[i,ID];使用内部函数，ID 内部函数的ID : 1:标准电阻测量时的检查，2：更改内标准电阻。
+[v,VAR,INTV];设置特殊变量VAR = INTV (V=m_RangeV,B=m_iBASE,for j and t ,c use) T=m_iDelayKT I=m_iDelayKI
+
+[d,type,VALUE,[prec]];控制FlexGrid:type = 'r','c','t','v','z','p','d'
+={rowset(if(-1)added),columnset,textset,valueuse,resultuse,position,justvalue}
+prec : decimal length
+[w,type,VALUE];打印值 type 't','v','z' 定义同上，用\n 代表回车
+[u,type,VALUE];控制m_sDisplay:type = r,t
+={rowset(m_GridLine);textset;
+[p,time]:暂停time 秒
+
+//Report define:
+@@Z(i)@@ --替换Z值
+@@V(i)@@ --替换V值
+                 
+	                 

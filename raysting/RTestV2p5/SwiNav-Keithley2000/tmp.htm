@@ -1,0 +1,210 @@
+////////////////////////////////////////////////////////////
+
+//	menu bar
+
+////////////////////////////////////////////////////////////
+
+function setTab(index) {
+
+	var posarray = new Array(88,214,340,466,592);
+
+	var tab=document.getElementById('tablight');
+
+	tab.style.left = posarray[index];
+
+}
+
+
+function mOver(aptr){
+
+//	this.style.textDecoration = "";
+
+	aptr.style.color = 'orange';
+
+	aptr.style.fontweight='bold';
+
+}
+
+
+function mOut(aptr){
+
+	aptr.style.color = "";
+
+}
+
+
+function loadTbrform(){
+
+var Digital=new Date();
+
+var hours=Digital.getHours();
+
+var minutes=Digital.getMinutes();
+
+var seconds=Digital.getSeconds();
+
+var dn="AM";
+
+if(hours>12){dn="PM";
+
+hours=hours-12;
+
+}if(hours==0)
+
+hours=12;
+
+if(minutes<=9)
+
+minutes="0"+minutes;
+
+if(seconds<=9)
+
+seconds="0"+seconds;
+
+//change font size here to your desire
+
+myclock=hours+":"+minutes+":"+seconds+" "+dn;
+
+var id = document.getElementById('curtime');
+
+id.value = myclock;
+
+}
+
+
+document.writeln("<div id='tablight' style='position:absolute; top: 5; left: 88; z-index:0;' >");
+
+
+document.writeln("  <table border = '0' cellspacing='0' background='imgorg/tablight.gif' width='116' height='33'>");
+
+document.writeln("  <tr > <td></td> </tr> </table></div>");
+
+document.writeln("<div  id='tabtext' style='position: absolute; top: 10; left: 13; width: 780px; height: 47px;z-index: 4;'>");
+
+document.writeln("  <table  border='0' cellspacing='0' width='780' >");
+
+document.writeln("    <tr width='780' > ");
+
+document.writeln("      <td width='11%'>&nbsp;</td>");
+
+document.writeln("      <td width='12%'  valign='bottom' class='tabfont'>");
+
+document.writeln("<a   style='cursor:hand' onmouseover='mOver(this)' onMouseOut='mOut(this)' onClick=showpage('reghtm') >注册信息</A></td>");
+
+document.writeln("      <td width='3%'>&nbsp;</td>");
+
+document.writeln("      <td width='15%' valign='bottom' class='tabfont'>");
+
+document.writeln("<a  style='cursor:hand' onmouseover='mOver(this)' onMouseOut='mOut(this)' onClick=showpage('testhtm') >原始数据</A></td>");
+
+document.writeln("      <td width='1%' >&nbsp;</td>");
+
+document.writeln("      <td width='14%'  valign='bottom' class='tabfont'>");
+
+document.writeln("<a  style='cursor:hand' onmouseover='mOver(this)' onMouseOut='mOut(this)' onClick=showpage('datahtm') >数据处理</A></td>");
+
+document.writeln("      <td width='2%' >&nbsp;</td>");
+
+document.writeln("      <td width='14%' valign='bottom' class='tabfont'>");
+
+document.writeln("<a  style='cursor:hand' onmouseover='mOver(this)' onMouseOut='mOut(this)' onClick=showpage('reporthtm') >生成报告</a></td>");
+
+document.writeln("      <td width='2%' >&nbsp;</td>");
+
+document.writeln("      <td width='14%'  valign='bottom' class='tabfont'>");
+
+document.writeln("<a  style='cursor:hand' onmouseover='mOver(this)' onMouseOut='mOut(this)' onClick=showpage('exithtm') >退出程序</a></td>");
+
+
+document.writeln("<td width='%14' align='right' valign='bottom'>");
+document.writeln("<input type='text' id='curtime' size='9' class='nbinput'></td>");
+
+document.writeln("      <td valign='bottom'  class='tabfont'><form name='tbrform' method='POST' action='ToHtmlCtrl'><Input type='hidden' name='curview' value='@@curview@@'>");
+
+document.writeln("<Input type='hidden' name='curhtm' value='@@curhtm@@'>");
+
+document.writeln("</form></td>   </tr></table>");
+
+document.writeln("</div>");
+
+
+///////////////////////////////////////////////////////////////////
+
+//common javascript code
+
+function getCookieVal (offset) 
+
+   {
+
+
+   var endstr = document.cookie.indexOf(";", offset);
+
+
+   if (endstr == -1)
+
+
+      endstr = document.cookie.length;
+
+
+   return unescape(document.cookie.substring(offset, endstr));
+
+
+   }
+
+
+
+function GetCookie (name) {  
+
+var arg = name + "=";  
+
+var alen = arg.length;  
+
+var clen = document.cookie.length;  
+
+var i = 0;  
+
+while (i < clen) {    
+
+var j = i + alen;    
+
+if (document.cookie.substring(i, j) == arg)      
+
+return getCookieVal (j);    
+
+i = document.cookie.indexOf(" ", i) + 1;    
+
+if (i == 0) break;   
+
+}  
+
+return null;
+
+}
+
+function SetCookie (name, value) {  
+
+var argv = SetCookie.arguments;  
+
+var argc = SetCookie.arguments.length;  
+
+var expires = (argc > 2) ? argv[2] : null;  
+
+var path = (argc > 3) ? argv[3] : null;  
+
+var domain = (argc > 4) ? argv[4] : null;  
+
+var secure = (argc > 5) ? argv[5] : false;  
+
+document.cookie = name + "=" + escape (value) + 
+
+((expires == null) ? "" : ("; expires=" + expires.toGMTString())) + 
+
+((path == null) ? "" : ("; path=" + path)) +  
+
+((domain == null) ? "" : ("; domain=" + domain)) +    
+
+((secure == true) ? "; secure" : "");
+
+}
+
+

@@ -1,0 +1,243 @@
+<HTML>
+	<head>
+		<meta content="http://schemas.microsoft.com/intellisense/ie5" name="vs_targetSchema">
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312">
+		<style type="text/css"> 
+		#splash { position:absolute; padding-right:0px; line-height:16pt; top:-2084px; left:0px; font-size: 14px; color:#333333}
+		#tablight {position:absolute; top: 5; left: 88;z-index=-1}
+		</style>
+		<script language="javascript">
+<!--
+function setrq()
+{
+var Digital=new Date();
+
+var year=Digital.getFullYear();
+var month=Digital.getMonth()+1;
+var day=Digital.getDate();
+
+var ctrl;
+ctrl=document.getElementById('jdrq');
+ctrl.value = year + '-'+month+'-'+day;
+
+var Day2 = new Date(Digital.getTime() - 24*60*60*1000);
+
+var year2=Day2.getFullYear()+1;
+var month2=Day2.getMonth()+1;
+var day2=Day2.getDate();
+
+//if(day > 1){
+//	year2 = year+1;
+//	month2 = month;
+//	day2 = day - 1;
+//}
+
+ctrl=document.getElementById('yxqz');
+ctrl.value = year2 + '-'+month2+'-'+day2;
+
+}
+//-->
+		</script>
+	</head>
+	<BODY id="CTryData5Dlg" bgColor="lightgrey" onload="setrq()" background="res:/JPG/#199">
+		<div id="tablight">
+			<table id="Table1" height="33" cellSpacing="0" width="116" background="res:/JPG/#200"
+				border="0">
+				<tr>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+		<div id="splash">
+			<TABLE id="splash_tbl" width="100%">
+				<TR>
+					<TD vAlign="middle" align="center">
+						<P><img src="res:/JPG/#200">
+						</P>
+					</TD>
+				</TR>
+			</TABLE>
+		</div>
+		<table id="frameset" cellSpacing="0" width="100%" border="0">
+			<TBODY>
+				<tr>
+					<td width="48" height="93" rowSpan="10"></td>
+					<td width="43" height="93" rowSpan="10"></td>
+				</tr>
+				<TR>
+					<td colSpan="6" height="92">
+						<table id="header" cellSpacing="0" width="100%" border="0">
+							<tr>
+								<td vAlign="bottom" borderColor="black" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_reg">注册信息</A></td>
+								<td vAlign="bottom" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_config">参数设置</A></td>
+								<td vAlign="bottom" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_data">测量/校验</A></td>
+								<td vAlign="bottom" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_report">生成报告</A></td>
+								<td vAlign="bottom" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_quit">退出程序</A></td>
+								<td width="10%"><label id="curtime"></label></td>
+							</tr>
+						</table>
+						<table id="regitems" cellSpacing="0" background="texture.jpg" border="0">
+							<tr vAlign="bottom">
+								<td>
+									<p id="schemelist">正在查询..</p>
+								</td>
+								<td><button id="schupd" type="button">修改设置</button></td>
+								<td><button id="schadd" type="button">新建为..</button></td>
+								<td><button id="schdel" type="button">删除设置</button></td>
+								<td>过滤器:<select id="fltidselect">
+										<option value="" selected></option>
+										<option value="zsbh">证书编号</option>
+										<option value="wtz">委托者</option>
+										<option value="wtzdz">委托者地址</option>
+										<option value="qjmc">器具名称</option>
+										<option value="zzc">制造厂</option>
+										<option value="xhgg">型号/规格</option>
+										<option value="qjbh">器具编号</option>
+										<option value="jdrq">检定日期</option>
+									</select>
+								</td>
+								<td>=</td>
+								<td>
+									<p id="filtervalue"></p>
+								</td>
+							</tr>
+						</table>
+						<input id="idvals" type="hidden" value=",zsbh,wtz,wtzdz,qjmc,zzc,xhgg,qjbh,qjzqd,xljc,jdjl,jdrq,yxqz,jsgf,dd,wd,sd,jydz,gpnysy,mc1,bh1,zsbh1,clfw1,mc2,bh2,zsbh2,clfw2,mc3,bh3,zsbh3,clfw3,mc4,bh4,zsbh4,clfw4,mc5,bh5,zsbh5,clfw5,mc6,bh6,zsbh6,clfw6,mc7,bh7,zsbh7,clfw7,xh1,xh2,xh3,xh4,xh5,xh6,xh7,yxqx1,yxqx2,yxqx3,yxqx4,yxqx5,yxqx6,yxqx7,">
+						<table id="Table2" style="WIDTH: 626px;" borderColor="#000000" cellSpacing="0" width="626" border="1">
+				<TR>
+					<td>证书编号</td>
+					<td><input class="EDIT" id="zsbh" type="text" name="zsbh"></td>
+					<td>委托者</td>
+					<td><input class="EDIT" id="wtz" type="text" name="wtz"></td>
+				</TR>
+				<tr>
+					<td>委托者地址</td>
+					<td><input class="EDIT" id="wtzdz" type="text" name="wtzdz">
+					</td>
+					<td>器具名称</td>
+					<td><input class="EDIT" id="qjmc" type="text" name="qjmc"></td>
+				</tr>
+				<tr>
+					<td>制造厂</td>
+					<td><input class="EDIT" id="zzc" type="text" name="zzc"></td>
+					<td>型号/规格</td>
+					<td><input class="EDIT" id="xhgg" type="text" name="xhgg"></td>
+				</tr>
+				<tr>
+					<td>器具编号</td>
+					<td><input class="EDIT" id="qjbh" type="text" name="qjbh"></td>
+					<td>器具准确度</td>
+					<td><input class="EDIT" id="qjzqd" type="text" name="qjzqd"></td>
+				</tr>
+				<tr>
+					<td>外观及线路检查</td>
+					<td><input class="EDIT" id="xljc" type="text" name="xljc"></td>
+					<td>检定结论</td>
+					<td><input class="EDIT" id="jdjl" type="text" name="jdjl"></td>
+				</tr>
+				<tr>
+					<td>检定日期&nbsp;（<A onclick="setrq()" href="#"><b><font size="2">设为今天</font></b></A>）</td>
+					<td><input class="EDIT" id="jdrq" type="text" name="jdrq"></td>
+					<td>有效期至</td>
+					<td><input class="EDIT" id="yxqz" type="text" name="yxqz"></td>
+				</tr>
+				<tr>
+					<td colSpan="1">依据的技术规范</td>
+					<td colSpan="1"><input class="EDIT" id="jsgf" type="text" name="jsgf"></td>
+					<td colSpan="1">地点</td>
+					<td colSpan="1"><input class="EDIT" id="dd" type="text" name="dd"></td>
+				</tr>
+				<tr>
+					<td>温度:(℃)</td>
+					<td><input class="EDIT" id="wd" type="text" name="wd"></td>
+					<td>湿度:(%RH)</td>
+					<td><input class="EDIT" id="sd" type="text" name="sd"></td>
+				</tr>
+				<tr>
+					<td>绝缘电阻</td>
+					<td><input class="EDIT" id="jydz" type="text" name="jydz"></td>
+					<td>测量范围</td>
+					<td><input class="EDIT" id="gpnysy" type="text" name="gpnysy"></td>
+				</tr>
+			</table>
+		</td>
+	</TR>
+	<tr>
+	<td>
+		<table style="WIDTH: 626px;" borderColor="#000000" cellSpacing="0" width="626" border="1">
+				<tr align="center">
+					<td colSpan="6">本次检定所使用的主要计量标准器具：
+					</td>
+				</tr>
+				<tr>
+					<td width='106'> <p align="center">名称</p></td>
+					<td width='106'> <p align="center">型号</p></td>
+					<td width='106'> <p align="center">编号</p> </td>
+					<td width='106'> <p align="center">证书编号 </p> </td>
+					<td width='106'> <p align="center">有效期限 </p> </td>
+					<td width='106'> <p align="center">范围/准确度</p> </td>
+				</tr>
+				<tr>
+					<td><input size='11' class="EDIT" id="mc1" type="text" name="mc1"></td>
+					<td><input size='11' class="EDIT" id="xh1" type="text" name="xh1"></td>
+					<td><input size='11' class="EDIT" id="bh1" type="text" name="bh1"></td>
+					<td><input size='11' class="EDIT" id="zsbh1" type="text" name="zsbh1"></td>
+					<td><input size='11' class="EDIT" id="yxqx1" type="text" name="yxqx1"></td>
+					<td><input size='11' class="EDIT" id="clfw1" type="text" name="clfw1"></td>
+				</tr>
+				<tr>
+					<td><input size='11' class="EDIT" id="mc2" type="text" name="mc2"></td>
+					<td><input size='11' class="EDIT" id="xh2" type="text" name="xh2"></td>
+					<td><input size='11' class="EDIT" id="bh2" type="text" name="bh2"></td>
+					<td><input size='11' class="EDIT" id="zsbh2" type="text" name="zsbh2"></td>
+					<td><input size='11' class="EDIT" id="yxqx2" type="text" name="yxqx2"></td>
+					<td><input size='11' class="EDIT" id="clfw2" type="text" name="clfw2"></td>
+				</tr>
+				<tr>
+					<td><input size='11' class="EDIT" id="mc3" type="text" name="mc3"></td>
+					<td><input size='11' class="EDIT" id="xh3" type="text" name="xh3"></td>
+					<td><input size='11' class="EDIT" id="bh3" type="text" name="bh3"></td>
+					<td><input size='11' class="EDIT" id="zsbh3" type="text" name="zsbh3"></td>
+					<td><input size='11' class="EDIT" id="yxqx3" type="text" name="yxqx3"></td>
+					<td><input size='11' class="EDIT" id="clfw3" type="text" name="clfw3"></td>
+				</tr>
+				<tr>
+					<td><input size='11' class="EDIT" id="mc4" type="text" name="mc4"></td>
+					<td><input size='11' class="EDIT" id="xh4" type="text" name="xh4"></td>
+					<td><input size='11' class="EDIT" id="bh4" type="text" name="bh4"></td>
+					<td><input size='11' class="EDIT" id="zsbh4" type="text" name="zsbh4"></td>
+					<td><input size='11' class="EDIT" id="yxqx4" type="text" name="yxqx4"></td>
+					<td><input size='11' class="EDIT" id="clfw4" type="text" name="clfw4"></td>
+				</tr>
+				<tr>
+					<td><input size='11' class="EDIT" id="mc5" type="text" name="mc5"></td>
+					<td><input size='11' class="EDIT" id="xh5" type="text" name="xh5"></td>
+					<td><input size='11' class="EDIT" id="bh5" type="text" name="bh5"></td>
+					<td><input size='11' class="EDIT" id="zsbh5" type="text" name="zsbh5"></td>
+					<td><input size='11' class="EDIT" id="yxqx5" type="text" name="yxqx5"></td>
+					<td><input size='11' class="EDIT" id="clfw5" type="text" name="clfw5"></td>
+				</tr>
+				<tr>
+					<td><input size='11' class="EDIT" id="mc6" type="text" name="mc6"></td>
+					<td><input size='11' class="EDIT" id="xh6" type="text" name="xh6"></td>
+					<td><input size='11' class="EDIT" id="bh6" type="text" name="bh6"></td>
+					<td><input size='11' class="EDIT" id="zsbh6" type="text" name="zsbh6"></td>
+					<td><input size='11' class="EDIT" id="yxqx6" type="text" name="yxqx6"></td>
+					<td><input size='11' class="EDIT" id="clfw6" type="text" name="clfw6"></td>
+				</tr>
+				<tr>
+					<td><input size='11' class="EDIT" id="mc7" type="text" name="mc7"></td>
+					<td><input size='11' class="EDIT" id="xh7" type="text" name="xh7"></td>
+					<td><input size='11' class="EDIT" id="bh7" type="text" name="bh7"></td>
+					<td><input size='11' class="EDIT" id="zsbh7" type="text" name="zsbh7"></td>
+					<td><input size='11' class="EDIT" id="yxqx7" type="text" name="yxqx7"></td>
+					<td><input size='11' class="EDIT" id="clfw7" type="text" name="clfw7"></td>
+				</tr></table>
+		</TD></TR></TBODY></TABLE>
+	</BODY>
+</HTML>

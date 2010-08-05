@@ -1,0 +1,71 @@
+// SjChart.odl : type library source for ActiveX Control project.
+
+// This file will be processed by the Make Type Library (mktyplib) tool to
+// produce the type library (SjChart.tlb) that will become a resource in
+// SjChart.ocx.
+
+#include <olectl.h>
+#include <idispids.h>
+
+[ uuid(8BDA8E7A-9A2C-47C3-9368-157815FFE854), version(1.0),
+  helpfile("SjChart.hlp"),
+  helpstring("SjChart ActiveX Control module"),
+  control ]
+library SJCHARTLib
+{
+	importlib(STDOLE_TLB);
+	importlib(STDTYPE_TLB);
+
+	//  Primary dispatch interface for CRTestChartCtrl
+
+	[ uuid(D84D0A57-0C9F-4D1C-BBFF-5BA7F8293735),
+	  helpstring("Dispatch interface for RTestChart Control"), hidden ]
+	dispinterface _DRTestChart
+	{
+		properties:
+			// NOTE - ClassWizard will maintain property information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_PROP(CRTestChartCtrl)
+			//}}AFX_ODL_PROP
+
+		methods:
+			// NOTE - ClassWizard will maintain method information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_METHOD(CRTestChartCtrl)
+			[id(1)] void SetAxis(double upper, double lower, double base, double criteria);
+			[id(2)] void AddData(double value);
+			[id(3)] void ClearAll();
+			//}}AFX_ODL_METHOD
+	};
+
+	//  Event dispatch interface for CRTestChartCtrl
+
+	[ uuid(9783833C-4ED6-4C0E-A882-11E6A39BC123),
+	  helpstring("Event interface for RTestChart Control") ]
+	dispinterface _DRTestChartEvents
+	{
+		properties:
+			//  Event interface has no properties
+
+		methods:
+			// NOTE - ClassWizard will maintain event information here.
+			//    Use extreme caution when editing this section.
+			//{{AFX_ODL_EVENT(CRTestChartCtrl)
+			[id(DISPID_MOUSEUP)] void MouseUp(short Button, short Shift, OLE_XPOS_PIXELS x, OLE_YPOS_PIXELS y);
+			//}}AFX_ODL_EVENT
+	};
+
+	//  Class information for CRTestChartCtrl
+
+	[ uuid(F537BB40-FE2D-4C97-84B1-539C75D8CBF9),
+	  helpstring("RTestChart Control"), control ]
+	coclass RTestChart
+	{
+		[default] dispinterface _DRTestChart;
+		[default, source] dispinterface _DRTestChartEvents;
+	};
+
+
+	//{{AFX_APPEND_ODL}}
+	//}}AFX_APPEND_ODL}}
+};
