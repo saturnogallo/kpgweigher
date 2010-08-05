@@ -1,0 +1,80 @@
+<HTML>
+	<head>
+		<meta content="http://schemas.microsoft.com/intellisense/ie5" name="vs_targetSchema">
+		<META http-equiv="Content-Type" content="text/html; charset=gb2312">
+		<style type="text/css"> #tablight {position:absolute; top: 5; left: 340;z-index=-1}
+		</style>
+		<script language="JavaScript">
+<!--
+function showhide(arg)
+{
+	var arglst=arg.split(';');
+	var index=0;
+	var ctrl;
+	for (index=0;index< arglst.length -1;index++){
+		var valuelst = arglst[index].split('=');
+		ctrl = document.getElementById(valuelst[0]);
+		if(ctrl){
+			ctrl.style.display = valuelst[1];
+		}
+	}
+}
+
+//-->
+		</script>
+	</head>
+	<BODY id="CTryData5Dlg" vLink="#0033ff" link="#0033ff" bgColor="lightgrey"
+		background="res:/JPG/#199">
+		<div id="tablight" style="Z-INDEX: -1">
+			<table id="Table1" height="33" cellSpacing="0" width="116" background="res:/JPG/#200"
+				border="0">
+				<tr>
+					<td></td>
+				</tr>
+			</table>
+		</div>
+		<table id="frameset" cellSpacing="0" width="100%" border="0">
+			<TBODY>
+				<tr>
+					<td style="HEIGHT: 93px" width="48" rowSpan="10"></td>
+					<td style="WIDTH: 43px; HEIGHT: 93px" width="43" rowSpan="10"></td>
+				</tr>
+				<TR>
+					<td style="HEIGHT: 92px" colSpan="6">
+						<table id="header" cellSpacing="0" width="100%" border="0">
+							<tr>
+								<td vAlign="bottom" borderColor="black" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_reg">注册信息</A></td>
+								<td vAlign="bottom" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_config">参数设置</A></td>
+								<td vAlign="bottom" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_data">测量/校验</A></td>
+								<td vAlign="bottom" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_report">生成报告</A></td>
+								<td vAlign="bottom" align="left"><A class="URL" style="FONT-WEIGHT: bold; FONT-SIZE: medium; CURSOR: hand; COLOR: #3366cc; FONT-STYLE: italic; FONT-FAMILY: '楷体_GB2312'"
+										href="#page_quit">退出程序</A></td>
+								<td width="10%"><label id='curtime'></label></td>
+							</tr>
+						</table>
+						<table id="regitems" cellSpacing="0" width="646" background="texture.jpg" border="0">
+							<tr vAlign="bottom">
+								<td>
+									<p id="schemelist">查询..</p>
+								</td>
+								<td><button id="schupd" type="button">保存</button><button id="schadd" type="button">存档</button><button id="schdel" type="button">删除</button><button id="data_export" type="button">导出</button><A class="URL" title="用图表方式显示历史数据" href="#data_chart">图表</A></td>
+								<td borderColor="#663333">校验设置:<A class="URL" id="jhname" href="#page_jh">设置</A><button id="data_jiaohe" type="button">校验处理</button><button id="data_xiuzheng" type="button">修正值</button></td>
+							</tr>
+							<tr>
+								<td><A class="URL" id="pause" href="#prg_start">开始测量</A></td>
+								<td><font color="#990000"><span id="action"> </span></font>
+								</td>
+								<td align="right"><font color="#6600ff"><span id="swistatus">外标准[ ],被测[ ]</span></font></td>
+							</tr>
+						</table>
+						<div id="cont">正在导入测量表格..</div>
+					</td>
+				</TR>
+			</TBODY>
+		</table>
+	</BODY>
+</HTML>

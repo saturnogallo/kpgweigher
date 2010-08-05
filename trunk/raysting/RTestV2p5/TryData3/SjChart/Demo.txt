@@ -1,0 +1,2 @@
+<object classid="clsid:F537BB40-FE2D-4C97-84B1-539C75D8CBF9" id="RTestChart1" width="721" height="390">
+</object>

@@ -1,0 +1,514 @@
+<style>
+<!--
+.font11
+	{color:windowtext;
+	font-size:18.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Times New Roman", serif;
+	}
+.font6
+	{color:windowtext;
+	font-size:18.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:华文楷体;
+	}
+.font5
+	{color:windowtext;
+	font-size:12.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Times New Roman", serif;
+	}
+.font0
+	{color:windowtext;
+	font-size:12.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:宋体;
+	}
+.font10
+	{color:windowtext;
+	font-size:6.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Times New Roman", serif;
+	}
+.font7
+	{color:windowtext;
+	font-size:12.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:华文楷体;
+	}
+.font8
+	{color:windowtext;
+	font-size:6.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:华文楷体;
+	}
+.font9
+	{color:windowtext;
+	font-size:9.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:华文楷体;
+	}
+.font12
+	{color:windowtext;
+	font-size:18.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Times New Roman", serif;
+	}
+-->
+</style>
+
+<input id="idvals" type="hidden" value="
+,Z130,Z150,Z170,Z190,Z41,Z71,Z101,Z131,Z151,Z171,Z191,Z42,Z72,Z102,Z132,Z152,Z172,Z192,Z43,Z73,Z103,Z133,Z153,Z173,Z193,Z44,Z74,Z104,Z134,Z154,Z174,Z194,Z45,Z75,Z105,Z135,Z155,Z175,Z195,Z46,Z76,Z106,Z136,Z156,Z176,Z196,Z47,Z77,Z107,Z137,Z157,Z177,Z197,Z48,Z78,Z108,Z138,Z158,Z178,Z198,Z49,Z79,Z109,Z139,Z159,Z179,Z199,Z50,Z80,Z110,Z140,Z160,Z180,Z200,Z51,Z81,Z111,mvalues,Z221,Z224,Z227,Z52,Z82,Z112,Z53,Z83,Z113,Z54,Z84,Z114,Z55,Z85,Z115,Z222,Z225,Z228,Z56,Z86,Z116,Z57,Z87,Z117,Z58,Z88,Z118,Z59,Z89,Z119,Z223,Z226,Z229,Z60,Z90,Z120,Z61,Z91,Z121,Z62,Z92,Z122,Z209,Z189,Z169,Z149,Z129,Z99,Z69,Z230,Z231,Z232,jdjg,">
+
+<table id="wbtbl" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse; width: 995px" id="table2">
+	<colgroup>
+		<col width="42" style="width: 32pt"><col width="48" style="width: 36pt">
+		<col width="86" span="5" style="width: 64pt">
+		<col width="138" style="width: 103pt">
+		<col width="90" style="width: 68pt">
+		<col width="103" style="width: 77pt">
+		<col width="81" style="width: 61pt">
+	</colgroup>
+	<tr height="34" style="height:25.8pt">
+		<td height="34" width="42" style="height: 25.8pt; width: 32pt; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td width="48" style="width: 36pt; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td width="86" style="width: 64pt; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td width="86" style="width: 64pt; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td colspan="4" width="396" style="width: 295pt; font-size: 18.0pt; font-family: 华文楷体; color: windowtext; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		标准电池原始记录</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px" colspan="3">
+		JDJ/F26T002.1/0-2006</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		测量日期</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" colspan="5">
+		<span id="jdrq"></span></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		计算公式：</td>
+		<td colspan="3" style="font-family: 'Times New Roman', serif; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		E<font class="font8">X20</font><font class="font7">=E</font><font class="font8">n20</font><font class="font7">+N</font><font class="font8">X</font><font class="font7">-N</font><font class="font8">n</font><font class="font7">+</font><font class="font6">Δ</font><font class="font7">E</font><font class="font8">C</font><font class="font7">/1000000</font></td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td height="30" style="height: 22.2pt; font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		测量</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		t<font class="font9">0</font><font class="font10">（℃）</font></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z490" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z491" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z492" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td colspan="3" style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid black; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		Δ<font class="font7">E</font><font class="font8">C</font><font class="font7">=</font><font class="font6">（</font><font class="font7">t</font><font class="font8">x</font><font class="font7">-t</font><font class="font8">0</font><font class="font6">）（</font><font class="font7">t</font><font class="font8">x</font><font class="font7">-t</font><font class="font8">0</font><font class="font6">）</font></td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td height="30" style="height: 22.2pt; font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		温度</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		t<font class="font9">x</font><font class="font10">（℃）</font></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z480" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z481" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z482" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td colspan="3" style="font-family: 'Times New Roman', serif; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid black; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		R<font class="font8">X</font><font class="font7">=</font><font class="font0">（</font><font class="font7">N</font><font class="font8">X</font><font class="font7">-N</font><font class="font8">X</font><font class="font7">’</font><font class="font0">）</font><font class="font7">R</font><font class="font8">S</font></td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td height="30" style="height: 22.2pt; font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-size: 8.0pt; font-family: 华文楷体; color: windowtext; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		Δ<font class="font10">E</font><font class="font9">C</font></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z470" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z471" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z472" size="8"></td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td colspan="4" style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid black; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		标准器号</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		第一次</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		第二次</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		第三次</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		最大变差（μ<font class="font7">V</font><font class="font6">）</font></td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		标准平均值</td>
+		<td colspan="2" style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		20℃标准数据（V）</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		N<font class="font9">n1</font></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z60' prec="-7" class='ONCE' title='BZPOINT:60,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z70' prec="-7" class='ONCE' title='BZPOINT:70,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z80' prec="-7" class='ONCE' title='BZPOINT:80,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id="Z110" class='CACU' prec='-1'>&nbsp;&nbsp;</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		<span id="Z120" class='CACU' prec='-7'>&nbsp;&nbsp;</span></td>
+		<td colspan="2" style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z460" size="8"></td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		N<font class="font9">n2</font></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z61' prec="-7" class='ONCE' title='BZPOINT:61,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z71' prec="-7" class='ONCE' title='BZPOINT:71,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z81' prec="-7" class='ONCE' title='BZPOINT:81,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id="Z111" class='CACU' prec='-1'>&nbsp;&nbsp;</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		<span id="Z121" class='CACU' prec='-7'>&nbsp;&nbsp;</span></td>
+		<td colspan="2" style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z461" size="8"></td>
+	</tr>
+	<tr height="28" style="height: 21.0pt">
+		<td colspan="2" height="28" style="height: 21.0pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="128">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="118">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		　</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		被检器号</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		第一次</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		第二次</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		第三次</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		N<font class="font9">X</font></td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		N<font class="font9">X’</font></td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		最大变差（μV）</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		平均值</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="117">
+		化整值（V）</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		内电阻</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		N<font class="font9">X1</font></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z260' prec="-7" class='ONCE' title='BZPOINT:260,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z270' prec="-7" class='ONCE' title='BZPOINT:270,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z280' prec="-7" class='ONCE' title='BZPOINT:280,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z290' prec="-7" class='ONCE' title='BZPOINT:290,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z300' prec="-7" class='ONCE' title='BZPOINT:300,'>单击测量</span></td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　<span id="Z310" class='CACU' prec='-1'>&nbsp;&nbsp;</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		<span id="Z320" class='CACU' prec='-7'>&nbsp;&nbsp;</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="117">
+		<span id="Z330" class='CACU' prec='-7'>&nbsp;&nbsp;</span></td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+				<span id="Z340" class='CACU' prec='-1'>&nbsp;&nbsp;</span> Ω</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		N<font class="font9">X2</font></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z261' prec="-7" class='ONCE' title='BZPOINT:261,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z271' prec="-7" class='ONCE' title='BZPOINT:271,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z281' prec="-7" class='ONCE' title='BZPOINT:281,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z291' prec="-7" class='ONCE' title='BZPOINT:291,'>单击测量</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='Z301' prec="-7" class='ONCE' title='BZPOINT:301,'>单击测量</span></td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id="Z311" class='CACU' prec='-1'>&nbsp;&nbsp;</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		<span id="Z321" class='CACU' prec='-7'>&nbsp;&nbsp;</span></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="117">
+		<span id="Z331" class='CACU' prec='-7'>&nbsp;&nbsp;</span></td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+				<span id="Z341" class='CACU' prec='-1'>&nbsp;&nbsp;</span> Ω</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="128">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="118">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		　</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='jdrqn'></span> 年</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='jdrqy'></span>月</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='jdrqr'></span>日</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		传递<font class="font7">E</font><font class="font8">n20</font></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<input class="EDIT" type="text" id="Z450" size="8"></td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		（V）</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="128">
+		上年度数据</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="118">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		　</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		标准器编号</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		A&nbsp;</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		制造厂</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		<span id='zzc'></span></td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		检定日期</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="117">
+				<input class="EDIT" type="text" id="Z451" size="8"></td>年<input class="EDIT" type="text" id="Z452" size="8"></td> 月		<input class="EDIT" type="text" id="Z453" size="8"></td> 日</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		　</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		标准依据</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		年</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		月</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		日</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		传递属于</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		二等</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		　</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="117">
+		20℃绝对伏特</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		内电阻</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: .5pt solid black; border-top: .5pt solid windowtext; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		器号</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		过渡电池</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		A</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="117">
+		<input class="EDIT" type="text" id="Z440" size="8"></td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+				<input class="EDIT" type="text" id="Z441" size="8">Ω</td>
+	</tr>
+	<tr height="30" style="height: 22.2pt">
+		<td colspan="2" height="30" style="height: 22.2pt; font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		检定方法</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		差值替代法</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		器号</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="127">
+		B</td>
+		<td style="font-family: 华文楷体; text-align: left; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="117">
+				<input class="EDIT" type="text" id="Z442" size="8"></td>
+		<td style="font-family: 'Times New Roman', serif; text-align: center; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		<input class="EDIT" type="text" id="Z442" size="8">Ω</td>
+	</tr>
+	<tr height="22" style="height:16.8pt">
+		<td height="22" colspan="2" style="height: 16.8pt; font-family: 华文楷体; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: medium none; border-top: .5pt solid windowtext; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		备注：</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="128">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="118">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		　</td>
+	</tr>
+	<tr height="21" style="height:15.6pt">
+		<td height="21" style="height: 15.6pt; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: medium none; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="128">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="118">　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: medium none; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		　</td>
+	</tr>
+	<tr height="21" style="height:15.6pt">
+		<td height="21" style="height: 15.6pt; color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: .5pt solid windowtext; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="128">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: medium none; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="118">
+		　</td>
+		<td style="color: windowtext; font-size: 12.0pt; font-weight: 400; font-style: normal; text-decoration: none; font-family: 宋体; text-align: general; vertical-align: bottom; white-space: nowrap; border-left: medium none; border-right: .5pt solid windowtext; border-top: medium none; border-bottom: .5pt solid windowtext; padding-left: 1px; padding-right: 1px; padding-top: 1px" width="71">
+		　</td>
+	</tr>
+</table>
+

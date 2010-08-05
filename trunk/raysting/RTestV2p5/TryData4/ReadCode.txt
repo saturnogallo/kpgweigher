@@ -1,0 +1,87 @@
+Design:
+4 types of links.
+URL : title bars and start command
+CMD : used for re-test in progressive test
+EDIT: user input. (when lost focus, the value will be stored
+ONCE: used for test in clickonce test
+
+MAIN is the entry of each prg, especially for progressive test
+CLICKONCE: parameter is stored in title in format Func:parms, m_iRetestID = -1
+URL: besides page url, we have prg_start,data_chart, data_modnbz,
+
+index over 400 will not be checked in Calibration process
+
+data display:
+SetHtmlText(id,dvalue) when [d,..] command is found
+normal case: after selection, generate options for jhsel or select class,
+for non colored id, if class is ONCE , if no data is found ,display 单击测量，
+if colored id, remove color first and display the value
+
+Variable Definition:
+bTwice in OnTimer: prevent enter multiple times
+m_State : SUSPEND,BEERROR,IDLE,RUNNING
+newPage, m_currPage: store the page switch history and target url
+m_cmdStep  : just command step(state machine) , CMD_LOADHTML,CMD_IDLEHTML,CMD_CONTHTML,CMD_CONTHTML2,CMD_INITHTML 
+m_bAddData : indicate whether we are in re-test in progressive test, so that we can add new data to 
+             测量结果,by internalfunction('9'), it will be reset to false in this function
+m_sDataSel : current scheme of DataPage
+m_sRegSel,m_sConfSel,m_sJhSel,m_sReportSel : just the same as other scheme selection
+m_sDataUrl : data of last selection part of CMD link (got it when MouseOverCmd)
+m_iRetestID: id of retest
+
+m_sConfigvals, m_sJhvals, m_sRegvals, m_sDatavals: id list for values on each page
+pause : the id of run/stop button on the data page 
+jhsel0 - 19 total 20 options of jiaohe
+cklt1-9 total 9 group of resistence inside
+confdxcl , single direction test
+lcselect , liang cheng 
+zdpselect , Lowest pan , zui di pan
+schsel schadd schdel schupd is used for all pages
+ButtonOK,ButtonCancel is used for ChartDlg.htm
+fltidselect fltvalselect filter on reg page
+
+function:
+InternalRoutines('a') :modify neibiaozhun
+HandleCommand: 's', switch, 't', read data, 'm': waiting message box, 'n': navameter
+               'i' internalRoutines, 'f', single action function, 'p': pause, 'zv',zvalue,vvalue
+               'u,t', display text on id action
+HandleDataShow: 'vz' , zvalue,vvalue with offset(m_iBase)
+InternalRoutines: '1': only one outer dianzu can be selected and caculate iScaleR0 0.001 or 0.01 or 0.1 scale
+'2': replace to the internal standard value with Z11-Z16 since only 1 to 100K ohm is checked
+'3': at least one outer dianzu should be selected
+'4': caculate average and biao-zhuncha between Z10,Z11,Z9, can be replaced further, result is in Z10
+'5': no use
+'6' : scale the Z8 = int(log(Z8)), can be removed later
+'7' :no use
+'8' : clear all the Z value
+'9' : update data to 测量结果
+'a' : modify nbz
+SetHtmlText: set dvalue to id base on prec
+ExecuteClickAction: for dwcj only
+CollectValues :  collect data of EDIT,CMD,CACU, can be replaced further
+Handler: silent option is only used when startup 'init' since select will following and update nbz value
+
+Tips for creating new form
+1. <input id="idvals" type="hidden" value="ids that will be collected as values">
+2. <span id=""></span> to display data an reg page
+3. <input class="EDIT" type="text" id="Z490" size="7"> for user input
+4. <span id='Z60' prec="-7" class='ONCE' title='BZPOINT:60,'><font size="2">单击测量</font></span> for clickonce test
+5. <span id="Z110" class='CACU' prec='-1'><font size="2">0.0</font></span> for result display only
+
+calibration setting:
+	unsigned char type; //type of the calibration routine will be used
+	int istart;     //rules apply when index >= istart index <= istart;
+	int iend;   
+	int ibasepos;	//used for RGROUP type as the basic position to minus with
+	const char* sScope; //standard value should be iscope * (ipos-ibasepos) or iscope * ibasepos
+	const char* sJhsel; //list of jhsel to use, ex: "jhsel0"
+	const char* sLevel; //list of jhsel valid values: "0.05,0.1"
+	const char* sDigipos;  //list of digital position to round off
+	const char* sMantissa; //list of mantissa for each sLevel
+	const char* sPrecious; //list of Precious to compare
+	const char* sRef; //other config based on prec_type
+	const TCHAR* sErrMsg; //special error message
+PRECBASE2 g_Cfg[] ={
+{
+PREC_TYPE_RSINGLE,start_position,end_position,ibasepos,"stdvalue"}
+}
