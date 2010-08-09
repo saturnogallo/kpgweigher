@@ -61,12 +61,13 @@ char highc(uchar x);
 #define PRBTYPE_BIT	0x10
 typedef struct _PRBDATA
 {
-	char  name[PRBS_PER_SECTOR][10];	//probe serials
-	uchar type[PRBS_PER_SECTOR];		//probe type
 	double param1[PRBS_PER_SECTOR];
 	double param2[PRBS_PER_SECTOR];
 	double param3[PRBS_PER_SECTOR];
 	double param4[PRBS_PER_SECTOR];
+	char  name[PRBS_PER_SECTOR][10];	//probe serials
+	uchar type[PRBS_PER_SECTOR];		//probe type
+
 }PRBDATA;
 #define MODE_BIT	0x01
 #define KTT_BIT	0x40
@@ -82,30 +83,30 @@ typedef struct _PRBDATA
 #define SET_THERM_MODE	sdata.mode |= MODE_BIT
 #define TOGGLE_MODE_BORE sdata.mode ^= MODE_BIT
 
-#define INC_CH	{curr_ch++ ;  if(curr_ch > sdata.scanmode) curr_ch = 1;}
-#define DEC_CH	{curr_ch-- ;  if(curr_ch == 0)  curr_ch = sdata.scanmode;}
+#define INC_CH	curr_ch += 1 ;  if(curr_ch > sdata.scanmode) curr_ch = 1;
+#define DEC_CH	curr_ch -= 1 ;  if(curr_ch == 0)  curr_ch = sdata.scanmode;
 #define MAX_CH_NUM	24
 #define MAX_PROBE_NUM	24
 #define INVALID_PROBE	0xff
 typedef struct _SYSDATA
 {
-	uchar   ktime;	  	//time for switch
 	double 	Rs1;	  	//jiao-zheng zhi
 	double  V0;	  	//voltage offset value
+	int   ktime;	  	//time for switch
+	int 	scanmode;	//channel definition of scanner
 	uchar	mode;	  	//do BORE or thermo test, has KTT or not
-	uchar 	scanmode;	//channel definition of scanner
 	uchar 	id[MAX_CH_NUM];	//probe index of each channel
 }SYSDATA;
 typedef struct _RUNDATA
 {
-	uchar	has_scanner;				  //whether scanner is available
+
 	double  reading[MAX_CH_NUM];		  //reading on each channel
 	double  temperature[MAX_CH_NUM];	  //temperature result on each channel
 
 	double 	Rx;		  //final result
 	double  Temp1820;	  //reading of 18b20
 	double  stdV;		  //voltage on stdV;
-	
+	uchar	has_scanner;				  //whether scanner is available	
 }RUNDATA;
 
 
@@ -132,8 +133,9 @@ extern void get_18b20();
 
 void SwitchWindow(uchar page);
 
-extern xdata char strbuf[]; 	//global string buffer
+extern char strbuf[]; 	//global string buffer
 extern xdata char databuf[];
 extern uchar pos_strbuf;	//length of string buffer
 extern uchar pos_databuf;
+int sjprintf(char *s, const char *fmt, ...);
 #endif

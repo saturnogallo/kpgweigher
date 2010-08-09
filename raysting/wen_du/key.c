@@ -89,9 +89,9 @@ void Key_Init()
 void key_debug(char* buf)
 {
 	if(KEYBJ2)
-		sprintf(buf,"1,%i,%c",keycount,keykeep);
+		sjprintf(buf,"1,%i,%c",keycount,keykeep);
 	else
-		sprintf(buf,"0,%i,%c",keycount,keykeep);
+		sjprintf(buf,"0,%i,%c",keycount,keykeep);
 }
 
 void Key_Scan()

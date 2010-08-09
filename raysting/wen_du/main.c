@@ -1,3 +1,9 @@
+/*
+	TODO: 4wire 2wire option
+		  change english to chinese.
+		  furnish draw label function
+*/
+
 #include "stc51.h"
 #include "utili.h"
 #include "lcd.h"
@@ -7,11 +13,11 @@
 #include "window.h"
 #include "scanner.h"
 #include "math.h"
-#include "wendu.h"
+//#include "wendu.h"
 RUNDATA rdata;
 SYSDATA sdata;
 PRBDATA	prbdata;
-xdata char strbuf[20];
+char strbuf[20];
 uchar pos_strbuf = 0;
 uchar key;
 
@@ -93,34 +99,55 @@ sbit KTT=P3^7;
 #define KTT_POSITIVE	KTT = 1
 #define KTT_NEGATIVE	KTT = 0;
 uchar ktt_pos = 0; //0 means positive,1 means negative
-uchar 	curr_ch = 1;	//index of current channel
-uchar   curr_prb = 1;	//index of current probe selection
-extern MSG_HANDLER caller;
+int 	curr_ch = 1;	//index of current channel
+int   curr_prb = 1;	//index of current probe selection
 
-LABEL code bootup = {LBL_HZ16,30,30,1,"booting..."};
-LABEL code calibrate = {LBL_HZ16,30,30,1,"calibrating"};
+
+LABEL code bootup = {LBL_HZ16,30,30,1,"正在启动..."};
+LABEL code calibrate = {LBL_HZ16,30,30,1,"正在校准..."};
+LABEL code lbldbg = {LBL_HZ16,30,50,8,strbuf};
 uchar nextwin = 0;
 void calculate_temp(ch)
 {
+	rdata.temperature[ch-1] = 20.1;
+	return;
 	//todo get temperature;
-	if(prbdata.type[ch-1] && PRBTYPE_BIT)
+/*	if(prbdata.type[ch-1] && PRBTYPE_BIT)
 		rdata.temperature[ch-1] = GetThmoVolt(rdata.reading[ch-1],prbdata.type[ch-1]);
 	else
 		rdata.temperature[ch-1] = MValueToTValue(rdata.reading[ch-1],prbdata.type[ch-1]);
+*/
 }
 double get_reading(uchar ch)
 {
 	double ret;
 
+	rdata.reading[ch-1] = 1.23;
+	return 0;
 	//todo get reading
 	//sm_write();
 	//sm_read();
 	rdata.reading[ch-1] = ret;
 	return 0;
 }
+void debugwnd()
+{
+	 sjprintf(strbuf,"key:?",key);
+	 wnd_msgbox(&lbldbg);
+
+	 while(1)
+	 {
+		if(key != KEY_INVALID)
+		{
+			sjprintf(strbuf,"key:%c",key);
+			wnd_msgbox(&lbldbg);
+
+		}
+	 }
+}
 void main()
 {
-	 uchar ch_to_search = 1;
+	 int ch_to_search = 1;
 	 int delay_cnt_p = 0;
 	 int delay_cnt_n = 0;
 	 double valuep;
@@ -130,7 +157,7 @@ void main()
 	 LCD_Init();
 
 	 wnd_msgbox(&bootup);
-	 	 
+	 
 	 Key_Init();
 	 Init_18b20();
 
@@ -139,24 +166,33 @@ void main()
 	 initiate_timer();
 
 	 sm_Init();
-
 	 IE = 0x92;//enable serial int and timer0 interrupt
-
-	 State_Init();	
+//	 State_Init();	
 	 
 	 //todo collect first batch data (based on scanmode)
+	 rdata.has_scanner = 0; //debug use
+	 sdata.ktime = 30;
+	 rdata.stdV = 1.0;
+	 sdata.Rs1 = 1;
+	 sdata.V0 = 0;
+	 sdata.mode = KTT_BIT;
+	sdata.scanmode = 12;
+	 for(curr_ch = 0; curr_ch <12;curr_ch++)
+	 {
+		 sjprintf(prbdata.name[curr_ch],"sr%i",curr_ch);
+		 rdata.reading[curr_ch] = curr_ch+1.234;
+ 		 rdata.temperature[curr_ch] = curr_ch+20.5678;
+	 }	 
 	 if(rdata.has_scanner){
 		scanner_set_channel(ch_to_search);
 		delay_cnt_p = ONESEC * sdata.ktime;
 	 }
 	 nextwin = PG_MAIN;
 	 
-	 caller = 0; //no caller so far
 	 key = KEY_INVALID;
 	 curr_ch = 1;
 	 while(1)
 	 {
-		
  	 	if(nextwin != 0)
 		{
 			SwitchWindow(nextwin);
@@ -187,12 +223,7 @@ void main()
 					//todo
 				}
 			}else{
-				if(caller != 0)
-				{
-					(*caller)((*curr_window)(key));
-				}else{
-					(*curr_window)(key);
-				}
+				(*curr_window)(key);
 			}
 			key = KEY_INVALID;
 	  	}else{
@@ -221,6 +252,7 @@ void main()
 				delay_cnt_n--;
 				continue;
 			}
+/*
 			if(IS_BORE_MODE)
 			{
 
@@ -236,6 +268,7 @@ void main()
 				rdata.reading[ch_to_search-1] = valuep - sdata.V0;	
 			}
 			calculate_temp(ch_to_search);
+*/
 			ch_to_search++;
 			if(ch_to_search > sdata.scanmode)
 				ch_to_search = 1;
