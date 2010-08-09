@@ -38,16 +38,13 @@ extern uchar nextwin;
 			if(last_pos == curr_pos)	return;\
 			if(curr_pos % max_option == 1)  {new_page = 1;}else{new_page = 0;}
 
-#define DEC_TABLE	last_pos = curr_pos;\
-			if(curr_pos == 1) {curr_pos = max_index;}else{curr_pos = min_index;}\
-			if(last_pos == curr_pos) return;\
+#define DEC_TABLE	last_pos = curr_pos;   curr_pos--;\
+			if(curr_pos < min_index) curr_pos = max_index;\
+			if(last_pos == curr_pos)  return;\
 			if(curr_pos % max_option == 0)  {new_page = 1;}else{new_page = 0;}
 
-#define KEY_TABLE	if(pos_strbuf >= chvalue.width) return;\
-			strbuf[pos_strbuf++] = msg; strbuf[pos_strbuf] = '\0'; last_pos = curr_pos;\
-			curr_pos = buf2byte();\
-			if((uchar)((last_pos-1)/max_option) == (uchar)((curr_pos-1)/max_option))\
-			{new_page = 0; }else{	new_page = 1;}
+#define KEY_TABLE	if((msg > KEY_NUM0) && (msg-KEY_NUM0)*max_option <= max_index)\
+					{new_page = 1; curr_pos = (msg-KEY_NUM1)*max_option+1;}
 
 #define INIT_OPTIONS	for(i = min_option;i <= max_option; i++) {\
 				draw_label(&options[i-1], SW_NORMAL);\
@@ -70,8 +67,8 @@ extern uchar nextwin;
 			if(curr_sel < min_option)\
 				curr_sel = max_option;
 
-extern uchar   curr_ch;		//index of current channel
-extern uchar   curr_prb;	//index of current probe selection
+extern int   curr_ch;		//index of current channel
+extern int   curr_prb;	//index of current probe selection
 
 
 void State_Init() {
@@ -85,7 +82,6 @@ void State_Init() {
 		LoadProbeData(1 + THERM_PRB_OFFSET);
 	}
 	rdata.has_scanner = scanner_is_available();
-	sdata.scanmode = 1;
 	if(rdata.has_scanner)
 		sdata.scanmode = scanner_get_mode();
 	//todo : check the available of scanner and set the scanmode
@@ -98,21 +94,27 @@ void State_Init() {
 }
 
 void pgmain_handler(uchar msg) {
-	uchar i,old_ch;
+	int i,old_ch;
 	LABEL code chs[] = {
-		{LBL_HZ16,2,30,strbuf},
-		{LBL_HZ16,2,60,strbuf}
+		{LBL_HZ12, 2, 3,3,strbuf},
+		{LBL_HZ6X8,2,30,3,strbuf},
+		{LBL_HZ6X8,2,40,3,strbuf},
+		{LBL_HZ6X8,2,50,3,strbuf}
 	};
 	LABEL code values[] = {
-		{LBL_HZ16,30,30,strbuf},
-		{LBL_HZ16,30,60,strbuf}
+		{LBL_HZ12, 40,3, 8,strbuf},
+		{LBL_HZ6X8,40,30,8,strbuf},
+		{LBL_HZ6X8,40,40,8,strbuf},
+		{LBL_HZ6X8,40,50,8,strbuf}
 	};
 	LABEL code temps[] = {
-		{LBL_HZ16,130,30,strbuf},
-		{LBL_HZ16,130,60,strbuf}
+		{LBL_HZ12, 140,3, 8,strbuf},
+		{LBL_HZ6X8,140,30,8,strbuf},
+		{LBL_HZ6X8,140,40,8,strbuf},
+		{LBL_HZ6X8,140,50,8,strbuf}
 	};
 	
-	LABEL code usage = {LBL_HZ6X8,220,60,5,"usage"};
+	//LABEL code usage = {LBL_HZ6X8,220,60,5,"usage"};
 
 	if(msg == KEY_TAB) {
 		if(IS_THERM_MODE)
@@ -123,33 +125,37 @@ void pgmain_handler(uchar msg) {
 	}
 	if(msg == MSG_INIT) {
 		LCD_Cls();
-		draw_label(&usage,SW_NORMAL);
+//		draw_label(&usage,SW_NORMAL);
+		curr_ch = 1;
 		msg = MSG_REFRESH;
 	}
 	if(msg == KEY_UP) {
-		INC_CH;
+		DEC_CH;	
 		msg = MSG_REFRESH;
 	}
 	if(msg == KEY_DN) {
-		DEC_CH;
+
+		INC_CH;
 		msg = MSG_REFRESH;
 	}
 	if(msg == MSG_REFRESH) {
 		old_ch = curr_ch;
-		for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)
+		for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
 		{
-			sprintf(strbuf,"CH%i:",curr_ch);
+			sprintf(strbuf,"CH%02i:",curr_ch);
 			draw_label(&chs[i],SW_NORMAL);
 			if( sdata.id[curr_ch - 1] == INVALID_PROBE ) {
 				sprintf(strbuf,"*");
 			}else{
+			
 				if(IS_THERM_MODE)
-					sprintf(strbuf,"%.4f mV",rdata.reading[curr_ch - 1]);
+					sprintf(strbuf,"%8f mV",rdata.reading[curr_ch - 1]);
 				else
-					sprintf(strbuf,"%.4f ohm",rdata.reading[curr_ch - 1]);
+					sprintf(strbuf,"%8f ohm",rdata.reading[curr_ch - 1]);
 				draw_label(&values[i],SW_NORMAL);
-				sprintf(strbuf,"%.4f C",rdata.temperature[curr_ch - 1]);
+				sprintf(strbuf,"%6f C",rdata.temperature[curr_ch - 1]);
 				draw_label(&temps[i],SW_NORMAL);
+				
 			}
 			if(1 == sdata.scanmode)
 				break;
@@ -159,45 +165,42 @@ void pgmain_handler(uchar msg) {
 	}
 }
 //main configuration window of R
-void ktime_caller(uchar ret){
-	if(ret == KEY_OK)
-		sdata.ktime = buf2byte();
-	nextwin = PG_RCONFIG;
-}
 void pgrconfig_handler(uchar msg) {
 	uchar i;
-	LABEL code banner = {LBL_HZ16,3,3,1,"Rconfig"};
-	LABEL code calibrate = {LBL_HZ16,30,30,1,"calibrating"};
+	LABEL code banner = {LBL_HZ16,3,3,1,"铂电阻参数配置"};
+	LABEL code calibrate = {LBL_HZ16,30,30,1,"内标准校准中..."};
+	LABEL code klbl = {LBL_HZ6X8, 88,28, 9,strbuf};
 	LABEL code options[] = {
-		{LBL_HZ16,30,20,10,strbuf},
-		{LBL_HZ16,130,20,8,"2 calibrating"},
-		{LBL_HZ16,30,40,8,"3 ch config"},
-		{LBL_HZ16,130,40,8,"4 probe cfg"}
+		{LBL_HZ16, 10,23,1,"1.电流换向"},
+		{LBL_HZ16, 130,23,8,"2.内标准校准"},
+		{LBL_HZ16, 10,45,8,"3.通道探头选择"},
+		{LBL_HZ16,130,45,8,"4.设置探头参数"}
 	};
-	
-	LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
+
+//	LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
 	
 	static uchar curr_sel = 1;
 	static uchar last_sel = 1;
 	const uchar min_option = 1;
 	const uchar max_option = sizeof(options)/sizeof(LABEL);
+
 	if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
 		nextwin = PG_MAIN;
 		return;
 	}
 	if(msg == MSG_INIT) {
 		LCD_Cls();
-		sprintf(strbuf,"1.ktime (%is)",sdata.ktime);
 		draw_label(&banner, SW_NORMAL);
-		draw_label(&usage, SW_NORMAL);
+		sprintf(strbuf,"(%i)",sdata.ktime);
+		draw_label(&klbl, SW_NORMAL);
 		INIT_OPTIONS;
 		msg = MSG_REFRESH;
 	}
 	if(msg == KEY_NUM1) {
 		window_setup(4);
-		sprintf(strbuf,"ktime setup");
-		caller = ktime_caller;
-		wnd_intinput(MSG_INIT);
+		sprintf(strbuf,"电流换向时间设置");
+		sdata.ktime = wnd_intinput(sdata.ktime);
+		nextwin = PG_RCONFIG;
 		return;
 	}
 	if(msg == KEY_NUM2)
@@ -212,7 +215,7 @@ void pgrconfig_handler(uchar msg) {
 		return;
 	}
 	if(msg == KEY_NUM4) {
-		nextwin = PG_RPRBCONFIG;
+		nextwin = PG_PRBSET;
 		return;
 	}
 	if(msg == MSG_REFRESH) {
@@ -222,12 +225,12 @@ void pgrconfig_handler(uchar msg) {
 //main configuration window of T
 void pgtconfig_handler(uchar msg) {
 	uchar i;
-   	LABEL code banner = {LBL_HZ16,3,3,8,"Tconfig"};
+   	LABEL code banner = {LBL_HZ16,3,3,7,"热电偶参数配置"};
 	LABEL code options[] = {
-		{LBL_HZ16,30,20,8,"1.ch set"},
-		{LBL_HZ16,30,40,8,"2.probset"}
+		{LBL_HZ16,40,25,8,"1.选择各通道探头"},
+		{LBL_HZ16,40,45,8,"2.设置各探头参数"}
 	};
-	LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
+	//LABEL code usage = {LBL_HZ6X8,100,55,5,"(1-9:select，TAB:return)"};
 	static uchar curr_sel = 1;
 	static uchar last_sel = 1;
 	const uchar min_option = 1;
@@ -239,7 +242,7 @@ void pgtconfig_handler(uchar msg) {
 	if(msg == MSG_INIT) {
 		LCD_Cls();
 		draw_label(&banner, SW_NORMAL);
-		draw_label(&usage, SW_NORMAL);
+//		draw_label(&usage, SW_NORMAL);
 		INIT_OPTIONS;
 		msg = MSG_REFRESH;
 	}
@@ -248,7 +251,7 @@ void pgtconfig_handler(uchar msg) {
 		return;
 	}
 	if(msg == KEY_NUM2) {
-		nextwin = PG_TPRBCONFIG;
+		nextwin = PG_PRBSET;
 		return;
 	}
 	if(msg == MSG_REFRESH) {
@@ -258,53 +261,43 @@ void pgtconfig_handler(uchar msg) {
 }
 //channel probe setup
 void pgchset_handler(uchar msg) {
-	LABEL code banner =    {LBL_HZ16,3,3,8,"channel setup"};
-	LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
-	LABEL code chvalue = {LBL_HZ6X8,30,40,2,strbuf};
+	LABEL code banner =    {LBL_HZ16,3,3,4,"通道设置"};
+	//LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
+	LABEL code chvalue = {LBL_HZ6X8,130,3,2,strbuf};
 	LABEL code items[] = {
-		{LBL_HZ16, 30,30,10, strbuf},
-		{LBL_HZ16, 30,30,10, strbuf},
-		{LBL_HZ16, 30,30,10, strbuf},
-		{LBL_HZ16, 30,30,10, strbuf},
-		{LBL_HZ16, 30,30,10, strbuf},
-		{LBL_HZ16, 30,30,10, strbuf}
+		{LBL_HZ6X8, 10, 30, 10, strbuf},
+		{LBL_HZ6X8, 130,30, 10, strbuf},
+		{LBL_HZ6X8, 10, 40, 10, strbuf},
+		{LBL_HZ6X8, 130,40, 10, strbuf},
+		{LBL_HZ6X8, 10, 50, 10, strbuf},
+		{LBL_HZ6X8, 130,50, 10, strbuf}
 	};
 
-	static uchar curr_pos = 0;
-	static uchar last_pos = 0;
+	static uint curr_pos = 0;
+	static uint last_pos = 0;
 	const uchar code min_option = 1;
 	const uchar code max_option = sizeof(items)/sizeof(LABEL);
 	const uchar code min_index = 1;
 	uchar max_index = sdata.scanmode;
 	uchar new_page = 0;
-	uchar i,j;
-	if(msg == KEY_TAB) {
+	int i,j;
+	if(msg == KEY_TAB || msg == KEY_CE) {
 		if(IS_BORE_MODE)
 			nextwin = PG_RCONFIG;
 		else
 			nextwin = PG_TCONFIG;
 		return;
 	}
-	if(msg == KEY_CE) {
-		pos_strbuf = 0;
-		strbuf[0] = '\0';
-		msg = MSG_REFRESH;
-	}
+
 	if(msg == KEY_UP) {
-		INC_TABLE;
-		msg = MSG_REFRESH;
-	}
-	if(msg == KEY_DN) {
 		DEC_TABLE;
 		msg = MSG_REFRESH;
 	}
+	if(msg == KEY_DN) {
+		INC_TABLE;
+		msg = MSG_REFRESH;
+	}
 	if(msg == KEY_OK) {	//show window to select the probe
-		last_pos = curr_pos;
-		curr_pos = buf2byte();
-		if(curr_pos < min_index || curr_pos > max_index) {
-			curr_pos = last_pos;
-			return;
-		}
 		curr_ch = curr_pos;
 		nextwin = PG_PRBLIST;
 		return;
@@ -316,124 +309,111 @@ void pgchset_handler(uchar msg) {
 	if(msg == MSG_INIT) {
 		LCD_Cls();
 		draw_label(&banner, SW_NORMAL);
-		draw_label(&usage, SW_NORMAL);
+//		draw_label(&usage, SW_NORMAL);
 		curr_pos = 1;
 		new_page = 1;
 		msg = MSG_REFRESH;
 	}
 	if(msg == MSG_REFRESH) {
 		REFRESH_TABLES1;
-		if(sdata.id[j-1] == INVALID_PROBE)	{
-			sprintf(strbuf,"CH%i:*",j);
-		}else{
+				if(sdata.id[j-1] == INVALID_PROBE)	{
+					sprintf(strbuf,"CH%i:*",j);
+				}else{
 			//draw line item j
-		       	if(IS_THERM_MODE){
-				LoadProbeData(curr_pos + THERM_PRB_OFFSET);
-			}else{
-				LoadProbeData(curr_pos);
-			}
-			sprintf(strbuf,"%s",prbdata.name[(sdata.id[j]-1) % (PRBS_PER_SECTOR)]);
-		}
+//	       	if(IS_THERM_MODE){
+//				LoadProbeData(curr_pos + THERM_PRB_OFFSET);
+//			}else{
+//				LoadProbeData(curr_pos);
+//			}
+//				sprintf(strbuf,"%s",prbdata.name[(sdata.id[j]-1) % (PRBS_PER_SECTOR)]);
+					sprintf(strbuf,"%s",prbdata.name[j-1]);
+				}
 		REFRESH_TABLES2;
 	}
 	return;
 }
 //select probe to edit.
 void pgprbset_handler(uchar msg) {
-	//almost the same as pgchset_handler;
-	LABEL code banner =    {LBL_HZ16,3,3,8,"probe setup"};
-	LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
-	LABEL code chvalue = {LBL_HZ16,30,40,2,strbuf};
+	LABEL code banner = {LBL_HZ16,3,3,8,"请选择要配置的探头"};
+	LABEL code chvalue = {LBL_HZ6X8,180,3,2,strbuf};
 	LABEL code items[] = {
-		{LBL_HZ16, 30,30, strbuf},
-		{LBL_HZ16, 30,30, strbuf},
-		{LBL_HZ16, 30,30, strbuf},
-		{LBL_HZ16, 30,30, strbuf},
-		{LBL_HZ16, 30,30, strbuf},
-		{LBL_HZ16, 30,30, strbuf}
+		{LBL_HZ6X8, 10, 30, 10, strbuf},
+		{LBL_HZ6X8, 130,30, 10, strbuf},
+		{LBL_HZ6X8, 10, 40, 10, strbuf},
+		{LBL_HZ6X8, 130,40, 10, strbuf},
+		{LBL_HZ6X8, 10, 50, 10, strbuf},
+		{LBL_HZ6X8, 130,50, 10, strbuf}
 	};
-	static uchar curr_pos = 0;
-	static uchar last_pos = 0;
-	const uchar code min_option = 1;
-	const uchar code max_option = sizeof(items)/sizeof(LABEL);
-	const uchar code min_index = 1;
-	const uchar code max_index = MAX_PROBE_NUM;
+	//LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
+	static uint curr_pos = 1;
+	static uint last_pos = 1;
+	const uchar min_option = 1;
+	const uchar max_option = sizeof(items)/sizeof(LABEL);
+	const uchar min_index = 1;
+	const uchar max_index = MAX_PROBE_NUM;
+	int i,j;
 	uchar new_page = 1;
-	uchar i,j;
-	if(msg == KEY_TAB) {
-		if(IS_BORE_MODE)
-			nextwin = PG_RCONFIG;
-		else
-			nextwin = PG_TCONFIG;
-		return;
-	}
-	if(msg == KEY_CE) {
-		pos_strbuf = 0;
-		strbuf[0] = '\0';
-		msg = MSG_REFRESH;
-	}
-	if(msg == KEY_UP) {
-		INC_TABLE;
-		msg = MSG_REFRESH;
-	}
-	if(msg == KEY_DN) {
-		DEC_TABLE;
-		msg = MSG_REFRESH;
-	}
-	if(msg == KEY_OK) {	//show window to config the probe
-		last_pos = curr_pos;
-		curr_pos = buf2byte();
-		if(curr_pos < min_index || curr_pos > MAX_PROBE_NUM) {
-			curr_pos = last_pos;
-			return;
-		}
-		curr_prb = curr_pos;
-		if(IS_BORE_MODE)
-			nextwin = PG_RPRBCONFIG;
-		else
-			nextwin = PG_TPRBCONFIG;
-		return;
-	}
 	if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
 		KEY_TABLE;
 		msg = MSG_REFRESH;
+	}
+	if(msg == KEY_TAB || msg == KEY_CE)
+	{
+		if(IS_THERM_MODE)
+			nextwin = PG_TCONFIG;
+		else
+			nextwin = PG_RCONFIG;
+		return;
+	}
+	if(msg == KEY_OK)
+	{
+		curr_prb = curr_pos;
+		if(IS_THERM_MODE)
+			nextwin = PG_TPRBCONFIG;
+		else
+			nextwin = PG_RPRBCONFIG;
+		return;
 	}
 	if(msg == MSG_INIT)
 	{
 		LCD_Cls();
 		draw_label(&banner, SW_NORMAL);
-		draw_label(&usage, SW_NORMAL);
+//		draw_label(&usage, SW_NORMAL);
 		curr_pos = 1;
 		new_page = 1;
 		msg = MSG_REFRESH;
 	}
-	if(msg == MSG_REFRESH)
-	{
-		REFRESH_TABLES1;
-		if(sdata.id[j-1] == INVALID_PROBE)	{
-			sprintf(strbuf,"CH%i:*",j);
-		}else{
+	if(msg == KEY_UP) {
+		DEC_TABLE;
+		msg = MSG_REFRESH;
+	}
+	if(msg == KEY_DN) {
+		INC_TABLE;
+		msg = MSG_REFRESH;
+	}
+	if(msg == MSG_REFRESH) {
+		REFRESH_TABLES1;	
 			sprintf(strbuf,"%s",prbdata.name[j-1]);
 			draw_label(&(items[i-1]),SW_NORMAL);
-		}
-		REFRESH_TABLES2;	
+		REFRESH_TABLES2;
 	}
 	return;
 }
 //select probe for channel setup
 void pgprblist_handler(uchar msg) {
-	LABEL code banner = {LBL_HZ16,3,3,8,"prb type config"};
-	LABEL code chvalue = {LBL_HZ16,30,40,2,strbuf};
+	LABEL code banner = {LBL_HZ16,3,3,8,strbuf};
+	LABEL code chvalue = {LBL_HZ6X8,180,3,2,strbuf};
 	LABEL code items[] = {
-		{LBL_HZ16,30,20,10,strbuf},
-		{LBL_HZ16,30,20,10,strbuf},
-		{LBL_HZ16,130,20,10,strbuf},
-		{LBL_HZ16,30,40,10,strbuf},
-		{LBL_HZ16,130,40,10,strbuf},
+		{LBL_HZ6X8, 10, 30, 10, strbuf},
+		{LBL_HZ6X8, 130,30, 10, strbuf},
+		{LBL_HZ6X8, 10, 40, 10, strbuf},
+		{LBL_HZ6X8, 130,40, 10, strbuf},
+		{LBL_HZ6X8, 10, 50, 10, strbuf},
+		{LBL_HZ6X8, 130,50, 10, strbuf}
 	};
-	LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
-	static uchar curr_pos = 1;
-	static uchar last_pos = 1;
+	//LABEL code usage = {LBL_HZ6X8,100,55,5,"usage"};
+	static uint curr_pos = 1;
+	static uint last_pos = 1;
 	const uchar min_option = 1;
 	const uchar max_option = sizeof(items)/sizeof(LABEL);
 	const uchar min_index = 1;
@@ -447,15 +427,16 @@ void pgprblist_handler(uchar msg) {
 
 	if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK)
 	{
-		sdata.id[curr_ch-1] = curr_pos;
+		sdata.id[curr_ch-1] = curr_pos-1;
 		nextwin = PG_CHSET;
 		return;
 	}
 	if(msg == MSG_INIT)
 	{
 		LCD_Cls();
+		sprintf(strbuf,"请选择通道%i使用的探头",curr_ch);
 		draw_label(&banner, SW_NORMAL);
-		draw_label(&usage, SW_NORMAL);
+//		draw_label(&usage, SW_NORMAL);
 		curr_pos = 1;
 		new_page = 1;
 		msg = MSG_REFRESH;
@@ -537,47 +518,7 @@ void pgprbtypelist_handler(uchar msg) {
 	}
 	return;
 }
-void rprb_sn_caller(uchar ret)
-{
-	if(ret == KEY_OK) {
-		mystrcpy(prbdata.name[curr_prb-1],databuf,pos_databuf);
-	}
-	nextwin = PG_RPRBCONFIG;
-	return;
-}
-void rprb_p1_caller(uchar ret)
-{
-	if(ret == KEY_OK) {
-		prbdata.param1[curr_prb-1] = buf2double();
-	}
-	nextwin = PG_RPRBCONFIG;
-	return;
-}
-void rprb_p2_caller(uchar ret)
-{
-	if(ret == KEY_OK) {
-		prbdata.param2[curr_prb-1] = buf2double();
-	}
-	nextwin = PG_RPRBCONFIG;
-	return;
-}
-void rprb_p3_caller(uchar ret)
-{
-	if(ret == KEY_OK) {
-		prbdata.param3[curr_prb-1] = buf2double();
-	}
-	nextwin = PG_RPRBCONFIG;
-	return;
-}
 
-void rprb_p4_caller(uchar ret)
-{
-	if(ret == KEY_OK) {
-		prbdata.param4[curr_prb-1] = buf2double();
-	}
-	nextwin = PG_RPRBCONFIG;
-	return;
-}
 //config r probe parameter
 void pgrprbconfig_handler(uchar msg) {
 	LABEL code banner = {LBL_HZ16,3,3,8,"R prb set"};
@@ -622,8 +563,7 @@ void pgrprbconfig_handler(uchar msg) {
 	if(msg == KEY_NUM1) {
 		window_setup(4);
 		sprintf(strbuf,"sn input");
-		caller = rprb_sn_caller;
-		wnd_sninput(MSG_INIT);
+		wnd_sninput(prbdata.name[curr_prb-1]);
 		return;
 	}
 	if(msg == KEY_NUM2){
@@ -633,29 +573,25 @@ void pgrprbconfig_handler(uchar msg) {
 	if(msg == KEY_NUM3 ){
 		window_setup(8);
 		sprintf(strbuf,"p1 input");
-		caller = rprb_p1_caller;
-		wnd_floatinput(MSG_INIT);
+		prbdata.param1[curr_prb-1] = wnd_floatinput(prbdata.param1[curr_prb-1]);
 		return;
 	}
 	if(msg == KEY_NUM4) {
 		window_setup(8);
 		sprintf(strbuf,"p2 input");
-		caller = rprb_p2_caller;
-		wnd_floatinput(MSG_INIT);
+		prbdata.param2[curr_prb-1] = wnd_floatinput(prbdata.param2[curr_prb-1]);
 		return;
 	}
 	if(msg == KEY_NUM5) {
 		window_setup(8);
 		sprintf(strbuf,"p3 input");
-		caller = rprb_p3_caller;
-		wnd_floatinput(MSG_INIT);
+		prbdata.param3[curr_prb-1] = wnd_floatinput(prbdata.param3[curr_prb-1]);
 		return;
 	}
 	if(msg == KEY_NUM6) {
 		window_setup(8);
 		sprintf(strbuf,"p4 input");
-		caller = rprb_p4_caller;
-		wnd_floatinput(MSG_INIT);
+		prbdata.param4[curr_prb-1] = wnd_floatinput(prbdata.param4[curr_prb-1]);
 		return;
 	}
 	

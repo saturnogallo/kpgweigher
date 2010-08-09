@@ -45,9 +45,9 @@ typedef struct typLABEL
 void draw_checkbox(CHECKBOX *ckb, uchar status);
 void draw_label(LABEL *lbl,uchar reverse);
 void wnd_msgbox(LABEL *lbl);
-uchar wnd_floatinput(uchar msg);
-uchar wnd_intinput(uchar msg);
-uchar wnd_sninput(uchar msg);
+double wnd_floatinput(double oldval);
+uchar wnd_intinput(uchar oldval);
+void wnd_sninput(char *buf);
 extern MSG_HANDLER curr_window;
 extern MSG_HANDLER caller;
 extern uchar max_databuf;

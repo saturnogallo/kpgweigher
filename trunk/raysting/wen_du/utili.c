@@ -72,7 +72,7 @@ int buf2byte()	    //convert rdata.tempbuf to byte (00-99)
 
 //MY SPI Related function 
 uchar xdata ch1buf[8];
-uchar xdata ch2buf[8];
+//uchar xdata ch2buf[8];
 #define SM_WDELAY	100
 #define SM_RDELAY	100
 #define SM_RDELAY2	10
@@ -129,9 +129,119 @@ void sm_read(uchar pos,uchar ch)
 	SPI_CK = 1;
 	if( ch & HASCH1)
 		ch1buf[pos] = value1;
-	if( ch & HASCH2)
-		ch2buf[pos] = value2;
  }  
 
 
+/*********************************************************************/
+/*                                                                   */
+/*   Copyright Agilent Technology  1996-2000                         */
+/*   all rights reserved                                             */
+/*                                                                   */
+/*********************************************************************/
+
+#include	"stdarg.h"
+
+#define   fSP  0x01
+#define   fPL  0x02
+#define   fMI  0x04
+#define   fNO  0x08
+#define   fZE  0x10
+#define   WMAX   99
+
+static
+int sjstrlen(const char *s1)
+{
+	char *s2 = (char *)s1;
+	while (*s2) s2++;
+	return (s2 - s1);
+}
+
+
+static
+int _sjPrintf(char *p, const char *fmt, va_list ap)
+{
+static const char code ldig[] = "0123456789abcdef";
+static const char code udig[] = "0123456789ABCDEF";
+
+	char ac[24];
+	char  *s, *s1;
+	const char *dig;
+	short flags, width, prec, nchar;
+	char  qual;
+	short n0, n1, nz0;
+	int   vi;
+	unsigned int vu;
+
+        nchar = 0;
+	while (*fmt != '\0') {
+          if (*fmt == '%') {
+	    fmt++;
+	    for (flags = 0; ;fmt++)
+	      if (*fmt == ' ') flags |= fSP;
+	      else if (*fmt == '+') flags |= fPL;
+	      else if (*fmt == '-') flags |= fMI;
+	      else if (*fmt == '#') flags |= fNO;
+	      else if (*fmt == '0') flags |= fZE;
+	      else break;
+	    for (width = 0; (*fmt >= '0') && (*fmt <= '9'); fmt++)
+	      if (width < WMAX) width = (width * 10) + *fmt - '0';
+	    if (*fmt == '.') {
+	      fmt++;
+	      for (prec = 0; (*fmt >= '0') && (*fmt <= '9'); fmt++)
+	        if (prec < WMAX) prec = (prec * 10) + *fmt - '0';
+	    } else prec = -1;
+	    if ((*fmt == 'h') || (*fmt == 'l') || (*fmt == 'L')) qual = *fmt++;
+	    else qual = '\0';
+	    s = ac;  s1 = s + 24;  *--s1 = '\0';  n0 = n1 = nz0 = 0;
+	    if (*fmt == 'c') {
+	      *s++ = va_arg(ap, int);  n0 = 1; }
+	    else if ((*fmt == 'i') || (*fmt == 'd')) {
+	      vi = va_arg(ap, int); 
+	      if (vi < 0) {*s++ = '-';  n0 = 1; vi = -vi; }
+	      else if ((flags & fPL) != 0) {*s++ = '+';  n0 = 1; }
+	      else if ((flags & fSP) != 0) {*s++ = ' ';  n0 = 1; };
+	      do {
+		*--s1 = ldig[vi % 10];  vi = vi / 10;  n1++; } while (vi > 0);
+	      goto prn1; }
+	    else if (*fmt == 'u') {
+	      vu = va_arg(ap, int); 
+	      if (qual == 'h') vu = vu & 0x0ffff;
+	      do {
+		*--s1 = ldig[vu % 10];  vu = vu / 10;  n1++; } while (vu > 0);
+	      goto prn1; }
+	    else if ((*fmt == 'x') || (*fmt == 'X')) {
+	      vu = va_arg(ap, int);  if (*fmt == 'x') dig = ldig; else dig = udig;
+	      if (qual == 'h') vu = vu & 0x0ffff;
+	      if ((flags & fNO) != 0) {*s++ = '0'; *s++ = *fmt; n0 = 2; };
+	      do {
+		*--s1 = dig[vu & 0x0f];  vu = vu >> 4;  n1++; } while (vu > 0);
+   prn1:      if (n1 < prec) nz0 = prec - n1;
+	      if (prec < 0 && flags & fZE && width > (n0 + nz0 + n1))
+		 nz0 = width - (n0 + nz0 + n1); }
+	    else if (*fmt == 's') {
+	      s1 = va_arg(ap, char *);  n1 = sjstrlen(s1);
+	      if (0 <= prec && prec < n1) n1 = prec; }
+	    else {*s++ = *fmt;  n0 = 1;};
+	    width -= n0 + nz0 + n1;
+	    if ((flags & fMI) == 0) for (; width>0; --width) {*p++ = ' '; nchar++; };
+	    for (s = ac; n0 > 0; --n0) {*p++ = *s++; nchar++; };
+	    for (; nz0 > 0; --nz0) {*p++ = '0'; nchar++; };
+	    for (; n1 > 0; --n1) {*p++ = *s1++; nchar++; };
+	    if ((flags & fMI) != 0) for (; width>0; --width) {*p++ = ' '; nchar++; };
+	  }
+	  else {*p++ = *fmt; nchar++; };
+	  fmt++;
+	};
+	*p = '\0';
+	return nchar;
+}
+
+int sjprintf(char *s, const char *fmt, ...)
+{
+        va_list ap; int i;
+        va_start(ap, fmt);
+        i = _sjPrintf(s, fmt, ap);
+        va_end(ap);
+	return i;
+}
 
