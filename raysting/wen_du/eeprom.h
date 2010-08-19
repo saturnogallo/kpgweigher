@@ -7,6 +7,6 @@ uchar byte_read(uint byte_addr);
 void byte_write(uint byte_addr, uchar original_data);
 void LoadFromEEPROM();
 void SaveToEEPROM();
-void LoadProbeData(uchar pos);
-void SaveProbeData(uchar pos);
+void LoadProbeData();
+void SaveProbeData();
 #endif

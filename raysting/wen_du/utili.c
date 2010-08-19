@@ -1,8 +1,9 @@
 #include "utili.h"
 #include "stc51.h"
+#include "window.h"
 sbit SPI_CK = P3^5;
-sbit SPI_DI1 = P3^4;
-sbit SPI_DI2 = P0^5;
+sbit SPI_DI = P3^4;
+sbit SPI_DI2 = P3^7;
 sbit SPI_DO = P3^3;
 
 /*---------------延时子程序----------------*/
@@ -10,6 +11,7 @@ void delay (uint us)
 {
   	while(us--);
 }
+/*
 void delay1 (uint ms) 
 {
   	int i,j;
@@ -18,6 +20,8 @@ void delay1 (uint ms)
   		;
 		
 }
+*/
+/*
 char lowc(uchar x)
 {
 	x = x&0x0f;
@@ -35,7 +39,8 @@ char highc(uchar x)
 	else
 		return '0'+x;
 }
-//计算字符串长度
+*/
+/*计算字符串长度
 uchar strlen(uchar *s)
 {
 	uchar len = 0;
@@ -43,6 +48,7 @@ uchar strlen(uchar *s)
 	
 	return len;
 }
+*/
 double buf2double()		
 {
 	double tmp = 0.0;
@@ -71,24 +77,21 @@ int buf2byte()	    //convert rdata.tempbuf to byte (00-99)
 }
 
 //MY SPI Related function 
-uchar xdata ch1buf[8];
-//uchar xdata ch2buf[8];
+uchar data ch1buf[8];
 #define SM_WDELAY	100
 #define SM_RDELAY	100
-#define SM_RDELAY2	10
-#define HEAD_MARK	0xcc	//header mark
+#define SM_RDELAY2	100
+//#define HEAD_MARK	0xcc	//header mark
 void sm_init()
 {	
 	uchar i;
-	i = SPI_DI1; //set to input
-	i = SPI_DI2; //set to input
+	i = SPI_DI; //set to input
 }
-void   sm_write(uchar   value)  
+void   sm_ch(uchar   value)  
 {  
 	uchar   no;  
   	for(no=0;no<8;no++) {  
-	       SPI_CK = 1;      
-		 
+	    SPI_CK = 1;      
    	  	if   ((value &0x80)==0x80)  
        		  SPI_DO = 1;  
 		else  
@@ -96,42 +99,150 @@ void   sm_write(uchar   value)
 		 delay(SM_WDELAY);   
 	     SPI_CK = 0;    
    		 value   =   (value <<1);  
-		delay(SM_WDELAY);
+		 delay(SM_WDELAY);
   	}
 	SPI_CK = 1;
-}  
-void sm_read(uchar pos,uchar ch)
+}
+void sm_write(uchar value)
+{
+	sm_ch(HEAD_MARK);
+	sm_ch(value);
+}
+  
+uchar sm_read()
 {  
-   	uchar   no,value1,value2;  
-   
+   	uchar   no,value1;
  	for (no=0;no<8;no++) 	{ 
 		  SPI_CK = 1;  
 		  delay(SM_RDELAY);		
-		  if( ch & HASCH1)
-		          value1   =   (value1   <<1);  
-		  if( ch & HASCH2)
-			  value2   =   (value2   <<1);  
-         	  SPI_CK = 0;  
+          value1   =   (value1   <<1);  
+       	  SPI_CK = 0;  
 		  delay(SM_RDELAY2);
-		  if( ch & HASCH1){
-	 		  if (SPI_DI1 == 1)  
-		        	value1  |=0x01;  
-  			  else  
+ 		  if (SPI_DI == 1)  
+		        value1  |=0x01;  
+  		   else  
 				value1  &=~0x01;  
-		  }
-		  if( ch & HASCH2) {
-	 		  if (SPI_DI2 == 1)  
-			        value2  |=0x01;  
-  			  else  
-				value2  &=~0x01;  
-		  }
 	}
 	SPI_CK = 1;
-	if( ch & HASCH1)
-		ch1buf[pos] = value1;
- }  
+	return value1;
+}  
+extern void dead();
+void sm_wait_done(uchar cmd)
+{
+
+	int count = 0;
+	return;	
+	while(count++ < 9999)
+	{
+		delay(200);
+		sm_write(cmd);
+		delay(200);
+		if(CMD_INVALID == sm_read())
+			return;
+	}
+	dead();
+}
+
+extern LABEL code lbldbg;
+void sm_action(uchar cmd)
+{
+	int count = 0;
+	uchar i;
+	
+	while(count++ < 999999)
+	{
+		sm_write(cmd);
+		if(count > 1)
+			delay(100);
+		else
+			delay(10);
+		i = sm_read();
+		if(CMD_ACCEPT == i)
+			return;
+	}
+	dead();
+}
+
+double smget_double(uchar cmd)
+{
+	sm_write(cmd);
+	ch1buf[0] = sm_read();
+	ch1buf[1] = sm_read();
+	ch1buf[2] = sm_read();
+	ch1buf[3] = sm_read();
+	if(~(ch1buf[3]+ch1buf[2]+ch1buf[1]+ch1buf[0]) == sm_read())
+		return (*((double*)ch1buf));;
+	return 0;
+}
 
 
+uchar sm2_read()
+{  
+   	uchar   no,value1;
+ 	for (no=0;no<8;no++) 	{ 
+		  SPI_CK = 1;  
+		  delay(SM_RDELAY);		
+          value1   =   (value1   <<1);  
+       	  SPI_CK = 0;  
+		  delay(SM_RDELAY2);
+ 		  if (SPI_DI2 == 1)  
+		        value1  |=0x01;  
+  		   else  
+				value1  &=~0x01;  
+	}
+	SPI_CK = 1;
+	return value1;
+}  
+
+void sm2_wait_done(uchar cmd)
+{
+
+	int count = 0;
+	return;	
+	while(count++ < 9999)
+	{
+		delay(200);
+		sm_write(cmd);
+		delay(200);
+		if(CMD_INVALID == sm2_read())
+			return;
+	}
+	dead();
+}
+
+extern LABEL code lbldbg;
+/*
+void sm2_action(uchar cmd)
+{
+	int count = 0;
+	uchar i;
+	
+	while(count++ < 999999)
+	{
+		sm_write(cmd);
+		if(count > 1)
+			delay(100);
+		else
+			delay(10);
+		i = sm2_read();
+		if(CMD_ACCEPT == i)
+			return;
+	}
+	dead();
+}
+
+double sm2get_double(uchar cmd)
+{
+	sm_write(cmd);
+	ch1buf[0] = sm2_read();
+	ch1buf[1] = sm2_read();
+	ch1buf[2] = sm2_read();
+	ch1buf[3] = sm2_read();
+	if(~(ch1buf[3]+ch1buf[2]+ch1buf[1]+ch1buf[0]) == sm2_read())
+		return (*((double*)ch1buf));;
+	return 0;
+}
+*/
 /*********************************************************************/
 /*                                                                   */
 /*   Copyright Agilent Technology  1996-2000                         */
@@ -147,7 +258,7 @@ void sm_read(uchar pos,uchar ch)
 #define   fNO  0x08
 #define   fZE  0x10
 #define   WMAX   99
-
+/*
 static
 int sjstrlen(const char *s1)
 {
@@ -155,8 +266,8 @@ int sjstrlen(const char *s1)
 	while (*s2) s2++;
 	return (s2 - s1);
 }
-
-
+*/
+/*
 static
 int _sjPrintf(char *p, const char *fmt, va_list ap)
 {
@@ -244,4 +355,4 @@ int sjprintf(char *s, const char *fmt, ...)
         va_end(ap);
 	return i;
 }
-
+*/

@@ -20,8 +20,11 @@ namespace ioex_cs
         internal List<SubNode> nodes;  //list of all nodes
         internal List<SPort> allports; //list of all serial ports
 
-        internal bool bQueryBusy;   //indicate the status of query loop
-        private bool _bPause;
+        internal bool bQueryBusy;   //status of query loop
+        private bool _bPause;       //internal variable for pause
+        internal bool bSimulate;    //indicate whether it is simulate run;
+
+
         internal bool bMainPause
         {
             get{
@@ -29,9 +32,13 @@ namespace ioex_cs
             }
             set{
                 _bPause = value;
-                while(bQueryBusy)
+                if (_bPause)
                 {
-                    Thread.Sleep(1);
+                    while (bQueryBusy)
+                    {
+                        Thread.Sleep(1);
+                    }
+
                 }
             }
         }   //indicate the pause status of main loop
@@ -53,19 +60,19 @@ namespace ioex_cs
         private PwdWnd pwdwnd;
         private ConfigMenuWnd configwnd;
         private BottomWnd bottomwnd;
-
+        private ProdWnd prodwnd;
         public kbd kbdwnd;
 
         private Thread query_loop;
         public void WeightQuery(object param)
         {
-            App app = param as App;
+            App app = Application.Current as App;
             while (true)
             {
                 bQueryBusy = false;
+                Thread.Sleep(1);
                 if(bMainPause)
                 {
-                    Thread.Sleep(1000);
                     bQueryBusy = false;
                     continue;
                 }
@@ -74,12 +81,13 @@ namespace ioex_cs
                 {
                     if (p.status != PackerStatus.RUNNING)
                     {
-                        Thread.Sleep(1000);
+//                        Thread.Sleep(1);
                     }
                     if (p.status == PackerStatus.INERROR)
                     {
                         return;
                     }
+                    
                     foreach (WeighNode n in p.weight_node)
                     {
                         if (n.status == NodeStatus.ST_LOST)
@@ -88,17 +96,35 @@ namespace ioex_cs
                         }
                         while (n.status != NodeStatus.ST_IDLE)
                         {
-                            Thread.Sleep(10);
+                            Thread.Sleep(1);
                         }
                         n.Action("query", true);
+                    }
+                    bool alldone = false;
+                    while(!alldone)
+                    {
+                        alldone = true;
+                        foreach (WeighNode n in p.weight_node)
+                        {
+                            if (n.status == NodeStatus.ST_LOST || n["Mtrl_Weight_gram"].HasValue)
+                            {
+                                continue;
+                            }
+                            while (n.status != NodeStatus.ST_IDLE)
+                            {
+                                Thread.Sleep(1);
+                            }
+                            n.Action("query", true);
+                            alldone = false;
+                        }
                     }
                     if (p.status == PackerStatus.RUNNING)
                     {
                         p.CheckCombination();
                     }
-                    else
+                    foreach (WeighNode n in p.weight_node)
                     {
-                        UpdateUI();
+                        n.weight = 0;
                     }
                 }
                 bQueryBusy = false;
@@ -106,12 +132,12 @@ namespace ioex_cs
         }
         private void UpdateUI()
         {
-            //todo
+            
+
         }
         public App()
         {
             int baudrate;// baudrate
-            MessageBox.Show("hit");
  
            
             histwnd = new History();
@@ -122,12 +148,14 @@ namespace ioex_cs
             pwdwnd = new PwdWnd();
             engwnd = new EngConfigWnd();
             configwnd = new ConfigMenuWnd();
-            configwnd.Show();
+            prodwnd = new ProdWnd();
+            //prodwnd.Show();
+            
             singlewnd = new SingleMode();
             
             runwnd = new RunMode();
-            
 
+            
             allports = new List<SPort>();
             packers = new List<Packer>();
             nodes = new List<SubNode>();
@@ -135,8 +163,11 @@ namespace ioex_cs
             app_cfg.LoadConfigFromFile();
             default_cfg = app_cfg.LoadConfig("default");
 
+            
+            
             query_loop = new Thread(new ParameterizedThreadStart(WeightQuery));
-            query_loop.IsBackground = true;
+            
+            query_loop.IsBackground = false;
 
             bQueryBusy = false;
             bMainPause = false;
@@ -148,7 +179,17 @@ namespace ioex_cs
             string tot = default_cfg.Element("totalports").Value.ToString();
             foreach (string port in tot.Split(new char[]{','}))
             {
-                allports.Add(new SPort(port,baudrate,Parity.Even,8,StopBits.One));
+                SPort sp = new SPort(port, baudrate, Parity.None, 8, StopBits.One);
+                if (sp.Open())
+                {
+                    allports.Add(sp);
+                }
+                else
+                {
+                    MessageBox.Show("failed to open port " + port);
+                    throw new Exception("failed to open port " + port);
+                }
+                
             }
 
             //create all nodes
@@ -208,7 +249,7 @@ namespace ioex_cs
                     throw new Exception("Serial Port open failed");
                 }
             }*/
-            return;
+            //return;
             //check the availability of each board
             foreach (SubNode n in nodes)
             {
@@ -220,15 +261,19 @@ namespace ioex_cs
                     throw new Exception("Node " + n.node_id.ToString() + " is lost");
                 }
 
-                n["board"] = null;
+                n["board_ID"] = null;
                 
             }
-            //load the default setting and download them
+            //runwnd.Show();
+            //todo: load the default setting and download them
+            /*
             for (int i = 0; i < machnum; i++)
             {
                 packers[i].LoadConfig(default_cfg.Element("packer" + i.ToString() + "_def").Value);
-            }
+            }*/
+
             query_loop.Start();
+            runwnd.Show();
         }
         
         public void SwitchTo(string mode)

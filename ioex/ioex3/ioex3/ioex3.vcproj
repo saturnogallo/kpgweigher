@@ -65,7 +65,6 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="H:\songjie_20100523\flash\ioex3.exe"
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="1"

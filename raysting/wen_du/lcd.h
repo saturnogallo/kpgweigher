@@ -95,12 +95,10 @@ void LCD_PrintBlackBlock(uchar x,uchar y,bool not_empty);
 //void LCD_PrintHex(uchar x,uchar y,uchar hex) ;
 //void LCD_TextPrintWord(uchar x,uchar y,uint16 n,uchar start) ;
 void LCD_ReverseRect(uchar x,uchar y,uchar w,uchar h);
-
-
-
 void LCD_PrintHz12(uchar x,uchar y,uchar *s);
 void LCD_PrintHz16(uchar x,uchar y,uchar *s);
 void LCD_Print24X32(uchar x, uchar y,uchar *s);
 void LCD_Print6X8(uchar x, uchar y,uchar *s);
+
 
 #endif

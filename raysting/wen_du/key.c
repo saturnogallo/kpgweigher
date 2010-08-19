@@ -1,5 +1,4 @@
 #include <stc51.h>
-#include <stdio.h>
 #include <intrins.h>
 #include <MATH.H>
 #include "utili.h"
@@ -85,13 +84,6 @@ void Key_Init()
 	keycount = 0;
 	keykeep = KEY_INVALID;
     P1 = 0x0f;l9=0;	 
-}
-void key_debug(char* buf)
-{
-	if(KEYBJ2)
-		sjprintf(buf,"1,%i,%c",keycount,keykeep);
-	else
-		sjprintf(buf,"0,%i,%c",keycount,keykeep);
 }
 
 void Key_Scan()

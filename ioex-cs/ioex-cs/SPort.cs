@@ -52,10 +52,12 @@ namespace ioex_cs
             
             buf[1] = 0xfe;
             buf[2] = 0x68;
-            buf[3] = 0xff;
+            buf[3] = 0x00;
             buf[4] = addr;
             buf[5] = (byte)'R';
             buf[6] = len;
+            cmd = buf[5];
+            
             for (int i = 0; i < len;i++ )
             {
                 data[i] = readregs[i + offset];
@@ -74,10 +76,12 @@ namespace ioex_cs
             }
             buf[1] = 0xfe;
             buf[2] = 0x68;
-            buf[3] = 0xff;
+            buf[3] = 0x00;
             buf[4] = addr;
             buf[5] = (byte)'W';
             buf[6] = (byte)(2 * len);
+            cmd = buf[5];
+            
             for (int i = 0; i < len; i++)
             {
                 data[2 * i] = writeregs[i+offset];
@@ -93,12 +97,12 @@ namespace ioex_cs
         
         public byte get_cksum()
         {
-            UInt32 sum = (UInt32)(0xfe) + (UInt32)(0x68);
+            UInt32 sum = (UInt32)(0xfe)+ (UInt32)(0x68) + (UInt32)addr + (UInt32)(0x00) + (UInt32)cmd + (UInt32)datalen;
             for (int i = 0; i < datalen; i++)
             {
                 sum = sum + data[i];
             }
-            sum = 256 - sum;
+            sum = 256 - (sum % 256);
             return (byte)sum;
         }
         public void ResetFlag()
@@ -148,7 +152,7 @@ namespace ioex_cs
             }
             if (flag == RF_STATE.RF_ADDRFROM)
             {
-                if (c == 0xff) //send to pc node
+                if (c == 0x00) //send to pc node
                 {
                     flag = RF_STATE.RF_ADDRTO;
                 }
@@ -229,7 +233,7 @@ namespace ioex_cs
 
         private void OutBufferCheck(object state)
         {
-            if (Status != PortStatus.BUSY || Status != PortStatus.IDLE)
+            if (Status != PortStatus.BUSY && Status != PortStatus.IDLE)
                 return;
 
             if (wait_id > 0)    //waiting for some response
@@ -253,13 +257,13 @@ namespace ioex_cs
             {
                 Status = PortStatus.BUSY;
                 byte[] cmd = CmdToSend.Dequeue();
+                
                 _serial.Write(cmd, 1, cmd[0]);
                 if (cmd[5] == 'R' || cmd[5] == 'S') //read command
                 {
                     timer_tick = 0;
                     wait_id = cmd[4];
                     last_cmd = cmd;
-                    
                 }
                 return;
             }

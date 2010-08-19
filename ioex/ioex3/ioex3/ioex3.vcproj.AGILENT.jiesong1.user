@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
 <VisualStudioUserFile
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="9.00"
 	ShowAllFiles="false"
 	>
 	<Configurations>
@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="$(TargetPath)"
 				WorkingDirectory=""
-				CommandArguments="2 115200 0 0 8"
+				CommandArguments="1 115200 1"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"
