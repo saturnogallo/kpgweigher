@@ -2,9 +2,10 @@
 #define _WINDOW_H_
 #include "typedef.h"
 
-typedef uchar (*MSG_HANDLER)(uchar key);
+typedef void (*MSG_HANDLER)(uchar key);
 #define SW_NORMAL	1
 #define SW_REVERSE	2
+#define SW_OVERLAP	4
 
 #define WINTYPE_LIST	1
 #define WINTYPE_INPUT	2
@@ -42,9 +43,9 @@ typedef struct typLABEL
 }LABEL;
 
 
-void draw_checkbox(CHECKBOX *ckb, uchar status);
 void draw_label(LABEL *lbl,uchar reverse);
 void wnd_msgbox(LABEL *lbl);
+void wnd_inputbox(LABEL *lbl);
 double wnd_floatinput(double oldval);
 uchar wnd_intinput(uchar oldval);
 void wnd_sninput(char *buf);

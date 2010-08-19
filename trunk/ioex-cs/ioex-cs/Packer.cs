@@ -83,6 +83,7 @@ namespace ioex_cs
             all_conf = new XmlConfig(pack_define_file);
             sys_cfg = new PackerConfig();
             curr_node = -1;
+            status = PackerStatus.IDLE;
         }
         public void AddNode(SubNode node)
         {
@@ -153,6 +154,7 @@ namespace ioex_cs
             {
                 n.Action("release",false);
             }
+            //check the bSimulate
             //todo add record to datalog.xml
         }
         //one bucket combination
@@ -298,7 +300,7 @@ namespace ioex_cs
 
         public void CheckCombination()
         {
-
+            //todo
         }
         
         public void StartRun()

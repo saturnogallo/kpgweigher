@@ -1,0 +1,32 @@
+
+headline {
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  display: block;
+}
+subheadline {
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 13px;
+  font-weight: bold;
+  display: block;
+}
+mainBody {
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 10px;
+  display: block;
+}
+biline {
+  font-family: Arial,Helvetica,sans-serif;
+  font-size: 11px;
+  font-style: italic;
+  display: inline;
+}
+A {
+  font-family: Arial,Helvetica,sans-serif;
+  color:111111;
+  font-size: 10px;
+  display: inline;
+  text-decoration:underline;
+}
+

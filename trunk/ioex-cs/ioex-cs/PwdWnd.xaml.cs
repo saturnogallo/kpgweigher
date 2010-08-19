@@ -27,7 +27,6 @@ namespace ioex_cs
         {
             App p = Application.Current as App;
             p.SwitchTo("ConfigMenu");
-
         }
 
         private void btn_modify_Click(object sender, RoutedEventArgs e)

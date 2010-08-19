@@ -1,11 +1,15 @@
+#include "utili.h"
 #include "wendu.h"
 #include "math.h"
 #define logl log
 #define powl pow
+
 double RValueToTValue(double r, uchar prbid)
 {
+
 	double ac,bc,cc,tlow,tup,rnew,tnew;
 	int count;
+	return r+1;
 	if(prbdata.type[prbid-1] == PRBTYPE_PT100)
 		r = r/100.0;
 	else if(prbdata.type[prbid-1] == PRBTYPE_PT25)
@@ -34,10 +38,82 @@ double RValueToTValue(double r, uchar prbid)
 		else
 			tlow = tnew;
 	}
-			
 	return floor((tlow*10000.0+tup*10000)/2.0+0.5)/10000.0;
+
+			
+//	return r+1;
 }
 
+/*
+*/
+
+double GetWr(double t)
+{
+	double result;
+	double pert;
+	int i;
+	const double code Ci[] = {2.78157254, 1.64650916 ,-0.13714390, -0.00649767 ,-0.00234444, 0.00511868 ,0.00187982, -0.00204472, -0.00046122 ,0.00045724};
+
+	const double code Ai[] = {-2.13534729 ,3.18324720 ,-1.80143597, 0.71727204 ,0.50344027, -0.61899395, -0.05332322, 0.28021362, 0.10715224, -0.29302865, 0.04459872 ,0.11868632 ,-0.05248134};			 
+		const uchar code sizeAi = sizeof(Ai)/sizeof(double);
+			const uchar code sizeCi = sizeof(Ci)/sizeof(double);
+	if(t < 0)
+	{
+		result = Ai[0];
+		pert = (logl((t+273.15)/273.16)+1.5)/1.5;
+		t = pert;
+		for(i=1;i<sizeAi;i++)
+		{
+			result = result + Ai[i] * t;
+			t = t*pert;
+		}
+		result = exp(result);
+	}else{
+			 result = Ci[0];
+			 pert = t/481.0 - 1;
+			 t = pert;
+			 for(i=1;i<sizeCi;i++)
+			 {
+				 result = result + Ci[i] * t;
+				 t = t*pert;
+			 }
+	}
+	return result;
+}
+
+
+double GetT(double w)
+{
+	double perw;
+	double result;
+	int i;
+	const double code Di[] = {439.932854 ,472.418020, 37.684494 ,7.472018 ,2.920828 ,0.005184, -0.963864, -0.188732, 0.191203, 0.049025};
+	const double code Bi[] = {0.183324722, 0.240975303, 0.209108771, 0.190439972, 0.142648498, 0.077993465, 0.012475611, -0.032267127, -0.075291522, -0.056470670, 0.076201285, 0.123893204, -0.029201193, -0.091173542, 0.001317696, 0.026025526};
+		const uchar code sizeDi = sizeof(Di)/sizeof(double);
+			const uchar code sizeBi = sizeof(Bi)/sizeof(double);
+	if(w >= 0)
+	{
+		perw = (w-2.64)/1.64;
+		w = perw;
+		result = Di[0];
+		for(i=1;i<sizeDi;i++)
+		{
+			result = result + Di[i] * w;
+			w = w*perw;
+		}
+	}else{
+		perw = (powl(w,1.0/6.0) - 0.65)/0.35;
+		w = perw;
+		result = Bi[0];
+		for(i=1;i<sizeBi;i++)
+		{
+			result = result + Bi[i] * w;
+			w = w*perw;
+		}		
+		result = 273.15*result - 273.5;
+	}
+	return result;
+}
 const double code TLow[]={0.000000000000E+00,0.387481063640E-01,0.441944343470E-04,0.118443231050E-06,0.200329735540E-07,0.901380195590E-09,0.226511565930E-10,0.360711542050E-12,0.384939398830E-14,0.282135219250E-16,0.142515947790E-18,0.487686622860E-21,0.107955392700E-23,0.139450270620E-26,0.797951539270E-30};
 const double code THigh[]={0.000000000000E+00,0.387481063640E-01,0.332922278800E-04,0.206182434040E-06,-0.218822568460E-08,0.109968809280E-10,-0.308157587720E-13,0.454791352900E-16,-0.275129016730E-19};
 
@@ -69,7 +145,7 @@ double GetThmoVolt(double t,char type)
 {
 	double result,pert;
 	int i;
-	int code TLowLen = sizeof(TLow)/sizeof(double);
+	const int code TLowLen = sizeof(TLow)/sizeof(double);
 	int code THighLen = sizeof(THigh)/sizeof(double);
 
 	int code SLowLen = sizeof(SLow)/sizeof(double);
@@ -116,12 +192,12 @@ double GetThmoVolt(double t,char type)
 			len = (t < 0) ? ELowLen : EHighLen;
 			break;
 		case 'B': 	
-			coef = (t < 630.615) ? NLow : NHigh;
-			len = (t < 630.615) ? NLowLen : NHighLen;
+			coef = (t < 630.615) ? BLow : BHigh;
+			len = (t < 630.615) ? BLowLen : BHighLen;
 			break;
 		case 'J': 	
-			coef = (t < 760) ? NLow : NHigh;
-			len = (t < 760) ? NLowLen : NHighLen;
+			coef = (t < 760) ? JLow : JHigh;
+			len = (t < 760) ? JLowLen : JHighLen;
 			break;
 
 		case 'S': 	
@@ -160,7 +236,7 @@ double MValueToTValue(double r,char type)
 	double rnew;
 	double tnew;
 	int count = 0;
-
+	return r+1;
 	switch(type)
 	{
 		case 'T': 	
@@ -205,65 +281,3 @@ double MValueToTValue(double r,char type)
 	return floor((tlow*10000.0+tup*10000.0)/2.0+0.5)/10000.0;
 }
 
-double GetWr(double t)
-{
-	double result;
-	double pert;
-	int i;
-	const double code Ci[] = {2.78157254, 1.64650916 ,-0.13714390, -0.00649767 ,-0.00234444, 0.00511868 ,0.00187982, -0.00204472, -0.00046122 ,0.00045724};
-
-	const double code Ai[] = {-2.13534729 ,3.18324720 ,-1.80143597, 0.71727204 ,0.50344027, -0.61899395, -0.05332322, 0.28021362, 0.10715224, -0.29302865, 0.04459872 ,0.11868632 ,-0.05248134};			 
-	if(t < 0)
-	{
-		result = Ai[0];
-		pert = (logl((t+273.15)/273.16)+1.5)/1.5;
-		t = pert;
-		for(i=1;i<sizeof(Ai)/sizeof(double);i++)
-		{
-			result = result + Ai[i] * t;
-			t = t*pert;
-		}
-		result = exp(result);
-	}else{
-			 result = Ci[0];
-			 pert = t/481.0 - 1;
-			 t = pert;
-			 for(i=1;i<sizeof(Ci)/sizeof(double);i++)
-			 {
-				 result = result + Ci[i] * t;
-				 t = t*pert;
-			 }
-	}
-	return result;
-}
-
-double GetT(double w)
-{
-	double perw;
-	double result;
-	int i;
-	const double code Di[] = {439.932854 ,472.418020, 37.684494 ,7.472018 ,2.920828 ,0.005184, -0.963864, -0.188732, 0.191203, 0.049025};
-	const double code Bi[] = {0.183324722, 0.240975303, 0.209108771, 0.190439972, 0.142648498, 0.077993465, 0.012475611, -0.032267127, -0.075291522, -0.056470670, 0.076201285, 0.123893204, -0.029201193, -0.091173542, 0.001317696, 0.026025526};
-	if(w >= 0)
-	{
-		perw = (w-2.64)/1.64;
-		w = perw;
-		result = Di[0];
-		for(i=1;i<sizeof(Di)/sizeof(double);i++)
-		{
-			result = result + Di[i] * w;
-			w = w*perw;
-		}
-	}else{
-		perw = (powl(w,1.0/6.0) - 0.65)/0.35;
-		w = perw;
-		result = Bi[0];
-		for(i=1;i<sizeof(Bi)/sizeof(double);i++)
-		{
-			result = result + Bi[i] * w;
-			w = w*perw;
-		}		
-		result = 273.15*result - 273.5;
-	}
-	return result;
-}

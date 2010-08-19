@@ -1,9 +1,11 @@
 #include "stc51.h"
-#include "stdio.h"
 #include "intrins.h"
+#include "stdio.h"
 #include "utili.h"
 #include "MATH.H"
-
+#define uchar unsigned char
+#define uint unsigned int
+#define ulong unsigned long
 ulong code Sector[10][4]={
 	                       {0x8000,0x8001,0x8002,0x8003},
 			               {0x8200,0x8201,0x8202,0x8203},
@@ -108,45 +110,48 @@ void byte_write(uint byte_addr, uchar original_data)
   byte_write(Sector[1][3],char)  把char写到这个字节中
   SectorErase(Sector[1][2])     扇区清除 
 **/
+extern ulong code Sector[10][4];
 #define RS_SECTBASE	Sector[0][0]
-#define PRB_SECTBASE(page)	Sector[page+1][0]	//[1][0],[2][0]
-							//[3][0],[4][0]	
-static uchar page = 0;
-//parameter pos will be 1-12 (Rpage1), 13-24 (Rpage2), 25
-void LoadProbeData(uchar pos)
+#define PRB_SECT1	Sector[1][0]
+#define PRB_SECT2	Sector[2][0]
+void LoadProbeData()
 {
 	uint i;
 	uchar* arr = (uchar*)&prbdata;
 
-
-	if( (pos <= (page+1) * PRBS_PER_SECTOR) && (pos > (page * PRBS_PER_SECTOR)))
-			return;
-	page = 0;
-	while(1)
+	for(i = PRB_SECT1;i < (PRB_SECT1 + (sizeof(PRBDATA)/2));i++)
 	{
-		if( (pos <= (page+1) * PRBS_PER_SECTOR) && (pos > (page * PRBS_PER_SECTOR)))
-			break;
-		page++;
+		*arr++ = byte_read(i);
 	}
-	for(i = PRB_SECTBASE(page);i < (PRB_SECTBASE(page)+sizeof(PRBDATA));i++)
+	for(i = PRB_SECT2;i < (PRB_SECT2 + (sizeof(PRBDATA)/2));i++)
 	{
 		*arr++ = byte_read(i);
 	}
 }
-void SaveProbeData(uchar pos)
+void SaveProbeData()
 {
-	uint i = PRB_SECTBASE(page);
-	uchar* arr = (uchar*)&prbdata;
+	ulong i;
+	uchar* arr; 
+
+	arr = (uchar*)&prbdata;
+	i = PRB_SECT1;
 	SectorErase(i);
-	for(;i < (PRB_SECTBASE(page)+sizeof(PRBDATA));i++)
+	for(;i < (PRB_SECT1+(sizeof(PRBDATA)/2));i++)
 	{
 		byte_write(i,*arr++);
 	}
+	i = PRB_SECT2;
+	SectorErase(i);
+	for(;i < (PRB_SECT2+(sizeof(PRBDATA)/2));i++)
+	{
+		byte_write(i,*arr++);
+	}
+
 }
 void LoadFromEEPROM()
 {
-	uint i = RS_SECTBASE;
-	uchar* arr = (uchar*)&rdata;
+	ulong i = RS_SECTBASE;
+	uchar* arr = (uchar*)&sdata;
 
 	for(i=RS_SECTBASE;i<(RS_SECTBASE+sizeof(SYSDATA));i++)
 	{
@@ -155,8 +160,8 @@ void LoadFromEEPROM()
 }
 void SaveToEEPROM()
 {
-	uint i = RS_SECTBASE;
-	uchar* arr = (uchar*)&rdata;
+	ulong i = RS_SECTBASE;
+	uchar* arr = (uchar*)&sdata;
 	SectorErase(RS_SECTBASE);
 
 	for(i=RS_SECTBASE;i<(RS_SECTBASE+sizeof(SYSDATA));i++)

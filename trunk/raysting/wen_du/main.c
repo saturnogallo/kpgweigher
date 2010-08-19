@@ -8,32 +8,32 @@
 #include "utili.h"
 #include "lcd.h"
 #include "key.h"
-#include "stdio.h"
 #include "eeprom.h"
 #include "window.h"
 #include "scanner.h"
 #include "math.h"
-//#include "wendu.h"
+#include "wendu.h"
 RUNDATA rdata;
 SYSDATA sdata;
 PRBDATA	prbdata;
-char strbuf[20];
+char data strbuf[20];
 uchar pos_strbuf = 0;
 uchar key;
 
-extern uchar pgmain_handler(uchar);	//running menu
-extern uchar pgrconfig_handler(uchar);	//main menu of R config
-extern uchar pgtconfig_handler(uchar);	//main menu of T config
-extern uchar pgchset_handler(uchar);	//menu of channel probe setup
-extern uchar pgprblist_handler(uchar);	//list of probe selection
-extern uchar pgprbtypelist_handler(uchar); //select probe type
-extern uchar pgprbset_handler(uchar);	//menu of probe setup
-extern uchar pgrprbconfig_handler(uchar);  //config of r probe
-extern uchar pgtprbconfig_handler(uchar);	//config of t probe
+extern void pgmain_handler(uchar);	//running menu
+extern void pgrconfig_handler(uchar);	//main menu of R config
+extern void pgtconfig_handler(uchar);	//main menu of T config
+extern void pgchset_handler(uchar);	//menu of channel probe setup
+extern void pgprblist_handler(uchar);	//list of probe selection
+extern void pgprbtypelist_handler(uchar); //select probe type
+extern void pgprbset_handler(uchar);	//menu of probe setup
+extern void pgprbconfig_handler(uchar);  //config of probe
 
+extern void pgboottype_handler(uchar msg) ; //boot up config
 #define SPIDLE	0
 #define SPBUSY	1
 uchar 	spSFlag=SPIDLE;
+/*
 void DBG(uchar a)
 { 
 	spSFlag = SPBUSY;
@@ -41,12 +41,11 @@ void DBG(uchar a)
 	while(spSFlag == SPBUSY)
 		;
 }
-
+*/
 void analog_timer()	interrupt 1
 {
 	Key_Scan();
 }
-
 
 void initiate_timer(void)
 {
@@ -72,7 +71,7 @@ void initiate_timer(void)
 }
 
 uchar rcv_pos;
-extern uchar xdata ch1buf[8];
+extern uchar data ch1buf[8];
 void SerialHandler(void) interrupt 4 using 2
 {
 	//just handle serial interrupt 1
@@ -83,53 +82,52 @@ void SerialHandler(void) interrupt 4 using 2
 	}
 	if(RI)
 	{
+	/*
 		if(rcv_pos < 8)
 		{
 			ch1buf[rcv_pos] = SBUF;
 			rcv_pos++;
 		}
+		*/
 		RI = 0;
 	}
 }
-
-
-#define ONESEC	1282
+const LABEL code error = {LBL_HZ16,30,30,8,"出错,请重新启动..."};
+void dead()
+{
+//	LCD_Cls();
+//	LCD_PrintHz16( error.x, error.y, error.param);
+	while(1)
+		;
+}
 
 sbit KTT=P3^7;
-#define KTT_POSITIVE	KTT = 1
-#define KTT_NEGATIVE	KTT = 0;
-uchar ktt_pos = 0; //0 means positive,1 means negative
-int 	curr_ch = 1;	//index of current channel
+#define	SET_NKTT
+#define SET_PKTT
+int   curr_ch = 1;	//index of current channel
 int   curr_prb = 1;	//index of current probe selection
 
 
-LABEL code bootup = {LBL_HZ16,30,30,1,"正在启动..."};
-LABEL code calibrate = {LBL_HZ16,30,30,1,"正在校准..."};
-LABEL code lbldbg = {LBL_HZ16,30,50,8,strbuf};
-uchar nextwin = 0;
-void calculate_temp(ch)
-{
-	rdata.temperature[ch-1] = 20.1;
-	return;
-	//todo get temperature;
-/*	if(prbdata.type[ch-1] && PRBTYPE_BIT)
-		rdata.temperature[ch-1] = GetThmoVolt(rdata.reading[ch-1],prbdata.type[ch-1]);
-	else
-		rdata.temperature[ch-1] = MValueToTValue(rdata.reading[ch-1],prbdata.type[ch-1]);
-*/
-}
-double get_reading(uchar ch)
-{
-	double ret;
+LABEL code bootup = {LBL_HZ16,30,30,7,"正在启动..."};
+LABEL code modify = {LBL_HZ16,30,30,8,"正在更新数据..."};
 
-	rdata.reading[ch-1] = 1.23;
-	return 0;
-	//todo get reading
-	//sm_write();
-	//sm_read();
-	rdata.reading[ch-1] = ret;
-	return 0;
+LABEL code lbldbg = {LBL_HZ16,30,30,8,strbuf};
+uchar nextwin = 0;
+
+
+double get_double(uchar cmd)
+{
+	sm_write(cmd);
+	ch1buf[0] = sm_read();
+	ch1buf[1] = sm_read();
+	ch1buf[2] = sm_read();
+	ch1buf[3] = sm_read();
+	ch1buf[4] = sm_read();
+	if((uchar)(ch1buf[3]+ch1buf[2]+ch1buf[1]+ch1buf[0]) == ~(ch1buf[4]))
+		return 1+(*((double*)ch1buf))*10000.0;
+	return -9999.9;
 }
+/*
 void debugwnd()
 {
 	 sjprintf(strbuf,"key:?",key);
@@ -145,52 +143,241 @@ void debugwnd()
 		}
 	 }
 }
+*/
+int ch_to_search = 1;
+int ch_mod_page = 1;
+
+int dlg_cnt = 0;
+uchar phase = 0;
+uchar bore_phase = 0;
+int dlg_rscheck_cnt = 0;
+double valuep;
+//state machine of therm type
+//phase 0 : search the current channel and switch to it if apply, add delay, to phase 1, otherwise to phase 2
+//phase 1:get the reading and update the display 
+//phase 2: move to next channel
+void therm_state()
+{
+	if(phase == 0)
+	{
+		if((prbdata.type[ch_to_search - 1] <= PRBTYPE_R) && (prbdata.type[ch_to_search - 1] >= PRBTYPE_K))
+		{
+				if(rdata.scanmode > 1){
+					sm_action(ch_to_search);	
+					dlg_cnt = ONESEC;
+				}
+				phase = 1;
+				return;
+		}else{
+			rdata.temperature[ch_to_search - 1] = -9999;
+			phase = 2;
+		}
+	}
+	if(phase == 1)
+	{
+//		sm_action(0x90 + prbdata.type[ch_to_search-1]); //set probe type
+//		sm_action(CMD_DMM_TUPDATE);
+		sm_action(CMD_DMM_VUPDATE);
+		rdata.reading[ch_to_search - 1] = get_double(CMDR_DMM_VOLT);
+		rdata.temperature[ch_to_search - 1] = MValueToTValue(get_double(CMDR_DMM_TEMP));
+		phase = 2;
+	}
+	if(phase == 2)
+	{
+		pgmain_handler(MSG_REFRESH);
+		ch_to_search++;
+		phase = 0;
+	}
+}
+//state machine of bore measure
+//phase0 the search the current channel and switch to it if apply, switch to rs, pktt, add delay, if not ktt to phase 2 else to phase 1, otherwise to phase n
+//phase1 get reading of rs+, set to nktt, add delay 
+//phase2 get reading of rs-, switch to rx, add delay, if  ktt to phase 3 else to phase 4
+//phase3 get reading of rx-, set to pktt, add delay
+//phase4 get reading of rx+, switch to rx, caculate
+//phase5 update display and move to next channel
+void bore_state()
+{
+	if(phase == 0)
+	{
+		if((prbdata.type[ch_to_search - 1] <= PRBTYPE_PT25) && (prbdata.type[ch_to_search - 1] >= PRBTYPE_PT100))
+		{
+			if(rdata.scanmode > 1)
+				sm_action(ch_to_search);	
+			SET_PKTT;
+			sm_action(CMD_DMM_RX);
+			dlg_cnt =  ONESEC * sdata.ktime;
+			if(IS_MODE_KTT)
+				phase = 1;
+			else
+				phase = 2;
+			return;
+		}else{
+			rdata.temperature[ch_to_search - 1] = -9999;
+			phase = 5;
+		}
+
+	}
+	if(phase == 1)
+	{
+		sm_action(CMD_DMM_VUPDATE);
+		rdata.stdV = get_double(CMDR_DMM_VOLT);
+		SET_NKTT;
+		dlg_cnt =  ONESEC * sdata.ktime;
+		phase = 2;
+		return;
+	}
+	if(phase == 2)
+	{
+		sm_action(CMD_DMM_VUPDATE);
+
+		if(IS_MODE_KTT)
+		{
+			rdata.stdV = (rdata.stdV + get_double(CMDR_DMM_VOLT));
+			phase = 3;
+		}else{
+			rdata.stdV = get_double(CMDR_DMM_VOLT);
+			phase = 4;
+		}
+		sm_action(CMD_DMM_RX);
+		dlg_cnt = ONESEC * sdata.ktime;
+		return;	
+	}
+	if(phase == 3)
+	{
+		sm_action(CMD_DMM_VUPDATE);
+		valuep = get_double(CMDR_DMM_VOLT);
+		SET_PKTT;
+		dlg_cnt = ONESEC * sdata.ktime;
+		phase = 4;
+		return;	
+
+	}
+	if(phase == 4)
+	{
+		sm_action(CMD_DMM_VUPDATE);
+		if(IS_MODE_KTT){
+			valuep = (valuep + get_double(CMDR_DMM_VOLT));
+		}else{
+			valuep = get_double(CMDR_DMM_VOLT);
+		}
+		if(rdata.stdV != 0)
+		{
+			rdata.reading[ch_to_search-1] = valuep*sdata.Rs1/rdata.stdV;
+			rdata.temperature[ch_to_search-1] = RValueToTValue(rdata.reading[ch_to_search-1],ch_to_search-1);
+		}else{
+				rdata.temperature[ch_to_search-1] = -9999;
+		}
+		phase = 5;
+	}
+	if(phase == 5)
+	{
+		pgmain_handler(MSG_REFRESH);
+		ch_to_search++;
+		phase = 0;
+	}
+}
 void main()
 {
-	 int ch_to_search = 1;
-	 int delay_cnt_p = 0;
-	 int delay_cnt_n = 0;
-	 double valuep;
+	 IE = 0;//close int
 	 nextwin = 0;
-	 KTT_POSITIVE;
 
 	 LCD_Init();
 
 	 wnd_msgbox(&bootup);
 	 
 	 Key_Init();
-	 Init_18b20();
+//	 Init_18b20();
 
-	 IE = 0;//close int
+
 	 /* Initiate timer */
 	 initiate_timer();
 
 	 sm_Init();
 	 IE = 0x92;//enable serial int and timer0 interrupt
-//	 State_Init();	
-	 
-	 //todo collect first batch data (based on scanmode)
-	 rdata.has_scanner = 0; //debug use
-	 sdata.ktime = 30;
-	 rdata.stdV = 1.0;
-	 sdata.Rs1 = 1;
-	 sdata.V0 = 0;
-	 sdata.mode = KTT_BIT;
-	sdata.scanmode = 12;
-	 for(curr_ch = 0; curr_ch <12;curr_ch++)
+/*
+	 while(1)
 	 {
-		 sjprintf(prbdata.name[curr_ch],"sr%i",curr_ch);
-		 rdata.reading[curr_ch] = curr_ch+1.234;
- 		 rdata.temperature[curr_ch] = curr_ch+20.5678;
-	 }	 
-	 if(rdata.has_scanner){
-		scanner_set_channel(ch_to_search);
-		delay_cnt_p = ONESEC * sdata.ktime;
+		sm_action(CMD_DMM_VUPDATE);
+		//sm_wait_done(CMDR_DMM_STATE);
+		valuep = get_double(CMDR_DMM_VOLT)*10000.0;
+
+		 sm_write(CMD_SCAN_UPDATE);
+		 sm_write(CMDR_SCAN_CHNUM);
+		 rdata.scanmode = sm2_read();
+ 		 sm_write(CMDR_SCAN_CHCURR);
+		 nextwin = sm2_read();
+		sprintf(strbuf,"%.4f,%i,%i",valuep,(int)nextwin,(int)rdata.scanmode);
+		wnd_msgbox(&lbldbg);		
 	 }
-	 nextwin = PG_MAIN;
+*/
+/*
+	 while(1)
+	 {
+//		sprintf(strbuf,"step1");
+//		wnd_msgbox(&lbldbg);
+		sm_action(CMD_DMM_VUPDATE);
+		//sm_wait_done(CMDR_DMM_STATE);
+		valuep = get_double(CMDR_DMM_VOLT)*10000.0;
+		sprintf(strbuf,"%.4f",valuep);
+		//sprintf(strbuf,"%i,%i,%i,%i,%i",(int)ch1buf[3],(int)ch1buf[2],(int)ch1buf[1],(int)ch1buf[0],(int)ch1buf[4]);
+		wnd_msgbox(&lbldbg);		
+	 }
+*/
+
+
+	 State_Init();	
+	
+	 SET_BORE_MODE;
+	 //dmm init
+	 SET_PKTT;
+	 sm_action(CMD_DMM_RS);
+	 for(curr_ch = 0; curr_ch <MAX_CH_NUM;curr_ch++)
+	 {
+	 	if(sdata.id[curr_ch] >= MAX_CH_NUM)
+			sdata.id[curr_ch] = INVALID_PROBE;
+	 }
+	 for(curr_ch = 0; curr_ch <MAX_CH_NUM;curr_ch++)
+	 {
+		 prbdata.name[curr_ch][7] = '\0';
+		 for(ch_mod_page = 0; ch_mod_page < 7; ch_mod_page++)
+		 {
+		 	if(prbdata.name[curr_ch][ch_mod_page] == '\0')
+				continue;
+			 if( (prbdata.name[curr_ch][ch_mod_page] >='0') && (prbdata.name[curr_ch][ch_mod_page] <='9'))
+			 	continue;
+			 if( (prbdata.name[curr_ch][ch_mod_page] >='A') && (prbdata.name[curr_ch][ch_mod_page] <='Z'))
+			 	continue;
+	 		prbdata.name[curr_ch][ch_mod_page] = '*';
+  		 }
+		if((prbdata.type[curr_ch] >= PRBTYPE_K) && (prbdata.type[curr_ch] <= PRBTYPE_R))
+			continue;
+		if((prbdata.type[curr_ch] >= PRBTYPE_PT100) && (prbdata.type[curr_ch] <= PRBTYPE_PT25))
+			continue;
+		prbdata.type[curr_ch] = PRBTYPE_INVALID;
+	 }	 
+	 /*
+	 sm_write(CMD_SCAN_UPDATE);
+	 sm2_wait_done(CMDR_SCAN_STATE);
+	 sm_write(CMDR_SCAN_CHNUM);
+	 rdata.scanmode = sm2_read();
+	 if(rdata.scanmode > 1)
+	 	rdata.has_scanner = 1;
+	 else
+	 	rdata.has_scanner = 0;
+	 */
+	 rdata.scanmode = 1;
+	 rdata.has_scanner = 0;
+
+/*
+	 if(rdata.has_scanner){
+		scanner_set_channel(ch_to_search); //channel for measure
+	 }
+*/
+	 nextwin = PG_BOOTTYPE;
 	 
 	 key = KEY_INVALID;
-	 curr_ch = 1;
+	 curr_ch = 1; //channel for display
 	 while(1)
 	 {
  	 	if(nextwin != 0)
@@ -203,77 +390,91 @@ void main()
 		{
 			if((key == KEY_BTN1)||(key == KEY_BTN2)||(key == KEY_BTN3)||(key == KEY_BTN4))
 			{
+				if(curr_window == pgmain_handler)
+				{
+					LCD_Cls();
+					wnd_msgbox(&modify);
+				}
 				if(key == KEY_BTN1) //mode switch
 				{
-					TOGGLE_MODE_BORE;
+					if(IS_BORE_MODE){
+						SET_THERM_MODE;
+					    sm_action(CMD_DMM_RS);
+						display_buttons(KEY_BTN1,1);
+					}else{
+						SET_BORE_MODE;
+						sm_action(CMD_DMM_RX);
+						display_buttons(KEY_BTN1,0);
+					}
+					SaveToEEPROM();
+					dlg_rscheck_cnt = 1;
+					phase = 0;
+					dlg_cnt = 0;
+					SET_PKTT;
 				}
 				if(key == KEY_BTN2) //auto ktt or not
 				{
-					TOGGLE_MODE_KTT;
-					if(!(IS_MODE_KTT)){
-						KTT_POSITIVE;
+
+					if((IS_MODE_KTT)){
+						CLR_MODE_KTT;
+						display_buttons(KEY_BTN2,1);
+					}else{
+						SET_MODE_KTT;
+						SET_PKTT;
+						display_buttons(KEY_BTN2,0);
 					}
+					SaveToEEPROM();
+					dlg_rscheck_cnt = 1;
 				}
 				if(key == KEY_BTN3) //thermal probe type
 				{
-					//todo
+					display_buttons(KEY_BTN3,1);
+					if((prbdata.type[curr_ch-1] >= PRBTYPE_K) &&\
+					   (prbdata.type[curr_ch-1] <= PRBTYPE_R))
+					{
+						if(prbdata.type[curr_ch-1] == PRBTYPE_R)
+							prbdata.type[curr_ch-1] = PRBTYPE_K;
+						else
+							prbdata.type[curr_ch-1] +=1;
+						SaveProbeData();
+					}
+					display_buttons(KEY_BTN3,0);
+					
 				}
 				if(key == KEY_BTN4) //remove zero
 				{
-					//todo
+					display_buttons(KEY_BTN4,1);
+					sm_write(CMD_DMM_ZERO);
+					sm_wait_done(CMDR_DMM_STATE);
+					display_buttons(KEY_BTN4,0);
+				}
+				if(curr_window == pgmain_handler)
+				{
+					LCD_Cls();
 				}
 			}else{
 				(*curr_window)(key);
 			}
 			key = KEY_INVALID;
 	  	}else{
-			//todo get readings on current channel
 			if(curr_window != pgmain_handler)
 				continue;
-			if(delay_cnt_p > 1){
-				delay_cnt_p--;
+			sprintf(strbuf,"ph:%i,dl:%i",(int)phase,(int)dlg_cnt);
+			LCD_Print6X8(10, 20,strbuf);
+			if(dlg_cnt > 1)
+			{
+				dlg_cnt--;
 				continue;
 			}
-			if(delay_cnt_p == 1)
+			if((IS_THERM_MODE))			
 			{
-				valuep = get_reading(ch_to_search);
-				if(IS_MODE_KTT)
-				{
-					delay_cnt_n = ONESEC * sdata.ktime;
-					KTT_NEGATIVE;					
-				}else{
-					delay_cnt_n = 0;
-				}
-				if(IS_THERM_MODE)
-					delay_cnt_n = 0;	//no ktt for therm mode
-				delay_cnt_p = 0;
+				therm_state();
+			}else{
+				bore_state();
 			}
-			if(delay_cnt_n > 0){
-				delay_cnt_n--;
-				continue;
-			}
-/*
-			if(IS_BORE_MODE)
-			{
-
-				if(IS_MODE_KTT)
-				{
-					valuep = abs(valuep) + abs(get_reading(ch_to_search));
-					valuep = valuep / 2;
-				}
-				rdata.reading[ch_to_search-1] = valuep*sdata.Rs1/rdata.stdV;
-			}
-			if(IS_THERM_MODE)
-			{
-				rdata.reading[ch_to_search-1] = valuep - sdata.V0;	
-			}
-			calculate_temp(ch_to_search);
-*/
-			ch_to_search++;
-			if(ch_to_search > sdata.scanmode)
+			if(ch_to_search > rdata.scanmode)
 				ch_to_search = 1;
-			scanner_set_channel(ch_to_search);
-			pgmain_handler(MSG_REFRESH);
+			
 		}
 	}	
 }
@@ -288,8 +489,8 @@ WINDOW code wins[]={
 	{PG_PRBLIST,	pgprblist_handler},	//list of probe selection
 	{PG_PRBTYPELIST,pgprbtypelist_handler}, //select probe type
 	{PG_PRBSET,	pgprbset_handler},	//menu of probe setup
-	{PG_RPRBCONFIG,	pgrprbconfig_handler},  //config of r probe
-	{PG_TPRBCONFIG,	pgtprbconfig_handler},	//config of t probe
+	{PG_PRBCONFIG,	pgprbconfig_handler},  //config of r probe
+	{PG_BOOTTYPE,	pgboottype_handler}	//config of t probe
 };
 
 

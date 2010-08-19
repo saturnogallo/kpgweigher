@@ -23,22 +23,21 @@ sbit ACC7=   ACC^7;
 	#define uint unsigned int
 	#define ulong unsigned long
 
-    sbit dat= P0^1;   //定义数据线
-    sbit clk= P0^0;   //定义时钟端
-//	sbit clr= P3^5;   //清零端
-    sbit sclk= P1^0;  //串行时钟端
-    sbit sdata= P1^1;   //串行数据线
-    sbit drdy= P1^2;    //逻辑输出端
-	sbit a0= P1^3;      //地址输入端
-    sbit rfs= P1^4;    //同步接受端
-    sbit tfs= P1^5;    //同步传输端
+sbit dat= P0^1;   //定义数据线
+sbit clk= P0^0;   //定义时钟端
+sbit clr= P3^5;   //清零端
+sbit sclk= P1^0;  //串行时钟端
+sbit sdata= P1^1;   //串行数据线
+sbit drdy= P1^2;    //逻辑输出端
+sbit a0= P1^3;      //地址输入端
+sbit rfs= P1^4;    //同步接受端
+sbit tfs= P1^5;    //同步传输端
 
-    sbit jdq1= P1^7;   //继电器XI
-	sbit jdq2= P1^6;   //继电器X2
+sbit jdq1= P1^7;   //继电器XI
+sbit jdq2= P1^6;   //继电器X2
 
-//	sbit CH0= P2^6;	   //
-	sbit CH1= P2^7;    //
-    sbit CH2 =P2^6;
+sbit CH1= P2^7;    
+sbit CH2 =P2^6;
    // sbit BT_REC =P2^5;
 
 	sbit key_tl=  P0^2; //调零

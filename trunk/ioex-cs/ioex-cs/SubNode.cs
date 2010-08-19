@@ -8,11 +8,6 @@ using System.ComponentModel;
 using System.Threading;
 namespace ioex_cs
 {
-    public class NodeData
-    {
-        public string name;
-        public UInt32 value;
-    }
     enum NodeStatus
     {
         ST_IDLE,
@@ -22,9 +17,6 @@ namespace ioex_cs
         ST_RUNNING,
     }
 
-    enum NodeCommand : byte
-    {
-    }
     enum NodeType : byte
     {
         BOARD_TYPE_VIBRATE = 0,
@@ -112,14 +104,26 @@ namespace ioex_cs
     }
     internal class WeighNode : SubNode
     {
+        private double _weight;
+        private double off;
         public double weight
         {
-            get { 
-                if (!this["weight"].HasValue)
+            get {
+                return _weight;
+            }
+            set{
+                if (!this["Mtrl_Weight_gram"].HasValue)
                 {
-                    return -1000000.0;
+                    _weight = -1000000.0;
                 }
-                return this["weight"].Value; 
+                if (off > 1)
+                {
+                    off = 0;
+                }else{
+                    off = off + 0.1;
+                }
+                _weight = (double)(this["Mtrl_Weight_gram"].Value)+off;// +(double)this["Mtrl_Weight_decimal"].Value / (double)16.0; 
+
             }
         }
         public void NextCycle()
@@ -144,7 +148,18 @@ namespace ioex_cs
             base.Action(action, Wait);
             if (action == "query") //query the weight and status
             {
-                read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal", "status", "hw_status" });
+                while (status == NodeStatus.ST_BUSY)
+                {
+                    Thread.Sleep(1);
+                }
+                status = NodeStatus.ST_BUSY;
+//                read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal", "status" });
+                read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal" });
+                while (status == NodeStatus.ST_BUSY)
+                {
+                    Thread.Sleep(1);
+                }
+                return;
             }
             if (action == "zero")
             {
@@ -176,7 +191,7 @@ namespace ioex_cs
         internal WeighNode(SPort _port, byte node_addr)
             : base(_port,node_addr)
         {
-            
+            off = 0;
         }
     }
     /*
@@ -376,6 +391,7 @@ namespace ioex_cs
                     reg_mulitply_tbl[(byte)(offset + 3)] = 1;
                 }
             }
+            
             return;
         }
         internal SubNode(SPort _port, byte node_id)
@@ -398,6 +414,7 @@ namespace ioex_cs
             
             timeout_cnt = 0;
             status = NodeStatus.ST_LOST;
+            _errmsg = "";
             
         }
         private void write_regs(string[] names,UInt32[] values)
@@ -469,9 +486,10 @@ namespace ioex_cs
                 {
                     throw new Exception("reenter when busy");
                 }
+                status = NodeStatus.ST_BUSY;
                 while (port.Status == PortStatus.BUSY)
                 {
-                    Thread.Sleep(10);
+                    Thread.Sleep(1);
                 }
                 if (value.HasValue)
                 {
@@ -493,9 +511,9 @@ namespace ioex_cs
                     read_regs(new string[] { reg_name });
 
                 }
-                while (port.Status == PortStatus.BUSY)
+                while (status == NodeStatus.ST_BUSY)
                 {
-                    Thread.Sleep(10);
+                    Thread.Sleep(1);
                 }
                 
                 status = NodeStatus.ST_IDLE;
@@ -605,6 +623,7 @@ namespace ioex_cs
                     }
                 }
             }
+            status = NodeStatus.ST_IDLE;
 #region obsolete_readword_code
             /*
             if (ifrm.cmd == 'X')
@@ -638,7 +657,7 @@ namespace ioex_cs
                 {
                     return;
                 }
-                Thread.Sleep(10);
+                Thread.Sleep(1);
             }
         }
         public void init_load_regs()  //load the initial reg value
@@ -654,11 +673,7 @@ namespace ioex_cs
         }
         public virtual void Action(string action, bool Wait)  // empty, pass, fill, flash, zero, query
         {
-            while (status == NodeStatus.ST_BUSY)
-            {
-                Thread.Sleep(10);
-            }
-	    if (action == "stop")
+	        if (action == "stop")
             {
                 this["flag_enable"] = 0;
             }  
