@@ -115,27 +115,51 @@ void pgmain_handler(uchar msg) {
 	if(msg == MSG_INIT) {
 		LCD_Cls();
 //		draw_label(&usage,SW_NORMAL);
-		curr_ch = 1;
+//		curr_ch = 1;
+		old_ch = curr_ch;
+		for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
+		{
+			sprintf(strbuf,"CH%02i:",curr_ch);
+			draw_label(&chs[i],SW_NORMAL);
+			INC_CH;
+		}
+		curr_ch = old_ch;
 		msg = MSG_REFRESH;
 	}
 	if(msg == KEY_UP) {
 		DEC_CH;	
+		old_ch = curr_ch;
+		for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
+		{
+			sprintf(strbuf,"CH%02i:",curr_ch);
+			draw_label(&chs[i],SW_NORMAL);
+			INC_CH;
+		}
+		curr_ch = old_ch;
 		msg = MSG_REFRESH;
 	}
 	if(msg == KEY_DN) {
 
 		INC_CH;
+		old_ch = curr_ch;
+		for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
+		{
+			sprintf(strbuf,"CH%02i:",curr_ch);
+			draw_label(&chs[i],SW_NORMAL);
+			INC_CH;
+		}
+		curr_ch = old_ch;
 		msg = MSG_REFRESH;
 	}
 	if(msg == MSG_REFRESH) {
 		old_ch = curr_ch;
 		for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
 		{
-			sprintf(strbuf,"CH%02i:",curr_ch);
-			draw_label(&chs[i],SW_NORMAL);
+//			sprintf(strbuf,"CH%02i:",curr_ch);
+//			draw_label(&chs[i],SW_NORMAL);
 			cptr = getprbtype(prbdata.type[sdata.id[curr_ch-1]]);
 			if((sdata.id[curr_ch - 1] == INVALID_PROBE) ||\
-				(rdata.temperature[curr_ch - 1] < -9000) ||\
+				(rdata.temperature[curr_ch - 1] < -90000) ||\
 				((IS_THERM_MODE) && (cptr[0] == 'P'))||\ 
 				((IS_BORE_MODE) && (cptr[0] != 'P'))){
 				sprintf(strbuf," -------");
@@ -144,13 +168,15 @@ void pgmain_handler(uchar msg) {
 			}else{
 				if(IS_THERM_MODE)
 				{
-					sprintf(strbuf,"%8f mV",rdata.reading[curr_ch - 1]);
+					sprintf(strbuf,"%8f",rdata.reading[curr_ch - 1]);
+					sprintf(strbuf+8," mV");
 				}else{
-					sprintf(strbuf,"%8f ohm",rdata.reading[curr_ch - 1]);
+					sprintf(strbuf,"%8f",rdata.reading[curr_ch - 1]);
+					sprintf(strbuf+8," ohm");
 				}
 				draw_label(&values[i],SW_NORMAL|SW_OVERLAP);
-				
-				sprintf(strbuf," %6fC,%c",rdata.temperature[curr_ch - 1],cptr[0]);
+				sprintf(strbuf," %8f",rdata.temperature[curr_ch - 1]);
+				sprintf(strbuf+8," C,%c",cptr[0]);
 				draw_label(&temps[i],SW_NORMAL|SW_OVERLAP);
 			}
 //			if(1 == rdata.scanmode)
