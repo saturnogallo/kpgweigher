@@ -9,7 +9,7 @@ double RValueToTValue(double r, uchar prbid)
 
 	double ac,bc,cc,tlow,tup,rnew,tnew;
 	int count;
-	return r+1;
+
 	if(prbdata.type[prbid-1] == PRBTYPE_PT100)
 		r = r/100.0;
 	else if(prbdata.type[prbid-1] == PRBTYPE_PT25)
@@ -114,6 +114,7 @@ double GetT(double w)
 	}
 	return result;
 }
+/*
 const double code TLow[]={0.000000000000E+00,0.387481063640E-01,0.441944343470E-04,0.118443231050E-06,0.200329735540E-07,0.901380195590E-09,0.226511565930E-10,0.360711542050E-12,0.384939398830E-14,0.282135219250E-16,0.142515947790E-18,0.487686622860E-21,0.107955392700E-23,0.139450270620E-26,0.797951539270E-30};
 const double code THigh[]={0.000000000000E+00,0.387481063640E-01,0.332922278800E-04,0.206182434040E-06,-0.218822568460E-08,0.109968809280E-10,-0.308157587720E-13,0.454791352900E-16,-0.275129016730E-19};
 
@@ -280,4 +281,4 @@ double MValueToTValue(double r,char type)
 				
 	return floor((tlow*10000.0+tup*10000.0)/2.0+0.5)/10000.0;
 }
-
+*/

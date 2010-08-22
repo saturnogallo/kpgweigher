@@ -40,7 +40,7 @@ char highc(uchar x)
 		return '0'+x;
 }
 */
-/*计算字符串长度
+/*计算字符串长度*/
 uchar strlen(uchar *s)
 {
 	uchar len = 0;
@@ -48,7 +48,7 @@ uchar strlen(uchar *s)
 	
 	return len;
 }
-*/
+
 double buf2double()		
 {
 	double tmp = 0.0;
@@ -77,7 +77,7 @@ int buf2byte()	    //convert rdata.tempbuf to byte (00-99)
 }
 
 //MY SPI Related function 
-uchar data ch1buf[8];
+uchar data ch1buf[25];
 #define SM_WDELAY	100
 #define SM_RDELAY	100
 #define SM_RDELAY2	100
@@ -92,24 +92,27 @@ void   sm_ch(uchar   value)
 	uchar   no;  
   	for(no=0;no<8;no++) {  
 	    SPI_CK = 1;      
+	    delay(SM_WDELAY);
    	  	if   ((value &0x80)==0x80)  
        		  SPI_DO = 1;  
 		else  
 		      SPI_DO = 0;  
 		 delay(SM_WDELAY);   
 	     SPI_CK = 0;    
+		 delay(SM_WDELAY);   
    		 value   =   (value <<1);  
-		 delay(SM_WDELAY);
   	}
 	SPI_CK = 1;
+	delay(SM_WDELAY);   
 }
 void sm_write(uchar value)
 {
+
 	sm_ch(HEAD_MARK);
 	sm_ch(value);
 }
   
-uchar sm_read()
+uchar sm_read(uchar final)
 {  
    	uchar   no,value1;
  	for (no=0;no<8;no++) 	{ 
@@ -121,8 +124,15 @@ uchar sm_read()
  		  if (SPI_DI == 1)  
 		        value1  |=0x01;  
   		   else  
-				value1  &=~0x01;  
+				value1  &= 0xfe;  
 	}
+	SPI_CK = 1;
+	delay(SM_RDELAY);
+	if(final == 1)
+	{
+		SPI_CK = 0; //clear the last bit to read
+	}
+	delay(SM_RDELAY2);
 	SPI_CK = 1;
 	return value1;
 }  
@@ -131,13 +141,12 @@ void sm_wait_done(uchar cmd)
 {
 
 	int count = 0;
-	return;	
-	while(count++ < 9999)
+	while(count++ < 999)
 	{
 		delay(200);
 		sm_write(cmd);
 		delay(200);
-		if(CMD_INVALID == sm_read())
+		if(CMD_INVALID == sm_read(1))
 			return;
 	}
 	dead();
@@ -147,36 +156,36 @@ extern LABEL code lbldbg;
 void sm_action(uchar cmd)
 {
 	int count = 0;
-	uchar i;
 	
-	while(count++ < 999999)
+	while(count++ < 999)
 	{
 		sm_write(cmd);
 		if(count > 1)
 			delay(100);
 		else
 			delay(10);
-		i = sm_read();
-		if(CMD_ACCEPT == i)
+		if(CMD_ACCEPT == sm_read(1))
 			return;
 	}
 	dead();
 }
-
+extern void LCD_Print6X8(uchar x, uchar y,uchar *s);
 double smget_double(uchar cmd)
 {
 	sm_write(cmd);
-	ch1buf[0] = sm_read();
-	ch1buf[1] = sm_read();
-	ch1buf[2] = sm_read();
-	ch1buf[3] = sm_read();
-	if(~(ch1buf[3]+ch1buf[2]+ch1buf[1]+ch1buf[0]) == sm_read())
-		return (*((double*)ch1buf));;
-	return 0;
+	ch1buf[0] = sm_read(0);
+	ch1buf[1] = sm_read(0);
+	ch1buf[2] = sm_read(0);
+	ch1buf[3] = sm_read(0);
+	ch1buf[4] = sm_read(1);
+
+	if((uchar)(ch1buf[3]+ch1buf[2]+ch1buf[1]+ch1buf[0]) == ~ch1buf[4])
+		return (*((double*)ch1buf));
+	return -9999.9;
 }
 
 
-uchar sm2_read()
+uchar sm2_read(uchar final)
 {  
    	uchar   no,value1;
  	for (no=0;no<8;no++) 	{ 
@@ -191,46 +200,52 @@ uchar sm2_read()
 				value1  &=~0x01;  
 	}
 	SPI_CK = 1;
+    delay(SM_RDELAY);
+	if(final == 1)
+	{
+		SPI_CK = 0; //clear the last bit to read
+	}
+	delay(SM_RDELAY2);
+	SPI_CK = 1;
+
 	return value1;
 }  
-
+/*
 void sm2_wait_done(uchar cmd)
 {
 
 	int count = 0;
-	return;	
-	while(count++ < 9999)
+	
+	while(count++ < 999)
 	{
 		delay(200);
 		sm_write(cmd);
 		delay(200);
-		if(CMD_INVALID == sm2_read())
+		if(CMD_INVALID == sm2_read(1))
 			return;
 	}
 	dead();
 }
-
+*/
 extern LABEL code lbldbg;
-/*
+
 void sm2_action(uchar cmd)
 {
 	int count = 0;
-	uchar i;
 	
-	while(count++ < 999999)
+	while(count++ < 999)
 	{
 		sm_write(cmd);
 		if(count > 1)
 			delay(100);
 		else
 			delay(10);
-		i = sm2_read();
-		if(CMD_ACCEPT == i)
+		if(CMD_ACCEPT == sm2_read(1))
 			return;
 	}
 	dead();
 }
-
+/*
 double sm2get_double(uchar cmd)
 {
 	sm_write(cmd);
@@ -238,7 +253,7 @@ double sm2get_double(uchar cmd)
 	ch1buf[1] = sm2_read();
 	ch1buf[2] = sm2_read();
 	ch1buf[3] = sm2_read();
-	if(~(ch1buf[3]+ch1buf[2]+ch1buf[1]+ch1buf[0]) == sm2_read())
+	if(~(ch1buf[3]+ch1buf[2]+ch1buf[1]+ch1buf[0]) == sm2_read(1))
 		return (*((double*)ch1buf));;
 	return 0;
 }

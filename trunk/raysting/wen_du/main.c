@@ -16,7 +16,7 @@
 RUNDATA rdata;
 SYSDATA sdata;
 PRBDATA	prbdata;
-char data strbuf[20];
+char data strbuf[25];
 uchar pos_strbuf = 0;
 uchar key;
 
@@ -102,8 +102,8 @@ void dead()
 }
 
 sbit KTT=P3^7;
-#define	SET_NKTT
-#define SET_PKTT
+#define	SET_NKTT	sm2_action(CMD_SCAN_NKTT)
+#define SET_PKTT	sm2_action(CMD_SCAN_PKTT)
 int   curr_ch = 1;	//index of current channel
 int   curr_prb = 1;	//index of current probe selection
 
@@ -111,22 +111,23 @@ int   curr_prb = 1;	//index of current probe selection
 LABEL code bootup = {LBL_HZ16,30,30,7,"正在启动..."};
 LABEL code modify = {LBL_HZ16,30,30,8,"正在更新数据..."};
 
-LABEL code lbldbg = {LBL_HZ16,30,30,8,strbuf};
+LABEL code lbldbg = {LBL_HZ6X8,10,30,8,strbuf};
 uchar nextwin = 0;
 
-
-double get_double(uchar cmd)
+/*
+double smget_double(uchar cmd)
 {
 	sm_write(cmd);
-	ch1buf[0] = sm_read();
-	ch1buf[1] = sm_read();
-	ch1buf[2] = sm_read();
-	ch1buf[3] = sm_read();
-	ch1buf[4] = sm_read();
+	ch1buf[0] = sm_read(0);
+	ch1buf[1] = sm_read(0);
+	ch1buf[2] = sm_read(0);
+	ch1buf[3] = sm_read(0);
+	ch1buf[4] = sm_read(1);
 	if((uchar)(ch1buf[3]+ch1buf[2]+ch1buf[1]+ch1buf[0]) == ~(ch1buf[4]))
-		return 1+(*((double*)ch1buf))*10000.0;
+		return (*((double*)ch1buf));
 	return -9999.9;
 }
+*/
 /*
 void debugwnd()
 {
@@ -160,10 +161,12 @@ void therm_state()
 {
 	if(phase == 0)
 	{
+
 		if((prbdata.type[ch_to_search - 1] <= PRBTYPE_R) && (prbdata.type[ch_to_search - 1] >= PRBTYPE_K))
 		{
+
 				if(rdata.scanmode > 1){
-					sm_action(ch_to_search);	
+					sm2_action(ch_to_search);	
 					dlg_cnt = ONESEC;
 				}
 				phase = 1;
@@ -175,11 +178,17 @@ void therm_state()
 	}
 	if(phase == 1)
 	{
-//		sm_action(0x90 + prbdata.type[ch_to_search-1]); //set probe type
-//		sm_action(CMD_DMM_TUPDATE);
-		sm_action(CMD_DMM_VUPDATE);
-		rdata.reading[ch_to_search - 1] = get_double(CMDR_DMM_VOLT);
-		rdata.temperature[ch_to_search - 1] = MValueToTValue(get_double(CMDR_DMM_TEMP));
+		sm_action(0x90 + prbdata.type[ch_to_search-1]); //set probe type
+		sm_action(CMD_DMM_TUPDATE);
+		sm_wait_done(CMDR_DMM_STATE);
+		rdata.reading[ch_to_search - 1] = smget_double(CMDR_DMM_VOLT);
+//			sprintf(strbuf,"%f",(*((double*)ch1buf)));
+//			LCD_Print6X8(100, 20,strbuf);
+
+		rdata.temperature[ch_to_search - 1] = smget_double(CMDR_DMM_TEMP);
+//			sprintf(strbuf,"%f",(*((double*)ch1buf)));
+//			LCD_Print6X8(100, 20,strbuf);
+
 		phase = 2;
 	}
 	if(phase == 2)
@@ -202,8 +211,11 @@ void bore_state()
 	{
 		if((prbdata.type[ch_to_search - 1] <= PRBTYPE_PT25) && (prbdata.type[ch_to_search - 1] >= PRBTYPE_PT100))
 		{
+//			sprintf(strbuf,"%f",(*((double*)ch1buf)));
+//			LCD_Print6X8(100, 20,strbuf);
+
 			if(rdata.scanmode > 1)
-				sm_action(ch_to_search);	
+				sm2_action(ch_to_search);	
 			SET_PKTT;
 			sm_action(CMD_DMM_RX);
 			dlg_cnt =  ONESEC * sdata.ktime;
@@ -221,7 +233,8 @@ void bore_state()
 	if(phase == 1)
 	{
 		sm_action(CMD_DMM_VUPDATE);
-		rdata.stdV = get_double(CMDR_DMM_VOLT);
+		sm_wait_done(CMDR_DMM_STATE);
+		rdata.stdV = smget_double(CMDR_DMM_VOLT);
 		SET_NKTT;
 		dlg_cnt =  ONESEC * sdata.ktime;
 		phase = 2;
@@ -230,13 +243,13 @@ void bore_state()
 	if(phase == 2)
 	{
 		sm_action(CMD_DMM_VUPDATE);
-
+		sm_wait_done(CMDR_DMM_STATE);
 		if(IS_MODE_KTT)
 		{
-			rdata.stdV = (rdata.stdV + get_double(CMDR_DMM_VOLT));
+			rdata.stdV = (rdata.stdV + smget_double(CMDR_DMM_VOLT));
 			phase = 3;
 		}else{
-			rdata.stdV = get_double(CMDR_DMM_VOLT);
+			rdata.stdV = smget_double(CMDR_DMM_VOLT);
 			phase = 4;
 		}
 		sm_action(CMD_DMM_RX);
@@ -246,7 +259,8 @@ void bore_state()
 	if(phase == 3)
 	{
 		sm_action(CMD_DMM_VUPDATE);
-		valuep = get_double(CMDR_DMM_VOLT);
+		sm_wait_done(CMDR_DMM_STATE);
+		valuep = smget_double(CMDR_DMM_VOLT);
 		SET_PKTT;
 		dlg_cnt = ONESEC * sdata.ktime;
 		phase = 4;
@@ -256,10 +270,11 @@ void bore_state()
 	if(phase == 4)
 	{
 		sm_action(CMD_DMM_VUPDATE);
+		sm_wait_done(CMDR_DMM_STATE);
 		if(IS_MODE_KTT){
-			valuep = (valuep + get_double(CMDR_DMM_VOLT));
+			valuep = (valuep + smget_double(CMDR_DMM_VOLT));
 		}else{
-			valuep = get_double(CMDR_DMM_VOLT);
+			valuep = smget_double(CMDR_DMM_VOLT);
 		}
 		if(rdata.stdV != 0)
 		{
@@ -298,9 +313,29 @@ void main()
 /*
 	 while(1)
 	 {
+	 	sm2_action(CMD_SCAN_NKTT);
+		while(key == KEY_INVALID);
+		key = KEY_INVALID;
+		sm2_action(CMD_SCAN_PKTT);
+
+		while(key == KEY_INVALID);
+		key = KEY_INVALID;
+
+		sm_action(CMD_DMM_RX);
+		while(key == KEY_INVALID);
+		key = KEY_INVALID;
+		sm_action(CMD_DMM_RS);
+		while(key == KEY_INVALID);
+		key = KEY_INVALID;
+
+
+	 }
+/*
+	 while(1)
+	 {
 		sm_action(CMD_DMM_VUPDATE);
 		//sm_wait_done(CMDR_DMM_STATE);
-		valuep = get_double(CMDR_DMM_VOLT)*10000.0;
+		valuep = smget_double(CMDR_DMM_VOLT)*10000.0;
 
 		 sm_write(CMD_SCAN_UPDATE);
 		 sm_write(CMDR_SCAN_CHNUM);
@@ -314,20 +349,23 @@ void main()
 /*
 	 while(1)
 	 {
-//		sprintf(strbuf,"step1");
-//		wnd_msgbox(&lbldbg);
-		sm_action(CMD_DMM_VUPDATE);
-		//sm_wait_done(CMDR_DMM_STATE);
-		valuep = get_double(CMDR_DMM_VOLT)*10000.0;
-		sprintf(strbuf,"%.4f",valuep);
-		//sprintf(strbuf,"%i,%i,%i,%i,%i",(int)ch1buf[3],(int)ch1buf[2],(int)ch1buf[1],(int)ch1buf[0],(int)ch1buf[4]);
-		wnd_msgbox(&lbldbg);		
+		sm_action(CMD_DMM_TUPDATE);
+		sm_wait_done(CMDR_DMM_STATE);
+		valuep = smget_double(CMDR_DMM_VOLT);
+
+		//smget_double(CMDR_DMM_TEMP);
+		sprintf(strbuf,"%10f",valuep);
+		LCD_Print6X8(10, 20,strbuf);
+		sprintf(strbuf,"%10f",smget_double(CMDR_DMM_TEMP));
+		LCD_Print6X8(10, 30,strbuf);
+
+
 	 }
 */
 
 
 	 State_Init();	
-	
+	 sdata.Rs1 = 100;
 	 SET_BORE_MODE;
 	 //dmm init
 	 SET_PKTT;
@@ -366,7 +404,7 @@ void main()
 	 else
 	 	rdata.has_scanner = 0;
 	 */
-	 rdata.scanmode = 1;
+	 rdata.scanmode = 2;
 	 rdata.has_scanner = 0;
 
 /*
@@ -394,6 +432,7 @@ void main()
 				{
 					LCD_Cls();
 					wnd_msgbox(&modify);
+
 				}
 				if(key == KEY_BTN1) //mode switch
 				{
@@ -411,20 +450,24 @@ void main()
 					phase = 0;
 					dlg_cnt = 0;
 					SET_PKTT;
+					if(curr_window == pgmain_handler)
+						pgmain_handler(MSG_INIT);
 				}
 				if(key == KEY_BTN2) //auto ktt or not
 				{
-
-					if((IS_MODE_KTT)){
-						CLR_MODE_KTT;
-						display_buttons(KEY_BTN2,1);
-					}else{
-						SET_MODE_KTT;
-						SET_PKTT;
-						display_buttons(KEY_BTN2,0);
+					if(IS_BORE_MODE)
+					{
+						if((IS_MODE_KTT)){
+							CLR_MODE_KTT;
+							display_buttons(KEY_BTN2,1);
+						}else{
+							SET_MODE_KTT;
+							SET_PKTT;
+							display_buttons(KEY_BTN2,0);
+						}
+						SaveToEEPROM();
+						dlg_rscheck_cnt = 1;
 					}
-					SaveToEEPROM();
-					dlg_rscheck_cnt = 1;
 				}
 				if(key == KEY_BTN3) //thermal probe type
 				{
@@ -459,8 +502,9 @@ void main()
 	  	}else{
 			if(curr_window != pgmain_handler)
 				continue;
-			sprintf(strbuf,"ph:%i,dl:%i",(int)phase,(int)dlg_cnt);
-			LCD_Print6X8(10, 20,strbuf);
+//			sprintf(strbuf,"ph:%i,dl:%i",(int)phase,(int)dlg_cnt);
+//			LCD_Print6X8(10, 20,strbuf);
+
 			if(dlg_cnt > 1)
 			{
 				dlg_cnt--;

@@ -9,7 +9,7 @@
 
 void delay (uint us) ;
 void delay1 (uint ms);
-//uchar strlen(uchar *s);
+uchar strlen(uchar *s);
 char lowc(uchar x);
 char highc(uchar x);
 #define KEY_INVALID '-'													  
@@ -135,13 +135,13 @@ int buf2byte();
 void LCD_Print8X16(uchar x, uchar y,uchar *s);
 
 void sm_Init();
-uchar sm_read();
+uchar sm_read(uchar final);
 void sm_write(uchar value);
 void sm_action(uchar cmd);
 
 void sm_wait_done(uchar cmd);
 double smget_double(uchar cmd);
-uchar sm2_read();
+uchar sm2_read(uchar final);
 void sm2_wait_done(uchar cmd);
 double smget_double(uchar cmd);
 void sm2_action(uchar cmd);
@@ -150,6 +150,8 @@ void sm2_action(uchar cmd);
 #define ONESEC	2
 #define CMD_SCAN_SETCH_MAX	24	//set channel command 1 to 24
 #define CMD_SCAN_UPDATE		0x70    //update the status of scanner
+#define CMD_SCAN_PKTT		0x71
+#define CMD_SCAN_NKTT		0x73
 #define CMDR_SCAN_CHTYPE	0x74	//scanner channel type 2 wire or 4 wire
 #define CMDR_SCAN_CHCURR	0x76	//current channel index
 #define CMDR_SCAN_CHNUM		0x78	//current channel number
