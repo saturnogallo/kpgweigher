@@ -42,14 +42,14 @@ namespace ioex_cs
             if (!this.IsVisible)
                 return;
             
-            Packer p = (System.Windows.Application.Current as App).packers[0];
-
-            //currentApp().bMainPause = true;
+            Packer p = (System.Windows.Application.Current as App).curr_packer;
+            
+            currentApp().bMainPause = true;
             foreach (WeighNode n in p.weight_node)
             {
                 UpdateUI("wei_node" + n.node_id);
             }
-            //currentApp().bMainPause = false;
+            currentApp().bMainPause = false;
         }
         void  RunMode_Loaded(object sender, RoutedEventArgs e)
         {
@@ -57,11 +57,11 @@ namespace ioex_cs
         private void group_action(string action)
         {
             App p = currentApp();
-            if (p.packers[0].status == PackerStatus.PAUSED || p.packers[0].status == PackerStatus.RUNNING)
+            if (p.curr_packer.status == PackerStatus.PAUSED || p.curr_packer.status == PackerStatus.RUNNING)
             {
                 return;
             }
-            p.packers[0].ActionAll(action);
+            p.curr_packer.ActionAll(action);
         }
         private void btn_empty_click(object sender, RoutedEventArgs e)
         {
@@ -75,20 +75,22 @@ namespace ioex_cs
         private void btn_start_click(object sender, RoutedEventArgs e)
         {
             App p = currentApp();
-            if (p.packers[0].status == PackerStatus.RUNNING)
+            if (p.curr_packer.status == PackerStatus.RUNNING)
             {
-                p.packers[0].status = PackerStatus.IDLE;
+                p.curr_packer.StopRun();
                 this.btn_allstart.Content = StringResource.str("all_start");
+
             }else{
                 p.bSimulate = false;
-                p.packers[0].status = PackerStatus.RUNNING;
+                p.curr_packer.StartRun();
+                p.curr_packer.status = PackerStatus.RUNNING;
                 this.btn_allstart.Content = StringResource.str("all_stop");
             }
         }
         private void btn_history_click(object sender, RoutedEventArgs e)
         {
             App p = currentApp();
-            if (p.packers[0].status == PackerStatus.RUNNING)
+            if (p.curr_packer.status == PackerStatus.RUNNING)
             {
                 return;
             }
@@ -98,7 +100,7 @@ namespace ioex_cs
         private void btn_singlemode_click(object sender, RoutedEventArgs e)
         {
             App p = currentApp();
-            if (p.packers[0].status == PackerStatus.RUNNING)
+            if (p.curr_packer.status == PackerStatus.RUNNING)
             {
                 return;
             }
@@ -107,7 +109,7 @@ namespace ioex_cs
         private void grp_reg(string regname)
         {
             App p = currentApp();
-            if (p.packers[0].status == PackerStatus.RUNNING)
+            if (p.curr_packer.status == PackerStatus.RUNNING)
             {
                 MessageBox.Show("is_running");
                 return;
@@ -115,9 +117,9 @@ namespace ioex_cs
             p.kbdwnd.Init(StringResource.str("enter_"+regname), regname, false, KbdData);
 
         }
-        public int StringToId(string name)
+        static public int StringToId(string name)
         {
-                        StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             Regex re = new Regex("(\\d+)");
             Match m2 = re.Match(name);
             if (m2.Success)
@@ -128,65 +130,56 @@ namespace ioex_cs
         public void UpdateUI(string param)
         {
             App p = currentApp();
-            Packer pack = p.packers[0];
-            int id;
-            //todo diplay the variable based on current setting
-            if (int.TryParse(param,out id))
-            {
-                //todo update the display of each node
-            }
+            Packer pack = p.curr_packer;
+            
+            //diplay the variable based on current setting
+
             if (param == "run_uvar")
             {
-//                this.grp_uvar_input.Text = pack.sys_cfg.upper_var.ToString();
+                this.input_uvar.Content = pack.curr_cfg.upper_var.ToString();
             }
             if (param == "run_dvar")
             {
-//                this.grp_dvar_input.Text = pack.sys_cfg.lower_var.ToString();
+                this.input_dvar.Content = pack.curr_cfg.lower_var.ToString();
             }
             if (param == "run_target")
             {
-//                this.grp_target_input.Text = pack.target.ToString();
+                this.lbl_weight.Content = pack.curr_cfg.target.ToString();
             }
             if (param == "lbl_prd_no")
             {
-//                this.grp_amp_input.Text = pack.vib_node[0]["magnet_amp"].Value.ToString();
-                //todo load the corresponding pictiure and description.
+                this.lbl_prd_no.Content = pack.curr_cfg.product_no.ToString();
+
             }
             if (param == "lbl_desc")
             {
-//                this.grp_freq_input.Text = pack.vib_node[0]["magnet_freq"].Value.ToString();
+                this.lbl_desc.Content = pack.curr_cfg.product_desc.ToString();
+                Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
+                //load the corresponding pictiure.
+                (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("f:\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
+
             }
             if (param.IndexOf("wei_node") == 0)
             {
                 Label lb = NameToControl(param) as Label;
-                string ct = pack.weight_node[StringToId(param) - 1].weight.ToString();
+                Button btn = NameToControl(param.Replace("wei_node", "bucket")) as Button;
+                WeighNode n = pack.weight_node[StringToId(param) - 1];
+                //todo add fixed point position
+                string ct = n.weight.ToString().Substring(0,n.weight.ToString().IndexOf('.')+2);
                 lb.Content = ct;
+                if (n.status == NodeStatus.ST_LOST)
+                {
+                    (btn.FindName("BarPath") as Path).Fill = Brushes.Chocolate;
+                }
+                if (n.status == NodeStatus.ST_RELEASE)
+                {
+                    (btn.FindName("BarPath") as Path).Fill = Brushes.OrangeRed;
+                }
             }
         }
         private object NameToControl(string name)
         {
-            if (name == "wei_node1")
-                return wei_node1;
-            if (name == "wei_node2")
-                return wei_node2;
-            if (name == "wei_node3")
-                return wei_node3;
-            if (name == "wei_node4")
-                return wei_node4;
-            if (name == "wei_node5")
-                return wei_node5;
-            if (name == "wei_node6")
-                return wei_node6;
-            if (name == "wei_node7")
-                return wei_node7;
-            if (name == "wei_node8")
-                return wei_node8;
-            if (name == "wei_node9")
-                return wei_node9;
-            if (name == "wei_node10")
-                return wei_node10;
-            return null;
-
+            return this.FindName(name);
         }
         private void grp_target_click(object sender, RoutedEventArgs e)
         {
@@ -202,35 +195,23 @@ namespace ioex_cs
         }
         public void KbdData(string param, string data)
         {
-            //todo update the input into the setting
-            /*
             try
             {
                 App p = Application.Current as App;
-                Packer pack = p.packers[0];
+                Packer pack = p.curr_packer;
                 if (param == "run_uvar")
                 {
-                    pack.sys_cfg.upper_var = double.Parse(data);
+                    pack.curr_cfg.upper_var = double.Parse(data);
                     
                 }
                 if (param == "run_dvar")
                 {
-                    pack.sys_cfg.lower_var = double.Parse(data);
+                    pack.curr_cfg.lower_var = double.Parse(data);
                     
                 }
                 if (param == "run_target")
                 {
-                    pack.target = double.Parse(data);
-                    
-                }
-                if (param == "run_amp")
-                {
-                    pack.vib_node[0]["magnet_amp"] = UInt32.Parse(data);
-                    
-                }
-                if (param == "run_freq")
-                {
-                    pack.vib_node[0]["magnet_amp"] = UInt32.Parse(data);
+                    pack.curr_cfg.target = double.Parse(data);
                     
                 }
                 UpdateUI(param);
@@ -240,7 +221,6 @@ namespace ioex_cs
                 MessageBox.Show("Invalid Parameter");
                 return;
             }
-          * */
         }
     }
 }

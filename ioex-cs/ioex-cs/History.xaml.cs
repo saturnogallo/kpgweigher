@@ -36,7 +36,6 @@ namespace ioex_cs
 
         private void query_Click(object sender, RoutedEventArgs e)
         {
-            //todo change the path and sum up the total weight and total pack number and average weight
         }
 
         private void return_Click(object sender, RoutedEventArgs e)

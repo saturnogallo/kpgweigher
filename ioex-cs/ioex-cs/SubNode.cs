@@ -39,45 +39,168 @@ namespace ioex_cs
             get { return true; }
             set{}
         }
+        public UInt16 Amp { get; set; }
+        public UInt16 Freq { get; set; }
         internal VibrateNode(SPort _port,byte node_addr): base(_port,node_addr)
         {
 
         }
         public void FromElement(XElement cfgNode)
         {
-            //todo
+            Amp = UInt16.Parse(cfgNode.Element("Amplitude").Value);
+            Freq = UInt16.Parse(cfgNode.Element("Frequency").Value);
         }
         public void ToElement(XElement cfgNode)
         {
-            //todo
+            cfgNode.Add(new XElement("Amplitude", Amp.ToString()));
+            cfgNode.Add(new XElement("Frequency", Freq.ToString()));
         }
         public override void Action(string action, bool Wait)
         {
+            (Application.Current as App).bMainPause = true;
             base.Action(action, Wait);
-            if (action == "start")
+            (Application.Current as App).bMainPause = false;
+        }
+    }
+    internal class Intf
+    {
+        public UInt16 buf { get; set; }
+
+        public Intf(UInt16 ini_intf)
+        {
+            buf = ini_intf;
+        }
+        private UInt16 getbits(byte start, byte end) //get several bits based on bit position start from 0
+        {
+            UInt16 i = (UInt16)1;
+            UInt16 j = (UInt16)1;
+            while (start-- > end)
             {
-                //todo
+                j = (UInt16)(j * 2);
             }
-            if (action == "stop")
+            while (end-- > 0)
             {
-                //todo
+                i = (UInt16)(i * 2);
+            }
+            return (UInt16)((UInt16)(buf / i) - (UInt16)((UInt16)(buf / j) * j));
+        }
+        public bool b_Handshake
+        {
+            get
+            {
+                return (getbits(8, 7) == 1);
+            }
+            set
+            {
+                if (value)
+                {
+                    buf += 128;
+                }
+            }
+        }
+        public bool b_Hasmem
+        {
+            get
+            {
+                return (getbits(2, 1) == 1);
+            }
+            set
+            {
+                if (value)
+                {
+                    buf += 2;
+                }
+            }
+        }
+        public bool b_Hasdelay
+        {
+            get
+            {
+                return (getbits(3, 2) == 1);
+            }
+            set
+            {
+                if (value)
+                {
+                    buf += 4;
+                }
+            }
+        }
+        public UInt16 fmt_input
+        {
+            get { return getbits(7, 5); }
+            set
+            {
+                if (value < 4)
+                {
+                    buf += (UInt16)(value * 32);
+                }
+            }
+        }
+        public UInt16 fmt_output
+        {
+            get { return getbits(5, 3); }
+            set
+            {
+                if (value < 4)
+                {
+                    buf += (UInt16)(value * 8);
+                }
+            }
+        }
+        public UInt16 feed_times
+        {
+            get { return getbits(11, 8); }
+            set
+            {
+                if (value < 8)
+                {
+                    buf += (UInt16)(value * 256);
+                }
+            }
+        }
+        public UInt16 delay_length
+        {
+            get { return getbits(16, 11); }
+            set
+            {
+                if (value < 32)
+                {
+                    buf += (UInt16)(value * 2048);
+                }
             }
         }
     }
+        
     internal class BottomPackNode : SubNode
     {
+        public Intf intf_byte;
+        
         public UInt32 mode
         {
             get { return 0; }
             set {}
         }
+        
         public void FromElement(XElement cfgNode)
         {
-            //todo
+            intf_byte.b_Handshake = bool.Parse(cfgNode.Element("Handshake").Value);
+            intf_byte.b_Hasdelay = bool.Parse(cfgNode.Element("Hasdelay").Value);
+            intf_byte.b_Hasmem = bool.Parse(cfgNode.Element("Hasmem").Value);
+            intf_byte.delay_length = UInt16.Parse(cfgNode.Element("delay_length").Value);
+            intf_byte.feed_times = UInt16.Parse(cfgNode.Element("feed_times").Value);
+            intf_byte.fmt_input = UInt16.Parse(cfgNode.Element("fmt_input").Value);
+            intf_byte.fmt_output = UInt16.Parse(cfgNode.Element("fmt_output").Value);
         }
         public void ToElement(XElement cfgNode)
         {
-            //todo
+            cfgNode.Add(new XElement("Handshake", intf_byte.b_Handshake.ToString()));
+            cfgNode.Add(new XElement("Hasdelay", intf_byte.b_Hasdelay.ToString()));
+            cfgNode.Add(new XElement("Hasmem", intf_byte.b_Hasmem.ToString()));
+            cfgNode.Add(new XElement("delay_length", intf_byte.delay_length.ToString()));
+            cfgNode.Add(new XElement("feed_times", intf_byte.feed_times.ToString()));
+            cfgNode.Add(new XElement("fmt_input", intf_byte.fmt_input.ToString()));
+            cfgNode.Add(new XElement("fmt_output", intf_byte.fmt_output.ToString()));
         }
         public  void SetInterface() //composition of interface parameter
         {
@@ -95,11 +218,14 @@ namespace ioex_cs
         internal BottomPackNode(SPort _port, byte node_addr)
             : base(_port, node_addr)
         {
-
+            intf_byte = new Intf(0);
         }
         public override void Action(string action, bool Wait)
         {
+            (Application.Current as App).bMainPause = true;
             base.Action(action, Wait);
+            
+            (Application.Current as App).bMainPause = false;
         }
     }
     internal class WeighNode : SubNode
@@ -116,13 +242,8 @@ namespace ioex_cs
                 {
                     _weight = -1000000.0;
                 }
-                if (off > 1)
-                {
-                    off = 0;
-                }else{
-                    off = off + 0.1;
-                }
-                _weight = (double)(this["Mtrl_Weight_gram"].Value)+off;// +(double)this["Mtrl_Weight_decimal"].Value / (double)16.0; 
+                
+                _weight = (double)(this["Mtrl_Weight_gram"].Value) +(double)this["Mtrl_Weight_decimal"].Value / (double)16.0; 
 
             }
         }
@@ -133,10 +254,10 @@ namespace ioex_cs
         
         public void DoCalibration(byte slot, UInt32 weight)
         {
-            this["cs_mtrl"] = 0;
+            this["cs_mtrl"] = null;
             if (slot == 0) //zero point calibration
             {
-                this["cs_zero"] = this["cs_zero"];
+                this["cs_zero"] = this["cs_cs_mtrl"];
                 return;
             }else{
                 this["Poise_Weight_gram" + slot.ToString()] = weight;
@@ -145,48 +266,45 @@ namespace ioex_cs
         }
         public override void Action(string action, bool Wait)
         {
+            if (action == "loopquery") //query the weight and status
+            {
+                WaitForIdle();
+                status = NodeStatus.ST_BUSY;
+                read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal", "status" });
+                //read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal" });
+                WaitForIdle();
+                return;
+            }
+            (Application.Current as App).bMainPause = true;
             base.Action(action, Wait);
+            
             if (action == "query") //query the weight and status
             {
-                while (status == NodeStatus.ST_BUSY)
-                {
-                    Thread.Sleep(1);
-                }
                 status = NodeStatus.ST_BUSY;
-//                read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal", "status" });
-                read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal" });
-                while (status == NodeStatus.ST_BUSY)
-                {
-                    Thread.Sleep(1);
-                }
-                return;
+                read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal", "status" });
+                //read_regs(new string[] { "Mtrl_Weight_gram", "Mtrl_Weight_decimal" });
             }
             if (action == "zero")
             {
                 this["flag_enable"] = 7;
-                if (errmsg == "")
-                    WaitUntilGetValue("flag_enable", 0);
-
             }
-            if (action == "empty")
+            if (action == "empty" || action == "stop")
             {
                 this["flag_enable"] = 4;
-                if (errmsg == "")
-                    WaitUntilGetValue("flag_enable", 0);
             }
             if (action == "pass")
             {
+                
                 this["flag_enable"] = 3;
-                if (errmsg == "")
-                    WaitUntilGetValue("flag_enable", 0);
 
             }
             if (action == "fill")
             {
                 this["flag_enable"] = 5;
-                if (errmsg == "")
-                    WaitUntilGetValue("flag_enable", 0);
             }
+            WaitForIdle();
+            (Application.Current as App).bMainPause = false;
+            return;
         }
         internal WeighNode(SPort _port, byte node_addr)
             : base(_port,node_addr)
@@ -309,7 +427,7 @@ namespace ioex_cs
         }
         
     }
-    internal class SubNode : Object
+    internal abstract class SubNode : Object
     {
 
         private static Dictionary<string, RegType> reg_type_tbl; //table to map the reg name to details, should be loaded from xml file setting
@@ -463,7 +581,7 @@ namespace ioex_cs
                     outptr = outptr+4;
                 }
             }
-            ofrm.generate_write_frame(outbuffer,regbuffer,valbuffer,0,(byte)(outptr/2));
+            ofrm.generate_write_frame(outbuffer,regbuffer,valbuffer,0,(byte)(outptr));
             port.AddCommand(outbuffer);
         }
         public Nullable<UInt32> this[byte reg_id]    //get/set the reg_value
@@ -477,7 +595,7 @@ namespace ioex_cs
         }
         public Nullable<UInt32> this[string reg_name]   //get/set the reg_value
         {
-            get { 
+            get {
                 return curr_conf[reg_name]; 
             }
             set {
@@ -503,7 +621,13 @@ namespace ioex_cs
                     if (reg_type_tbl[reg_name].rw != 'r')
                     {
                         write_regs(new string[] { reg_name }, new UInt32[] { value.Value });
+                        if (reg_type_tbl[reg_name].rw == 'v') //volatile value
+                        {
+                            status = NodeStatus.ST_IDLE;
+                            return;
+                        }
                     }
+                    
                 }
                 if (reg_type_tbl[reg_name].rw != 'w')
                 {
@@ -551,7 +675,7 @@ namespace ioex_cs
                     outptr = outptr + 4;
                 }
             }
-            ofrm.generate_read_frame(outbuffer, regbuffer, 0, (byte)((outptr+1) / 2));
+            ofrm.generate_read_frame(outbuffer, regbuffer, 0, (byte)(outptr));
             port.AddCommand(outbuffer);
         }
  
@@ -571,6 +695,8 @@ namespace ioex_cs
         public void LoadCurrentConfig(string cfgname)
         {
             XElement cfgNode = all_conf.LoadConfig(cfgname);
+            ////todo: load the default setting and download them
+            return;
             foreach (string reg in curr_conf.Keys)
             {
                 curr_conf[reg] = UInt32.Parse(cfgNode.Element(reg).Value);
@@ -644,8 +770,19 @@ namespace ioex_cs
 
 #endregion
         }
+        protected void WaitForIdle()
+        {
+            while (status == NodeStatus.ST_BUSY)
+            {
+                Thread.Sleep(1);
+            }
+
+        }
+
         protected void WaitUntilGetValue(string regname, UInt32 value)
         {
+            Thread.Sleep(100);
+            
             while(true)
             {
                 if ((this[regname].HasValue && this[regname].Value == value))
@@ -653,11 +790,12 @@ namespace ioex_cs
                     return;
                 }
                 this[regname] = null;
+                status = NodeStatus.ST_IDLE;
                 if (errmsg != "")
                 {
-                    return;
+                    status = NodeStatus.ST_IDLE;
                 }
-                Thread.Sleep(1);
+                Thread.Sleep(100);
             }
         }
         public void init_load_regs()  //load the initial reg value
@@ -673,14 +811,21 @@ namespace ioex_cs
         }
         public virtual void Action(string action, bool Wait)  // empty, pass, fill, flash, zero, query
         {
-	        if (action == "stop")
+            if (status == NodeStatus.ST_LOST)
+                return;
+            WaitForIdle();
+            if (action == "stop")
             {
+                status = NodeStatus.ST_IDLE;
                 this["flag_enable"] = 0;
+                Thread.Sleep(100);
             }  
 
             if (action == "start")
             {
+                status = NodeStatus.ST_RUNNING;
                 this["flag_enable"] = 1;
+                Thread.Sleep(100);
             }  
             if (action == "flash")
             {
@@ -689,6 +834,7 @@ namespace ioex_cs
                 if (errmsg == "")
                     WaitUntilGetValue("NumOfDataToBePgmed", 0);
             }
+            WaitForIdle();
         }
     }
 }

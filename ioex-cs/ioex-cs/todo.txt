@@ -1,0 +1,6 @@
+1. when boot up, stop all the nodes
+2. border and color painting when mouse over or select.
+3. product_no selection on bootup.
+4. store the last run configuration.
+5. update the display of release. 
+6. add node id icon in single mode.

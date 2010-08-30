@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Root current="01">
+  <Item Name="01">
+    <target>100.0</target>
+    <upper_var>10</upper_var>
+    <lower_var>10</lower_var>
+    <product_no>01</product_no>
+    <product_desc>2</product_desc>
+    <Handshake>true</Handshake>
+    <Hasdelay>true</Hasdelay>
+    <Hasmem>false</Hasmem>
+    <delay_length>1</delay_length>
+    <feed_times>1</feed_times>
+    <fmt_input>1</fmt_input>
+    <fmt_output>1</fmt_output>
+    <Amplitude>1</Amplitude>
+    <Frequency>1</Frequency>
+  </Item>
+</Root>
+

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-
+using System.Windows;
 namespace ioex_cs
 {
     enum PackerStatus : byte
@@ -39,29 +39,13 @@ namespace ioex_cs
             cfgNode.Add(new XElement("target", target.ToString()));
             cfgNode.Add(new XElement("upper_var", upper_var.ToString()));
             cfgNode.Add(new XElement("lower_var", lower_var.ToString()));
-            cfgNode.Add(new XElement("product_no", target));
-            cfgNode.Add(new XElement("product_desc", target));
+            cfgNode.Add(new XElement("product_no", product_no.ToString()));
+            cfgNode.Add(new XElement("product_desc", product_desc.ToString()));
         }
 
     }
 
-    public class onepack
-    {
-        public double weight { get; set; }
-        public char bucket1 { get; set; }
-        public char bucket2 { get; set; }
-        public char bucket3 { get; set; }
-        public char bucket4 { get; set; }
-        public char bucket5 { get; set; }
-        public onepack(double w, char b1, char b2, char b3, char b4, char b5)
-        {
-            weight = w; bucket1 = b1; bucket2 = b2; bucket3 = b3; bucket4 = b4; bucket5 = b5;
-        }
-        public onepack()
-        {
-
-        }
-    }
+    
     class Packer
     {
         public int curr_node { get; set; } //for single mode , curr_node means the index of last selected weight node.
@@ -71,6 +55,7 @@ namespace ioex_cs
         public BottomPackNode pack_node;  //bottom pack node list
         private XmlConfig all_conf;//store all the configurations of the packer
         private PackerConfig sys_cfg;
+        public PackerConfig curr_cfg { get {return sys_cfg;} }
         static string pack_define_file = "pack_define.xml";
 
         public PackerStatus status { get; set; } //status of running
@@ -81,6 +66,7 @@ namespace ioex_cs
             pack_node = null;
             weight_node = new List<WeighNode>();
             all_conf = new XmlConfig(pack_define_file);
+            all_conf.LoadConfigFromFile();
             sys_cfg = new PackerConfig();
             curr_node = -1;
             status = PackerStatus.IDLE;
@@ -108,30 +94,43 @@ namespace ioex_cs
             {
                 n.LoadCurrentConfig(cfgname);
             }
+            XElement cfgNode = all_conf.LoadConfig(cfgname);
             vib_node.LoadCurrentConfig(cfgname);
-            pack_node.LoadCurrentConfig(cfgname);
+            
             
             //load the configuration of packer settings
-            XElement cfgNode = all_conf.LoadConfig(cfgname);
+     
 
             sys_cfg.FromElement(cfgNode);
             vib_node.FromElement(cfgNode);
-            pack_node.FromElement(cfgNode);
+            if (pack_node is BottomPackNode)
+            {
+                pack_node.FromElement(cfgNode);
+                pack_node.LoadCurrentConfig(cfgname);
+            }
         }
         //convert the current configuration into an XElement node
-        private void SaveCurrentConfig()
+        public void SaveCurrentConfig()
         {
             XElement cfgNode = new XElement("Item");
             sys_cfg.ToElement(cfgNode);
             vib_node.ToElement(cfgNode);
-            pack_node.ToElement(cfgNode);
+            if (pack_node is BottomPackNode)
+            {
+                pack_node.ToElement(cfgNode);
+            }
             all_conf.AddConfig(all_conf.cfg_name, cfgNode);
             all_conf.SaveConfigToFile();
         }
 
         public void DuplicateCurrentConfig(string newcfg)
         {
+            if (newcfg == "")
+            {
+                newcfg = (all_conf.Keys.Count() + 1).ToString();
+            }
             //add new configuration
+
             foreach (WeighNode n in this.weight_node)
             {
                 n.DuplicateCurrentConfig(newcfg);
@@ -147,6 +146,7 @@ namespace ioex_cs
             all_conf.AddConfig(newcfg, cfgNode);
             all_conf.SaveConfigToFile();
             this.LoadConfig(newcfg);    
+            
         }
         private void DoRelease(SubNode[] addrs, double weight)
         {
@@ -154,11 +154,24 @@ namespace ioex_cs
             {
                 n.Action("release",false);
             }
-            //check the bSimulate
-            //todo add record to datalog.xml
+            //todo update the display;
+
+            onepack o = new onepack();
+            o.bucket = new byte[5];
+            o.bucket[1] = o.bucket[2] = o.bucket[3] = o.bucket[4] = o.bucket[0] = (byte)0;
+            int i = 0;
+            foreach (SubNode n in addrs)
+            {
+                o.bucket[i++] = (byte)n["addr"].Value;
+                o.time = DateTime.Now;
+            }
+
+            o.weight = weight;
+            ProdHistory.AddNewPack(o,(Application.Current as App).bSimulate);
+            
         }
         //one bucket combination
-        private void Caculation1()
+        private bool Caculation1()
         {
             double sum = 0;
             double uvar = sys_cfg.target + sys_cfg.upper_var;
@@ -172,10 +185,12 @@ namespace ioex_cs
                 if(sum > uvar && sum < dvar)
                 {
                     DoRelease(new SubNode[] { weight_node[i] }, sum);
+                    return true;
                 }
             }
+            return false;
         }
-        private void Caculation2()
+        private bool Caculation2()
         {
             double sum = 0;
             double uvar = sys_cfg.target + sys_cfg.upper_var;
@@ -193,11 +208,13 @@ namespace ioex_cs
                     if (sum > uvar && sum < dvar)
                     {
                         DoRelease(new SubNode[] { weight_node[i], weight_node[j]}, sum);
+                        return true;
                     }
                 }
             }
+            return false;
         }
-        private void Caculation3()
+        private bool Caculation3()
         {
             double sum = 0;
             double uvar = sys_cfg.target + sys_cfg.upper_var;
@@ -220,12 +237,14 @@ namespace ioex_cs
                         if (sum > uvar && sum < dvar)
                         {
                             DoRelease(new SubNode[] { weight_node[i], weight_node[j], weight_node[k] }, sum);
+                            return true;
                         }
                     }
                 }
             }
+            return false;
         }
-        private void Caculation4()
+        private bool Caculation4()
         {
             double sum = 0;
             double uvar = sys_cfg.target + sys_cfg.upper_var;
@@ -252,13 +271,15 @@ namespace ioex_cs
                             if (sum > uvar && sum < dvar)
                             {
                                 DoRelease(new SubNode[] { weight_node[i], weight_node[j], weight_node[k], weight_node[l] }, sum);
+                                return true;
                             }
                         }
                     }
                 }
             }
+            return false;
         }
-        private void Caculation5()
+        private bool Caculation5()
         {
             double sum = 0;
             double uvar = sys_cfg.target + sys_cfg.upper_var;
@@ -290,28 +311,60 @@ namespace ioex_cs
                                 if (sum > uvar && sum < dvar)
                                 {
                                     DoRelease(new SubNode[] { weight_node[i], weight_node[j], weight_node[k], weight_node[l], weight_node[m] }, sum);
+                                    return true;
                                 }
                             }
                         }
                     }
                 }
             }
+            return false;
         }
 
         public void CheckCombination()
         {
-            //todo
+            while (Caculation5()) ;
+            while (Caculation4()) ;
+            while (Caculation3()) ;
+            while (Caculation2()) ;
+            while (Caculation1()) ;
+            
+            for (int i = 0; i < weight_node.Count; i++ )
+            {
+                if (weight_node[i].status == NodeStatus.ST_LOST)
+                    continue;
+                //todo check force release and over_weight case
+                weight_node[i]["flag_goon"] = 1;
+                if (weight_node[i]["flag_goon"] != 1)
+                {
+                    weight_node[i]["flag_goon"] = 1;
+                }
+            }
         }
         
         public void StartRun()
         {
             vib_node.Action("start",false);
+            foreach (WeighNode n in this.weight_node)
+            {
+                if (n.status != NodeStatus.ST_LOST)
+                {
+                    n.Action("start", true);
+                }
+            }
             status = PackerStatus.RUNNING;
         }
         public void StopRun()
         {
             status = PackerStatus.IDLE;
             vib_node.Action("stop",false);
+            foreach (WeighNode n in this.weight_node)
+            {
+                if (n.status != NodeStatus.ST_LOST)
+                {
+                    n.Action("stop", true);
+                }
+            }
         }
 
        

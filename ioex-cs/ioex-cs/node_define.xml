@@ -22,268 +22,291 @@
     <update>i</update>
   </reg>
   <reg>
+    <size>8</size>
+    <name>align1</name>
+    <offset>3</offset>
+    <rw>r</rw>
+    <update>i</update>
+  </reg>
+  
+  <reg>
     <size>16</size>
     <name>Poise_Weight_gram0</name>
-    <offset>3</offset>
+    <offset>4</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>Poise_Weight_gram1</name>
-    <offset>5</offset>
+    <offset>6</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>Poise_Weight_gram2</name>
-    <offset>7</offset>
+    <offset>8</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>Poise_Weight_gram3</name>
-    <offset>9</offset>
+    <offset>10</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>Poise_Weight_gram4</name>
-    <offset>11</offset>
+    <offset>12</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_poise0</name>
-    <offset>13</offset>
+    <offset>14</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_poise1</name>
-    <offset>15</offset>
+    <offset>16</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_poise2</name>
-    <offset>17</offset>
+    <offset>18</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_poise3</name>
-    <offset>19</offset>
+    <offset>20</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_poise4</name>
-    <offset>21</offset>
+    <offset>22</offset>
     <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_zero</name>
-    <offset>23</offset>
+    <offset>24</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>target_weight</name>
-    <offset>25</offset>
+    <offset>26</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>8</size>
     <name>addr_copy1</name>
-    <offset>27</offset>
-    <rw>r</rw>
-    <update>i</update>
-  </reg>
-  <reg>
-    <size>8</size>
-    <name>board_copy1</name>
     <offset>28</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>cs_filter_option</name>
+    <name>board_copy1</name>
     <offset>29</offset>
-    <rw>b</rw>
-    <update>s</update>
+    <rw>r</rw>
+    <update>i</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>cs_gain_wordrate</name>
+    <name>cs_filter_option</name>
     <offset>30</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>motor_speed</name>
+    <name>cs_gain_wordrate</name>
     <offset>31</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>magnet_freq</name>
+    <name>motor_speed</name>
     <offset>32</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>magnet_amp</name>
+    <name>magnet_freq</name>
     <offset>33</offset>
+    <rw>b</rw>
+    <update>s</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>magnet_amp</name>
+    <offset>34</offset>
+    <rw>b</rw>
+    <update>s</update>
+    </reg>
+  <reg>
+    <size>8</size>
+    <name>align2</name>
+    <offset>35</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>16</size>
     <name>magnet_time</name>
-    <offset>34</offset>
-    <rw>b</rw>
-    <update>s</update>
-  </reg>
-  <reg>
-    <size>8</size>
-    <name>delay_f</name>
     <offset>36</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>delay_w</name>
-    <offset>37</offset>
-    <rw>b</rw>
-    <update>s</update>
-  </reg>
-  <reg>
-    <size>8</size>
-    <name>delay_s</name>
+    <name>delay_f</name>
     <offset>38</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>open_s</name>
+    <name>delay_w</name>
     <offset>39</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>open_w</name>
+    <name>delay_s</name>
     <offset>40</offset>
     <rw>b</rw>
     <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>check_sum</name>
+    <name>open_s</name>
     <offset>41</offset>
-    <rw>r</rw>
-    <update>i</update>
+    <rw>b</rw>
+    <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>rom_para_valid</name>
+    <name>open_w</name>
     <offset>42</offset>
-    <rw>r</rw>
-    <update>i</update>
+    <rw>b</rw>
+    <update>s</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>addr_copy2</name>
+    <name>check_sum</name>
     <offset>43</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>board_copy2</name>
+    <name>rom_para_valid</name>
     <offset>44</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
+    <size>8</size>
+    <name>addr_copy2</name>
+    <offset>45</offset>
+    <rw>r</rw>
+    <update>i</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>board_copy2</name>
+    <offset>46</offset>
+    <rw>r</rw>
+    <update>i</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>align3</name>
+    <offset>47</offset>
+    <rw>r</rw>
+    <update>i</update>
+  </reg>
+  
+  <reg>
     <size>16</size>
     <name>cs_mtrl</name>
-    <offset>45</offset>
+    <offset>48</offset>
     <rw>r</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>16</size>
     <name>Mtrl_Weight_gram</name>
-    <offset>47</offset>
-    <rw>r</rw>
-    <update>p</update>
-  </reg>
-  <reg>
-    <size>8</size>
-    <name>Mtrl_Weight_decimal</name>
-    <offset>49</offset>
-    <rw>r</rw>
-    <update>p</update>
-  </reg>
-  <reg>
-    <size>8</size>
-    <name>status</name>
     <offset>50</offset>
     <rw>r</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>8</size>
+    <name>Mtrl_Weight_decimal</name>
+    <offset>52</offset>
+    <rw>r</rw>
+    <update>p</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>status</name>
+    <offset>53</offset>
+    <rw>r</rw>
+    <update>p</update>
+  </reg>
+  <reg>
+    <size>8</size>
     <name>cs_status</name>
-    <offset>51</offset>
+    <offset>54</offset>
     <rw>r</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>8</size>
     <name>hw_status</name>
-    <offset>52</offset>
+    <offset>55</offset>
     <rw>r</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_sys_gain_cal_data_uw</name>
-    <offset>53</offset>
+    <offset>56</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_sys_gain_cal_data_lw</name>
-    <offset>55</offset>
+    <offset>58</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>cs_sys_offset_cal_data_uw</name>
-    <offset>57</offset>
+    <offset>60</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
@@ -291,98 +314,113 @@
   <reg>
     <size>16</size>
     <name>cs_sys_offset_cal_data_lw</name>
-    <offset>59</offset>
+    <offset>62</offset>
     <rw>i</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>old_cs_zero</name>
-    <offset>61</offset>
+    <offset>64</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>8</size>
     <name>NumOfDataToBePgmed</name>
-    <offset>63</offset>
-    <rw>v</rw>
-    <update>a</update>
-  </reg>
-  <reg>
-    <size>8</size>
-    <name>flag_reset</name>
-    <offset>64</offset>
-    <rw>v</rw>
-    <update>a</update>
-  </reg>
-  <reg>
-    <size>8</size>
-    <name>flag_enable</name>
-    <offset>65</offset>
-    <rw>v</rw>
-    <update>a</update>
-  </reg>
-  <reg>
-    <size>8</size>
-    <name>flag_disable</name>
     <offset>66</offset>
     <rw>v</rw>
     <update>a</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>flag_release</name>
+    <name>flag_reset</name>
     <offset>67</offset>
     <rw>v</rw>
     <update>a</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>flag_goon</name>
+    <name>flag_enable</name>
     <offset>68</offset>
     <rw>v</rw>
     <update>a</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>test_mode_reg1</name>
+    <name>flag_disable</name>
     <offset>69</offset>
     <rw>v</rw>
     <update>a</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>test_mode_reg2</name>
+    <name>flag_release</name>
     <offset>70</offset>
     <rw>v</rw>
     <update>a</update>
   </reg>
   <reg>
     <size>8</size>
-    <name>mode</name>
+    <name>flag_goon</name>
     <offset>71</offset>
+    <rw>v</rw>
+    <update>a</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>test_mode_reg1</name>
+    <offset>72</offset>
+    <rw>v</rw>
+    <update>a</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>test_mode_reg2</name>
+    <offset>73</offset>
+    <rw>v</rw>
+    <update>a</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>mode</name>
+    <offset>74</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>8</size>
     <name>phase</name>
-    <offset>72</offset>
+    <offset>75</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>8</size>
     <name>pulse_num</name>
-    <offset>73</offset>
+    <offset>76</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
+    <size>8</size>
+    <name>align4</name>
+    <offset>77</offset>
+    <rw>r</rw>
+    <update>i</update>
+  </reg>  
+  <reg>
+    <size>16</size>
+    <name>align5</name>
+    <offset>78</offset>
+    <rw>r</rw>
+    <update>i</update>
+  </reg>  
+
+  <reg>
     <size>16</size>
     <name>pulse_num_uw</name>
-    <offset>74</offset>
+    <offset>80</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
@@ -390,14 +428,14 @@
   <reg>
     <size>16</size>
     <name>pulse_num_lw</name>
-    <offset>76</offset>
+    <offset>82</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
     <size>16</size>
     <name>half_period</name>
-    <offset>78</offset>
+    <offset>84</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>

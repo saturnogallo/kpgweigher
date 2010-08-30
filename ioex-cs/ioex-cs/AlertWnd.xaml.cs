@@ -26,7 +26,7 @@ namespace ioex_cs
         private void button1_Click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
-            p.SwitchTo("ConfigMenu");
+            p.SwitchTo("configmenu");
         }
     }
 }

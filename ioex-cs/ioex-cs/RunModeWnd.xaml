@@ -236,7 +236,7 @@
 
         <ControlTemplate x:Key="WeightBar" TargetType="{x:Type Button}">
             <Canvas>
-                <Path Stroke="DarkGray" StrokeThickness="2" Fill="Blue" Name="weiboard">
+                <Path Stroke="DarkGray" StrokeThickness="2" Fill="Blue" Name="BarPath">
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
@@ -253,7 +253,7 @@
             </Canvas>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver"  Value = "True">
-                    <Setter TargetName="weiboard" Property = "Fill" Value = "Blue"/>
+                    <Setter TargetName="BarPath" Property = "Fill" Value = "Blue"/>
                 </Trigger>
             </ControlTemplate.Triggers>
 
@@ -546,7 +546,7 @@
         <Label Canvas.Left="917.5" Canvas.Top="127" Content="0.1" Height="35" Name="input_uvar" Style="{StaticResource LabelStyle1}" Width="84.5" Foreground="Black" />
         <Label Canvas.Left="917.5" Canvas.Top="161" Content="0.1" Height="33" Name="input_dvar" Style="{StaticResource LabelStyle1}" Width="84.5" />
 
-        <Button Template="{StaticResource cfgBtn}" Canvas.Left="650" Canvas.Top="337" Height="122" Name="btn_config" Width="159" FontSize="36" Foreground="LightGray" VerticalAlignment="Bottom" Content="{DynamicResource config}" />
+        <Button Template="{StaticResource cfgBtn}" Click="btn_singlemode_click" Canvas.Left="650" Canvas.Top="337" Height="184" Name="btn_config" Width="183" FontSize="36" Foreground="LightGray" VerticalAlignment="Bottom" Content="{DynamicResource config}" />
         <Button Template="{StaticResource RectBtn}" Canvas.Left="666" Canvas.Top="21.2" Height="62.8" Name="prd_no" Width="159" FontSize="36" Foreground="LightGray" VerticalAlignment="Bottom" Content="01" />
 
         <Rectangle x:Name="ellipseWithImageBrush" Stroke="Black" StrokeThickness="4" Height="77" Width="147" Canvas.Left="828" Canvas.Top="20">

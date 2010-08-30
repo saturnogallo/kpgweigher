@@ -63,6 +63,7 @@ namespace ioex_cs
         private void btn_return_Click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
+            this.Hide();
             p.SwitchTo("runmode");
         }
     }

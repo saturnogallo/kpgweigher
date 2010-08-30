@@ -15,11 +15,13 @@ using System.IO;
 
 namespace ioex_cs
 {
+    public delegate void ProdClickHandler(string data);
     /// <summary>
     /// Interaction logic for ProdWnd.xaml
     /// </summary>
     public partial class ProdWnd : Window
     {
+        public ProdClickHandler phandler;
         public ProdWnd()
         {
             InitializeComponent();
@@ -44,9 +46,19 @@ namespace ioex_cs
             
         }
         private Dictionary<string, string> imglist;
+        public void Init(ProdClickHandler h)
+        {
+            this.phandler = h;
+            this.Show();
+        }
         private void ImageSelected(object sender, EventArgs arg)
         {
-            MessageBox.Show((sender as Button).Name);
+            if (phandler is ProdClickHandler)
+            {
+                phandler((sender as Button).Name.Remove(0,2));
+            }
+            this.Hide();
+
         }
     }
 }
