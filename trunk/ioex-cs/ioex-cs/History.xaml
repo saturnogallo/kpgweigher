@@ -14,21 +14,9 @@
         </Grid.RowDefinitions>
         <!-- Use the XmlDataProvider-->
         <Grid.Resources>
-            <XmlDataProvider x:Key="BucketXmlDoc" Source="C:\\Debug\\datalog.xml"/>
+            
         </Grid.Resources>
-        <!-- Now, build a grid of data, mapping attributes/elements to columns
-using XPath expressions -->
-        <ListView Name="lstBuckets" Grid.Row="2" ItemsSource="{Binding Source={StaticResource BucketXmlDoc}, XPath=/Items/Item}" Margin="0,26,0,0">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Width="100" Header="start"  DisplayMemberBinding="{Binding XPath=start}"/>
-                    <GridViewColumn Width="100" Header="end"  DisplayMemberBinding="{Binding XPath=end}"/>
-                    <GridViewColumn Width="100" Header="type"  DisplayMemberBinding="{Binding XPath=type}"/>
-                    <GridViewColumn Width="100" Header="weight"  DisplayMemberBinding="{Binding XPath=weight}"/>
-                    <GridViewColumn Width="100" Header="packnum"  DisplayMemberBinding="{Binding XPath=packnum}"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        
         <Label HorizontalAlignment="Left" Margin="4,8,0,0" FontSize="24" Name="label1" Width="128" Content="{DynamicResource start_date}"/>
         <wfi:WindowsFormsHost HorizontalAlignment="Left" Margin="134,0,0,0" x:Name="startdateHost" Width="200">
             <wf:DateTimePicker Name="start_date"></wf:DateTimePicker>

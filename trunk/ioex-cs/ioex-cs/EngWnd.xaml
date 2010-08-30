@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ioex_cs.EngConfigWnd"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="EngConfigWnd" Height="300" Width="300" Topmost="True" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+    Title="EngConfigWnd" Height="303" Width="300" Topmost="True" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
     <Window.Resources>
         <Style x:Key ="ButtonStyle" TargetType = "{x:Type Button}">
             <Setter Property = "Foreground" Value = "Black"/>
@@ -69,9 +69,22 @@
     </Window.Resources>
     <Grid>
         <Button Style="{StaticResource ButtonStyle}" Name="btn_modify" Height="33" VerticalAlignment="Bottom" Margin="87,0,91,12" Content="{DynamicResource modify_password}" Click="btn_modify_Click" />
-        <TextBox Margin="0,131,41,101" MaxLength="50" Name="gain_input" HorizontalAlignment="Right" Width="82" />
-        <Label Content="{DynamicResource gain}" Margin="28,131,128,105" Name="gain_label" />
-        <TextBox Height="30" Margin="0,0,41,65" MaxLength="50" Name="cs_filter_input" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="82" />
-        <Label Content="{DynamicResource cs_filter}" Height="26" Margin="28,0,128,69" Name="cs_filter_label" VerticalAlignment="Bottom" />
+        <TextBox Margin="0,60,31,0" GotFocus="gain_input_GotFocus" MaxLength="50" Name="gain_input" HorizontalAlignment="Right" Width="92" Height="33" VerticalAlignment="Top" />
+        <Label Content="{DynamicResource gain}" Margin="28,64,128,0" Name="gain_label" Height="29" VerticalAlignment="Top" />
+        <TextBox Margin="0,103,31,132" GotFocus="cs_filter_input_GotFocus" MaxLength="50" Name="cs_filter_input" HorizontalAlignment="Right" Width="92" />
+        <Label Content="{DynamicResource cs_filter}" Height="26" Margin="28,103,128,0" Name="cs_filter_label" VerticalAlignment="Top" />
+        <ComboBox Height="31" HorizontalAlignment="Right" Margin="0,16,31,0" Name="address" SelectionChanged="address_SelectionChanged" VerticalAlignment="Top" Width="92">
+            <ComboBoxItem>1</ComboBoxItem>
+            <ComboBoxItem>2</ComboBoxItem>
+            <ComboBoxItem>3</ComboBoxItem>
+            <ComboBoxItem>4</ComboBoxItem>
+            <ComboBoxItem>5</ComboBoxItem>
+            <ComboBoxItem>6</ComboBoxItem>
+            <ComboBoxItem>7</ComboBoxItem>
+            <ComboBoxItem>8</ComboBoxItem>
+            <ComboBoxItem>9</ComboBoxItem>
+            <ComboBoxItem>10</ComboBoxItem>
+        </ComboBox>
+        <Label Content="{DynamicResource address}" Height="29" Margin="28,18,128,0" Name="label1" VerticalAlignment="Top" />
     </Grid>
 </Window>

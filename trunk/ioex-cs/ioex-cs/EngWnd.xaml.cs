@@ -21,23 +21,55 @@ namespace ioex_cs
         public EngConfigWnd()
         {
             InitializeComponent();
+            
         }
+        public void UpdateDisplay()
+        {
+            App p = (Application.Current as App);
+            cs_filter_input.Text = p.curr_packer.weight_node[address.SelectedIndex]["cs_filter"].ToString();
+            gain_input.Text = p.curr_packer.weight_node[address.SelectedIndex]["gain"].ToString();
 
+        }
         private void button1_Click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
             p.SwitchTo("ConfigMenu");
-
-        }
-
-        private void button1_Click_1(object sender, RoutedEventArgs e)
-        {
-
         }
 
         private void btn_modify_Click(object sender, RoutedEventArgs e)
         {
+            App p = (Application.Current as App);
+            p.curr_packer.weight_node[address.SelectedIndex]["cs_filter"] = UInt32.Parse(cs_filter_input.Text);
+            p.curr_packer.weight_node[address.SelectedIndex]["gain"] = UInt32.Parse(gain_input.Text);
+        }
+        private void node_reg(string regname)
+        {
+            (Application.Current as App).kbdwnd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
+        }
+        private void gain_input_GotFocus(object sender, RoutedEventArgs e)
+        {
+            node_reg("gain");
+        }
 
+        private void cs_filter_input_GotFocus(object sender, RoutedEventArgs e)
+        {
+            node_reg("cs_filter");
+        }
+        public void KbdData(string param, string data)
+        {
+            if (param == "cs_filter")
+            {
+                this.cs_filter_input.Text = data;
+            }
+            if (param == "gain")
+            {
+                gain_input.Text = data;
+            }
+        }
+
+        private void address_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            UpdateDisplay();
         }
     }
 }

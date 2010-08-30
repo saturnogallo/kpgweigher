@@ -76,6 +76,7 @@
     <s:String x:Key="wei_dtime">送料前延时</s:String>
     <s:String x:Key="motor_speed">开关马达速度</s:String>
 
+    <s:String x:Key="address">节点地址</s:String>
     <s:String x:Key="subcfg_apply">应用设置</s:String>
     <s:String x:Key="subcfg_applyall">应用到同组其他斗</s:String>
     <s:String x:Key="cmd_pass">下料</s:String>

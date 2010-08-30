@@ -310,7 +310,7 @@
 
         <ControlTemplate x:Key="WeightBar" TargetType="{x:Type Button}">
             <Canvas>
-                <Path Stroke="DarkGray" StrokeThickness="2" Fill="Blue" Name="weiboard">
+                <Path Stroke="DarkGray" StrokeThickness="2" Fill="Blue" x:Name="BarPath">
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
@@ -327,7 +327,7 @@
             </Canvas>
             <ControlTemplate.Triggers>
                 <Trigger Property="IsMouseOver"  Value = "True">
-                    <Setter TargetName="weiboard" Property = "Fill" Value = "Blue"/>
+                    <Setter TargetName="BarPath" Property = "Fill" Value = "Blue"/>
                 </Trigger>
             </ControlTemplate.Triggers>
 
@@ -374,152 +374,152 @@
         <Button Canvas.Left="22" Canvas.Top="572" Click="btn_action_Click" Content="{DynamicResource cmd_pass}" Height="30" Name="btn_pass" Style="{StaticResource ButtonStyle}" Width="100" />
         <Button Canvas.Left="22" Canvas.Top="518" Click="btn_action_Click" Content="{DynamicResource cmd_fill}" Height="30" Name="btn_fill" Style="{StaticResource ButtonStyle}" Width="100" />
         <Label Background="#FFEEF2FB" Canvas.Left="619.752" Canvas.Top="0" Content="{DynamicResource bucketsetting}" FontSize="24" Height="38" Name="label12" Width="176" />
-        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Name="bucket1" Template="{StaticResource WeightBar}" Width="46">
+        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Click="weibucket_Click" Name="bucket1" Template="{StaticResource WeightBar}" Width="46">
             <Button.RenderTransform>
                 <RotateTransform Angle="18" />
             </Button.RenderTransform> 1
         </Button>
-        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Name="bucket2" Template="{StaticResource WeightBar}" Width="96">
+        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Click="weibucket_Click" Name="bucket2" Template="{StaticResource WeightBar}" Width="96">
             <Button.RenderTransform>
                 <RotateTransform Angle="54" />
             </Button.RenderTransform> 2
         </Button>
-        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0" Name="bucket3" Template="{StaticResource WeightBar}" Width="104">
+        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0"  Click="weibucket_Click" Name="bucket3" Template="{StaticResource WeightBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="90" />
             </Button.RenderTransform> 3
         </Button>
-        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Name="bucket4" Template="{StaticResource WeightBar}" Width="36">
+        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="weibucket_Click" Name="bucket4" Template="{StaticResource WeightBar}" Width="36">
             <Button.RenderTransform>
                 <RotateTransform Angle="126" />
             </Button.RenderTransform> 4
         </Button>
-        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Name="bucket5" Template="{StaticResource WeightBar}" Width="72">
+        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="weibucket_Click" Name="bucket5" Template="{StaticResource WeightBar}" Width="72">
             <Button.RenderTransform>
                 <RotateTransform Angle="162" />
             </Button.RenderTransform> 5
         </Button>
-        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Name="bucket6" Template="{StaticResource WeightBar}" Width="0">
+        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="weibucket_Click" Name="bucket6" Template="{StaticResource WeightBar}" Width="0">
             <Button.RenderTransform>
                 <RotateTransform Angle="198" />
             </Button.RenderTransform> 6
         </Button>
-        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Name="bucket7" Template="{StaticResource WeightBar}" Width="30">
+        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="weibucket_Click" Name="bucket7" Template="{StaticResource WeightBar}" Width="30">
             <Button.RenderTransform>
                 <RotateTransform Angle="234" />
             </Button.RenderTransform> 7
         </Button>
-        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Name="bucket8" Template="{StaticResource WeightBar}" Width="74">
+        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="weibucket_Click" Name="bucket8" Template="{StaticResource WeightBar}" Width="74">
             <Button.RenderTransform>
                 <RotateTransform Angle="270" />
             </Button.RenderTransform> 8
         </Button>
-        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Name="bucket9" Template="{StaticResource WeightBar}" Width="114">
+        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="weibucket_Click" Name="bucket9" Template="{StaticResource WeightBar}" Width="114">
             <Button.RenderTransform>
                 <RotateTransform Angle="306" />
             </Button.RenderTransform> 9
         </Button>
-        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Name="bucket10" Template="{StaticResource WeightBar}" Width="104">
+        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="weibucket_Click" Name="bucket10" Template="{StaticResource WeightBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="342" />
             </Button.RenderTransform> 10
         </Button>
-        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Name="vib1" Template="{StaticResource VibBar}" Width="46">
+        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Click="vibbucket_Click" Name="vib1" Template="{StaticResource VibBar}" Width="46">
             <Button.RenderTransform>
                 <RotateTransform Angle="18" />
             </Button.RenderTransform> 1
         </Button>
-        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Name="vib2" Template="{StaticResource VibBar}" Width="96">
+        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Click="vibbucket_Click" Name="vib2" Template="{StaticResource VibBar}" Width="96">
             <Button.RenderTransform>
                 <RotateTransform Angle="54" />
             </Button.RenderTransform> 2
         </Button>
-        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0" Name="vib3" Template="{StaticResource VibBar}" Width="104">
+        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0" Click="vibbucket_Click" Name="vib3" Template="{StaticResource VibBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="90" />
             </Button.RenderTransform> 3
         </Button>
-        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Name="vib4" Template="{StaticResource VibBar}" Width="36">
+        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="vibbucket_Click" Name="vib4" Template="{StaticResource VibBar}" Width="36">
             <Button.RenderTransform>
                 <RotateTransform Angle="126" />
             </Button.RenderTransform> 4
         </Button>
-        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Name="vib5" Template="{StaticResource VibBar}" Width="72">
+        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="vibbucket_Click" Name="vib5" Template="{StaticResource VibBar}" Width="72">
             <Button.RenderTransform>
                 <RotateTransform Angle="162" />
             </Button.RenderTransform> 5
         </Button>
-        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Name="vib6" Template="{StaticResource VibBar}" Width="0">
+        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="vibbucket_Click" Name="vib6" Template="{StaticResource VibBar}" Width="0">
             <Button.RenderTransform>
                 <RotateTransform Angle="198" />
             </Button.RenderTransform> 6
         </Button>
-        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Name="vib7" Template="{StaticResource VibBar}" Width="30">
+        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="vibbucket_Click" Name="vib7" Template="{StaticResource VibBar}" Width="30">
             <Button.RenderTransform>
                 <RotateTransform Angle="234" />
             </Button.RenderTransform> 7
         </Button>
-        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Name="vib8" Template="{StaticResource VibBar}" Width="74">
+        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="vibbucket_Click" Name="vib8" Template="{StaticResource VibBar}" Width="74">
             <Button.RenderTransform>
                 <RotateTransform Angle="270" />
             </Button.RenderTransform> 8
         </Button>
-        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Name="vib9" Template="{StaticResource VibBar}" Width="114">
+        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="vibbucket_Click" Name="vib9" Template="{StaticResource VibBar}" Width="114">
             <Button.RenderTransform>
                 <RotateTransform Angle="306" />
             </Button.RenderTransform> 9
         </Button>
-        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Name="vib10" Template="{StaticResource VibBar}" Width="104">
+        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="vibbucket_Click" Name="vib10" Template="{StaticResource VibBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="342" />
             </Button.RenderTransform> 10
         </Button>
-        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Name="pass1" Template="{StaticResource PassBar}" Width="46">
+        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Click="passbucket_Click" Name="pass1" Template="{StaticResource PassBar}" Width="46">
             <Button.RenderTransform>
                 <RotateTransform Angle="18" />
             </Button.RenderTransform> 1
         </Button>
-        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Name="pass2" Template="{StaticResource PassBar}" Width="96">
+        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Click="passbucket_Click" Name="pass2" Template="{StaticResource PassBar}" Width="96">
             <Button.RenderTransform>
                 <RotateTransform Angle="54" />
             </Button.RenderTransform> 2
         </Button>
-        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0" Name="pass3" Template="{StaticResource PassBar}" Width="104">
+        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0" Click="passbucket_Click" Name="pass3" Template="{StaticResource PassBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="90" />
             </Button.RenderTransform> 3
         </Button>
-        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Name="pass4" Template="{StaticResource PassBar}" Width="36">
+        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="passbucket_Click" Name="pass4" Template="{StaticResource PassBar}" Width="36">
             <Button.RenderTransform>
                 <RotateTransform Angle="126" />
             </Button.RenderTransform> 4
         </Button>
-        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Name="pass5" Template="{StaticResource PassBar}" Width="72">
+        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="passbucket_Click" Name="pass5" Template="{StaticResource PassBar}" Width="72">
             <Button.RenderTransform>
                 <RotateTransform Angle="162" />
             </Button.RenderTransform> 5
         </Button>
-        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Name="pass6" Template="{StaticResource PassBar}" Width="0">
+        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="passbucket_Click" Name="pass6" Template="{StaticResource PassBar}" Width="0">
             <Button.RenderTransform>
                 <RotateTransform Angle="198" />
             </Button.RenderTransform> 6
         </Button>
-        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Name="pass7" Template="{StaticResource PassBar}" Width="30">
+        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="passbucket_Click" Name="pass7" Template="{StaticResource PassBar}" Width="30">
             <Button.RenderTransform>
                 <RotateTransform Angle="234" />
             </Button.RenderTransform> 7
         </Button>
-        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Name="pass8" Template="{StaticResource PassBar}" Width="74">
+        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="passbucket_Click" Name="pass8" Template="{StaticResource PassBar}" Width="74">
             <Button.RenderTransform>
                 <RotateTransform Angle="270" />
             </Button.RenderTransform> 8
         </Button>
-        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Name="pass9" Template="{StaticResource PassBar}" Width="114">
+        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="passbucket_Click" Name="pass9" Template="{StaticResource PassBar}" Width="114">
             <Button.RenderTransform>
                 <RotateTransform Angle="306" />
             </Button.RenderTransform> 9
         </Button>
-        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Name="pass10" Template="{StaticResource PassBar}" Width="104">
+        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="passbucket_Click" Name="pass10" Template="{StaticResource PassBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="342" />
             </Button.RenderTransform> 10
@@ -548,7 +548,7 @@
         <Button Canvas.Left="22" Canvas.Top="412" Content="{DynamicResource cmd_zero}" Click="btn_action_Click" Height="30" Name="btn_zero" Style="{StaticResource ButtonStyle}" Width="100" />
         <Button Canvas.Left="22" Canvas.Top="464" Content="{DynamicResource cmd_mainvib}" Click="btn_action_Click" Height="30" Name="btn_mainvib" Style="{StaticResource ButtonStyle}" Width="100" />
         <Button Canvas.Left="169.063" Canvas.Top="444" Content="{DynamicResource cmd_run}" Click="btn_trial_Click" FontSize="36" Foreground="LightGray" Height="170" Name="btn_trial" Template="{StaticResource cfgBtn}" Width="176.937" />
-        <Label Canvas.Left="143.341" Canvas.Top="644" Content="{DynamicResource totalweight}" Height="64" Name="lbl_summary" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="257.752" />
+        <Label Canvas.Left="143.341" Canvas.Top="644" Content="{DynamicResource totalweight}" Height="64" Name="lbl_summary" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="173" />
         <Button Canvas.Left="845.976" Canvas.Top="460" Content="{DynamicResource cmd_save}" Click="btn_save_Click" FontSize="36" Foreground="Black" Height="128.359" Name="btn_save" Template="{StaticResource saveBtn}" Width="124.422" />
         <Label Canvas.Left="447.976" Canvas.Top="444" Content="{DynamicResource product_no}" Height="50" Name="lbl_prd_no" Style="{StaticResource LabelStyle}" Width="130" />
         <Label Canvas.Left="443.976" Canvas.Top="488" Content="{DynamicResource product_desc}" Height="36" Name="lbl_desc" Style="{StaticResource LabelStyle}" Width="154" />
@@ -573,8 +573,8 @@
         <TextBox Canvas.Left="576.148" Canvas.Top="47.4" Height="30" MaxLength="50" Name="run_freq" Style="{StaticResource InputStyle}" Width="82" />
         <Label Canvas.Left="664" Canvas.Top="48.5" Content="{DynamicResource grp_amp}" Height="26" Name="label4" Style="{StaticResource MainLblStyle}" Width="122" />
         <TextBox Canvas.Left="788.148" Canvas.Top="48.5" Height="30" MaxLength="50" Name="run_amp" Style="{StaticResource InputStyle}" Width="82" />
-        <Button Canvas.Left="507.259" Canvas.Top="448" Content="+" Height="30" Name="new_prd" Template="{StaticResource roundButton}" Width="16.665" />
-        <Button Canvas.Left="526.614" Canvas.Top="682.154" Height="42.218" Name="btn_ret_config" Width="147.763">回到设置</Button>
-        <Button Canvas.Left="765.479" Canvas.Top="682.154" Height="39.996" Name="btn_ret_run" Width="148.874">回到运行</Button>
+        <Button Canvas.Left="507.259" Canvas.Top="448" Content="+" Height="30" Name="new_prd" Template="{StaticResource roundButton}" Width="16.665" Click="new_prd_Click" />
+        <Button Canvas.Left="526.614" Canvas.Top="682.154" Height="42.218" Name="btn_ret_config" Width="147.763" Click="btn_ret_config_Click">回到设置</Button>
+        <Button Canvas.Left="765.479" Canvas.Top="682.154" Height="39.996" Name="btn_ret_run" Width="148.874" Click="btn_ret_run_Click">回到运行</Button>
     </Canvas>
 </Window>

@@ -24,6 +24,11 @@ namespace ioex_cs
         private bool _bPause;       //internal variable for pause
         internal bool bSimulate;    //indicate whether it is simulate run;
 
+        internal Packer curr_packer { 
+            get { 
+                return packers[0]; 
+            } 
+        }
 
         internal bool bMainPause
         {
@@ -60,7 +65,7 @@ namespace ioex_cs
         private PwdWnd pwdwnd;
         private ConfigMenuWnd configwnd;
         private BottomWnd bottomwnd;
-        private ProdWnd prodwnd;
+        public ProdWnd prodwnd;
         public kbd kbdwnd;
 
         private Thread query_loop;
@@ -94,11 +99,7 @@ namespace ioex_cs
                         {
                             continue;
                         }
-                        while (n.status != NodeStatus.ST_IDLE)
-                        {
-                            Thread.Sleep(1);
-                        }
-                        n.Action("query", true);
+                        n.Action("loopquery", true);
                     }
                     bool alldone = false;
                     while(!alldone)
@@ -110,11 +111,7 @@ namespace ioex_cs
                             {
                                 continue;
                             }
-                            while (n.status != NodeStatus.ST_IDLE)
-                            {
-                                Thread.Sleep(1);
-                            }
-                            n.Action("query", true);
+                            n.Action("loopquery", true);
                             alldone = false;
                         }
                     }
@@ -146,7 +143,7 @@ namespace ioex_cs
             bottomwnd = new BottomWnd();
             alertwnd = new AlertWnd();
             pwdwnd = new PwdWnd();
-            engwnd = new EngConfigWnd();
+            
             configwnd = new ConfigMenuWnd();
             prodwnd = new ProdWnd();
             //prodwnd.Show();
@@ -256,8 +253,21 @@ namespace ioex_cs
                 n["addr"] = null;
                 if (n.errmsg != "")
                 {
-                    MessageBox.Show("Node " +n.node_id.ToString()+ " is lost");
-                    //todo check the availbility of pending nodes
+                    //check the availbility of pending nodes
+                    missingnode = new WeighNode(allports[0],36); //36 is the default address of board
+                    missingnode["addr"] = null;
+                    if (n.errmsg == "") //node is found
+                    {
+                        missingnode["addr"] = n.node_id;
+                        Thread.Sleep(100);
+                        n["addr"] = null;
+                        if(n.errmsg == "")
+                        {
+                            n.Action("flash", true);
+                            continue;
+                        }
+                    }
+                    MessageBox.Show("Node " + n.node_id.ToString() + " is lost");
                     throw new Exception("Node " + n.node_id.ToString() + " is lost");
                 }
 
@@ -265,15 +275,17 @@ namespace ioex_cs
                 
             }
             //runwnd.Show();
-            //todo: load the default setting and download them
-            /*
+            
+            
             for (int i = 0; i < machnum; i++)
             {
                 packers[i].LoadConfig(default_cfg.Element("packer" + i.ToString() + "_def").Value);
-            }*/
-
+            }
+            
+            engwnd = new EngConfigWnd();
             query_loop.Start();
-            runwnd.Show();
+            //runwnd.Show();
+            
         }
         
         public void SwitchTo(string mode)
@@ -309,10 +321,11 @@ namespace ioex_cs
                 engwnd.Show();
                 engwnd.BringIntoView();
             }
-            if (mode == "ConfigMenu")
+            if (mode == "configmenu")
             {
                 configwnd.Show();
                 configwnd.BringIntoView();
+                return;
             }
             if (mode == "product")
             {
