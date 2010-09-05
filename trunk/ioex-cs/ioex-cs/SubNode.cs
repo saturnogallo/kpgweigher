@@ -13,8 +13,6 @@ namespace ioex_cs
         ST_IDLE,
         ST_LOST,
         ST_BUSY,
-        ST_RELEASE,
-        ST_RUNNING,
     }
 
     enum NodeType : byte
@@ -232,6 +230,8 @@ namespace ioex_cs
     {
         private double _weight;
         private double off;
+
+        public bool bRelease { get; set; }
         public double weight
         {
             get {
@@ -275,6 +275,12 @@ namespace ioex_cs
                 WaitForIdle();
                 return;
             }
+            if (action == "release")
+            {
+                this["flag_enable"] = 4;
+                this.bRelease = true;
+            }
+
             (Application.Current as App).bMainPause = true;
             base.Action(action, Wait);
             
@@ -823,7 +829,6 @@ namespace ioex_cs
 
             if (action == "start")
             {
-                status = NodeStatus.ST_RUNNING;
                 this["flag_enable"] = 1;
                 Thread.Sleep(100);
             }  

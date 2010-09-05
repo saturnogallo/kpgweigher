@@ -1,6 +1,15 @@
-1. when boot up, stop all the nodes
-2. border and color painting when mouse over or select.
+1. when boot up, stop all the nodes //done
+2. border and color painting when mouse over or select. //done
 3. product_no selection on bootup.
 4. store the last run configuration.
-5. update the display of release. 
-6. add node id icon in single mode.
+5. update the display of release. //done
+6. add node id icon in single mode.//done
+
+2.pack talk
+3.apply to all may have some trouble
+5.add new config
+5.gram is ok but decimal has problem 
+6.update the database record
+7.add the alert window
+8.add operator list
+9.check force release and over_weight case

@@ -137,6 +137,11 @@ namespace ioex_cs
             speed = 0;
             packhist.Clear();
         }
+        private static DateTime rStart;
+        static public void InitNewRun()
+        {
+
+        }
         static public void AddNewPack(onepack o,bool IsSimulate)
         {
             total_packs++;
@@ -148,17 +153,20 @@ namespace ioex_cs
                 packhist.Dequeue();
             }
             //update the speed
-            UInt32 count = 0;
+            long count = 0;
             DateTime lastmin = DateTime.Now;
             lastmin.Subtract(new TimeSpan(0,1,1));
             foreach (onepack op in packhist)
             {
-                if (op.time > lastmin)
+                if (op.time < lastmin)
                 {
                     count = count + 1;
+                }else{
+                    count = packhist.Count - count;
+                    break;
                 }
             }
-            speed = count;
+            speed = (UInt32)count;
             if (IsSimulate)
             {
                 return;

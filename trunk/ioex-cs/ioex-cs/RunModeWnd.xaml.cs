@@ -37,11 +37,15 @@ namespace ioex_cs
             uiTimer.Start();
         }
 
+        public bool bNeedInvalidate = false;
         void uiTimer_Tick(object sender, EventArgs e)
         {
             if (!this.IsVisible)
                 return;
-            
+            if (! bNeedInvalidate)
+            {
+                return;
+            }
             Packer p = (System.Windows.Application.Current as App).curr_packer;
             
             currentApp().bMainPause = true;
@@ -169,12 +173,19 @@ namespace ioex_cs
                 lb.Content = ct;
                 if (n.status == NodeStatus.ST_LOST)
                 {
-                    (btn.FindName("BarPath") as Path).Fill = Brushes.Chocolate;
+                    btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
                 }
-                if (n.status == NodeStatus.ST_RELEASE)
+                if (n is WeighNode)
                 {
-                    (btn.FindName("BarPath") as Path).Fill = Brushes.OrangeRed;
+                    if ((n as WeighNode).bRelease)
+                        btn.Template = this.FindResource("WeightBarRelease") as ControlTemplate;
                 }
+                if (n.status == NodeStatus.ST_IDLE)
+                {
+                    btn.Template = this.FindResource("WeightBar") as ControlTemplate;
+                }
+
+                btn.ApplyTemplate();
             }
         }
         private object NameToControl(string name)
@@ -193,6 +204,13 @@ namespace ioex_cs
         {
             grp_reg("run_dvar");
         }
+        private void weibucket_Click(object sender, RoutedEventArgs e)
+        {
+        }
+        private void vibbucket_Click(object sender, RoutedEventArgs e)
+        {
+        }
+
         public void KbdData(string param, string data)
         {
             try
