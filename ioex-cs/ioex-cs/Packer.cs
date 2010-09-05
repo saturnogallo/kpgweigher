@@ -153,6 +153,7 @@ namespace ioex_cs
             foreach (SubNode n in addrs)
             {
                 n.Action("release",false);
+                (n as WeighNode).bRelease = true;
             }
             //todo update the display;
 
@@ -179,7 +180,7 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count; i++ )
             {
-                if(weight_node[i].status != NodeStatus.ST_RUNNING)
+                if(weight_node[i].status == NodeStatus.ST_LOST)
                     continue;
                 sum = weight_node[i].weight;
                 if(sum > uvar && sum < dvar)
@@ -198,11 +199,11 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count-1; i++)
             {
-                if (weight_node[i].status != NodeStatus.ST_RUNNING)
+                if (weight_node[i].status == NodeStatus.ST_LOST)
                     continue;
                 for (int j = i + 1; j < weight_node.Count; j++)
                 {
-                    if (weight_node[j].status != NodeStatus.ST_RUNNING)
+                    if (weight_node[i].status == NodeStatus.ST_LOST)
                         continue;
                     sum = weight_node[i].weight + weight_node[j].weight;
                     if (sum > uvar && sum < dvar)
@@ -222,15 +223,15 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count - 2; i++)
             {
-                if (weight_node[i].status != NodeStatus.ST_RUNNING)
+                if (weight_node[i].status == NodeStatus.ST_LOST)
                     continue;
                 for (int j = i + 1; j < weight_node.Count-1; j++)
                 {
-                    if (weight_node[j].status != NodeStatus.ST_RUNNING)
+                    if (weight_node[i].status == NodeStatus.ST_LOST)
                         continue;
                     for (int k = j + 1; k < weight_node.Count ; k++)
                     {
-                        if (weight_node[k].status != NodeStatus.ST_RUNNING)
+                        if (weight_node[i].status == NodeStatus.ST_LOST)
                             continue;
 
                         sum = weight_node[i].weight + weight_node[j].weight + weight_node[k].weight;
@@ -252,20 +253,20 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count - 3; i++)
             {
-                if (weight_node[i].status != NodeStatus.ST_RUNNING)
+                if (weight_node[i].status == NodeStatus.ST_LOST)
                     continue;
                 for (int j = i + 1; j < weight_node.Count - 2; j++)
                 {
-                    if (weight_node[j].status != NodeStatus.ST_RUNNING)
+                    if (weight_node[i].status == NodeStatus.ST_LOST)
                         continue;
                     for (int k = j + 1; k < weight_node.Count - 1; k++)
                     {
-                        if (weight_node[k].status != NodeStatus.ST_RUNNING)
+                        if (weight_node[i].status == NodeStatus.ST_LOST)
                             continue;
 
                         for (int l = k + 1; l < weight_node.Count; l++)
                         {
-                            if (weight_node[l].status != NodeStatus.ST_RUNNING)
+                            if (weight_node[i].status == NodeStatus.ST_LOST)
                                 continue;
                             sum = weight_node[i].weight + weight_node[j].weight + weight_node[k].weight + weight_node[l].weight;
                             if (sum > uvar && sum < dvar)
@@ -287,24 +288,24 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count - 4; i++)
             {
-                if (weight_node[i].status != NodeStatus.ST_RUNNING)
+                if (weight_node[i].status == NodeStatus.ST_LOST)
                     continue;
                 for (int j = i + 1; j < weight_node.Count - 3; j++)
                 {
-                    if (weight_node[j].status != NodeStatus.ST_RUNNING)
+                    if (weight_node[i].status == NodeStatus.ST_LOST)
                         continue;
                     for (int k = j + 1; k < weight_node.Count - 2; k++)
                     {
-                        if (weight_node[k].status != NodeStatus.ST_RUNNING)
+                        if (weight_node[i].status == NodeStatus.ST_LOST)
                             continue;
 
                         for (int l = k + 1; l < weight_node.Count-1; l++)
                         {
-                            if (weight_node[l].status != NodeStatus.ST_RUNNING)
+                            if (weight_node[i].status == NodeStatus.ST_LOST)
                                 continue;
                             for (int m = l + 1; m < weight_node.Count; m++)
                             {
-                                if (weight_node[m].status != NodeStatus.ST_RUNNING)
+                                if (weight_node[i].status == NodeStatus.ST_LOST)
                                     continue;
 
                                 sum = weight_node[i].weight + weight_node[j].weight + weight_node[k].weight + weight_node[l].weight + weight_node[m].weight;
@@ -323,12 +324,22 @@ namespace ioex_cs
 
         public void CheckCombination()
         {
-            while (Caculation5()) ;
-            while (Caculation4()) ;
-            while (Caculation3()) ;
-            while (Caculation2()) ;
-            while (Caculation1()) ;
-            
+            while (Caculation5())
+            {
+            }
+            while (Caculation4())
+            {
+            }
+            while (Caculation3())
+            {
+            }
+            while (Caculation2())
+            {
+            }
+            while (Caculation1())
+            {
+            }
+
             for (int i = 0; i < weight_node.Count; i++ )
             {
                 if (weight_node[i].status == NodeStatus.ST_LOST)

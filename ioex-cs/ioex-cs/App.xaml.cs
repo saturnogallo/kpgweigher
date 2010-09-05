@@ -37,14 +37,9 @@ namespace ioex_cs
             }
             set{
                 _bPause = value;
-                if (_bPause)
-                {
-                    while (bQueryBusy)
-                    {
-                        Thread.Sleep(1);
-                    }
-
-                }
+                if (!_bPause) return;
+                while (bQueryBusy)
+                    Thread.Sleep(1);
             }
         }   //indicate the pause status of main loop
 
@@ -115,10 +110,18 @@ namespace ioex_cs
                             alldone = false;
                         }
                     }
+
                     if (p.status == PackerStatus.RUNNING)
                     {
+                        foreach (WeighNode n in p.weight_node)
+                        {
+                            n.bRelease = false;
+                        }
                         p.CheckCombination();
                     }
+                    this.singlewnd.bNeedInvalidate = true;
+                    this.runwnd.bNeedInvalidate = true;
+
                     foreach (WeighNode n in p.weight_node)
                     {
                         n.weight = 0;
@@ -233,7 +236,6 @@ namespace ioex_cs
                         }
                     }
                 }
-
             }
             
             //open sport 
@@ -269,6 +271,8 @@ namespace ioex_cs
                     }
                     MessageBox.Show("Node " + n.node_id.ToString() + " is lost");
                     throw new Exception("Node " + n.node_id.ToString() + " is lost");
+                }else{
+                    n.Action("stop",true);
                 }
 
                 n["board_ID"] = null;

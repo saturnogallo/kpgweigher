@@ -29,7 +29,23 @@
     <s:String x:Key="enter_run_target">请输入目标重量</s:String>
     <s:String x:Key="enter_run_uvar">请输入上偏重量</s:String>
     <s:String x:Key="enter_run_dvar">请输入下偏重量</s:String>
-    
+    <s:String x:Key="enter_target">请输入目标重量</s:String>
+    <s:String x:Key="enter_uvar">请输入上偏重量</s:String>
+    <s:String x:Key="enter_dvar">请输入下偏重量</s:String>
+    <s:String x:Key="enter_gain">请输入AD转换速度</s:String>
+    <s:String x:Key="enter_cs_filter">请输入AD滤波器选择</s:String>
+    <s:String x:Key="enter_cali0">请输入校准砝码重量</s:String>
+    <s:String x:Key="enter_prd_no">请输入产品号</s:String>
+    <s:String x:Key="enter_motor_speed_input">请输入开关马达速度</s:String>
+    <s:String x:Key="enter_col_otime_input">请输入送料斗打开时间</s:String>
+    <s:String x:Key="enter_sub_amp_input">请输入震动斗振动幅度</s:String>
+    <s:String x:Key="enter_col_dtime_input">请输入送料后延时</s:String>
+    <s:String x:Key="enter_sub_time_input">请输入震动斗震动时间</s:String>
+    <s:String x:Key="enter_sub_freq_input">请输入震动斗震动频率</s:String>
+    <s:String x:Key="enter_wei_otime_input">请输入下料后延时</s:String>
+    <s:String x:Key="enter_wei_dtime_input">请输入下料前延时</s:String>
+    <s:String x:Key="enter_openwei_input">请输入xxx</s:String>
+   
     <s:String x:Key="is_running">请先停止运行后再尝试操作</s:String>
     <s:String x:Key="zero_complete">清零操作完成</s:String>
     <s:String x:Key="return">返回</s:String>
@@ -73,7 +89,7 @@
     
     <s:String x:Key="sub_time">震动斗振动时间</s:String>
     <s:String x:Key="wei_otime">下料后时间</s:String>
-    <s:String x:Key="wei_dtime">送料前延时</s:String>
+    <s:String x:Key="wei_dtime">下料前延时</s:String>
     <s:String x:Key="motor_speed">开关马达速度</s:String>
 
     <s:String x:Key="address">节点地址</s:String>

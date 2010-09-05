@@ -33,11 +33,16 @@ namespace ioex_cs
         {
             return (System.Windows.Application.Current as App);
         }
+
+        public bool bNeedInvalidate = false;
         void uiTimer_Tick(object sender, EventArgs e)
         {
             if (!this.IsVisible)
                 return;
-            
+            if (! bNeedInvalidate)
+            {
+                return;
+            }
             App p = currentApp();
             if (p.curr_packer.curr_node == -1)
             {
@@ -61,12 +66,18 @@ namespace ioex_cs
             lb.Content = ct;
             if (n.status == NodeStatus.ST_LOST)
             {
-                (btn.FindName("BarPath") as Path).Fill = Brushes.Chocolate;
+                btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
             }
-            if (n.status == NodeStatus.ST_RELEASE)
+            if (n is WeighNode)
             {
-                (btn.FindName("BarPath") as Path).Fill = Brushes.OrangeRed;
+                if ((n as WeighNode).bRelease)
+                    btn.Template = this.FindResource("WeightBarRelease") as ControlTemplate;
             }
+            if (n.status == NodeStatus.ST_IDLE)
+            {
+                btn.Template = this.FindResource("WeightBar") as ControlTemplate;
+            }
+            btn.ApplyTemplate();
         }
         private void weibucket_Click(object sender, RoutedEventArgs e)
         {
@@ -84,7 +95,7 @@ namespace ioex_cs
         {
             StringBuilder sb = new StringBuilder();
             Regex re = new Regex("(\\d+)");
-            Match m2 = re.Match((sender as Button).Name);
+            Match m2 = re.Match((sender as Control).Name);
             if (m2.Success)
                 return int.Parse(m2.Groups[0].Value);
             else
@@ -106,15 +117,8 @@ namespace ioex_cs
             
             Button lastbtn = IdToButton(last_node+1);
             Button currbtn = IdToButton(nodeid);
-            if (lastbtn is Button)
-            {
-                lastbtn.BorderThickness = new Thickness(2);
-                lastbtn.BorderBrush = Brushes.DarkGray;
 
-            }
-
-            currbtn.BorderThickness = new Thickness(6);
-            currbtn.BorderBrush = Brushes.Black;
+            currbtn.Focus();
             p.curr_packer.curr_node = nodeid - 1;
             //update parameter of the current node to UI.
             p.bMainPause = true;
@@ -159,6 +163,7 @@ namespace ioex_cs
             btn_uvar.Content = p.curr_packer.curr_cfg.upper_var.ToString();
             btn_dvar.Content = p.curr_packer.curr_cfg.lower_var.ToString();
 
+            lbl_currNode.Content = p.curr_packer.curr_node.ToString();
             Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
             //load the corresponding pictiure.
             (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("f:\\" + p.curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
@@ -341,9 +346,9 @@ namespace ioex_cs
         }
         private void btn_pack_uvar_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current as App).kbdwnd.Init(StringResource.str("enter_dvar"), "uvar", false, KbdData);
+            (Application.Current as App).kbdwnd.Init(StringResource.str("enter_uvar"), "uvar", false, KbdData);
         }
-        void ShowStatus(string msg)
+        private void ShowStatus(string msg)
         {
             lbl_summary.Content = StringResource.str(msg);
         }
@@ -386,6 +391,11 @@ namespace ioex_cs
         private void btn_ret_run_Click(object sender, RoutedEventArgs e)
         {
             (Application.Current as App).SwitchTo("runmode");
+        }
+
+        private void lbl_currNode_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
     }
