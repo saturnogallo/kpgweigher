@@ -53,7 +53,7 @@ namespace ioex_cs
         //window list
         private RunMode runwnd;
         private SingleMode singlewnd;
-        private History histwnd;
+        private ProdHistory histwnd;
         private Help helpwnd;
         private AlertWnd alertwnd;
         private EngConfigWnd engwnd;
@@ -110,7 +110,6 @@ namespace ioex_cs
                             alldone = false;
                         }
                     }
-
                     if (p.status == PackerStatus.RUNNING)
                     {
                         foreach (WeighNode n in p.weight_node)
@@ -138,9 +137,9 @@ namespace ioex_cs
         public App()
         {
             int baudrate;// baudrate
- 
-           
-            histwnd = new History();
+
+
+            histwnd = new ProdHistory();
             helpwnd = new Help();
             kbdwnd = new kbd();
             bottomwnd = new BottomWnd();
@@ -179,7 +178,7 @@ namespace ioex_cs
             string tot = default_cfg.Element("totalports").Value.ToString();
             foreach (string port in tot.Split(new char[]{','}))
             {
-                SPort sp = new SPort(port, baudrate, Parity.None, 8, StopBits.One);
+                SPort sp = new SPort(port, baudrate, Parity.Even, 8, StopBits.One);
                 if (sp.Open())
                 {
                     allports.Add(sp);
@@ -223,7 +222,7 @@ namespace ioex_cs
             //create packers
             for (int i=0;i<machnum;i++)
             {
-                packers.Add(new Packer());
+                packers.Add(new Packer(i));
                 string title = "packer" + i.ToString();
                 tot = default_cfg.Element(title).Value.ToString();
                 foreach (string node in tot.Split(new char[]{','}))
@@ -283,12 +282,14 @@ namespace ioex_cs
             
             for (int i = 0; i < machnum; i++)
             {
-                packers[i].LoadConfig(default_cfg.Element("packer" + i.ToString() + "_def").Value);
+                packers[i].InitConfig();
             }
             
             engwnd = new EngConfigWnd();
+
+            configwnd.Hide();
+            runwnd.Show();
             query_loop.Start();
-            //runwnd.Show();
             
         }
         
@@ -341,9 +342,10 @@ namespace ioex_cs
             }
             if (mode == "runmode")
             {
+                
                 runwnd.Show();
+                runwnd.UpdateUI("sys_config");
                 runwnd.BringIntoView();
-
                 return;
             }
             if (mode == "singlemode")
@@ -355,7 +357,7 @@ namespace ioex_cs
             if (mode == "histmode")
             {
                 histwnd.Show();
-                histwnd.BringIntoView();
+                histwnd.BringToFront();
                 return;
             }
             if (mode == "helpmode")

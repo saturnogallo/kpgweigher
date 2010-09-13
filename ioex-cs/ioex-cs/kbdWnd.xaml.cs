@@ -170,5 +170,10 @@ namespace ioex_cs
                 UpdateData();
             }
         }
+
+        private void btn_quit_Click(object sender, RoutedEventArgs e)
+        {
+            Hide();
+        }
     }
 }

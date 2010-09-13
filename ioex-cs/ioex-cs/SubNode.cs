@@ -200,14 +200,18 @@ namespace ioex_cs
             cfgNode.Add(new XElement("fmt_input", intf_byte.fmt_input.ToString()));
             cfgNode.Add(new XElement("fmt_output", intf_byte.fmt_output.ToString()));
         }
-        public  void SetInterface() //composition of interface parameter
+        public  void SetInterface(Intf newIntf) //composition of interface parameter from UI
         {
-            //todo set interface
+            this["interface"] = (UInt32)intf_byte.buf;
         }
 
-        public void getInterface() //decomposition of interface parameter
+        public Intf getInterface() //decomposition of interface parameter to UI
         {
-            //todo parse interface
+            //todo identify the reg
+            this["interface"] = null;
+            intf_byte.buf = (UInt16) this["interface"].Value;
+            return intf_byte;
+            
         }
         public void TriggerPack()
         {
@@ -275,10 +279,12 @@ namespace ioex_cs
                 WaitForIdle();
                 return;
             }
-            if (action == "release")
+            if (action == "looprelease")
             {
                 this["flag_enable"] = 4;
                 this.bRelease = true;
+                WaitForIdle();
+                return;
             }
 
             (Application.Current as App).bMainPause = true;
@@ -304,6 +310,12 @@ namespace ioex_cs
                 this["flag_enable"] = 3;
 
             }
+            if (action == "release")
+            {
+                this["flag_enable"] = 4;
+
+            }
+
             if (action == "fill")
             {
                 this["flag_enable"] = 5;
@@ -360,11 +372,15 @@ namespace ioex_cs
         {
             try
             {
+                if (cfg_name == null)
+                {
+                    cfg_name = "001";
+                }
                 XElement all = new XElement("Root", new XAttribute("current", cfg_name));
                 foreach (string cfg in curr_conf.Keys)
                 {
                     XElement ecfg = XElement.Parse(curr_conf[cfg]);
-                    ecfg.Add(new XAttribute("Name", cfg));
+                    ecfg.ReplaceAttributes(new XAttribute("Name", cfg));
                     all.Add(ecfg);
                 }
                 XDocument newdoc = new XDocument(
@@ -491,7 +507,6 @@ namespace ioex_cs
                 
                 if ( size == 8)
                 {
-                    
                     reg_pos2name_tbl[offset] = name;
                     reg_mulitply_tbl[offset] = 1;
                 }
@@ -499,20 +514,20 @@ namespace ioex_cs
                 {
                     
                     reg_pos2name_tbl[offset] = name;
-                    reg_mulitply_tbl[offset] = 256;
+                    reg_mulitply_tbl[offset] = 1;
                     reg_pos2name_tbl[(byte)(offset+1)] = name;
-                    reg_mulitply_tbl[(byte)(offset+1)] = 1;
+                    reg_mulitply_tbl[(byte)(offset+1)] = 256;
                 }
                 if (size == 32)
                 {
                     reg_pos2name_tbl[offset] = name;
-                    reg_mulitply_tbl[offset] = 256*256*256;
+                    reg_mulitply_tbl[offset] = 1;
                     reg_pos2name_tbl[(byte)(offset + 1)] = name;
-                    reg_mulitply_tbl[(byte)(offset + 1)] = 256 * 256;
+                    reg_mulitply_tbl[(byte)(offset + 1)] = 256 ;
                     reg_pos2name_tbl[(byte)(offset + 2)] = name;
-                    reg_mulitply_tbl[(byte)(offset + 2)] = 256;
+                    reg_mulitply_tbl[(byte)(offset + 2)] = 256*256;
                     reg_pos2name_tbl[(byte)(offset + 3)] = name;
-                    reg_mulitply_tbl[(byte)(offset + 3)] = 1;
+                    reg_mulitply_tbl[(byte)(offset + 3)] =256*256*2561;
                 }
             }
             
@@ -528,6 +543,7 @@ namespace ioex_cs
             curr_conf = new Dictionary<string, Nullable<UInt32>>();
             uidata = new UIParam();
             all_conf = new XmlConfig("node_" + node_id + ".xml");
+            all_conf.LoadConfigFromFile();
             ICollection<string> names = reg_type_tbl.Keys;
             foreach (string name in names)
             {
@@ -564,21 +580,21 @@ namespace ioex_cs
                 }
                 if (reg_type_tbl[names[i]].size == 16)
                 {
-                    valbuffer[outptr] = (byte)(values[i]/256);
-                    valbuffer[outptr+1] = (byte)(values[i]%256);
+                    valbuffer[outptr] = (byte)(values[i]%256);
+                    valbuffer[outptr + 1] = (byte)(values[i] / 256);
                     regbuffer[outptr] = reg_type_tbl[names[i]].pos;
                     regbuffer[outptr+1] = (byte)(regbuffer[outptr] + 1);
                     outptr = outptr+2;
                 }
                 if (reg_type_tbl[names[i]].size == 32)
                 {
-                    valbuffer[outptr+3] = (byte)(values[i]%256);
-                    values[i] = (UInt32)(values[i]/256);
-                    valbuffer[outptr+2] = (byte)(values[i]%256);
+                    valbuffer[outptr+0] = (byte)(values[i]%256);
                     values[i] = (UInt32)(values[i]/256);
                     valbuffer[outptr+1] = (byte)(values[i]%256);
                     values[i] = (UInt32)(values[i]/256);
-                    valbuffer[outptr+0] = (byte)(values[i]%256);
+                    valbuffer[outptr+2] = (byte)(values[i]%256);
+                    values[i] = (UInt32)(values[i]/256);
+                    valbuffer[outptr+3] = (byte)(values[i]%256);
                     regbuffer[outptr] = reg_type_tbl[names[i]].pos;
                     regbuffer[outptr+1] = (byte)(regbuffer[outptr] + 1);
                     regbuffer[outptr+2] = (byte)(regbuffer[outptr] + 2);
@@ -590,6 +606,56 @@ namespace ioex_cs
             ofrm.generate_write_frame(outbuffer,regbuffer,valbuffer,0,(byte)(outptr));
             port.AddCommand(outbuffer);
         }
+        private void write_vregs(string[] names, UInt32[] values)
+        {
+            FrameBuffer ofrm = new FrameBuffer();
+            ofrm.cmd = (byte)'W';
+            if (!curr_conf["addr"].HasValue)
+            {
+                throw new Exception("Invalid node address");
+            }
+            ofrm.addr = (byte)curr_conf["addr"].Value;
+            byte[] regbuffer = new byte[16];
+            byte[] valbuffer = new byte[16];
+            byte[] outbuffer = new byte[32];
+            int outptr = 0;
+            for (int i = 0; i < names.GetLength(0); i++)
+            {
+                if (reg_type_tbl[names[i]].size == 8)
+                {
+                    regbuffer[outptr] = reg_type_tbl[names[i]].pos;
+                    valbuffer[outptr] = (byte)values[i];
+                    outptr++;
+                }
+                if (reg_type_tbl[names[i]].size == 16)
+                {
+                    valbuffer[outptr ] = (byte)(values[i] % 256);
+                    valbuffer[outptr + 1] = (byte)(values[i] / 256);
+                    regbuffer[outptr] = reg_type_tbl[names[i]].pos;
+                    regbuffer[outptr + 1] = (byte)(regbuffer[outptr] + 1);
+                    outptr = outptr + 2;
+                }
+                if (reg_type_tbl[names[i]].size == 32)
+                {
+                    valbuffer[outptr + 0] = (byte)(values[i] % 256);
+                    values[i] = (UInt32)(values[i] / 256);
+                    valbuffer[outptr + 1] = (byte)(values[i] % 256);
+                    values[i] = (UInt32)(values[i] / 256);
+                    valbuffer[outptr + 2] = (byte)(values[i] % 256);
+                    values[i] = (UInt32)(values[i] / 256);
+                    valbuffer[outptr + 3] = (byte)(values[i] % 256);
+                    regbuffer[outptr] = reg_type_tbl[names[i]].pos;
+                    regbuffer[outptr + 1] = (byte)(regbuffer[outptr] + 1);
+                    regbuffer[outptr + 2] = (byte)(regbuffer[outptr] + 2);
+                    regbuffer[outptr + 3] = (byte)(regbuffer[outptr] + 3);
+
+                    outptr = outptr + 4;
+                }
+            }
+            ofrm.generate_write_frame(outbuffer, regbuffer, valbuffer, 0, (byte)(outptr));
+            port.AddVCommand(outbuffer);
+        }
+
         public Nullable<UInt32> this[byte reg_id]    //get/set the reg_value
         {
             get { 
@@ -605,7 +671,7 @@ namespace ioex_cs
                 return curr_conf[reg_name]; 
             }
             set {
-                                
+                        
                 if(status == NodeStatus.ST_BUSY)
                 {
                     throw new Exception("reenter when busy");
@@ -621,17 +687,20 @@ namespace ioex_cs
                     {
                         if (reg_type_tbl[reg_name].rw != 'v') //non volatile value
                         {
+                            status = NodeStatus.ST_IDLE;
                             return;
                         }
                     }
                     if (reg_type_tbl[reg_name].rw != 'r')
                     {
-                        write_regs(new string[] { reg_name }, new UInt32[] { value.Value });
+                        
                         if (reg_type_tbl[reg_name].rw == 'v') //volatile value
                         {
+                            write_vregs(new string[] { reg_name }, new UInt32[] { value.Value });
                             status = NodeStatus.ST_IDLE;
                             return;
                         }
+                        write_regs(new string[] { reg_name }, new UInt32[] { value.Value });
                     }
                     
                 }
@@ -647,7 +716,6 @@ namespace ioex_cs
                 }
                 
                 status = NodeStatus.ST_IDLE;
-                    
             }
         }
         protected void read_regs(string[] names)
@@ -712,13 +780,17 @@ namespace ioex_cs
         {
             XElement cfgNode = new XElement("Item");
             cfgNode.SetAttributeValue("Name", newcfg);
-            foreach (string reg in curr_conf.Keys)
+            foreach (string reg in reg_type_tbl.Keys)
             {
+                if (!curr_conf[reg].HasValue)
+                {
+                    this[reg] = null;
+                }
                 cfgNode.Add(new XElement(reg, curr_conf[reg]));
             }
             all_conf.AddConfig(newcfg, cfgNode);
-            all_conf.SaveConfigToFile();
             all_conf.LoadConfig(newcfg);
+            all_conf.SaveConfigToFile();
         }
         private void HandleTimeout(byte[] last_cmd)
         {

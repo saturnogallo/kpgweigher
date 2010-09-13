@@ -33,6 +33,7 @@ namespace ioex_cs
         {
             
         }
+
         static private void SetConnection()
         {
             sql_con = new SQLiteConnection("Data Source=History.db;Version=3;New=False;Compress=True;");
@@ -40,6 +41,8 @@ namespace ioex_cs
         public ProdHistory()
         {
             InitializeComponent();
+            this.BackColor = Color.FromArgb(0xFF, 0xEE, 0xF2, 0xFB);
+            btnRet.Text = StringResource.str("return");
             lb_oper.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             lb_prod.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             lb_prodno.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
@@ -54,10 +57,6 @@ namespace ioex_cs
             DistinctValue("operator",lb_oper);
             DistinctValue("product_desc", lb_prod);
             DistinctValue("product_no", lb_prodno);
-        }
-        static public void InsertRecord()
-        {
-            //todo insert/update the new record
         }
         static private void ExecuteQuery(string txtQuery)
         {
@@ -95,22 +94,22 @@ namespace ioex_cs
             sql_con.Open();
 
             sql_cmd = sql_con.CreateCommand();
-            string cols = "select start_date, stop_date, operator, prod_no, prod_desc, weight, pack_num from  mains ";
+            string cols = "select start_date, end_date, operator, product_no, product_desc, weight, pack_num from  mains ";
             DateTime s_dt = mc_starttime.SelectionStart;
-            DateTime e_dt = mc_starttime.SelectionEnd;
-            string CommandText = cols + String.Format("where start_date>='{1}-{2}-{3}' and end_date<='{4}-{5}-{6}'",
-                                                        s_dt.Year,s_dt.Month,s_dt.Day,e_dt.Year,e_dt.Month,e_dt.Day);
-            if (lb_oper.SelectedValue.ToString() != "*")
+            DateTime e_dt = mc_endtime.SelectionEnd;
+            string CommandText = cols + String.Format("where start_date>='{0}-{1}-{2} 00:00:00' and end_date<='{3}-{4}-{5} 23:59:59'",
+                                                        s_dt.Year,s_dt.Month.ToString("D2"),s_dt.Day.ToString("D2"),e_dt.Year,e_dt.Month.ToString("D2"),e_dt.Day.ToString("D2"));
+            if (lb_oper.SelectedIndex >=0 && lb_oper.SelectedItem.ToString() != "*")
             {
-                CommandText += String.Format(" and operator='{1}'", lb_oper.SelectedValue.ToString());
+                CommandText += String.Format(" and operator='{0}'", lb_oper.SelectedItem.ToString());
             }
-            if (lb_prod.SelectedValue.ToString() != "*")
+            if (lb_prod.SelectedIndex >= 0 && lb_prod.SelectedItem.ToString() != "*")
             {
-                CommandText += String.Format(" and prod_desc='{1}'", lb_prod.SelectedValue.ToString());
+                CommandText += String.Format(" and product_desc='{0}'", lb_prod.SelectedItem.ToString());
             }
-            if (lb_prodno.SelectedValue.ToString() != "*")
+            if (lb_prodno.SelectedIndex >= 0 && lb_prodno.SelectedItem.ToString() != "*")
             {
-                CommandText += String.Format(" and prod_no='{1}'", lb_prodno.SelectedValue.ToString());
+                CommandText += String.Format(" and product_no='{0}'", lb_prodno.SelectedItem.ToString());
             }
 
             DB = new SQLiteDataAdapter(CommandText, sql_con);
@@ -125,12 +124,20 @@ namespace ioex_cs
                 total_sum += Double.Parse(dr["weight"].ToString());
             }
             this.dataGridView1.DataSource = DT;
+            foreach (DataGridViewColumn dcol in dataGridView1.Columns)
+            {
+                dcol.HeaderText = StringResource.str(dcol.Name);
+                dcol.AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells;
+                
+            }
+            this.lbl_summary.Text = String.Format("{0}:{1}{6} , {2}:{3} , {4}:{5}{6}",StringResource.str("totalweight"),total_sum.ToString("F1"),
+                StringResource.str("totalpacknum"),total_pack.ToString(),StringResource.str("avgweight"),(total_sum/total_pack).ToString("F1"),StringResource.str("gram"));
             sql_con.Close();
         }
         /// <summary>
         /// reset the status of history record
         /// </summary>
-        static public void ResetHistory()
+        static private void ResetHistory()
         {
             total_packs = 0;
             total_weights = 0;
@@ -138,9 +145,22 @@ namespace ioex_cs
             packhist.Clear();
         }
         private static DateTime rStart;
-        static public void InitNewRun()
+        static public void InitNewRun(string oper,string prod_no,string prod_desc)
         {
-
+            string txtUpdate = "insert into mains (start_date,end_date,operator,product_no,product_desc,weight,pack_num) values ('";
+            rStart = DateTime.Now;
+            txtUpdate = txtUpdate + rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + oper + "','" + prod_no + "','" + prod_desc + "',0,0)";
+            ExecuteQuery(txtUpdate);
+        }
+        static public void EndNewRun()
+        {
+            UpdateRecord();
+            ResetHistory();
+        }
+        static public void UpdateRecord()
+        {
+            string txtUpdate = "update mains set end_date=\"" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\", weight=\"" + total_weights.ToString() + "\", pack_num=\"" + total_packs.ToString() + "\" where start_date=\"" + rStart.ToString("yyyy-MM-dd HH:mm:ss") + "\"";
+            ExecuteQuery(txtUpdate);
         }
         static public void AddNewPack(onepack o,bool IsSimulate)
         {
@@ -172,11 +192,12 @@ namespace ioex_cs
                 return;
             }
             if (total_packs % 100 == 1)
-            {
-                //todo update the record in database
-            }
+                UpdateRecord();
+        }
 
-            
+        private void btnRet_Click(object sender, EventArgs e)
+        {
+            Hide();
         }
     }
 }

@@ -1,40 +1,49 @@
-﻿<?xml version="1.0" encoding="utf-8" ?> 
-<!--predefined configuration list-->
-<Root>
-  <Item Name="default">
-    <addr>0</addr>
-    <board_ID>0</board_ID>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Root current="002">
+  <Item Name="002">
+    <addr>8</addr>
+    <board_ID>16</board_ID>
     <baudrate>0</baudrate>
-    <Poise_Weight_gram>0</Poise_Weight_gram>[<5>0</5>]
-    <cs_poise>0</cs_poise>[<5>0</5>]
-    <cs_zero>0</cs_zero>
-    <target_weight>0</target_weight>
-    <addr_copy1>0</addr_copy1>
-    <board_copy1>0</board_copy1>
-    <cs_Filter_option>0</cs_Filter_option>
-    <cs_gain_wordrate>0</cs_gain_wordrate>
-    <motor_speed>0</motor_speed>
-    <magnet_freq>0</magnet_freq>
-    <magnet_amp>0</magnet_amp>
-    <magnet_time>0</magnet_time>
-    <delay_f>0</delay_f>
-    <delay_w>0</delay_w>
-    <delay_s>0</delay_s>
-    <open_s>0</open_s>
-    <open_w>0</open_w>
-    <check_sum>0</check_sum>
-    <rom_para_valid>0</rom_para_valid>
-    <addr_copy2>0</addr_copy2>
-    <board_copy2>0</board_copy2>
-    <cs_mtrl>0</cs_mtrl>
+    <Poise_Weight_gram0>12800</Poise_Weight_gram0>
+    <Poise_Weight_gram1>25600</Poise_Weight_gram1>
+    <Poise_Weight_gram2>51200</Poise_Weight_gram2>
+    <Poise_Weight_gram3>11265</Poise_Weight_gram3>
+    <Poise_Weight_gram4>62465</Poise_Weight_gram4>
+    <cs_poise0>36177</cs_poise0>
+    <cs_poise1>44118</cs_poise1>
+    <cs_poise2>60512</cs_poise2>
+    <cs_poise3>12139</cs_poise3>
+    <cs_poise4>52860</cs_poise4>
+    <cs_zero>27468</cs_zero>
+    <target_weight>25600</target_weight>
+    <addr_copy1>8</addr_copy1>
+    <board_copy1>16</board_copy1>
+    <cs_filter>0</cs_filter>
+    <cs_gain_wordrate>3</cs_gain_wordrate>
+    <motor_speed>1</motor_speed>
+    <magnet_freq>10</magnet_freq>
+    <magnet_amp>45</magnet_amp>
+    <magnet_time>2560</magnet_time>
+    <delay_f>20</delay_f>
+    <delay_w>20</delay_w>
+    <delay_s>20</delay_s>
+    <open_s>10</open_s>
+    <open_w>10</open_w>
+    <check_sum>255</check_sum>
+    <rom_para_valid>170</rom_para_valid>
+    <addr_copy2>8</addr_copy2>
+    <board_copy2>16</board_copy2>
+    <cs_mtrl>34124</cs_mtrl>
     <Mtrl_Weight_gram>0</Mtrl_Weight_gram>
-    <Mtrl_Weight_decimal>0</Mtrl_Weight_decimal>
-    <status>0</status>
+    <Mtrl_Weight_decimal>60</Mtrl_Weight_decimal>
+    <status>204</status>
     <cs_status>0</cs_status>
     <hw_status>0</hw_status>
-    <cs_sys_gain_cal_data>0</cs_sys_gain_cal_data>
-    <cs_sys_offset_cal_data>0</cs_sys_offset_cal_data>
-    <old_cs_zero>0</old_cs_zero>
+    <cs_sys_gain_cal_data_uw>0</cs_sys_gain_cal_data_uw>
+    <cs_sys_gain_cal_data_lw>0</cs_sys_gain_cal_data_lw>
+    <cs_sys_offset_cal_data_uw>0</cs_sys_offset_cal_data_uw>
+    <cs_sys_offset_cal_data_lw>0</cs_sys_offset_cal_data_lw>
+    <old_cs_zero>27468</old_cs_zero>
     <NumOfDataToBePgmed>0</NumOfDataToBePgmed>
     <flag_reset>0</flag_reset>
     <flag_enable>0</flag_enable>
@@ -43,10 +52,70 @@
     <flag_goon>0</flag_goon>
     <test_mode_reg1>0</test_mode_reg1>
     <test_mode_reg2>0</test_mode_reg2>
-    <mode>0</mode>
-    <phase>0</phase>
+    <mode>87</mode>
+    <phase>128</phase>
     <pulse_num>0</pulse_num>
+    <pulse_num_uw>0</pulse_num_uw>
+    <pulse_num_lw>0</pulse_num_lw>
+    <half_period>0</half_period>
+  </Item>
+  <Item Name="001">
+    <addr>8</addr>
+    <board_ID>16</board_ID>
+    <baudrate>0</baudrate>
+    <Poise_Weight_gram0>12800</Poise_Weight_gram0>
+    <Poise_Weight_gram1>25600</Poise_Weight_gram1>
+    <Poise_Weight_gram2>51200</Poise_Weight_gram2>
+    <Poise_Weight_gram3>11265</Poise_Weight_gram3>
+    <Poise_Weight_gram4>62465</Poise_Weight_gram4>
+    <cs_poise0>36177</cs_poise0>
+    <cs_poise1>44118</cs_poise1>
+    <cs_poise2>60512</cs_poise2>
+    <cs_poise3>12139</cs_poise3>
+    <cs_poise4>52860</cs_poise4>
+    <cs_zero>27468</cs_zero>
+    <target_weight>25600</target_weight>
+    <addr_copy1>8</addr_copy1>
+    <board_copy1>16</board_copy1>
+    <cs_filter>0</cs_filter>
+    <cs_gain_wordrate>3</cs_gain_wordrate>
+    <motor_speed>1</motor_speed>
+    <magnet_freq>10</magnet_freq>
+    <magnet_amp>45</magnet_amp>
+    <magnet_time>2560</magnet_time>
+    <delay_f>20</delay_f>
+    <delay_w>20</delay_w>
+    <delay_s>20</delay_s>
+    <open_s>10</open_s>
+    <open_w>10</open_w>
+    <check_sum>255</check_sum>
+    <rom_para_valid>170</rom_para_valid>
+    <addr_copy2>8</addr_copy2>
+    <board_copy2>16</board_copy2>
+    <cs_mtrl>34124</cs_mtrl>
+    <Mtrl_Weight_gram>0</Mtrl_Weight_gram>
+    <Mtrl_Weight_decimal>58</Mtrl_Weight_decimal>
+    <status>204</status>
+    <cs_status>0</cs_status>
+    <hw_status>0</hw_status>
+    <cs_sys_gain_cal_data_uw>0</cs_sys_gain_cal_data_uw>
+    <cs_sys_gain_cal_data_lw>0</cs_sys_gain_cal_data_lw>
+    <cs_sys_offset_cal_data_uw>0</cs_sys_offset_cal_data_uw>
+    <cs_sys_offset_cal_data_lw>0</cs_sys_offset_cal_data_lw>
+    <old_cs_zero>27468</old_cs_zero>
+    <NumOfDataToBePgmed>0</NumOfDataToBePgmed>
+    <flag_reset>0</flag_reset>
+    <flag_enable>0</flag_enable>
+    <flag_disable>0</flag_disable>
+    <flag_release>0</flag_release>
+    <flag_goon>0</flag_goon>
+    <test_mode_reg1>0</test_mode_reg1>
+    <test_mode_reg2>0</test_mode_reg2>
+    <mode>87</mode>
+    <phase>128</phase>
     <pulse_num>0</pulse_num>
+    <pulse_num_uw>0</pulse_num_uw>
+    <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
 </Root>

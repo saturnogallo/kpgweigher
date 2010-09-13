@@ -8,6 +8,11 @@
     <s:String x:Key="new_password2">确认密码</s:String>
     <s:String x:Key="find_password">恢复初始密码</s:String>
     <s:String x:Key="modify_password">完成修改</s:String>
+    <s:String x:Key="password_config">修改密码</s:String>
+    <s:String x:Key="intftrig1">低电平输出</s:String>
+    <s:String x:Key="intftrig2">正脉冲输出</s:String>
+    <s:String x:Key="intftrig3">负脉冲输出</s:String>
+    <s:String x:Key="intftrig4">高电平输出</s:String>
     
     <s:String x:Key="login">登录系统</s:String>
     <s:String x:Key="help">帮助</s:String>
@@ -15,6 +20,7 @@
     <s:String x:Key="product_desc">产品描述</s:String>
     <s:String x:Key="config">设置</s:String>
     <s:String x:Key="preview">预览</s:String>
+    <s:String x:Key="quit">取消</s:String>
     <s:String x:Key="product_config">产品号设置</s:String>
     <s:String x:Key="bucket_config">各斗参数设置</s:String>
     <s:String x:Key="eng_config">工程师页面</s:String>
@@ -46,10 +52,9 @@
     <s:String x:Key="enter_wei_dtime_input">请输入下料前延时</s:String>
     <s:String x:Key="enter_openwei_input">请输入xxx</s:String>
    
-    <s:String x:Key="is_running">请先停止运行后再尝试操作</s:String>
+    <s:String x:Key="quit_eng">退出修改</s:String>    
     <s:String x:Key="zero_complete">清零操作完成</s:String>
     <s:String x:Key="return">返回</s:String>
-    <s:String x:Key="backspace">退格</s:String>
     <s:String x:Key="history">历史数据</s:String>
     <s:String x:Key="his_query">查询</s:String>
     <s:String x:Key="start_date">开始时间</s:String>
@@ -57,12 +62,21 @@
     <s:String x:Key="invalid_pwd">密码错误</s:String>
     <s:String x:Key="singlemode">设置单斗参数</s:String>
     <s:String x:Key="totalweight">总重量</s:String>
+    <s:String x:Key="totalpacknum">总包数</s:String>
+    <s:String x:Key="weight">总重量</s:String>
+    <s:String x:Key="pack_num">总包数</s:String>
+
+    <s:String x:Key="avgweight">平均重量</s:String>
+    <s:String x:Key="gram">克</s:String>
     <s:String x:Key="packsetting">包装机接口设置</s:String>
     <s:String x:Key="bucketsetting">各斗参数设置</s:String>
     <s:String x:Key="all_empty">清空</s:String>
     <s:String x:Key="all_zero">置零</s:String>
     <s:String x:Key="all_start">开始运行</s:String>
     <s:String x:Key="all_stop">停止运行</s:String>
+    <s:String x:Key="sall_start">运行</s:String>
+    <s:String x:Key="sall_stop">停止</s:String>
+    <s:String x:Key="operator">操作员</s:String>
     <s:String x:Key="intf_lb_feed_times">灌装次数</s:String>
     <s:String x:Key="intf_ckb_delay">灌装延时(*0.1s)</s:String>
     <s:String x:Key="intf_handshake">从机模式</s:String>
@@ -72,6 +86,8 @@
     <s:String x:Key="intf_cmd_output_fmt">低电平输出|正脉冲输出|负脉冲输出|高电平输出</s:String>
     <s:String x:Key="intf_cmd_input_fmt">低电平输出|正脉冲输出|负脉冲输出|高电平输出</s:String>
     
+    <s:String x:Key="enter_intf_lb_feed_times">请输入灌装次数</s:String>
+    <s:String x:Key="enter_intf_ckb_delay">请输入灌装延时</s:String>
     <s:String x:Key="grp_name">当前设置名称</s:String>
     <s:String x:Key="grp_amp">主震幅度</s:String>
     <s:String x:Key="grp_freq">主震频率</s:String>

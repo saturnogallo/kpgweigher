@@ -2,7 +2,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:CorLib="clr-namespace:System;assembly=mscorlib"
-    Title="SingleMode" Height="768" Width="1024" Topmost="True" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+    Title="SingleMode" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
     <Window.Resources>
         <Style x:Key ="InputStyle" TargetType = "{x:Type TextBox}">
             <Setter Property = "Foreground" Value = "Black"/>
@@ -265,7 +265,24 @@
                 <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Canvas.Top="10" Canvas.Left="20"/>
             </Canvas>
         </ControlTemplate>
-
+        <ControlTemplate x:Key="RetBtn1" TargetType="{x:Type Button}">
+            <Canvas>
+                <Rectangle Width="140" Height="40">
+                    <Rectangle.Fill>
+                        <ImageBrush ImageSource="F:\\ret1.gif"/>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Canvas>
+        </ControlTemplate>
+        <ControlTemplate x:Key="RetBtn2" TargetType="{x:Type Button}">
+            <Canvas>
+                <Rectangle Width="140" Height="40" >
+                    <Rectangle.Fill>
+                        <ImageBrush ImageSource="F:\\ret2.gif"/>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Canvas>
+        </ControlTemplate>
         <ControlTemplate x:Key="MainBucket" TargetType="{x:Type Button}">
             <Canvas>
                 <Ellipse Fill="Purple" Width="70" Height="70" Stroke="Black"></Ellipse>
@@ -328,7 +345,7 @@
             <ControlTemplate.Triggers>
                 <Trigger Property="IsFocused"  Value = "True">
                     <Setter TargetName="BarPath" Property = "Stroke" Value = "Black"/>
-                    <Setter TargetName="BarPath" Property ="StrokeThickness" Value = "6"/>
+                    <Setter TargetName="BarPath" Property ="StrokeThickness" Value = "3"/>
                 </Trigger>
             </ControlTemplate.Triggers>
 
@@ -638,11 +655,11 @@
         <Label Canvas.Left="689.976" Canvas.Top="578" Foreground="Red" FontSize="36" FontFamily="华文楷体" Content="{DynamicResource preview}" Height="64" Name="label1" Opacity="0.9" OpacityMask="Beige" Width="100" />
         <Label Background="#FFEEF2FB" Canvas.Left="610" Canvas.Top="392" Content="{DynamicResource product_config}" FontSize="24" Height="38" Name="label2" Width="176" />
         <Label Canvas.Left="444" Canvas.Top="47.4" Content="{DynamicResource grp_freq}" Height="30" Name="label3" Style="{StaticResource MainLblStyle}" Width="128" />
-        <TextBox Canvas.Left="576.148" Canvas.Top="47.4" Height="30" MaxLength="50" Name="run_freq" Style="{StaticResource InputStyle}" Width="82" />
+        <TextBox Canvas.Left="576.148" Canvas.Top="47.4" Height="30" MaxLength="50" Name="run_freq" GotFocus="main_input_click" Style="{StaticResource InputStyle}" Width="82" />
         <Label Canvas.Left="664" Canvas.Top="48.5" Content="{DynamicResource grp_amp}" Height="26" Name="label4" Style="{StaticResource MainLblStyle}" Width="122" />
-        <TextBox Canvas.Left="788.148" Canvas.Top="48.5" Height="30" MaxLength="50" Name="run_amp" Style="{StaticResource InputStyle}" Width="82" />
+        <TextBox Canvas.Left="788.148" GotFocus="main_input_click" Canvas.Top="48.5" Height="30" MaxLength="50" Name="run_amp" Style="{StaticResource InputStyle}" Width="82" />
         <Button Canvas.Left="507.259" Canvas.Top="448" Content="+" Height="30" Name="new_prd" Template="{StaticResource roundButton}" Width="16.665" Click="new_prd_Click" />
-        <Button Canvas.Left="526.614" Canvas.Top="682.154" Height="42.218" Name="btn_ret_config" Width="147.763" Click="btn_ret_config_Click">回到设置</Button>
-        <Button Canvas.Left="765.479" Canvas.Top="682.154" Height="39.996" Name="btn_ret_run" Width="148.874" Click="btn_ret_run_Click">回到运行</Button>
+        <Button Template="{StaticResource RetBtn1}" Canvas.Left="526.614" Canvas.Top="682.154" Height="42.218" Name="btn_ret_config" Width="147.763" Click="btn_ret_config_Click">回到设置</Button>
+        <Button Template="{StaticResource RetBtn2}" Canvas.Left="765.479" Canvas.Top="682.154" Height="39.996" Name="btn_ret_run" Width="148.874" Click="btn_ret_run_Click">回到运行</Button>
     </Canvas>
 </Window>

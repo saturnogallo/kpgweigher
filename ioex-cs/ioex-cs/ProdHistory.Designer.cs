@@ -40,6 +40,7 @@
             this.lbl_prod = new System.Windows.Forms.Label();
             this.lb_prod = new System.Windows.Forms.ListBox();
             this.lbl_summary = new System.Windows.Forms.Label();
+            this.btnRet = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -151,11 +152,22 @@
             this.lbl_summary.TabIndex = 11;
             this.lbl_summary.Text = "label1";
             // 
+            // btnRet
+            // 
+            this.btnRet.Location = new System.Drawing.Point(834, 689);
+            this.btnRet.Name = "btnRet";
+            this.btnRet.Size = new System.Drawing.Size(170, 44);
+            this.btnRet.TabIndex = 12;
+            this.btnRet.Text = "button1";
+            this.btnRet.UseVisualStyleBackColor = true;
+            this.btnRet.Click += new System.EventHandler(this.btnRet_Click);
+            // 
             // ProdHistory
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1016, 736);
+            this.Controls.Add(this.btnRet);
             this.Controls.Add(this.lbl_summary);
             this.Controls.Add(this.lbl_prod);
             this.Controls.Add(this.lb_prod);
@@ -190,5 +202,6 @@
         private System.Windows.Forms.Label lbl_prod;
         private System.Windows.Forms.ListBox lb_prod;
         private System.Windows.Forms.Label lbl_summary;
+        private System.Windows.Forms.Button btnRet;
     }
 }

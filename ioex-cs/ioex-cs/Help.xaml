@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ioex_cs.Help"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Help" Height="768" Width="1024" Topmost="True" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+    Title="Help" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
     <Grid>
         <Label Height="110" Margin="346,0,132,236" Name="label1" VerticalAlignment="Bottom">Help or manual</Label>
         <Button Height="44" Margin="402,0,410,16" Name="return" VerticalAlignment="Bottom" Content="{DynamicResource return}" Click="return_Click"/>

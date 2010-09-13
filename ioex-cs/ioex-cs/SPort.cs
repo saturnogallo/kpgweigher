@@ -201,7 +201,7 @@ namespace ioex_cs
         
         public PortStatus Status { get; set; }
         public static int max_timeout = 30; //30*20ms(timer)
-        public static int timer_cycle = 20; //20ms
+        public static int timer_cycle = 1; //20ms
         private FrameBuffer ifrm;
         private byte wait_id; //node that is waiting for response currently
         private UInt32 timer_tick;  //timer tick used to check timeout of response
@@ -213,6 +213,8 @@ namespace ioex_cs
         {
             _serial = new SerialPort(PortName, BaudRate, Parity, DataBits, StopBit);
             _serial.DataReceived +=new SerialDataReceivedEventHandler(_serial_DataReceived);
+            _serial.Handshake = Handshake.None;
+            
             
             CmdToSend = new Queue<byte[]>();
             InFrameHandlers = new Dictionary<byte, IOInFrameHandler>();
@@ -253,9 +255,8 @@ namespace ioex_cs
                 }
             }
             //last command is completed
-            if (CmdToSend.Count > 0)
+            while (CmdToSend.Count > 0)
             {
-                Status = PortStatus.BUSY;
                 byte[] cmd = CmdToSend.Dequeue();
                 
                 _serial.Write(cmd, 1, cmd[0]);
@@ -264,10 +265,29 @@ namespace ioex_cs
                     timer_tick = 0;
                     wait_id = cmd[4];
                     last_cmd = cmd;
+                    return;
                 }
-                return;
             }
             Status = PortStatus.IDLE;
+        }
+        public bool AddVCommand(byte[] cmd) ////cmd[0] would be length of data, command is sent out with no enqueue
+        {
+            if (Status == PortStatus.CLOSED || Status == PortStatus.ERROR)
+            {
+                return false;
+            }
+            if (CmdToSend.Contains(cmd)) //duplicate command
+            {
+                return false;
+            }
+
+            while ((CmdToSend.Count > 0))
+            {
+                Thread.Sleep(1);
+            }
+            _serial.Write(cmd, 1, cmd[0]);
+
+            return true;
         }
         public bool AddCommand(byte[] cmd) //cmd[0] would be length of data
         {
@@ -281,6 +301,10 @@ namespace ioex_cs
             }
             
             Status = PortStatus.BUSY;
+            if (cmd == null)
+            {
+                throw new Exception("Invalid command");
+            }
             CmdToSend.Enqueue(cmd);
             if (CmdToSend.Count > 1000)
             {
@@ -325,8 +349,6 @@ namespace ioex_cs
                         wait_id = 0;
                         OutBufferCheck(null);
                     }
-
-                    
                 }
             }
         }

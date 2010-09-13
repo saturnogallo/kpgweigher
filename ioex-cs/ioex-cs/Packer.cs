@@ -56,16 +56,16 @@ namespace ioex_cs
         private XmlConfig all_conf;//store all the configurations of the packer
         private PackerConfig sys_cfg;
         public PackerConfig curr_cfg { get {return sys_cfg;} }
-        static string pack_define_file = "pack_define.xml";
+        public string pack_define_file = "pack_define.xml";
 
         public PackerStatus status { get; set; } //status of running
 
-        public Packer()
+        public Packer(int id)
         {
             vib_node = null;
             pack_node = null;
             weight_node = new List<WeighNode>();
-            all_conf = new XmlConfig(pack_define_file);
+            all_conf = new XmlConfig("pack_define"+id.ToString()+".xml");
             all_conf.LoadConfigFromFile();
             sys_cfg = new PackerConfig();
             curr_node = -1;
@@ -85,6 +85,10 @@ namespace ioex_cs
             {
                 pack_node = node as BottomPackNode;
             }
+        }
+        public void InitConfig()
+        {
+            LoadConfig(all_conf.cfg_name);
         }
         //load all the configuration and update the UI,
         //packer and sub node will share the same configuration name
@@ -125,9 +129,11 @@ namespace ioex_cs
 
         public void DuplicateCurrentConfig(string newcfg)
         {
+            App p = Application.Current as App;
+            p.bMainPause = true;
             if (newcfg == "")
             {
-                newcfg = (all_conf.Keys.Count() + 1).ToString();
+                newcfg = (all_conf.Keys.Count() + 1).ToString("D3");
             }
             //add new configuration
 
@@ -136,23 +142,29 @@ namespace ioex_cs
                 n.DuplicateCurrentConfig(newcfg);
             }
             vib_node.DuplicateCurrentConfig(newcfg);
-            pack_node.DuplicateCurrentConfig(newcfg);
+            if (pack_node != null)
+            {
+                pack_node.DuplicateCurrentConfig(newcfg);
+            }
+            
 
-            XElement cfgNode = new XElement("NodeProperty");
+            XElement cfgNode = new XElement("Item");
             sys_cfg.ToElement(cfgNode);
+            cfgNode.Element("product_no").Value = newcfg;
             vib_node.ToElement(cfgNode);
-            pack_node.ToElement(cfgNode);
+            if (pack_node != null)
+                pack_node.ToElement(cfgNode);
 
             all_conf.AddConfig(newcfg, cfgNode);
+            this.LoadConfig(newcfg);
             all_conf.SaveConfigToFile();
-            this.LoadConfig(newcfg);    
-            
+            p.bMainPause = false;
         }
         private void DoRelease(SubNode[] addrs, double weight)
         {
             foreach (SubNode n in addrs)
             {
-                n.Action("release",false);
+                n.Action("looprelease",false);
                 (n as WeighNode).bRelease = true;
             }
             //todo update the display;
@@ -164,9 +176,9 @@ namespace ioex_cs
             foreach (SubNode n in addrs)
             {
                 o.bucket[i++] = (byte)n["addr"].Value;
-                o.time = DateTime.Now;
+                
             }
-
+            o.time = DateTime.Now;
             o.weight = weight;
             ProdHistory.AddNewPack(o,(Application.Current as App).bSimulate);
             
@@ -339,22 +351,24 @@ namespace ioex_cs
             while (Caculation1())
             {
             }
-
+//            DoRelease(new SubNode[] { weight_node[0], weight_node[1], weight_node[2], weight_node[3], weight_node[4] }, 123);
             for (int i = 0; i < weight_node.Count; i++ )
             {
                 if (weight_node[i].status == NodeStatus.ST_LOST)
                     continue;
                 //todo check force release and over_weight case
                 weight_node[i]["flag_goon"] = 1;
-                if (weight_node[i]["flag_goon"] != 1)
+/*                if (weight_node[i]["flag_goon"] != 1)
                 {
                     weight_node[i]["flag_goon"] = 1;
                 }
+ */
             }
         }
         
         public void StartRun()
         {
+            ProdHistory.InitNewRun("sj", sys_cfg.product_no, sys_cfg.product_desc);
             vib_node.Action("start",false);
             foreach (WeighNode n in this.weight_node)
             {
@@ -368,6 +382,7 @@ namespace ioex_cs
         public void StopRun()
         {
             status = PackerStatus.IDLE;
+            ProdHistory.EndNewRun();
             vib_node.Action("stop",false);
             foreach (WeighNode n in this.weight_node)
             {
