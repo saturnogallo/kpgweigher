@@ -67,11 +67,18 @@ interrupt [TIM1_OVF] void timer1_ovf_isr(void)
 /**************************************************************************************/
 //                              Global Variable
 /**************************************************************************************/
-NODE RS485_Node[MAX_NODE_NUM];                       // RS485节点信息及参数设置 
-NODE vibrator[MAX_VIBR_NUM];                         // 主振动机
-SYSTEM system;                                       // 系统参数设置
+NODE RS485_Node[MAX_NODE_NUM];                       // RS485 node information
+NODE vibrator[MAX_VIBR_NUM];                         // master vibarator
+SYSTEM system;                                       // system parameter setting
+BOOT_COMM_INTERFACE boot_comm;                       // interface with node bootloader
 
- 
+u8 dsm_rcmd, dsm_rpara,dsm_cmd_received;             // debug state machine.
+u8 x_modem_databuf[130];                             // buffer constaining data received through x_modem protocol
+                                                     // x_modem_databuf[128],[129] are CRC bytes.
+u8 x_modem_one_pack_received = 0;                    // flag set by interrupt to indicate a pack has been received.
+u8 x_modem_file_being_transferred = 0;               // flag set by interrupt to indicate file is being transferred.
+u8 x_modem_file_transfer_complete = 0;               // flag set by interrupt to indicate end of file transfer.
+
 #define SUCCEED	1
 #define FAILED  0
 
@@ -145,6 +152,18 @@ u8 readb_until_return(u8 port, u8 regid, u8 nodeid){
         return (timeout > 0)? SUCCEED : FAILED;
 }
 
+u8 nfu_readb_until_return(u8 nodeid, u8 regid, u8 size, u8 port){
+        u16 timeout;
+        RWait[port] = regid;
+        cm_query(nodeid,regid,size,port);
+        timeout = 0x400; //1024
+        while((RWait[port] == regid) && (timeout != 0)){
+                nfu_process_node_feedback();
+                timeout--; 
+        }       
+        RWait[port] = R_NOWAIT;                   
+        return (timeout > 0)? SUCCEED : FAILED;
+}
 
 /**************************************************************************************/
 ////////////////////////////////////////////
@@ -673,10 +692,13 @@ void report_loop(){
 /**************************************************************************************/
 //
 /**************************************************************************************/
+void node_fw_upgrade_state_machine();
+
 void main(void)
 {
     
     u16 tick = 0;
+	dsm_cmd_received = 0;                        /* no debug command arrives */
     system.flag_report = MY_ADDR;                //will be set to STATE_DONE_OK once node search is done.
     // RS485 Node    
     init_var();	//init data structure 
@@ -719,9 +741,15 @@ void main(void)
     packer_config = 0x00; // 0xa8 IR OR/OF falling edge, with handshake, mem
     Init_interface(); 
          
-    //loop of each group;
+    //loop of each group; 
     while(1)
     {
+       /* f/w upgrade */               
+       if(dsm_cmd_received)
+       { node_fw_upgrade_state_machine();
+         continue;
+       }
+
  //       if(system.flag_search[0] == STATE_DONE_OK)
  //	                system.flag_goon[0] = 1;
       
@@ -748,29 +776,366 @@ void main(void)
 
 
        cm_process(); 
-       
-       // LED to indicate code is running. 
+              
        if(++tick>2000)
        {
          //LED_FLASH(LED_RUN);       
-         tick=0;
-#ifdef TEST_SERIAL_PORTS
-         putchar('C');
-         putchar('O');
-         putchar('M');
-         putchar('1');
-         d_putchar('C');
-         d_putchar('O');
-         d_putchar('M');
-         d_putchar('0');
-#endif         
+         tick=0;        
        }
-       // LED logic ends.
+
     }
 }      
 /*******************************************/
 /*      debug related function             */
 /*******************************************/
+
+/******************************************************************************/
+// Calculate CRC 
+/******************************************************************************/
+int calcrc(unsigned char *ptr, int count) 
+{ 
+    int crc = 0; 
+    unsigned char i; 
+     
+    while (--count >= 0) 
+    { 
+        crc = crc ^ (int) *ptr++ << 8; 
+        i = 8; 
+        do 
+        { 
+        if (crc & 0x8000) 
+            crc = crc << 1 ^ 0x1021; 
+        else 
+            crc = crc << 1; 
+        } while(--i); 
+    } 
+    return (crc); 
+}
+
+/**************************************************************************************/
+// node firmware upgrade state machine
+/**************************************************************************************/
+#define RESET_NODE_TO_UPGRADE_FW 0xa0
+
+#define NFU_QUERY_NODE_STATUS       0
+#define NFU_RESET_NODE              1
+#define NFU_GREETING_MSG            2
+#define NFU_REQ_PC_2_SEND           3
+#define NFU_AWAIT_PC_DATA           4
+#define NFU_CAL_PC_CRC              5
+#define NFU_NCMD_SEND_PAGE_ADDR     6
+#define NFU_NCMD_SEND_PAGE_DATA     7 
+#define NFU_NCMD_SEND_PGM_CMD       8
+#define NFU_NCMD_AWAIT_PGM_DONE     9
+#define NFU_UPGRADE_CMPLT          10
+#define NFU_NCMD_RUN_APP           11
+#define NFU_RETURN_FROM_FW_UPGRADE 12
+
+#define BE_IDLE            0x0             /* firmware upgrade request is served successfully, or failed */
+#define INVALIDATE_APP     0x1             /* Clear last application page to indicate code is disturbed */
+#define PGM_CURRENT_PAGE   0x2             /* command from master board asking node bootloader to program current flash page */
+#define FW_UPGRADE_CMPT    0x3             /* Bootloader calculates CRC of whole application code and writes it to last app page */
+#define RUN_APP            0x4             /* firmware upgrade completes, run application */
+
+#define BL_REG_CMD  0x0
+#define BL_REG_STATUS 0x1
+#define BL_REG_PAGE_ADDR 0x2
+#define BL_REG_PAGE_BUF 0x4   
+
+// bootloader returned flags:
+#define CRC_ERR 0x20                       /* bit 5 */
+#define PGM_ERR 0x10                       /* bit 4 */
+
+void node_fw_upgrade_state_machine(void)
+{
+  u16 crc, crc_pc, addr_backup;   
+  u8 i, reset_cmd;  
+  static u8 nfu_state;
+  static u32 count;   
+  if(!dsm_cmd_received)
+    return;
+
+  if(dsm_rcmd == 1) /* upgrade firmware */
+  {  
+       /************************************************************/
+       // master board needs to know what is going on in node board.
+       // This is done through querying board_id register (addr 0x2)
+       // if node is in bootloader section, a 'B' character will be returned. 
+       // if node is in primary firmware section, a valid board id will
+       // be returned. 
+       /************************************************************/  
+       //if (SUCCEED == readb_until_return(SPORTD,NREG_BOARD,dsm_rpara)) ;
+       
+       
+       /************************************************************/
+       // Reset node on reset command from master board.
+       // flag_reset[7:4] --- reset type
+       //   #define UPGRADE_FIRMWARE 0xA
+       //   #define NORMAL_BOOT      0x0 Default data after powerup
+       // flag_reset[2:0] --- baud rate
+       //   0 - 115200bps   1 - 57600bps  2 - 38400bps 
+       //   3 - 19200bps    4 - 9600bps   
+       /************************************************************/
+          /* write 0xA0 to flag_reset register of node */
+     
+     switch(nfu_state)
+     {
+       /*********************************************************************/
+       // Test if node is in bootloader or primary firmware.
+       /*********************************************************************/
+	 case NFU_QUERY_NODE_STATUS:
+         if(nfu_readb_until_return(dsm_rpara, NREG_BOARD, 1, SPORTD))
+         {
+             /* board id returned */
+             if(boot_comm.status == 'B')
+                nfu_state = NFU_GREETING_MSG;
+  	     else /* Node is in primary firmware */			 
+                nfu_state = NFU_RESET_NODE;
+         }
+         else
+         {
+          d_putstr("\r\nNode not found.\r\n");
+         }         
+         break;
+       /*********************************************************************/
+       // Send command to put node into bootloader mode
+       /*********************************************************************/
+       case NFU_RESET_NODE:          
+         reset_cmd = RESET_NODE_TO_UPGRADE_FW;
+         cm_write(dsm_rpara, NREG_RESET, 1, &reset_cmd, SPORTD);
+         sleepms(500);
+         d_putstr("\r\nSend command to reset node.\r\n");
+        
+         nfu_state = NFU_QUERY_NODE_STATUS; 
+         break;
+       /*********************************************************************/
+       // Print greeting messages.
+       /*********************************************************************/
+       case NFU_GREETING_MSG: 
+          /* check*/   
+          d_putstr("Ready to upgrade node board firmware. \r\n"); 
+          d_putstr("Node selected is No. ");
+          d_putchar2(dsm_rpara);
+          d_putstr("(Decimal).\r\n");
+          d_putstr("Please download *.BIN file using xmodem protocol. \r\n");
+          nfu_state = NFU_REQ_PC_2_SEND;
+
+          /* initialize variables */
+          count = 0; 
+          boot_comm.page_addr = 0;
+          break; 
+       /*********************************************************************/
+       // Request PC (hyperterminal) to send data, start x_modem transfer.
+       /*********************************************************************/           
+      case  NFU_REQ_PC_2_SEND:
+          if(x_modem_file_being_transferred)
+          {   nfu_state = NFU_AWAIT_PC_DATA;  
+              x_modem_file_being_transferred = 0; 
+          } 
+          else
+          {  
+             if(!count)              /* send immediately at the first time */
+               d_putchar('C');       /* request PC to start x_modem transfer */ 
+             
+             count++;
+             
+             if(count > 240000)
+               count = 0;                                                
+          } 
+          break;
+       /*********************************************************************/
+       // Await PC to complete data transfer (128 words) 
+       /*********************************************************************/
+       case NFU_AWAIT_PC_DATA:
+          count = 0; 
+          if(x_modem_one_pack_received)
+          {
+             nfu_state = NFU_CAL_PC_CRC;
+             x_modem_one_pack_received = 0;    /* clear flag for next cycle */
+          }
+          break;
+       /*********************************************************************/
+       // Perform CRC check over received data.
+       /*********************************************************************/     
+       case NFU_CAL_PC_CRC: 
+          crc = x_modem_databuf[128] ;
+          crc = crc <<8;
+          crc += x_modem_databuf[129];
+          crc_pc = calcrc(&x_modem_databuf[0],128);
+          if( crc_pc != crc)
+          {   /* CRC check failed, clear buffer flag */
+              //d_putstr("crc error, request pc to resend..\r\n");                          
+              /* request PC to re-send */
+              d_putchar(XMODEM_NAK);     
+              nfu_state = NFU_AWAIT_PC_DATA; 
+          }
+          else /* CRC check pass */ 
+          {                    
+              nfu_state = NFU_NCMD_SEND_PAGE_ADDR;               
+          }
+          break;
+       /*********************************************************************/
+       // Send data received from PC to node.
+       // Received 128-byte data from PC
+       /*********************************************************************/   
+       case NFU_NCMD_SEND_PAGE_ADDR:
+	  //d_putstr("Sending data to node ... \r\n");
+	  /* write page address, 2 bytes */ 
+	  cm_write(dsm_rpara, BL_REG_PAGE_ADDR, 2, (u8*)(&boot_comm.page_addr), SPORTD);	  
+
+          /*back up page_addr first, this could be changed by reading page_addr reg in node */
+          addr_backup = boot_comm.page_addr; 
+          sleepms(5);    /* ~1 frame/ms @ 115200bps. */          
+          /* read node to make sure page_addr was correctly written */
+
+          if(nfu_readb_until_return(dsm_rpara, BL_REG_PAGE_ADDR, 2, SPORTD))
+          {
+             if(boot_comm.page_addr == addr_backup ) /* data read out matches with what was written */
+             {   nfu_state = NFU_NCMD_SEND_PAGE_DATA; /* move to next state */   
+                 LED_FLASH(PORTB.5);
+             }
+          }
+          boot_comm.page_addr = addr_backup;  /* restore original address, resend page address */
+                   
+          break;
+       /*********************************************************************/
+       // Send data to node to fill a flash page 
+       /*********************************************************************/                 
+       case NFU_NCMD_SEND_PAGE_DATA:
+          /* fill in data, 128 bytes + 2 CRC bytes */
+          cm_block_write(dsm_rpara, BL_REG_PAGE_BUF, 130, x_modem_databuf, SPORTD);
+          /*for(i =0; i<130; i++)
+          {  
+            cm_write(dsm_rpara, BL_REG_PAGE_BUF + i, 1, &(x_modem_databuf[i]), SPORTD);            
+          } */
+          /* read first byte back to make sure data was sent out correctly */
+          if(nfu_readb_until_return(dsm_rpara, BL_REG_PAGE_BUF, 1, SPORTD))
+          { 
+              if(boot_comm.page_buffer == x_modem_databuf[0])
+              {  nfu_state = NFU_NCMD_SEND_PGM_CMD;
+                 LED_FLASH(PORTB.6);
+              }
+          }
+          break;
+       /*********************************************************************/
+       // Send program command to node
+       /*********************************************************************/       
+       case NFU_NCMD_SEND_PGM_CMD: 
+          boot_comm.upgrade_cmd =  PGM_CURRENT_PAGE; 
+          cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD);
+          
+          nfu_state = NFU_NCMD_AWAIT_PGM_DONE;
+          break;
+       /*********************************************************************/
+       // Await current flash page program to complete.
+       /*********************************************************************/ 
+       case NFU_NCMD_AWAIT_PGM_DONE:
+	  /* query node's bootloader register */
+	 //d_putstr("await current flash page to be programmed ... \r\n");
+	 
+	  if(nfu_readb_until_return(dsm_rpara, BL_REG_CMD, 1, SPORTD))
+	  {
+            switch(boot_comm.upgrade_cmd)
+            {
+               case PGM_CURRENT_PAGE:        /* command not served yet */ 
+                  LED_FLASH(PORTD.7);
+                  break;
+               case BE_IDLE:
+                  if(!x_modem_file_transfer_complete)
+                  {  
+  	             boot_comm.page_addr += 128;             /* move index to next page */
+  	             d_putchar(XMODEM_ACK);                  /* acknowledge PC*/ 
+  	             nfu_state = NFU_AWAIT_PC_DATA;          /* await for next pack*/	
+  	             LED_FLASH(PORTB.7);             
+  	          }
+  	          else
+  	          {
+  	             nfu_state = NFU_UPGRADE_CMPLT; 
+  	             PORTD.7 = 1;
+  	             PORTD.6 = 1;
+  	             PORTD.5 = 1; 
+  	             d_putchar(XMODEM_ACK);                  /* acknowledge PC*/ 
+  	          }
+                  break;
+               case CRC_ERR:
+                  nfu_state = NFU_NCMD_SEND_PAGE_ADDR; 
+                  LED_ON(PORTB.4);
+	          //d_putstr("corrupted data received by node. \r\n");
+	          break; 
+	       case PGM_ERR:
+                  nfu_state = NFU_NCMD_SEND_PAGE_ADDR;  
+                  LED_ON(PORTB.4);
+                  //d_putstr("program failed. retrying... \r\n");
+	          break;
+	       default:
+	           LED_ON(PORTB.4);
+	          //d_putstr("unexpected error occured. \r\n");
+	          break;
+	     }
+	  }
+	  else
+	  {
+	       //d_putstr("node response timeout. \r\n");
+	       sleepms(100);	          
+	  }
+	  	  
+          break;  
+       /*********************************************************************/
+       // Inform node bootloader that firmware upgrade completes
+       /*********************************************************************/  
+       case NFU_UPGRADE_CMPLT:          
+          /* send program command */ 
+          boot_comm.upgrade_cmd =  FW_UPGRADE_CMPT; 
+          cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD); 
+          
+          if(nfu_readb_until_return(dsm_rpara, BL_REG_CMD, 1, SPORTD))
+          {
+             if(boot_comm.upgrade_cmd == BE_IDLE)
+             {     //d_putstr("firmware upgrade completed successfully. \r\n"); 
+                   nfu_state = NFU_NCMD_RUN_APP;
+             } 
+             else
+             {     //d_putstr("firmware upgrade completed with error. \r\n");  
+                   nfu_state = NFU_NCMD_RUN_APP;
+             } 
+                       
+          }
+          else 
+          {    sleepms(100);                /*sleep and re-try later */
+               //d_putstr("query upgrade status again ... \r\n");
+          }
+          
+          break;
+       /*********************************************************************/
+       // inform node to start to run applications
+       /*********************************************************************/
+        case NFU_NCMD_RUN_APP:
+          boot_comm.upgrade_cmd =  RUN_APP; 
+          cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD);
+          //d_putstr("node starts to run applications ... \r\n");
+          d_putstr("run application \r\n");  
+          nfu_state = NFU_RETURN_FROM_FW_UPGRADE;
+          break;
+       /*********************************************************************/
+       // default state.
+       /*********************************************************************/       
+       case NFU_RETURN_FROM_FW_UPGRADE:
+       default: 
+          //d_putstr("return from node firmware upgrade. \r\n"); 
+          d_putstr("return. \r\n"); 
+          dsm_cmd_received = 0; 
+          nfu_state = NFU_QUERY_NODE_STATUS;          
+          break;        
+     } /* end of switch */
+  } /* end of if(dsm_rcmd == 1) */
+  
+}
+
+
+
+
+/*
+
 void push_debug(u8 data)
 {               
         u8 i;
@@ -870,6 +1235,7 @@ void push_debug(u8 data)
 /**************************************************************************************/
 //
 /**************************************************************************************/
+/*
 void debug_getc(u8 data){
         static u8 dtpos = 0;
         static u8 dtval = 0;
@@ -891,6 +1257,7 @@ void debug_getc(u8 data){
 /**************************************************************************************/
 //
 /**************************************************************************************/                                   
+/*
 void debug(u8 data){               
                 if((data>= 'G') && (data <='Z')){    
                         push_debug(data);       
@@ -905,4 +1272,5 @@ void debug(u8 data){
 }
 
 
+*/
 
