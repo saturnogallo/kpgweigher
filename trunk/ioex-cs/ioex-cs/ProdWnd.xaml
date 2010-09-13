@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ioex_cs.ProdWnd"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="ProductWnd" Height="768" Width="1024" Topmost="True" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+    Title="ProductWnd" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
     <Window.Resources>
         <ControlTemplate x:Key="imgBtn" TargetType="{x:Type Button}">
             <Grid>

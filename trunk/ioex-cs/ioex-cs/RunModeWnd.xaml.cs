@@ -33,13 +33,14 @@ namespace ioex_cs
             this.Loaded +=new RoutedEventHandler(RunMode_Loaded);
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
-            uiTimer.Interval = 10;
+            uiTimer.Interval = 100;
             uiTimer.Start();
         }
 
         public bool bNeedInvalidate = false;
         void uiTimer_Tick(object sender, EventArgs e)
         {
+            lbl_datetime.Content = DateTime.Now.ToLongDateString() + "\n" + DateTime.Now.ToLongTimeString();
             if (!this.IsVisible)
                 return;
             if (! bNeedInvalidate)
@@ -47,13 +48,15 @@ namespace ioex_cs
                 return;
             }
             Packer p = (System.Windows.Application.Current as App).curr_packer;
-            
+
+//          (System.Windows.Application.Current as App).WeightQuery(null);
             currentApp().bMainPause = true;
             foreach (WeighNode n in p.weight_node)
             {
                 UpdateUI("wei_node" + n.node_id);
             }
             currentApp().bMainPause = false;
+ 
         }
         void  RunMode_Loaded(object sender, RoutedEventArgs e)
         {
@@ -136,30 +139,21 @@ namespace ioex_cs
             App p = currentApp();
             Packer pack = p.curr_packer;
             
-            //diplay the variable based on current setting
-
-            if (param == "run_uvar")
+            //display the variable based on current setting
+            if(param == "sys_config")
             {
                 this.input_uvar.Content = pack.curr_cfg.upper_var.ToString();
-            }
-            if (param == "run_dvar")
-            {
-                this.input_dvar.Content = pack.curr_cfg.lower_var.ToString();
-            }
-            if (param == "run_target")
-            {
-                this.lbl_weight.Content = pack.curr_cfg.target.ToString();
-            }
-            if (param == "lbl_prd_no")
-            {
-                this.lbl_prd_no.Content = pack.curr_cfg.product_no.ToString();
 
-            }
-            if (param == "lbl_desc")
-            {
-                this.lbl_desc.Content = pack.curr_cfg.product_desc.ToString();
+                this.input_dvar.Content = pack.curr_cfg.lower_var.ToString();
+
+                this.lbl_weight.Content = pack.curr_cfg.target.ToString();
+
+                this.prd_no.Content = pack.curr_cfg.product_no.ToString();
+
+
+                this.prd_desc.Content = pack.curr_cfg.product_desc.ToString();
                 Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
-                //load the corresponding pictiure.
+                //load the corresponding picture.
                 (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("f:\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
 
             }
@@ -168,8 +162,8 @@ namespace ioex_cs
                 Label lb = NameToControl(param) as Label;
                 Button btn = NameToControl(param.Replace("wei_node", "bucket")) as Button;
                 WeighNode n = pack.weight_node[StringToId(param) - 1];
-                //todo add fixed point position
-                string ct = n.weight.ToString().Substring(0,n.weight.ToString().IndexOf('.')+2);
+                
+                string ct = n.weight.ToString("F1");
                 lb.Content = ct;
                 if (n.status == NodeStatus.ST_LOST)
                 {
@@ -232,7 +226,7 @@ namespace ioex_cs
                     pack.curr_cfg.target = double.Parse(data);
                     
                 }
-                UpdateUI(param);
+                UpdateUI("sys_config");
             }
             catch (System.Exception e)
             {

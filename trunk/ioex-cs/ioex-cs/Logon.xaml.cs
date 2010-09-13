@@ -23,7 +23,7 @@ namespace ioex_cs
             str_tbl = new Dictionary<string, string>();
             
             XDocument xml_doc;
-            xml_doc = XDocument.Load("C:\\Debug\\Resources\\Lang\\zh-CN.xaml");
+            xml_doc = XDocument.Load("Resources\\Lang\\zh-CN.xaml");
             IEnumerable<XElement> elem = xml_doc.Elements().First().Elements();
             foreach (XElement e in elem)
             {

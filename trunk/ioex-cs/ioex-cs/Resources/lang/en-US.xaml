@@ -9,18 +9,36 @@
     <s:String x:Key="find_password">恢复初始密码</s:String>
     <s:String x:Key="modify_password">完成修改</s:String>
 
+    <s:String x:Key="password_config">修改密码</s:String>
+    
+    <s:String x:Key="intftrig1">低电平输出</s:String>
+    <s:String x:Key="intftrig2">正脉冲输出</s:String>
+    <s:String x:Key="intftrig3">负脉冲输出</s:String>
+    <s:String x:Key="intftrig4">高电平输出</s:String>
+
+    <s:String x:Key="quit_eng">退出修改</s:String>
     <s:String x:Key="login">Log on</s:String>
     <s:String x:Key="reset">Reset</s:String>
     <s:String x:Key="help">Help</s:String>
     <s:String x:Key="ok">确定</s:String>
     <s:String x:Key="clr">清除</s:String>
+    <s:String x:Key="quit">取消</s:String>
+    <s:String x:Key="sall_start">运行</s:String>
+    <s:String x:Key="sall_stop">停止</s:String>
+
     <s:String x:Key="preview">预览</s:String>
     <s:String x:Key="product_no">产品号</s:String>
     <s:String x:Key="product_desc">产品描述</s:String>
     <s:String x:Key="config">设置</s:String>
+    <s:String x:Key="operator">操作员</s:String>
     <s:String x:Key="product_config">产品号设置</s:String>
     <s:String x:Key="bucket_config">各斗参数设置</s:String>
+    <s:String x:Key="totalpacknum">总包数</s:String>
+    <s:String x:Key="weight">总重量</s:String>
+    <s:String x:Key="pack_num">总包数</s:String>
 
+    <s:String x:Key="avgweight">平均重量</s:String>
+    <s:String x:Key="gram">克</s:String>
     <s:String x:Key="eng_config">工程师页面</s:String>
     <s:String x:Key="bottom_config">联机设置</s:String>
     <s:String x:Key="alert_config">报警设置</s:String>
@@ -72,7 +90,7 @@
     <s:String x:Key="motor_speed">开关马达速度</s:String>
 
     <s:String x:Key="address">节点地址</s:String>
-    <s:String x:Key="subcfg_apply">应用设置</s:String>
+    <s:String x:Key="subcfg_apply">应用设置</s:String> 
     <s:String x:Key="subcfg_applyall">应用到同组其他斗</s:String>
     <s:String x:Key="cmd_pass">下料</s:String>
     <s:String x:Key="cmd_mask">禁用</s:String>

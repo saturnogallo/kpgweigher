@@ -26,21 +26,23 @@ namespace ioex_cs
         public void UpdateDisplay()
         {
             App p = (Application.Current as App);
+            p.curr_packer.weight_node[address.SelectedIndex]["cs_filter"] = null;
+            p.curr_packer.weight_node[address.SelectedIndex]["cs_gain_wordrate"] = null;
             cs_filter_input.Text = p.curr_packer.weight_node[address.SelectedIndex]["cs_filter"].ToString();
-            gain_input.Text = p.curr_packer.weight_node[address.SelectedIndex]["gain"].ToString();
+            gain_input.Text = p.curr_packer.weight_node[address.SelectedIndex]["cs_gain_wordrate"].ToString();
 
         }
         private void button1_Click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
-            p.SwitchTo("ConfigMenu");
+            p.SwitchTo("configmenu");
         }
 
         private void btn_modify_Click(object sender, RoutedEventArgs e)
         {
             App p = (Application.Current as App);
             p.curr_packer.weight_node[address.SelectedIndex]["cs_filter"] = UInt32.Parse(cs_filter_input.Text);
-            p.curr_packer.weight_node[address.SelectedIndex]["gain"] = UInt32.Parse(gain_input.Text);
+            p.curr_packer.weight_node[address.SelectedIndex]["cs_gain_wordrate"] = UInt32.Parse(gain_input.Text);
         }
         private void node_reg(string regname)
         {
@@ -48,7 +50,7 @@ namespace ioex_cs
         }
         private void gain_input_GotFocus(object sender, RoutedEventArgs e)
         {
-            node_reg("gain");
+            node_reg("cs_gain_wordrate");
         }
 
         private void cs_filter_input_GotFocus(object sender, RoutedEventArgs e)
@@ -61,7 +63,7 @@ namespace ioex_cs
             {
                 this.cs_filter_input.Text = data;
             }
-            if (param == "gain")
+            if (param == "cs_gain_wordrate")
             {
                 gain_input.Text = data;
             }
@@ -70,6 +72,12 @@ namespace ioex_cs
         private void address_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateDisplay();
+        }
+
+        private void btn_quit_eng_click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
+
         }
     }
 }

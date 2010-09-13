@@ -62,7 +62,7 @@ namespace ioex_cs
             Button btn = this.FindName(param.Replace("wei_node", "bucket")) as Button;
             WeighNode n = currentApp().curr_packer.weight_node[RunMode.StringToId(param) - 1];
 
-            string ct = n.weight.ToString();
+            string ct = n.weight.ToString("F1");
             lb.Content = ct;
             if (n.status == NodeStatus.ST_LOST)
             {
@@ -135,8 +135,8 @@ namespace ioex_cs
             n["motor_speed"] = null;
             vn["magnet_freq"] = null;
             vn["magnet_amp"] = null;
-            UpdateUI();
             p.bMainPause = false;
+            UpdateUI();
         }
         private void UpdateUI()
         {
@@ -163,7 +163,7 @@ namespace ioex_cs
             btn_uvar.Content = p.curr_packer.curr_cfg.upper_var.ToString();
             btn_dvar.Content = p.curr_packer.curr_cfg.lower_var.ToString();
 
-            lbl_currNode.Content = p.curr_packer.curr_node.ToString();
+            lbl_currNode.Content = (p.curr_packer.curr_node+1).ToString();
             Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
             //load the corresponding pictiure.
             (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("f:\\" + p.curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
@@ -182,13 +182,14 @@ namespace ioex_cs
         public void KbdData(string param, string data)
         {
             //update the display based on keyboard input
+            App p = Application.Current as App;
             try
             {
-                App p = Application.Current as App;
+                
                 Packer pack = p.curr_packer;
                 WeighNode n = p.curr_packer.weight_node[p.curr_packer.curr_node];
                 VibrateNode vn = p.curr_packer.vib_node;
-
+                p.bMainPause = true;
                 if (param == "sub_freq_input")
                 {
                     n["magnet_freq"] = UInt32.Parse(data);
@@ -245,7 +246,7 @@ namespace ioex_cs
                 {
                     p.curr_packer.curr_cfg.lower_var = Double.Parse(data);
                 }
-                if (param == "prod_no")
+                if (param == "prd_no")
                 {
                     p.curr_packer.LoadConfig(data);
                 }
@@ -257,10 +258,12 @@ namespace ioex_cs
                 }
   
                 UpdateUI();
+                p.bMainPause = false;
             }
             catch (System.Exception e)
             {
                 MessageBox.Show("Invalid Parameter");
+                p.bMainPause = false;
                 return;
             }
         }
@@ -316,13 +319,16 @@ namespace ioex_cs
             if (p.curr_packer.status == PackerStatus.RUNNING)
             {
                 p.curr_packer.status = PackerStatus.IDLE;
-                this.btn_trial.Content = StringResource.str("all_start");
+
+                this.btn_trial.Content = StringResource.str("sall_start");
+                p.curr_packer.StopRun();
             }
             else
             {
                 p.bSimulate = true;
                 p.curr_packer.status = PackerStatus.RUNNING;
-                this.btn_trial.Content = StringResource.str("all_stop");
+                this.btn_trial.Content = StringResource.str("sall_stop");
+                p.curr_packer.StartRun();
             }
         }
 
@@ -359,6 +365,7 @@ namespace ioex_cs
             Packer pack = p.curr_packer;
             WeighNode cn = p.curr_packer.weight_node[p.curr_packer.curr_node];
             ShowStatus("updating");
+            p.bMainPause = true;
             string[] regs ={"magnet_freq","magnet_amp","magnet_time","open_w","delay_w","open_s","delay_s","delay_f","motor_speed"};
             foreach (string reg in regs)
             {
@@ -373,19 +380,22 @@ namespace ioex_cs
                     n[reg] = val;
                 }
             }
+            p.bMainPause = false;
             ShowStatus("done");
         }
 
         private void new_prd_Click(object sender, RoutedEventArgs e)
         {
             (Application.Current as App).curr_packer.DuplicateCurrentConfig("");
+            (Application.Current as App).bMainPause = true;
             UpdateUI();
+            (Application.Current as App).bMainPause = false;
             
         }
 
         private void btn_ret_config_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current as App).SwitchTo("ConfigMenu");
+            (Application.Current as App).SwitchTo("configmenu");
         }
 
         private void btn_ret_run_Click(object sender, RoutedEventArgs e)
@@ -398,5 +408,16 @@ namespace ioex_cs
 
         }
 
+        private void main_input_click(object sender, RoutedEventArgs e)
+        {
+            App p = Application.Current as App;
+            if (p.curr_packer.status == PackerStatus.RUNNING)
+            {
+                MessageBox.Show("is_running");
+                return;
+            }
+            string regname = (sender as TextBox).Name;
+            p.kbdwnd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
+        }
     }
 }
