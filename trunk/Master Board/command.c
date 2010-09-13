@@ -145,7 +145,34 @@ void cm_write(u8 addr, u8 regid, u8 size, u8 *dat, u8 port)
                 outfrm[port].databuf[j++] = *dat++;
         }
         cm_ack(port);
-}                              
+}
+/****************************************************************************/
+// Block data transfer
+// output data buf: 1-byte addr, "size"-byte data, 2-byte CRC
+// max data size: 128 bytes.
+/****************************************************************************/
+extern int calcrc(char *ptr, int count);
+
+void cm_block_write(u8 addr, u8 start_addr, u8 size, u8 *dat, u8 port)
+{
+
+        u8 j;
+        u16 crc_data;
+        outfrm[port].addr_from = MY_ADDR;
+        outfrm[port].addr_to = addr;       
+        outfrm[port].cmd = 'S';
+        //outfrm[port].datalen = size + 1 + 2;
+        outfrm[port].datalen = size + 1;
+        j = 0;
+        /* start address byte */
+        outfrm[port].databuf[j++] = start_addr;
+        /* fill in data bytes */
+        while(j < size+1 ){                   
+            outfrm[port].databuf[j++] = *dat++;
+        }
+        cm_ack(port);
+}
+
 u8 checksum(u8 *buf, u8 size){
         u8 sum = 0;
         while(size-- > 0){
@@ -168,10 +195,14 @@ void cm_forward(u8 *infrm, u8 oport)
 void cm_ack(u8 port)
 {                      
    outfrm[port].cksum = checksum((u8*)(&outfrm[port]),6)+checksum( outfrm[port].databuf, outfrm[port].datalen);
-
+   /* output header */
    prints((u8*)(&outfrm[port]),6,port);
+   /* output data buf */
    if(outfrm[port].datalen > 0)
+   {
         prints(outfrm[port].databuf, outfrm[port].datalen, port);
+   }
+   /* output checksum */
    prints((u8*)&(outfrm[port].cksum),1,port);
    
 }
@@ -244,6 +275,7 @@ void parse_sys_frm(u8* ptr, u8 *infrm)
                 }      
                 return;                        
         }
+
         if(infrm[FRM_POS_CMD] == 'R'){   //read environment by bytes
                 j = 0;                       
                outfrm[SPORTPC].cmd = 'W';         
@@ -486,6 +518,34 @@ void cm_process()   //process command from nodes
 
          
 }
+
+/**********************************************************************************************************/
+// subroutine for node firmware upgrade 
+/**********************************************************************************************************/
+void nfu_process_node_feedback()
+{
+    u8 *infrm;
+    if(RFlagD == RF_CKSUM)
+    {             
+       infrm = infrmD;
+       if(infrm == (u8*)&ginfrm[SPORTD]){
+          use_infrm2Bin(D);
+       }else{
+          use_infrmBin(D);
+       }        
+       RFlagD = RF_IDLE;
+       if(((checksum(infrm,6)+checksum(infrm+FRM_POS_DBUF,*(infrm+FRM_POS_DLEN))) & 0xff) == *(infrm+FRM_POS_CKSUM)){   //cksum ok
+          if(*(infrm+FRM_POS_TO) == MY_ADDR){ 
+              parse_node_frm((u8*)&boot_comm,infrm,SPORTD); //modify the content
+          }
+       }           
+    }        
+}
+
+
+
+
+
 
 /**********************************************************************************************************/
 //

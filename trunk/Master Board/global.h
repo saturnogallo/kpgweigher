@@ -113,7 +113,7 @@ extern u8 false_val;
 // bit 7:  "1" -> Complete Frame Received.
 
 #define CM_INBUF_MAX    0x10          
-#define CM_OUTBUF_MAX   0x10
+#define CM_OUTBUF_MAX   0x84   /* max size used by burst write: 1-byte regid,128-byte data buf, 2-byte CRC */
 
 typedef struct {
         u8      head_1;
@@ -215,11 +215,30 @@ typedef struct  {
 #define Set_10ms_Tick() TCNT0 = 122               /* 10ms interrupt */
 #define TMR0_Is_Enabled() (TIMSK & 0x1)  // bit 0 TOIE0
 
-               
+// Xmodem control characters
+#define XMODEM_NUL 0x00 
+#define XMODEM_SOH 0x01 
+#define XMODEM_STX 0x02 
+#define XMODEM_EOT 0x04 
+#define XMODEM_ACK 0x06 
+#define XMODEM_NAK 0x15 
+#define XMODEM_CAN 0x18 
+#define XMODEM_EOF 0x1A 
+#define XMODEM_RECIEVING_WAIT_CHAR 'C' 
+
+typedef struct {
+    u8 upgrade_cmd;                     /* command sent from master to control firmware upgrade in node board */
+    u8 status;                          /* firmware upgrade status, polled by master board */
+    
+    u16 page_addr;                      /* specify which page to be written */
+    u8 page_buffer;                     /* databuf, actually this is an array in node.*/
+} BOOT_COMM_INTERFACE;                  /* boot communication interface with master board */
+              
 //packer related function     
 void Init_interface();
 u8 Packer_Is_Busy();
 void Tell_Packer_Weigher_Rdy();
 u8 Tell_Packer_Release_Done();
 extern u16 packer_config;
+void nfu_process_node_feedback();
 #endif

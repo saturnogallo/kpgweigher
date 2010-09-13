@@ -276,7 +276,7 @@ void Init_554(void)
 /********************************************************************************/
 void prints(u8 *str, u8 length, char uart_port)
 {           
-    u8 len;
+    u8 len, i;
     len = length & 0x0F;        //15bytes at most
     switch(uart_port)
     {
@@ -313,12 +313,29 @@ void prints(u8 *str, u8 length, char uart_port)
               
            break;
        case SPORTD:
-           while( !(UC_554D_LSR & 0x20) );
+/*           while( !(UC_554D_LSR & 0x20) );
            
            while(len-- > 0)
-              UC_554D_THR = *str++;
-              
-           break; 
+              UC_554D_THR = *str++;*/
+             while(len)
+           {
+              /* wait for FIFO to be empty */
+              while( !(UC_554D_LSR & 0x20) );
+              /* fill FIFO with 16 bytes  */
+              /* write all bytes to FIFO if num of bytes is less than FIFO size */
+              if(len <16) 
+              {   for(i=0; i<len; i++)                 
+                     UC_554D_THR = *str++;           
+                  len = 0; 
+              }
+              else /* write 16 bytes into FIFO */
+              {   for(i=0;i<16;i++)
+                     UC_554D_THR = *str++;
+                  len = len - 16;
+              }
+           }               
+           break;
+            
        case SPORTPC:
            while(len-- > 0){
 #ifdef USE_COM0           
