@@ -277,7 +277,8 @@ void Init_554(void)
 void prints(u8 *str, u8 length, char uart_port)
 {           
     u8 len, i;
-    len = length & 0x0F;        //15bytes at most
+    //len = length & 0x0F;        //15bytes at most 
+    len = length; 
     switch(uart_port)
     {
        case SPORTA:

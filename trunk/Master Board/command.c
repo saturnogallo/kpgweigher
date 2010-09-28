@@ -161,8 +161,7 @@ void cm_block_write(u8 addr, u8 start_addr, u8 size, u8 *dat, u8 port)
         outfrm[port].addr_from = MY_ADDR;
         outfrm[port].addr_to = addr;       
         outfrm[port].cmd = 'S';
-        //outfrm[port].datalen = size + 1 + 2;
-        outfrm[port].datalen = size + 1;
+        outfrm[port].datalen = size + 1; // start address (1 byte) + data size; 
         j = 0;
         /* start address byte */
         outfrm[port].databuf[j++] = start_addr;
@@ -254,6 +253,26 @@ void parse_node_frm(u8* ptr, u8 *infrm,u8 port)
                 return;          
         }
 }
+
+void nfu_parse_node_frm(u8* ptr, u8 *infrm,u8 port)
+{
+        u8 j;                                      
+        u8 temp;
+        if(infrm[FRM_POS_CMD] == 'W'){   //write environment by bytes
+                j = 0;
+                while(j < infrm[FRM_POS_DLEN]){             
+                        temp = infrm[FRM_POS_DBUF+j];
+                        if( temp == RWait[port]){
+                              RWait[port] = R_NOWAIT;  
+                        }                        
+                        if( temp < 5 ){  // totally 5 bytes in boot_comm
+                             *(ptr+temp) = infrm[FRM_POS_DBUF+j+1];  		       
+                        }
+                        j = j+2;
+                }                        
+        }
+}
+
 void parse_sys_frm(u8* ptr, u8 *infrm)
 {
         u8 j;     
@@ -536,7 +555,7 @@ void nfu_process_node_feedback()
        RFlagD = RF_IDLE;
        if(((checksum(infrm,6)+checksum(infrm+FRM_POS_DBUF,*(infrm+FRM_POS_DLEN))) & 0xff) == *(infrm+FRM_POS_CKSUM)){   //cksum ok
           if(*(infrm+FRM_POS_TO) == MY_ADDR){ 
-              parse_node_frm((u8*)&boot_comm,infrm,SPORTD); //modify the content
+              nfu_parse_node_frm((u8*)&boot_comm,infrm,SPORTD); //modify the content
           }
        }           
     }        
