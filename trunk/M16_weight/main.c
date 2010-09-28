@@ -44,8 +44,8 @@ u8 flag_turn_off_watchdog;
 /*********************************************************************************************************************/
 // Boot vetctors: This structure is used to share boot configuration info between primary firmware and boot firmware.
 /*********************************************************************************************************************/
-#define BOOT_VECT_ADDR 0x60
-BOOT_CONFIG boot_vector @ BOOT_VECT_ADDR;  /* store boot vector at a specified address in SRAM for sharing with primary */
+//#define BOOT_VECT_ADDR 0x60
+//BOOT_CONFIG boot_vector @ BOOT_VECT_ADDR;  /* store boot vector at a specified address in SRAM for sharing with primary */
                                            /* firmware. The first 96 (0x0~0x5F) addresses are reserved for I/O and registers */
                                             
 /*****************************************************************************/
@@ -886,7 +886,7 @@ void main(void)
 {           
    u8 flag_turn_off_watchdog; 
    u8 i;
-   u8 Convtemp[4]; 
+   //u8 Convtemp[4]; 
    /********************************************************************/
    //               System Initialization
    /********************************************************************/          
@@ -903,7 +903,13 @@ void main(void)
    // RS485._flash.cs_zero is involved. 
    Init_Vars();
    query_fw_version();   /* the LSB byte of variable "cs_sys_gain_cal_data" */
-      
+
+   // check and clear bootloader flag in EEPROM
+   bReadDataFromEeprom_c(EEPROM_BOOTFLAG_ADDR, &i);
+   if(i != 0xff)
+   {  bWriteData2Eeprom_c(EEPROM_BOOTFLAG_ADDR, 0xff);
+   }
+   
    // Write default system parameters into EEPROM if EEPROM data is invalid.
 #ifdef _FORCE_INIT_EEPROM_  
    RS485._flash.rom_para_valid = ~ROM_DATA_VALID_FLAG;
@@ -933,95 +939,6 @@ void main(void)
    myaddr = RS485._flash.addr;         
 
    /*************************************************************************/ 
-   // Test motor and magnet
-   /*************************************************************************/
-
-#ifdef _DISP_AD_OUT_ 
-
-   while(1)
-   {
-      Convtemp[0]=0;
-      Convtemp[1]=0;
-      Convtemp[2]=0;
-      Convtemp[3]=0;
-      putchar(RS485._flash.addr);
-      sleepms(UART_DELAY);
-      putchar(RS485._flash.board);
-      sleepms(UART_DELAY); 
-      CS5532_ReadADC(Convtemp);   
-     // CS5532_PoiseWeight();
-      putchar('A');
-      
-      //if ((Convtemp[0] != 0) || (Convtemp[1] != 0))
-      {  
-         sleepms(UART_DELAY);
-         putchar(Convtemp[0]);   
-         sleepms(UART_DELAY);
-         putchar(Convtemp[1]);   
-         sleepms(UART_DELAY);
-         putchar(Convtemp[2]);   
-         sleepms(UART_DELAY);
-         putchar(Convtemp[3]);
-         sleepms(UART_DELAY);  
-         LED_FLASH(PIN_HWOK);       
-      }                  
-   }
-#endif
-    
-#ifdef _TEST_MOTOR_MAGNET_
-   Test_Motor_Magnet_Loop();
-#endif
-
-#ifdef _TEST_MAGNET_
-  sleepms(5000);
-   LED_OFF(PIN_RxOK);
-   LED_OFF(PIN_TxOK);
-   LED_OFF(PIN_HWOK);
-  while(1)
-  {
-   while(Magnet_Is_Running())
-   {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
-          break; 
-   }
-   //LED_ON(PIN_RxOK);
-   RS485._flash.magnet_time = 20;
-   RS485._flash.magnet_amp = 45;
-   E_Magnet_Driver(RS485._flash.magnet_time); 
-   while(Magnet_Is_Running())
-   {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
-          break; 
-   }
-   //LED_OFF(PIN_RxOK); 
-   
-   sleepms(1000);
-   
-   LED_ON(PIN_TxOK);
-   RS485._flash.magnet_time = 20;
-   RS485._flash.magnet_amp = 55;
-   E_Magnet_Driver(RS485._flash.magnet_time); 
-   while(Magnet_Is_Running())
-   {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
-          break; 
-   }
-   LED_OFF(PIN_TxOK);
-   
-   sleepms(1000);
-
-   //LED_ON(PIN_HWOK);
-   RS485._flash.magnet_time = 20;
-   RS485._flash.magnet_amp = 65;
-   E_Magnet_Driver(RS485._flash.magnet_time); 
-   while(Magnet_Is_Running())
-   {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
-          break; 
-   }
-   //LED_OFF(PIN_HWOK);
-   
-   sleepms(1000);
-      
-  }
-#endif
-   /*************************************************************************/ 
    //                          Task State Machine
    /*************************************************************************/          
    while(1) 
@@ -1045,8 +962,14 @@ void main(void)
        /************************************************************/
        if(RS485._global.flag_reset >0 )
        { 
-          boot_vector.baud_rate = RS485._global.flag_reset & 0x7;
-          boot_vector.boot_cmd  = RS485._global.flag_reset >> 4;
+          //boot_vector.baud_rate = RS485._global.flag_reset & 0x7;
+          //boot_vector.boot_cmd  = RS485._global.flag_reset >> 4; 
+          /* if MSB 4 bits refer to a boot for firmware upgrade, write 
+             boot flag into EEPROM (addr 0x40), this will be checked by 
+             bootloader */
+          if( (RS485._global.flag_reset >> 4) == UPGRADE_FIRMWARE)
+          {    bWriteData2Eeprom_c(EEPROM_BOOTFLAG_ADDR, RS485._global.flag_reset);           
+          } 
           // housekeeping (motor/magnet) before reset
           // we should make sure magnet/motor action completes.
                    
