@@ -131,8 +131,10 @@ void sleeps(u16);
 
 
 // RS485节点信息/参数在EEPROM中的存放地址
+#define EEPROM_BOOTFLAG_ADDR 0x40
 #define EEPROM_RS485ADDR 0x80
-#define CAL_DATA_START_ADDR_IN_EEPROM 0xA0   
+//#define CAL_DATA_START_ADDR_IN_EEPROM 0xA0   
+#define UPGRADE_FIRMWARE 0xA
 
 // bit 0:  "1" -> First Head Byte(0xfe) Found
 // bit 1:  "1" -> Frame header (0xfe/0x68) Found
@@ -364,13 +366,13 @@ typedef struct {
 extern NODE_CONFIG RS485;
 extern u8 debug_mode;  
 
-typedef struct {
- u8 addr;                  /* node addr, set by primary firmware before switching to boot firmware, default 0x0:broadcasting */
- u8 baud_rate;             /* serial baud rate, set by primary firmware, default: 9600 bps */
- u8 boot_cmd;              /* command to tell boot firmware to upgrade primary firmware or do other tasks */
- u8 boot_status;           /* boot status set by boot loader for primary firmware */
- u8 reserved;
-} BOOT_CONFIG;             
+//typedef struct {
+// u8 addr;                  /* node addr, set by primary firmware before switching to boot firmware, default 0x0:broadcasting */
+// u8 baud_rate;             /* serial baud rate, set by primary firmware, default: 9600 bps */
+// u8 boot_cmd;              /* command to tell boot firmware to upgrade primary firmware or do other tasks */
+// u8 boot_status;           /* boot status set by boot loader for primary firmware */
+// u8 reserved;
+//} BOOT_CONFIG;             
 
 #define prints  mputs
 
