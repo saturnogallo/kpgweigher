@@ -156,11 +156,12 @@ u8 nfu_readb_until_return(u8 nodeid, u8 regid, u8 size, u8 port){
         u16 timeout;
         RWait[port] = regid;
         cm_query(nodeid,regid,size,port);
-        timeout = 0x400; //1024
+        timeout = 0x400; //1024                         
         while((RWait[port] == regid) && (timeout != 0)){
                 nfu_process_node_feedback();
                 timeout--; 
         }       
+
         RWait[port] = R_NOWAIT;                   
         return (timeout > 0)? SUCCEED : FAILED;
 }
@@ -829,29 +830,33 @@ int calcrc(unsigned char *ptr, int count)
 #define NFU_NCMD_AWAIT_PGM_DONE     9
 #define NFU_UPGRADE_CMPLT          10
 #define NFU_NCMD_RUN_APP           11
-#define NFU_RETURN_FROM_FW_UPGRADE 12
+#define NFU_RETURN_FROM_FW_UPGRADE 12 
+#define NFU_END                    13
 
 #define BE_IDLE            0x0             /* firmware upgrade request is served successfully, or failed */
-#define INVALIDATE_APP     0x1             /* Clear last application page to indicate code is disturbed */
+//#define INVALIDATE_APP   0x1             /* Clear last application page to indicate code is disturbed */
 #define PGM_CURRENT_PAGE   0x2             /* command from master board asking node bootloader to program current flash page */
-#define FW_UPGRADE_CMPT    0x3             /* Bootloader calculates CRC of whole application code and writes it to last app page */
-#define RUN_APP            0x4             /* firmware upgrade completes, run application */
+#define FW_UPGRADE_CMPT    0x3             /* Tell bootloader all code has been sent. On receiving this command, node bootloader 
+                                              will program a "valid firmware" flag in last application flash page. */
+#define RUN_APP            0x4             /* firmware upgrade completes, ask node run application */
 
 #define BL_REG_CMD  0x0
 #define BL_REG_STATUS 0x1
 #define BL_REG_PAGE_ADDR 0x2
 #define BL_REG_PAGE_BUF 0x4   
 
-// bootloader returned flags:
+// bootloader returned result (in upgrade_cmd reg):
 #define CRC_ERR 0x20                       /* bit 5 */
 #define PGM_ERR 0x10                       /* bit 4 */
 
 void node_fw_upgrade_state_machine(void)
 {
   u16 crc, crc_pc, addr_backup;   
-  u8 i, reset_cmd;  
+  u8 temp, reset_cmd; 
+  static u8 fail_counter;  
   static u8 nfu_state;
-  static u32 count;   
+  static u32 count;     
+  
   if(!dsm_cmd_received)
     return;
 
@@ -880,6 +885,7 @@ void node_fw_upgrade_state_machine(void)
      
      switch(nfu_state)
      {
+
        /*********************************************************************/
        // Test if node is in bootloader or primary firmware.
        /*********************************************************************/
@@ -887,14 +893,21 @@ void node_fw_upgrade_state_machine(void)
          if(nfu_readb_until_return(dsm_rpara, NREG_BOARD, 1, SPORTD))
          {
              /* board id returned */
-             if(boot_comm.status == 'B')
+             if(boot_comm.status == 'B')     /* already in bootloader */
                 nfu_state = NFU_GREETING_MSG;
-  	     else /* Node is in primary firmware */			 
+  	     else /* Node is running application firmware */			 
                 nfu_state = NFU_RESET_NODE;
          }
          else
          {
-          d_putstr("\r\nNode not found.\r\n");
+           d_putstr("No response from Node. Query again. \r\n"); 
+           fail_counter++; 
+           if(fail_counter > 10)
+           {  nfu_state = NFU_END; 
+              d_putstr("Node was not found. Please check whether node exists.\r\n");
+              fail_counter = 0; 
+           } 
+           sleepms(500);
          }         
          break;
        /*********************************************************************/
@@ -904,7 +917,8 @@ void node_fw_upgrade_state_machine(void)
          reset_cmd = RESET_NODE_TO_UPGRADE_FW;
          cm_write(dsm_rpara, NREG_RESET, 1, &reset_cmd, SPORTD);
          sleepms(500);
-         d_putstr("\r\nSend command to reset node.\r\n");
+         d_putstr("Application is running.\r\n");
+         d_putstr("Sending command to put node in bootloader... \r\n");
         
          nfu_state = NFU_QUERY_NODE_STATUS; 
          break;
@@ -914,9 +928,11 @@ void node_fw_upgrade_state_machine(void)
        case NFU_GREETING_MSG: 
           /* check*/   
           d_putstr("Ready to upgrade node board firmware. \r\n"); 
+          d_putstr("Application firmware has been invalidated. You MUST COMPLETE firmware upgrade.\r\n");
           d_putstr("Node selected is No. ");
+          //temp = (dsm_rpara/10)<<4 + (dsm_rpara%10);
           d_putchar2(dsm_rpara);
-          d_putstr("(Decimal).\r\n");
+          d_putstr(".\r\n");
           d_putstr("Please download *.BIN file using xmodem protocol. \r\n");
           nfu_state = NFU_REQ_PC_2_SEND;
 
@@ -925,7 +941,8 @@ void node_fw_upgrade_state_machine(void)
           boot_comm.page_addr = 0;
           break; 
        /*********************************************************************/
-       // Request PC (hyperterminal) to send data, start x_modem transfer.
+       // Request PC (hyperterminal) to send data, start x_modem transfer. 
+       // Continue to send data 'C' (CRC check) before PC starts to response.
        /*********************************************************************/           
       case  NFU_REQ_PC_2_SEND:
           if(x_modem_file_being_transferred)
@@ -952,26 +969,36 @@ void node_fw_upgrade_state_machine(void)
           {
              nfu_state = NFU_CAL_PC_CRC;
              x_modem_one_pack_received = 0;    /* clear flag for next cycle */
+             break;
+          }
+          /* if file transfer completes, the last frame from PC is only an "XMODEM_EOT" byte
+              we will never one pack again, so we need also check variable 
+              "x_modem_file_transfer_complete".
+          */
+          if(x_modem_file_transfer_complete)  
+          {
+             d_putchar(XMODEM_ACK);                  /* acknowledge PC*/ 
+             nfu_state = NFU_UPGRADE_CMPLT;
+             break;
           }
           break;
        /*********************************************************************/
        // Perform CRC check over received data.
        /*********************************************************************/     
-       case NFU_CAL_PC_CRC: 
+       case NFU_CAL_PC_CRC:
           crc = x_modem_databuf[128] ;
           crc = crc <<8;
           crc += x_modem_databuf[129];
           crc_pc = calcrc(&x_modem_databuf[0],128);
           if( crc_pc != crc)
-          {   /* CRC check failed, clear buffer flag */
-              //d_putstr("crc error, request pc to resend..\r\n");                          
+          {   /* CRC check failed, clear buffer flag */                         
               /* request PC to re-send */
               d_putchar(XMODEM_NAK);     
               nfu_state = NFU_AWAIT_PC_DATA; 
           }
           else /* CRC check pass */ 
           {                    
-              nfu_state = NFU_NCMD_SEND_PAGE_ADDR;               
+              nfu_state = NFU_NCMD_SEND_PAGE_ADDR; 
           }
           break;
        /*********************************************************************/
@@ -979,42 +1006,36 @@ void node_fw_upgrade_state_machine(void)
        // Received 128-byte data from PC
        /*********************************************************************/   
        case NFU_NCMD_SEND_PAGE_ADDR:
-	  //d_putstr("Sending data to node ... \r\n");
-	  /* write page address, 2 bytes */ 
+	  /* write page address, 2 bytes */
 	  cm_write(dsm_rpara, BL_REG_PAGE_ADDR, 2, (u8*)(&boot_comm.page_addr), SPORTD);	  
-
           /*back up page_addr first, this could be changed by reading page_addr reg in node */
           addr_backup = boot_comm.page_addr; 
-          sleepms(5);    /* ~1 frame/ms @ 115200bps. */          
-          /* read node to make sure page_addr was correctly written */
-
+          sleepms(10);    /* ~1 frame/ms @ 115200bps. */          
+          /* read node to make sure page_addr was correctly written */ 
           if(nfu_readb_until_return(dsm_rpara, BL_REG_PAGE_ADDR, 2, SPORTD))
-          {
+          {  
              if(boot_comm.page_addr == addr_backup ) /* data read out matches with what was written */
              {   nfu_state = NFU_NCMD_SEND_PAGE_DATA; /* move to next state */   
-                 LED_FLASH(PORTB.5);
+                 LED_FLASH(PORTB.5);    
              }
           }
           boot_comm.page_addr = addr_backup;  /* restore original address, resend page address */
-                   
+         
           break;
        /*********************************************************************/
        // Send data to node to fill a flash page 
        /*********************************************************************/                 
        case NFU_NCMD_SEND_PAGE_DATA:
-          /* fill in data, 128 bytes + 2 CRC bytes */
-          cm_block_write(dsm_rpara, BL_REG_PAGE_BUF, 130, x_modem_databuf, SPORTD);
-          /*for(i =0; i<130; i++)
-          {  
-            cm_write(dsm_rpara, BL_REG_PAGE_BUF + i, 1, &(x_modem_databuf[i]), SPORTD);            
-          } */
+          /* fill in data, 128 bytes + 2 CRC bytes */               
+          cm_block_write(dsm_rpara, BL_REG_PAGE_BUF, 130, x_modem_databuf, SPORTD);   
+          sleepms(100);
           /* read first byte back to make sure data was sent out correctly */
           if(nfu_readb_until_return(dsm_rpara, BL_REG_PAGE_BUF, 1, SPORTD))
           { 
               if(boot_comm.page_buffer == x_modem_databuf[0])
               {  nfu_state = NFU_NCMD_SEND_PGM_CMD;
                  LED_FLASH(PORTB.6);
-              }
+              }           
           }
           break;
        /*********************************************************************/
@@ -1023,53 +1044,51 @@ void node_fw_upgrade_state_machine(void)
        case NFU_NCMD_SEND_PGM_CMD: 
           boot_comm.upgrade_cmd =  PGM_CURRENT_PAGE; 
           cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD);
-          
-          nfu_state = NFU_NCMD_AWAIT_PGM_DONE;
+          /* We need to check whether this command is really received. */ 
+          for(temp = 3; temp>0; temp--)
+          {   if(nfu_readb_until_return(dsm_rpara, BL_REG_CMD, 1, SPORTD))
+                  if(boot_comm.upgrade_cmd == PGM_CURRENT_PAGE)  /* equal to last write */
+                  {   nfu_state = NFU_NCMD_AWAIT_PGM_DONE;
+                      break; 
+                  }
+          }          
           break;
        /*********************************************************************/
        // Await current flash page program to complete.
        /*********************************************************************/ 
        case NFU_NCMD_AWAIT_PGM_DONE:
 	  /* query node's bootloader register */
-	 //d_putstr("await current flash page to be programmed ... \r\n");
-	 
 	  if(nfu_readb_until_return(dsm_rpara, BL_REG_CMD, 1, SPORTD))
 	  {
             switch(boot_comm.upgrade_cmd)
             {
                case PGM_CURRENT_PAGE:        /* command not served yet */ 
-                  LED_FLASH(PORTD.7);
+                  LED_FLASH(PORTD.7); 
+                  sleepms(50);               /* wait a while before next query */
                   break;
                case BE_IDLE:
                   if(!x_modem_file_transfer_complete)
                   {  
   	             boot_comm.page_addr += 128;             /* move index to next page */
   	             d_putchar(XMODEM_ACK);                  /* acknowledge PC*/ 
-  	             nfu_state = NFU_AWAIT_PC_DATA;          /* await for next pack*/	
-  	             LED_FLASH(PORTB.7);             
+  	             nfu_state = NFU_AWAIT_PC_DATA;          /* await for next pack*/ 	 
   	          }
   	          else
   	          {
-  	             nfu_state = NFU_UPGRADE_CMPLT; 
-  	             PORTD.7 = 1;
-  	             PORTD.6 = 1;
-  	             PORTD.5 = 1; 
-  	             d_putchar(XMODEM_ACK);                  /* acknowledge PC*/ 
-  	          }
+  	            d_putchar(XMODEM_ACK);                   /* acknowledge to close file transmition dialog*/
+  	            nfu_state = NFU_UPGRADE_CMPLT;
+  	          } 
                   break;
-               case CRC_ERR:
-                  nfu_state = NFU_NCMD_SEND_PAGE_ADDR; 
-                  LED_ON(PORTB.4);
-	          //d_putstr("corrupted data received by node. \r\n");
+               case CRC_ERR: 
+                  nfu_state = NFU_NCMD_SEND_PAGE_ADDR;       /* retry */
+                  LED_ON(PORTB.4);      
 	          break; 
 	       case PGM_ERR:
-                  nfu_state = NFU_NCMD_SEND_PAGE_ADDR;  
-                  LED_ON(PORTB.4);
-                  //d_putstr("program failed. retrying... \r\n");
+                  nfu_state = NFU_NCMD_SEND_PAGE_ADDR;        /* retry */
+                  LED_ON(PORTB.4); 
 	          break;
 	       default:
-	           LED_ON(PORTB.4);
-	          //d_putstr("unexpected error occured. \r\n");
+	           LED_ON(PORTB.4);  
 	          break;
 	     }
 	  }
@@ -1087,22 +1106,37 @@ void node_fw_upgrade_state_machine(void)
           /* send program command */ 
           boot_comm.upgrade_cmd =  FW_UPGRADE_CMPT; 
           cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD); 
-          
-          if(nfu_readb_until_return(dsm_rpara, BL_REG_CMD, 1, SPORTD))
+          //We need to check whether this command is really received.       
+           if(nfu_readb_until_return(dsm_rpara, BL_REG_CMD, 1, SPORTD))
           {
-             if(boot_comm.upgrade_cmd == BE_IDLE)
-             {     //d_putstr("firmware upgrade completed successfully. \r\n"); 
-                   nfu_state = NFU_NCMD_RUN_APP;
-             } 
-             else
-             {     //d_putstr("firmware upgrade completed with error. \r\n");  
-                   nfu_state = NFU_NCMD_RUN_APP;
-             } 
-                       
+
+             switch(boot_comm.upgrade_cmd)
+             {
+                case FW_UPGRADE_CMPT:               /* equal to last cmd byte, command not served yet*/ 
+                 /* Node bootloader will change the value of upgrade_cmd reg to "BE_IDLE" once last
+                    application flash page is programmed. Node bootloader will ignore new writes to 
+                    reg "upgrade_cmd" once it starts to program. We need to add delay here to avoid 
+                    writing upgrade_cmd reg too fast and allow bootloader to move to program state. 
+                 */
+                 sleepms(50); 
+                  break;
+                case BE_IDLE:                       /* command has been served successfully, ready to send next command */ 
+                  d_putstr("\r\nFirmware upgrade completed successfully. \r\n"); 
+                  nfu_state = NFU_NCMD_RUN_APP;
+                  break;
+                case PGM_ERR:                       /* bootloader set reg upgrade_cmd to "PGM_ERR(0x10)" */
+                  d_putstr("Failed when programing firmware upgrade success flag. \r\n"); 
+                  d_putstr("Trying again. \r\n");
+                  sleepms(1000);        
+                  break;                  
+                default:
+                  d_putstr("Unexpected error (NFU_UPGRADE_CMPLT) occured. \r\n");
+                  break;
+             }                      
           }
           else 
-          {    sleepms(100);                /*sleep and re-try later */
-               //d_putstr("query upgrade status again ... \r\n");
+          {    sleepms(100);                /*sleep and re-try later */ 
+               d_putstr("Query (NFU_UPGRADE_CMPLT) times out.  retrying ... \r\n");
           }
           
           break;
@@ -1111,19 +1145,25 @@ void node_fw_upgrade_state_machine(void)
        /*********************************************************************/
         case NFU_NCMD_RUN_APP:
           boot_comm.upgrade_cmd =  RUN_APP; 
-          cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD);
-          //d_putstr("node starts to run applications ... \r\n");
-          d_putstr("run application \r\n");  
+          cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD); 
+          d_putstr("Node "); 
+          d_putchar2(dsm_rpara);          
+          d_putstr(" is running application ... \r\n");  
           nfu_state = NFU_RETURN_FROM_FW_UPGRADE;
           break;
        /*********************************************************************/
-       // default state.
+       //  Command has been served. 
        /*********************************************************************/       
-       case NFU_RETURN_FROM_FW_UPGRADE:
+       case NFU_RETURN_FROM_FW_UPGRADE: 
+         d_putstr("You may now upgrade firmware of another node. \r\n"); 
+         d_putstr("Command example 1: CMD1 10 --- (upgrade node 10 (decimal)). \r\n");
+         d_putstr("Command example 2: CMD1 01 --- (upgrade node 1 ). \r\n");         
+       case NFU_END:         
        default: 
-          //d_putstr("return from node firmware upgrade. \r\n"); 
-          d_putstr("return. \r\n"); 
-          dsm_cmd_received = 0; 
+          dsm_cmd_received = 0;                /* clear variables for next cycle */
+          x_modem_file_being_transferred = 0;
+          x_modem_file_transfer_complete = 0;
+          x_modem_one_pack_received = 0; 
           nfu_state = NFU_QUERY_NODE_STATUS;          
           break;        
      } /* end of switch */

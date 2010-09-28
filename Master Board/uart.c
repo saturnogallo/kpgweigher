@@ -356,8 +356,10 @@ void x_modem_protocol_rsm(u8 data)
 {
    static u8 x_modem_state;
    static u8 num_of_data_received;
+
    switch(x_modem_state)
    { 
+      
       case X_MODEM_AWAIT_SOH:
 		num_of_data_received = 0;
 		if(data == XMODEM_SOH )
@@ -386,7 +388,7 @@ void x_modem_protocol_rsm(u8 data)
 
 	  case X_MODEM_PACKNUM2_RECEIVED:  
 	       num_of_data_received = 1;                                     /* record num of data that has been received */
-		   x_modem_databuf[0] = data;                                    /* save data into receiver buffer*/
+		   x_modem_databuf[0] = data;                                    /* save data into receiver buffer*/		   
 		   x_modem_state = X_MODEM_DATA_RECEIVING;
 		break;
 
