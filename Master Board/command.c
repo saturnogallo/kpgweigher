@@ -202,8 +202,7 @@ void cm_ack(u8 port)
         prints(outfrm[port].databuf, outfrm[port].datalen, port);
    }
    /* output checksum */
-   prints((u8*)&(outfrm[port].cksum),1,port);
-   
+   prints((u8*)&(outfrm[port].cksum),1,port);   
 }
 /****************************************************************************/
 //                     RS485 Frame Analysis 

@@ -855,7 +855,8 @@ void node_fw_upgrade_state_machine(void)
   u8 temp, reset_cmd; 
   static u8 fail_counter;  
   static u8 nfu_state;
-  static u32 count;     
+  static u32 count;  
+  static u8 query_counts;    
   
   if(!dsm_cmd_received)
     return;
@@ -1103,13 +1104,15 @@ void node_fw_upgrade_state_machine(void)
        // Inform node bootloader that firmware upgrade completes
        /*********************************************************************/  
        case NFU_UPGRADE_CMPLT:          
-          /* send program command */ 
-          boot_comm.upgrade_cmd =  FW_UPGRADE_CMPT; 
-          cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD); 
-          //We need to check whether this command is really received.       
-           if(nfu_readb_until_return(dsm_rpara, BL_REG_CMD, 1, SPORTD))
+          /* send program command */
+          if(!query_counts) 
+          { boot_comm.upgrade_cmd =  FW_UPGRADE_CMPT; 
+            cm_write(dsm_rpara, BL_REG_CMD, 1, &boot_comm.upgrade_cmd, SPORTD);
+          }
+          sleepms(100);
+          //We need to check whether this command was successfully received.       
+          if(nfu_readb_until_return(dsm_rpara, BL_REG_CMD, 1, SPORTD))
           {
-
              switch(boot_comm.upgrade_cmd)
              {
                 case FW_UPGRADE_CMPT:               /* equal to last cmd byte, command not served yet*/ 
@@ -1118,27 +1121,33 @@ void node_fw_upgrade_state_machine(void)
                     reg "upgrade_cmd" once it starts to program. We need to add delay here to avoid 
                     writing upgrade_cmd reg too fast and allow bootloader to move to program state. 
                  */
-                 sleepms(50); 
+                 query_counts++;
+                 if(query_counts > 5)
+                    query_counts = 0;                    
                   break;
                 case BE_IDLE:                       /* command has been served successfully, ready to send next command */ 
                   d_putstr("\r\nFirmware upgrade completed successfully. \r\n"); 
                   nfu_state = NFU_NCMD_RUN_APP;
+                  query_counts = 0;
                   break;
                 case PGM_ERR:                       /* bootloader set reg upgrade_cmd to "PGM_ERR(0x10)" */
                   d_putstr("Failed when programing firmware upgrade success flag. \r\n"); 
                   d_putstr("Trying again. \r\n");
+                  query_counts = 0;
                   sleepms(1000);        
                   break;                  
                 default:
                   d_putstr("Unexpected error (NFU_UPGRADE_CMPLT) occured. \r\n");
+                  sleepms(1000);                          
+                  query_counts = 0;                  
                   break;
              }                      
           }
           else 
-          {    sleepms(100);                /*sleep and re-try later */ 
+          {    sleepms(1000);                /*sleep and re-try later */ 
+               query_counts = 0;                            
                d_putstr("Query (NFU_UPGRADE_CMPLT) times out.  retrying ... \r\n");
-          }
-          
+          }          
           break;
        /*********************************************************************/
        // inform node to start to run applications
