@@ -9,14 +9,56 @@
     <s:String x:Key="find_password">恢复初始密码</s:String>
     <s:String x:Key="modify_password">完成修改</s:String>
     <s:String x:Key="password_config">修改密码</s:String>
-    <s:String x:Key="intftrig1">低电平输出</s:String>
-    <s:String x:Key="intftrig2">正脉冲输出</s:String>
-    <s:String x:Key="intftrig3">负脉冲输出</s:String>
-    <s:String x:Key="intftrig4">高电平输出</s:String>
-    
+    <s:String x:Key="invaiddata">数据无效，有效输入为</s:String>
+    <s:String x:Key="normal">运行正常</s:String>
+    <s:String x:Key="to">到</s:String>
+    <s:String x:Key="delete">删除</s:String>
+    <s:String x:Key="alert_select">请选择:</s:String>
+    <s:String x:Key="alert_solved">1.故障已手动排除</s:String>
+    <s:String x:Key="alert_force">2.强排此斗</s:String>
+    <s:String x:Key="alert_disable">3.禁用此斗</s:String>
+    <s:String x:Key="alert_quit">4.退出</s:String>
+    <s:String x:Key="cfg_inuse">当前设置正在使用中，不能删除</s:String>
+    <s:String x:Key="admin">管理员</s:String>
+    <s:String x:Key="user">用户</s:String>
+    <s:String x:Key="emptydata">输入不能为空</s:String>
+    <s:String x:Key="configpage">配置页面</s:String>
+    <s:String x:Key="alertpage">报警配置页面</s:String>
+    <s:String x:Key="pwdpage">密码设置页面</s:String>
+    <s:String x:Key="totalpack">总包数(包)</s:String>
+    <s:String x:Key="lastweight">上包重量(克)</s:String>
+    <s:String x:Key="speed">速度(包/每分钟)</s:String>
+    <s:String x:Key="pack">包</s:String>
+    <s:String x:Key="packpermin">包/每分钟</s:String>
+    <s:String x:Key="backspace">退格</s:String>
+    <s:String x:Key="enter_singlemode_pwd">请输入密码</s:String>
+    <s:String x:Key="selectprod">选择产品对应的图片</s:String>
+    <s:String x:Key="selectprodnum">选择使用产品号</s:String>
+    <s:String x:Key="intftrig1">低电平</s:String>
+    <s:String x:Key="intftrig2">负脉冲</s:String>
+    <s:String x:Key="intftrig3">正脉冲</s:String>
+    <s:String x:Key="intftrig4">高电平</s:String>
+    <s:String x:Key="intftrig5">上升沿</s:String>
+    <s:String x:Key="intftrig6">下降沿</s:String>
+
+    <s:String x:Key="calibrating">正在校准</s:String>
+    <s:String x:Key="cali_done">校准完成</s:String>
+
+    <s:String x:Key="store_setting">正在保存设置</s:String>
+    <s:String x:Key="store_done">设置保存成功</s:String>
+    <s:String x:Key="input_newprdno">请输入要使用的新的产品号</s:String>
+    <s:String x:Key="used_prdno">你输入的产品号已经被使用，请输入新的产品号</s:String>
+
+    <s:String x:Key="loading">正在读取配置</s:String>
+    <s:String x:Key="modifying">正在修改配置</s:String>
+    <s:String x:Key="downloading">正在下载配置</s:String>
+    <s:String x:Key="clearpack">复位总包数</s:String>
+    <s:String x:Key="done">操作完成</s:String>
     <s:String x:Key="login">登录系统</s:String>
     <s:String x:Key="help">帮助</s:String>
     <s:String x:Key="product_no">产品号</s:String>
+    <s:String x:Key="operator_no">操作员号</s:String>
+    <s:String x:Key="enter_operator_no">请输入操作员号</s:String>
     <s:String x:Key="product_desc">产品描述</s:String>
     <s:String x:Key="config">设置</s:String>
     <s:String x:Key="preview">预览</s:String>
@@ -26,33 +68,43 @@
     <s:String x:Key="eng_config">工程师页面</s:String>
     <s:String x:Key="bottom_config">联机设置</s:String>
     <s:String x:Key="alert_config">报警设置</s:String>
-    
+
+    <s:String x:Key="turnon_alert">报警开启</s:String>
+    <s:String x:Key="stop_onalert">报警并停机</s:String>
+    <s:String x:Key="show_alert">报警显示</s:String>
+    <s:String x:Key="manual_reset">手动修复</s:String>
+
     <s:String x:Key="ok">确定</s:String>
     <s:String x:Key="clr">清除</s:String>
+
+    <s:String x:Key="enter_run_time">请输入主震时间(*0.1s)</s:String>
+    <s:String x:Key="grp_time">主震时间(*0.1s)</s:String>
+    <s:String x:Key="enter_test_mode_reg1">请输入寄存器1的值</s:String>
+    <s:String x:Key="enter_test_mode_reg2">请输入寄存器2的值</s:String>
     <s:String x:Key="enter_pwd">请输入密码</s:String>
     <s:String x:Key="enter_run_amp">请输入主震幅度</s:String>
     <s:String x:Key="enter_run_freq">请输入主震频率</s:String>
-    <s:String x:Key="enter_run_target">请输入目标重量</s:String>
-    <s:String x:Key="enter_run_uvar">请输入上偏重量</s:String>
-    <s:String x:Key="enter_run_dvar">请输入下偏重量</s:String>
-    <s:String x:Key="enter_target">请输入目标重量</s:String>
-    <s:String x:Key="enter_uvar">请输入上偏重量</s:String>
-    <s:String x:Key="enter_dvar">请输入下偏重量</s:String>
+    <s:String x:Key="enter_run_target">请输入目标重量(克)</s:String>
+    <s:String x:Key="enter_run_uvar">请输入上偏重量(克)</s:String>
+    <s:String x:Key="enter_run_dvar">请输入下偏重量(克)</s:String>
+    <s:String x:Key="enter_target">请输入目标重量(克)</s:String>
+    <s:String x:Key="enter_uvar">请输入上偏重量(克)</s:String>
+    <s:String x:Key="enter_dvar">请输入下偏重量(克)</s:String>
     <s:String x:Key="enter_gain">请输入AD转换速度</s:String>
     <s:String x:Key="enter_cs_filter">请输入AD滤波器选择</s:String>
-    <s:String x:Key="enter_cali0">请输入校准砝码重量</s:String>
+    <s:String x:Key="enter_cali0">请输入校准砝码重量(克)</s:String>
     <s:String x:Key="enter_prd_no">请输入产品号</s:String>
     <s:String x:Key="enter_motor_speed_input">请输入开关马达速度</s:String>
-    <s:String x:Key="enter_col_otime_input">请输入送料斗打开时间</s:String>
+    <s:String x:Key="enter_col_otime_input">请输入送料斗打开时间(*0.1s)</s:String>
     <s:String x:Key="enter_sub_amp_input">请输入震动斗振动幅度</s:String>
-    <s:String x:Key="enter_col_dtime_input">请输入送料后延时</s:String>
-    <s:String x:Key="enter_sub_time_input">请输入震动斗震动时间</s:String>
+    <s:String x:Key="enter_col_dtime_input">请输入送料后延时(*0.1s)</s:String>
+    <s:String x:Key="enter_sub_time_input">请输入震动斗震动时间(*0.1s)</s:String>
     <s:String x:Key="enter_sub_freq_input">请输入震动斗震动频率</s:String>
-    <s:String x:Key="enter_wei_otime_input">请输入下料后延时</s:String>
-    <s:String x:Key="enter_wei_dtime_input">请输入下料前延时</s:String>
-    <s:String x:Key="enter_openwei_input">请输入xxx</s:String>
-   
-    <s:String x:Key="quit_eng">退出修改</s:String>    
+    <s:String x:Key="enter_wei_otime_input">请输入下料后延时(*0.1s)</s:String>
+    <s:String x:Key="enter_wei_dtime_input">请输入下料前延时(*0.1s)</s:String>
+    <s:String x:Key="enter_openwei_input">请输入下料斗打开时间(*0.1s)</s:String>
+
+    <s:String x:Key="quit_eng">退出修改</s:String>
     <s:String x:Key="zero_complete">清零操作完成</s:String>
     <s:String x:Key="return">返回</s:String>
     <s:String x:Key="history">历史数据</s:String>
@@ -61,15 +113,16 @@
     <s:String x:Key="end_date">结束时间</s:String>
     <s:String x:Key="invalid_pwd">密码错误</s:String>
     <s:String x:Key="singlemode">设置单斗参数</s:String>
-    <s:String x:Key="totalweight">总重量</s:String>
+    <s:String x:Key="totalweight">总重量(克)</s:String>
     <s:String x:Key="totalpacknum">总包数</s:String>
-    <s:String x:Key="weight">总重量</s:String>
+    <s:String x:Key="weight">总重量(克)</s:String>
     <s:String x:Key="pack_num">总包数</s:String>
-
-    <s:String x:Key="avgweight">平均重量</s:String>
+    <s:String x:Key="notsame_pwd">确认密码错误</s:String>
+    <s:String x:Key="avgweight">平均重量(克)</s:String>
     <s:String x:Key="gram">克</s:String>
     <s:String x:Key="packsetting">包装机接口设置</s:String>
     <s:String x:Key="bucketsetting">各斗参数设置</s:String>
+    <s:String x:Key="runonce">运行一次</s:String>
     <s:String x:Key="all_empty">清空</s:String>
     <s:String x:Key="all_zero">置零</s:String>
     <s:String x:Key="all_start">开始运行</s:String>
@@ -85,32 +138,39 @@
     <s:String x:Key="intf_lb_output_fmt">输出触发方式</s:String>
     <s:String x:Key="intf_cmd_output_fmt">低电平输出|正脉冲输出|负脉冲输出|高电平输出</s:String>
     <s:String x:Key="intf_cmd_input_fmt">低电平输出|正脉冲输出|负脉冲输出|高电平输出</s:String>
-    
+    <s:String x:Key="intf_lb_pulse_width">信号脉冲宽度(*10ms)</s:String>
+
     <s:String x:Key="enter_intf_lb_feed_times">请输入灌装次数</s:String>
-    <s:String x:Key="enter_intf_ckb_delay">请输入灌装延时</s:String>
+    <s:String x:Key="enter_intf_pulse_width">请输入灌装脉冲宽度</s:String>
+    <s:String x:Key="enter_intf_ckb_delay">请输入灌装延时(*0.1s)</s:String>
+
     <s:String x:Key="grp_name">当前设置名称</s:String>
     <s:String x:Key="grp_amp">主震幅度</s:String>
     <s:String x:Key="grp_freq">主震频率</s:String>
     <s:String x:Key="grp_target">目标重量</s:String>
     <s:String x:Key="grp_uvar">上偏重量</s:String>
     <s:String x:Key="grp_dvar">下偏重量</s:String>
-    
-    <s:String x:Key="openwei">下料斗打开时间</s:String>
+
+    <s:String x:Key="openwei">下料斗打开时间(*0.1s)</s:String>
     <s:String x:Key="gain">AD转换速度</s:String>
     <s:String x:Key="cs_filter">AD滤波器选择</s:String>
-    <s:String x:Key="col_otime">送料斗时间</s:String>
-    <s:String x:Key="col_dtime">送料后延时</s:String>
+    <s:String x:Key="col_otime">送料斗时间(*0.1s)</s:String>
+    <s:String x:Key="col_dtime">送料后延时(*0.1s)</s:String>
     <s:String x:Key="sub_amp">震动斗振动幅度</s:String>
     <s:String x:Key="sub_freq">震动斗振动频率</s:String>
-    
-    <s:String x:Key="sub_time">震动斗振动时间</s:String>
-    <s:String x:Key="wei_otime">下料后时间</s:String>
-    <s:String x:Key="wei_dtime">下料前延时</s:String>
+
+    <s:String x:Key="test_mode_reg1">调试寄存器1</s:String>
+    <s:String x:Key="test_mode_reg2">调试寄存器2</s:String>
+
+    <s:String x:Key="sub_time">震动斗振动时间(*0.1s)</s:String>
+    <s:String x:Key="wei_otime">下料后时间(*0.1s)</s:String>
+    <s:String x:Key="wei_dtime">下料前延时(*0.1s)</s:String>
     <s:String x:Key="motor_speed">开关马达速度</s:String>
 
     <s:String x:Key="address">节点地址</s:String>
     <s:String x:Key="subcfg_apply">应用设置</s:String>
     <s:String x:Key="subcfg_applyall">应用到同组其他斗</s:String>
+    <s:String x:Key="cmd_selectall">全选</s:String>
     <s:String x:Key="cmd_pass">下料</s:String>
     <s:String x:Key="cmd_mask">禁用</s:String>
     <s:String x:Key="cmd_fill">振料</s:String>
@@ -120,9 +180,64 @@
     <s:String x:Key="cmd_flash">Flash</s:String>
     <s:String x:Key="cmd_run">运行</s:String>
     <s:String x:Key="cmd_save">保存</s:String>
-    <s:String x:Key="cmd_cali0">校准1</s:String>
-    <s:String x:Key="cmd_cali1">校准2</s:String>
-    <s:String x:Key="cmd_cali2">校准3</s:String>
-    <s:String x:Key="cmd_cali3">校准4</s:String>
-    <s:String x:Key="cmd_cali4">校准5</s:String>
+    <s:String x:Key="cmd_cali0">校零</s:String>
+    <s:String x:Key="cmd_cali1">50g砝码</s:String>
+    <s:String x:Key="cmd_cali2">100g砝码</s:String>
+    <s:String x:Key="cmd_cali3">200g砝码</s:String>
+    <s:String x:Key="cmd_cali4">300g砝码</s:String>
+    <s:String x:Key="cmd_cali5">500g砝码</s:String>
+
+    <s:String x:Key="err65529">超量程</s:String>
+    <s:String x:Key="err_ow">超重</s:String>
+    <s:String x:Key="err_om">多次未组合</s:String>
+
+    <s:String x:Key="cali1_llimit">0</s:String>
+    <s:String x:Key="cali1_ulimit">65535</s:String>
+    <s:String x:Key="cali2_llimit">0</s:String>
+    <s:String x:Key="cali2_ulimit">65535</s:String>
+    <s:String x:Key="cali3_llimit">0</s:String>
+    <s:String x:Key="cali3_ulimit">65535</s:String>
+    <s:String x:Key="cali4_llimit">0</s:String>
+    <s:String x:Key="cali4_ulimit">65535</s:String>
+    <s:String x:Key="cali5_llimit">0</s:String>
+    <s:String x:Key="cali5_ulimit">65535</s:String>
+    <s:String x:Key="dvar_llimit">0</s:String>
+    <s:String x:Key="dvar_ulimit">65535</s:String>
+    <s:String x:Key="target_llimit">0</s:String>
+    <s:String x:Key="target_ulimit">65535</s:String>
+    <s:String x:Key="uvar_llimit">0</s:String>
+    <s:String x:Key="uvar_ulimit">65535</s:String>
+    <s:String x:Key="run_freq_llimit">0</s:String>
+    <s:String x:Key="run_freq_ulimit">65535</s:String>
+    <s:String x:Key="run_time_llimit">0</s:String>
+    <s:String x:Key="run_time_ulimit">65535</s:String>
+    <s:String x:Key="run_amp_llimit">0</s:String>
+    <s:String x:Key="run_amp_ulimit">65535</s:String>
+    <s:String x:Key="sub_freq_input_llimit">0</s:String>
+    <s:String x:Key="sub_freq_input_ulimit">65535</s:String>
+    <s:String x:Key="sub_amp_input_llimit">0</s:String>
+    <s:String x:Key="sub_amp_input_ulimit">65535</s:String>
+    <s:String x:Key="sub_time_input_llimit">0</s:String>
+    <s:String x:Key="sub_time_input_ulimit">65535</s:String>
+    <s:String x:Key="wei_otime_input_llimit">0</s:String>
+    <s:String x:Key="wei_otime_input_ulimit">65535</s:String>
+    <s:String x:Key="wei_dtime_input_llimit">0</s:String>
+    <s:String x:Key="wei_dtime_input_ulimit">65535</s:String>
+    <s:String x:Key="col_dtime_input_llimit">0</s:String>
+    <s:String x:Key="col_dtime_input_ulimit">65535</s:String>
+    <s:String x:Key="col_otime_input_llimit">0</s:String>
+    <s:String x:Key="col_otime_input_ulimit">65535</s:String>
+    <s:String x:Key="openwei_input_llimit">0</s:String>
+    <s:String x:Key="openwei_input_ulimit">65535</s:String>
+    <s:String x:Key="motor_speed_input_llimit">0</s:String>
+    <s:String x:Key="motor_speed_input_ulimit">65535</s:String>
+
+    <s:String x:Key="intf_pulse_width_llimit">0</s:String>
+    <s:String x:Key="intf_pulse_width_ulimit">200</s:String>
+
+    <s:String x:Key="intf_lb_feed_times_llimit">0</s:String>
+    <s:String x:Key="intf_lb_feed_times_ulimit">80</s:String>
+
+    <s:String x:Key="intf_ckb_delay_llimit">0</s:String>
+    <s:String x:Key="intf_ckb_delay_ulimit">50</s:String>
 </ResourceDictionary>

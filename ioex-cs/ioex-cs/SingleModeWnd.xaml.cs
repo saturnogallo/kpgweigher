@@ -21,12 +21,48 @@ namespace ioex_cs
     public partial class SingleMode : Window
     {
         System.Windows.Forms.Timer uiTimer;
+        private object lastsender = null;
+        private string lastcall = "";
+        private bool bSelectAll = false;
+        private void HandleLongCommand()
+        {
+            if (lastcall == "UpdateProdNo")
+            {
+                App p = Application.Current as App;
+                p.curr_packer.LoadConfig(p.curr_packer.curr_cfg.product_no);
+                p.curr_packer.SaveCurrentConfig();
+                lastcall = "UpdateUI";
+            }
+            if (lastcall.IndexOf("cali") == 0)
+            {
+                calibrate(lastcall);
+                lastcall = "";
+                MessageBox.Show(StringResource.str("cali_done"));
+            }
+            if (lastcall == "UpdateUI")
+                UpdateUI();
+            if (lastcall == "ApplyToAll")
+                sub_applyall();
+            if (lastcall == "select_prdno")
+                new_prd_Click(null, null);
+            if (lastcall == "save_config")
+            {
+                (Application.Current as App).curr_packer.SaveCurrentConfig();
+                lastcall = "";
+                MessageBox.Show(StringResource.str("store_done"));
+            }
+            lastcall = "";
+            txt_oper.Visibility = Visibility.Hidden;
+            bg_oper.Visibility = Visibility.Hidden;
+        }
         public SingleMode()
         {
             InitializeComponent();
+            curr_btn = null;
+            last_btn = null;
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
-            uiTimer.Interval = 10;
+            uiTimer.Interval = 100;
             uiTimer.Start();
         }
         private App currentApp()
@@ -34,62 +70,77 @@ namespace ioex_cs
             return (System.Windows.Application.Current as App);
         }
 
-        public bool bNeedInvalidate = false;
+        private Button curr_btn;
+        private Button last_btn;
         void uiTimer_Tick(object sender, EventArgs e)
         {
             if (!this.IsVisible)
                 return;
-            if (! bNeedInvalidate)
-            {
-                return;
-            }
-            App p = currentApp();
-            if (p.curr_packer.curr_node == -1)
+
+            UIPacker p = currentApp().curr_packer;
+            if (p.curr_node_index == -1)
             {
                 bucket_click(1);
+            }else{
+                if (p.NeedRefresh || p.status == PackerStatus.RUNNING)
+                {
+                    foreach (byte n in p.weight_nodes)
+                    {
+                        UpdateNodeUI("wei_node" + n.ToString());
+                    }
+                }
+                if (lastcall != "")
+                    HandleLongCommand();
             }
-
-            p.bMainPause = true;
-            foreach (WeighNode n in p.curr_packer.weight_node)
+            if (p.status == PackerStatus.RUNNING)
             {
-                UpdateNodeUI("wei_node" + n.node_id);
+                lbl_speed.Content = p.speed.ToString();
+                lbl_lastweight.Content = p.last_pack_weight.ToString("F2");
+                lbl_totalpack.Content = p.total_sim_packs.ToString();
+                lbl_totalweights.Content = p.total_sim_weights.ToString("F2");
             }
-            p.bMainPause = false;
         }
         private void UpdateNodeUI(string param)
         {
             Label lb = this.FindName(param) as Label;
             Button btn = this.FindName(param.Replace("wei_node", "bucket")) as Button;
-            WeighNode n = currentApp().curr_packer.weight_node[RunMode.StringToId(param) - 1];
-
-            string ct = n.weight.ToString("F1");
-            lb.Content = ct;
-            if (n.status == NodeStatus.ST_LOST)
+            byte n = (byte)(RunMode.StringToId(param));
+            NodeAgent agent = currentApp().curr_packer.agent;
+            
+            if(agent.weight(n) > -1000)
+                lb.Content = agent.weight(n).ToString("F1");
+            if (agent.GetStatus(n) == NodeStatus.ST_LOST)
             {
                 btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
             }
-            if (n is WeighNode)
+            if (n != currentApp().curr_packer.vib_addr)
             {
-                if ((n as WeighNode).bRelease)
+                if (agent.GetWNodeFlag(n,"bRelease"))
                     btn.Template = this.FindResource("WeightBarRelease") as ControlTemplate;
             }
-            if (n.status == NodeStatus.ST_IDLE)
+            if (agent.GetStatus(n) == NodeStatus.ST_IDLE)
             {
-                btn.Template = this.FindResource("WeightBar") as ControlTemplate;
+                if(btn == curr_btn || bSelectAll)
+                    btn.Template = this.FindResource("WeightBarFocus") as ControlTemplate;
+                else
+                    btn.Template = this.FindResource("WeightBar") as ControlTemplate;
             }
             btn.ApplyTemplate();
         }
         private void weibucket_Click(object sender, RoutedEventArgs e)
         {
             bucket_click(ButtonToId(sender));
+            bSelectAll = false;
         }
         private void passbucket_Click(object sender, RoutedEventArgs e)
         {
             bucket_click(ButtonToId(sender));
+            bSelectAll = false;
         }
         private void vibbucket_Click(object sender, RoutedEventArgs e)
         {
             bucket_click(ButtonToId(sender));
+            bSelectAll = false;
         }
         private int ButtonToId(object sender)
         {
@@ -102,6 +153,7 @@ namespace ioex_cs
                 return -1;
 
         }
+        
         private Button IdToButton(int nodeid)
         {
             return this.FindName("bucket" + nodeid) as Button;
@@ -109,72 +161,72 @@ namespace ioex_cs
         private void bucket_click(int nodeid)
         {
             App p = Application.Current as App;
-            int last_node = p.curr_packer.curr_node;
+            int last_node = p.curr_packer.curr_node_index;
             if (nodeid < 1)
             {
                 return;
             }
             
-            Button lastbtn = IdToButton(last_node+1);
-            Button currbtn = IdToButton(nodeid);
+            last_btn = IdToButton(last_node);
+            curr_btn = IdToButton(nodeid);
 
-            currbtn.Focus();
-            p.curr_packer.curr_node = nodeid - 1;
+            p.curr_packer.curr_node_index = nodeid;
+
+            if (last_btn is Button)
+            {
+                last_btn.Template = this.FindResource("WeightBar") as ControlTemplate;
+                last_btn.ApplyTemplate();
+            }
+            if (curr_btn is Button)
+            {
+                curr_btn.Template = this.FindResource("WeightBarFocus") as ControlTemplate;
+                curr_btn.ApplyTemplate();
+            }
             //update parameter of the current node to UI.
-            p.bMainPause = true;
-            WeighNode n = p.curr_packer.weight_node[p.curr_packer.curr_node];
-            VibrateNode vn = p.curr_packer.vib_node;
-            n["magnet_freq"] = null;
-            n["magnet_amp"] = null;
-            n["magnet_time"] = null;
-            n["open_w"] = null;
-            n["delay_w"] = null;
-            n["delay_s"] = null;
-            n["open_s"] = null;
-            n["delay_f"] = null;
-            n["motor_speed"] = null;
-            vn["magnet_freq"] = null;
-            vn["magnet_amp"] = null;
-            p.bMainPause = false;
-            UpdateUI();
+            lastcall = "UpdateUI";
+            return;
+            
+            
         }
         private void UpdateUI()
         {
             App p = Application.Current as App;
-            WeighNode n = p.curr_packer.weight_node[p.curr_packer.curr_node];
-            VibrateNode vn = p.curr_packer.vib_node;
-            sub_freq_input.Text = n["magnet_freq"].ToString();
-            sub_amp_input.Text = n["magnet_amp"].ToString();
-            sub_time_input.Text = n["magnet_time"].ToString();
+            NodeAgent n = p.curr_packer.agent;
+            byte vn = p.curr_packer.vib_addr;
 
-            wei_otime_input.Text = n["open_w"].ToString();
-            wei_dtime_input.Text = n["delay_w"].ToString();
-            col_dtime_input.Text = n["delay_s"].ToString();
-            col_otime_input.Text = n["open_s"].ToString();
-            openwei_input.Text = n["delay_f"].ToString();
+            sub_freq_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_freq");
+            sub_amp_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_amp");
+            sub_time_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_time");
 
-            motor_speed_input.Text = n["motor_speed"].ToString();
+            wei_otime_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "open_w");
+            wei_dtime_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "delay_w");
+            col_dtime_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "delay_s");
+            col_otime_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "open_s");
+            openwei_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "delay_f");
 
-            run_freq.Text = vn["magnet_freq"].ToString();
-            run_amp.Text = vn["magnet_amp"].ToString();
+            motor_speed_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "motor_speed");
+
+            run_freq.Content = n.GetNodeReg(p.curr_packer.vib_addr,"magnet_freq");
+            run_amp.Content = n.GetNodeReg(p.curr_packer.vib_addr,"magnet_amp");
+            run_time.Content = n.GetNodeReg(p.curr_packer.vib_addr, "magnet_time");
             btn_prd_no.Content = p.curr_packer.curr_cfg.product_no.ToString();
             btn_prd_desc.Content = p.curr_packer.curr_cfg.product_desc.ToString();
-            btn_target.Content = p.curr_packer.curr_cfg.target.ToString();
-            btn_uvar.Content = p.curr_packer.curr_cfg.upper_var.ToString();
-            btn_dvar.Content = p.curr_packer.curr_cfg.lower_var.ToString();
+            btn_target.Content = p.curr_packer.curr_cfg.target.ToString() +StringResource.str("gram");
+            btn_uvar.Content = p.curr_packer.curr_cfg.upper_var.ToString() + StringResource.str("gram");
+            btn_dvar.Content = p.curr_packer.curr_cfg.lower_var.ToString() + StringResource.str("gram");
 
-            lbl_currNode.Content = (p.curr_packer.curr_node+1).ToString();
+            lbl_currNode.Content = (p.curr_packer.curr_node_index).ToString();
             Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
             //load the corresponding pictiure.
-            (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("f:\\" + p.curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
-
+            (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("c:\\ioex\\prodpic\\" + p.curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
+            
         }
         private void node_reg(string regname)
         {
             App p = Application.Current as App;
             if (p.curr_packer.status == PackerStatus.RUNNING)
             {
-                MessageBox.Show("is_running");
+                //MessageBox.Show("is_running");
                 return;
             }
             p.kbdwnd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
@@ -186,53 +238,57 @@ namespace ioex_cs
             try
             {
                 
-                Packer pack = p.curr_packer;
-                WeighNode n = p.curr_packer.weight_node[p.curr_packer.curr_node];
-                VibrateNode vn = p.curr_packer.vib_node;
-                p.bMainPause = true;
+                UIPacker pack = p.curr_packer;
+                NodeAgent n = p.curr_packer.agent;
+                
                 if (param == "sub_freq_input")
                 {
-                    n["magnet_freq"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_freq", UInt32.Parse(data));
                 }
                 if (param == "sub_amp_input")
                 {
-                    n["magnet_amp"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_amp", UInt32.Parse(data));
                 }
                 if (param == "sub_time_input")
                 {
-                    n["magnet_time"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_time", UInt32.Parse(data));
                 }
                 if (param == "wei_otime_input")
                 {
-                    n["open_w"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "open_w", UInt32.Parse(data));
                 }
                 if (param == "wei_dtime_input")
                 {
-                    n["delay_w"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "delay_w", UInt32.Parse(data));
                 }
                 if (param == "col_dtime_input")
                 {
-                    n["delay_s"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "delay_s", UInt32.Parse(data));
                 }
                 if (param == "col_otime_input")
                 {
-                    n["open_s"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "open_s", UInt32.Parse(data));
                 }
                 if (param == "openwei_input")
                 {
-                    n["delay_f"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "delay_f", UInt32.Parse(data));
                 }
                 if (param == "motor_speed_input")
                 {
-                    n["motor_speed"] = UInt32.Parse(data);
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "motor_speed", UInt32.Parse(data));
                 }
                 if (param == "run_freq")
                 {
-                    vn["magnet_freq"] = UInt32.Parse(data);
+                    n.SetNodeReg(p.curr_packer.vib_addr, "magnet_freq", UInt32.Parse(data));
                 }
+                if (param == "run_time")
+                {
+                    n.SetNodeReg(p.curr_packer.vib_addr, "magnet_time", UInt32.Parse(data));
+                }
+                
                 if (param == "run_amp")
                 {
-                    vn["magnet_amp"] = UInt32.Parse(data);
+                    n.SetNodeReg(p.curr_packer.vib_addr, "magnet_amp", UInt32.Parse(data));
                 }
                 if (param == "target")
                 {
@@ -246,24 +302,27 @@ namespace ioex_cs
                 {
                     p.curr_packer.curr_cfg.lower_var = Double.Parse(data);
                 }
-                if (param == "prd_no")
+
+                if (param == "cali1" || param == "cali2" || param == "cali3" || param == "cali4" || param == "cali5")
                 {
-                    p.curr_packer.LoadConfig(data);
+                    ShowStatus("calibrating");
+                    int i = RunMode.StringToId(param) - 1;
+                    if (p.curr_packer.curr_node_index >= 0)
+                    {
+                        n.SetNodeReg((byte)p.curr_packer.curr_node_index, "poise_weight_gram" + i.ToString(), UInt32.Parse(data));
+                        string cs_mtrl_val = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "cs_mtrl");
+                        n.SetNodeReg((byte)p.curr_packer.curr_node_index, "cs_poise" + i.ToString(), UInt32.Parse(cs_mtrl_val));
+                    }
+                    p.curr_packer.agent.Action((byte)p.curr_packer.curr_node_index, "flash");
+                    return;
                 }
-                if (param == "cali0" || param == "cali1" || param == "cali2" || param == "cali3" || param == "cali4")
-                {
-                    int i = RunMode.StringToId(param);
-                    n["Poise_Weight_gram"+i.ToString()] = UInt32.Parse(data);
-                    n["cs_poise"+i.ToString()] = n["cs_mtrl"].Value;
-                }
-  
-                UpdateUI();
-                p.bMainPause = false;
+                ShowStatus("modifying");
+                lastcall = "UpdateUI";
             }
             catch (System.Exception e)
             {
                 MessageBox.Show("Invalid Parameter");
-                p.bMainPause = false;
+                
                 return;
             }
         }
@@ -273,39 +332,90 @@ namespace ioex_cs
             App p = Application.Current as App;
             if (p.curr_packer.status == PackerStatus.RUNNING)
             {
-                MessageBox.Show("is_running");
+                //MessageBox.Show("is_running");
                 return;
             }
-            string regname = (sender as TextBox).Name;
+            string regname = (sender as Label).Name;
             p.kbdwnd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
         }
-
-        private void btn_cali_Click(object sender, RoutedEventArgs e)
+        private void calibrate(string calreg)
         {
-            string calreg = (sender as TextBox).Name;
             App p = Application.Current as App;
-            WeighNode n = p.curr_packer.weight_node[p.curr_packer.curr_node];
             if (calreg == "cali0")
             {
-                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_"+calreg), calreg, false, KbdData);
+                NodeAgent n = p.curr_packer.agent;
+                if (p.curr_packer.curr_node_index >= 0)
+                {
+                    string cs_mtrl_val = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "cs_mtrl");
+                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "cs_zero", UInt32.Parse(cs_mtrl_val));
+                    p.curr_packer.agent.Action((byte)p.curr_packer.curr_node_index, "flash");
+                }
             }
+            if (calreg == "cali1" )
+                KbdData(calreg, "50");
+            if (calreg == "cali2")
+                KbdData(calreg, "100");
+            if (calreg == "cali3")
+                KbdData(calreg, "200");
+            if (calreg == "cali4")
+                KbdData(calreg, "300");
+            if (calreg == "cali5")
+                KbdData(calreg, "500");
+
+        }
+        private void btn_cali_Click(object sender, RoutedEventArgs e)
+        {
+            string calreg = (sender as Button).Name.Remove(0,4); //remove "btn_" string
+            
+
+            ShowStatus("modifying");
+            lastcall = calreg;                
+
         }
 
         private void btn_action_Click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
-            SubNode n = p.nodes[p.curr_packer.curr_node];
+            byte n = (byte)p.curr_packer.curr_node_index;
             string name = (sender as Button).Name;
-            if (name == "btn_pass" || name == "btn_empty" || name == "btn_fill" || name == "btn_flash")
+            if (name == "btn_mainvib")
             {
-                n.Action(name.Replace("btn_",""), true);
+                p.curr_packer.agent.Action(p.curr_packer.vib_addr, "fill");
+            }
+            if (name == "btn_pass" || name == "btn_empty" || name == "btn_fill" || name == "btn_flash" || name == "btn_zero")
+            {
+                if (!bSelectAll)
+                    p.curr_packer.agent.Action(n, name.Replace("btn_", ""));
+                else
+                {
+                    if (name == "btn_flash")
+                    {
+                        foreach (byte addr in p.curr_packer.weight_nodes)
+                        {
+                            p.curr_packer.agent.Action(addr, name.Replace("btn_", ""));
+                        }
+                    }
+                    else
+                    {
+                        p.curr_packer.agent.Action((byte)(0x80+p.curr_packer._pack_id), name.Replace("btn_", ""));
+                    }
+                }
             }
         }
         private void prd_desc_selected(string item)
         {
             App p = Application.Current as App;
             p.curr_packer.curr_cfg.product_desc = item;
-            this.UpdateUI();
+            ShowStatus("loading");
+            lastcall = "UpdateUI";
+        }
+        private void prd_no_selected(string item)
+        {
+            App p = Application.Current as App;
+            p.curr_packer.curr_cfg.product_no = item;
+
+            ShowStatus("loading");
+            lastcall = "UpdateProdNo";
         }
         private void btn_prd_desc_Click(object sender, RoutedEventArgs e)
         {
@@ -315,31 +425,33 @@ namespace ioex_cs
 
         private void btn_trial_Click(object sender, RoutedEventArgs e)
         {
+            btn_trial.Click -= btn_trial_Click;
             App p = Application.Current as App;
             if (p.curr_packer.status == PackerStatus.RUNNING)
             {
-                p.curr_packer.status = PackerStatus.IDLE;
-
-                this.btn_trial.Content = StringResource.str("sall_start");
                 p.curr_packer.StopRun();
+                this.btn_trial.Content = StringResource.str("sall_start");
             }
             else
             {
-                p.bSimulate = true;
-                p.curr_packer.status = PackerStatus.RUNNING;
-                this.btn_trial.Content = StringResource.str("sall_stop");
+                App.bSimulate = true;
                 p.curr_packer.StartRun();
+                this.btn_trial.Content = StringResource.str("sall_stop");
+                p.curr_packer.status = PackerStatus.RUNNING;
             }
+            btn_trial.Click += btn_trial_Click;
         }
-
         private void btn_save_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current as App).curr_packer.SaveCurrentConfig();
+            ShowStatus("store_setting");
+            lastcall = "save_config";
+            
         }
 
         private void btn_prd_no_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current as App).kbdwnd.Init(StringResource.str("enter_prd_no"), "prd_no", false, KbdData);
+            App p = Application.Current as App;
+            p.prodnum.Init(prd_no_selected,true);
         }
 
         private void btn_pack_dvar_Click(object sender, RoutedEventArgs e)
@@ -356,68 +468,89 @@ namespace ioex_cs
         }
         private void ShowStatus(string msg)
         {
-            lbl_summary.Content = StringResource.str(msg);
+            txt_oper.Content = StringResource.str(msg);
+            txt_oper.Visibility = Visibility.Visible;
+            bg_oper.Visibility = Visibility.Visible;
+
+        }
+        private void sub_applyall()
+        {
+            App p = Application.Current as App;
+            UIPacker pack = p.curr_packer;
+            NodeAgent agent = pack.agent;
+            byte cn = (byte)p.curr_packer.curr_node_index;
+
+            string[] regs = { "magnet_freq", "magnet_amp", "magnet_time", "open_w", "delay_w", "open_s", "delay_s", "delay_f", "motor_speed", "target_weight", "cs_filter", "cs_gain_wordrate" };
+            foreach (string reg in regs)
+            {
+
+                UInt32 val = UInt32.Parse(p.curr_packer.agent.GetNodeReg(cn, reg));
+                foreach (byte n in p.curr_packer.weight_nodes)
+                {
+                    if (agent.GetStatus(n) == NodeStatus.ST_LOST)
+                        continue;
+                    if (n == cn)
+                        continue;
+                    p.curr_packer.agent.SetNodeReg(n, reg, val);
+                }
+            }
         }
         private void btn_sub_applyall_Click(object sender, RoutedEventArgs e)
         {
             //apply for other nodes.
-            App p = Application.Current as App;
-            Packer pack = p.curr_packer;
-            WeighNode cn = p.curr_packer.weight_node[p.curr_packer.curr_node];
-            ShowStatus("updating");
-            p.bMainPause = true;
-            string[] regs ={"magnet_freq","magnet_amp","magnet_time","open_w","delay_w","open_s","delay_s","delay_f","motor_speed"};
-            foreach (string reg in regs)
-            {
-                
-                UInt32 val = cn[reg].Value;
-                foreach (WeighNode n in p.curr_packer.weight_node)
-                {
-                    if (n.status == NodeStatus.ST_LOST)
-                        continue;
-                    if (n == cn)
-                        continue;
-                    n[reg] = val;
-                }
-            }
-            p.bMainPause = false;
-            ShowStatus("done");
+            ShowStatus("modifying");
+            lastcall = "ApplyToAll";
         }
-
+        public void new_prd_no_input(string param, string data)
+        {
+            if ((Application.Current as App).curr_packer.all_conf.Keys.Contains<string>(data))
+            {
+                MessageBox.Show(StringResource.str("used_prdno"));
+                lastcall = "select_prdno";
+            }
+            else
+            {
+                (Application.Current as App).curr_packer.DuplicateCurrentConfig(data);
+                ShowStatus("loading");
+                lastcall = "UpdateUI";
+            }
+        }
         private void new_prd_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current as App).curr_packer.DuplicateCurrentConfig("");
-            (Application.Current as App).bMainPause = true;
-            UpdateUI();
-            (Application.Current as App).bMainPause = false;
-            
+            (Application.Current as App).kbdwnd.Init(StringResource.str("input_newprdno"), "", false, new_prd_no_input);
         }
 
         private void btn_ret_config_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current as App).SwitchTo("configmenu");
+            if ((Application.Current as App).curr_packer.status != PackerStatus.RUNNING)
+                (Application.Current as App).SwitchTo("configmenu");
         }
-
         private void btn_ret_run_Click(object sender, RoutedEventArgs e)
         {
-            (Application.Current as App).SwitchTo("runmode");
+            if ((Application.Current as App).curr_packer.status != PackerStatus.RUNNING)
+                (Application.Current as App).SwitchTo("runmode");
         }
-
         private void lbl_currNode_Click(object sender, RoutedEventArgs e)
         {
 
         }
-
         private void main_input_click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
             if (p.curr_packer.status == PackerStatus.RUNNING)
             {
-                MessageBox.Show("is_running");
+                //MessageBox.Show("is_running");
                 return;
             }
-            string regname = (sender as TextBox).Name;
+            string regname = (sender as Label).Name;
             p.kbdwnd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
+        }
+
+        private void btn_selectall_Click(object sender, RoutedEventArgs e)
+        {
+            bSelectAll = !bSelectAll;
+            lastcall = "UpdateUI";
+            btn_selectall.Style = bSelectAll ? this.FindResource("ButtonStyle2") as Style : this.FindResource("ButtonStyle") as Style;
         }
     }
 }

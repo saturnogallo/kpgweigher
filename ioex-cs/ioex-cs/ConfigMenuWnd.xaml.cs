@@ -29,6 +29,7 @@ namespace ioex_cs
             App p = Application.Current as App;
             if(b.Name == "btn_pwd")
             {
+
                 p.SwitchTo("password");
                 return;
             }

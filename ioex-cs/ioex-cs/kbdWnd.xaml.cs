@@ -42,6 +42,7 @@ namespace ioex_cs
             param = init_param;
             password = init_pwd;
             kbdhandler = handler;
+            UpdateData();
             this.Show();
         }
         private void UpdateData()
@@ -151,6 +152,25 @@ namespace ioex_cs
 
         private void btn_ok_Click(object sender, RoutedEventArgs e)
         {
+            string llimit = StringResource.str(param+"_llimit");
+            string ulimit = StringResource.str(param + "_ulimit");
+            if (data.ToString() == "")
+            {
+                MessageBox.Show(StringResource.str("emptydata"));
+                return;
+            }
+            if (llimit != "Invalid String Key")
+            {
+                Int32 ll = Int32.Parse(llimit);
+                Int32 hl = Int32.Parse(ulimit);
+                
+                if (Int32.Parse(data.ToString()) < ll || Int32.Parse(data.ToString()) > hl)
+                {
+                    MessageBox.Show(StringResource.str("invaliddata")+llimit+StringResource.str("to")+ulimit);
+                    return;
+                }
+            }
+
             kbdhandler(param, data.ToString());
             Hide();
         }
@@ -158,13 +178,12 @@ namespace ioex_cs
         private void btn_clr_Click(object sender, RoutedEventArgs e)
         {
             data.Remove(0, data.Length);
-            note = "";
             UpdateData();
         }
 
         private void btn_backspace_Click(object sender, RoutedEventArgs e)
         {
-            if (data.Length > 1)
+            if (data.Length > 0)
             {
                 data.Remove(data.Length - 1, 1);
                 UpdateData();

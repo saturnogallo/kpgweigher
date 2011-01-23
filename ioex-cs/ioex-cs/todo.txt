@@ -10,10 +10,52 @@
 
 3. product_no selection on bootup. //done
 4. store the last run configuration. //done
-2.bottom pack talk
+
+2.bottom pack talk. //done - to test
 7.add the alert window
-8.add operator list	
+8.add operator list. //done - using login page	
 9.check force release and over_weight case
-10. add prod_no list instead of input
-11. add limits for each inputs
+10. add prod_no list instead of input  //done
+11. add limits for each inputs //done
 12. display the status and progress of packing 
+13. bootloader code
+
+宋杰，
+ 
+用老的界面连接新的板子发现数据在0.1克上下跳动，比如放入50克的砝码，测出的重量有时候显示49.9有时候显示50.0，数据变化比较频繁，估计是实际重量在49.9～50.0之间，在加上称头精度较高，容易受外界干扰。我原本打算在节点板里面处理一下，再发送给你显示，现在我觉得节点板发给上位机原始数据比较好，需要你在显示的时候对待显示的数据稍微做些处理：
+1. 当新的数据与当前显示的数据之间差别不超过0.1，则显示原来的数据（忽略0.1的跳动）。
+2. 当连续若干个新的数据都比当前显示数据大（或小），则显示新数据。
+ 
+若数据为49.9 50.0, 49.9, 50.0, 49.9, 50.0.... 则恒显示50.0或49.9。
+若当前显示数据为50.0，接下来收到的数据为50.0,49.9, 49.9,49.9，则显示49.9
+ 
+不知这样做是否合理？
+
+宋杰，
+ 
+我调试了新做的包装机接口。说明一下，以便你集成到你的程序里去。
+ 
+1. 包装机接口电路集成到了原来用来驱动主振电磁铁的电路板（RS485 Addr 11或15（14头））。你可以按以前的做法读板子的类型Board_ID来识别是称重板或者振动/接口板。
+ 
+对于振动/接口板（addr 11或15)
+2. 包装机接口控制字Config_reg. 这里使用了RS485._flash.target_weight寄存器。组合称输出的信号脉冲宽度可调（RS485._flash_cs_Filter_option, 单位10ms，你可以设置默认30，即300ms)。上位机程序写RS485._global.flag_enable = 9 （执行后寄存器自动变成0），来初始化包装机接口。 
+3. 上位机程序通过查询RS485._global.hw_status来判断包装机是否忙（0xff)或准备就绪(0x0). 只有包装机不忙的时候，才可以释放组合到的斗。
+4. 上位机程序放料后，要写RS485._global.flag_enable = 10 （执行后寄存器自动变成0），以便组合称发放料信号给包装机。
+ 
+你的程序平时只需：
+ 
+yourmainloop( ) 
+{
+   io_read(board_11, RS485._global.hw_status); 
+   if ((RS485._global.hw_status == PACKER_READY_ZERO) && （组合成功））
+   {
+          io_release_material( );
+          io_write( board_11, RS485._global.flag_enable, 10); // issue interface signals.
+   }
+ 
+   other_tasks( ); 
+}
+ 
+具体可参考程序main.c
+ 
+

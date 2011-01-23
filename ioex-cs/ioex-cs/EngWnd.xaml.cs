@@ -23,14 +23,15 @@ namespace ioex_cs
             InitializeComponent();
             
         }
+        int currnode;
         public void UpdateDisplay()
         {
-            App p = (Application.Current as App);
-            p.curr_packer.weight_node[address.SelectedIndex]["cs_filter"] = null;
-            p.curr_packer.weight_node[address.SelectedIndex]["cs_gain_wordrate"] = null;
-            cs_filter_input.Text = p.curr_packer.weight_node[address.SelectedIndex]["cs_filter"].ToString();
-            gain_input.Text = p.curr_packer.weight_node[address.SelectedIndex]["cs_gain_wordrate"].ToString();
-
+            NodeAgent ag = (Application.Current as App).curr_packer.agent;
+            currnode = address.SelectedIndex+1;
+            cs_filter_input.Content = ag.GetNodeReg((byte)currnode, "cs_filter");
+            gain_input.Content = ag.GetNodeReg((byte)currnode, "cs_gain_wordrate");
+            test_mode_reg1_input.Content = ag.GetNodeReg((byte)currnode, "test_mode_reg1");
+            test_mode_reg2_input.Content = ag.GetNodeReg((byte)currnode, "test_mode_reg2");
         }
         private void button1_Click(object sender, RoutedEventArgs e)
         {
@@ -40,9 +41,11 @@ namespace ioex_cs
 
         private void btn_modify_Click(object sender, RoutedEventArgs e)
         {
-            App p = (Application.Current as App);
-            p.curr_packer.weight_node[address.SelectedIndex]["cs_filter"] = UInt32.Parse(cs_filter_input.Text);
-            p.curr_packer.weight_node[address.SelectedIndex]["cs_gain_wordrate"] = UInt32.Parse(gain_input.Text);
+            NodeAgent ag = (Application.Current as App).curr_packer.agent;
+            currnode = address.SelectedIndex + 1;
+            ag.SetNodeReg((byte)currnode, "cs_filter", UInt32.Parse(cs_filter_input.Content.ToString()));
+            ag.SetNodeReg((byte)currnode, "test_mode_reg1", UInt32.Parse(test_mode_reg1_input.Content.ToString()));
+            ag.SetNodeReg((byte)currnode, "test_mode_reg2", UInt32.Parse(test_mode_reg2_input.Content.ToString()));
         }
         private void node_reg(string regname)
         {
@@ -57,16 +60,34 @@ namespace ioex_cs
         {
             node_reg("cs_filter");
         }
+        private void testmodereg2_input_GotFocus(object sender, RoutedEventArgs e)
+        {
+            node_reg("test_mode_reg2");
+        }
+
+        private void testmodereg1_input_GotFocus(object sender, RoutedEventArgs e)
+        {
+            node_reg("test_mode_reg1");
+        }
         public void KbdData(string param, string data)
         {
             if (param == "cs_filter")
             {
-                this.cs_filter_input.Text = data;
+                this.cs_filter_input.Content = data;
             }
             if (param == "cs_gain_wordrate")
             {
-                gain_input.Text = data;
+                gain_input.Content = data;
             }
+            if (param == "test_mode_reg1")
+            {
+                test_mode_reg1_input.Content = data;
+            }
+            if (param == "test_mode_reg2")
+            {
+                test_mode_reg2_input.Content = data;
+            }
+
         }
 
         private void address_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -77,7 +98,6 @@ namespace ioex_cs
         private void btn_quit_eng_click(object sender, RoutedEventArgs e)
         {
             this.Hide();
-
         }
     }
 }

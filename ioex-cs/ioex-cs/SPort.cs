@@ -197,128 +197,97 @@ namespace ioex_cs
     {
         private Queue<byte[]> CmdToSend; //Command list of register read/write waiting for sendout
         public Dictionary<byte, IOInFrameHandler> InFrameHandlers;  //handler for incoming frame, key is the address of the node
-        public Dictionary<byte, IOTimeoutHandler> TimeoutHandlers;  //handler for outgoing frame, key is the address of the node
         
         public PortStatus Status { get; set; }
-        public static int max_timeout = 30; //30*20ms(timer)
-        public static int timer_cycle = 1; //20ms
         private FrameBuffer ifrm;
-        private byte wait_id; //node that is waiting for response currently
-        private UInt32 timer_tick;  //timer tick used to check timeout of response
         private SerialPort _serial;
-        private TimerCallback timecb; //callback of timer
-        private Timer t;
-        private byte[] last_cmd; //buffer used to resend the command when timeout occurs
+        private Timer _timer;
+        byte[] rbuf = new byte[100];
+        private void _checkport(object state)
+        {
+            if (Status == PortStatus.CLOSED)
+                return;
+            if (_serial.BytesToRead > 0)
+            {
+                int size = _serial.Read(rbuf, 0, _serial.BytesToRead);
+                int p = 0;
+                while (size-- >= 0)
+                {
+                    ifrm.pushc(rbuf[p++]);
+                    if (ifrm.flag == RF_STATE.RF_CKSUM)
+                    {
+                        if (InFrameHandlers.ContainsKey(ifrm.addr))
+                        {
+                            InFrameHandlers[ifrm.addr](ifrm);
+                        }
+                        ifrm.ResetFlag();
+                    }
+                }
+            }
+            
+        }
         public SPort(string PortName, int BaudRate, Parity Parity, int DataBits, StopBits StopBit)
         {
             _serial = new SerialPort(PortName, BaudRate, Parity, DataBits, StopBit);
-            _serial.DataReceived +=new SerialDataReceivedEventHandler(_serial_DataReceived);
+            //_serial.DataReceived +=new SerialDataReceivedEventHandler(_serial_DataReceived);
             _serial.Handshake = Handshake.None;
+
+            if (!NodeAgent.IsDebug)
+            {
+                _timer = new Timer(_checkport);
+
+                _timer.Change(0, 3);
+            }
             
+//            _serial.ErrorReceived += new SerialErrorReceivedEventHandler(_serial_ErrorReceived);
+//            _serial.RtsEnable = false;
+
             
             CmdToSend = new Queue<byte[]>();
             InFrameHandlers = new Dictionary<byte, IOInFrameHandler>();
-            TimeoutHandlers = new Dictionary<byte, IOTimeoutHandler>();
-
             
             ifrm = new FrameBuffer();
             ifrm.ResetFlag();
 
-            timecb = new TimerCallback(OutBufferCheck);
-            t = new Timer(timecb, null, 0, timer_cycle);
-            
-            wait_id = 0x00; //invalid node id
-            timer_tick = 0;
-            last_cmd = null;
             Status = PortStatus.CLOSED;
         }
 
-        private void OutBufferCheck(object state)
+        void _serial_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
-            if (Status != PortStatus.BUSY && Status != PortStatus.IDLE)
-                return;
-
-            if (wait_id > 0)    //waiting for some response
-            {
-                timer_tick++;
-                if (timer_tick > max_timeout) //timeout
-                {
-                    if (TimeoutHandlers.ContainsKey(wait_id))
-                    {
-                        TimeoutHandlers[wait_id](last_cmd);
-                    }
-                    timer_tick = 0;
-                    wait_id = 0;
-                }else{
-                    //still waiting for response
-                    return;
-                }
-            }
-            //last command is completed
-            while (CmdToSend.Count > 0)
-            {
-                byte[] cmd = CmdToSend.Dequeue();
-                
-                _serial.Write(cmd, 1, cmd[0]);
-                if (cmd[5] == 'R' || cmd[5] == 'S') //read command
-                {
-                    timer_tick = 0;
-                    wait_id = cmd[4];
-                    last_cmd = cmd;
-                    return;
-                }
-            }
-            Status = PortStatus.IDLE;
+            throw new NotImplementedException();
         }
+
+        /*
+         * Just send out the command and no use of buffer
+         */
         public bool AddVCommand(byte[] cmd) ////cmd[0] would be length of data, command is sent out with no enqueue
         {
             if (Status == PortStatus.CLOSED || Status == PortStatus.ERROR)
-            {
                 return false;
-            }
-            if (CmdToSend.Contains(cmd)) //duplicate command
+            lock(CmdToSend)
             {
-                return false;
+                if (CmdToSend.Contains(cmd)) //duplicate command
+                    return false;
             }
-
-            while ((CmdToSend.Count > 0))
-            {
-                Thread.Sleep(1);
-            }
+                /*for double FEFE head
+                byte l = cmd[0];
+                cmd[0] = 0xfe;
+                _serial.Write(cmd, 0, l+1);
+                cmd[0] = l;
+                */
             _serial.Write(cmd, 1, cmd[0]);
-
-            return true;
-        }
-        public bool AddCommand(byte[] cmd) //cmd[0] would be length of data
-        {
-            if (Status == PortStatus.CLOSED || Status == PortStatus.ERROR)
-            {
-                return false;
-            }
-            if (CmdToSend.Contains(cmd)) //duplicate command
-            {
-                return false;
-            }
             
-            Status = PortStatus.BUSY;
-            if (cmd == null)
-            {
-                throw new Exception("Invalid command");
-            }
-            CmdToSend.Enqueue(cmd);
-            if (CmdToSend.Count > 1000)
-            {
-                throw new Exception("exceed the buffer limit of serial port");
-            }
             return true;
         }
+
         public bool Open()
         {
-            if (Status == PortStatus.BUSY || Status == PortStatus.IDLE)
+            if (Status != PortStatus.CLOSED)
                 return true;
             try
             {
                 _serial.Open();
+                _serial.DiscardInBuffer();
             }
             catch (System.Exception e)
             {
@@ -330,6 +299,11 @@ namespace ioex_cs
                 Status = PortStatus.IDLE;
             }
             return _serial.IsOpen;            	
+        }
+        public void ResetInFlag()
+        {
+            _serial.DiscardInBuffer();
+            ifrm.ResetFlag();
         }
         private void  _serial_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -343,15 +317,8 @@ namespace ioex_cs
                         InFrameHandlers[ifrm.addr](ifrm);
                     }
                     ifrm.ResetFlag();
-                    if (ifrm.addr == wait_id)
-                    {
-                        timer_tick = 0;
-                        wait_id = 0;
-                        OutBufferCheck(null);
-                    }
                 }
             }
         }
-
     }
 }

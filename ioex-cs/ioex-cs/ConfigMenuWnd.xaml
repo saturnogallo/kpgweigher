@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ioex_cs.ConfigMenuWnd"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="ConfigMenuWnd" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="LightGray">
+    Title="ConfigMenuWnd" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Background="LightGray">
     <Window.Resources>
         <Style x:Key ="ListStyle" TargetType = "{x:Type ComboBox}">
             <Setter Property = "Foreground" Value = "Black"/>
@@ -79,7 +79,7 @@
         <Style x:Key ="ButtonStyle1" TargetType = "{x:Type Button}">
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
-            <Setter Property = "Height" Value = "80"/>
+            <Setter Property = "Height" Value = "123"/>
             <Setter Property = "Width" Value = "100"/>
             <Setter Property = "FontSize" Value="72"/>
             <Setter Property = "FontWeight" Value="Black"/>
@@ -98,7 +98,11 @@
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="1"/>
                         </Border>
 
-
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Green"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
 
                     </ControlTemplate>
                 </Setter.Value>
@@ -137,7 +141,7 @@
             <Canvas>
                 <Rectangle Width="140" Height="40">
                     <Rectangle.Fill>
-                        <ImageBrush ImageSource="F:\\ret1.gif"/>
+                        <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret1.gif"/>
                     </Rectangle.Fill>
                 </Rectangle>
             </Canvas>
@@ -146,7 +150,7 @@
             <Canvas>
                 <Rectangle Width="200" Height="80" >
                     <Rectangle.Fill>
-                        <ImageBrush ImageSource="F:\\ret2.gif"/>
+                        <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret2.gif"/>
                     </Rectangle.Fill>
                 </Rectangle>
             </Canvas>
@@ -209,13 +213,13 @@
         </ControlTemplate>
     </Window.Resources>
     <Grid>
-        <Button Template="{StaticResource cfgBtn}" Canvas.Left="650" Canvas.Top="337" Height="122" Name="btn_config" FontSize="36" Foreground="LightGray" VerticalAlignment="Top" Content="{DynamicResource config}" Margin="422,0" />
-        <Button Content="{DynamicResource product_config}" Click="lbl_sub_Click" Style="{StaticResource ButtonStyle1}" Margin="50,208,0,0" Name="btn_product" Foreground="Black" FontSize="72" Height="96" Canvas.Left="670" Canvas.Top="132" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="404" />
-        <Button Content="{DynamicResource history}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Height="96" HorizontalAlignment="Right" Margin="0,208,38,0" Name="btn_history" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Top" Width="404"/>
-        <Button Content="{DynamicResource bottom_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Height="96" HorizontalAlignment="Left" Margin="50,0,0,262" Name="btn_bottom" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Bottom" Width="404"/>
-        <Button Content="{DynamicResource alert_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Height="96" Margin="0,0,38,262" Name="btn_alert" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="404"/>
-        <Button Content="{DynamicResource password_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Height="96" HorizontalAlignment="Left" Margin="50,0,0,108" Name="btn_pwd" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Bottom" Width="404"/>
-        <Button Content="{DynamicResource eng_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Height="96" Margin="0,0,38,108" Name="btn_eng" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="404"/>
-        <Button Template="{StaticResource RetBtn2}" Height="50" Margin="378,0,310,40" Name="btn_return" Click="btn_return_Click" VerticalAlignment="Bottom">return</Button>
+        <Label Name="lbl_title" Content="{DynamicResource configpage}" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="70" FontWeight="Black" HorizontalContentAlignment="Center" Margin="41,12,63,0" Height="91.685" VerticalAlignment="Top"></Label>
+        <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource product_config}" Click="lbl_sub_Click" Style="{StaticResource ButtonStyle1}" Margin="50,163.366,0,0" Name="btn_product" Foreground="Black" FontSize="72" Canvas.Left="670" Canvas.Top="132" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="404" />
+        <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource history}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" HorizontalAlignment="Right" Margin="0,163.366,38,0" Name="btn_history" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Top" Width="404"/>
+        <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource bottom_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" HorizontalAlignment="Left" Margin="50,316.942,0,290.058" Name="btn_bottom" Style="{StaticResource ButtonStyle1}" Width="404" />
+        <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource alert_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Margin="0,310.062,38,296.726" Name="btn_alert" Style="{StaticResource ButtonStyle1}" HorizontalAlignment="Right" Width="404" />
+        <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource password_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black"  HorizontalAlignment="Left" Margin="50,0,0,138.361" Name="btn_pwd" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Bottom" Width="404"/>
+        <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource eng_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Margin="0,0,38,138.361" Name="btn_eng" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="404"/>
+        <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource RetBtn2}" Height="50" Margin="378,0,310,40" Name="btn_return" Click="btn_return_Click" VerticalAlignment="Bottom">return</Button>
     </Grid>
 </Window>

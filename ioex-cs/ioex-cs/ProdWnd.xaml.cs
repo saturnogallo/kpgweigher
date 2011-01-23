@@ -27,7 +27,7 @@ namespace ioex_cs
             InitializeComponent();
             imglist = new Dictionary<string, string>();
             
-            foreach (string f in Directory.GetFiles("f:\\","*.jpg"))
+            foreach (string f in Directory.GetFiles("c:\\ioex\\prodpic\\","*.jpg"))
             {
                 FileInfo fi = new FileInfo(f);
                 string nm = fi.Name.Remove(fi.Name.Length-4,4);
@@ -58,7 +58,11 @@ namespace ioex_cs
                 phandler((sender as Button).Name.Remove(0,2));
             }
             this.Hide();
+        }
 
+        private void btn_ret_run_Click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
         }
     }
 }

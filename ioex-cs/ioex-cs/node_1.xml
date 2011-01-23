@@ -2,13 +2,13 @@
 <Root current="002">
   <Item Name="002">
     <addr>1</addr>
-    <board_ID>16</board_ID>
+    <board_id>16</board_id>
     <baudrate>0</baudrate>
-    <Poise_Weight_gram0>12800</Poise_Weight_gram0>
-    <Poise_Weight_gram1>25600</Poise_Weight_gram1>
-    <Poise_Weight_gram2>51200</Poise_Weight_gram2>
-    <Poise_Weight_gram3>11265</Poise_Weight_gram3>
-    <Poise_Weight_gram4>62465</Poise_Weight_gram4>
+    <poise_weight_gram0>12800</poise_weight_gram0>
+    <poise_weight_gram1>25600</poise_weight_gram1>
+    <poise_weight_gram2>51200</poise_weight_gram2>
+    <poise_weight_gram3>11265</poise_weight_gram3>
+    <poise_weight_gram4>62465</poise_weight_gram4>
     <cs_poise0>9544</cs_poise0>
     <cs_poise1>15949</cs_poise1>
     <cs_poise2>29015</cs_poise2>
@@ -34,8 +34,8 @@
     <addr_copy2>1</addr_copy2>
     <board_copy2>16</board_copy2>
     <cs_mtrl>35651</cs_mtrl>
-    <Mtrl_Weight_gram>1024</Mtrl_Weight_gram>
-    <Mtrl_Weight_decimal>55</Mtrl_Weight_decimal>
+    <mtrl_weight_gram>1024</mtrl_weight_gram>
+    <mtrl_weight_decimal>55</mtrl_weight_decimal>
     <status>204</status>
     <cs_status>0</cs_status>
     <hw_status>0</hw_status>
@@ -61,13 +61,13 @@
   </Item>
   <Item Name="001">
     <addr>1</addr>
-    <board_ID>16</board_ID>
+    <board_id>16</board_id>
     <baudrate>0</baudrate>
-    <Poise_Weight_gram0>12800</Poise_Weight_gram0>
-    <Poise_Weight_gram1>25600</Poise_Weight_gram1>
-    <Poise_Weight_gram2>51200</Poise_Weight_gram2>
-    <Poise_Weight_gram3>11265</Poise_Weight_gram3>
-    <Poise_Weight_gram4>62465</Poise_Weight_gram4>
+    <poise_weight_gram0>12800</poise_weight_gram0>
+    <poise_weight_gram1>25600</poise_weight_gram1>
+    <poise_weight_gram2>51200</poise_weight_gram2>
+    <poise_weight_gram3>11265</poise_weight_gram3>
+    <poise_weight_gram4>62465</poise_weight_gram4>
     <cs_poise0>9544</cs_poise0>
     <cs_poise1>15949</cs_poise1>
     <cs_poise2>29015</cs_poise2>
@@ -93,8 +93,8 @@
     <addr_copy2>1</addr_copy2>
     <board_copy2>16</board_copy2>
     <cs_mtrl>35651</cs_mtrl>
-    <Mtrl_Weight_gram>1024</Mtrl_Weight_gram>
-    <Mtrl_Weight_decimal>55</Mtrl_Weight_decimal>
+    <mtrl_weight_gram>1024</mtrl_weight_gram>
+    <mtrl_weight_decimal>55</mtrl_weight_decimal>
     <status>204</status>
     <cs_status>0</cs_status>
     <hw_status>0</hw_status>
