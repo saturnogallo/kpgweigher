@@ -1,15 +1,19 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Root current="default">
   <Item Name="default">
     <machine_number>1</machine_number>
-    <baudrate>115200</baudrate>
+	<baudrate>115200</baudrate>
+	<def_addr>36</def_addr>
     <parity>None</parity>
-    <def_addr>36</def_addr>
-    <romsize>45</romsize>
     <!--define ports splitted in , ex "COM1,COM2"-->
     <totalports>COM2</totalports>
     <!--define nodes address splitted in , ex "1,2"-->
     <totalnodes>1,2,3,4,5,6,7,8,9,10,11</totalnodes>
+    <!--alert definition-->
+    <turnon_alert>OFF</turnon_alert>
+    <show_alert>ON</show_alert>
+    <stop_onalert>ON</stop_onalert>
+    <manual_reset>ON</manual_reset>
     <!--define of node type and com definition-->
     <node_type1>weight</node_type1>
     <node_type2>weight</node_type2>
@@ -36,5 +40,6 @@
     <node_com10>0</node_com10>
     <node_com11>0</node_com11>
     <node_com12>0</node_com12>
+    <operator>002</operator>
   </Item>
 </Root>
