@@ -1,0 +1,3 @@
+MODE				 OFF
+CONFIG	下 上 下 上 上 上 上 上         下 上 下 上 上 上 下 上
+GPIB ADDRESS         ON
