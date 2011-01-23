@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml.Linq;
-
+using System.IO;
 namespace ioex_cs
 {
     public class StringResource
@@ -30,7 +30,26 @@ namespace ioex_cs
                 
                 str_tbl[e.FirstAttribute.Value] = e.Value.ToString();
             }
+            FileStream fsLog = new FileStream(System.Threading.Thread.GetDomain().BaseDirectory + "\\history.log", FileMode.Truncate, FileAccess.Write, FileShare.Read);
+            fsLog.Close();
         }
+        static public void dolog(string log)
+        {
+            try
+            {
+                FileStream fsLog = new FileStream(System.Threading.Thread.GetDomain().BaseDirectory + "\\history.log", FileMode.Append, FileAccess.Write, FileShare.Read);
+                StreamWriter sw = new StreamWriter(fsLog);
+                sw.WriteLine(DateTime.Now.ToString("G") + "\t" + log);
+                sw.Close();
+                fsLog.Close();
+            }
+            catch (System.Exception)
+            {
+
+            }
+
+        }
+
         public static string str(string key)
         {
             if (str_tbl.ContainsKey(key))
@@ -55,7 +74,6 @@ namespace ioex_cs
             //load password.xml and fill in the username list
             pwds = new XmlConfig("password.xml");
             pwds.LoadConfigFromFile();
-
         }
         public static IEnumerable<string> users {
             get{
@@ -111,9 +129,10 @@ namespace ioex_cs
                 MessageBox.Show(StringResource.str("invalid_pwd"));
                 return;
             }
-            //open runmode window.
+            //open configmenu window.
             App p = Application.Current as App;
-            p.SwitchTo("runmode");
+            PackerConfig.oper = usr_input.SelectedValue.ToString();
+            p.SwitchTo("configmenu");
         }
 
         private void btn_help_Click(object sender, RoutedEventArgs e)

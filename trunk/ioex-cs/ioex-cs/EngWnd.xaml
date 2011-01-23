@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ioex_cs.EngConfigWnd"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="EngConfigWnd" Height="303" Width="300" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+    Title="EngConfigWnd" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Background="#FFEEF2FB">
     <Window.Resources>
         <Style x:Key ="ButtonStyle" TargetType = "{x:Type Button}">
             <Setter Property = "Foreground" Value = "Black"/>
@@ -33,9 +33,8 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key ="InputStyle" TargetType = "{x:Type TextBox}">
+        <Style x:Key ="InputStyle" TargetType = "{x:Type Label}">
             <Setter Property = "Foreground" Value = "Black"/>
-            <Setter Property = "MaxLines" Value = "1"/>
             <Setter Property = "Background" Value = "Beige"/>
             <Setter Property = "Height" Value = "30"/>
             <Setter Property = "Width" Value = "150"/>
@@ -68,12 +67,12 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <Button Style="{StaticResource ButtonStyle}" Name="btn_modify" Height="33" VerticalAlignment="Bottom" Margin="10.4,0,0,8" Content="{DynamicResource modify_password}" Click="btn_modify_Click" HorizontalAlignment="Left" Width="100" />
-        <TextBox Margin="0,60,31,0" GotFocus="gain_input_GotFocus" MaxLength="50" Name="gain_input" HorizontalAlignment="Right" Width="92" Height="33" VerticalAlignment="Top" />
-        <Label Content="{DynamicResource gain}" Margin="28,64,128,0" Name="gain_label" Height="29" VerticalAlignment="Top" />
-        <TextBox Margin="0,103,31,132" GotFocus="cs_filter_input_GotFocus" MaxLength="50" Name="cs_filter_input" HorizontalAlignment="Right" Width="92" />
-        <Label Content="{DynamicResource cs_filter}" Height="26" Margin="28,103,128,0" Name="cs_filter_label" VerticalAlignment="Top" />
-        <ComboBox Height="31" HorizontalAlignment="Right" Margin="0,16,31,0" Name="address" SelectionChanged="address_SelectionChanged" VerticalAlignment="Top" Width="92">
+        <Button Style="{StaticResource ButtonStyle}" Name="btn_modify" Height="33" VerticalAlignment="Top" Margin="14.29,247.217,0,0" Content="{DynamicResource modify_password}" Click="btn_modify_Click" HorizontalAlignment="Left" Width="100" />
+        <Label Margin="150.045,53,0,0" MouseLeftButtonUp="gain_input_GotFocus"  Name="gain_input" HorizontalAlignment="Left" Width="92" Height="33" VerticalAlignment="Top" />
+        <Label Content="{DynamicResource gain}" Margin="28,56,0,0" Name="gain_label" Height="29" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
+        <Label Margin="150.045,91,0,0" MouseLeftButtonUp="cs_filter_input_GotFocus"  Name="cs_filter_input" HorizontalAlignment="Left" Width="92" Height="30" VerticalAlignment="Top" />
+        <Label Content="{DynamicResource cs_filter}" Height="26" Margin="28,94,0,0" Name="cs_filter_label" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
+        <ComboBox Height="31" HorizontalAlignment="Left" Margin="150.045,16,0,0" Name="address" SelectionChanged="address_SelectionChanged" VerticalAlignment="Top" Width="92">
             <ComboBoxItem>1</ComboBoxItem>
             <ComboBoxItem>2</ComboBoxItem>
             <ComboBoxItem>3</ComboBoxItem>
@@ -85,7 +84,11 @@
             <ComboBoxItem>9</ComboBoxItem>
             <ComboBoxItem>10</ComboBoxItem>
         </ComboBox>
-        <Label Content="{DynamicResource address}" Height="29" Margin="28,18,128,0" Name="label1" VerticalAlignment="Top" />
-        <Button Content="{DynamicResource quit_eng}" Click="btn_quit_eng_click" Height="33" HorizontalAlignment="Right" Margin="0,0,9,8" Name="quit_eng" Style="{StaticResource ButtonStyle}" VerticalAlignment="Bottom" Width="100" />
+        <Label Content="{DynamicResource address}" Height="29" Margin="28,18,0,0" Name="label1" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
+        <Button Content="{DynamicResource quit_eng}" Click="btn_quit_eng_click" Height="33" HorizontalAlignment="Left" Margin="142.045,247.217,0,0" Name="quit_eng" Style="{StaticResource ButtonStyle}" VerticalAlignment="Top" Width="100" />
+        <Label Content="{DynamicResource test_mode_reg1}" Margin="28,130,0,0" Name="label2" Height="32.867" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
+        <Label Content="{DynamicResource test_mode_reg2}" Height="26" Margin="28,177.196,0,0" Name="label3" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
+        <Label HorizontalAlignment="Left" Margin="150.045,130,0,0"  Name="test_mode_reg1_input" MouseLeftButtonUp="testmodereg1_input_GotFocus" Width="92" Height="32.867" VerticalAlignment="Top" />
+        <Label Height="30" HorizontalAlignment="Left" Margin="150.045,177.196,0,0"  Name="test_mode_reg2_input" Style="{StaticResource InputStyle}" MouseLeftButtonUp="testmodereg2_input_GotFocus" VerticalAlignment="Top" Width="92" />
     </Grid>
 </Window>

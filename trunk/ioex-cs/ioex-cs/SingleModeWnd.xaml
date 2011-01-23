@@ -2,9 +2,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:CorLib="clr-namespace:System;assembly=mscorlib"
-    Title="SingleMode" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+    Title="SingleMode" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Background="LightGray">
     <Window.Resources>
-        <Style x:Key ="InputStyle" TargetType = "{x:Type TextBox}">
+        <Style x:Key ="InputStyle" TargetType = "{x:Type Label}">
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
             <Setter Property = "Height" Value = "30"/>
@@ -135,7 +135,6 @@
             <Setter Property = "FontFamily" Value="华文楷体"/>
         </Style>
         <Style x:Key ="ButtonStyle1" TargetType = "{x:Type Button}">
-
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
             <Setter Property = "Height" Value = "30"/>
@@ -156,15 +155,16 @@
                             </Border.Background>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="1"/>
                         </Border>
-
-
-
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Green"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
 
         </Style>
-
         <Style x:Key ="ButtonStyle" TargetType = "{x:Type Button}">
 
             <Setter Property = "Foreground" Value = "Black"/>
@@ -184,9 +184,37 @@
                             </Border.BitmapEffect>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Yellow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
 
 
+        <Style x:Key ="ButtonStyle2" TargetType = "{x:Type Button}">
 
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Yellow"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="18"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
+
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="15" Background="Yellow">
+                            <Border.BitmapEffect>
+                                <DropShadowBitmapEffect Color="#000" Direction="-90" ShadowDepth="5" Softness="0.1" Opacity="0.3"/>
+                            </Border.BitmapEffect>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -209,6 +237,11 @@
                 </Ellipse>
                 <ContentPresenter Canvas.Left="60" Canvas.Top="70"/>
             </Canvas>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed"  Value = "True">
+                    <Setter TargetName="inner" Property="Fill" Value="LightGray"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
         </ControlTemplate>
         <ControlTemplate x:Key="saveBtn" TargetType="{x:Type Button}">
             <Canvas>
@@ -229,25 +262,66 @@
 
 
             </Canvas>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed"  Value = "True">
+                    <Setter TargetName="inner" Property="Fill" Value="LightGray"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
         </ControlTemplate>
 
-        <ControlTemplate x:Key="RectBtn" TargetType="{x:Type Button}">
-            <Canvas>
-                <Rectangle Name="outer" Width="70" Height="40" RadiusX="5" RadiusY="5">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="White" Offset="0" />
-                            <GradientStop Color="Black" Offset="0.5" />
-                        </LinearGradientBrush>
+        <Style x:Key ="RectBtnBg" TargetType = "{x:Type Label}">
 
-                    </Rectangle.Fill>
-                </Rectangle>
-                <Rectangle Name="inner" Width="60" Height="30" Canvas.Left="5" Canvas.Top="5" Fill="Purple" RadiusX="5" RadiusY="5">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="18"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
 
-                </Rectangle>
-                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Canvas.Top="2" Canvas.Left="20"/>
-            </Canvas>
-        </ControlTemplate>
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Label">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="10" >
+                            <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                <GradientStop Color="White" Offset="0" />
+                                                <GradientStop Color="Black" Offset="0.5" />
+                                            </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key ="RectBtn" TargetType = "{x:Type Button}">
+
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "20"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="18"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
+
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="5" Background="Purple">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Yellow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
+
         <ControlTemplate x:Key="StartBtn" TargetType="{x:Type Button}">
             <Canvas>
                 <Rectangle Name="outer" Width="200" Height="80" RadiusX="20" RadiusY="20">
@@ -264,12 +338,17 @@
                 </Rectangle>
                 <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Canvas.Top="10" Canvas.Left="20"/>
             </Canvas>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed"  Value = "True">
+                    <Setter TargetName="inner" Property="Fill" Value="LightGray"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
         </ControlTemplate>
         <ControlTemplate x:Key="RetBtn1" TargetType="{x:Type Button}">
             <Canvas>
                 <Rectangle Width="140" Height="40">
                     <Rectangle.Fill>
-                        <ImageBrush ImageSource="F:\\ret1.gif"/>
+                        <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret1.gif"/>
                     </Rectangle.Fill>
                 </Rectangle>
             </Canvas>
@@ -278,7 +357,7 @@
             <Canvas>
                 <Rectangle Width="140" Height="40" >
                     <Rectangle.Fill>
-                        <ImageBrush ImageSource="F:\\ret2.gif"/>
+                        <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret2.gif"/>
                     </Rectangle.Fill>
                 </Rectangle>
             </Canvas>
@@ -308,7 +387,7 @@
         </ControlTemplate>
         <ControlTemplate x:Key="PassBar" TargetType="{x:Type Button}">
             <Canvas>
-                <Path Stroke="DarkGray" StrokeThickness="2" Fill="AliceBlue" Name="passboard">
+                <Path Stroke="DarkGray" StrokeThickness="2" Fill="Green" Name="passboard">
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
@@ -342,18 +421,30 @@
                     </Path.Data>
                 </Path>
             </Canvas>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsFocused"  Value = "True">
-                    <Setter TargetName="BarPath" Property = "Stroke" Value = "Black"/>
-                    <Setter TargetName="BarPath" Property ="StrokeThickness" Value = "3"/>
-                </Trigger>
-            </ControlTemplate.Triggers>
-
         </ControlTemplate>
 
-        <ControlTemplate x:Key="WeightBarRelease" TargetType="{x:Type Button}">
+            <ControlTemplate x:Key="WeightBarFocus" TargetType="{x:Type Button}">
+                <Canvas>
+                    <Path Stroke="Black" StrokeThickness="2" Fill="LightBlue" Name="BarPathFocus">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathGeometry.Figures>
+                                    <PathFigure StartPoint="29.09,84.89" IsClosed="True">
+                                        <LineSegment Point="4.37,8.8"/>
+                                        <ArcSegment Point="115.62,8.8" Size="180,180" SweepDirection="Clockwise"/>
+                                        <LineSegment Point="90.90,84.89"/>
+                                        <ArcSegment Point="29.09,84.89" Size="120,120" SweepDirection="Counterclockwise"/>
+                                    </PathFigure>
+                                </PathGeometry.Figures>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+                </Canvas>
+            </ControlTemplate>
+
+            <ControlTemplate x:Key="WeightBarRelease" TargetType="{x:Type Button}">
             <Canvas>
-                <Path Stroke="DarkGray" StrokeThickness="2" Fill="Blue" Name="BarPath">
+                <Path Stroke="DarkGray" StrokeThickness="2" Fill="LightYellow" Name="BarPath">
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
@@ -368,19 +459,11 @@
                     </Path.Data>
                 </Path>
             </Canvas>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsFocused"  Value = "True">
-                    <Setter TargetName="BarPath" Property = "Stroke" Value = "Black"/>
-                    <Setter TargetName="BarPath" Property ="StrokeThickness" Value = "6"/>
-
-                </Trigger>
-            </ControlTemplate.Triggers>
-
         </ControlTemplate>
 
         <ControlTemplate x:Key="WeightBarError" TargetType="{x:Type Button}">
             <Canvas>
-                <Path Stroke="DarkGray" StrokeThickness="2" Fill="Blue" Name="BarPath">
+                <Path Stroke="DarkGray" StrokeThickness="2" Fill="Black" Name="BarPath">
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
@@ -395,14 +478,6 @@
                     </Path.Data>
                 </Path>
             </Canvas>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsFocused"  Value = "True">
-                    <Setter TargetName="BarPath" Property = "Stroke" Value = "Black"/>
-                    <Setter TargetName="BarPath" Property ="StrokeThickness" Value = "6"/>
-
-                </Trigger>
-            </ControlTemplate.Triggers>
-
         </ControlTemplate>
 
         <ControlTemplate x:Key ="roundButton" TargetType ="{x:Type Button}">
@@ -414,6 +489,11 @@
                 </Rectangle>
                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsPressed"  Value = "True">
+                    <Setter TargetName="InnerRing" Property="Fill" Value="Yellow"/>
+                </Trigger>
+            </ControlTemplate.Triggers>
         </ControlTemplate>
 
         <ControlTemplate x:Key ="roundButton2" TargetType ="{x:Type Button}">
@@ -428,183 +508,190 @@
         </ControlTemplate>
     </Window.Resources>
     <Canvas>
-        <Rectangle Canvas.Left="429" Canvas.Top="376.742" Height="296.726" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" Width="541.398" />
-        <Rectangle Canvas.Left="429" Canvas.Top="-0.003" Height="360.503" Name="rectangle1" RadiusX="10" RadiusY="10" Stroke="Black" Width="541.775" />
-        <TextBox Canvas.Left="238" Canvas.Top="197" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="motor_speed_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="204" Canvas.Top="199" Content="{DynamicResource motor_speed}" Height="26" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="motor_speed_label" Style="{StaticResource LabelStyle}" VerticalAlignment="Bottom" Width="125" />
-        <TextBox Canvas.Left="450" Canvas.Top="159" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="col_otime_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="424" Canvas.Top="126" Content="{DynamicResource col_otime}" Height="26" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="col_otime_label" Style="{StaticResource PassLblStyle}" VerticalAlignment="Bottom" Width="120" />
-        <TextBox Canvas.Left="238" Canvas.Top="121" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="sub_amp_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="204" Canvas.Top="126" Content="{DynamicResource sub_amp}" Height="26" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="sub_amp_label" Style="{StaticResource VibLblStyle}" VerticalAlignment="Bottom" Width="125" />
-        <TextBox Canvas.Left="450" Canvas.Top="121" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="col_dtime_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="424" Canvas.Top="163" Content="{DynamicResource col_dtime}" Height="26" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="col_dtime_label" Style="{StaticResource PassLblStyle}" VerticalAlignment="Bottom" Width="120" />
-        <TextBox Canvas.Left="238" Canvas.Top="159" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="sub_time_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="204" Canvas.Top="163" Content="{DynamicResource sub_time}" Height="26" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="sub_time_label" Style="{StaticResource VibLblStyle}" VerticalAlignment="Bottom" Width="125" />
-        <TextBox Canvas.Left="238" Canvas.Top="86" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="sub_freq_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="204" Canvas.Top="86" Content="{DynamicResource sub_freq}" Height="30" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="sub_freq_label" Style="{StaticResource VibLblStyle}" VerticalAlignment="Bottom" Width="128" />
-        <TextBox Canvas.Left="450" Canvas.Top="236" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="wei_otime_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="422" Canvas.Top="237" Content="{DynamicResource wei_otime}" Height="26" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="wei_otime_label" Style="{StaticResource WeiLblStyle}" VerticalAlignment="Bottom" Width="122" />
-        <TextBox Canvas.Left="450" Canvas.Top="86" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="wei_dtime_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="424" Canvas.Top="89" Content="{DynamicResource wei_dtime}" Height="26" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="wei_dtime_label" Style="{StaticResource PassLblStyle}" VerticalAlignment="Bottom" Width="122" />
-        <TextBox Canvas.Left="450" Canvas.Top="197" GotFocus="input_GotFocus" Height="30" Margin="338.148,0,289.852,124.533" MaxLength="50" Name="openwei_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="82" />
-        <Label Canvas.Left="422" Canvas.Top="199" Content="{DynamicResource openwei}" Height="26" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="openwei_label" Style="{StaticResource WeiLblStyle}" VerticalAlignment="Bottom" Width="122" />
-        <Button Canvas.Left="632.676" Canvas.Top="320.028" Content="{DynamicResource subcfg_applyall}" Click="btn_sub_applyall_Click" Height="29.988" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_sub_applyall" Style="{StaticResource ButtonStyle}" VerticalAlignment="Bottom" Width="149.107" />
-        <Button Canvas.Left="441.924" Canvas.Top="284.5" Click="btn_cali_Click" Content="{DynamicResource cmd_cali0}" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali0" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="82" />
-        <Button Canvas.Left="547.924" Canvas.Top="284.5" Click="btn_cali_Click" Content="{DynamicResource cmd_cali1}" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali1" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="82" />
-        <Button Canvas.Left="657.924" Canvas.Top="284.5" Click="btn_cali_Click" Content="{DynamicResource cmd_cali2}" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali2" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="82" />
-        <Button Canvas.Left="757.924" Canvas.Top="284.5" Click="btn_cali_Click" Content="{DynamicResource cmd_cali3}" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali3" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="84" />
-        <Button Canvas.Left="853.924" Canvas.Top="284.5" Click="btn_cali_Click" Content="{DynamicResource cmd_cali4}" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali4" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="84" />
-        <Button Canvas.Left="22" Canvas.Top="625.612" Click="btn_action_Click" Content="{DynamicResource cmd_empty}" Height="30" Name="btn_empty" Style="{StaticResource ButtonStyle}" Width="100" />
-        <Button Canvas.Left="22" Canvas.Top="572" Click="btn_action_Click" Content="{DynamicResource cmd_pass}" Height="30" Name="btn_pass" Style="{StaticResource ButtonStyle}" Width="100" />
-        <Button Canvas.Left="22" Canvas.Top="518" Click="btn_action_Click" Content="{DynamicResource cmd_fill}" Height="30" Name="btn_fill" Style="{StaticResource ButtonStyle}" Width="100" />
-        <Label Background="#FFEEF2FB" Canvas.Left="619.752" Canvas.Top="0" Content="{DynamicResource bucketsetting}" FontSize="24" Height="38" Name="label12" Width="176" />
-        <Button Canvas.Left="447.976" Canvas.Top="8" Content="1" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="lbl_currNode" Template="{StaticResource roundButton2}" VerticalAlignment="Bottom" Width="66" Click="lbl_currNode_Click" />        
-        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Click="weibucket_Click" Name="bucket1" Template="{StaticResource WeightBar}" Width="46">
+        <Rectangle Canvas.Left="429" Canvas.Top="408.848" Height="264.418" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" Width="540.903" />
+        <Label Canvas.Left="547.976" Canvas.Top="622.16" Height="45.551" Style="{StaticResource RectBtnBg}" Width="167.761">123123</Label>
+        <Label Canvas.Left="547.976" Canvas.Top="572.165" Height="45.551" Style="{StaticResource RectBtnBg}" Width="167.761">123123</Label>
+        <Label Canvas.Left="547.976" Canvas.Top="524.392" Height="45.551" Style="{StaticResource RectBtnBg}" Width="167.761">123123</Label>
+        <Label Canvas.Left="547.976" Canvas.Top="474.397" Height="45.551" Style="{StaticResource RectBtnBg}" Width="167.761">123123</Label>
+        <Label Style="{StaticResource RectBtnBg}" Canvas.Left="547.976" Canvas.Top="425.513" Height="45.551" Width="167.761">123123</Label>
+        <Rectangle Canvas.Left="849.915" Canvas.Top="499.95" Fill="Black" Height="19.998" Stroke="Black" StrokeThickness="0" Width="9.999" />
+        <Rectangle Canvas.Left="429" Canvas.Top="24.442" Height="361.075" Name="rectangle1" RadiusX="10" RadiusY="10" Stroke="Black" Width="541.775" />
+        <Label FocusVisualStyle="{x:Null}" Canvas.Left="245.531" Canvas.Top="246.642" MouseLeftButtonUp="input_GotFocus" Height="28.886" Margin="338.148,0,289.852,124.533" Name="motor_speed_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="95.546" />
+        <Label Canvas.Left="213.312" Canvas.Top="246.642" Content="{DynamicResource motor_speed}" Height="27.775" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="motor_speed_label" Style="{StaticResource LabelStyle}" VerticalAlignment="Bottom" Width="125.543" />
+        <Label Canvas.Left="526.614" Canvas.Top="168.872" MouseLeftButtonUp="input_GotFocus" Height="29.997" Margin="338.148,0,289.852,124.533"  Name="col_otime_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="94.435" />
+        <Label Canvas.Left="453.288" Canvas.Top="134.581" Content="{DynamicResource col_otime}" Height="29.847" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="col_otime_label" Style="{StaticResource PassLblStyle}" VerticalAlignment="Bottom" Width="166.65" />
+        <Label Canvas.Left="245.531" Canvas.Top="168.872" MouseLeftButtonUp="input_GotFocus" Height="29.997" Margin="338.148,0,289.852,124.533"  Name="sub_amp_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="95.546" />
+        <Label Canvas.Left="213.312" Canvas.Top="166.65" Content="{DynamicResource sub_amp}" Height="32.219" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="sub_amp_label" Style="{StaticResource VibLblStyle}" VerticalAlignment="Bottom" Width="125.543" Foreground="Yellow" />
+        <Label Canvas.Left="526.614" Canvas.Top="134.431" MouseLeftButtonUp="input_GotFocus" Height="29.997" Margin="338.148,0,289.852,124.533"  Name="col_dtime_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="95.546" />
+        <Label Canvas.Left="453.288" Canvas.Top="167.761" Content="{DynamicResource col_dtime}" Height="33.33" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="col_dtime_label" Style="{StaticResource PassLblStyle}" VerticalAlignment="Bottom" Width="166.65" />
+        <Label Canvas.Left="245.531" Canvas.Top="206.646" MouseLeftButtonUp="input_GotFocus" Height="29.997" Margin="338.148,0,289.852,124.533"  Name="sub_time_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="95.546" />
+        <Label Canvas.Left="213.312" Canvas.Top="206.646" Content="{DynamicResource sub_time}" Height="25.553" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="sub_time_label" Style="{StaticResource VibLblStyle}" VerticalAlignment="Bottom" Width="125.543" Foreground="Yellow" />
+        <Label Canvas.Left="245.531" Canvas.Top="134.431" MouseLeftButtonUp="input_GotFocus" Height="29.997" Margin="338.148,0,289.852,124.533"  Name="sub_freq_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="95.546" />
+        <Label Canvas.Left="213.312" Canvas.Top="134.431" Content="{DynamicResource sub_freq}" Height="29.997" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="sub_freq_label" Style="{StaticResource VibLblStyle}" VerticalAlignment="Bottom" Width="127.765" Foreground="Yellow" />
+        <Label Canvas.Left="526.614" Canvas.Top="244.42" MouseLeftButtonUp="input_GotFocus" Height="29.997" Margin="338.148,0,289.852,124.533"  Name="wei_otime_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="94.435" />
+        <Label Canvas.Left="459.954" Canvas.Top="246.642" Content="{DynamicResource wei_otime}" Height="28.886" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="wei_otime_label" Style="{StaticResource WeiLblStyle}" VerticalAlignment="Bottom" Width="159.984" />
+        <Label Canvas.Left="526.614" Canvas.Top="96.657" MouseLeftButtonUp="input_GotFocus" Height="29.997" Margin="338.148,0,289.852,124.533"  Name="wei_dtime_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="94.435" />
+        <Label Canvas.Left="451.066" Canvas.Top="96.657" Content="{DynamicResource wei_dtime}" Height="39.996" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="wei_dtime_label" Style="{StaticResource PassLblStyle}" VerticalAlignment="Bottom" Width="168.872" />
+        <Label Canvas.Left="526.614" Canvas.Top="204.424" MouseLeftButtonUp="input_GotFocus" Height="29.997" Margin="338.148,0,289.852,124.533"  Name="openwei_input" Style="{StaticResource InputStyle}" VerticalAlignment="Bottom" Width="94.435" />
+        <Label Canvas.Left="446.622" Canvas.Top="206.646" Content="{DynamicResource openwei}" Height="27.775" HorizontalAlignment="Right" Margin="239.976,0,0,124.533" Name="openwei_label" Style="{StaticResource WeiLblStyle}" VerticalAlignment="Bottom" Width="176.649" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="628.826" Canvas.Top="293.304" Content="{DynamicResource subcfg_applyall}" Click="btn_sub_applyall_Click" Height="29.997" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_sub_applyall" Style="{StaticResource ButtonStyle}" VerticalAlignment="Bottom" Width="162.206" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="463.287" Canvas.Top="333.297" Click="btn_cali_Click" Content="{DynamicResource cmd_cali0}" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali0" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="63" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="549.945" Canvas.Top="333.297" Click="btn_cali_Click" Content="{DynamicResource cmd_cali1}" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali1" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="82.214" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="618.827" Canvas.Top="333.297" Click="btn_cali_Click" Content="{DynamicResource cmd_cali2}" Height="30" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali2" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="82.214" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="687.709" Canvas.Top="333.3" Click="btn_cali_Click" Content="{DynamicResource cmd_cali3}" Height="29.997" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali3" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="84.436" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="756.591" Canvas.Top="333.3" Click="btn_cali_Click" Content="{DynamicResource cmd_cali4}" Height="29.997" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali4" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="84.436" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="828.806" Canvas.Top="333.3" Click="btn_cali_Click" Content="{DynamicResource cmd_cali5}" Height="29.997" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="btn_cali5" Template="{StaticResource roundButton}" VerticalAlignment="Bottom" Width="84.436" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="22" Canvas.Top="625.612" Click="btn_action_Click" Content="{DynamicResource cmd_empty}" Height="30" Name="btn_empty" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="22" Canvas.Top="582" Click="btn_action_Click" Content="{DynamicResource cmd_pass}" Height="30" Name="btn_pass" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="22" Canvas.Top="540" Click="btn_action_Click" Content="{DynamicResource cmd_fill}" Height="30" Name="btn_fill" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Label Background="LightGray" Canvas.Left="619.752" Canvas.Top="6.666" Content="{DynamicResource bucketsetting}" FontSize="24" Height="37.774" Name="label12" Width="152.393" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="765.479" Canvas.Top="11.11" Content="1" Height="29.997" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="lbl_currNode" Template="{StaticResource roundButton2}" VerticalAlignment="Bottom" Width="66" Click="lbl_currNode_Click" />        
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="191" Canvas.Top="10" Height="48" Click="weibucket_Click" Name="bucket1" Template="{StaticResource WeightBar}" Width="46">
             <Button.RenderTransform>
                 <RotateTransform Angle="18" />
             </Button.RenderTransform> 1
         </Button>
-        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Click="weibucket_Click" Name="bucket2" Template="{StaticResource WeightBar}" Width="96">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="304" Canvas.Top="46" Height="80" Click="weibucket_Click" Name="bucket2" Template="{StaticResource WeightBar}" Width="96">
             <Button.RenderTransform>
                 <RotateTransform Angle="54" />
             </Button.RenderTransform> 2
         </Button>
-        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0"  Click="weibucket_Click" Name="bucket3" Template="{StaticResource WeightBar}" Width="104">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="374" Canvas.Top="141.5" Height="0"  Click="weibucket_Click" Name="bucket3" Template="{StaticResource WeightBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="90" />
             </Button.RenderTransform> 3
         </Button>
-        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="weibucket_Click" Name="bucket4" Template="{StaticResource WeightBar}" Width="36">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="weibucket_Click" Name="bucket4" Template="{StaticResource WeightBar}" Width="36">
             <Button.RenderTransform>
                 <RotateTransform Angle="126" />
             </Button.RenderTransform> 4
         </Button>
-        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="weibucket_Click" Name="bucket5" Template="{StaticResource WeightBar}" Width="72">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="weibucket_Click" Name="bucket5" Template="{StaticResource WeightBar}" Width="72">
             <Button.RenderTransform>
                 <RotateTransform Angle="162" />
             </Button.RenderTransform> 5
         </Button>
-        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="weibucket_Click" Name="bucket6" Template="{StaticResource WeightBar}" Width="0">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="weibucket_Click" Name="bucket6" Template="{StaticResource WeightBar}" Width="0">
             <Button.RenderTransform>
                 <RotateTransform Angle="198" />
             </Button.RenderTransform> 6
         </Button>
-        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="weibucket_Click" Name="bucket7" Template="{StaticResource WeightBar}" Width="30">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="weibucket_Click" Name="bucket7" Template="{StaticResource WeightBar}" Width="30">
             <Button.RenderTransform>
                 <RotateTransform Angle="234" />
             </Button.RenderTransform> 7
         </Button>
-        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="weibucket_Click" Name="bucket8" Template="{StaticResource WeightBar}" Width="74">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="weibucket_Click" Name="bucket8" Template="{StaticResource WeightBar}" Width="74">
             <Button.RenderTransform>
                 <RotateTransform Angle="270" />
             </Button.RenderTransform> 8
         </Button>
-        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="weibucket_Click" Name="bucket9" Template="{StaticResource WeightBar}" Width="114">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="weibucket_Click" Name="bucket9" Template="{StaticResource WeightBar}" Width="114">
             <Button.RenderTransform>
                 <RotateTransform Angle="306" />
             </Button.RenderTransform> 9
         </Button>
-        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="weibucket_Click" Name="bucket10" Template="{StaticResource WeightBar}" Width="104">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="weibucket_Click" Name="bucket10" Template="{StaticResource WeightBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="342" />
             </Button.RenderTransform> 10
         </Button>
-        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Click="vibbucket_Click" Name="vib1" Template="{StaticResource VibBar}" Width="46">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="191" Canvas.Top="10" Height="48" Click="vibbucket_Click" Name="vib1" Template="{StaticResource VibBar}" Width="46">
             <Button.RenderTransform>
                 <RotateTransform Angle="18" />
             </Button.RenderTransform> 1
         </Button>
-        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Click="vibbucket_Click" Name="vib2" Template="{StaticResource VibBar}" Width="96">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="304" Canvas.Top="46" Height="80" Click="vibbucket_Click" Name="vib2" Template="{StaticResource VibBar}" Width="96">
             <Button.RenderTransform>
                 <RotateTransform Angle="54" />
             </Button.RenderTransform> 2
         </Button>
-        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0" Click="vibbucket_Click" Name="vib3" Template="{StaticResource VibBar}" Width="104">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="374" Canvas.Top="141.5" Height="0" Click="vibbucket_Click" Name="vib3" Template="{StaticResource VibBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="90" />
             </Button.RenderTransform> 3
         </Button>
-        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="vibbucket_Click" Name="vib4" Template="{StaticResource VibBar}" Width="36">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="vibbucket_Click" Name="vib4" Template="{StaticResource VibBar}" Width="36">
             <Button.RenderTransform>
                 <RotateTransform Angle="126" />
             </Button.RenderTransform> 4
         </Button>
-        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="vibbucket_Click" Name="vib5" Template="{StaticResource VibBar}" Width="72">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="vibbucket_Click" Name="vib5" Template="{StaticResource VibBar}" Width="72">
             <Button.RenderTransform>
                 <RotateTransform Angle="162" />
             </Button.RenderTransform> 5
         </Button>
-        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="vibbucket_Click" Name="vib6" Template="{StaticResource VibBar}" Width="0">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="vibbucket_Click" Name="vib6" Template="{StaticResource VibBar}" Width="0">
             <Button.RenderTransform>
                 <RotateTransform Angle="198" />
             </Button.RenderTransform> 6
         </Button>
-        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="vibbucket_Click" Name="vib7" Template="{StaticResource VibBar}" Width="30">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="vibbucket_Click" Name="vib7" Template="{StaticResource VibBar}" Width="30">
             <Button.RenderTransform>
                 <RotateTransform Angle="234" />
             </Button.RenderTransform> 7
         </Button>
-        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="vibbucket_Click" Name="vib8" Template="{StaticResource VibBar}" Width="74">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="vibbucket_Click" Name="vib8" Template="{StaticResource VibBar}" Width="74">
             <Button.RenderTransform>
                 <RotateTransform Angle="270" />
             </Button.RenderTransform> 8
         </Button>
-        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="vibbucket_Click" Name="vib9" Template="{StaticResource VibBar}" Width="114">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="vibbucket_Click" Name="vib9" Template="{StaticResource VibBar}" Width="114">
             <Button.RenderTransform>
                 <RotateTransform Angle="306" />
             </Button.RenderTransform> 9
         </Button>
-        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="vibbucket_Click" Name="vib10" Template="{StaticResource VibBar}" Width="104">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="vibbucket_Click" Name="vib10" Template="{StaticResource VibBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="342" />
             </Button.RenderTransform> 10
         </Button>
-        <Button Canvas.Left="191" Canvas.Top="10" Height="48" Click="passbucket_Click" Name="pass1" Template="{StaticResource PassBar}" Width="46">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="191" Canvas.Top="10" Height="48" Click="passbucket_Click" Name="pass1" Template="{StaticResource PassBar}" Width="46">
             <Button.RenderTransform>
                 <RotateTransform Angle="18" />
             </Button.RenderTransform> 1
         </Button>
-        <Button Canvas.Left="304" Canvas.Top="46" Height="80" Click="passbucket_Click" Name="pass2" Template="{StaticResource PassBar}" Width="96">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="304" Canvas.Top="46" Height="80" Click="passbucket_Click" Name="pass2" Template="{StaticResource PassBar}" Width="96">
             <Button.RenderTransform>
                 <RotateTransform Angle="54" />
             </Button.RenderTransform> 2
         </Button>
-        <Button Canvas.Left="374" Canvas.Top="141.5" Height="0" Click="passbucket_Click" Name="pass3" Template="{StaticResource PassBar}" Width="104">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="374" Canvas.Top="141.5" Height="0" Click="passbucket_Click" Name="pass3" Template="{StaticResource PassBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="90" />
             </Button.RenderTransform> 3
         </Button>
-        <Button Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="passbucket_Click" Name="pass4" Template="{StaticResource PassBar}" Width="36">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="375" Canvas.Top="259.5" Height="80" Click="passbucket_Click" Name="pass4" Template="{StaticResource PassBar}" Width="36">
             <Button.RenderTransform>
                 <RotateTransform Angle="126" />
             </Button.RenderTransform> 4
         </Button>
-        <Button Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="passbucket_Click" Name="pass5" Template="{StaticResource PassBar}" Width="72">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="306" Canvas.Top="355.5" Height="62" Click="passbucket_Click" Name="pass5" Template="{StaticResource PassBar}" Width="72">
             <Button.RenderTransform>
                 <RotateTransform Angle="162" />
             </Button.RenderTransform> 5
         </Button>
-        <Button Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="passbucket_Click" Name="pass6" Template="{StaticResource PassBar}" Width="0">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="194" Canvas.Top="392.5" Height="564" Click="passbucket_Click" Name="pass6" Template="{StaticResource PassBar}" Width="0">
             <Button.RenderTransform>
                 <RotateTransform Angle="198" />
             </Button.RenderTransform> 6
         </Button>
-        <Button Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="passbucket_Click" Name="pass7" Template="{StaticResource PassBar}" Width="30">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="81" Canvas.Top="356.5" Height="60" Click="passbucket_Click" Name="pass7" Template="{StaticResource PassBar}" Width="30">
             <Button.RenderTransform>
                 <RotateTransform Angle="234" />
             </Button.RenderTransform> 7
         </Button>
-        <Button Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="passbucket_Click" Name="pass8" Template="{StaticResource PassBar}" Width="74">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="10.8" Canvas.Top="262.5" Height="34" Click="passbucket_Click" Name="pass8" Template="{StaticResource PassBar}" Width="74">
             <Button.RenderTransform>
                 <RotateTransform Angle="270" />
             </Button.RenderTransform> 8
         </Button>
-        <Button Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="passbucket_Click" Name="pass9" Template="{StaticResource PassBar}" Width="114">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="10" Canvas.Top="143.5" Height="0" Click="passbucket_Click" Name="pass9" Template="{StaticResource PassBar}" Width="114">
             <Button.RenderTransform>
                 <RotateTransform Angle="306" />
             </Button.RenderTransform> 9
         </Button>
-        <Button Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="passbucket_Click" Name="pass10" Template="{StaticResource PassBar}" Width="104">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="78.5" Canvas.Top="47.5" Height="106" Click="passbucket_Click" Name="pass10" Template="{StaticResource PassBar}" Width="104">
             <Button.RenderTransform>
                 <RotateTransform Angle="342" />
             </Button.RenderTransform> 10
@@ -615,8 +702,8 @@
         <Label Canvas.Left="294" Canvas.Top="284.5" Height="24" Name="wei_node4" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="52">00.0</Label>
         <Label Canvas.Left="218" Canvas.Top="336.5" Height="24" Name="wei_node5" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="58">00.0</Label>
         <Label Canvas.Left="119" Canvas.Top="336.5" Height="24" Name="wei_node6" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="56">00.0</Label>
-        <Label Canvas.Left="22" Canvas.Top="194.5" Height="24" Name="wei_node7" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="56">00.0</Label>
-        <Label Canvas.Left="53" Canvas.Top="284.5" Height="24" Name="wei_node8" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="54">00.0</Label>
+        <Label Canvas.Left="22" Canvas.Top="194.5" Height="24" Name="wei_node8" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="56">00.0</Label>
+        <Label Canvas.Left="53" Canvas.Top="284.5" Height="24" Name="wei_node7" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="54">00.0</Label>
         <Label Canvas.Left="53" Canvas.Top="105.5" Height="24" Name="wei_node9" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="54">00.0</Label>
         <Label Canvas.Left="119" Canvas.Top="48.5" Height="24" Name="wei_node10" MouseLeftButtonUp="weibucket_Click" Style="{StaticResource WeightLabel}" Width="56">00.0</Label>
         <Label Canvas.Left="200" Canvas.Top="140.5" Height="29" Name="vib_lbl1" MouseLeftButtonUp="vibbucket_Click" Style="{StaticResource VibLabel}" Width="58">1</Label>
@@ -629,37 +716,49 @@
         <Label Canvas.Left="133.707" Canvas.Top="188.321" Height="29" Name="vib_lbl8" MouseLeftButtonUp="vibbucket_Click" Style="{StaticResource VibLabel}" Width="24.293">8</Label>
         <Label Canvas.Left="142" Canvas.Top="158.5" Height="30" Name="vib_lbl9" MouseLeftButtonUp="vibbucket_Click" Style="{StaticResource VibLabel}" Width="54">9</Label>
         <Label Canvas.Left="163.347" Canvas.Top="140.155" Height="28.58" Name="vib_lbl10" MouseLeftButtonUp="vibbucket_Click" Style="{StaticResource VibLabel}" Width="55.731">10</Label>
-        <Button Canvas.Left="158" Canvas.Top="166.5" Height="0" Name="main_bucket" Template="{StaticResource MainBucket}" Width="0" />
-        <Button Canvas.Left="22" Canvas.Top="412" Content="{DynamicResource cmd_zero}" Click="btn_action_Click" Height="30" Name="btn_zero" Style="{StaticResource ButtonStyle}" Width="100" />
-        <Button Canvas.Left="22" Canvas.Top="464" Content="{DynamicResource cmd_mainvib}" Click="btn_action_Click" Height="30" Name="btn_mainvib" Style="{StaticResource ButtonStyle}" Width="100" />
-        <Button Canvas.Left="169.063" Canvas.Top="444" Content="{DynamicResource cmd_run}" Click="btn_trial_Click" FontSize="36" Foreground="LightGray" Height="170" Name="btn_trial" Template="{StaticResource cfgBtn}" Width="176.937" />
-        <Label Canvas.Left="143.341" Canvas.Top="644" Content="{DynamicResource totalweight}" Height="64" Name="lbl_summary" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="173" />
-        <Button Canvas.Left="845.976" Canvas.Top="460" Content="{DynamicResource cmd_save}" Click="btn_save_Click" FontSize="36" Foreground="Black" Height="128.359" Name="btn_save" Template="{StaticResource saveBtn}" Width="124.422" />
-        <Label Canvas.Left="447.976" Canvas.Top="444" Content="{DynamicResource product_no}" Height="50" Name="lbl_prd_no" Style="{StaticResource LabelStyle}" Width="130" />
-        <Label Canvas.Left="443.976" Canvas.Top="488" Content="{DynamicResource product_desc}" Height="36" Name="lbl_desc" Style="{StaticResource LabelStyle}" Width="154" />
-        <Label Canvas.Left="443.976" Canvas.Top="536" Content="{DynamicResource grp_target}" Height="36" Name="grp_target_label" Style="{StaticResource LabelStyle}" Width="154" />
-        <Label Canvas.Left="443.976" Canvas.Top="578" Content="{DynamicResource grp_uvar}" Foreground="Black" Height="36" Name="grp_uvar_label" Style="{StaticResource LabelStyle}" Width="120" />
-        <Label Canvas.Left="443.976" Canvas.Top="620" Content="{DynamicResource grp_dvar}" Height="32" Name="grp_dvar_label" Style="{StaticResource LabelStyle}" Width="120" />
-        <Button Canvas.Left="549.976" Canvas.Top="438" FontSize="24" Foreground="LightGray" Height="40" Click="btn_prd_no_Click" Name="btn_prd_no" Template="{StaticResource RectBtn}" Width="90">01</Button>
-        <Rectangle Canvas.Left="667.976" Canvas.Top="470" Height="78" Name="ellipseWithImageBrush" Stroke="Black" StrokeThickness="4" Width="148">
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="158" Canvas.Top="166.5" Height="0" Name="main_bucket" Template="{StaticResource MainBucket}" Width="0" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="22" Canvas.Top="448" Content="{DynamicResource cmd_zero}" Click="btn_action_Click" Height="30" Name="btn_zero" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="22" Canvas.Top="494" Content="{DynamicResource cmd_mainvib}" Click="btn_action_Click" Height="30" Name="btn_mainvib" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="185.537" Canvas.Top="410.931" Content="{DynamicResource cmd_run}" Click="btn_trial_Click" FontSize="36" Foreground="LightGray" Height="170" Name="btn_trial" Template="{StaticResource cfgBtn}" Width="176.649" />
+        <Label Canvas.Left="163.347" Canvas.Top="682.154" Content="{DynamicResource totalweight}" FontSize="20" Height="39.996" Name="lbl_summary"  Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Foreground="Black" Width="120.036" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="806.586" Canvas.Top="550" Content="{DynamicResource cmd_save}" Click="btn_save_Click" FontSize="36" Foreground="Black" Height="128.359" Name="btn_save" Template="{StaticResource saveBtn}" Width="124.432" />
+        <Label Canvas.Left="445.511" Canvas.Top="437.734" Content="{DynamicResource product_no}" Height="34.441" Name="lbl_prd_no" Style="{StaticResource LabelStyle}" Width="77.77" />
+        <Label Canvas.Left="443.289" Canvas.Top="481.063" Content="{DynamicResource product_desc}" Height="35.552" Name="lbl_desc" Style="{StaticResource LabelStyle}" Width="99.99" />
+        <Label Canvas.Left="441.067" Canvas.Top="528.836" Content="{DynamicResource grp_target}" Height="35.552" Name="grp_target_label" Style="{StaticResource LabelStyle}" Width="103.323" />
+        <Label Canvas.Left="442.178" Canvas.Top="578.831" Content="{DynamicResource grp_uvar}" Foreground="Black" Height="35.552" Name="grp_uvar_label" Style="{StaticResource LabelStyle}" Width="102.212" />
+        <Label Canvas.Left="443.289" Canvas.Top="626.604" Content="{DynamicResource grp_dvar}" Height="32.219" Name="grp_dvar_label" Style="{StaticResource LabelStyle}" Width="101.101" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="552.167" Canvas.Top="429.957" FontSize="24" Foreground="LightGray" Height="34.441" Click="btn_prd_no_Click" Name="btn_prd_no" Style="{StaticResource RectBtn}" Content="01" Width="161" />
+        <Rectangle Canvas.Left="783.018" Canvas.Top="432.179" Height="77.77" Name="ellipseWithImageBrush" Stroke="Black" StrokeThickness="4" Width="148" MouseLeftButtonUp="btn_prd_desc_Click">
             <Rectangle.Fill>
-                <ImageBrush ImageSource="file:///C:/Debug/zh-CN.jpg" />
+                <ImageBrush ImageSource="file:///C:/ioex/apppic/zh-CN.jpg"/>
             </Rectangle.Fill>
         </Rectangle>
-        <Ellipse Canvas.Left="713.976" Canvas.Top="550" Fill="Black" Height="16" StrokeThickness="0" Width="50" />
-        <Rectangle Canvas.Left="733.976" Canvas.Top="542" Fill="Black" Height="20" Stroke="Black" StrokeThickness="0" Width="10" />
-        <Button Canvas.Left="549.976" Canvas.Top="482" FontSize="24" Foreground="LightGray" Height="40" Name="btn_prd_desc" Click="btn_prd_desc_Click" Template="{StaticResource RectBtn}" Width="90">01</Button>
-        <Button Canvas.Left="549.976" Canvas.Top="530" FontSize="24" Foreground="LightGray" Height="40" Name="btn_target" Click="btn_pack_target_Click" Template="{StaticResource RectBtn}" Width="90">01</Button>
-        <Button Canvas.Left="549.976" Canvas.Top="572" FontSize="24" Foreground="LightGray" Height="40" Name="btn_uvar" Click="btn_pack_uvar_Click" Template="{StaticResource RectBtn}" Width="90">01</Button>
-        <Button Canvas.Left="549.976" Canvas.Top="620" FontSize="24" Foreground="LightGray" Height="40" Name="btn_dvar" Click="btn_pack_dvar_Click" Template="{StaticResource RectBtn}" Width="90">01</Button>
-        <Label Canvas.Left="689.976" Canvas.Top="578" Foreground="Red" FontSize="36" FontFamily="华文楷体" Content="{DynamicResource preview}" Height="64" Name="label1" Opacity="0.9" OpacityMask="Beige" Width="100" />
-        <Label Background="#FFEEF2FB" Canvas.Left="610" Canvas.Top="392" Content="{DynamicResource product_config}" FontSize="24" Height="38" Name="label2" Width="176" />
-        <Label Canvas.Left="444" Canvas.Top="47.4" Content="{DynamicResource grp_freq}" Height="30" Name="label3" Style="{StaticResource MainLblStyle}" Width="128" />
-        <TextBox Canvas.Left="576.148" Canvas.Top="47.4" Height="30" MaxLength="50" Name="run_freq" GotFocus="main_input_click" Style="{StaticResource InputStyle}" Width="82" />
-        <Label Canvas.Left="664" Canvas.Top="48.5" Content="{DynamicResource grp_amp}" Height="26" Name="label4" Style="{StaticResource MainLblStyle}" Width="122" />
-        <TextBox Canvas.Left="788.148" GotFocus="main_input_click" Canvas.Top="48.5" Height="30" MaxLength="50" Name="run_amp" Style="{StaticResource InputStyle}" Width="82" />
-        <Button Canvas.Left="507.259" Canvas.Top="448" Content="+" Height="30" Name="new_prd" Template="{StaticResource roundButton}" Width="16.665" Click="new_prd_Click" />
-        <Button Template="{StaticResource RetBtn1}" Canvas.Left="526.614" Canvas.Top="682.154" Height="42.218" Name="btn_ret_config" Width="147.763" Click="btn_ret_config_Click">回到设置</Button>
-        <Button Template="{StaticResource RetBtn2}" Canvas.Left="765.479" Canvas.Top="682.154" Height="39.996" Name="btn_ret_run" Width="148.874" Click="btn_ret_run_Click">回到运行</Button>
+        <Ellipse Canvas.Left="832.139" Canvas.Top="512.171" Fill="Black" Height="15.554" StrokeThickness="0" Width="49.995" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="551.056" Canvas.Top="479.952" FontSize="24" Foreground="LightGray" Height="34.441" Name="btn_prd_desc" Click="btn_prd_desc_Click" Style="{StaticResource RectBtn}" Width="161">01</Button>
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="552.167" Canvas.Top="531.058" FontSize="24" Foreground="LightGray" Height="34.441" Name="btn_target" Click="btn_pack_target_Click" Style="{StaticResource RectBtn}" Width="161">01</Button>
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="552.167" Canvas.Top="577.72" FontSize="24" Foreground="LightGray" Height="34.441" Name="btn_uvar" Click="btn_pack_uvar_Click" Style="{StaticResource RectBtn}" Width="161">01</Button>
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="552.167" Canvas.Top="626.604" FontSize="24" Foreground="LightGray" Height="34.441" Name="btn_dvar" Click="btn_pack_dvar_Click" Style="{StaticResource RectBtn}" Width="161">01</Button>
+        <Label Background="LightGray" Canvas.Left="610" Canvas.Top="386.628" Content="{DynamicResource product_config}" FontSize="24" Height="37.774" Name="label2" Width="145.541" HorizontalContentAlignment="Center" />
+        <Label Canvas.Left="453.288" Canvas.Top="58.883" Content="{DynamicResource grp_freq}" Height="29.997" Name="label3" Style="{StaticResource MainLblStyle}" Width="127.765" />
+        <Label Canvas.Left="584.386" Canvas.Top="58.883" Height="29.997"  Name="run_freq" MouseLeftButtonUp="main_input_click" Style="{StaticResource InputStyle}" Width="94.435" />
+        <Label Canvas.Left="691.042" Canvas.Top="58.883" Content="{DynamicResource grp_amp}" Height="29.997" Name="label4" Style="{StaticResource MainLblStyle}" Width="122.21" />
+        <Label Canvas.Left="863.651" MouseLeftButtonUp="main_input_click" Canvas.Top="58.883" Height="29.997"  Name="run_amp" Style="{StaticResource InputStyle}" Width="95.546" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="516.615" Canvas.Top="437.734" Content="+" Height="28.886" Name="new_prd" Template="{StaticResource roundButton}" Width="27.775" Click="new_prd_Click" />
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="526.614" Canvas.Top="682.154" Height="42.218" Name="btn_ret_config" Width="147.763" Click="btn_ret_config_Click">回到设置</Button>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Canvas.Left="765.479" Canvas.Top="682.154" Height="39.996" Name="btn_ret_run" Width="148.874" Click="btn_ret_run_Click">回到运行</Button>
+        <Label Canvas.Left="453.288" Canvas.Top="96.657" Content="{DynamicResource grp_time}" Height="29.997" Name="label5" Style="{StaticResource MainLblStyle}" Width="127.765" />
+        <Label Canvas.Left="584.386" Canvas.Top="96.657" Height="29.997"  Name="run_time" MouseLeftButtonUp="main_input_click" Style="{StaticResource InputStyle}" Width="94.435" />
+        <Button Canvas.Left="22" Canvas.Top="392" Content="{DynamicResource cmd_selectall}" Click="btn_selectall_Click" FocusVisualStyle="{x:Null}" Height="30" Name="btn_selectall" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Rectangle Canvas.Left="349.29" Canvas.Top="254.956" Height="78.345" Name="bg_oper" Stroke="Beige" RadiusX="30" RadiusY="30" Width="341.077" Fill="Beige" Opacity="0.8
+                   " Visibility="Hidden">
+        </Rectangle>
+        <Label Canvas.Left="372.621" Canvas.Top="273.301" Height="50" Name="txt_oper" Width="285.527" Opacity="1" FontSize="26" Foreground="Tomato" FontWeight="Black" Visibility="Hidden">Label</Label>
+        <Label Canvas.Left="326" Canvas.Top="599.46" FontSize="20" Height="34.441" Name="lbl_speed" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="81.103">0</Label>
+        <Label Canvas.Left="163.347" Canvas.Top="599.303" Content="{DynamicResource speed}" FontSize="20" Foreground="Black" Height="32.219" Name="title_speed" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="153.318" />
+        <Label Canvas.Left="326" Canvas.Top="627.838" FontSize="20" Height="33.207" Name="lbl_lastweight" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="74.459">0.0</Label>
+        <Label Canvas.Left="326" Canvas.Top="654.379" FontSize="20" Height="32.219" Name="lbl_totalpack" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="81.103">0</Label>
+        <Label Canvas.Left="163.347" Canvas.Top="626.604" Content="{DynamicResource lastweight}" FontSize="20" Foreground="Black" Height="33.33" Name="title_lastweight" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="136.653" />
+        <Label Canvas.Left="163.347" Canvas.Top="654.379" Content="{DynamicResource totalpack}" FontSize="20" Foreground="Black" Height="32.219" Name="title_totalpack" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="136.651" />
+        <Label Canvas.Left="326" Canvas.Top="682.154" FontSize="20" Height="32.219" Name="lbl_totalweights" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="94.435">0</Label>
     </Canvas>
 </Window>

@@ -1,14 +1,14 @@
 ﻿<Window x:Class="ioex_cs.PwdWnd"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="Password Setup window" Height="300" Width="300" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="SingleBorderWindow" ShowInTaskbar="False" ResizeMode="CanResize" Background="#FFEEF2FB">
+    Title="Password Setup window" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Background="LightGray">
     <Window.Resources>
         <Style x:Key ="ButtonStyle" TargetType = "{x:Type Button}">
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
             <Setter Property = "Height" Value = "30"/>
-            <Setter Property = "Width" Value = "100"/>
-            <Setter Property = "FontSize" Value="16"/>
+            <Setter Property = "Width" Value = "90"/>
+            <Setter Property = "FontSize" Value="20"/>
             <Setter Property = "FontWeight" Value="Black"/>
             <Setter Property = "FontFamily" Value="华文楷体"/>
             <Setter Property = "BitmapEffect">
@@ -17,7 +17,21 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key ="ListStyle" TargetType = "{x:Type ComboBox}">
+        <Style x:Key ="ListStyle" TargetType = "{x:Type ListBox}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "FontSize" Value="14"/>
+            <Setter Property = "BorderBrush" Value="DarkGoldenrod"/>
+            <Setter Property = "BorderThickness" Value="1"/>
+            <Setter Property = "Opacity" Value="0.5"/>
+            <Setter Property = "FontFamily" Value="Arial"/>
+            <Setter Property = "BitmapEffect">
+                <Setter.Value>
+                    <DropShadowBitmapEffect Color="Beige" Opacity="0.5" />
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key ="InputStyle" TargetType = "{x:Type Label}">
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
             <Setter Property = "Height" Value = "30"/>
@@ -33,29 +47,31 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <Style x:Key ="InputStyle" TargetType = "{x:Type TextBox}">
-            <Setter Property = "Foreground" Value = "Black"/>
-            <Setter Property = "MaxLines" Value = "1"/>
-            <Setter Property = "Background" Value = "Beige"/>
-            <Setter Property = "Height" Value = "30"/>
-            <Setter Property = "Width" Value = "150"/>
-            <Setter Property = "FontSize" Value="14"/>
-            <Setter Property = "BorderBrush" Value="DarkGoldenrod"/>
-            <Setter Property = "BorderThickness" Value="1"/>
-            <Setter Property = "Opacity" Value="0.5"/>
-            <Setter Property = "FontFamily" Value="Arial"/>
-            <Setter Property = "BitmapEffect">
-                <Setter.Value>
-                    <DropShadowBitmapEffect Color="Beige" Opacity="0.5" />
-                </Setter.Value>
-            </Setter>
-        </Style>
+
+        <ControlTemplate x:Key="RetBtn1" TargetType="{x:Type Button}">
+            <Canvas>
+                <Rectangle Width="90" Height="30">
+                    <Rectangle.Fill>
+                        <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret1.gif"/>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Canvas>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="RetBtn2" TargetType="{x:Type Button}">
+                <Canvas>
+                    <Rectangle Width="100" Height="30">
+                        <Rectangle.Fill>
+                            <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret2.gif"/>
+                        </Rectangle.Fill>
+                    </Rectangle>
+                </Canvas>
+            </ControlTemplate>
+
+        
         <Style x:Key ="PwdStyle" TargetType = "{x:Type PasswordBox}">
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
-            <Setter Property = "Height" Value = "30"/>
-            <Setter Property = "Width" Value = "150"/>
-            <Setter Property = "FontSize" Value="14"/>
             <Setter Property = "BorderBrush" Value="DarkGoldenrod"/>
             <Setter Property = "BorderThickness" Value="1"/>
             <Setter Property = "Opacity" Value="0.5"/>
@@ -67,16 +83,22 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid>
-        <ComboBox Background="Beige" Height="30" Margin="122.648,10,5.352,0" Name="usr_input" Style="{StaticResource ListStyle}" VerticalAlignment="Top" />
-        <Label Content="{DynamicResource account}" FontSize="16" Height="27.27" HorizontalAlignment="Left" Margin="10,12.73,0,0" Name="usr_label" VerticalAlignment="Top" Width="89.082" />
-        <PasswordBox Height="30" Margin="122.648,59.086,5.352,0" Name="old_pwd_input" Style="{StaticResource PwdStyle}" VerticalAlignment="Top" />
-        <Label Content="{DynamicResource org_password}" FontSize="16" Height="30.906" HorizontalAlignment="Left" Margin="10,59.086,0,0" Name="label1" VerticalAlignment="Top" Width="96.354" />
-        <PasswordBox Margin="122.648,109,5.352,123" Name="new_pwd_input1" Style="{StaticResource PwdStyle}" />
-        <Label Content="{DynamicResource new_password}" FontSize="16" HorizontalAlignment="Left" Margin="10,109,0,122" Name="label2" Width="96.354" />
-        <PasswordBox Height="30" Margin="122.648,0,5.352,75" Name="new_pwd_input2" Style="{StaticResource PwdStyle}" VerticalAlignment="Bottom" />
-        <Label Content="{DynamicResource new_password2}" FontSize="16" Height="30.906" HorizontalAlignment="Left" Margin="10,0,0,74" Name="label3" VerticalAlignment="Bottom" Width="96.354" />
-        <Button Content="{DynamicResource modify_password}" Style="{StaticResource ButtonStyle}" Name="btn_modify" VerticalAlignment="Bottom" HorizontalAlignment="Left" Click="btn_modify_Click" Height="30" Width="106" Margin="10,0,0,11" />
-        <Button Content="{DynamicResource find_password}" Style="{StaticResource ButtonStyle}" Name="btn_restore" VerticalAlignment="Bottom" HorizontalAlignment="Right" Click="btn_restore_Click" Height="30" Width="106" Margin="0,0,5.352,11" />
-    </Grid>
+    <Canvas Width="411.552">
+        <ListBox Background="Beige" Height="50" Margin="173,29,30,0" Name="usr_input" Style="{StaticResource ListStyle}" VerticalAlignment="Top" FontSize="20" Width="173" Canvas.Left="65.552" Canvas.Top="77.5">
+            <ListBoxItem Content="{DynamicResource admin}" Name="admin"></ListBoxItem>
+            <ListBoxItem Content="{DynamicResource user}" Name="user"></ListBoxItem>
+        </ListBox>
+        <Label Content="{DynamicResource account}" FontSize="26" Height="37.5" HorizontalAlignment="Left" Margin="31,29,0,0" Name="usr_label" VerticalAlignment="Top" Width="127.5" Canvas.Top="92.5" Canvas.Left="7.5" />
+        <PasswordBox FocusVisualStyle="{x:Null}" Height="45" Margin="173,92,30,0" Name="old_pwd_input" GotFocus="new_pwd_input2_GotFocus" MouseLeftButtonUp="pwd_GotFocus" Style="{StaticResource PwdStyle}" VerticalAlignment="Top" FontSize="20" Width="173" Canvas.Top="97.5" Canvas.Left="68.5" />
+        <Label Content="{DynamicResource org_password}" FontSize="26" Height="45" HorizontalAlignment="Left" Margin="31,92,0,0" Name="label1" VerticalAlignment="Top" Width="127.5" Canvas.Left="7.5" Canvas.Top="97.5" />
+        <PasswordBox FocusVisualStyle="{x:Null}" Margin="173,153,30,174" Name="new_pwd_input1" GotFocus="new_pwd_input2_GotFocus" MouseLeftButtonUp="pwd_GotFocus" Style="{StaticResource PwdStyle}" VerticalAlignment="Top" FontSize="20" Height="42.5" Canvas.Left="65.552" Width="173" Canvas.Top="110" />
+        <Label Content="{DynamicResource new_password}" FontSize="26" HorizontalAlignment="Left" Margin="31,153,0,167" VerticalAlignment="Top" Name="label2" Width="127.5" Height="40" Canvas.Left="7.5" Canvas.Top="112.5" />
+        <PasswordBox FocusVisualStyle="{x:Null}" Height="42.5" Margin="173,0,30,117" GotFocus="new_pwd_input2_GotFocus" MouseLeftButtonUp="pwd_GotFocus" Name="new_pwd_input2" Style="{StaticResource PwdStyle}" VerticalAlignment="Bottom" FontSize="20" Canvas.Left="65.552" Canvas.Top="332.5" Width="173" />
+        <Label Content="{DynamicResource new_password2}" FontSize="26" Height="42.5" HorizontalAlignment="Left" Margin="31,0,0,117" Name="label3" VerticalAlignment="Bottom" Width="127.5" Canvas.Left="7.5" Canvas.Top="332.5" />
+        <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource modify_password}" Style="{StaticResource ButtonStyle}" Name="btn_modify" VerticalAlignment="Bottom" HorizontalAlignment="Left" Click="btn_modify_Click" Height="42.5" Width="136" Margin="18,0,0,55" Canvas.Left="13" Canvas.Top="432.5" />
+        <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource find_password}" Style="{StaticResource ButtonStyle}" Name="btn_restore" VerticalAlignment="Bottom" Click="btn_restore_Click" Height="42.5" Margin="0,0,17,55" HorizontalAlignment="Right" Width="139" Canvas.Left="241.5" Canvas.Top="432.5" />
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="-57" Canvas.Top="645" Height="40" Name="btn_ret_config" Click="btn_return_Click" Margin="119,0,85,0" VerticalAlignment="Bottom" Width="0">回到运行</Button>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Canvas.Left="122.5" Canvas.Top="644.988" Height="40.012" Name="btn_ret_run" Click="btn_return_Click" Margin="119,0,85,0" VerticalAlignment="Bottom" Width="0">回到运行</Button>
+        <Label Canvas.Left="62" Canvas.Top="0" Content="{DynamicResource pwdpage}" FontFamily="华文楷体" FontSize="48" FontWeight="Black" Foreground="ForestGreen" Height="92.5" HorizontalContentAlignment="Center" Name="lbl_title" Width="310.093" />
+    </Canvas>
 </Window>

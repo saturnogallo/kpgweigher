@@ -56,16 +56,16 @@ namespace ioex_cs
         private XmlConfig all_conf;//store all the configurations of the packer
         private PackerConfig sys_cfg;
         public PackerConfig curr_cfg { get {return sys_cfg;} }
-        public string pack_define_file = "pack_define.xml";
+        static string pack_define_file = "pack_define.xml";
 
         public PackerStatus status { get; set; } //status of running
 
-        public Packer(int id)
+        public Packer()
         {
             vib_node = null;
             pack_node = null;
             weight_node = new List<WeighNode>();
-            all_conf = new XmlConfig("pack_define"+id.ToString()+".xml");
+            all_conf = new XmlConfig(pack_define_file);
             all_conf.LoadConfigFromFile();
             sys_cfg = new PackerConfig();
             curr_node = -1;
@@ -85,10 +85,6 @@ namespace ioex_cs
             {
                 pack_node = node as BottomPackNode;
             }
-        }
-        public void InitConfig()
-        {
-            LoadConfig(all_conf.cfg_name);
         }
         //load all the configuration and update the UI,
         //packer and sub node will share the same configuration name
@@ -129,11 +125,9 @@ namespace ioex_cs
 
         public void DuplicateCurrentConfig(string newcfg)
         {
-            App p = Application.Current as App;
-            p.bMainPause = true;
             if (newcfg == "")
             {
-                newcfg = (all_conf.Keys.Count() + 1).ToString("D3");
+                newcfg = (all_conf.Keys.Count() + 1).ToString();
             }
             //add new configuration
 
@@ -142,30 +136,23 @@ namespace ioex_cs
                 n.DuplicateCurrentConfig(newcfg);
             }
             vib_node.DuplicateCurrentConfig(newcfg);
-            if (pack_node != null)
-            {
-                pack_node.DuplicateCurrentConfig(newcfg);
-            }
-            
+            pack_node.DuplicateCurrentConfig(newcfg);
 
-            XElement cfgNode = new XElement("Item");
+            XElement cfgNode = new XElement("NodeProperty");
             sys_cfg.ToElement(cfgNode);
-            cfgNode.Element("product_no").Value = newcfg;
             vib_node.ToElement(cfgNode);
-            if (pack_node != null)
-                pack_node.ToElement(cfgNode);
+            pack_node.ToElement(cfgNode);
 
             all_conf.AddConfig(newcfg, cfgNode);
-            this.LoadConfig(newcfg);
             all_conf.SaveConfigToFile();
-            p.bMainPause = false;
+            this.LoadConfig(newcfg);    
+            
         }
         private void DoRelease(SubNode[] addrs, double weight)
         {
             foreach (SubNode n in addrs)
             {
-                n.Action("looprelease",false);
-                (n as WeighNode).bRelease = true;
+                n.Action("release",false);
             }
             //todo update the display;
 
@@ -176,9 +163,9 @@ namespace ioex_cs
             foreach (SubNode n in addrs)
             {
                 o.bucket[i++] = (byte)n["addr"].Value;
-                
+                o.time = DateTime.Now;
             }
-            o.time = DateTime.Now;
+
             o.weight = weight;
             ProdHistory.AddNewPack(o,(Application.Current as App).bSimulate);
             
@@ -192,7 +179,7 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count; i++ )
             {
-                if(weight_node[i].status == NodeStatus.ST_LOST)
+                if(weight_node[i].status != NodeStatus.ST_RUNNING)
                     continue;
                 sum = weight_node[i].weight;
                 if(sum > uvar && sum < dvar)
@@ -211,11 +198,11 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count-1; i++)
             {
-                if (weight_node[i].status == NodeStatus.ST_LOST)
+                if (weight_node[i].status != NodeStatus.ST_RUNNING)
                     continue;
                 for (int j = i + 1; j < weight_node.Count; j++)
                 {
-                    if (weight_node[i].status == NodeStatus.ST_LOST)
+                    if (weight_node[j].status != NodeStatus.ST_RUNNING)
                         continue;
                     sum = weight_node[i].weight + weight_node[j].weight;
                     if (sum > uvar && sum < dvar)
@@ -235,15 +222,15 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count - 2; i++)
             {
-                if (weight_node[i].status == NodeStatus.ST_LOST)
+                if (weight_node[i].status != NodeStatus.ST_RUNNING)
                     continue;
                 for (int j = i + 1; j < weight_node.Count-1; j++)
                 {
-                    if (weight_node[i].status == NodeStatus.ST_LOST)
+                    if (weight_node[j].status != NodeStatus.ST_RUNNING)
                         continue;
                     for (int k = j + 1; k < weight_node.Count ; k++)
                     {
-                        if (weight_node[i].status == NodeStatus.ST_LOST)
+                        if (weight_node[k].status != NodeStatus.ST_RUNNING)
                             continue;
 
                         sum = weight_node[i].weight + weight_node[j].weight + weight_node[k].weight;
@@ -265,20 +252,20 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count - 3; i++)
             {
-                if (weight_node[i].status == NodeStatus.ST_LOST)
+                if (weight_node[i].status != NodeStatus.ST_RUNNING)
                     continue;
                 for (int j = i + 1; j < weight_node.Count - 2; j++)
                 {
-                    if (weight_node[i].status == NodeStatus.ST_LOST)
+                    if (weight_node[j].status != NodeStatus.ST_RUNNING)
                         continue;
                     for (int k = j + 1; k < weight_node.Count - 1; k++)
                     {
-                        if (weight_node[i].status == NodeStatus.ST_LOST)
+                        if (weight_node[k].status != NodeStatus.ST_RUNNING)
                             continue;
 
                         for (int l = k + 1; l < weight_node.Count; l++)
                         {
-                            if (weight_node[i].status == NodeStatus.ST_LOST)
+                            if (weight_node[l].status != NodeStatus.ST_RUNNING)
                                 continue;
                             sum = weight_node[i].weight + weight_node[j].weight + weight_node[k].weight + weight_node[l].weight;
                             if (sum > uvar && sum < dvar)
@@ -300,24 +287,24 @@ namespace ioex_cs
 
             for (int i = 0; i < weight_node.Count - 4; i++)
             {
-                if (weight_node[i].status == NodeStatus.ST_LOST)
+                if (weight_node[i].status != NodeStatus.ST_RUNNING)
                     continue;
                 for (int j = i + 1; j < weight_node.Count - 3; j++)
                 {
-                    if (weight_node[i].status == NodeStatus.ST_LOST)
+                    if (weight_node[j].status != NodeStatus.ST_RUNNING)
                         continue;
                     for (int k = j + 1; k < weight_node.Count - 2; k++)
                     {
-                        if (weight_node[i].status == NodeStatus.ST_LOST)
+                        if (weight_node[k].status != NodeStatus.ST_RUNNING)
                             continue;
 
                         for (int l = k + 1; l < weight_node.Count-1; l++)
                         {
-                            if (weight_node[i].status == NodeStatus.ST_LOST)
+                            if (weight_node[l].status != NodeStatus.ST_RUNNING)
                                 continue;
                             for (int m = l + 1; m < weight_node.Count; m++)
                             {
-                                if (weight_node[i].status == NodeStatus.ST_LOST)
+                                if (weight_node[m].status != NodeStatus.ST_RUNNING)
                                     continue;
 
                                 sum = weight_node[i].weight + weight_node[j].weight + weight_node[k].weight + weight_node[l].weight + weight_node[m].weight;
@@ -336,39 +323,27 @@ namespace ioex_cs
 
         public void CheckCombination()
         {
-            while (Caculation5())
-            {
-            }
-            while (Caculation4())
-            {
-            }
-            while (Caculation3())
-            {
-            }
-            while (Caculation2())
-            {
-            }
-            while (Caculation1())
-            {
-            }
-//            DoRelease(new SubNode[] { weight_node[0], weight_node[1], weight_node[2], weight_node[3], weight_node[4] }, 123);
+            while (Caculation5()) ;
+            while (Caculation4()) ;
+            while (Caculation3()) ;
+            while (Caculation2()) ;
+            while (Caculation1()) ;
+            
             for (int i = 0; i < weight_node.Count; i++ )
             {
                 if (weight_node[i].status == NodeStatus.ST_LOST)
                     continue;
                 //todo check force release and over_weight case
                 weight_node[i]["flag_goon"] = 1;
-/*                if (weight_node[i]["flag_goon"] != 1)
+                if (weight_node[i]["flag_goon"] != 1)
                 {
                     weight_node[i]["flag_goon"] = 1;
                 }
- */
             }
         }
         
         public void StartRun()
         {
-            ProdHistory.InitNewRun("sj", sys_cfg.product_no, sys_cfg.product_desc);
             vib_node.Action("start",false);
             foreach (WeighNode n in this.weight_node)
             {
@@ -382,7 +357,6 @@ namespace ioex_cs
         public void StopRun()
         {
             status = PackerStatus.IDLE;
-            ProdHistory.EndNewRun();
             vib_node.Action("stop",false);
             foreach (WeighNode n in this.weight_node)
             {

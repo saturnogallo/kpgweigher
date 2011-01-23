@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("ioex-cs")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Agilent")]
+[assembly: AssemblyCompany("KingPak")]
 [assembly: AssemblyProduct("ioex-cs")]
-[assembly: AssemblyCopyright("Copyright © Agilent 2010")]
+[assembly: AssemblyCopyright("Copyright © KingPak 2010")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

@@ -21,10 +21,7 @@ namespace ioex_cs
         static private SQLiteConnection sql_con;
         static private SQLiteCommand sql_cmd;
         
-        static private Queue<onepack> packhist = new Queue<onepack>();
-        static private double total_weights = 0;
-        static private UInt32 total_packs = 0;
-        static private UInt32 speed = 0;
+
         private SQLiteDataAdapter DB;
         private DataSet DS = new DataSet();
         private DataTable DT = new DataTable();
@@ -43,6 +40,7 @@ namespace ioex_cs
             InitializeComponent();
             this.BackColor = Color.FromArgb(0xFF, 0xEE, 0xF2, 0xFB);
             btnRet.Text = StringResource.str("return");
+            btnClr.Text = StringResource.str("clearpack");
             lb_oper.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             lb_prod.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             lb_prodno.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
@@ -53,25 +51,34 @@ namespace ioex_cs
             lbl_oper.Text = StringResource.str("operator");
             lbl_prodno.Text = StringResource.str("product_no");
             lbl_prod.Text = StringResource.str("product_desc");
-            
-            DistinctValue("operator",lb_oper);
+            UpdateList();
+        }
+        public void UpdateList()
+        {
+            DistinctValue("operator", lb_oper);
             DistinctValue("product_desc", lb_prod);
             DistinctValue("product_no", lb_prodno);
+
         }
         static private void ExecuteQuery(string txtQuery)
         {
-            SetConnection();
-            sql_con.Open();
+            lock(sql_con)
+            {
+                SetConnection();
+                sql_con.Open();
 
-            sql_cmd = sql_con.CreateCommand();
-            sql_cmd.CommandText = txtQuery;
+                sql_cmd = sql_con.CreateCommand();
+                sql_cmd.CommandText = txtQuery;
 
-            sql_cmd.ExecuteNonQuery();
-            sql_con.Close();
+                sql_cmd.ExecuteNonQuery();
+                sql_con.Close();
+
+            }
             
         }
         private void DistinctValue(string field,ListBox lb)
         {
+            lb.Items.Clear();
             lb.Items.Add("*");
             SetConnection();
             sql_con.Open();
@@ -81,6 +88,7 @@ namespace ioex_cs
             DS.Reset();
             DB.Fill(DS);
             DT = DS.Tables[0];
+
             foreach (DataRow dr in DT.Rows)
             {
                 lb.Items.Add(dr[0].ToString());
@@ -131,73 +139,33 @@ namespace ioex_cs
                 
             }
             this.lbl_summary.Text = String.Format("{0}:{1}{6} , {2}:{3} , {4}:{5}{6}",StringResource.str("totalweight"),total_sum.ToString("F1"),
-                StringResource.str("totalpacknum"),total_pack.ToString(),StringResource.str("avgweight"),(total_sum/total_pack).ToString("F1"),StringResource.str("gram"));
+                StringResource.str("totalpacknum"),total_pack.ToString(),StringResource.str("avgweight"),(total_pack==0 ? "0" :(total_sum/total_pack).ToString("F1")),StringResource.str("gram"));
             sql_con.Close();
         }
-        /// <summary>
-        /// reset the status of history record
-        /// </summary>
-        static private void ResetHistory()
+
+        static internal void UpdateRecord(UIPacker p)
         {
-            total_packs = 0;
-            total_weights = 0;
-            speed = 0;
-            packhist.Clear();
+            string txtUpdate = "update mains set end_date=\"" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\", weight=\"" + p.total_weights.ToString() + "\", pack_num=\"" + p.total_packs.ToString() + "\" where start_date=\"" + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "\"";
+            ExecuteQuery(txtUpdate);
         }
-        private static DateTime rStart;
-        static public void InitNewRun(string oper,string prod_no,string prod_desc)
+        static internal void InitNewRun(UIPacker p)
         {
             string txtUpdate = "insert into mains (start_date,end_date,operator,product_no,product_desc,weight,pack_num) values ('";
-            rStart = DateTime.Now;
-            txtUpdate = txtUpdate + rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + oper + "','" + prod_no + "','" + prod_desc + "',0,0)";
+
+            txtUpdate = txtUpdate + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + PackerConfig.oper + "','" + p.curr_cfg.product_no + "','" + p.curr_cfg.product_desc + "',0,0)";
             ExecuteQuery(txtUpdate);
-        }
-        static public void EndNewRun()
-        {
-            UpdateRecord();
-            ResetHistory();
-        }
-        static public void UpdateRecord()
-        {
-            string txtUpdate = "update mains set end_date=\"" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\", weight=\"" + total_weights.ToString() + "\", pack_num=\"" + total_packs.ToString() + "\" where start_date=\"" + rStart.ToString("yyyy-MM-dd HH:mm:ss") + "\"";
-            ExecuteQuery(txtUpdate);
-        }
-        static public void AddNewPack(onepack o,bool IsSimulate)
-        {
-            total_packs++;
-            total_weights += o.weight;
-            
-            packhist.Enqueue(o);
-            if (packhist.Count > 500)
-            {
-                packhist.Dequeue();
-            }
-            //update the speed
-            long count = 0;
-            DateTime lastmin = DateTime.Now;
-            lastmin.Subtract(new TimeSpan(0,1,1));
-            foreach (onepack op in packhist)
-            {
-                if (op.time < lastmin)
-                {
-                    count = count + 1;
-                }else{
-                    count = packhist.Count - count;
-                    break;
-                }
-            }
-            speed = (UInt32)count;
-            if (IsSimulate)
-            {
-                return;
-            }
-            if (total_packs % 100 == 1)
-                UpdateRecord();
         }
 
         private void btnRet_Click(object sender, EventArgs e)
         {
             Hide();
+        }
+
+        private void btnClr_Click(object sender, EventArgs e)
+        {
+            App p = System.Windows.Application.Current as App;
+            p.curr_packer.total_packs = 0;
+            MessageBox.Show(StringResource.str("done"));
         }
     }
 }
