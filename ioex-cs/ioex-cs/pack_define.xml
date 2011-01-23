@@ -1,22 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Root current="001">
-  <Item Name="001">
+<Root current="01">
+  <Item Name="01">
     <target>45</target>
     <upper_var>10</upper_var>
     <lower_var>10</lower_var>
-    <product_no>001</product_no>
+    <product_no>01</product_no>
+    <operator_no>111</operator_no>
     <product_desc>3</product_desc>
     <Amplitude>1</Amplitude>
     <Frequency>1</Frequency>
   </Item>
-  <Item Name="002">
-    <target>45</target>
-    <upper_var>10</upper_var>
-    <lower_var>10</lower_var>
-    <product_no>002</product_no>
-    <product_desc>3</product_desc>
-    <Amplitude>1</Amplitude>
-    <Frequency>1</Frequency>
-  </Item>
-  
 </Root>
