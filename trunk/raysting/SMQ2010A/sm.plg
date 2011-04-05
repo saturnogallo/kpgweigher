@@ -1,0 +1,17 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Project:</h2>
+E:\RAYSTING_20100801\raysting_sidney\Program\É¨Ãè¿ª¹Ø\v1.6\sm.uvproj
+Project File Date:  07/19/2010
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling main.c...
+compiling ZLG7289.C...
+linking...
+Program Size: data=25.2 xdata=0 code=2014
+creating hex file from "sm"...
+"sm" - 0 Error(s), 0 Warning(s).

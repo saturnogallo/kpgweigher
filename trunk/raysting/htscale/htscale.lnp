@@ -1,0 +1,7 @@
+"main.obj",
+"ds1302.obj",
+"pt6312.obj",
+"eeprom.obj",
+"cs5532.obj" 
+TO "htscale" 
+RAMSIZE(256) 
