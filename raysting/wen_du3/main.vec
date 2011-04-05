@@ -1,0 +1,38 @@
+
+;INTERRUPT VECTORS
+	JMP  __RESET
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  _ext_int4_isr
+	JMP  _ext_int5_isr
+	JMP  _ext_int6_isr
+	JMP  _ext_int7_isr
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  _timer1_ovf_isr
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  _usart0_rx_isr
+	JMP  0x00
+	JMP  _usart0_tx_isr
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  0x00
+	JMP  _usart1_rx_isr
+	JMP  0x00
+	JMP  _usart1_tx_isr
+	JMP  0x00
+	JMP  0x00
+

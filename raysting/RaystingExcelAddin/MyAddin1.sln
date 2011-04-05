@@ -1,0 +1,27 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "RaystingExcelAddin", "RaystingExcelAddin.vbproj", "{4E163E39-EE7B-497C-8558-95766040DA43}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "RaystingExcelAddinSetup", "MyAddin1Setup\MyAddin1Setup.vdproj", "{1DFBB5A9-2DBC-4F7F-89AA-2A16F6912CCA}"
+EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "justtest", "..\justtest\justtest.vbproj", "{8B440DF4-6530-4E0D-A9B4-B1AAC5FD4E00}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4E163E39-EE7B-497C-8558-95766040DA43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E163E39-EE7B-497C-8558-95766040DA43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E163E39-EE7B-497C-8558-95766040DA43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E163E39-EE7B-497C-8558-95766040DA43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DFBB5A9-2DBC-4F7F-89AA-2A16F6912CCA}.Debug|Any CPU.ActiveCfg = Debug
+		{1DFBB5A9-2DBC-4F7F-89AA-2A16F6912CCA}.Release|Any CPU.ActiveCfg = Release
+		{8B440DF4-6530-4E0D-A9B4-B1AAC5FD4E00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B440DF4-6530-4E0D-A9B4-B1AAC5FD4E00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

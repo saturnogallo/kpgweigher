@@ -1,0 +1,6 @@
+"key.obj",
+"main.obj",
+"lcd.obj",
+"font.obj" 
+TO "bjy" 
+RAMSIZE(256) 

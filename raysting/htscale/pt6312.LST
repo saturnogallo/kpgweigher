@@ -1,0 +1,518 @@
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE PT6312
+OBJECT MODULE PLACED IN pt6312.OBJ
+COMPILER INVOKED BY: F:\GreenTools\Keil\C51\BIN\C51.EXE pt6312.c OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "define.h"
+   2          
+   3          /*
+   4                  LED definition
+   5          */
+   6          #define SEG_A 0x1000
+   7          #define SEG_B 0x2000
+   8          #define SEG_C 0x4000
+   9          #define SEG_D 0x0800
+  10          #define SEG_E 0x0400
+  11          #define SEG_F 0x0100
+  12          #define SEG_G 0x0200
+  13          #define SEG_DP  0x8000
+  14          #define SEG_CM  0x0000
+  15          #define SEG_ID  0x0080
+  16          
+  17          #define NUM_0 SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F
+  18          #define NUM_1 SEG_B|SEG_C
+  19          #define NUM_2 SEG_A|SEG_B|SEG_D|SEG_E|SEG_G
+  20          #define NUM_3 SEG_A|SEG_B|SEG_C|SEG_D|SEG_G
+  21          #define NUM_4 SEG_B|SEG_C|SEG_F|SEG_G
+  22          #define NUM_5 SEG_A|SEG_C|SEG_D|SEG_F|SEG_G
+  23          #define NUM_6 SEG_A|SEG_C|SEG_D|SEG_E|SEG_F|SEG_G
+  24          #define NUM_7 SEG_A|SEG_B|SEG_C
+  25          #define NUM_8 SEG_A|SEG_B|SEG_C|SEG_D|SEG_E|SEG_F|SEG_G
+  26          #define NUM_9 SEG_A|SEG_B|SEG_C|SEG_D|SEG_F|SEG_G
+  27          
+  28          #define CHAR_a CHAR_A 
+  29          #define CHAR_b CHAR_B
+  30          #define CHAR_c SEG_D|SEG_E|SEG_G
+  31          #define CHAR_d SEG_B|SEG_C|SEG_D|SEG_E|SEG_G
+  32          #define CHAR_e CHAR_E
+  33          #define CHAR_f CHAR_F 
+  34          #define CHAR_g NUM_9
+  35          #define CHAR_h CHAR_BLANK
+  36          #define CHAR_i NUM_1
+  37          #define CHAR_j CHAR_BLANK
+  38          #define CHAR_k CHAR_BLANK
+  39          #define CHAR_l CHAR_L 
+  40          #define CHAR_m CHAR_BLANK
+  41          #define CHAR_n SEG_B|SEG_C|SEG_E|SEG_F
+  42          #define CHAR_o SEG_C|SEG_D|SEG_E|SEG_G
+  43          #define CHAR_p CHAR_P
+  44          #define CHAR_q CHAR_BLANK
+  45          #define CHAR_r SEG_E|SEG_G
+  46          #define CHAR_s CHAR_BLANK
+  47          #define CHAR_t SEG_D|SEG_E|SEG_F|SEG_G
+  48          #define CHAR_u CHAR_BLANK
+  49          #define CHAR_v CHAR_BLANK
+  50          #define CHAR_w CHAR_BLANK
+  51          #define CHAR_x CHAR_BLANK
+  52          #define CHAR_y CHAR_BLANK
+  53          #define CHAR_z CHAR_BLANK
+  54          
+  55          #define CHAR_A SEG_A|SEG_B|SEG_C|SEG_E|SEG_F|SEG_G
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 2   
+
+  56          #define CHAR_B SEG_C|SEG_D|SEG_E|SEG_F|SEG_G
+  57          #define CHAR_C SEG_A|SEG_D|SEG_E|SEG_F
+  58          #define CHAR_D CHAR_d 
+  59          #define CHAR_E SEG_A|SEG_D|SEG_E|SEG_F|SEG_G
+  60          #define CHAR_F SEG_A|SEG_E|SEG_F|SEG_G 
+  61          #define CHAR_G NUM_9
+  62          #define CHAR_H SEG_B|SEG_C|SEG_E|SEG_F|SEG_G
+  63          #define CHAR_J CHAR_BLANK
+  64          #define CHAR_K CHAR_BLANK
+  65          #define CHAR_I NUM_1
+  66          #define CHAR_L SEG_D|SEG_E|SEG_F
+  67          #define CHAR_M CHAR_BLANK
+  68          #define CHAR_N SEG_A|SEG_B|SEG_C|SEG_E|SEG_F
+  69          #define CHAR_O NUM_0
+  70          #define CHAR_P SEG_A|SEG_B|SEG_E|SEG_F|SEG_G
+  71          #define CHAR_Q CHAR_BLANK
+  72          #define CHAR_R CHAR_r
+  73          #define CHAR_S SEG_A|SEG_C|SEG_D|SEG_F|SEG_G
+  74          #define CHAR_T CHAR_t
+  75          #define CHAR_U SEG_B|SEG_C|SEG_D|SEG_E|SEG_F
+  76          #define CHAR_V CHAR_BLANK
+  77          #define CHAR_W CHAR_BLANK
+  78          #define CHAR_X CHAR_BLANK
+  79          #define CHAR_Y SEG_B|SEG_C|SEG_D|SEG_F|SEG_G
+  80          #define CHAR_Z CHAR_BLANK
+  81          
+  82          #define CHAR_BLANK 0x00 
+  83          
+  84          typedef union _PTSEGS
+  85          {
+  86                  u16     dat;
+  87                  struct {
+  88                          u8 hseg; //seg9 to seg16
+  89                          u8 lseg; //seg1 to seg8
+  90                  }C0;
+  91          }PTSEGS;
+  92          
+  93          #define LED_NUMBER      6
+  94          
+  95          static PTSEGS LED_DIGITALS[LED_NUMBER];
+  96          //DP: digital point
+  97          //CM: comma point
+  98          //ID: indicate point
+  99          #define LED_DP_ON(x)        (LED_DIGITALS[x].dat |= SEG_DP)
+ 100          #define LED_CM_ON(x)        (LED_DIGITALS[x].dat |= SEG_CM)
+ 101          #define LED_ID_ON(x)        (LED_DIGITALS[x].dat |= SEG_ID)
+ 102          
+ 103          const u16 code LED_DIGI_CODE[] = {NUM_0,NUM_1,NUM_2,NUM_3,NUM_4,NUM_5,NUM_6,NUM_7,NUM_8,NUM_9};
+ 104          const u16 code LED_UCHAR_CODE[] = {CHAR_A,CHAR_B,CHAR_C,CHAR_D,CHAR_E,CHAR_F,CHAR_G,CHAR_H,CHAR_I,\
+ 105                                                                             CHAR_J,CHAR_K,CHAR_L,CHAR_M,CHAR_N,CHAR_O,CHAR_P,CHAR_Q,CHAR_R,\
+ 106                                                                             CHAR_S,CHAR_T,CHAR_U,CHAR_V,CHAR_W,CHAR_X,CHAR_Y,CHAR_Z};
+ 107          const u16 code LED_LCHAR_CODE[] = {CHAR_a,CHAR_b,CHAR_c,CHAR_d,CHAR_e,CHAR_f,CHAR_g,CHAR_h,CHAR_i,\
+ 108                                                                             CHAR_j,CHAR_k,CHAR_l,CHAR_m,CHAR_n,CHAR_o,CHAR_p,CHAR_q,CHAR_r,\
+ 109                                                                             CHAR_s,CHAR_t,CHAR_u,CHAR_v,CHAR_w,CHAR_x,CHAR_y,CHAR_z};
+ 110          
+ 111          void    PT6312_Print(u8 *str,u8 size)
+ 112          {
+ 113   1              u8 i;
+ 114   1      
+ 115   1              if(size > LED_NUMBER)
+ 116   1                      return;
+ 117   1              for(i=(LED_NUMBER-size);i<LED_NUMBER;i++,str++){
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 3   
+
+ 118   2                      if(*str == '\0')
+ 119   2                              return;
+ 120   2                      if(((*str) <= '9') && ((*str) >= '0'))
+ 121   2                      {
+ 122   3                              LED_DIGITALS[i].dat = LED_DIGI_CODE[((*str) -(u8)('0'))];
+ 123   3                              continue;
+ 124   3                      }
+ 125   2                      if(((*str) <= 'Z') && ((*str) >= 'A'))
+ 126   2                      {
+ 127   3                              LED_DIGITALS[i].dat = LED_UCHAR_CODE[(*str -'A')];
+ 128   3                              continue;
+ 129   3                      }
+ 130   2                      if(((*str) <= 'z') && ((*str) >= 'a'))
+ 131   2                      {
+ 132   3                              LED_DIGITALS[i].dat = LED_LCHAR_CODE[(*str -'a')];
+ 133   3                              continue;
+ 134   3                      }
+ 135   2      
+ 136   2                      switch(*str){
+ 137   3      
+ 138   3                              case '.':
+ 139   3                                      i--;
+ 140   3                                              LED_DP_ON(i); 
+ 141   3                                              break;
+ 142   3                              case ',':  
+ 143   3                                              i--;
+ 144   3                                              LED_CM_ON(i); 
+ 145   3                                              break;
+ 146   3                              case '^':
+ 147   3                                              i--;
+ 148   3                                              LED_ID_ON(i);
+ 149   3                                              break;
+ 150   3                              case ' ':
+ 151   3                                              LED_DIGITALS[i].dat = CHAR_BLANK;
+ 152   3                                              break;
+ 153   3                              
+ 154   3                              default: 
+ 155   3                                              break;
+ 156   3                              }
+ 157   2                      
+ 158   2              }
+ 159   1      }
+ 160          
+ 161          
+ 162          // VFD管脚定义
+ 163          sbit VFDDOUT=P2^6;
+ 164          sbit VFDDIN=P2^5;
+ 165          sbit VFDCLK=P2^0;
+ 166          sbit VFDSTB=P2^4;
+ 167          #define PT6312_DOUT()         VFDDOUT//GET_PORT( PINC,PINC3 )
+ 168          #define PT6312_DIN_H()        VFDDIN = 1//SET_PORT( PORTC,PC4 )
+ 169          #define PT6312_DIN_L()        VFDDIN = 0//CLR_PORT( PORTC,PC4 )
+ 170          #define PT6312_CLK_H()        VFDCLK = 1//SET_PORT( PORTC,PC5 )
+ 171          #define PT6312_CLK_L()        VFDCLK = 0//CLR_PORT( PORTC,PC5 )
+ 172          #define PT6312_STB_H()        VFDSTB = 1//SET_PORT( PORTC,PC6 )
+ 173          #define PT6312_STB_L()        VFDSTB = 0//CLR_PORT( PORTC,PC6 )
+ 174          #define PT6312_DDRC_INIT()    //for avr only: DDRC |= _BV(PC4) | _BV(PC5) | _BV(PC6); DDRC &= ~_BV(PC3)
+ 175          
+ 176          // 向指定的LED(从0开始编号）写入数据(假设只用前8段）
+ 177          #define PT6312_WriteN( n,dat )  PT6312_WriteData( ((n) << 1), (dat) )
+ 178          
+ 179          
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 4   
+
+ 180          // 前置声明
+ 181          static void _SendData( u8 dat );
+ 182          static void _SendCommand( u8 dat );
+ 183          static u8 _ReadSWData();
+ 184          // 向指定地址写入数据
+ 185          static void _WriteData( u8 addr,u8 dat );
+ 186          
+ 187          /*
+ 188          00 : Write data to display memory
+ 189          01 : Write data to LED port
+ 190          10 : Read key data
+ 191          11 : Read SW data
+ 192          */
+ 193          #define WR_MEM  0
+ 194          #define WR_LED  1
+ 195          #define RD_KEY  2
+ 196          #define RD_SW   3
+ 197          
+ 198          #define ADDR_INC        0
+ 199          #define ADDR_FIX        1
+ 200          
+ 201          #define MODE_WORK       0
+ 202          #define MODE_TEST       1
+ 203          
+ 204          /*      
+ 205                  000 : Set pulse width to 1/16.
+ 206                  001 : 2/16
+ 207                  010 : 4/16
+ 208                  011 : 10/16
+ 209                  100 : 11/16
+ 210                  101 : 12/16
+ 211                  110 : 13/16
+ 212                  111 : 14/16
+ 213          */
+ 214          #define DISP_DIM_BASE   0
+ 215          #define DISP_OFF                0
+ 216          #define DISP_ON                 1
+ 217          
+ 218          // 设置显示方式
+ 219          #define SET_MODE_COMMAND( cmd,dispmode )    cmd.C0.Mode = dispmode; cmd.C0.Null = 0; cmd.C0.Cmd = 0;
+ 220          
+ 221          // 数据IO
+ 222          #define DATA_IO_COMMAND( cmd, iomode,addrmode,testmode) cmd.C1.IoMode=iomode;cmd.C1.AddrMode=addrmode;cmd.
+             -C1.TestMode=testmode;cmd.C1.Null= 0;cmd.C1.Cmd = 1;
+ 223          
+ 224          // 地址设定
+ 225          #define SET_ADDR_COMMAND( cmd,addr ) cmd.C3.Addr = addr; cmd.C3.Null = 0; cmd.C3.Cmd = 3;
+ 226          
+ 227          // 显示控制
+ 228          #define DISP_CONTROL_COMMAND( cmd,light,control) cmd.C2.Light = light;cmd.C2.Control = control;cmd.C2.Null
+             - = 0;cmd.C2.Cmd = 2;
+ 229          
+ 230          
+ 231          // VFD模式
+ 232          #define PT6312_MODE            0x02 // 6 digits * 16 segment 
+ 233          
+ 234          // PT6312命令
+ 235          typedef union uPT6312Command
+ 236          {
+ 237              u8 Data;
+ 238              
+ 239              // 设置显示方式
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 5   
+
+ 240          /*      
+ 241                  Mode:
+ 242                  000 : 4 digits 16 segments
+ 243                  001 : 5 digits 16 segments
+ 244                  010 : 6 digits 16 segments
+ 245                  011 : 7 digits 15 segments
+ 246                  101 : 9 digits 13 segments
+ 247                  110 : 10 digits 12 segments
+ 248                  111 : 11 digits 11 segments
+ 249          */
+ 250              struct
+ 251              {
+ 252                  u8 Mode    : 3;    // 显示屏硬件的栅和段的位数
+ 253                  u8 Null    : 3;    // 数据空位
+ 254                  u8 Cmd    : 2;     // 固定为00
+ 255              }C0;
+ 256          
+ 257              // 数据IO
+ 258                  /*
+ 259                  00 : Write data to display memory
+ 260                  01 : Write data to LED port
+ 261                  10 : Read key data
+ 262                  11 : Read SW data
+ 263                  */
+ 264              struct
+ 265              {
+ 266                  u8 IoMode    : 2;    // IO模式
+ 267                  u8 AddrMode    : 1;  // 地址模式 （0：递增 1：固定地址）
+ 268                  u8 TestMode    : 1;  // 测试模式（0：正常操作 1： 测试模式）
+ 269                  u8 Null        : 2;  // 无用
+ 270                  u8 Cmd        : 2;   // 固定为01
+ 271              }C1;
+ 272          
+ 273              // 地址设定
+ 274              struct
+ 275              {
+ 276                  u8 Addr    : 5;    // 地址（00-15H）
+ 277                  u8 Null    : 1;    // 无用
+ 278                  u8 Cmd    : 2;     // 固定为11
+ 279              }C3;
+ 280          
+ 281              // 显示控制
+ 282                  /*
+ 283                  000 : Set pulse width to 1/16.
+ 284                  001 : 2/16
+ 285                  010 : 4/16
+ 286                  011 : 10/16
+ 287                  100 : 11/16
+ 288                  101 : 12/16
+ 289                  110 : 13/16
+ 290                  111 : 14/16
+ 291                  */
+ 292              struct
+ 293              {    
+ 294                  u8 Light        : 3;    // 调光等级
+ 295                  u8 Control    : 1;      // 显示控制（ 0 关闭 1 显示）
+ 296                  u8 Null        : 2;     // 无用
+ 297                  u8 Cmd        : 2;      // 固定为10
+ 298              }C2;
+ 299          
+ 300          }PT6312Command;
+ 301          
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 6   
+
+ 302          
+ 303          
+ 304          // 向PT6312写数据(跟在命令后面，所需不需设置STB）
+ 305          static void _SendData( u8 dat )
+ 306          {
+ 307   1          u8 i = 0;
+ 308   1          for( i = 0; i < 8; i++)
+ 309   1          {
+ 310   2              PT6312_CLK_H();
+ 311   2              PT6312_CLK_H();
+ 312   2              PT6312_CLK_L();
+ 313   2              PT6312_CLK_L();
+ 314   2      
+ 315   2              if( dat & 0x01 )
+ 316   2                  PT6312_DIN_H();
+ 317   2              else
+ 318   2                  PT6312_DIN_L();
+ 319   2      
+ 320   2              dat = dat >> 1;
+ 321   2              PT6312_CLK_H();
+ 322   2              PT6312_CLK_H();
+ 323   2              PT6312_CLK_H();
+ 324   2              PT6312_CLK_H();
+ 325   2          }
+ 326   1      }
+ 327          
+ 328          // 向PT6312写命令
+ 329          static void _SendCommand( u8 dat )
+ 330          {
+ 331   1          PT6312_STB_H();
+ 332   1          PT6312_STB_H();
+ 333   1          PT6312_STB_L();
+ 334   1          _SendData( dat );
+ 335   1      }
+ 336          
+ 337          // 向指定地址写入数据
+ 338          static void _WriteData( u8 addr,u8 dat )
+ 339          {
+ 340   1          PT6312Command command;
+ 341   1      
+ 342   1          // 数据IO
+ 343   1          DATA_IO_COMMAND( command,WR_MEM,ADDR_FIX,MODE_WORK);
+ 344   1          _SendCommand( command.Data );
+ 345   1          PT6312_STB_H();
+ 346   1      
+ 347   1          // 指定地址
+ 348   1          SET_ADDR_COMMAND( command,addr );
+ 349   1          _SendCommand( command.Data );
+ 350   1          _SendData( dat );
+ 351   1          PT6312_STB_H();
+ 352   1      
+ 353   1          // 显示控制
+ 354   1          DISP_CONTROL_COMMAND( command,DISP_DIM_BASE+7,DISP_ON ); //light = 7, control = 1
+ 355   1          _SendCommand( command.Data );
+ 356   1          PT6312_STB_H();
+ 357   1      }
+ 358          
+ 359          // 读取SW数据
+ 360          static u8 _ReadSWData()
+ 361          {
+ 362   1          u8 i = 0,dat = 0;
+ 363   1          PT6312Command command;
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 7   
+
+ 364   1          DATA_IO_COMMAND( command,RD_SW,ADDR_FIX,MODE_WORK);
+ 365   1          _SendCommand( command.Data );
+ 366   1          for( i = 0; i < 4; i++ )
+ 367   1          {
+ 368   2              PT6312_CLK_H();
+ 369   2              PT6312_CLK_H();
+ 370   2              PT6312_CLK_L();
+ 371   2              PT6312_CLK_L();
+ 372   2              PT6312_CLK_L();
+ 373   2              PT6312_CLK_H();
+ 374   2              if( PT6312_DOUT() )
+ 375   2                  dat = ( dat << 1 ) +1;
+ 376   2              else
+ 377   2                  dat = dat << 1;
+ 378   2          }
+ 379   1          
+ 380   1          return dat;
+ 381   1      }
+ 382          
+ 383          // 初始化PT6312
+ 384          void PT6312_Init()
+ 385          {
+ 386   1          PT6312Command command;
+ 387   1      
+ 388   1          // 设定端口输出方向
+ 389   1          PT6312_DDRC_INIT();
+ 390   1      
+ 391   1          // 设置显示模式
+ 392   1          SET_MODE_COMMAND( command,PT6312_MODE );
+ 393   1          _SendCommand( command.Data );
+ 394   1          PT6312_STB_H();
+ 395   1          
+ 396   1          // 显示控制
+ 397   1          DISP_CONTROL_COMMAND( command,DISP_DIM_BASE+7,DISP_ON );
+ 398   1          _SendCommand( command.Data );
+ 399   1          PT6312_STB_H();
+ 400   1      }
+ 401          
+ 402          // 写入LED数据
+ 403          void PT6312_WriteLED( u8 dat )
+ 404          {
+ 405   1          PT6312Command command;
+ 406   1          DATA_IO_COMMAND( command,WR_LED,ADDR_FIX,MODE_WORK);
+ 407   1          _SendCommand( command.Data );
+ 408   1          _SendData( dat );
+ 409   1          PT6312_STB_H();
+ 410   1      }
+ 411          
+ 412          
+ 413          
+ 414          
+ 415          // 读取键盘
+ 416          u32 PT6312_ReadKey()
+ 417          {
+ 418   1          u8 i      = 0;
+ 419   1          u32 key    = 0;
+ 420   1          PT6312Command command;
+ 421   1          DATA_IO_COMMAND( command,RD_KEY,ADDR_FIX,MODE_WORK);
+ 422   1          _SendCommand( command.Data );
+ 423   1          for( i = 0; i < 24; i++ )
+ 424   1          {
+ 425   2              PT6312_CLK_H();
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 8   
+
+ 426   2              PT6312_CLK_H();
+ 427   2              PT6312_CLK_L();
+ 428   2              PT6312_CLK_L();
+ 429   2              PT6312_CLK_L();
+ 430   2              PT6312_CLK_H();
+ 431   2              if( PT6312_DOUT() )
+ 432   2                  key = ( key << 1 ) +1;
+ 433   2              else
+ 434   2                  key = key << 1;
+ 435   2          }
+ 436   1          return key;
+ 437   1      }
+ 438          
+ 439          void PT6312_Refresh()
+ 440          {
+ 441   1          u8 i = 0;
+ 442   1              
+ 443   1          for( i = 0; i < LED_NUMBER; i++ )
+ 444   1          {
+ 445   2                      _WriteData(2*i,   LED_DIGITALS[i].C0.lseg);             
+ 446   2                      _WriteData(2*i+1, LED_DIGITALS[i].C0.hseg);
+ 447   2              }
+ 448   1      }
+ 449          
+ 450          char lowc(u8 x)
+ 451          {
+ 452   1              x = x&0x0f;
+ 453   1              if(x > 0x09)
+ 454   1                      return 'A'+x-0x0a;
+ 455   1              else
+ 456   1                      return '0'+x;
+ 457   1      }
+ 458          char highc(u8 x)
+ 459          {
+ 460   1      
+ 461   1              x = x>>4;
+ 462   1              if(x > 0x09)
+ 463   1                      return 'A'+x-0x0a;
+ 464   1              else
+ 465   1                      return '0'+x;
+ 466   1      }
+ 467          // 测试PT6312的程序
+ 468          void PT6312_Test()
+ 469          {
+ 470   1        
+ 471   1          // 初始化
+ 472   1          PT6312_Init();    
+ 473   1      
+ 474   1      
+ 475   1      }
+ 476          
+ 477          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    806    ----
+   CONSTANT SIZE    =    124    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     12      13
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+C51 COMPILER V7.01  PT6312                                                                 06/10/2010 19:06:59 PAGE 9   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
