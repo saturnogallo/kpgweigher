@@ -232,5 +232,4 @@ void l_update_buffer(char *data,int length,DWORD userdata)
 				}
 			}
 		}
-
 	}

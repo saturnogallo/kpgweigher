@@ -1,0 +1,5 @@
+"STARTUP.obj",
+"main.obj",
+"ZLG7289.obj" 
+TO "sm" 
+RAMSIZE(256) 
