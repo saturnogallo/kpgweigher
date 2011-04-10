@@ -166,11 +166,15 @@ void cm_pushc(u8 c,u8 port)
 }
 
 /****************************************************************************/
-//    Analysis a incoming frame/command after it is completed received
+//  Analysis a incoming frame/command after it is completed received
+//  BROADCAST_BASE_ADDR : 0x80
+//  Group A : 0x80 Group B : 0x81 Group C : 0x82 Group D : 0x83
 /****************************************************************************/
 void cm_process(u8 port)   
 {       
-   if((infrm[port].addr_to == myaddr) || (infrm[port].addr_to == BROADCAST_ADDR))
+   u8 broadcast_addr; 
+   broadcast_addr = BROADCAST_BASE_ADDR + (RS485._flash.board & BOARD_GROUP_MASK);
+   if((infrm[port].addr_to == myaddr) || (infrm[port].addr_to == broadcast_addr))
    {    parse_node_frm((u8*)&RS485,port); //modify the content 
         LED_FLASH(PIN_RxOK);
    }                    

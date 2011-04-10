@@ -43,7 +43,6 @@ extern u8 debug_mode;
 interrupt [USART_RXC] void usart_rx_isr(void)
 {
    u8 status,data;
-   
    //read status and data
    status=UCSRA;
    data=UDR;    

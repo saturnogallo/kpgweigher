@@ -2,37 +2,25 @@
 #include "define.h" 
 
 //delay after close signal is detected
-#define SHIFT_PULSE_INCNUM            2
-#define SHIFT_PULSE_DECNUM            2              
+#define SHIFT_PULSE_INCNUM            0
+#define SHIFT_PULSE_DECNUM            0              
 
 /*****************************************************************************/
 //                       Hardware Related definition
 /*****************************************************************************/
-#define _HW_REV_3_          /* hardware changes */
 
-#define MOTORS_CLOSED   PIND.3 == 1
-#define MOTORW_CLOSED   PIND.2 == 1      
-                                                          
-#ifdef _HW_REV_2_
-#define MAGNET_PULSE_PORT	PORTB.1
-#define ENABLE_MOTOR_W          PORTC.0 = 1
-#define DISABLE_MOTOR_W		PORTC.0 = 0
-#define ENABLE_MOTOR_S		PORTC.1 = 1
-#define DISABLE_MOTOR_S		PORTC.1 = 0
-#define OUTPUT_ENABLE           PORTC.2 = 1
-#define OUTPUT_DISABLE          PORTC.2 = 0
-#define MOTOR_CLOCK_PIN         PORTC.4   
+#define WGHT_MOTORS_CLOSED   PIND.3 == 1           // weight board: sensor is read at PORTD[3:2]
+#define WGHT_MOTORW_CLOSED   PIND.2 == 1 
+#define INTF_MOTORS_CLOSED   PINC.1 == 1           // interface board: sensor is read at PORTC[1:0]
+#define INTF_MOTORW_CLOSED   PINC.0 == 1     
+#define BOARD_IS_INTERFACE   (hw_id == HW_ID_INTERFACE)
+#define BOARD_IS_WEIGHT      (hw_id == HW_ID_WEIGHT)
 
-#define TRIG_TRIAC()    PORTB.1 = 1 
-#define TRIG_CMPLT()    PORTB.1 = 0
-#endif
-
-#ifdef _HW_REV_3_
-#define MAGNET_PULSE_PORT	PORTB.1
-#define ENABLE_MOTOR_W          PORTA.0 = 0         /* optocoupler, inverted logic */
-#define DISABLE_MOTOR_W		PORTA.0 = 1
-#define ENABLE_MOTOR_S		PORTA.1 = 0
-#define DISABLE_MOTOR_S		PORTA.1 = 1
+#define MAGNET_PULSE_PORT       PORTB.1
+#define ENABLE_MOTOR_W	        PORTA.0 = 0         /* optocoupler, inverted logic */
+#define DISABLE_MOTOR_W	        PORTA.0 = 1
+#define ENABLE_MOTOR_S	        PORTA.1 = 0
+#define DISABLE_MOTOR_S	        PORTA.1 = 1
 #define MT_MODE_BIT0            PORTA.2
 #define MT_MODE_BIT1            PORTA.3 
 #define MOTOR_CLOCK_PIN         PORTA.4
@@ -41,16 +29,17 @@
 
 #define TRIG_TRIAC()    PORTB.1 = 0 
 #define TRIG_CMPLT()    PORTB.1 = 1
-#endif
 
-flash u8 MOTOR_FREQ[]={CYCLE_2_3,CYCLE_2_6,CYCLE_3_0,CYCLE_3_3,CYCLE_3_6,CYCLE_4_0,CYCLE_4_5,CYCLE_5_0,CYCLE_6_0,CYCLE_7_0};        
+flash u8 MOTOR_FREQ[]={CYCLE_1_5,CYCLE_2_0,CYCLE_2_3,CYCLE_2_6,CYCLE_3_0,CYCLE_3_3,CYCLE_3_6,CYCLE_4_0,CYCLE_4_5,CYCLE_5_0};        
 
 
 #define SET_BY_ACINT 1
 #define SET_BY_TMR1 2
 #define ONE_PLS_CMPLT 3
 
-u8 Timer1_flag;  
+u8 Timer1_flag; 
+u8 ana_cmp_isr_counter; 
+ 
 /*****************************************************************************/
 //  Generate a clock pulse to move stepping motor forward a step
 /*****************************************************************************/
@@ -91,19 +80,27 @@ void Motor_One_Step()
 // 186: Max triac ON range: 0 ~ 175 degree. 0.3ms Triac ON time 
 interrupt [ANA_COMP] void ana_comp_isr(void)
 {
-  u16 temp; 
+  u16 temp;                                
+  
+  if(os_sched.status & 0x80)                         // continue to count if timer is
+     ana_cmp_isr_counter++;                          // not timeout. 
+  
   if(RS485._magnet.pulse_num) 
-      RS485._magnet.pulse_num--; 
-  else
-  {  ACSR &= 0xF7;  // disable AC interrupt
-     TIMSK &= 0xFB; // disable timer1 OV interrupt.
-     Timer1_flag = ONE_PLS_CMPLT;  
-     TRIG_CMPLT(); //  shut down triac.
-     return;
+  {    RS485._magnet.pulse_num--;         
   }
-         
+  else 
+  {  
+     if(!(os_sched.status & 0x80))                // Timer task 7 (measure power AC frequency) ongoing, 
+     {  ACSR &= 0xF7;                             // disable AC interrupt
+        TIMSK &= 0xFB;                            // disable timer1 OV interrupt.
+     } 
+     Timer1_flag = ONE_PLS_CMPLT;  
+     TRIG_CMPLT();                                //  shut down triac.
+     return; 
+  }       
+  
   if(Timer1_flag == ONE_PLS_CMPLT)
-  { 
+  {  
     // Timers starts on system power up. Timer 1 is started now. 
     // So OV1 flag has already been set. 
     // Clear Timer1 over-flow flag residuals: TOV1, bit 2.
@@ -115,8 +112,7 @@ interrupt [ANA_COMP] void ana_comp_isr(void)
        temp =  (u16)RS485._flash.magnet_amp * 6 + 64166; 
     else
        temp =  (u16)RS485._flash.magnet_amp * 3 + 64166; 
-    /* IMPORTANT NOTES: Because TCNT1 is a 16-bit register, writing to TCNT1 will be broken into 2 bytes.
-       To */
+    /* IMPORTANT NOTES: Because TCNT1 is a 16-bit register, writing to TCNT1 will be broken into 2 bytes.*/
     //TCNT1 = COUNTER_BASE + temp<<3 ;
     TCNT1 = temp;
     //TCNT1 = 65535 - 6 * (MAX_TRIAC_ANGEL - RS485._flash.magnet_amp); 
@@ -124,8 +120,8 @@ interrupt [ANA_COMP] void ana_comp_isr(void)
     TIMSK |= 0x4;
     // flag to indicate timer is set by Analog comparator interruption.
     Timer1_flag = SET_BY_ACINT;  
-  }                           
-  LED_FLASH(PIN_HWOK);
+  }
+                              
 }
 
 /*****************************************************************************/
@@ -134,20 +130,31 @@ interrupt [ANA_COMP] void ana_comp_isr(void)
 // Timer 1 is used to when triac should be triggered.
 /*****************************************************************************/
 interrupt [TIM1_OVF] void timer1_ovf_isr(void)
-{        
+{         
    if(Timer1_flag == SET_BY_ACINT)
    { TRIG_TRIAC();
      TCNT1 = 65500; // 0.31ms. Triac trigger pulse width is 0.31ms 
      Timer1_flag = SET_BY_TMR1;
-     //return;
    }
    else
-   //if(Timer1_flag == SET_BY_TMR1)
-   {  TRIG_CMPLT();            
+   {  
+     //######################################################
+     // PORTB.1 is magnet output control logic output, 
+     // PORTA.6 is the feedback from field. If they are not 
+     // consistent, report loop wire-open fault. 
+     //######################################################
+     if(!PINB.1)                
+     {
+        if(PINA.6)
+           RS485._global.diag_status1 |= 0x2;   // set err bit 1
+        else
+           RS485._global.diag_status1 &= 0xFD;  // clear bit 1
+     }
+     //#######################################################   
+      TRIG_CMPLT();            
       Timer1_flag = ONE_PLS_CMPLT;
       TIMSK &= 0xFB; // disable timer1 OV interrupt.
    }       
-   LED_FLASH(PIN_RxOK);
 }
 
 /*****************************************************************************/
@@ -173,16 +180,18 @@ interrupt [TIM1_OVF] void timer1_ovf_isr(void)
 #define POWERON 0b01000000
 #define POWEROFF 00    
 
+#define NUM_OF_STARTUP_PULSE 25
+
 #define RETURN_TO_SENSOR ((RS485._motor.pulse_num>SHIFT_PULSE_INCNUM) && (RS485._motor.pulse_num < 50))
 
 interrupt [TIM0_OVF] void timer0_ovf_isr(void)
 {
-  static u8 motor_close_happened;
   // Does the motor still need more pulse (1 cycle completes?)? 
   // Will use a TP807 sensor to detect whether more pulses are needed or not
   if (RS485._motor.pulse_num)
   {                    
-      RS485._motor.pulse_num--;
+      RS485._motor.pulse_num--;      
+      
       //check how many low-frequency driving pulses need to be issued before motor
       // is ready to run at high speed. Bit 5~0 of "phase" contains pulse numbers.
       if(RS485._motor.phase & 0x3F)
@@ -190,8 +199,8 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
          TCNT0 = MOTOR_FREQ[0]; // start at a relatively lower speed
       }
       else // motor is ready to run at high speed now. 
-      {   TCNT0 = MOTOR_FREQ[RS485._flash.motor_speed];
-      }
+         TCNT0 = MOTOR_FREQ[RS485._flash.motor_speed];
+      
       // Motor to Move one step
       Motor_One_Step(); 
       // If Bit4 of test_mode_reg1 is unset, motor sensors are enabled. see "define.h".
@@ -209,15 +218,33 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
           if((RS485._motor.phase & 0x40 ) == 0)
           {   if(RS485._motor.mode == 'W')
               {  
-                 if((RETURN_TO_SENSOR) && (MOTORW_CLOSED))
-                     RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
+                 if(RETURN_TO_SENSOR)
+                 {   if((BOARD_IS_INTERFACE) && (INTF_MOTORW_CLOSED)) 
+                        RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
+                     if((BOARD_IS_WEIGHT) && (WGHT_MOTORW_CLOSED))
+                        RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;                     
+                 }
               }
               if(RS485._motor.mode == 'S')
-              {  if((RETURN_TO_SENSOR) && (MOTORS_CLOSED))
-                     RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
+              {  if(RETURN_TO_SENSOR)
+                 {   if((BOARD_IS_INTERFACE) && (INTF_MOTORS_CLOSED))
+                        RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
+                     if((BOARD_IS_WEIGHT) && (WGHT_MOTORS_CLOSED))                        
+                        RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;                     
+                 }
               }
-              if((MOTORW_CLOSED)||(MOTORS_CLOSED))
-                 RS485._motor.phase |= CLOSURE_DETECTED;   //bit 7 as a flag.   
+  
+              if(BOARD_IS_WEIGHT)
+              { 
+                 if((WGHT_MOTORW_CLOSED)||(WGHT_MOTORS_CLOSED))
+                    RS485._motor.phase |= CLOSURE_DETECTED;   //bit 7 as a flag.   
+              }
+              else if(BOARD_IS_INTERFACE)
+              { 
+                 if((INTF_MOTORW_CLOSED)||(INTF_MOTORS_CLOSED))
+                    RS485._motor.phase |= CLOSURE_DETECTED;   //bit 7 as a flag.   
+              }
+                            
           }
       }        
   }   
@@ -226,43 +253,72 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
   {  
       if(ENABLE_MOTOR_SENSORS)
       {
-          if(RS485._motor.phase && CLOSURE_DETECTED) // if bit 7 is set. 
+          if(RS485._motor.phase && CLOSURE_DETECTED)
           {  if(RS485._motor.mode == 'S')
-                RS485._global.hw_status &= 0xFE;
-             if(RS485._motor.mode == 'W')
-                RS485._global.hw_status &= 0xFD;
+                RS485._global.diag_status1 &= 0xF7;
+             if(RS485._motor.mode == 'W')        
+                RS485._global.diag_status1 &= 0xFB;
           }
           else
           {  if(RS485._motor.mode == 'S')
-                RS485._global.hw_status |= 0x1;
+                RS485._global.diag_status1 |= 0x8;
              if(RS485._motor.mode == 'W')
-                RS485._global.hw_status |= 0x2;      
+                RS485._global.diag_status1 |= 0x4;      
           } 
-      } //*/          
+      }           
       // No more pulse needed. If bit 6 of phase (power on/off flag) 
       // is not set, power off motor driver after rotation completes.
       if((RS485._motor.phase & 0x40 ) == 0)
       { DISABLE_MOTOR_W; DISABLE_MOTOR_S;}      
       // TIMSK Bit 0 is cleared to disable Timer 0 interrupt. Stop pulses.
       TIMSK &= 0xFE; 
-  } 
+  }
+  
 }
+
+/*****************************************************************************/
+// Read ana_cmp_isr_counter. enquired by main loop for diagnostic. 
+/*****************************************************************************/
+u8 read_ana_cmp_isr_counter()
+{
+   return ana_cmp_isr_counter; 
+}                              
 
 /*****************************************************************************/
 //                    Electrical magnet driver
 // Define E_magnet working time, unity is 20ms
 // Usage: E_Magnet_Driver(u16 arg)
 /*****************************************************************************/
-#define MAX_AMP 100
+#define MAX_AMP 100 
+#define MIN_VIBRATING_TIME 4
+
 void E_Magnet_Driver(u16 pls_num)
 {                                            
+   u8 temp;
    // Max amplitude is 85% duty based on experiment.OCR1A/ICR1 is pulse duty   
    if(RS485._flash.magnet_amp > MAX_AMP)
       RS485._flash.magnet_amp = MAX_AMP; 
-        
-   // Magnet will work for pls_num * 20ms.
-   RS485._magnet.pulse_num = pls_num;   
+
+   // Initialize isr counter. 
+   ana_cmp_isr_counter = 0;  
+   // Magnet will work for pls_num * 20ms.   
+   RS485._magnet.pulse_num = pls_num; 
    
+   // adjust magnet time. variable is unsigned but used as signed one.
+   // treat RS485._magnet.pulse_num = 0 as a special case (measure AC freq)  
+   if((EN_RUNTIME_MAGNET_ADJ)&&(RS485._magnet.pulse_num))
+   {  if(RS485._magnet.time_adj < 128)       // positive, increase magnet working time
+        RS485._magnet.pulse_num += RS485._magnet.time_adj;
+      else    // negative, reduce magnet working time 
+      {
+         temp = ~RS485._magnet.time_adj + 1;
+         if(RS485._magnet.pulse_num > (u16)temp + MIN_VIBRATING_TIME)
+           RS485._magnet.pulse_num -= temp;
+         else
+           RS485._magnet.pulse_num = MIN_VIBRATING_TIME;
+      }   
+   } 
+      
    // initialize Timer flag.
    Timer1_flag = ONE_PLS_CMPLT;   
    // Clear AC interrupt flag, ACSR4 (ACI), either cleared by HW when int is serviced
@@ -270,54 +326,60 @@ void E_Magnet_Driver(u16 pls_num)
    // is set every 20ms (50HZ). so when interrupt is enabled again. interrupt is quickly
    // serviced. Actually interrupt should be serviced only when AC power supply crosses zero.
    // Enable Analog Comparator interrupt.     
-#ifdef _HW_REV_3_
    ACSR=0x1B;                    /* both AIN+ and AIN- are driven from external */
-#else
-   ACSR=0x5B;                    /* AIN+ is driven by internal voltage base */ 
-#endif
-
-
 }
 
 /*****************************************************************************/
 //                    Stepping Motor driver
 // set stepping motor speed and running mode. 
 // Usage: Motor_Driver(arg1, arg2) 
-// totally 6 available speed, from 2.3 cycle/s to 4 cycle/s. selected by arg1
+// totally 6 available speed, from 1.5 cycle/s to 4 cycle/s. selected by arg1
 // totally 4 working mode: selected by arg2
 // 'N': Motor 1(top) and 2 (bottom) stop. 'B': Both Motor 1 and 2 work
 // 'W': Weighing Motor(1) works.  'S': Storing Motor(2)works.
-//  Arg powerdown, 0->power down motor driver after rotation. >0 keep driver active.
+//  Arg poweron: 
+//  0: power down motor driver after rotation. (back to optocoupler) 
+//  >0 keep driver active.(departure, first half)
+//            *   *
+//         *        *
+//       *            *
+//       *            *
+//         *        *
+//            *   *
+//       <          <
+//   poweron>0      poweron = 0 
+//    1st half      2nd half
 /*****************************************************************************/
-#define NUM_OF_STARTUP_PULSE 25
 void Motor_Driver(u8 MotorMode,u8 pulsenum,u8 powerdown)
 {
    // Motor driving frequency table, set to Timer register TCNT.
+   // 0xDC: 1 cycle/s; 0xE8: 1.5 cycle/s; 0xEE: 2 cycles/s; 
    // 0xF0: 2.3 cycle/s; 0xF2: 2.6; 0xF4: 3; 0xF5: 3.3; 0xF6: 3.6; 0xF7: 4 cycle/s
    // 0xF8: 4.5 cycle/s; 0xF9: 5 cycle/s; 0xFA: 6 cycle/s; 0xFB: 7 cycle/s
    // Motor_Pulse_Freq[10]={0xF0,0xF2,0xF4,0xF5,0xF6,0xF7,0xF8,0xF9,0xFA,0xFB}; 
    // totally 10 speed options       
    u8 i;
-   if(RS485._flash.motor_speed >= (sizeof(MOTOR_FREQ)/sizeof(u8)))
-        return;
+   i = sizeof(MOTOR_FREQ)/sizeof(u8); 
+   if(RS485._flash.motor_speed >= i)
+     RS485._flash.motor_speed = i-1;                            
+       
    RS485._motor.pulse_num = pulsenum; // 1.8 degree per step. 200 pulses to run one cycle
    // To avoid motor mis-step at high speed, force motor to start at low speed 
    // during first several driving pulses. 
    // bit 5~0 of phase indicates how many pulses are given at low frequency.
    RS485._motor.phase = NUM_OF_STARTUP_PULSE; 
    // bit 6 of phase is motor power on/off flag after rotation.
-   if (powerdown > 0)
-        RS485._motor.phase |= 0x40;  // set bit 6, keep motor driver active after rotation.
+   if (powerdown)
+        RS485._motor.phase |= 0x40;  // set bit 6, keep motor driver active after rotation.  
    else
         RS485._motor.phase &= 0xBF; // clear bit 6, power off motor driver after rotation.
    RS485._motor.mode = MotorMode;  
    
    // Activate Motor back from Reset mode
-#ifdef _HW_REV_3_
    MOTOR_ROTATE_CLKWISE;        /* motor rotates clockwise */
    MT_MODE_BIT0 = 1;            /* motor mode is 00 (4 phases) */
    MT_MODE_BIT1 = 1; 
-#endif   
+
    switch(RS485._motor.mode)
    {
        case 'W':             	 
@@ -367,9 +429,8 @@ u8 Motor_Is_Running()
 // >0 and doesn't decrease when timeout, something wrong happened with magnet driver,
 // we should set flag to indicate "magnet_dead".
 /*******************************************************************************/
-extern u16 timerlen[4]; 
-#define SET_MAGNET_ERROR_BIT RS485._global.hw_status |= 0x4
-#define CLEAR_MAGNET_ERROR_BIT  RS485._global.hw_status &= 0xFB
+#define SET_MAGNET_ERROR_BIT RS485._global.diag_status1 |= 0x1
+#define CLEAR_MAGNET_ERROR_BIT  RS485._global.diag_status1 &= 0xFE
 u16 Magnet_Is_Running()
 { 
   static u8 timer_set_already;
@@ -378,27 +439,21 @@ u16 Magnet_Is_Running()
   if(RS485._magnet.pulse_num == 0)
   {  timer_set_already = 0;           /* clear flag anyway*/
      last_pulse_num = 0;
-     CLEAR_MAGNET_ERROR_BIT;  
      return 0; 
   } 
-
+  
   /* magnet is running, we have to set a limit to avoid infinite waiting */ 
   if(!timer_set_already)               /* timeout not set yet, set it*/
   {  
-     timerlen[3] = 4;                  /* set timer2 to 4*10ms */
-     TCNT2=0xB8;                       /* 10ms timer tick */
-
-     TIFR |= (1<<TOV2);                /* clear overflow flag */
-
-     TIMSK |= 0x40;                    /* enable TMR2 overflow interrupt.*/
+     kick_off_timer(6, 4);             /* kick off Timer service 6 for 40 ms timer */
      timer_set_already = 0xff;         /* set flag */
      last_pulse_num = RS485._magnet.pulse_num; 
      CLEAR_MAGNET_ERROR_BIT;
      return(RS485._magnet.pulse_num); 
   }
-
+  
   /* magnet is running, and we have kicked off a timer */  
-  if(timerlen[3] ==0)                  /* time expires */
+  if(!(os_sched.status & 0x40))                  /* time expires */
   { if(last_pulse_num == RS485._magnet.pulse_num)
     {  
        RS485._magnet.pulse_num = 0;    /* error happened, stop magnet pulses */ 

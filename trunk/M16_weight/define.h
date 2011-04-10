@@ -5,15 +5,10 @@
 
 //My compile switches here: enabled when uncommented
 #define _50HZ_FILTER_           //50HZ AC power supply. uncommented if 60HZ.
-//#define _SENSOR_ENABLED_        //uncommented to enable stepping motor sensors
 #define _DISABLE_WATCHDOG_    //uncommented to disable watchdog
 //#define _FORCE_INIT_EEPROM_  // force to initialize EEPROM.
-//#define _FORCE_CONSTANT_WEIGHT_    
-#define _BOARD_TYPE_IS_VIBRATE_
-//#define _TEST_MOTOR_MAGNET_
-//#define _TEST_MAGNET_
-//#define _DISP_AD_OUT_ 
-//#define _HW_REV3_CS5530_CHANGE_
+//#define _BOARD_TYPE_IS_VIBRATE_15
+//#define _BOARD_TYPE_IS_VIBRATE_11
 
 #define i32 	long int
 #define i16 	int
@@ -27,6 +22,8 @@
 #define NULL 0x0
 #define PASS 0x0        
 #define FAIL 0xff
+#define TRUE 1
+#define FALSE 0
 #define GOT_DATA 0x0
 #define CS5532_BUSY 0xFF  
 #define SYS_GAIN_CAL_PREWORK_NOT_READY 1
@@ -74,9 +71,6 @@
 // 定义还有多少数据需要被写入EEPROM。
 #define NUM_OF_DATA_TO_BE_PGMED 0xFF
 
-// used in debug mode, define delay (ms) between sending 2 
-#define UART_DELAY 50    //
-
 void sleepus(u16);
 void sleepms(u16);
 void sleeps(u16);
@@ -90,16 +84,19 @@ void sleeps(u16);
 #define LED_ON(x)         x = 0
 #define LED_OFF(x)        x = 1
 #define LED_FLASH(x)      x = ~x
-                                    
-#define TARGET_WEIGHT_500G 500
-
-// 马达/线振机参数最大可选项个数
-#define MAX_MOTOR_SPEED_INDEX 10
-#define MAX_MAGNET_AMP_INDEX 75
-#define MAX_MAGNET_FREQ_INDEX 5
 
 // 定义步进电机的驱动频率选项: 这些数值将被赋给定时器寄存器 TCNT
 // 0xF0: 2.3 cycle/s; 0xF2: 2.6; 0xF4: 3; 0xF5: 3.3; 0xF6: 3.6; 0xF7: 4 cycle/s 
+
+#define CYCLE_0_5       0xB8
+#define CYCLE_0_6       0xC4
+#define CYCLE_0_7       0xCC
+#define CYCLE_0_8       0xD3
+#define CYCLE_0_9       0xD8
+#define CYCLE_1_0	0xDC
+#define CYCLE_1_2       0xE2
+#define CYCLE_1_5	0xE8
+#define CYCLE_2_0	0xEE
 #define CYCLE_2_3	0xF0  //0xF0->0xFB
 #define CYCLE_2_6	0xF2
 #define CYCLE_3_0	0xF4
@@ -113,27 +110,18 @@ void sleeps(u16);
 
 //define motor pulse numbers
 #define MOTOR_ONE_CYCLE_WITH_SENSOR 230 
-#define MOTOR_ONE_CYCLE_NO_SENSOR 245 //originally 200        
-#define MOTOR_SHIFT_CYCLE_OPEN 100
-#define HALF_CYCLE_CLOSE_WITH_SENSOR 130
+#define MOTOR_ONE_CYCLE_NO_SENSOR 200 //originally s200        
+#define MOTOR_SHIFT_CYCLE_OPEN 100  // org 100
+#define HALF_CYCLE_CLOSE_WITH_SENSOR 130 //130
 #define HALF_CYCLE_CLOSE_NO_SENSOR 100
 
 // define motor's power modes. 
 #define KEEP_POWER_ON 0x1       // bit0  = 1
 #define POWER_OFF_AFTER_ROTATION 0x0  //bit0 = 0
 
-// 定义步进电机驱动相位: 2 phase---4 steps
-// L298 only. Not used anymore. 
-//#define PHASE_1		0x32
-//#define PHASE_2		0x38
-//#define PHASE_3		0x31
-//#define PHASE_4		0x34
-
-
 // RS485节点信息/参数在EEPROM中的存放地址
 #define EEPROM_BOOTFLAG_ADDR 0x40
 #define EEPROM_RS485ADDR 0x80
-//#define CAL_DATA_START_ADDR_IN_EEPROM 0xA0   
 #define UPGRADE_FIRMWARE 0xA
 
 // bit 0:  "1" -> First Head Byte(0xfe) Found
@@ -276,19 +264,12 @@ typedef struct {
         volatile u8      Mtrl_Weight_decimal;    // decimal part: LSB: (1/64)g
                 
         
-        // status of state machine. polled by master board.
-        // Originally defined by sojo, no changes. May be polled by master board as needed
-        volatile u8      status;
+        // Diagnostic resultm byte 1, polled by master
+        volatile u8      diag_status1;
         
         // AD status polled by master board for error check, when set:
-        // bit 0 -> cs5530 offset cal fail. This bit won't be used in production(keep 0).
-        // bit 1 -> cs5530 gain cal fail. This bit won't be used in production(keep 0). 
-        // bit 2 -> cs5532 initialization fail.
-        // bit 3 -> cs5530 conversion overflow (invalid readout)  
-        // bit 4 -> cs5530 output-to-gram calculaton error, "Mtrl_Weight_gram" invalid. 
-        // bit 7:5 -> reserved for future use. keep 0.
-        // maybe polled by master board as needed.
-        volatile u8      cs_status; 
+        // Diagnostic result byte 2, polled by master.
+        volatile u8      diag_status2; 
         
         // hardware status, when set:
         // bit 0: -> motor_s action fail
@@ -354,6 +335,8 @@ typedef struct  { //status of magnet
       volatile u16 pulse_num;  //u16 changed to u32
       volatile u16 reserved; 
       volatile u16 half_period;
+      u8 amp_adj;
+      u8 time_adj;
 }S_MAGNET;
 
 typedef struct {
@@ -363,6 +346,12 @@ typedef struct {
         S_MAGNET _magnet;
 }NODE_CONFIG;       
 
+typedef struct {
+   u16 timerlen[8];                    /* Time to go before task will be scheduled */
+   u8  status;                         /* boolean type variable, 1: in progress, 0: task completed */
+} OS_SCHEDULER;
+
+extern OS_SCHEDULER os_sched; 
 extern NODE_CONFIG RS485;
 extern u8 debug_mode;  
 
@@ -396,6 +385,9 @@ extern u8 debug_mode;
 #define BOARD_TYPE_MOTOR        0x20
 #define BOARD_TYPE_INVALID      0xf0    
 
+#define HW_ID_WEIGHT            0x3     // Don't change, H/W dependant
+#define HW_ID_INTERFACE         0x2     // Don't change, H/W dependant 
+
 #define BOARD_GROUP_MASK        0x0f
 #define BOARD_GROUP_A           0x00
 #define BOARD_GROUP_B           0x01
@@ -412,6 +404,7 @@ extern u8 debug_mode;
 #define TEST_BIT6               0b01000000
 #define TEST_BIT7               0b10000000
 #define TEST_BITS_76            0b11000000
+#define TEST_BITS_765           0b11100000
 
 #define ENABLE_MULTI_POISES    (RS485._global.test_mode_reg1 & TEST_BIT7) == 0
 #define ENABLE_MOTOR_SENSORS   (RS485._global.test_mode_reg1 & TEST_BIT6) == 0
@@ -421,7 +414,7 @@ extern u8 debug_mode;
 #define EN_RUNTIME_ZERO_ADJUST (RS485._global.test_mode_reg1 & TEST_BIT2) == 1
 #define EN_RUNTIME_MAGNET_ADJ  (RS485._global.test_mode_reg1 & TEST_BIT1) == 1   
 
-#define CHANGE_RS485_ADDR    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x80
-#define CHANGE_BOARD_TYPE    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x40
+#define CHANGE_RS485_ADDR    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0xC0
+#define CHANGE_BOARD_TYPE    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x80
 
 #endif
