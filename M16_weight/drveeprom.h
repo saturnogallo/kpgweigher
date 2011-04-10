@@ -14,7 +14,7 @@ typedef struct
     u8 bVal; 
 } S_EEPROM_POSITION; 
 
-#define EEPROM_WRITE_BUF_SIZE   64 
+#define EEPROM_WRITE_BUF_SIZE   48 
 #define RET_BUSY 0xff
 #define RET_SUCCESS 0x0  
 

@@ -27,7 +27,7 @@
 // USART Receiver buffer 
 #define RX_BUFFER_SIZE 0x20  
 
-#define BROADCAST_ADDR 0x80    // RS485 Boardcast address
+#define BROADCAST_BASE_ADDR 0x80    // RS485 Boardcast address, group A~D 0x80-0x83
 
 // subroutines that maybe called by subroutines in other *.c files. 
 void UART_Init(void);

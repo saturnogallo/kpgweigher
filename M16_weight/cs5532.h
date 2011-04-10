@@ -153,6 +153,6 @@ u8 CS5532_SysOffsetCal(void);
 //void CS5532_Test(void);
 void CS5532_Poise2Result(void);
 void CS5532_PoiseWeight(void); 
-//u8 CS5532_Cont_Conv_Stop();
+u8 CS5532_Cont_Conv_Stop();
 
 #endif

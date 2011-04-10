@@ -80,63 +80,6 @@ void CS5532_Config(u16 cfg_hw, u16 cfg_lw)
   SPI_MasterTransmit_w(cfg_hw); 
   SPI_MasterTransmit_w(cfg_lw);
 }
-
-/******************************************************************/
-//              CS5532/CS5530 channel setup 
-// CS5532 totally has 8 16-bit setup registers
-// Decoder: 
-// CS[1:0]/Bit[15:14], forced to 00 to select channel 1
-// CG[2:0]/Bit[13:11], Gain x1(set to 0)/x2/x4/x8/x16/x32/x64(set to 6)
-// WR[3:0]/Bit[10:7], 0000/100sps 0001/50sps 0010/25sps 0011/12.5sps
-// 0100/6.25sps 1000/3200sps 1001/1600sps 1010/800sps 1011/400sps
-// 1110/200sps
-// other bits (Bit[6:0] set to 0x40, see datasheet for details.
-// Function introduction:
-// This function sets setup register 1 based on word rate and gain settings
-// input by user. 
-// valid word rate range is "0~4" and "8~12"
-// valid gain setting is "0~6". See datasheet for details
-// return 0x0 if setup is successful. return 0xff if setup failed. 
-// Note: each CSR are 32 bits long and contains 2 setups. 2 setups
-// need to be accessed in pairs, even only 1 setup is needed.
-/******************************************************************/
-/*
-u8 CS5532_Setup_CH1(u8 word_rate, u8 gain)
-{
-   u8 cFlag;
-   u8 setup_data[4],i;   
-
-   if(word_rate>12)
-        return(0xff);                   //invalid word rate settings
-   if((word_rate>4) && (word_rate<8))                               
-        return(0xff);                   //invalid word rate settings
-   if (gain>6)                          // invalid gain settings
-        return (0xff);
-   
-   setup_data[0] = (gain<<3) + (word_rate/2);
-   setup_data[1] = 0x40 + ((word_rate%2)<<7);
-   //setup registers needed to be be accessed x32 bits together
-   setup_data[2] = setup_data[0];  
-   setup_data[3] = setup_data[1];   
-   
-   // Initalize setup success flag. 0 represents successful setup.
-   cFlag = 0x0;           
- 
-   //write settings into CS5530/CS5532 setup register 1
-   SPI_MasterTransmit_c(CMD_WRITE_SETUP_REG1);
-   for(i=0;i<4;i++)
-        SPI_MasterTransmit_c(setup_data[i]);
- 
-   //read out all setup registers to check if setup is successful or not.
-   SPI_MasterTransmit_c(CMD_READ_SETUP_REG1);
-   for(i=0;i<4;i++)
-   { //set error flag if data read out doesn't match previous settings
-     if(SPI_MasterReceive_c() != setup_data[i])
-         cFlag = 0xFF;
-   } 
-   return(cFlag);      
-}
-//*/
  
 /******************************************************************/
 //            CS5532 continous conversion
@@ -215,12 +158,6 @@ void CS5532_Manual_Offset_Gain_Cal(u8 *AD_Output, u8 gain)
   temp1 = *ptr++;
   offset += temp1 << 8; 
   offset += *ptr;
-  
-  //calculate data to be written into offset register
-  //temp1 = offset >> 2; 
-  //temp2 = offset >> 6;
-  //temp3 = offset >> 7;       
-  //offset = temp1 + temp2 + temp3;
 
   //write offset data to offset register
   SPI_MasterTransmit_c(CMD_WRITE_OFFSET_REG1);
@@ -239,7 +176,7 @@ void CS5532_Manual_Offset_Gain_Cal(u8 *AD_Output, u8 gain)
 // stop CS5532 continous conversion mode so that it can receive
 // new command.
 /******************************************************************/
-/*u8 CS5532_Cont_Conv_Stop()
+u8 CS5532_Cont_Conv_Stop()
 { 
    if(PORTB.P_MISO == 1)
       return(0xff);
@@ -248,7 +185,7 @@ void CS5532_Manual_Offset_Gain_Cal(u8 *AD_Output, u8 gain)
    //clock out the 32 bits before exit
    SPI_MasterReceive_l();      
    return(0x0);   
-} //*/
+}
 
 /******************************************************************/
 //            CS5532 system offset calibration
@@ -423,153 +360,138 @@ void CS5532_Manual_Offset_Gain_Cal(u8 *AD_Output, u8 gain)
 // return AD_OVER_FLOW if A/D conversion overflow happens.
 // otherwise return average of multiple AD samples.
 /********************************************************************************/ 
-#define DATA_NUM 4                 
-//fill data buffer and return average.
-u16 DataBuf[DATA_NUM];
-
-u16 FillDatBuf()
+u16 read_ad_data()
 {
-   u32 sum;
-   u16 average;
-   u8 ConvTempbuf[4], k; 
-   k = 0;
+   u16 raw_data, temp;
+   u8 ConvTempbuf[4]; 
    
-    //get multiple (DATA_NUM) samples.
-   while(k < DATA_NUM)
-   {      
-      if(CS5532_ReadADC(ConvTempbuf) != SUCCESSFUL)                      
-          return(AD_BUSY);
+   if(CS5532_ReadADC(ConvTempbuf) != SUCCESSFUL)                      
+      return(AD_BUSY);
       
-      //LSB byte of the 32 bits is monitor byte, 
-      if (ConvTempbuf[3] != 0) { 
-          RS485._global.cs_status |= 0x8; 
-          return(AD_OVER_FLOW);
-      }
-      else 
-      {  
-         RS485._global.cs_status &= 0xF7; 
-         sum = ConvTempbuf[0];            
-         DataBuf[k++] = (sum << 8) + ConvTempbuf[1];
-      }
+   // LSB byte of the 32 bits is monitor byte, 
+   if (ConvTempbuf[3] != 0) { 
+       RS485._global.diag_status1 |= 0x20;         // set bit 5 error flag
+       return(AD_OVER_FLOW);                       
    }
-   
-   // average of all samples.          
-   sum = 0;
-   for(k=0; k< DATA_NUM; k++)
-      sum += DataBuf[k];
-   // long int to int type
-   average = (sum/DATA_NUM) & 0xFFFF;              
-   return(average);
+   else{  
+       RS485._global.diag_status1 &= 0xDF;         // clear error flag 
+       temp = ConvTempbuf[0];                      // xianghua                   
+       raw_data = temp << 8; 
+       raw_data += ConvTempbuf[1];                 
+   }   
+   return(raw_data);
 } 
 
 /********************************************************************************/     
-// software filter on material weight 
-// Algorithm:  
+// software filter on material weight  
 /********************************************************************************/     
-#define AVERAGE_NUM 32  //average buffer size, must be times of 4.
-u8 Buf_Is_Full = 0;
+#define AVERAGE_NUM 64  //average buffer size, must be times of 8.  xianghua 64
 
 void CS5532_PoiseWeight()
 {       
-   static u16 AverageBuf[AVERAGE_NUM];
+   static u16 Raw_DataBuf[AVERAGE_NUM];        // data buffer contains raw data from A/D
+   static u8 cur_data_index, data_counts;      // variables associated to Raw_DataBuf
+   static u8 raw_data_index; 
+   
    u16 SortBuf[AVERAGE_NUM];     
-   u16 temp; 
+   u16 temp, temp_latest, delta; 
    u32 sum;
-   u8 i, j;
-   
-   /*************************************************************/         
-   //sample more data at the first time to fill the buffer.       
+   u8 i, j, filter_size;
+        
    /*************************************************************/
-   if(Buf_Is_Full == 0)
-   { 
-      for(j=0; j< AVERAGE_NUM; j++)
-      {
-         temp = FillDatBuf();
-         if((temp == AD_BUSY) || (temp == AD_OVER_FLOW)) 
-         {
-           RS485._global.cs_mtrl = temp; // invalid data 
-           return; 
-         }
-         else
-           AverageBuf[j] = temp;     
-      }      
-  
-      // flag to indicate databuf is ready.
-      Buf_Is_Full = 1;  
-   }     
-   /*************************************************************/
-   //shift in the buffer to only save latest AVERAGE_NUM average data.
-   /*************************************************************/
-   temp = FillDatBuf();
-   if((temp == AD_BUSY) || (temp == AD_OVER_FLOW)) 
+   // read a data sample
+   /*************************************************************/    
+   temp = read_ad_data();       
+   //if((temp == AD_BUSY) || (temp == AD_OVER_FLOW)) 
    {
-      RS485._global.cs_mtrl = temp; // invalidate "cs_mtrl"
-      return;
+      RS485._global.cs_mtrl = temp;            // invalidate "cs_mtrl"
+      return;                                  // return if data is invalid
    }
-   
+             
    /*************************************************************/
-   // insert new data to data buffer (latest on the right)
-   // copy data to sortbuf for further process.
+   // calculate sample size for medium filtering
+   /*************************************************************/   
+   filter_size = 6;
+   filter_size = filter_size << 3;             // size of data: 8 ~ 64, must be times of 8
    /*************************************************************/
-   for(j=0; j<AVERAGE_NUM-1; j++)
-   {  AverageBuf[j] = AverageBuf[j+1];
-      SortBuf[j] = AverageBuf[j];   
-   }
-   AverageBuf[AVERAGE_NUM-1] = temp;
-   SortBuf[AVERAGE_NUM-1] = temp; 
-   
-
-   // sort data buffer. min at buf[0].
-   for(i=0; i<(AVERAGE_NUM/2); i++)
-   {  for(j=0; j<AVERAGE_NUM-1-i; j++)
-      {  // swap data, max to higher address
-         if(SortBuf[j] > SortBuf[j+1])
+   // push data to queue, report current A/D reading directly if data 
+   // size has not reached required data size for filtering. 
+   /*************************************************************/ 
+   Raw_DataBuf[cur_data_index++] = temp;       
+   if(cur_data_index > filter_size-1)
+     cur_data_index = 0;              
+   if(data_counts < filter_size)               
+   {  data_counts++;  
+      RS485._global.cs_mtrl = temp;            // skip filter if data sample size
+      return;                                  // is not big enough.  
+   }   
+   /*************************************************************/
+   // Medium Value Filtering
+   // First copy data to sort buffer and sort data (Min in Buf[0])
+   /*************************************************************/
+   for(j=0; j<filter_size; j++)
+      SortBuf[j] = Raw_DataBuf[j];             
+   for(i=0; i<(filter_size>>1); i++)            // sort data buffer. min at buf[0].
+   {  for(j=0; j < filter_size-1-i; j++)
+      {  
+         if(SortBuf[j] > SortBuf[j+1])         // swap data, max to higher address
          {  temp = SortBuf[j+1];
             SortBuf[j+1] = SortBuf[j];
             SortBuf[j] = temp;            
          }                                       
       }      
-   } 
-   
-   /*
-   if(temp <= AverageBuf[0])
-   {  // insert data into buf[0]
-      for(j=AVERAGE_NUM-1; j>0; j--)
-        AverageBuf[j] = AverageBuf[j-1];
-      AverageBuf[j] = temp;  
-   }
-   else if(temp >= AverageBuf[AVERAGE_NUM-1])
-   {  for(j=0; j<AVERAGE_NUM-1; j++)
-         AverageBuf[j] = AverageBuf[j+1];
-      AverageBuf[j] = temp;    
-   }
-   else // insert data in the middle of buffer 
-   {  for(j=0; j<AVERAGE_NUM-1;)
-      {  if(temp >= AverageBuf[j])
-           j++;
-         else
-           break;          
-      } 
-      // insert data at buf[j]
-      for(i=0; i< j-1; i++)
-         AverageBuf[i] = AverageBuf[i+1];
-      AverageBuf[i] = temp;       
-   } */
-
+   }      
    /*********************************************************/
-   // Median Filter                         
+   // Medium Filtering, excludes high end (1/8 of queue size)
+   // and low end data (1/8 of queue size)
+   // Calculate average over medium parts (3/4 of queue size).
    /*********************************************************/   
    sum = 0;
-   i = AVERAGE_NUM>>2;
-   for(j=i; j<AVERAGE_NUM-i; j++)
-   {
+   i = filter_size >> 3; 
+   for(j=i;j<filter_size-i; j++)
       sum+= SortBuf[j];
+   i = filter_size - (filter_size >>2);
+   temp = (sum/i) & 0xFFFF;
+   /*************************************************************/
+   // Calculate average of latest 8 data sampes as an indicator
+   // of remarkable data change. 
+   /*************************************************************/   
+   sum = 0;
+   for(i=0; i<8; i++)
+   {  if(cur_data_index>i)                      
+        j = cur_data_index-1- i;
+      else
+        j = filter_size - 1 - i + cur_data_index; 
+      sum+= Raw_DataBuf[j];   
    }
-   RS485._global.cs_mtrl = (sum/16) & 0xFFFF;   
+   temp_latest = (sum >> 3) & 0xFFFF;
+   /*************************************************************/
+   // weight-based average
+   // temp1 is the calculation over latest 16 data samples
+   // temp is the calculation over latest 32 data samples
+   // if the delta between temp1 and temp is greater than 2g(
+   // 50 * 0.04g, assume delta caused by noise is less than 1g)
+   // it is very likely that material feeding or releasing starts,
+   // so we only use the latest 16 data samples. 
+   /*************************************************************/   
+   if(temp_latest>temp)
+      delta = temp_latest - temp;
+   else
+      delta = temp - temp_latest; 
+      
+   if(delta<32)
+      sum = temp;
+   else if(delta>64) 
+   {   sum = temp_latest; 
+       data_counts = 0;                      // invalidate data queue. 
+   }
+   else
+   {  sum = temp;
+      sum+= temp_latest;  
+      sum = sum >>1; 
+   }
    
-   //if ((RS485._flash.cs_Filter_option & 0xF0) == 0x10)
-   
-                    
+   RS485._global.cs_mtrl = sum & 0xFFFF;        
 }                                                                   
 
 /*****************************************************************************/
@@ -598,10 +520,6 @@ void CS5532_Poise2Result()
    u32 temp1,temp3, temp4;
    u16 delta, min_delta;
    u8 i;             
-#ifdef _FORCE_CONSTANT_WEIGHT_ 
-   RS485._global.Mtrl_Weight_gram = 0xfff1;
-   return;   
-#endif
 
    // check if error happened in CS5532_PoiseWeight()
    if(RS485._global.cs_mtrl > MAX_VALID_DATA)
@@ -667,9 +585,12 @@ void CS5532_Poise2Result()
       if(RS485._global.Mtrl_Weight_gram==0xffff)
           RS485._global.Mtrl_Weight_gram= OVERWEIGHT;
       RS485._global.Mtrl_Weight_decimal = temp4 & 0x3F;
+      RS485._global.diag_status1 &= 0xBF;          // clear bit 6 error flag      
    }   
    else
-      RS485._global.Mtrl_Weight_gram =  DIV_ERROR; // indicate bad calibration                     
+   {  RS485._global.Mtrl_Weight_gram =  DIV_ERROR; // indicate bad calibration
+      RS485._global.diag_status1 |= 0x40;          // set bit 6 error flag
+   }                           
    // master board won't find this node if Mtrl_Weight_gram is always 0xffff.
    // Bad calibartion data will make Mtrl_Weight_gram always bad.
    // so we set Mtrl_Weight_gram to a different data to indicate calibration error.
