@@ -24,7 +24,6 @@ Data Stack size     : 256
 #include <mega16.h>
 #include "define.h"
 #include "uart.h" 
-#include "drveeprom.h"
 
 #define LAST_APP_PAGE 0x3780    /* byte addr, bootloader code starts from 0x3800 (byte address) */   
 #define SPMCSR SPMCR
