@@ -3,7 +3,13 @@
     xmlns:s="clr-namespace:System;assembly=mscorlib">
     <s:String x:Key="account">帐号</s:String>
     <s:String x:Key="password">密码</s:String>
+    <s:String x:Key="search_newnode">搜索新加斗</s:String>
+    <s:String x:Key="waitpack">等待包装机响应</s:String>
+    <s:String x:Key="search_node">搜索斗</s:String>
+    <s:String x:Key="found_node">找到斗</s:String>
+    <s:String x:Key="init_nodereg">初始化各斗设置</s:String>
     <s:String x:Key="org_password">旧密码</s:String>
+    <s:String x:Key="fail">失败</s:String>
     <s:String x:Key="new_password">新密码</s:String>
     <s:String x:Key="new_password2">确认密码</s:String>
     <s:String x:Key="find_password">恢复初始密码</s:String>
@@ -17,21 +23,41 @@
     <s:String x:Key="alert_solved">1.故障已手动排除</s:String>
     <s:String x:Key="alert_force">2.强排此斗</s:String>
     <s:String x:Key="alert_disable">3.禁用此斗</s:String>
+    <s:String x:Key="alert_enable">3.启用此斗</s:String>
     <s:String x:Key="alert_quit">4.退出</s:String>
     <s:String x:Key="cfg_inuse">当前设置正在使用中，不能删除</s:String>
     <s:String x:Key="admin">管理员</s:String>
     <s:String x:Key="user">用户</s:String>
     <s:String x:Key="emptydata">输入不能为空</s:String>
+    <s:String x:Key="engineerpage">工程师页面</s:String>
+    <s:String x:Key="entersystem">进入系统</s:String>
+    <s:String x:Key="enter_system">请输入进入操作系统的密码</s:String>
+    <s:String x:Key="enter_locknum">请输入锁定数值</s:String>
+    <s:String x:Key="lockon">锁定已开</s:String>
+    <s:String x:Key="locksystem">锁定功能</s:String>
+    <s:String x:Key="language">中文语言</s:String>
+    <s:String x:Key="changeaddr">更改地址</s:String>
+    <s:String x:Key="updatefw">程序更新</s:String>
+    <s:String x:Key="updatefwcomplete">程序更新完成</s:String>
+    <s:String x:Key="updatefwfail">程序更新失败.节点</s:String>
+    <s:String x:Key="change_addr_success">节点地址更新成功</s:String>
+    <s:String x:Key="change_addr_fail">节点地址更新失败</s:String>
+    <s:String x:Key="setregs">寄存器设置</s:String>
+    <s:String x:Key="refresh">刷新</s:String>
+    <s:String x:Key="reginfo">寄存器信息</s:String>
+    <s:String x:Key="seladdr">节点选择</s:String>
     <s:String x:Key="configpage">配置页面</s:String>
     <s:String x:Key="alertpage">报警配置页面</s:String>
     <s:String x:Key="pwdpage">密码设置页面</s:String>
     <s:String x:Key="totalpack">总包数(包)</s:String>
     <s:String x:Key="lastweight">上包重量(克)</s:String>
-    <s:String x:Key="speed">速度(包/每分钟)</s:String>
+    <s:String x:Key="speed">速度(包/分钟)</s:String>
     <s:String x:Key="pack">包</s:String>
-    <s:String x:Key="packpermin">包/每分钟</s:String>
+    <s:String x:Key="packpermin">包/分钟</s:String>
     <s:String x:Key="backspace">退格</s:String>
     <s:String x:Key="enter_singlemode_pwd">请输入密码</s:String>
+    <s:String x:Key="enter_newaddr">请输入新地址</s:String>
+    <s:String x:Key="enter_newvalue">请输入新值</s:String>
     <s:String x:Key="selectprod">选择产品对应的图片</s:String>
     <s:String x:Key="selectprodnum">选择使用产品号</s:String>
     <s:String x:Key="intftrig1">低电平</s:String>
@@ -56,7 +82,7 @@
     <s:String x:Key="done">操作完成</s:String>
     <s:String x:Key="login">登录系统</s:String>
     <s:String x:Key="help">帮助</s:String>
-    <s:String x:Key="product_no">产品号</s:String>
+    <s:String x:Key="product_no">产 品 号</s:String>
     <s:String x:Key="operator_no">操作员号</s:String>
     <s:String x:Key="enter_operator_no">请输入操作员号</s:String>
     <s:String x:Key="product_desc">产品描述</s:String>
@@ -83,7 +109,7 @@
     <s:String x:Key="enter_test_mode_reg2">请输入寄存器2的值</s:String>
     <s:String x:Key="enter_pwd">请输入密码</s:String>
     <s:String x:Key="enter_run_amp">请输入主震幅度</s:String>
-    <s:String x:Key="enter_run_freq">请输入主震频率</s:String>
+    <s:String x:Key="enter_run_freq">请输入清零间隔</s:String>
     <s:String x:Key="enter_run_target">请输入目标重量(克)</s:String>
     <s:String x:Key="enter_run_uvar">请输入上偏重量(克)</s:String>
     <s:String x:Key="enter_run_dvar">请输入下偏重量(克)</s:String>
@@ -99,7 +125,7 @@
     <s:String x:Key="enter_sub_amp_input">请输入震动斗振动幅度</s:String>
     <s:String x:Key="enter_col_dtime_input">请输入送料后延时(*0.1s)</s:String>
     <s:String x:Key="enter_sub_time_input">请输入震动斗震动时间(*0.1s)</s:String>
-    <s:String x:Key="enter_sub_freq_input">请输入震动斗震动频率</s:String>
+    <s:String x:Key="enter_sub_freq_input">请输入清零间隔</s:String>
     <s:String x:Key="enter_wei_otime_input">请输入下料后延时(*0.1s)</s:String>
     <s:String x:Key="enter_wei_dtime_input">请输入下料前延时(*0.1s)</s:String>
     <s:String x:Key="enter_openwei_input">请输入下料斗打开时间(*0.1s)</s:String>
@@ -131,7 +157,7 @@
     <s:String x:Key="sall_stop">停止</s:String>
     <s:String x:Key="operator">操作员</s:String>
     <s:String x:Key="intf_lb_feed_times">灌装次数</s:String>
-    <s:String x:Key="intf_ckb_delay">灌装延时(*0.1s)</s:String>
+    <s:String x:Key="intf_ckb_delay">灌装延时(*0.2s)</s:String>
     <s:String x:Key="intf_handshake">从机模式</s:String>
     <s:String x:Key="intf_lb_input_fmt">输入触发方式</s:String>
     <s:String x:Key="intf_ckb_mem">记忆</s:String>
@@ -142,7 +168,7 @@
 
     <s:String x:Key="enter_intf_lb_feed_times">请输入灌装次数</s:String>
     <s:String x:Key="enter_intf_pulse_width">请输入灌装脉冲宽度</s:String>
-    <s:String x:Key="enter_intf_ckb_delay">请输入灌装延时(*0.1s)</s:String>
+    <s:String x:Key="enter_intf_ckb_delay">请输入灌装延时(*0.2s)</s:String>
 
     <s:String x:Key="grp_name">当前设置名称</s:String>
     <s:String x:Key="grp_amp">主震幅度</s:String>
@@ -157,7 +183,7 @@
     <s:String x:Key="col_otime">送料斗时间(*0.1s)</s:String>
     <s:String x:Key="col_dtime">送料后延时(*0.1s)</s:String>
     <s:String x:Key="sub_amp">震动斗振动幅度</s:String>
-    <s:String x:Key="sub_freq">震动斗振动频率</s:String>
+    <s:String x:Key="sub_freq">自动清零周期</s:String>
 
     <s:String x:Key="test_mode_reg1">调试寄存器1</s:String>
     <s:String x:Key="test_mode_reg2">调试寄存器2</s:String>
@@ -188,6 +214,9 @@
     <s:String x:Key="cmd_cali5">500g砝码</s:String>
 
     <s:String x:Key="err65529">超量程</s:String>
+    <s:String x:Key="err_ad">A/D信号溢出</s:String>
+    <s:String x:Key="err_dz">除零错误</s:String>
+   <s:String x:Key="err_ow1">A/D信号超重</s:String>
     <s:String x:Key="err_ow">超重</s:String>
     <s:String x:Key="err_om">多次未组合</s:String>
 
@@ -235,9 +264,9 @@
     <s:String x:Key="intf_pulse_width_llimit">0</s:String>
     <s:String x:Key="intf_pulse_width_ulimit">200</s:String>
 
-    <s:String x:Key="intf_lb_feed_times_llimit">0</s:String>
+    <s:String x:Key="intf_lb_feed_times_llimit">1</s:String>
     <s:String x:Key="intf_lb_feed_times_ulimit">80</s:String>
 
-    <s:String x:Key="intf_ckb_delay_llimit">0</s:String>
-    <s:String x:Key="intf_ckb_delay_ulimit">50</s:String>
+    <s:String x:Key="intf_ckb_delay_llimit">1</s:String>
+    <s:String x:Key="intf_ckb_delay_ulimit">30</s:String>
 </ResourceDictionary>

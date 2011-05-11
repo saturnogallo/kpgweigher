@@ -21,9 +21,9 @@ namespace ioex_cs
     public partial class SingleMode : Window
     {
         System.Windows.Forms.Timer uiTimer;
-        private object lastsender = null;
         private string lastcall = "";
         private bool bSelectAll = false;
+        private int curr_node_index { get; set; }
         private void HandleLongCommand()
         {
             if (lastcall == "UpdateProdNo")
@@ -60,6 +60,7 @@ namespace ioex_cs
             InitializeComponent();
             curr_btn = null;
             last_btn = null;
+            curr_node_index = -1;
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
             uiTimer.Interval = 100;
@@ -78,7 +79,7 @@ namespace ioex_cs
                 return;
 
             UIPacker p = currentApp().curr_packer;
-            if (p.curr_node_index == -1)
+            if (curr_node_index == -1)
             {
                 bucket_click(1);
             }else{
@@ -88,6 +89,9 @@ namespace ioex_cs
                     {
                         UpdateNodeUI("wei_node" + n.ToString());
                     }
+                    p.NeedRefresh = false;
+                    if (p.status == PackerStatus.IDLE || p.status == PackerStatus.PAUSED)
+                        p.GroupAction("clearweight");
                 }
                 if (lastcall != "")
                     HandleLongCommand();
@@ -106,9 +110,14 @@ namespace ioex_cs
             Button btn = this.FindName(param.Replace("wei_node", "bucket")) as Button;
             byte n = (byte)(RunMode.StringToId(param));
             NodeAgent agent = currentApp().curr_packer.agent;
-            
-            if(agent.weight(n) > -1000)
+            double wt = agent.weight(n);
+            if (wt > -1000 && wt < 65521)
                 lb.Content = agent.weight(n).ToString("F1");
+            else
+            {
+                if (wt >= 65521)
+                    lb.Content = "ERR";
+            }
             if (agent.GetStatus(n) == NodeStatus.ST_LOST)
             {
                 btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
@@ -161,7 +170,7 @@ namespace ioex_cs
         private void bucket_click(int nodeid)
         {
             App p = Application.Current as App;
-            int last_node = p.curr_packer.curr_node_index;
+            int last_node = curr_node_index;
             if (nodeid < 1)
             {
                 return;
@@ -170,7 +179,7 @@ namespace ioex_cs
             last_btn = IdToButton(last_node);
             curr_btn = IdToButton(nodeid);
 
-            p.curr_packer.curr_node_index = nodeid;
+            curr_node_index = nodeid;
 
             if (last_btn is Button)
             {
@@ -194,17 +203,18 @@ namespace ioex_cs
             NodeAgent n = p.curr_packer.agent;
             byte vn = p.curr_packer.vib_addr;
 
-            sub_freq_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_freq");
-            sub_amp_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_amp");
-            sub_time_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_time");
+             
+            sub_freq_input.Content = n.GetNodeReg((byte)curr_node_index, "magnet_freq");
+            sub_amp_input.Content = n.GetNodeReg((byte)curr_node_index, "magnet_amp");
+            sub_time_input.Content = n.GetNodeReg((byte)curr_node_index, "magnet_time");
 
-            wei_otime_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "open_w");
-            wei_dtime_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "delay_w");
-            col_dtime_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "delay_s");
-            col_otime_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "open_s");
-            openwei_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "delay_f");
+            wei_otime_input.Content = n.GetNodeReg((byte)curr_node_index, "open_w");
+            wei_dtime_input.Content = n.GetNodeReg((byte)curr_node_index, "delay_w");
+            col_dtime_input.Content = n.GetNodeReg((byte)curr_node_index, "delay_s");
+            col_otime_input.Content = n.GetNodeReg((byte)curr_node_index, "open_s");
+            openwei_input.Content = n.GetNodeReg((byte)curr_node_index, "delay_f");
 
-            motor_speed_input.Content = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "motor_speed");
+            motor_speed_input.Content = n.GetNodeReg((byte)curr_node_index, "motor_speed");
 
             run_freq.Content = n.GetNodeReg(p.curr_packer.vib_addr,"magnet_freq");
             run_amp.Content = n.GetNodeReg(p.curr_packer.vib_addr,"magnet_amp");
@@ -215,7 +225,7 @@ namespace ioex_cs
             btn_uvar.Content = p.curr_packer.curr_cfg.upper_var.ToString() + StringResource.str("gram");
             btn_dvar.Content = p.curr_packer.curr_cfg.lower_var.ToString() + StringResource.str("gram");
 
-            lbl_currNode.Content = (p.curr_packer.curr_node_index).ToString();
+            lbl_currNode.Content = (curr_node_index).ToString();
             Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
             //load the corresponding pictiure.
             (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("c:\\ioex\\prodpic\\" + p.curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
@@ -243,39 +253,39 @@ namespace ioex_cs
                 
                 if (param == "sub_freq_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_freq", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "magnet_freq", UInt32.Parse(data));
                 }
                 if (param == "sub_amp_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_amp", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "magnet_amp", UInt32.Parse(data));
                 }
                 if (param == "sub_time_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "magnet_time", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "magnet_time", UInt32.Parse(data));
                 }
                 if (param == "wei_otime_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "open_w", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "open_w", UInt32.Parse(data));
                 }
                 if (param == "wei_dtime_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "delay_w", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "delay_w", UInt32.Parse(data));
                 }
                 if (param == "col_dtime_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "delay_s", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "delay_s", UInt32.Parse(data));
                 }
                 if (param == "col_otime_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "open_s", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "open_s", UInt32.Parse(data));
                 }
                 if (param == "openwei_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "delay_f", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "delay_f", UInt32.Parse(data));
                 }
                 if (param == "motor_speed_input")
                 {
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "motor_speed", UInt32.Parse(data));
+                    n.SetNodeReg((byte)curr_node_index, "motor_speed", UInt32.Parse(data));
                 }
                 if (param == "run_freq")
                 {
@@ -307,13 +317,14 @@ namespace ioex_cs
                 {
                     ShowStatus("calibrating");
                     int i = RunMode.StringToId(param) - 1;
-                    if (p.curr_packer.curr_node_index >= 0)
+                    if (curr_node_index >= 0)
                     {
-                        n.SetNodeReg((byte)p.curr_packer.curr_node_index, "poise_weight_gram" + i.ToString(), UInt32.Parse(data));
-                        string cs_mtrl_val = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "cs_mtrl");
-                        n.SetNodeReg((byte)p.curr_packer.curr_node_index, "cs_poise" + i.ToString(), UInt32.Parse(cs_mtrl_val));
+                        n.InvalidNodeReg((byte)curr_node_index, "cs_mtrl");
+                        n.SetNodeReg((byte)curr_node_index, "poise_weight_gram" + i.ToString(), UInt32.Parse(data));
+                        string cs_mtrl_val = n.GetNodeReg((byte)curr_node_index, "cs_mtrl");
+                        n.SetNodeReg((byte)curr_node_index, "cs_poise" + i.ToString(), UInt32.Parse(cs_mtrl_val));
                     }
-                    p.curr_packer.agent.Action((byte)p.curr_packer.curr_node_index, "flash");
+                    p.curr_packer.WeightAction((byte)curr_node_index, "flash");
                     return;
                 }
                 ShowStatus("modifying");
@@ -344,11 +355,15 @@ namespace ioex_cs
             if (calreg == "cali0")
             {
                 NodeAgent n = p.curr_packer.agent;
-                if (p.curr_packer.curr_node_index >= 0)
+                if (curr_node_index >= 0)
                 {
-                    string cs_mtrl_val = n.GetNodeReg((byte)p.curr_packer.curr_node_index, "cs_mtrl");
-                    n.SetNodeReg((byte)p.curr_packer.curr_node_index, "cs_zero", UInt32.Parse(cs_mtrl_val));
-                    p.curr_packer.agent.Action((byte)p.curr_packer.curr_node_index, "flash");
+                    ShowStatus("calibrating");
+                    n.InvalidNodeReg((byte)curr_node_index, "cs_mtrl");
+                    string cs_mtrl_val = n.GetNodeReg((byte)curr_node_index, "cs_mtrl");
+                    n.SetNodeReg((byte)curr_node_index, "cs_zero", UInt32.Parse(cs_mtrl_val));
+                    p.curr_packer.WeightAction((byte)curr_node_index, "flash");
+                    ShowStatus("modifying");
+                    lastcall = "UpdateUI";
                 }
             }
             if (calreg == "cali1" )
@@ -361,7 +376,7 @@ namespace ioex_cs
                 KbdData(calreg, "300");
             if (calreg == "cali5")
                 KbdData(calreg, "500");
-
+            p.curr_packer.WeightAction((byte)curr_node_index, "query"); //update the readings
         }
         private void btn_cali_Click(object sender, RoutedEventArgs e)
         {
@@ -376,28 +391,28 @@ namespace ioex_cs
         private void btn_action_Click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
-            byte n = (byte)p.curr_packer.curr_node_index;
+            byte n = (byte)curr_node_index;
             string name = (sender as Button).Name;
             if (name == "btn_mainvib")
             {
-                p.curr_packer.agent.Action(p.curr_packer.vib_addr, "fill");
+                p.curr_packer.VibAction("fill");
             }
             if (name == "btn_pass" || name == "btn_empty" || name == "btn_fill" || name == "btn_flash" || name == "btn_zero")
             {
                 if (!bSelectAll)
-                    p.curr_packer.agent.Action(n, name.Replace("btn_", ""));
+                    p.curr_packer.WeightAction(n, name.Replace("btn_", ""));
                 else
                 {
                     if (name == "btn_flash")
                     {
                         foreach (byte addr in p.curr_packer.weight_nodes)
                         {
-                            p.curr_packer.agent.Action(addr, name.Replace("btn_", ""));
+                            p.curr_packer.WeightAction(addr, name.Replace("btn_", ""));
                         }
                     }
                     else
                     {
-                        p.curr_packer.agent.Action((byte)(0x80+p.curr_packer._pack_id), name.Replace("btn_", ""));
+                        p.curr_packer.GroupAction(name.Replace("btn_", ""));
                     }
                 }
             }
@@ -478,7 +493,7 @@ namespace ioex_cs
             App p = Application.Current as App;
             UIPacker pack = p.curr_packer;
             NodeAgent agent = pack.agent;
-            byte cn = (byte)p.curr_packer.curr_node_index;
+            byte cn = (byte)curr_node_index;
 
             string[] regs = { "magnet_freq", "magnet_amp", "magnet_time", "open_w", "delay_w", "open_s", "delay_s", "delay_f", "motor_speed", "target_weight", "cs_filter", "cs_gain_wordrate" };
             foreach (string reg in regs)

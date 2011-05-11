@@ -3,6 +3,92 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="EngConfigWnd" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Background="#FFEEF2FB">
     <Window.Resources>
+        <Style x:Key ="ButtonStyleOff" TargetType = "{x:Type Button}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "123"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="72"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
+
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="20" >
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="White" Offset="0.2" />
+                                    <GradientStop Color="Gray"  Offset="0.7" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="1"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value="Gray"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key ="ButtonStyleOn" TargetType = "{x:Type Button}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "123"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="72"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
+
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="20" >
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="White" Offset="0.2" />
+                                    <GradientStop Color="LightGreen"  Offset="0.7" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="1"/>
+                        </Border>
+
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Green"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
+        <ControlTemplate x:Key="RetBtn1" TargetType="{x:Type Button}">
+            <Canvas>
+                <Rectangle Width="140" Height="40">
+                    <Rectangle.Fill>
+                        <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret1.gif"/>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Canvas>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="RetBtn2" TargetType="{x:Type Button}">
+            <Canvas>
+                <Rectangle Width="140" Height="40" >
+                    <Rectangle.Fill>
+                        <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret2.gif"/>
+                    </Rectangle.Fill>
+                </Rectangle>
+            </Canvas>
+        </ControlTemplate>
+
         <Style x:Key ="ButtonStyle" TargetType = "{x:Type Button}">
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
@@ -49,6 +135,37 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key ="ButtonStyle2" TargetType = "{x:Type Button}">
+
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="24"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
+
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="15" Background="Goldenrod">
+                            <Border.BitmapEffect>
+                                <DropShadowBitmapEffect Color="#000" Direction="-90" ShadowDepth="5" Softness="0.1" Opacity="0.3"/>
+                            </Border.BitmapEffect>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Yellow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
+
+
         <Style x:Key ="PwdStyle" TargetType = "{x:Type PasswordBox}">
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
@@ -65,30 +182,95 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <ControlTemplate x:Key ="roundButton2" TargetType ="{x:Type Button}">
+            <Grid>
+                <Rectangle RadiusX="20" RadiusY="20" Name ="InnerRing" Width ="40" Height ="40" Fill ="Green" Stroke="DarkGray" StrokeThickness="1">
+                    <Rectangle.BitmapEffect>
+                        <DropShadowBitmapEffect Color="Black" Opacity="0.5" />
+                    </Rectangle.BitmapEffect>
+                </Rectangle>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key ="roundButtonerr2" TargetType ="{x:Type Button}">
+            <Grid>
+                <Rectangle RadiusX="20" RadiusY="20" Name ="InnerRing" Width ="40" Height ="40" Fill ="Gray" Stroke="DarkGray" StrokeThickness="1">
+                    <Rectangle.BitmapEffect>
+                        <DropShadowBitmapEffect Color="Black" Opacity="0.5" />
+                    </Rectangle.BitmapEffect>
+                </Rectangle>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key ="roundButtonsel2" TargetType ="{x:Type Button}">
+            <Grid>
+                <Rectangle RadiusX="20" RadiusY="20" Name ="InnerRing" Width ="40" Height ="40" Fill ="DarkGreen" Stroke="Yellow" StrokeThickness="4">
+                    <Rectangle.BitmapEffect>
+                        <DropShadowBitmapEffect Color="Black" Opacity="0.5" />
+                    </Rectangle.BitmapEffect>
+                </Rectangle>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </ControlTemplate>
+        <ControlTemplate x:Key ="roundButtonselerr2" TargetType ="{x:Type Button}">
+            <Grid>
+                <Rectangle RadiusX="20" RadiusY="20" Name ="InnerRing" Width ="40" Height ="40" Fill ="Gray" Stroke="Yellow" StrokeThickness="4">
+                    <Rectangle.BitmapEffect>
+                        <DropShadowBitmapEffect Color="Black" Opacity="0.5" />
+                    </Rectangle.BitmapEffect>
+                </Rectangle>
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </ControlTemplate>
+
     </Window.Resources>
-    <Grid>
-        <Button Style="{StaticResource ButtonStyle}" Name="btn_modify" Height="33" VerticalAlignment="Top" Margin="14.29,247.217,0,0" Content="{DynamicResource modify_password}" Click="btn_modify_Click" HorizontalAlignment="Left" Width="100" />
-        <Label Margin="150.045,53,0,0" MouseLeftButtonUp="gain_input_GotFocus"  Name="gain_input" HorizontalAlignment="Left" Width="92" Height="33" VerticalAlignment="Top" />
-        <Label Content="{DynamicResource gain}" Margin="28,56,0,0" Name="gain_label" Height="29" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
-        <Label Margin="150.045,91,0,0" MouseLeftButtonUp="cs_filter_input_GotFocus"  Name="cs_filter_input" HorizontalAlignment="Left" Width="92" Height="30" VerticalAlignment="Top" />
-        <Label Content="{DynamicResource cs_filter}" Height="26" Margin="28,94,0,0" Name="cs_filter_label" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
-        <ComboBox Height="31" HorizontalAlignment="Left" Margin="150.045,16,0,0" Name="address" SelectionChanged="address_SelectionChanged" VerticalAlignment="Top" Width="92">
-            <ComboBoxItem>1</ComboBoxItem>
-            <ComboBoxItem>2</ComboBoxItem>
-            <ComboBoxItem>3</ComboBoxItem>
-            <ComboBoxItem>4</ComboBoxItem>
-            <ComboBoxItem>5</ComboBoxItem>
-            <ComboBoxItem>6</ComboBoxItem>
-            <ComboBoxItem>7</ComboBoxItem>
-            <ComboBoxItem>8</ComboBoxItem>
-            <ComboBoxItem>9</ComboBoxItem>
-            <ComboBoxItem>10</ComboBoxItem>
-        </ComboBox>
-        <Label Content="{DynamicResource address}" Height="29" Margin="28,18,0,0" Name="label1" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
-        <Button Content="{DynamicResource quit_eng}" Click="btn_quit_eng_click" Height="33" HorizontalAlignment="Left" Margin="142.045,247.217,0,0" Name="quit_eng" Style="{StaticResource ButtonStyle}" VerticalAlignment="Top" Width="100" />
-        <Label Content="{DynamicResource test_mode_reg1}" Margin="28,130,0,0" Name="label2" Height="32.867" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
-        <Label Content="{DynamicResource test_mode_reg2}" Height="26" Margin="28,177.196,0,0" Name="label3" VerticalAlignment="Top" HorizontalAlignment="Left" Width="104.317" />
-        <Label HorizontalAlignment="Left" Margin="150.045,130,0,0"  Name="test_mode_reg1_input" MouseLeftButtonUp="testmodereg1_input_GotFocus" Width="92" Height="32.867" VerticalAlignment="Top" />
-        <Label Height="30" HorizontalAlignment="Left" Margin="150.045,177.196,0,0"  Name="test_mode_reg2_input" Style="{StaticResource InputStyle}" MouseLeftButtonUp="testmodereg2_input_GotFocus" VerticalAlignment="Top" Width="92" />
-    </Grid>
+    <Canvas>
+        <Rectangle Canvas.Left="458" Canvas.Top="190" Height="470" Name="rectangle1" RadiusX="10" RadiusY="10" Stroke="Black" Width="508" />
+        <Rectangle Canvas.Left="16.873" Canvas.Top="190" Height="470" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" Width="364" />
+        <Label Name="lbl_title" Content="{DynamicResource engineerpage}" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="70" FontWeight="Black" HorizontalContentAlignment="Center" Margin="41,12,63,0" Height="91.685" VerticalAlignment="Top" Canvas.Left="275.797" Canvas.Top="-12" Width="367.253"></Label>
+        
+            <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource entersystem}" Click="btn_entersys_Click" Style="{StaticResource ButtonStyleOn}" Margin="102.888,104.317,0,0" Name="btn_entersys" Foreground="Black" FontSize="40" Canvas.Left="280.084" Canvas.Top="-5.716" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="277.226" Height="61.447" />
+            <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource locksystem}" Click="btn_locksys_Click" Style="{StaticResource ButtonStyleOn}" Margin="0,104.317,241.501,0" Name="btn_locksys" Foreground="Black" FontSize="40" Canvas.Left="52.873" Canvas.Top="-5.716" BorderThickness="0" VerticalAlignment="Top" Height="61.447" HorizontalAlignment="Right" Width="258.649" />
+            <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource language}" Click="btn_language_Click" Style="{StaticResource ButtonStyleOn}" Margin="102.888,221.495,0,0" Name="btn_language" Foreground="Black" FontSize="40" Canvas.Left="611.612" Canvas.Top="-122.894" BorderThickness="0" VerticalAlignment="Top" Height="61.447" HorizontalAlignment="Left" Width="260.078" />
+
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="38" Canvas.Top="274" Content="1" Height="72" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="nd_1" Template="{StaticResource roundButton2}" VerticalAlignment="Bottom" Width="78" Click="nd_1_Click" FontSize="16" FontWeight="Black" Foreground="White" />
+        <Button Canvas.Left="112.873" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_2" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">2</Button>
+        <Button Canvas.Left="194.873" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_3" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">3</Button>
+        <Button Canvas.Left="38" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_13" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">13</Button>
+        <Button Canvas.Left="268.873" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_4" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">4</Button>
+        <Button Canvas.Left="38" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_5" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">5</Button>
+        <Button Canvas.Left="112.873" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_6" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">6</Button>
+        <Button Canvas.Left="112.873" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_14" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">14</Button>
+        <Button Canvas.Left="194.873" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_7" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">7</Button>
+        <Button Canvas.Left="268.873" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_8" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">8</Button>
+        <Button Canvas.Left="38" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_9" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">9</Button>
+        <Button Canvas.Left="194.873" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_15" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">15</Button>
+        <Button Canvas.Left="112.873" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_10" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">10</Button>
+        <Button Canvas.Left="194.873" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_11" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">11</Button>
+        <Button Canvas.Left="268.873" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_12" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">12</Button>
+        <Button Canvas.Left="38" Canvas.Top="526" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_36" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">?</Button>
+        <Button Canvas.Left="91.746" Canvas.Top="612" Content="{DynamicResource cmd_selectall}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_selectall" Click="btn_selectall_Click" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Button Canvas.Left="52.873" Canvas.Top="220" Content="{DynamicResource changeaddr}" FocusVisualStyle="{x:Null}" Height="44" Name="btn_changeaddr" Click="btn_changeaddr_Click" Style="{StaticResource ButtonStyle2}" Width="138" />
+        <Button Canvas.Left="206.395" Canvas.Top="224" Content="{DynamicResource updatefw}" FocusVisualStyle="{x:Null}" Height="40" Name="btn_updatefw" Click="btn_updatefw_Click" Style="{StaticResource ButtonStyle2}" Width="148" />
+        <Button Canvas.Left="268.873" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_16" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">16</Button>
+        <Button Canvas.Left="211.522" Canvas.Top="612" Content="{DynamicResource refresh}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_refreshaddr" Click="btn_refreshaddr_Click" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Label Background="#FFEEF2FB" Canvas.Left="127.332" Canvas.Top="172" Content="{DynamicResource seladdr}" FontSize="24" Height="38" HorizontalContentAlignment="Center" Name="label2" Width="145.541" />
+        <ListBox Canvas.Left="488" Canvas.Top="220" Height="378" Name="listBox1" Width="452" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" >
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding name}" Width="200" /> 
+                        <TextBlock Text="{Binding address}" Width="80" /> 
+                        <TextBlock Text="{Binding value}" Width="80" /> 
+                        <TextBlock Text="{Binding vhex}"  /> 
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Label Background="#FFEEF2FB" Canvas.Left="648" Canvas.Top="172" Content="{DynamicResource setregs}" FontSize="24" Height="38" HorizontalContentAlignment="Center" Name="label1" Width="146" />
+        <Button Canvas.Left="661.627" Canvas.Top="612" Content="{DynamicResource refresh}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_refreshreg" Style="{StaticResource ButtonStyle}" Width="100.03" Click="btn_refreshreg_Click" />
+        <Button Canvas.Left="316.797" Canvas.Top="682.154" Template="{StaticResource RetBtn2}" FocusVisualStyle="{x:Null}" Height="40" Name="btn_ret_run" Click="btn_ret_run_Click" Width="148.874">回到运行</Button>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="512.435" Canvas.Top="682.154" Height="42.218" Name="btn_ret_config" Width="147.763" Click="btn_ret_config_Click">回到设置</Button>
+        <ProgressBar Canvas.Left="45.728" Canvas.Top="281.513" Height="57.16" Name="fwprgs_bar" Visibility="Hidden" Width="308.664" />
+    </Canvas>
 </Window>

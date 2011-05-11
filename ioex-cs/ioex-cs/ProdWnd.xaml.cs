@@ -40,6 +40,7 @@ namespace ioex_cs
                 n.Click += ImageSelected;
                 n.ApplyTemplate();
                 ImageBrush ib = ct.FindName("ImageFill",n) as ImageBrush;
+                
                 ib.ImageSource = new BitmapImage(new Uri(fi.FullName));
                 this.wrapPanel1.Children.Add(n);
             }

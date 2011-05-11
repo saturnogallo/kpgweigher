@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.IO;
+using System.Diagnostics;
 namespace ioex_cs
 {
     enum BOOT_CMD
@@ -25,7 +26,7 @@ namespace ioex_cs
     // u16 page_addr; "baudrate"                      /* specify which page to be written */
     // u8 page_buffer[DATA_BUFFER_SIZE]; ""   /* data sent from master board. to be programmed to flash, last 2 bytes are CRC bytes */
     //} BOOT_COMM_INTERFACE;                  /* boot communication interface with master board */
-    
+    delegate void ShowProgressEvent(uint percent);
     class bootloader
     {
         private SubNode node;
@@ -53,56 +54,77 @@ namespace ioex_cs
         }
         private byte poll(string reg, byte quitval)
         {
-            byte uc = 2;
+            byte uc = quitval;
             byte timeout;
+            node.status = NodeStatus.ST_IDLE;
+            node[reg] = null;
+            Thread.Sleep(20);
             do
             {
-                timeout = 0;
-                node[reg] = null;
-                while((node.status == NodeStatus.ST_BUSY) && (timeout++ < 6))
-                    Thread.Sleep(50);
+                if (node[reg].HasValue)
+                {
+                    uc = (byte)node[reg].Value;
+                }
+                if (uc != quitval)
+                    return uc;
 
+                timeout = 0;
+                while ((node.status == NodeStatus.ST_BUSY) && (timeout++ < 10))
+                    Thread.Sleep(10);
                 if (node.status == NodeStatus.ST_BUSY)
                 {
                     node.status = NodeStatus.ST_IDLE;
-                    node[reg] = null;
                 }
-                if(node[reg].HasValue)
-                    uc = (byte)node[reg].Value;
-
+                node[reg] = null;
+                
             } while ((uc == quitval));
             return uc;
         }
-        public bool download(string fwfile)
+        public string download(string fwfile,ShowProgressEvent progress)
         {
-
-            int i = 0;
+            
             byte[] page = new byte[130];
-//            page[0] = 0x11;
-//            node.writeseq_abs_reg(4, page, 1);
 
-            node["addr"] = null;
-            Thread.Sleep(100);
+            while (true)
+            {
+                node.status = NodeStatus.ST_IDLE;
+                node["addr"] = null;
+                Thread.Sleep(100);
+                if (node["addr"].HasValue)
+                    break;
+            }
+
+            node.status = NodeStatus.ST_IDLE;
             node["board_id"] = null;
-            Thread.Sleep(100);
-            while (('B' != node["board_id"].Value) && (i<5))
+            Thread.Sleep(200);
+            if((node["board_id"] != null) && ('B' != node["board_id"].Value))
             {
                 /* we are in application firmware now*/
+                node.status = NodeStatus.ST_IDLE;
                 node["flag_reset"] = 0xA0; /*force node to stay in bootloader after WDT reset*/
-                Thread.Sleep(500);  /*update board_id*/
-                node["board_id"] = null; /* 500ms is enough for node to reset and power up*/
-                i++;
+                Thread.Sleep(2000);  /* 2000ms is enough for node to reset and power up*/
+                node.status = NodeStatus.ST_IDLE;
+                node["board_id"] = null; 
             }
-            if (i >= 5)
-                return false;            
+            while (true)
+            {
+                node.status = NodeStatus.ST_IDLE;
+                node["board_id"] = null;
+                Thread.Sleep(100);
+                if (node["board_id"].HasValue)
+                    break;
+            }
+            if ((node["board_id"] == null) || ('B' != node["board_id"].Value))
+                return "fail to enter bootloader mode";            
             
             
             /* Node is waiting for firmware upgrade now*/
-            UInt32 page_addr = 0;
+            UInt16 page_addr = 0;
             try
             {
                 using(FileStream fs = new FileStream(fwfile, FileMode.Open))
                 {
+                    progress((UInt16)(fs.Length >> 7 + 1));
                     int count;
                     while(fs.CanRead)
                     {
@@ -115,39 +137,44 @@ namespace ioex_cs
                         }
                         //get crc
                         UInt16 crc_ret = crc(page, count);
-                        page[count] = (byte)(crc_ret);
-                        page[count + 1] = (byte)(crc_ret>>8);
+                        page[count + 1] = (byte)(crc_ret);
+                        page[count] = (byte)(crc_ret>>8);
 
                         //write page_address
                         node.writebyte_abs_reg(new byte[] { (byte)2, (byte)3 }, new byte[] { (byte)page_addr, (byte)(page_addr >> 8) });
-
-                        node.writeseq_abs_reg(4, page, 1);
+                        Thread.Sleep(10);       
+                        byte b;
+                        b = (byte)page_addr;
+                        Debug.WriteLine(b.ToString());
+                        b = (byte)(page_addr >> 8);
+                        Debug.WriteLine(b.ToString());
                         //todo send data to node
                         node.writeseq_abs_reg(4, page, count+2);
-
+                        Thread.Sleep(20);       
                         node.writebyte_abs_reg(new byte[] { (byte)0 }, new byte[] { (byte)2, (byte)0 });//BOOT_CMD_PGM_PAGE =2
-                        
+                        Thread.Sleep(20);       
                         if (poll("addr",2) != 0)
-                            return false;
-                        page_addr += (UInt32)count;
+                            return "crc error";
+                        
+                        page_addr += (UInt16)count;
+                        progress((UInt16)(page_addr>>7));
                     }
                 }
                 node.writebyte_abs_reg(new byte[] { (byte)0 }, new byte[] { (byte)3, (byte)0 }); //BOOT_CMD_UPGRADE = 3
+                Thread.Sleep(500);
+                if (poll("addr",3) != 0)
+                    return "upgrade error";
+                node.writebyte_abs_reg(new byte[] { (byte)0 }, new byte[] { (byte)4, (byte)0 }); //BOOT_CMD_RUN_APP = 4
                 
-                if (poll("addr",2) != 0)
-                    return false;
-                node.writebyte_abs_reg(new byte[] { (byte)0 }, new byte[] { (byte)4, (byte)0 }); //BOOT_CMD_RUN_APP = 3
                 
-                i = 0;
 
-                Thread.Sleep(500);  /*update board_id*/
-                return (poll("board_id", (byte)('B')) == (byte)'B');
-
+                Thread.Sleep(2000);  /*update board_id*/
+                return (poll("board_id", (byte)('B')) != (byte)'B')?"":"reboot error";
             }
 
             catch (System.Exception e)
             {
-                return false;
+                return e.Message;
             }
             
 

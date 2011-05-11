@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
@@ -10,7 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-
+using System.Xml.Linq;
+using System.IO;
 namespace ioex_cs
 {
     /// <summary>
@@ -18,86 +20,414 @@ namespace ioex_cs
     /// </summary>
     public partial class EngConfigWnd : Window
     {
+        private int curr_sel = -1;
+        private bool all_sel = false;
+        public bool b_lockon = false;
         public EngConfigWnd()
         {
             InitializeComponent();
-            
         }
-        int currnode;
-        public void UpdateDisplay()
-        {
-            NodeAgent ag = (Application.Current as App).curr_packer.agent;
-            currnode = address.SelectedIndex+1;
-            cs_filter_input.Content = ag.GetNodeReg((byte)currnode, "cs_filter");
-            gain_input.Content = ag.GetNodeReg((byte)currnode, "cs_gain_wordrate");
-            test_mode_reg1_input.Content = ag.GetNodeReg((byte)currnode, "test_mode_reg1");
-            test_mode_reg2_input.Content = ag.GetNodeReg((byte)currnode, "test_mode_reg2");
-        }
-        private void button1_Click(object sender, RoutedEventArgs e)
+        public void InitDisplay()
         {
             App p = Application.Current as App;
-            p.SwitchTo("configmenu");
+            
+            XElement cfg = p.curr_cfg;
+            b_lockon = (cfg.Element("lock_on").Value == "ON");
+            p.agent.Stop();
+        }
+        public void UpdateDisplay(bool refresh)
+        {
+            SubNode n;
+            App p = Application.Current as App;
+            Button btn;
+            if (b_lockon)
+            {
+                btn_locksys.Style = this.FindResource("ButtonStyleOff") as Style;
+                btn_locksys.Content = StringResource.str("lockon");
+            }
+            else
+            {
+                btn_locksys.Style = this.FindResource("ButtonStyleOn") as Style;
+                btn_locksys.Content = StringResource.str("locksystem");
+            }
+
+            for (Byte i = 1; i < 18; i++)
+            {
+                n = null;
+                if (i < 17)
+                {
+                    btn = IdToButton(i.ToString());
+                    if (p.agent.nodemap.ContainsKey(i))
+                    {
+                        n = p.agent.nodemap[i];
+                    }
+                }
+                else
+                {
+                    btn = IdToButton("36");
+                    n = p.agent.missingnode;
+                }
+
+                if (n is SubNode)
+                {
+                    if (refresh) //refresh all the node status
+                    {
+                        n.status = NodeStatus.ST_IDLE;
+                        n["board_id"] = null;
+                        Thread.Sleep(100);
+                    }
+
+                    if (n["board_id"] != null)
+                    {
+                        if (curr_sel == -1)
+                            curr_sel = n.node_id;
+
+                        if (curr_sel == n.node_id || all_sel)
+                        {
+                            if ((n.errlist != "") || (n.status == NodeStatus.ST_LOST))
+                                btn.Template = this.FindResource("roundButtonselerr2") as ControlTemplate;
+                            else
+                                btn.Template = this.FindResource("roundButtonsel2") as ControlTemplate;
+                        }
+                        else
+                        {
+                            if ((n.errlist != "") || (n.status == NodeStatus.ST_LOST))
+                                btn.Template = this.FindResource("roundButtonerr2") as ControlTemplate;
+                            else
+                                btn.Template = this.FindResource("roundButton2") as ControlTemplate;
+                        }
+                        btn.ApplyTemplate();
+                        btn.Visibility = Visibility.Visible;
+                        continue;
+                    }
+                }
+                btn.Visibility = Visibility.Hidden;
+            }
+
+        }
+        private Button IdToButton(string id)
+        {
+            if (id == "1")  return nd_1;
+            if (id == "2")  return nd_2;
+            if (id == "3")  return nd_3;
+            if (id == "4")  return nd_4;
+            if (id == "5")  return nd_5;
+            if (id == "6")  return nd_6;
+            if (id == "7")  return nd_7;
+            if (id == "8")  return nd_8;
+            if (id == "9")  return nd_9;
+            if (id == "10") return nd_10;
+            if (id == "11") return nd_11;
+            if (id == "12") return nd_12;
+            if (id == "13") return nd_13;
+            if (id == "14") return nd_14;
+            if (id == "15") return nd_15;
+            if (id == "16") return nd_16;
+            if (id == "36") return nd_36;
+            return null;
+        }
+
+        public void KbdData(string param, string data)
+        {
+            App p = Application.Current as App;
+            XElement cfg = p.curr_cfg;
+
+            if (param == "entersys")
+            {
+                if (Password.get_pwd("system") == data)
+                {
+                    Type shellType = Type.GetTypeFromProgID("Shell.Application");
+                    object shellObject = System.Activator.CreateInstance(shellType);
+                    shellType.InvokeMember("ToggleDesktop", System.Reflection.BindingFlags.InvokeMethod, null, shellObject, null);
+                }
+                return;
+            }
+            if (param == "enterlock")
+            {
+                cfg.SetElementValue("lock_on", "ON"); //todo set the lock number on
+                p.SaveAppConfig();
+                UpdateDisplay(false);
+            }
+            if (param.IndexOf("reg_") == 0)
+            {
+                Button btn;
+                SubNode n = null;
+                Byte i = Convert.ToByte(curr_sel);
+                if (curr_sel == -1)
+                    return;
+                if (i < 17)
+                {
+                    btn = IdToButton(i.ToString());
+                    if (p.agent.nodemap.ContainsKey(i))
+                    {
+                        n = p.agent.nodemap[i];
+                    }
+                }
+                else
+                {
+                    btn = IdToButton("36");
+                    n = p.agent.missingnode;
+                }
+                if (n["addr"] != null)
+                {
+                    param = param.Remove(0, 4); 
+                    n[param] = UInt32.Parse(data);
+                    n[param] = null;
+                    Thread.Sleep(100);
+                    btn_refreshreg_Click(null, null);
+                }
+            }
+            if (param.IndexOf("chgnd_") == 0)
+            {
+                Byte oldaddr = Byte.Parse(param.Remove(0, 6));
+                Byte newaddr = Byte.Parse(data);
+
+                Button btn = IdToButton(newaddr.ToString());
+                if (btn != null && newaddr < 36) //valid new address
+                {
+                    if (btn.Visibility != Visibility.Visible)
+                    {
+                        SubNode oldn;
+                        SubNode newn;
+                        if (oldaddr == 36)
+                            oldn = p.agent.missingnode;
+                        else
+                            oldn= p.agent.nodemap[oldaddr];
+                        newn = p.agent.nodemap[newaddr];
+                        newaddr += 0xC0;
+                        newn.status = NodeStatus.ST_IDLE;
+                        oldn["test_mode_reg2"] = newaddr;
+                        
+                        Thread.Sleep(500);
+                        newn.status = NodeStatus.ST_IDLE;
+                        newn["addr"] = null;
+                        oldn.status = NodeStatus.ST_LOST;
+                        Thread.Sleep(100);
+                        if (newn["addr"].HasValue)
+                        {
+                             MessageBox.Show(StringResource.str("change_addr_success"));
+                             return;
+
+                        }
+                    }
+                }
+                MessageBox.Show(StringResource.str("change_addr_fail"));
+            }
+        }
+
+
+        private void btn_entersys_Click(object sender, RoutedEventArgs e)
+        {
+            (Application.Current as App).kbdwnd.Init(StringResource.str("enter_system"), "entersys", true, KbdData);
+        }
+
+        private void btn_locksys_Click(object sender, RoutedEventArgs e)
+        {
+            App p = Application.Current as App;
+            XElement cfg = p.curr_cfg;
+            if (b_lockon)
+            {
+                cfg.SetElementValue("lock_on", "OFF");
+                p.SaveAppConfig();
+                UpdateDisplay(true);
+            }
+            else
+            {
+                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_locknum"), "enterlock", false, KbdData);
+            }
+        }
+
+        private void btn_language_Click(object sender, RoutedEventArgs e)
+        {
+            if (StringResource.language == "zh-CN")
+                StringResource.SetLanguage("en-US");
+            else
+                StringResource.SetLanguage("zh-CN");
+        }
+
+        private void nd_1_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button)
+            {
+                Button btn = (sender as Button);
+                if (btn.Name.IndexOf("nd_") == 0)
+                {
+                    all_sel = false;
+                    curr_sel = int.Parse(btn.Name.Remove(0, 3));
+                    btn_refreshreg_Click(null, null);
+                }
+            }
+            UpdateDisplay(false);
+        }
+
+        private void btn_changeaddr_Click(object sender, RoutedEventArgs e)
+        {
+            (Application.Current as App).kbdwnd.Init(StringResource.str("enter_newaddr"), "chgnd_"+curr_sel.ToString(), false, KbdData);
+        }
+
+        private void btn_updatefw_Click(object sender, RoutedEventArgs e)
+        {
+            SubNode n;
+            if (curr_sel == -1)
+                return;
+            int lastcurr = curr_sel;
+            App p = Application.Current as App;
+            Button btn;
+            for (Byte i = 1; i < 18; i++)
+            {
+                n = null;
+                if (i < 17)
+                {
+                    btn = IdToButton(i.ToString());
+                    if (p.agent.nodemap.ContainsKey(i))
+                    {
+                        n = p.agent.nodemap[i];
+                    }
+                }
+                else
+                {
+                    btn = IdToButton("36");
+                    n = p.agent.missingnode;
+                }
+
+                if (n is SubNode)
+                {
+                     n.status = NodeStatus.ST_IDLE;
+                     n["board_id"] = null;
+                     Thread.Sleep(100);
+
+                    if (n["board_id"] != null)
+                    {
+                        if ((curr_sel == n.node_id) || (all_sel == true))
+                        {
+                            btn.Template = this.FindResource("roundButtonsel2") as ControlTemplate;
+                            btn.ApplyTemplate();
+                            btn.Visibility = Visibility.Visible;
+
+                            fwprgs_bar.Visibility = Visibility.Visible;
+                            fwprgs_bar.Minimum = 0;
+                            fwprgs_bar.Maximum = 1000;
+                            
+                            bootloader bl = new bootloader(n);
+                            string ret = bl.download("C:\\MAIN.bin",fwprogress);
+                            btn_updatefw.Content = StringResource.str("updatefw");
+                            fwprgs_bar.Visibility = Visibility.Hidden;
+                            if (ret != "")
+                                MessageBox.Show(StringResource.str("updatefwfail") +n.node_id.ToString() + "\r\n" + ret);
+                            continue;
+                        }
+                    }
+                }
+             }
+             btn_refreshreg_Click(null, null);
+             UpdateDisplay(true);
+        }
+        public void fwprogress(uint percent)
+        {
+            if (fwprgs_bar.Maximum == 1000)
+                fwprgs_bar.Maximum = percent + 1;
+            else
+            {
+                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, (Action)delegate
+                {
+                    btn_updatefw.Content = percent.ToString() + "Blocks";
+                    fwprgs_bar.Value = percent;
+                });
+            }
+        }
+        private void btn_selectall_Click(object sender, RoutedEventArgs e)
+        {
+            all_sel = !all_sel;
+
+            UpdateDisplay(false);
+        }
+
+        private void btn_refreshaddr_Click(object sender, RoutedEventArgs e)
+        {
+            UpdateDisplay(true);
+        }
+
+        private void btn_refreshreg_Click(object sender, RoutedEventArgs e)
+        {
+            App p = Application.Current as App;
+                Button btn;
+                SubNode n = null;
+                Byte i = Convert.ToByte(curr_sel);
+                if (curr_sel == -1)
+                    return;
+
+                if (i < 17)
+                {
+                    btn = IdToButton(i.ToString());
+                    if (p.agent.nodemap.ContainsKey(i))
+                    {
+                        n = p.agent.nodemap[i];
+                    }
+                }
+                else
+                {
+                    btn = IdToButton("36");
+                    n = p.agent.missingnode;
+                }
+                if (n["addr"] != null)
+                {
+                    listBox1.Items.Clear();
+                    foreach (string rtkey in SubNode.reg_type_tbl.Keys)
+                    {
+//                      if (!n[rtkey].HasValue)
+                        {
+                            n.status = NodeStatus.ST_IDLE;
+                            n[rtkey] = null;
+                            Thread.Sleep(30);
+                        }
+                        
+                        RegType rt = SubNode.reg_type_tbl[rtkey];
+                        if(n[rtkey].HasValue)
+                            listBox1.Items.Add(new PerReg { name=rtkey, address = rt.pos.ToString(), value = n[rtkey].Value.ToString(), vhex = n[rtkey].Value.ToString("X")});
+                        else
+                            listBox1.Items.Add(new PerReg { name = rtkey, address = rt.pos.ToString(), value = "Null" , vhex = "Null"});
+                    }
+                    return;
+                }
+        }
+
+        private void TextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (listBox1.SelectedItem is PerReg)
+            {
+                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_newvalue"), "reg_"+(listBox1.SelectedItem as PerReg).name, false, KbdData);
+            }
+        }
+
+        private void btn_ret_run_Click(object sender, RoutedEventArgs e)
+        {
+            App p = Application.Current as App;
+            p.agent.Resume();
+            this.Hide();
+            p.SwitchTo("runmode");
         }
 
         private void btn_modify_Click(object sender, RoutedEventArgs e)
         {
-            NodeAgent ag = (Application.Current as App).curr_packer.agent;
-            currnode = address.SelectedIndex + 1;
-            ag.SetNodeReg((byte)currnode, "cs_filter", UInt32.Parse(cs_filter_input.Content.ToString()));
-            ag.SetNodeReg((byte)currnode, "test_mode_reg1", UInt32.Parse(test_mode_reg1_input.Content.ToString()));
-            ag.SetNodeReg((byte)currnode, "test_mode_reg2", UInt32.Parse(test_mode_reg2_input.Content.ToString()));
-        }
-        private void node_reg(string regname)
-        {
-            (Application.Current as App).kbdwnd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
-        }
-        private void gain_input_GotFocus(object sender, RoutedEventArgs e)
-        {
-            node_reg("cs_gain_wordrate");
-        }
-
-        private void cs_filter_input_GotFocus(object sender, RoutedEventArgs e)
-        {
-            node_reg("cs_filter");
-        }
-        private void testmodereg2_input_GotFocus(object sender, RoutedEventArgs e)
-        {
-            node_reg("test_mode_reg2");
-        }
-
-        private void testmodereg1_input_GotFocus(object sender, RoutedEventArgs e)
-        {
-            node_reg("test_mode_reg1");
-        }
-        public void KbdData(string param, string data)
-        {
-            if (param == "cs_filter")
+            if (listBox1.SelectedItem is PerReg)
             {
-                this.cs_filter_input.Content = data;
+                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_newvalue"), "reg_" + (listBox1.SelectedItem as PerReg).name, false, KbdData);
             }
-            if (param == "cs_gain_wordrate")
-            {
-                gain_input.Content = data;
-            }
-            if (param == "test_mode_reg1")
-            {
-                test_mode_reg1_input.Content = data;
-            }
-            if (param == "test_mode_reg2")
-            {
-                test_mode_reg2_input.Content = data;
-            }
-
         }
 
-        private void address_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void btn_ret_config_Click(object sender, RoutedEventArgs e)
         {
-            UpdateDisplay();
-        }
-
-        private void btn_quit_eng_click(object sender, RoutedEventArgs e)
-        {
+            App p = Application.Current as App;
+            p.agent.Resume();
             this.Hide();
+            p.SwitchTo("configmenu");
         }
+    }
+    public class PerReg
+    {
+        public string name { get; set; }
+        public string address { get; set; }
+        public string value {get;set;}
+        public string vhex { get; set; }
     }
 }

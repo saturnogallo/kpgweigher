@@ -223,6 +223,8 @@ namespace ioex_cs
         private double _lastweight;
         public bool bRelease;
         public int cnt_match;
+        public const double INAVLID_WEIGHT = -1000000.0;
+        private int cnt_aderr; //count for ad error
         Random rand;
         public double weight
         {
@@ -231,28 +233,62 @@ namespace ioex_cs
                     return rand.NextDouble()*20;
                 if (!this["mtrl_weight_gram"].HasValue)
                 {
-                    return -1000000.0;
+                    return WeighNode.INAVLID_WEIGHT;
                 }
                 UInt32 value = this["mtrl_weight_gram"].Value;
-                if(value > 65528) //special message
+                if(value >= 65521) //special message
                 {
+                    if (value == 65534) //still in progress
+                        return WeighNode.INAVLID_WEIGHT;
+
+                    //try three times before an AD error is issued.
+                    if (cnt_aderr < 3)
+                    {
+                        cnt_aderr++;
+                        return WeighNode.INAVLID_WEIGHT;
+                    }
+                    cnt_aderr = 0;
+
                     if (value == 65529) //overweight
                     {
-                        if (errlist.IndexOf(value.ToString() + ";") < 0)
-                            errlist = errlist + value.ToString() + ";";
+                        if (errlist.IndexOf("err_ow1;") < 0)
+                            errlist = errlist + "err_ow1;";
+                        
                     }
+                    if (value == 65532) //AD overflow
+                    {
+                        if (errlist.IndexOf("err_ad;") < 0)
+                            errlist = errlist + "err_ad;";
+                    }
+                    if (value == 65530) //divide zero
+                    {
+                        return -100000.0;
+                        if (errlist.IndexOf("err_dz;") < 0)
+                            errlist = errlist + "err_dz;";
+                    }
+                    _lastweight = value;
                     return _lastweight;
                 }
-                if (errlist != "")
+                if (errlist != "")  //clear all the error message
                 {
                     errlist = errlist.Replace("65529;", "");
+                    errlist = errlist.Replace("65532;", "");
+                    errlist = errlist.Replace("65530;", "");
+                    errlist = errlist.Replace("err_ow1;", "");
+                    errlist = errlist.Replace("err_ad;", "");
+                    errlist = errlist.Replace("err_dz;", "");
+
                 }
                 bRelease = false;
                 double w = (double)(this["mtrl_weight_gram"].Value) +(double)this["mtrl_weight_decimal"].Value / (double)64.0;
+//                if (_lastweight != w)
+//                    StringResource.dolog(w.ToString("F2") + "#" + this.node_id);
+
                 if (Math.Abs(_lastweight-w) > 0.1)
                 {
                     _lastweight = w;
                 }
+                
                 return _lastweight; 
             }
         }
@@ -263,6 +299,8 @@ namespace ioex_cs
         }
         public void Query()
         {
+            if (NodeAgent.IsDebug)
+                return;
             read_regs(new string[] { "mtrl_weight_gram", "mtrl_weight_decimal", "status1","status2" });
             if (!NodeAgent.IsDebug)
                 status = NodeStatus.ST_BUSY;
@@ -275,11 +313,12 @@ namespace ioex_cs
             _lastweight = -1;
             rand = new Random();
             cnt_match = 0;
+            cnt_aderr = 0;
         }
     }
     /*
      * Manage XML file based config file, see app_config.xml for details
-     * <Item Name="Id">
+     * <Item Name="Id">1
      *  <value>xxx</value>
      * </Item>
      */
@@ -400,14 +439,14 @@ namespace ioex_cs
     internal abstract class SubNode : Object
     {
 
-        private static Dictionary<string, RegType> reg_type_tbl; //table to map the reg name to details, should be loaded from xml file setting
+        public static Dictionary<string, RegType> reg_type_tbl; //table to map the reg name to details, should be loaded from xml file setting
         
         private static Dictionary<byte, string> reg_pos2name_tbl; //format, <2,baudrate> where 1 the multiplier, table to map the reg position to name, should be loaded from xml file
         private static Dictionary<byte, UInt32> reg_mulitply_tbl; //multiplier of each register
-                
+        private Dictionary<string, bool> valfresh; //indicate whether value is fresh updated.
         protected Dictionary<string, Nullable<UInt32>> curr_conf; //store the configuration string of each config name (<config_name, xml_value> pair>
-        
 
+        public UInt32 flag_cnt = 0;
         static string reg_define_file = "node_define.xml";
         public byte node_id { get; set; }
         public NodeStatus status { get; set; }
@@ -486,12 +525,13 @@ namespace ioex_cs
             
             //to initial reg_table items from xml table
             curr_conf = new Dictionary<string, Nullable<UInt32>>();
-            
+            valfresh = new Dictionary<string, bool>();
            
             ICollection<string> names = reg_type_tbl.Keys;
             foreach (string name in names)
             {
                 curr_conf[name] = null;
+                valfresh[name] = false;
             }
             port.InFrameHandlers[node_id] = HandleInFrame;
             
@@ -652,6 +692,7 @@ namespace ioex_cs
                     else
                         return 0;
                 }
+                valfresh[reg_name] = false;
                 return curr_conf[reg_name]; 
             }
             set {
@@ -671,14 +712,19 @@ namespace ioex_cs
                     status = NodeStatus.ST_BUSY;
                     if (value.HasValue)
                     {
-                        if (curr_conf[reg_name].HasValue && curr_conf[reg_name].Value == value.Value)
+/*
+                        if (curr_conf[reg_name].HasValue)
                         {
-                            if (reg_type_tbl[reg_name].rw != 'v') //non volatile value
+                          if (curr_conf[reg_name].Value == value.Value)
                             {
-                                status = NodeStatus.ST_IDLE;
-                                return;
+                                if (reg_type_tbl[reg_name].rw != 'v') //non volatile value
+                                {
+                                    status = NodeStatus.ST_IDLE;
+                                    return;
+                                }
                             }
                         }
+ */
                         if (reg_type_tbl[reg_name].rw != 'r')
                         {
                             if (reg_type_tbl[reg_name].rw == 'v') //volatile value
@@ -688,6 +734,14 @@ namespace ioex_cs
                                 return;
                             }
                             write_vregs(new string[] { reg_name }, new UInt32[] { value.Value });
+                        }
+                    }
+                    else
+                    {   
+                        if(valfresh[reg_name])
+                        {
+                            status = NodeStatus.ST_IDLE;
+                            return;
                         }
                     }
 
@@ -767,6 +821,7 @@ namespace ioex_cs
                             value = curr_conf[name].Value;
                         }
                         UInt32 multiplier = reg_mulitply_tbl[ifrm.data[j]];
+                        valfresh[name] = true;
                         curr_conf[name] = 256 * multiplier * (UInt32)(value / (256 * multiplier)) + multiplier * ifrm.data[j + 1] + (value % multiplier);
                     }
                     catch (System.Exception e)

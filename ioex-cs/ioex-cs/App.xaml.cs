@@ -8,7 +8,7 @@ using System.IO.Ports;
 using System.Text;
 using System.Xml.Linq;
 using System.Threading;
-
+using System.IO;
 namespace ioex_cs
 {
     /// <summary>
@@ -19,7 +19,6 @@ namespace ioex_cs
         public static bool bSimulate = false;
         internal List<UIPacker> packers; //list of available packers , config in app_config.xml
         internal NodeAgent agent;
-        internal int machnum;
         internal UIPacker curr_packer { 
             get { 
                 return packers[0]; 
@@ -41,101 +40,57 @@ namespace ioex_cs
         public ProdWnd prodwnd;
         public ProdNum prodnum;
         public kbd kbdwnd;
-        
 
-        private void UpdateUI()
+        public string oper{
+            get{
+                try
+                {
+                    return curr_cfg.Element("operator").Value.ToString();
+                }
+                catch {
+                    return "999";
+                }
+            }
+            set{
+                curr_cfg.SetElementValue("operator", value);
+                SaveAppConfig();
+            }
+        }
+        public void InitAll()
         {
-            
-
+                alertwnd.UpdateUI(); //load alert configuration
         }
         public App()
         {
-            try
+
+            bSimulate = false;
+            app_cfg = new XmlConfig("app_config.xml");
+            app_cfg.LoadConfigFromFile();
+
+            curr_cfg = app_cfg.Current;
+
+
+            packers = new List<UIPacker>();
+            histwnd = new ProdHistory();
+            helpwnd = new Help();
+            kbdwnd = new kbd();
+            bottomwnd = new BottomWnd();
+            alertwnd = new AlertWnd();
+            pwdwnd = new PwdWnd();
+            engwnd = new EngConfigWnd();
+            configwnd = new ConfigMenuWnd();
+            prodwnd = new ProdWnd();
+            prodnum = new ProdNum();
+            agent = new NodeAgent();
+            singlewnd = new SingleMode();
+            runwnd = new RunMode();
+
+            for (int i = 0; i < Int32.Parse(curr_cfg.Element("machine_number").Value); i++)
             {
-                bSimulate = false;
-                app_cfg = new XmlConfig("app_config.xml");
-                app_cfg.LoadConfigFromFile();
-
-                
-                curr_cfg = app_cfg.Current;
-                try
-                {
-                    PackerConfig.oper = curr_cfg.Element("operator").Value.ToString();
-                }
-                catch
-                {
-                    PackerConfig.oper = "999";
-                }
-
-
-                machnum = Int32.Parse(curr_cfg.Element("machine_number").Value);
-                packers = new List<UIPacker>();
-
-
-                
-
-                histwnd = new ProdHistory();
-                
-                helpwnd = new Help();
-                
-                kbdwnd = new kbd();
-                
-                bottomwnd = new BottomWnd();
-                
-
-                alertwnd = new AlertWnd();
-                
-                alertwnd.UpdateUI(); //load alert configuration
-                
-                pwdwnd = new PwdWnd();
-                
-                engwnd = new EngConfigWnd();
-                
-                configwnd = new ConfigMenuWnd();
-                
-                prodwnd = new ProdWnd();
-
-                
-
-
-                prodnum = new ProdNum();
-
-                    agent = new NodeAgent();
-                    singlewnd = new SingleMode();
-
-                    runwnd = new RunMode();
-
-                    //configwnd.Show();
-                    //runwnd.Show();
-                    //create packers
-
-                    for (int i = 0; i < machnum; i++)
-                    {
-                        agent.packer = new UIPacker(i, agent);
-                        packers.Add(agent.packer);
-                    }
-
-                    agent.Start();
-
-                    for (int i = 0; i < machnum; i++)
-                    {
-                        packers[i].InitConfig();
-                    }
-
-
-                    SwitchTo("runmode");
-
-                
-
+                agent.packer = new UIPacker(i, agent);
+                packers.Add(agent.packer);
             }
-            catch (Exception e)
-            {
-                    MessageBox.Show(e.Message );
-                    foreach (Window w in Windows)
-                        w.Close();
-                    this.Shutdown();
 
-            }
         }
         public void SaveAppConfig()
         {
@@ -173,6 +128,7 @@ namespace ioex_cs
             }
             if (mode == "engineer")
             {
+                engwnd.InitDisplay();
                 engwnd.Show();
                 engwnd.BringIntoView();
                 return;
@@ -201,7 +157,6 @@ namespace ioex_cs
             }
             if (mode == "runmode")
             {
-                
                 runwnd.Show();
                 runwnd.UpdateUI("sys_config");
                 runwnd.BringIntoView();

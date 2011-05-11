@@ -205,11 +205,18 @@ namespace ioex_cs
         byte[] rbuf = new byte[100];
         private void _checkport(object state)
         {
+            int size = 0;
             if (Status == PortStatus.CLOSED)
                 return;
-            if (_serial.BytesToRead > 0)
+            lock(_serial)
             {
-                int size = _serial.Read(rbuf, 0, _serial.BytesToRead);
+                if (_serial.BytesToRead > 0)
+                {
+                    size = _serial.Read(rbuf, 0, _serial.BytesToRead);
+                }
+            }
+            if(size <= 0)               
+                return;
                 int p = 0;
                 while (size-- >= 0)
                 {
@@ -223,7 +230,7 @@ namespace ioex_cs
                         ifrm.ResetFlag();
                     }
                 }
-            }
+            
             
         }
         public SPort(string PortName, int BaudRate, Parity Parity, int DataBits, StopBits StopBit)

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Root current="12">
-  <Item Name="002">
+<Root current="12">1
+  <Item Name="002">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>45</magnet_amp>
     <magnet_time>10</magnet_time>
@@ -14,7 +14,7 @@
     <cs_gain_wordrate>3</cs_gain_wordrate>
     <target_weight>0</target_weight>
   </Item>
-  <Item Name="001">
+  <Item Name="001">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>45</magnet_amp>
     <magnet_time>10</magnet_time>
@@ -28,7 +28,7 @@
     <cs_gain_wordrate>3</cs_gain_wordrate>
     <target_weight>0</target_weight>
   </Item>
-  <Item Name="003">
+  <Item Name="003">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>45</magnet_amp>
     <magnet_time>10</magnet_time>
@@ -41,7 +41,7 @@
     <cs_filter>0</cs_filter>
     <cs_gain_wordrate>3</cs_gain_wordrate>
   </Item>
-  <Item Name="004">
+  <Item Name="004">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>50</magnet_amp>
     <magnet_time>10</magnet_time>
@@ -54,7 +54,7 @@
     <cs_filter>0</cs_filter>
     <cs_gain_wordrate>3</cs_gain_wordrate>
   </Item>
-  <Item Name="005">
+  <Item Name="005">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>45</magnet_amp>
     <magnet_time>10</magnet_time>
@@ -67,7 +67,7 @@
     <cs_filter>0</cs_filter>
     <cs_gain_wordrate>3</cs_gain_wordrate>
   </Item>
-  <Item Name="006">
+  <Item Name="006">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>45</magnet_amp>
     <magnet_time>10</magnet_time>
@@ -80,7 +80,7 @@
     <cs_filter>0</cs_filter>
     <cs_gain_wordrate>3</cs_gain_wordrate>
   </Item>
-  <Item Name="007">
+  <Item Name="007">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>50</magnet_amp>
     <magnet_time>10</magnet_time>
@@ -93,7 +93,7 @@
     <cs_filter>0</cs_filter>
     <cs_gain_wordrate>3</cs_gain_wordrate>
   </Item>
-  <Item Name="008">
+  <Item Name="008">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>50</magnet_amp>
     <magnet_time>10</magnet_time>
@@ -106,7 +106,7 @@
     <cs_filter>0</cs_filter>
     <cs_gain_wordrate>3</cs_gain_wordrate>
   </Item>
-  <Item Name="009">
+  <Item Name="009">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -165,7 +165,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="010">
+  <Item Name="010">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -224,7 +224,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="011">
+  <Item Name="011">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -283,7 +283,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="012">
+  <Item Name="012">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -342,7 +342,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="013">
+  <Item Name="013">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -401,7 +401,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="014">
+  <Item Name="014">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -460,7 +460,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="015">
+  <Item Name="015">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -519,7 +519,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="016">
+  <Item Name="016">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -578,7 +578,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="017">
+  <Item Name="017">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -637,7 +637,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="018">
+  <Item Name="018">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -696,7 +696,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="019">
+  <Item Name="019">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -755,7 +755,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="020">
+  <Item Name="020">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -814,7 +814,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="021">
+  <Item Name="021">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -873,7 +873,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="022">
+  <Item Name="022">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -932,7 +932,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="023">
+  <Item Name="023">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -991,7 +991,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="024">
+  <Item Name="024">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -1050,7 +1050,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="025">
+  <Item Name="025">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -1109,7 +1109,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="026">
+  <Item Name="026">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -1168,7 +1168,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="027">
+  <Item Name="027">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -1227,7 +1227,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="028">
+  <Item Name="028">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -1286,7 +1286,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="029">
+  <Item Name="029">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -1345,7 +1345,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="030">
+  <Item Name="030">1
     <addr>1</addr>
     <board_id>16</board_id>
     <baudrate>0</baudrate>
@@ -1404,7 +1404,7 @@
     <pulse_num_lw>0</pulse_num_lw>
     <half_period>0</half_period>
   </Item>
-  <Item Name="12">
+  <Item Name="12">1
     <magnet_freq>10</magnet_freq>
     <magnet_amp>50</magnet_amp>
     <magnet_time>10</magnet_time>
