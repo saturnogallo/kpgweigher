@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Root current="01">
-  <Item Name="01">
+<Root current="01">1
+  <Item Name="01">1
     <target>45</target>
     <upper_var>10</upper_var>
     <lower_var>10</lower_var>

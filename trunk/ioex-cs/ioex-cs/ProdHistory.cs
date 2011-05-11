@@ -152,7 +152,7 @@ namespace ioex_cs
         {
             string txtUpdate = "insert into mains (start_date,end_date,operator,product_no,product_desc,weight,pack_num) values ('";
 
-            txtUpdate = txtUpdate + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + PackerConfig.oper + "','" + p.curr_cfg.product_no + "','" + p.curr_cfg.product_desc + "',0,0)";
+            txtUpdate = txtUpdate + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + (System.Windows.Application.Current as App).oper + "','" + p.curr_cfg.product_no + "(" + p.curr_cfg.product_desc + ")" + "','" + p.curr_cfg.product_desc + "',0,0)";
             ExecuteQuery(txtUpdate);
         }
 

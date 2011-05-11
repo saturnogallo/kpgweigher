@@ -13,32 +13,18 @@ namespace ioex_cs
         INERROR,
         IDLE
     }
-    class UIParam
-    {
-        public static int last_nodeid;
-        public bool selected { get; set; }
-        static UIParam()
-        {
-            last_nodeid = -1;
-        }
-        public UIParam()
-        {
-            selected = false;
-        }
-
-    }
+    
     class PackerConfig
     {
         public string product_no;
         public string product_desc;
         public double target;
-        public string operator_no;
         public double upper_var;
         public double lower_var;
-        private string wnodes;
-        private string vnode;
+        private string wnodes;//weight node
+        private string vnode; //main vibrate node
+        private string bnode; //bottom node
         
-        static public string oper = "001";
         public PackerConfig()
         {
             target = 0;
@@ -52,10 +38,10 @@ namespace ioex_cs
             upper_var = Double.Parse(cfgNode.Element("upper_var").Value);
             lower_var = Double.Parse(cfgNode.Element("lower_var").Value);
             product_no = cfgNode.Element("product_no").Value;
-            operator_no = cfgNode.Element("operator_no").Value;
             product_desc = cfgNode.Element("product_desc").Value;
             wnodes = cfgNode.Element("WNodes").Value;
             vnode = cfgNode.Element("VNode").Value;
+            bnode = cfgNode.Element("BNode").Value;
         }
         public void ToElement(ref XElement cfgNode)
         {
@@ -63,9 +49,9 @@ namespace ioex_cs
             cfgNode.Add(new XElement("upper_var", upper_var.ToString()));
             cfgNode.Add(new XElement("lower_var", lower_var.ToString()));
             cfgNode.Add(new XElement("product_no", product_no.ToString()));
-            cfgNode.Add(new XElement("operator_no", operator_no.ToString()));
             cfgNode.Add(new XElement("product_desc", product_desc.ToString()));
             cfgNode.Add(new XElement("VNode", vnode));
+            cfgNode.Add(new XElement("BNode", bnode));
             cfgNode.Add(new XElement("WNodes", wnodes));
         }
 
@@ -75,24 +61,24 @@ namespace ioex_cs
     {
         public NodeAgent agent;
         public int _pack_id;
-#region uidata
-        public int curr_node_index { get; set; } //for single mode , curr_node means the index of last selected weight node.
-        public Dictionary<byte, UIParam> uidata; //UI status of each nodes
+        #region UI related variable
         
-#endregion
-        public byte vib_addr;               //vibrate node address
-        public List<byte> weight_nodes;     //weight node addr list
-        private bool _NeedRefresh;
-        private object refreshlock;
+        #endregion
 
-#region nodedata
-#endregion
+
+
+        public byte vib_addr;               //vibrate node address
+        public byte bot_addr;               //bottom pack node address
+        public List<byte> weight_nodes;     //weight node addr list
+        private bool _NeedRefresh;          //indicator of 
+        
+
 #region configdata
-        public Dictionary<byte, XmlConfig> nodes_config; //config of weight nodes   
+        public Dictionary<byte, XmlConfig> nodes_config; //config of nodes   
 
         public XmlConfig all_conf;//store all the configurations of the packer
-        private PackerConfig sys_cfg; //store packer related config
-        public PackerConfig curr_cfg { get { return sys_cfg; } }
+        private PackerConfig _curr_cfg; //store packer related config
+        public PackerConfig curr_cfg { get { return _curr_cfg; } }
 
 #endregion
         
@@ -108,7 +94,11 @@ namespace ioex_cs
         public UInt32 sim_speed; //
         
         public DateTime rStart;
-        public double last_pack_weight;
+        public double last_pack_weight {
+            get{
+                return last_one_pack.weight;
+            }
+        }
         public onepack last_one_pack;
 #endregion
 
@@ -117,9 +107,7 @@ namespace ioex_cs
         
         public bool NeedRefresh {
             get{
-                bool ret = _NeedRefresh;
-                _NeedRefresh = false;
-                return ret;
+                return _NeedRefresh;
             }
             set{
                 _NeedRefresh = value;
@@ -129,30 +117,55 @@ namespace ioex_cs
         {
             agent = nagent;
             vib_addr = 0xff;
-            curr_node_index = -1;
+            bot_addr = 0xff;
+
             _pack_id = pack_id;
             status = PackerStatus.IDLE;
             
-            refreshlock = new object();
+            
             weight_nodes = new List<byte>();
             nodes_config = new Dictionary<byte, XmlConfig>();
-            uidata = new Dictionary<byte, UIParam>();
+            
             all_conf = new XmlConfig("pack_define"+pack_id.ToString()+".xml");
+            
             all_conf.LoadConfigFromFile();
 
-            
-            sys_cfg = new PackerConfig();
+            _curr_cfg = new PackerConfig();
             packhist = new Queue<onepack>();
+        }
+        public void BottomAction(string command)
+        {
+            agent.Action(bot_addr, command);
+        }
+        public void VibAction(string command)
+        {
+            agent.Action(vib_addr, command);
+        }
+        public void GroupAction(string command)
+        {
+            if (command == "clearweight")
+            {
+                foreach (WeighNode wnode in agent.weight_nodes)
+                    wnode.ClearWeight(); //clear the weight value
+                return;
+            }
+            agent.Action((byte)(0x80 + _pack_id), command);
+        }
+        public void WeightAction(byte addr, string command)
+        {
+            if(weight_nodes.Contains(addr))
+                agent.Action(addr,command);
+            else{
+                MessageBox.Show("Invalid node for this packer.");
+            }
+
         }
         private void ResetHistory()
         {
             packhist.Clear();
-            //total_weights = 0;
-            //total_packs = 0;
-
             speed = 0;
-            last_pack_weight = 0;
-
+            last_one_pack.bucket = null;
+            last_one_pack.weight = 0.0;
         }
 
         public void AddNewPack(onepack o)
@@ -167,10 +180,8 @@ namespace ioex_cs
                 total_sim_weights += o.weight;
                 total_sim_packs++;
             }
-            last_pack_weight = o.weight;
             last_one_pack = o;
 
-            
             packhist.Enqueue(o);
             if (packhist.Count > 500)
             {
@@ -195,7 +206,7 @@ namespace ioex_cs
             speed = (UInt32)count;
             if (App.bSimulate)
                 return;
-            if (total_packs % 100 == 1)
+            if (total_packs % 100 == 1) //update record for every 100 packs
                 ProdHistory.UpdateRecord(this);
         }
 
@@ -205,12 +216,13 @@ namespace ioex_cs
         }
         public Intf getInterface()
         {
-            Intf intf_byte = new Intf(UInt16.Parse(agent.GetNodeReg(vib_addr, "target_weight")));
+            agent.InvalidNodeReg(bot_addr, "target_weight"); //the target_weight actually is interface for botton node
+            Intf intf_byte = new Intf(UInt16.Parse(agent.GetNodeReg(bot_addr, "target_weight")));
             return intf_byte;
         }
         public void setInterface(Intf intf_byte)
         {
-            agent.Action(vib_addr,"interface"+intf_byte.buf.ToString());
+            agent.Action(bot_addr,"interface"+intf_byte.buf.ToString()); //set interface of bottom packer ex, interface123
         }
 
         //load all the configuration and update the UI,
@@ -222,7 +234,7 @@ namespace ioex_cs
             weight_nodes.Clear();
             all_conf.LoadConfig(cfgname);
             XElement cfgNode = all_conf.Current;
-            sys_cfg.FromElement(cfgNode);
+            _curr_cfg.FromElement(cfgNode);
             foreach (string wnode in cfgNode.Element("WNodes").Value.ToString().Split(new char[] { ',' }))
             {
                 weight_nodes.Add(byte.Parse(wnode));
@@ -233,38 +245,58 @@ namespace ioex_cs
                 {
                     nodes_config[n] = new XmlConfig("node_" + n + ".xml");
                     nodes_config[n].LoadConfigFromFile();
+                    nodes_config[n].LoadConfig(cfgname);
                 }
-                nodes_config[n].LoadConfig(cfgname);
-                uidata[n] = new UIParam();
             }
             vib_addr = byte.Parse(cfgNode.Element("VNode").Value.ToString());
             if (!nodes_config.ContainsKey(vib_addr))
             {
                 nodes_config[vib_addr] = new XmlConfig("node_" + vib_addr + ".xml");
                 nodes_config[vib_addr].LoadConfigFromFile();
+                nodes_config[vib_addr].LoadConfig(cfgname);
             }
-            nodes_config[vib_addr].LoadConfig(cfgname);
-            //todo download the configuration of packer settings
+            
+
+            bot_addr = byte.Parse(cfgNode.Element("BNode").Value.ToString());
+            if (!nodes_config.ContainsKey(bot_addr))
+            {
+                nodes_config[bot_addr] = new XmlConfig("node_" + bot_addr + ".xml");
+                nodes_config[bot_addr].LoadConfigFromFile();
+                nodes_config[bot_addr].LoadConfig(cfgname);
+            }
+            
+
+            //download the configuration of node settings
             foreach (string reg in new string[] { "magnet_freq", "magnet_amp", "magnet_time", "target_weight", "cs_filter" })
             {
                 try
                 {
                     agent.SetNodeReg(vib_addr, reg, UInt32.Parse(nodes_config[vib_addr].Current.Element(reg).Value));
+                }catch{
+
                 }
-                catch
+            }
+            if (bot_addr != vib_addr)
+            {
+                foreach (string reg in new string[] { "magnet_freq", "magnet_amp", "magnet_time", "target_weight", "cs_filter" })
                 {
+                    try
+                    {
+                        agent.SetNodeReg(bot_addr, reg, UInt32.Parse(nodes_config[bot_addr].Current.Element(reg).Value));
+                    }
+                    catch
+                    {
+                    }
                 }
             }
             foreach (byte n in weight_nodes)
             {
                 foreach (string reg in new string[] { "magnet_freq", "magnet_amp", "magnet_time", "motor_speed", "cs_filter", "cs_gain_wordrate", "delay_f", "delay_w", "delay_s", "open_s", "open_w", "target_weight"})
-                    
                 {
                     try
                     {
                         agent.SetNodeReg(n, reg, UInt32.Parse(nodes_config[n].Current.Element(reg).Value));
-                    }catch
-                    {
+                    }catch{
                     }
                 }
             }
@@ -273,7 +305,7 @@ namespace ioex_cs
         public void SaveCurrentConfig()
         {
             XElement cfgNode = new XElement("Item");
-            sys_cfg.ToElement(ref cfgNode);
+            _curr_cfg.ToElement(ref cfgNode);
 
             all_conf.AddConfig(all_conf.cfg_name, cfgNode);
             all_conf.SaveConfigToFile();
@@ -289,6 +321,12 @@ namespace ioex_cs
             agent.GetNodeElement(vib_addr, ref sNode);
             nodes_config[vib_addr].AddConfig(all_conf.cfg_name, sNode);
             nodes_config[vib_addr].SaveConfigToFile();
+            if (bot_addr != vib_addr)
+            {
+                agent.GetNodeElement(bot_addr, ref sNode);
+                nodes_config[bot_addr].AddConfig(all_conf.cfg_name, sNode);
+                nodes_config[bot_addr].SaveConfigToFile();
+            }
         }
 
         public void DuplicateCurrentConfig(string newcfg)
@@ -307,10 +345,14 @@ namespace ioex_cs
             nodes_config[vib_addr].AddConfig(newcfg,nodes_config[vib_addr].Current);
             nodes_config[vib_addr].LoadConfig(newcfg);
             nodes_config[vib_addr].SaveConfigToFile();
-
-
+            if (bot_addr != vib_addr)
+            {
+                nodes_config[bot_addr].AddConfig(newcfg, nodes_config[bot_addr].Current);
+                nodes_config[bot_addr].LoadConfig(newcfg);
+                nodes_config[bot_addr].SaveConfigToFile();
+            }
             XElement cfgNode = new XElement("Item");
-            sys_cfg.ToElement(ref cfgNode);
+            _curr_cfg.ToElement(ref cfgNode);
             cfgNode.Element("product_no").Value = newcfg;
             
             all_conf.AddConfig(newcfg, cfgNode);
@@ -322,12 +364,14 @@ namespace ioex_cs
         {
             rStart = DateTime.Now;
             ProdHistory.InitNewRun(this);
-            agent.Action((byte)(0x80+_pack_id), "start");
+            agent.ResetStatus();
+            agent.Action((byte)(0x80+_pack_id), "start");//0x80 is group action
             status = PackerStatus.RUNNING;
         }
         public void StopRun()
         {
             status = PackerStatus.IDLE;
+            
             if (!App.bSimulate)
             {
                 ProdHistory.UpdateRecord(this);
@@ -338,33 +382,12 @@ namespace ioex_cs
                 total_sim_packs = 0;
                 total_sim_weights = 0;
             }
+            agent.ResetStatus();
             agent.Action((byte)(0x80 + _pack_id), "stop");
 
         }
 
         
-        public void ActionAll(string action) //select, deselect, empty, set zero
-        {
-            if (action == "select")
-            {
-                foreach (byte n in this.weight_nodes)
-                {
-                    if (agent.GetStatus(n) != NodeStatus.ST_LOST)
-                    {
-                        uidata[n].selected = true;
-                    }
-                }
-            }
-            if (action == "deselect")
-            {
-                foreach (byte n in this.weight_nodes)
-                {
-                    if (agent.GetStatus(n) != NodeStatus.ST_LOST)
-                    {
-                        uidata[n].selected = false;
-                    }
-                }
-            }
-        }
+ 
     }
 }

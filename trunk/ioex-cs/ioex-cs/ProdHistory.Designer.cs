@@ -10,7 +10,7 @@
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name="disposing">1true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -101,7 +101,7 @@
             // 
             this.lbl_starttime.AutoSize = true;
             this.lbl_starttime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_starttime.Location = new System.Drawing.Point(14, 5);
+            this.lbl_starttime.Location = new System.Drawing.Point(14, 3);
             this.lbl_starttime.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_starttime.Name = "lbl_starttime";
             this.lbl_starttime.Size = new System.Drawing.Size(51, 20);
@@ -112,7 +112,7 @@
             // 
             this.lbl_endtime.AutoSize = true;
             this.lbl_endtime.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_endtime.Location = new System.Drawing.Point(294, 5);
+            this.lbl_endtime.Location = new System.Drawing.Point(294, 2);
             this.lbl_endtime.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_endtime.Name = "lbl_endtime";
             this.lbl_endtime.Size = new System.Drawing.Size(51, 20);
@@ -123,7 +123,7 @@
             // 
             this.lbl_oper.AutoSize = true;
             this.lbl_oper.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_oper.Location = new System.Drawing.Point(569, 5);
+            this.lbl_oper.Location = new System.Drawing.Point(570, 2);
             this.lbl_oper.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_oper.Name = "lbl_oper";
             this.lbl_oper.Size = new System.Drawing.Size(51, 20);
@@ -134,7 +134,7 @@
             // 
             this.lbl_prodno.AutoSize = true;
             this.lbl_prodno.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_prodno.Location = new System.Drawing.Point(712, 5);
+            this.lbl_prodno.Location = new System.Drawing.Point(713, 2);
             this.lbl_prodno.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_prodno.Name = "lbl_prodno";
             this.lbl_prodno.Size = new System.Drawing.Size(83, 20);
@@ -145,7 +145,7 @@
             // 
             this.lbl_prod.AutoSize = true;
             this.lbl_prod.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_prod.Location = new System.Drawing.Point(853, 4);
+            this.lbl_prod.Location = new System.Drawing.Point(854, 1);
             this.lbl_prod.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_prod.Name = "lbl_prod";
             this.lbl_prod.Size = new System.Drawing.Size(65, 20);
@@ -172,9 +172,8 @@
             this.lbl_summary.Location = new System.Drawing.Point(166, 705);
             this.lbl_summary.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_summary.Name = "lbl_summary";
-            this.lbl_summary.Size = new System.Drawing.Size(60, 24);
+            this.lbl_summary.Size = new System.Drawing.Size(0, 24);
             this.lbl_summary.TabIndex = 11;
-            this.lbl_summary.Text = "";
             // 
             // btnRet
             // 

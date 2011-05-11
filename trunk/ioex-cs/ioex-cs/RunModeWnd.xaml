@@ -168,27 +168,59 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
-        <ControlTemplate x:Key="RectBtn" TargetType="{x:Type Button}">
-            <Canvas>
-                <Rectangle Name="outer" Width="150" Height="50" RadiusX="10" RadiusY="10">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="White" Offset="0" />
-                            <GradientStop Color="Black" Offset="0.5" />
-                        </LinearGradientBrush>
-                    </Rectangle.Fill>
-                </Rectangle>
-                <Rectangle Name="inner" Width="140" Height="40" Canvas.Left="5" Canvas.Top="5" Fill="Purple" RadiusX="5" RadiusY="5">
 
-                </Rectangle>
-                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Canvas.Top="2" Canvas.Left="30"/>
-            </Canvas>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsPressed"  Value = "True">
-                    <Setter TargetName="inner" Property="Fill" Value="LightGray"/>
-                </Trigger>
-            </ControlTemplate.Triggers>
-        </ControlTemplate>
+        <Style x:Key ="RectBtnBg" TargetType = "{x:Type Label}">
+
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="18"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
+
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Label">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="10" >
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="White" Offset="0" />
+                                    <GradientStop Color="Black" Offset="0.5" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key ="RectBtn" TargetType = "{x:Type Button}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "30"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="36"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
+
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="5" Background="Purple">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Top"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Yellow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+
+        </Style>
+
         <ControlTemplate x:Key="StartBtn" TargetType="{x:Type Button}">
             <Canvas>
                 <Rectangle Name="outer" Width="200" Height="80" RadiusX="20" RadiusY="20">
@@ -233,10 +265,15 @@
                 </Trigger>
             </ControlTemplate.Triggers>
         </ControlTemplate>
-
         <ControlTemplate x:Key="MainBucket" TargetType="{x:Type Button}">
             <Canvas>
-                <Ellipse Fill="Purple" Width="70" Height="70" Stroke="Black"></Ellipse>
+                <Ellipse Width="70" Fill="Purple" Height="70" Stroke="Black"></Ellipse>
+            </Canvas>
+        </ControlTemplate>
+
+        <ControlTemplate x:Key="MainBucketAct" TargetType="{x:Type Button}">
+            <Canvas>
+                <Ellipse Width="70" Fill="LightGray" Height="70" Stroke="Black"></Ellipse>
             </Canvas>
         </ControlTemplate>
         <ControlTemplate x:Key="VibBar" TargetType="{x:Type Button}">
@@ -618,8 +655,8 @@
         <Label Style="{StaticResource WeightLabel}" Canvas.Left="335" Canvas.Top="423" Name="wei_node4" MouseLeftButtonUp="weibucket_Click" Height="24" Width="52">00.0</Label>
         <Label Style="{StaticResource WeightLabel}" Canvas.Left="259" Canvas.Top="475" Name="wei_node5" MouseLeftButtonUp="weibucket_Click" Height="24" Width="58">00.0</Label>
         <Label Style="{StaticResource WeightLabel}" Canvas.Left="160" Canvas.Top="475" Name="wei_node6" MouseLeftButtonUp="weibucket_Click" Height="24" Width="56">00.0</Label>
-        <Label Style="{StaticResource WeightLabel}" Canvas.Left="63" Canvas.Top="333" Name="wei_node7" MouseLeftButtonUp="weibucket_Click" Height="24" Width="56">00.0</Label>
-        <Label Style="{StaticResource WeightLabel}" Canvas.Left="94" Canvas.Top="423" Name="wei_node8" MouseLeftButtonUp="weibucket_Click" Height="24" Width="54">00.0</Label>
+        <Label Style="{StaticResource WeightLabel}" Canvas.Left="94" Canvas.Top="423" Name="wei_node7" MouseLeftButtonUp="weibucket_Click" Height="24" Width="54">00.0</Label>
+        <Label Style="{StaticResource WeightLabel}" Canvas.Left="63" Canvas.Top="333" Name="wei_node8" MouseLeftButtonUp="weibucket_Click" Height="24" Width="56">00.0</Label>
         <Label Style="{StaticResource WeightLabel}" Canvas.Left="94" Canvas.Top="244" Name="wei_node9" MouseLeftButtonUp="weibucket_Click" Height="24" Width="54">00.0</Label>
         <Label Style="{StaticResource WeightLabel}" Canvas.Left="160" Canvas.Top="187" Name="wei_node10" MouseLeftButtonUp="weibucket_Click" Height="24" Width="56">00.0</Label>
 
@@ -639,7 +676,7 @@
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource all_zero}" Style="{StaticResource ButtonStyle}" Margin="0,0,228.159,25.452" Name="btn_allzero" Click="btn_zero_click"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="62.149" Width="152" Canvas.Left="259" Canvas.Top="607.851" />
 
         <Label FocusVisualStyle="{x:Null}"  Content="100.0" Style="{StaticResource LabelStyle1}" Margin="0,0,228.159,25.452" Name="lbl_weight" Foreground="Black" FontSize="36" HorizontalAlignment="Right" Height="50.8" Width="130" Canvas.Left="666" Canvas.Top="119" BorderThickness="0" />        
-        <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource MainBucket}" Name="main_bucket" Height="0" Canvas.Left="199" Canvas.Top="305" Width="0" />
+        <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource MainBucket}"  Name="main_bucket" Height="0" Canvas.Left="199" Canvas.Top="305" Width="0" />
         <Label Canvas.Left="506" Canvas.Top="20" Content="{DynamicResource product_no}" Height="50" Name="grp_lbl_prd_no" Style="{StaticResource LabelStyle}" Width="130" />
         <Label Canvas.Left="833" Canvas.Top="122.8" Content="dami" Height="47" Name="prd_desc" Style="{StaticResource LabelStyle}" HorizontalContentAlignment="Center" Width="128" />
         <Label Canvas.Left="506" Canvas.Top="119" Content="{DynamicResource grp_target}" Height="50" Name="grp_target_label" Style="{StaticResource LabelStyle}" Width="155" />
@@ -653,7 +690,8 @@
         <Label Canvas.Left="852" Canvas.Top="183" Content="0.1" Height="41" Name="input_dvar" Style="{StaticResource LabelStyle1}" Width="84" />
 
         <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource cfgBtn}" Click="btn_singlemode_click" Canvas.Left="650" Canvas.Top="337" Height="184" Name="btn_config" Width="183" FontSize="36" Foreground="LightGray" VerticalAlignment="Bottom" Content="{DynamicResource config}" />
-        <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource RectBtn}" Canvas.Left="650" Canvas.Top="21.2" Height="62.8" Name="prd_no" Width="175" FontSize="36" Foreground="LightGray" VerticalAlignment="Bottom" Content="01" Click="prd_no_Click" />
+        <Label Style="{StaticResource RectBtnBg}" Canvas.Left="650" Canvas.Top="24.449" Height="45.551" Width="146">123123</Label>
+        <Button FocusVisualStyle="{x:Null}"  Style="{StaticResource RectBtn}" Canvas.Left="655" Canvas.Top="27" Height="40" Name="prd_no" Width="137" FontSize="36" Foreground="LightGray" VerticalContentAlignment="Top" Content="01" Click="prd_no_Click" />
 
         <Rectangle x:Name="ellipseWithImageBrush" Stroke="Black" StrokeThickness="4" Height="77" Width="147" Canvas.Left="829" Canvas.Top="23" MouseLeftButtonUp="prd_no_MouseLeftButtonUp">
             <Rectangle.Fill>
@@ -663,7 +701,7 @@
         <Ellipse Width="50" Height="17" Fill="Black" StrokeThickness="0" Canvas.Left="875" Canvas.Top="110"/>
             
         <Rectangle Width="10" Height="20" Fill="Black" Stroke="Black" StrokeThickness="0" Canvas.Left="895" Canvas.Top="99" />
-        <Label Canvas.Left="393" Canvas.Top="689" Height="41" Name="lbl_datetime" Width="283" HorizontalAlignment="Center" HorizontalContentAlignment="Center">Label</Label>
+        <Label Canvas.Left="86" Canvas.Top="689" Height="41" Name="lbl_datetime" Width="283" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="16">Label</Label>
         <Label Canvas.Left="506" Canvas.Top="69" Content="{DynamicResource operator_no}" Height="50" Name="label1" Style="{StaticResource LabelStyle}" Width="155" />
         <Button Canvas.Left="650" Canvas.Top="76" FocusVisualStyle="{x:Null}" FontSize="36" Foreground="Black" Height="43" Name="operator_no" Style="{StaticResource ButtonStyle1}" Width="146" Click="operator_no_Click">01</Button>
         <Label Canvas.Left="259" Canvas.Top="60.296" Content="0.0" Height="64" Name="lbl_lastweight" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="202" />

@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ioex_cs.BottomWnd"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="BottomWnd" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Background="LightGray">
+    Title="BottomWnd" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Background="#FFEEF2FB">
     <Window.Resources>
         <Style x:Key ="InputStyle" TargetType = "{x:Type Label}">
             <Setter Property = "Foreground" Value = "Black"/>
@@ -48,15 +48,15 @@
         </Grid.RowDefinitions>
         <Rectangle Margin="18,32,38,98" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" Grid.RowSpan="2" />
         <Label Content="{DynamicResource intf_lb_input_fmt}" HorizontalAlignment="Left" Margin="134.61,134,0,106" FontSize="26" Name="intf_lb_input_fmt_label" Width="186" />
-        <CheckBox  FocusVisualStyle="{x:Null}" Content="{DynamicResource intf_ckb_mem}" Margin="343.552,95,0,0" Name="intf_ckb_mem" HorizontalAlignment="Left" Width="112.891" Grid.Row="1" FontSize="26" Height="46.018" VerticalAlignment="Top" />
-        <CheckBox  FocusVisualStyle="{x:Null}" Content="{DynamicResource intf_handshake}" HorizontalAlignment="Left" Margin="170.565,94,0,0" Name="intf_handshake" Width="150.045" Grid.Row="1" FontSize="26" Height="42.018" VerticalAlignment="Top" />
+        <CheckBox  FocusVisualStyle="{x:Null}" Content="{DynamicResource intf_ckb_mem}" Margin="343.552,95,0,0" Name="intf_ckb_mem" HorizontalAlignment="Left" Width="112.891" Grid.Row="1" FontSize="26" Height="46.018" VerticalAlignment="Top" MouseLeftButtonUp="intf_input_trigger_MouseLeftButtonUp" />
+        <CheckBox  FocusVisualStyle="{x:Null}" Content="{DynamicResource intf_handshake}" HorizontalAlignment="Left" Margin="170.565,94,0,0" Name="intf_handshake" Width="150.045" Grid.Row="1" FontSize="26" Height="42.018" VerticalAlignment="Top" MouseLeftButtonUp="intf_input_trigger_MouseLeftButtonUp" />
         <Label Content="{DynamicResource intf_lb_output_fmt}" HorizontalAlignment="Right" Margin="0,134,253.77,106" Name="intf_lb_output_fmt_label" Width="200.06" FontSize="26" />
         <Label  FocusVisualStyle="{x:Null}" Height="44.062" HorizontalAlignment="Right" Style="{StaticResource InputStyle}" MouseLeftButtonUp="TextBox_GotFocus" Margin="0,92,80.831,0"  Name="intf_ckb_delay" VerticalAlignment="Top" Width="165" Grid.Row="1" FontSize="20" />
         <Label Content="{DynamicResource intf_ckb_delay}" Height="46.062" HorizontalAlignment="Right" Margin="0,90,253.77,0" Name="intf_ckb_delay_label" VerticalAlignment="Top" Width="207" Grid.Row="1" FontSize="26" />
         <Label  FocusVisualStyle="{x:Null}" Style="{StaticResource InputStyle}" MouseLeftButtonUp="TextBox_GotFocus" Margin="0,284,80.831,0"  Name="intf_lb_feed_times" HorizontalAlignment="Right" Width="165" Height="42.58" VerticalAlignment="Top" FontSize="20" Grid.RowSpan="2" />
         <Label Content="{DynamicResource intf_lb_feed_times}" HorizontalAlignment="Right" Margin="0,284,253.77,0" Name="intf_lb_feed_times_label" Width="200.06" Height="41.441" VerticalAlignment="Top" FontSize="26" Grid.RowSpan="2" />
         <Label Background="#FFEEF2FB" Content="{DynamicResource packsetting}" FontSize="40" Height="58" HorizontalAlignment="Left" Margin="55,5,0,0" Name="label11" VerticalAlignment="Top" Width="332" Foreground="Green" />
-        <ListBox Name="intf_output_trigger" Margin="0,110,80.831,74" FontSize="20" HorizontalAlignment="Right" Width="165">
+        <ListBox Name="intf_output_trigger" Margin="0,110,80.831,74" FontSize="20" HorizontalAlignment="Right" Width="165" MouseLeftButtonUp="intf_input_trigger_MouseLeftButtonUp">
             <ListBoxItem  Content="{DynamicResource intftrig1}"></ListBoxItem>
             <ListBoxItem  Content="{DynamicResource intftrig2}"></ListBoxItem>
             <ListBoxItem  Content="{DynamicResource intftrig3}"></ListBoxItem>
@@ -65,7 +65,7 @@
         <Label Content="{DynamicResource intf_lb_pulse_width}" Height="51.25" HorizontalAlignment="Left" Margin="60.61,284,0,0" Name="label1" VerticalAlignment="Top" Width="260" FontSize="26" Grid.RowSpan="2" />
         <Label  FocusVisualStyle="{x:Null}" Height="42.58" Margin="343.552,284,493.448,0" Style="{StaticResource InputStyle}"  MouseLeftButtonUp="TextBox_GotFocus" Name="intf_pulse_width" VerticalAlignment="Top" FontSize="20" Grid.RowSpan="2" />
         <Button Content="{DynamicResource runonce}" Name="btn_run" Click="btn_run_Click" Margin="320,196,300,136" Grid.Row="1" FontSize="26" />
-        <ListBox Name="intf_input_trigger" Margin="343.552,110,493.448,74" FontSize="20">
+        <ListBox Name="intf_input_trigger" Margin="343.552,110,493.448,74" FontSize="20" MouseLeftButtonUp="intf_input_trigger_MouseLeftButtonUp" >
             <ListBoxItem  Content="{DynamicResource intftrig1}"></ListBoxItem>
             <ListBoxItem  Content="{DynamicResource intftrig5}"></ListBoxItem>
             <ListBoxItem  Content="{DynamicResource intftrig6}"></ListBoxItem>

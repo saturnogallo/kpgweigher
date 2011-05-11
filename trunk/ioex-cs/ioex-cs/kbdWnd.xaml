@@ -45,7 +45,7 @@
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource clr}" FontSize="30" Style="{StaticResource MyFontStyle}" Template="{StaticResource roundButton}" Click="btn_clr_Click" Name="btn_clr" HorizontalAlignment="Left" Width="82.5" Canvas.Left="-5.047" Canvas.Top="17.703" Margin="359.17,276.797,0,180.935" Height="80" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource backspace}" FontSize="30" Style="{StaticResource MyFontStyle}" Template="{StaticResource roundButton}" Click="btn_backspace_Click" Name="btn_backspace" HorizontalAlignment="Left" Width="82.5" Canvas.Left="-5.047" Canvas.Top="116.655" Margin="359.17,276.797,0,180.935" Height="80" />
         <Label Height="64" Margin="36.663,88.88,33.647,0" Name="datalabel"  VerticalAlignment="Top" BorderThickness="0" Background="Beige" BorderBrush="#FFEEF2FB" FontSize="40" FontWeight="Normal" Foreground="Red" Width="399.96" Canvas.Top="-4"> Label</Label>
-        <Label Height="47.773" Margin="34.441,16.665,33.647,0" Name="notelabel" VerticalAlignment="Top" FontSize="20">Label</Label>
+        <Label Height="47.773" Margin="34.441,16.665,33.647,0" Name="notelabel" VerticalAlignment="Top" FontSize="24" FontWeight="Black">Label</Label>
         <Button FocusVisualStyle="{x:Null}"  Canvas.Left="354.409" Canvas.Top="486.391" Content="{DynamicResource quit}" FontSize="30" Height="82" Name="btn_quit" Click="btn_quit_Click" Style="{StaticResource MyFontStyle}" Template="{StaticResource roundButton}" Width="82.214" />
     </Canvas>
 </Window>

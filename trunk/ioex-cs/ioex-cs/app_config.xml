@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<Root current="default">
-  <Item Name="default">
+<Root current="default">1
+  <Item Name="default">1
     <machine_number>1</machine_number>
 	<baudrate>115200</baudrate>
 	<def_addr>36</def_addr>

@@ -43,7 +43,7 @@ namespace ioex_cs
         void uiTimer_Tick(object sender, EventArgs e)
         {
             
-            lbl_datetime.Content = DateTime.Now.ToLongDateString() + "\n" + DateTime.Now.ToLongTimeString();
+            lbl_datetime.Content = DateTime.Now.ToLongDateString() + "  " + DateTime.Now.ToLongTimeString();
 
             if (!this.IsVisible)
                 return;
@@ -72,6 +72,23 @@ namespace ioex_cs
             {
                 UpdateUI("wei_node" + n);
             }
+            if(p.status == PackerStatus.IDLE || p.status == PackerStatus.PAUSED)
+                p.GroupAction("clearweight");
+            p.NeedRefresh = false;
+
+            if (p.agent.VibStatus == NodeAgent.VIB_READY)
+            {
+                main_bucket.Template = this.FindResource("MainBucket") as ControlTemplate;
+                main_bucket.ApplyTemplate();
+            }
+            else
+            {
+                if(p.status != PackerStatus.RUNNING)
+                    lbl_status.Content = StringResource.str("waitpack");
+                main_bucket.Template = this.FindResource("MainBucketAct") as ControlTemplate;
+                main_bucket.ApplyTemplate();
+            }
+            
             if (lbl_status.Content.ToString() == "")
             {
                 lbl_status.Content = StringResource.str("normal");
@@ -98,7 +115,7 @@ namespace ioex_cs
             {
                 return;
             }
-            p.curr_packer.agent.Action((Byte)(0x80+p.curr_packer._pack_id),action);
+            p.curr_packer.GroupAction(action);
             //todo update result message
         }
         private void btn_empty_click(object sender, RoutedEventArgs e)
@@ -191,7 +208,7 @@ namespace ioex_cs
 
                 this.prd_no.Content = pack.curr_cfg.product_no.ToString();
 
-                this.operator_no.Content = PackerConfig.oper;
+                this.operator_no.Content = p.oper;
 
                 this.prd_desc.Content = pack.curr_cfg.product_desc.ToString();
                 Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
@@ -208,7 +225,8 @@ namespace ioex_cs
                 
                 string ct = pack.agent.weight(n).ToString("F1");
                 string err = pack.agent.GetErrors(n);
-                if (pack.agent.weight(n) > -1000)
+                double wt = pack.agent.weight(n);
+                if (wt > -1000 && wt < 65521)
                 {
                     lb.Content = ct;
                 }
@@ -223,6 +241,7 @@ namespace ioex_cs
                     pbtn.Template = this.FindResource("PassBarError") as ControlTemplate;
                     pbtn.ToolTip = StringResource.str(err.Substring(0, err.IndexOf(';')));
                     lbl_status.Content = StringResource.str(err.Substring(0, err.IndexOf(';'))) + "\n";
+                    lb.Content = err.Substring(0, err.IndexOf(';'));//"ERR";
                     if (AlertWnd.b_turnon_alert && AlertWnd.b_stop_onalert && pack.status == PackerStatus.RUNNING)
                         btn_start_click(null, null);
                 }
@@ -240,13 +259,15 @@ namespace ioex_cs
                     }
                     else
                     {
+                        //check whether the node is in last pack.
                         if (n != pack.vib_addr)
                         {
-                            byte[] lbs = pack.last_one_pack.bucket;
-                            if (lbs != null)
+                            btn.Template = this.FindResource("WeightBar") as ControlTemplate;
+
+                            if ( pack.last_one_pack.bucket != null)
                             {
                                 bool hit = false;
-                                foreach (byte b in lbs)
+                                foreach (byte b in pack.last_one_pack.bucket)
                                 {
                                     if (n == b)
                                     {
@@ -254,10 +275,6 @@ namespace ioex_cs
                                         hit = true;
                                         break;
                                     }
-                                }
-                                if (!hit)
-                                {
-                                    btn.Template = this.FindResource("WeightBar") as ControlTemplate;
                                 }
                             }
                         }
@@ -311,10 +328,8 @@ namespace ioex_cs
                 }
                 if (param == "run_operator")
                 {
-                    PackerConfig.oper = data;
-                    XElement cfg = p.curr_cfg;
-                    cfg.SetElementValue("operator", data);
-                    p.SaveAppConfig();
+
+                    (Application.Current as App).oper = data;
                 }
                 if (param.IndexOf("run") == 0)
                     pack.SaveCurrentConfig();
@@ -407,7 +422,10 @@ namespace ioex_cs
                 }
                 if (l.Name == "lbl_alert3") //alert disable
                 {
-                    p.agent.SetStatus(id, NodeStatus.ST_LOST);
+                    if (p.agent.GetStatus(id) == NodeStatus.ST_LOST)
+                        p.agent.SetStatus(id, NodeStatus.ST_IDLE);
+                    else
+                        p.agent.SetStatus(id, NodeStatus.ST_LOST);
                 }
                 if (l.Name == "lbl_alert4") //alert quit
                 {
@@ -426,11 +444,15 @@ namespace ioex_cs
             {
                 App p = Application.Current as App;
                 byte id = (byte)ButtonToId(sender);
-                if (p.agent.GetErrors(id) != "")
+                //if (p.agent.GetErrors(id) != "")
                 {
                     curr_node = id;
                     if (AlertWnd.b_turnon_alert && AlertWnd.b_show_alert)
                     {
+                        if (p.agent.GetStatus(id) == NodeStatus.ST_LOST)
+                            lbl_alert3.Content = StringResource.str("alert_enable");
+                        else
+                            lbl_alert3.Content = StringResource.str("alert_disable");
                         UpdateAlertWindow(true);
                     }
                 }
