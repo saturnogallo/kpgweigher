@@ -4,23 +4,48 @@
 #include "math.h"
 #define logl log
 #define powl pow
+double PT100RToTValue(double r,double r0)
+{
+        double ac,bc,cc,tlow,tup,rnew,tnew;
+        int count;
+        ac = 3.908e-3;
+        bc = -5.775E-7;
+        cc = -4.183E-12;
+        tlow = -200;
+        tup = 850;
+	count = 0;
+				
+	while((tup - tlow > 0.00005) && (count++ < 100))
+	{
+		tnew = (tlow+tup)/2.0;
+		rnew = r0 + r0*ac*tnew + r0*bc*tnew*tnew;
+		if(tnew < 0)
+		         rnew = rnew + r0*cc*(tnew-100)*tnew*tnew*tnew;
+		         
+		if(r < rnew)
+			tup = tnew;
+		else
+			tlow = tnew;
+	}
+	return floor((tlow*10000.0+tup*10000)/2.0+0.5)/10000.0;
 
+}
 double RValueToTValue(double r, u8 prbid)
 {
-
 	double ac,bc,cc,tlow,tup,rnew,tnew;
 	int count;
 
+	ac = rprbdata.param1[prbid];
+	bc = rprbdata.param2[prbid];
+	cc = rprbdata.param3[prbid];
+
 	if(rprbdata.type[prbid] == PRBTYPE_PT100)
-		r = r/100.0;
+		return PT100RToTValue(r, cc);
 	else if(rprbdata.type[prbid] == PRBTYPE_PT25)
 		r = r/25.0;
 	else
 		return -9999.999;
 
-	ac = rprbdata.param1[prbid];
-	bc = rprbdata.param2[prbid];
-	cc = rprbdata.param3[prbid];
 
 	
 	//set the search range of T between GetT(r) +/- 1 degree
@@ -32,8 +57,11 @@ double RValueToTValue(double r, u8 prbid)
 	while((tup - tlow > 0.00005) && (count++ < 100))
 	{
 		tnew = (tlow+tup)/2.0;
-		rnew = GetWr(tnew);
-		rnew = rnew + ac*(rnew-1) + bc*(rnew-1)*(rnew-1) + cc*(rnew-1)*(rnew-1)*(rnew-1);
+		rnew = GetWr(tnew);      
+		if((tnew >= (83.8058-273.15)) && (tnew <= (273.16-273.15)))
+        		rnew = rnew + ac*(rnew-1) + bc*(rnew-1)*logl(rnew);
+                else
+        		rnew = rnew + ac*(rnew-1) + bc*(rnew-1)*(rnew-1) + cc*(rnew-1)*(rnew-1)*(rnew-1);
 		if(r < rnew)
 			tup = tnew;
 		else
@@ -56,7 +84,7 @@ double GetWr(double t)
 	double pert;
 	int i;
 	if(t < 0)
-	{
+	{       //equals to Wr189(t) in mfile
 		result = Ai[0];
 		pert = (logl((t+273.15)/273.16)+1.5)/1.5;
 		t = pert;
@@ -90,7 +118,7 @@ double GetT(double w)
 	int i;
 
 	if(w >= 0)
-	{
+	{       //t660r
 		perw = (w-2.64)/1.64;
 		w = perw;
 		result = Di[0];
@@ -99,7 +127,7 @@ double GetT(double w)
 			result = result + Di[i] * w;
 			w = w*perw;
 		}
-	}else{
+	}else{   //t189(r)
 		perw = (powl(w,1.0/6.0) - 0.65)/0.35;
 		w = perw;
 		result = Bi[0];
@@ -108,7 +136,7 @@ double GetT(double w)
 			result = result + Bi[i] * w;
 			w = w*perw;
 		}		
-		result = 273.15*result - 273.5;
+		result = 273.15*result - 273.15;
 	}
 	return result;
 }
@@ -236,7 +264,7 @@ double MValueToTValue(double r,char type)
 	double rnew;
 	double tnew;
 	int count = 0;
-	return r+1;
+
 	switch(type)
 	{
 		case 'T': 	

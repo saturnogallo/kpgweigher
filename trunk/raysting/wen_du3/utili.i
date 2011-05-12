@@ -107,7 +107,7 @@ char highc(unsigned char x);
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
-typedef eeprom struct _SYSDATA
+typedef eeprom struct _SYSDATA
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
@@ -129,11 +129,12 @@ char highc(unsigned char x);
 extern SYSDATA eeprom sysdata;
 extern PRBDATA eeprom tprbdata;	//probe data for T mode
 extern PRBDATA eeprom rprbdata;	//probe data for R mode
-void State_Init();
+void State_Init();
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-extern void DBG(unsigned char);
+//#define ONESECBIT       14
+extern void DBG(unsigned char);
 void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
@@ -193,7 +194,28 @@ void prbsninput();
 extern MSG_HANDLER curr_window;
 extern MSG_HANDLER caller;
 extern unsigned char max_databuf;
-/*---------------延时子程序----------------*/
+/* CodeVisionAVR C Compiler
+   Prototypes for standard library functions
+
+   (C) 1998-2003 Pavel Haiduc, HP InfoTech S.R.L.
+*/
+#pragma used+
+int atoi(char *str);
+long int atol(char *str);
+float atof(char *str);
+void itoa(int n,char *str);
+void ltoa(long int n,char *str);
+void ftoa(float n,unsigned char decimals,char *str);
+void ftoe(float n,unsigned char decimals,char *str);
+void srand(int seed);
+int rand(void);
+void *malloc(unsigned int size);
+void *calloc(unsigned int num, unsigned int size);
+void *realloc(void *ptr, unsigned int size); 
+void free(void *ptr);
+#pragma used-
+#pragma library stdlib.lib
+/*---------------延时子程序----------------*/
 /*
 void delay1 (uint ms) 
 {
@@ -228,12 +250,14 @@ char highc(uchar x)
 extern unsigned char data_sign;
 extern unsigned char databuf[12];
 double buf2double()		
-{
+{                  
+        return atof(databuf);
+        /*
 	double tmp = 0.0;
-	unsigned char i = 0;
-	unsigned char pos = 0;
+	uchar i = 0;
+	uchar pos = 0;
 	for(i=1;i<pos_databuf;i++) {
-		if(databuf[i] != '.')
+		if(databuf[i] != KEY_DOT)
 			tmp = tmp * 10.0+(databuf[i] - '0');
 		else
 			pos = pos_databuf - i - 2;
@@ -245,14 +269,18 @@ double buf2double()
 	if(data_sign == 1)
 	        tmp = -tmp;
        	return tmp;
+       	*/
 }
 int buf2byte()	    //convert rundata.tempbuf to byte (00-99)
-{
+{       
+        return atoi(databuf);
+        /*
 	int tmp = 0;
-	unsigned char i;
+	uchar i;
 	for(i=0;i<pos_databuf;i++) {
 		tmp = tmp * 10+(databuf[i] - '0');
 	}
 	return tmp;
+	*/
 }
 

@@ -77,15 +77,16 @@ typedef eeprom struct _PRBDATA
 }PRBDATA;
 
 #define IS_MODE_KTT	sysdata.kttmode == 1
-#define SET_MODE_KTT	sysdata.kttmode = 1;display_buttons(KEY_BTN2,0)
-#define CLR_MODE_KTT	sysdata.kttmode = 0;display_buttons(KEY_BTN2,1)
+#define SET_MODE_KTT	sysdata.kttmode = 1; display_buttons(KEY_BTN2,0)
+#define CLR_MODE_KTT	sysdata.kttmode = 0; display_buttons(KEY_BTN2,1)
 
 #define IS_BORE_MODE	sysdata.prbmode == 1
 #define SET_BORE_MODE	sysdata.prbmode = 1; scanner_set_mode(); display_buttons(KEY_BTN1,0)
 #define IS_THERM_MODE	sysdata.prbmode == 0
 #define SET_THERM_MODE	sysdata.prbmode = 0; scanner_set_mode(); display_buttons(KEY_BTN1,1)
 
-
+#define INC_DISPCH	curr_dispch += 1 ;  if(curr_dispch > MAX_CH_NUM){ curr_dispch = 1;}
+#define DEC_DISPCH	curr_dispch -= 1 ;  if(curr_dispch == 0){  curr_dispch = MAX_CH_NUM;  }
 #define INC_CH	curr_ch += 1 ;  if(curr_ch > MAX_CH_NUM){ curr_ch = 1;}
 #define DEC_CH	curr_ch -= 1 ;  if(curr_ch == 0){  curr_ch = MAX_CH_NUM;  }
 
@@ -127,7 +128,8 @@ void display_buttons(uchar pos,uchar val);
 double buf2double();
 int buf2byte();
 
-#define ONESEC	300000
+#define ONESEC	        100000
+//#define ONESECBIT       14
 
 extern void DBG(uchar);
 

@@ -107,7 +107,7 @@ char highc(unsigned char x);
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
-typedef eeprom struct _SYSDATA
+typedef eeprom struct _SYSDATA
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
@@ -129,11 +129,12 @@ char highc(unsigned char x);
 extern SYSDATA eeprom sysdata;
 extern PRBDATA eeprom tprbdata;	//probe data for T mode
 extern PRBDATA eeprom rprbdata;	//probe data for R mode
-void State_Init();
+void State_Init();
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-extern void DBG(unsigned char);
+//#define ONESECBIT       14
+extern void DBG(unsigned char);
 void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
@@ -160,7 +161,7 @@ signed char scanf(char flash *fmtstr,...);
 signed char sscanf(char *str, char flash *fmtstr,...);
                                                #pragma used-
 #pragma library stdio.lib
-  																	void scanner_set_channel(unsigned char ch);
+  																	void scanner_set_channel(unsigned char ch);
 void scanner_uart_push(unsigned char data);
 void pc_uart_push(unsigned char data);
 void nav_uart_push(unsigned char data);     
@@ -243,8 +244,10 @@ static unsigned char navcmd[12];
                sprintf(navcmd,"%%01;27\r");
         if(cmd == 7)
                sprintf(navcmd,"%%01;27\r");
-        if(cmd == 8)
-               sprintf(navcmd,"%%01:06\r");
+        if(cmd == 8)    
+        {
+               sprintf(navcmd,"%%01;06\r");
+        }
         if(cmd == 1) 
         {           
                 navlen = 0;   reading = -1000;  ;

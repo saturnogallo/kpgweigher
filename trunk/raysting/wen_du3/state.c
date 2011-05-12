@@ -7,8 +7,8 @@
 #include "utili.h"
 #include "scanner.h"
 
-extern uchar nextwin;  
-#define REFRESH_TABLES1(PRE)	sprintf(strbuf,"%i",curr_pos);draw_label(&PRE##chvalue,SW_NORMAL);\
+extern uchar nextwin;                                         //draw_label(&PRE##chvalue,SW_NORMAL);
+#define REFRESH_TABLES1(PRE)	sprintf(strbuf,"%i",curr_pos);\
                 		if(new_page == 1){\
 		                	for(i = min_option; i <= max_option; i++){\
 				                j = ((curr_pos-1)/max_option)*max_option + i;
@@ -57,9 +57,9 @@ extern uchar nextwin;
 			if(curr_sel < min_option)\
 				curr_sel = max_option;
 
-extern int   curr_ch;	//index of current channel
+extern int   curr_ch;	//index of current channel in configuation   menu
 extern int   curr_prb;	//index of current probe selection
-
+extern int   curr_dispch; //start of current channel for display in main menu
 
 void State_Init() {
 	display_buttons(KEY_BTN1,sysdata.prbmode);
@@ -69,29 +69,32 @@ void State_Init() {
 }
 char* getprbtype(uchar);
 LABEL flash pgmain_chs[] = {
-		{LBL_HZ12, 4, 3,3,strbuf},
-		{LBL_HZ6X8,2,30,3,strbuf},
-		{LBL_HZ6X8,2,40,3,strbuf},
-		{LBL_HZ6X8,2,50,3,strbuf}
+		{LBL_HZ6X8,3, 3,5,strbuf},
+		{LBL_HZ6X8,3,16,5,strbuf},
+		{LBL_HZ6X8,3,29,5,strbuf},
+		{LBL_HZ6X8,3,42,5,strbuf}
 	};
 LABEL flash pgmain_values[] = {
-		{LBL_HZ12, 40,3,  7,strbuf},
-		{LBL_HZ6X8,40,30,10,strbuf},
-		{LBL_HZ6X8,40,40,10,strbuf},
-		{LBL_HZ6X8,40,50,10,strbuf}
+		{LBL_HZ6X8,40,3,10,strbuf},
+		{LBL_HZ6X8,40,16,10,strbuf},
+		{LBL_HZ6X8,40,29,10,strbuf},
+		{LBL_HZ6X8,40,42,10,strbuf}
 	};
 LABEL flash pgmain_temps[] = {
-		{LBL_HZ12, 140,3,  7,strbuf},
-		{LBL_HZ6X8,140,30,10,strbuf},
-		{LBL_HZ6X8,140,40,10,strbuf},
-		{LBL_HZ6X8,140,50,10,strbuf}
+		{LBL_HZ6X8,140,3, 10,strbuf},
+		{LBL_HZ6X8,140,16,10,strbuf},
+		{LBL_HZ6X8,140,29,10,strbuf},
+		{LBL_HZ6X8,140,42,10,strbuf}
 };
-/*      Main display      */
-void pgmain_handler(uchar msg) {
-        uchar i,old_ch;	
+/*      Main display      */                          
+
+void pgmain_handler(uchar msg) {                                      
+        int max_option = 4;
+        uchar i,old_ch,isinit;	
                 uchar *cptr;
 	//LABEL flash usage = {LBL_HZ6X8,210,60,5,"usage"};
-
+                             
+	isinit = 0;
         //Menu
 	if(msg == KEY_TAB) {
 		if(IS_THERM_MODE)
@@ -100,93 +103,164 @@ void pgmain_handler(uchar msg) {
 			nextwin = PG_RCONFIG;
 		return;
 	}
-	if(msg == MSG_INIT) {
-		LCD_Cls();
-		old_ch = curr_ch;
-		for(i=0;i<sizeof(pgmain_chs)/sizeof(LABEL);i++)//
-		{
-			sprintf(strbuf,"CH%02i:",curr_ch);
-			draw_label(&pgmain_chs[i],SW_NORMAL);
-			INC_CH;
+        if(key == KEY_NUM1) //R0
+        {                                     
+                window_setup(10);                
+                if(IS_BORE_MODE)
+                {
+                        sprintf(strbuf,"请输入铂电阻R0阻值");
+	        	sysdata.R0 = wnd_floatinput(sysdata.R0);
+		        msg = MSG_INIT;                         
+		}else{
+		        return;
+                        sprintf(strbuf,"请输入V0值");
+	        	sysdata.V0 = wnd_floatinput(sysdata.V0);
+                        msg = MSG_INIT;
 		}
-		curr_ch = old_ch;
-		msg = MSG_REFRESH;
-	}
-	if(msg == KEY_UP) {
-		DEC_CH;	
-		old_ch = curr_ch;
-		for(i=0;i<sizeof(pgmain_chs)/sizeof(LABEL);i++)//
-		{
-			sprintf(strbuf,"CH%02i:",curr_ch);
-			draw_label(&pgmain_chs[i],SW_NORMAL);
-			INC_CH;
-		}
-		curr_ch = old_ch;
-		msg = MSG_REFRESH;
+        }
+        if(key == KEY_NUM2) //Rs1
+        {       
+                if(IS_BORE_MODE)
+                {
+                        window_setup(10);                
+                        sprintf(strbuf,"请输入内标准阻值");
+		        sysdata.Rs1 = wnd_floatinput(sysdata.Rs1);
+        		msg = MSG_INIT;		
+                }
+        }
+	if(msg == KEY_UP) {    
+		DEC_DISPCH;
+		msg = MSG_INIT;
 	}
 	if(msg == KEY_DN) {
+		INC_DISPCH;
+		msg = MSG_INIT;
+	}
+	
+	if(msg == MSG_INIT) {
+	        isinit = 1;
+		LCD_Cls();
+		old_ch = curr_dispch;     
 
-		INC_CH;
-		old_ch = curr_ch;
+	        curr_dispch = curr_dispch - ((curr_dispch-1) % max_option);		 
 		for(i=0;i<sizeof(pgmain_chs)/sizeof(LABEL);i++)//
 		{
-			sprintf(strbuf,"CH%02i:",curr_ch);
-			draw_label(&pgmain_chs[i],SW_NORMAL);
-			INC_CH;
+		        if(curr_dispch == old_ch)
+		        {
+        			sprintf(strbuf,"CH%02i:",curr_dispch);
+                                draw_label(&pgmain_chs[i],SW_NORMAL);
+                                draw_label(&pgmain_chs[i],SW_REVERSE);                                
+        		}
+        		else{
+        			sprintf(strbuf,"CH%02i:",curr_dispch);        			
+        			draw_label(&pgmain_chs[i],SW_NORMAL);
+        		}
+			INC_DISPCH;
 		}
-		curr_ch = old_ch;
+		curr_dispch = old_ch;
 		msg = MSG_REFRESH;
 	}
+	
 	if(msg == MSG_REFRESH) {
-		old_ch = curr_ch;
+		old_ch = curr_dispch;          
+		curr_dispch = curr_dispch - ((curr_dispch-1) % max_option);		 
 		for(i=0;i<sizeof(pgmain_chs)/sizeof(LABEL);i++)//
 		{                         
 		        if(IS_THERM_MODE)
 		        {
-			        cptr = getprbtype(tprbdata.type[sysdata.tid[curr_ch-1]]);
-        			if((sysdata.tid[curr_ch - 1] == INVALID_PROBE) ||\
-        				(rundata.temperature[curr_ch - 1] < -9000) ||\
+			        cptr = getprbtype(tprbdata.type[sysdata.tid[curr_dispch-1]]);
+        			if((sysdata.tid[curr_dispch - 1] == INVALID_PROBE) ||\
 	        			(cptr[0] == 'P')){
-        				sprintf(strbuf," -------");
-	        			draw_label(&pgmain_values[i],SW_NORMAL|SW_OVERLAP);
-		        		draw_label(&pgmain_temps[i],SW_NORMAL|SW_OVERLAP);
+               				sprintf(strbuf," -------  ");
+                                        if((curr_dispch-1 == ch_to_search) || (isinit == 1))
+                                        {
+                        			draw_label(&pgmain_values[i],SW_NORMAL);
+		                		draw_label(&pgmain_temps[i],SW_NORMAL);
+		                        }else{
+                        			draw_label(&pgmain_values[i],SW_NORMAL|SW_OVERLAP);
+		                		draw_label(&pgmain_temps[i],SW_NORMAL|SW_OVERLAP);
+		                        }
 			        }else{
-					sprintf(strbuf,"%8f",rundata.reading[curr_ch - 1]);
-					sprintf(strbuf+8," mV");
-					draw_label(&pgmain_values[i],SW_NORMAL|SW_OVERLAP);
-				        sprintf(strbuf," %8f",rundata.temperature[curr_ch - 1]);
-        				sprintf(strbuf+8," C %c",cptr[0]);
-	        			draw_label(&pgmain_temps[i],SW_NORMAL|SW_OVERLAP); 
+					sprintf(strbuf,"%8f",rundata.reading[curr_dispch - 1]);
+					if(curr_dispch-1 == ch_to_search)
+        					sprintf(strbuf+8,"*mV");
+                                        else                            
+                                                sprintf(strbuf+8," mV");
+                                        if((curr_dispch-1 == ch_to_search) || (isinit == 1))
+                                        {
+        					draw_label(&pgmain_values[i],SW_NORMAL);
+        					if(rundata.temperature[curr_dispch - 1] < -9000)
+        					        sprintf(strbuf," OVER    ");
+        					else
+                				        sprintf(strbuf," %8f",rundata.temperature[curr_dispch - 1]);
+                				        
+                				sprintf(strbuf+8," ! %c",cptr[0]);                  
+                			        draw_label(&pgmain_temps[i],SW_NORMAL); 
+                                        }else{                                            
+                                                draw_label(&pgmain_values[i],SW_NORMAL|SW_OVERLAP);
+                				if(rundata.temperature[curr_dispch - 1] < -9000)
+                				{
+                				        sprintf(strbuf," OVER    ");
+                				}else{
+                				        sprintf(strbuf," %8f",rundata.temperature[curr_dispch - 1]);
+                				}
+        				        sprintf(strbuf+8," ! %c",cptr[0]);                                 
+	        			        draw_label(&pgmain_temps[i],SW_NORMAL|SW_OVERLAP);                                                 
+                                        }
 				        if(pgmain_temps[i].type == LBL_HZ6X8)
         				        LCD_Rectange(221,pgmain_temps[i].y-2,221 + 12, pgmain_temps[i].y -2 +10);
         				else                                     //Hz12                            
                 				LCD_Rectange(221,pgmain_temps[i].y-2,221 + 12,pgmain_temps[i].y -2 + 16);	        			
 	                        }
 			}else{
-       			        cptr = getprbtype(rprbdata.type[sysdata.rid[curr_ch-1]]);
-        			if((sysdata.rid[curr_ch - 1] == INVALID_PROBE) ||\
-        				(rundata.temperature[curr_ch - 1] < -9000) ||\
+       			        cptr = getprbtype(rprbdata.type[sysdata.rid[curr_dispch-1]]);
+        			if((sysdata.rid[curr_dispch - 1] == INVALID_PROBE) ||\
+        				(rundata.temperature[curr_dispch - 1] < -9000) ||\
 	        			(cptr[0] != 'P'))
-	        		{
-        				sprintf(strbuf," -------");
-	        			draw_label(&pgmain_values[i],SW_NORMAL|SW_OVERLAP);
-		        		draw_label(&pgmain_temps[i],SW_NORMAL|SW_OVERLAP);
+	        		{                                           
+	        		        if(sysdata.rid[curr_dispch - 1] == INVALID_PROBE)
+                				sprintf(strbuf," ------- ohm");
+                			if(rundata.temperature[curr_dispch - 1] < -9000)
+                        			sprintf(strbuf," NO READ    ");
+                                        else
+                                        	sprintf(strbuf," -------    ");
+                                        if((curr_dispch-1 == ch_to_search) || (isinit == 1))
+                                        {
+        	        			draw_label(&pgmain_values[i],SW_NORMAL);
+                				sprintf(strbuf," -------  ");	        			
+		                		draw_label(&pgmain_temps[i],SW_NORMAL);
+		                	}else{
+        	        			draw_label(&pgmain_values[i],SW_NORMAL|SW_OVERLAP);
+                				sprintf(strbuf," -------  ");	        			
+		                		draw_label(&pgmain_temps[i],SW_NORMAL|SW_OVERLAP);
+		                	}
 			        }else{
-					sprintf(strbuf,"%8f",rundata.reading[curr_ch - 1]);
-					sprintf(strbuf+8," ohm");
-	        			draw_label(&pgmain_values[i],SW_NORMAL|SW_OVERLAP);
-		        		sprintf(strbuf," %8f",rundata.temperature[curr_ch - 1]);
-			        	sprintf(strbuf+8," C %c",cptr[0]);
-				        draw_label(&pgmain_temps[i],SW_NORMAL|SW_OVERLAP);
+					sprintf(strbuf,"%8f",rundata.reading[curr_dispch - 1]);     
+					if(curr_dispch-1 == ch_to_search)
+        					sprintf(strbuf+8,"*ohm");
+                                        else
+        					sprintf(strbuf+8," ohm");        					
+                                        if((curr_dispch-1 == ch_to_search) || (isinit == 1))
+                                        {        					
+	        			        draw_label(&pgmain_values[i],SW_NORMAL); 
+        		        		sprintf(strbuf," %8f",rundata.temperature[curr_dispch - 1]);
+	        		        	sprintf(strbuf+8," ! %c",cptr[0]);
+		        		        draw_label(&pgmain_temps[i],SW_NORMAL);
+		        		 }else{
+	        			        draw_label(&pgmain_values[i],SW_NORMAL|SW_OVERLAP); 
+        		        		sprintf(strbuf," %8f",rundata.temperature[curr_dispch - 1]);
+	        		        	sprintf(strbuf+8," ! %c",cptr[0]);
+		        		        draw_label(&pgmain_temps[i],SW_NORMAL|SW_OVERLAP);
+		        		 }
 				        if(pgmain_temps[i].type == LBL_HZ6X8)
         				        LCD_Rectange(221,pgmain_temps[i].y-2,221+12,pgmain_temps[i].y -2 +10);
         				else                                     //Hz12                            
                 				LCD_Rectange(221,pgmain_temps[i].y-2,221+12,pgmain_temps[i].y -2 + 16);
         			}       			        
 	                }
-			INC_CH;
+			INC_DISPCH;
 		}
-		curr_ch = old_ch;
+		curr_dispch = old_ch;
 	}
 }
 
@@ -213,7 +287,7 @@ void pgcalibrate()
 	if(oldvalue == 0)
                 return;	
         wnd_msgbox(&pgr_calibrate);                        
-        sysdata.Rs1 = (oldvalue + sysdata.R0)*sysdata.Rs1/(rundata.Rx+sysdata.R0);
+        sysdata.Rs1 = (oldvalue + sysdata.R0)*sysdata.Rs1/(rundata.reading[curr_dispch-1]+sysdata.R0);
 }       
 //main menu of bore config
 void pgrconfig_handler(uchar msg) {
@@ -225,6 +299,7 @@ void pgrconfig_handler(uchar msg) {
 	uchar max_option = sizeof(pgr_options)/sizeof(LABEL);
 
 	if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
+	        SET_BORE_MODE;
 		nextwin = PG_MAIN;
 		return;
 	}
@@ -276,6 +351,7 @@ void pgtconfig_handler(uchar msg) {
 	uchar min_option = 1;
 	uchar max_option = sizeof(pgt_options)/sizeof(LABEL);
 	if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
+	        SET_THERM_MODE;
 		nextwin = PG_MAIN;
 		return;
 	}
@@ -299,7 +375,7 @@ void pgtconfig_handler(uchar msg) {
 	return;
 }
 //channel probe setup
-LABEL flash pgch_banner =    {LBL_HZ16,3,3,4,"通道设置"};
+LABEL flash pgch_banner =    {LBL_HZ16,3,3,6,"选择要配置的通道"};
 LABEL flash pgch_chvalue = {LBL_HZ6X8,130,3,2,strbuf};
 LABEL flash pgch_items[] = {
 	{LBL_HZ6X8, 10, 30, 10, strbuf},
@@ -312,8 +388,8 @@ LABEL flash pgch_items[] = {
 
 //select the channel to config
 void pgchset_handler(uchar msg) {
-	static uint curr_pos = 0;
-	static uint last_pos = 0;
+	static uint curr_pos = 1; //absolute postion in options 1-24
+	static uint last_pos = 1;
 	uchar min_option = 1;
 	uchar max_option = sizeof(pgch_items)/sizeof(LABEL);
 	uchar min_index = 1;
@@ -342,18 +418,21 @@ void pgchset_handler(uchar msg) {
 		return;
 	}
 	if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
+	/*
 		KEY_TABLE;
 		msg = MSG_REFRESH;
+	*/
 	}
 	if(msg == KEY_DOT)
 	{                                    
 	        if(IS_THERM_MODE)
-	        {
+	        {                         
 		        sysdata.tid[curr_pos - 1] = INVALID_PROBE;
 	        }else{
        		        sysdata.rid[curr_pos - 1] = INVALID_PROBE;
 	        }
-		msg = MSG_REFRESH;
+		msg = MSG_REFRESH;        
+		new_page = 1; //refresh the whole page
 	}
 	if(msg == MSG_INIT) {
 		LCD_Cls();
@@ -408,8 +487,10 @@ void pgprbset_handler(uchar msg) {
 	int i,j;
 	uchar new_page = 1;
 	if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
+	/*
 		KEY_TABLE;
 		msg = MSG_REFRESH;
+	*/
 	}
 	if(msg == KEY_CE || msg == KEY_TAB)
 	{
@@ -445,9 +526,9 @@ void pgprbset_handler(uchar msg) {
 		REFRESH_TABLES1(pgprbset_);	
 		        if(IS_THERM_MODE)
 		        {
-			        sprintf(strbuf,"%i.%s",i,tname2b(j-1));
+			        sprintf(strbuf,"%i.%s",j,tname2b(j-1));
 		        }else{                                        
-        		        sprintf(strbuf,"%i.%s",i,rname2b(j-1));
+        		        sprintf(strbuf,"%i.%s",j,rname2b(j-1));
 		        }
         		draw_label(&(pgprbset_items[i-1]),SW_NORMAL);
 		REFRESH_TABLES2(pgprbset_);
@@ -477,21 +558,25 @@ void pgprblist_handler(uchar msg) {
 	uchar i,j;
 	uchar new_page = 1;
 	if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
+	/*
 		KEY_TABLE;
 		msg = MSG_REFRESH;
+	*/
 	}
-	if(msg == KEY_CE)
+	if(msg == KEY_TAB || msg == KEY_CE)
 	{
 		nextwin = PG_CHSET;
 		return;
 	}
-	if(msg == KEY_TAB || msg == KEY_OK)
+	if(msg == KEY_OK)
 	{                                      
 	        if(IS_THERM_MODE)
-	        {
-		        sysdata.tid[curr_ch-1] = curr_pos - 1;
+	        {                          
+       	                if(tprbdata.name[curr_pos-1][0] != '\0')           
+        		        sysdata.tid[curr_ch-1] = curr_pos - 1;
 	        }else{
-		        sysdata.rid[curr_ch-1] = curr_pos - 1;	        
+                        if(rprbdata.name[curr_pos-1][0] != '\0')           
+		                sysdata.rid[curr_ch-1] = curr_pos - 1;	        
 	        }
 		nextwin = PG_CHSET;
 		return;
@@ -521,6 +606,7 @@ void pgprblist_handler(uchar msg) {
 		        sysdata.rid[curr_ch-1] = INVALID_PROBE;	        
 	        }	        
        		msg = MSG_REFRESH;
+       		new_page = 1;
 	}
 	if(msg == MSG_REFRESH) {
 		REFRESH_TABLES1(prblist_);  
@@ -657,19 +743,22 @@ LABEL flash snlbl = {LBL_HZ12,10,17,4,"1.序列号"};
 LABEL flash snval = {LBL_HZ6X8,75,22,10,strbuf};
 LABEL flash typelbl = {LBL_HZ12,10,31,3,"2.类型"};
 LABEL flash typeval = {LBL_HZ6X8,59,36,10,strbuf};
-LABEL flash paramlbl1 = {LBL_HZ12,130,31,3,"3.a"};
-LABEL flash paramval1 = {LBL_HZ6X8,165,36,10,strbuf};
-LABEL flash paramlbl2 = {LBL_HZ12,10,45,3,"4.b"};
-LABEL flash paramval2 = {LBL_HZ6X8,45,50,10,strbuf};
-LABEL flash paramlbl3 = {LBL_HZ12,130,45,3,"5.c"};
-LABEL flash paramval3 = {LBL_HZ6X8,165,50,10,strbuf};
+LABEL flash paramlbl1 = {LBL_HZ12,130,31,3,"3."};
+LABEL flash paramval1 = {LBL_HZ6X8,147,36,10,strbuf};
+LABEL flash paramlbl2 = {LBL_HZ12,10,45,3,"4."};
+LABEL flash paramval2 = {LBL_HZ6X8,27,50,10,strbuf};
+LABEL flash paramlbl3 = {LBL_HZ12,130,45,3,"5."};
+LABEL flash paramval3 = {LBL_HZ6X8,147,50,10,strbuf};
+LABEL flash paramlbl3b = {LBL_HZ12,10,45,7,"3."};
+LABEL flash paramval3b = {LBL_HZ6X8,27,50,10,strbuf};
+
 //configuration of BORE probe parameter
 void pgprbconfig_handler(uchar msg) {
-	if(msg == KEY_TAB || msg == KEY_OK) {
+	if( msg == KEY_OK) {
 		nextwin = PG_PRBSET;
 		return;
 	}
-	if(msg == KEY_CE) {
+	if(msg == KEY_TAB || msg == KEY_CE) {
 		nextwin = PG_PRBSET;
 		return;
 	}
@@ -697,15 +786,22 @@ void pgprbconfig_handler(uchar msg) {
         		//type
 	        	sprintf(strbuf,":%s",getprbtype(rprbdata.type[curr_prb-1]));
 		        draw_label(&typelbl,SW_NORMAL);draw_label(&typeval,SW_NORMAL);
-        		//param1
-        		sprintf(strbuf,":%7f",rprbdata.param1[curr_prb-1]);
-		        draw_label(&paramlbl1,SW_NORMAL);draw_label(&paramval1,SW_NORMAL);
-        		//param2
-	        	sprintf(strbuf,":%7f",rprbdata.param2[curr_prb-1]);
-        		draw_label(&paramlbl2,SW_NORMAL);draw_label(&paramval2,SW_NORMAL);
-	        	//param3
-		        sprintf(strbuf,":%7f",rprbdata.param3[curr_prb-1]);
-        		draw_label(&paramlbl3,SW_NORMAL);draw_label(&paramval3,SW_NORMAL);
+		        if(rprbdata.type[curr_prb-1] == PRBTYPE_PT100)
+		        {
+		                sprintf(strbuf,"R(0!):%7f",rprbdata.param3[curr_prb-1]);
+        		        draw_label(&paramlbl3b,SW_NORMAL);draw_label(&paramval3b,SW_NORMAL);
+        		}else{
+        		        //param1
+                		sprintf(strbuf,"a:%9.3E",rprbdata.param1[curr_prb-1]);
+	        	        draw_label(&paramlbl1,SW_NORMAL);draw_label(&paramval1,SW_NORMAL);
+        	        	//param2
+	        	        sprintf(strbuf,"b:%9.3E",rprbdata.param2[curr_prb-1]);
+                		draw_label(&paramlbl2,SW_NORMAL);draw_label(&paramval2,SW_NORMAL);
+	                	//param3
+		                sprintf(strbuf,"c:%9.3E",rprbdata.param3[curr_prb-1]);
+        		        draw_label(&paramlbl3,SW_NORMAL);draw_label(&paramval3,SW_NORMAL);
+        		        
+        		}
                 }
 		return;
 	}
@@ -720,12 +816,19 @@ void pgprbconfig_handler(uchar msg) {
 		nextwin = PG_PRBTYPELIST;
 		return;
 	}
-	if(msg == KEY_NUM3 ){ 
+	if(msg == KEY_NUM3 ){                    
+	
 	        if(IS_BORE_MODE)
-	        {
-        		window_setup(8);
-	        	sprintf(strbuf,"输入系数a");
-		        rprbdata.param1[curr_prb-1] = wnd_floatinput(rprbdata.param1[curr_prb-1]);
+	        {              
+               		window_setup(10);
+	                if(rprbdata.type[curr_prb-1] == PRBTYPE_PT100)
+	                {
+        	                sprintf(strbuf,"输入R(0!)");                                              
+        	                rprbdata.param3[curr_prb-1] = wnd_floatinput(rprbdata.param1[curr_prb-1]);
+                        }else{
+        	        	sprintf(strbuf,"输入系数a");
+        	        	rprbdata.param1[curr_prb-1] = wnd_floatinput(rprbdata.param1[curr_prb-1]);
+        	        }
         		nextwin = PG_PRBCONFIG;
         	}
 		return;
@@ -733,7 +836,10 @@ void pgprbconfig_handler(uchar msg) {
 	if(msg == KEY_NUM4) {   
         	if(IS_BORE_MODE) 
         	{
-        		window_setup(8);
+	                if(rprbdata.type[curr_prb-1] == PRBTYPE_PT100)
+	                        return;
+
+        		window_setup(10);
 	        	sprintf(strbuf,"输入系数b");
 		        rprbdata.param2[curr_prb-1] = wnd_floatinput(rprbdata.param2[curr_prb-1]);
         		nextwin = PG_PRBCONFIG;
@@ -742,9 +848,11 @@ void pgprbconfig_handler(uchar msg) {
 	}
 	if(msg == KEY_NUM5) {     
 	        if(IS_BORE_MODE)
-	        {
-        		window_setup(8);
-		        sprintf(strbuf,"输入系数c");
+	        {       
+       	                if(rprbdata.type[curr_prb-1] == PRBTYPE_PT100)
+       	                        return;
+	                window_setup(10);       	                        
+       		        sprintf(strbuf,"输入系数c");
         		rprbdata.param3[curr_prb-1] = wnd_floatinput(rprbdata.param3[curr_prb-1]);
 		        nextwin = PG_PRBCONFIG;
 	        }

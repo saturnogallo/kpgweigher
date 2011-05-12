@@ -170,7 +170,7 @@ char highc(unsigned char x);
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
-typedef eeprom struct _SYSDATA
+typedef eeprom struct _SYSDATA
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
@@ -192,11 +192,12 @@ char highc(unsigned char x);
 extern SYSDATA eeprom sysdata;
 extern PRBDATA eeprom tprbdata;	//probe data for T mode
 extern PRBDATA eeprom rprbdata;	//probe data for R mode
-void State_Init();
+void State_Init();
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-extern void DBG(unsigned char);
+//#define ONESECBIT       14
+extern void DBG(unsigned char);
 void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
@@ -320,7 +321,7 @@ double RValueToTValue(double r, unsigned char prbid);
 double MValueToTValue(double r,char type);
 double GetWr(double t);
 double GetT(double w);
-  																	void scanner_set_channel(unsigned char ch);
+  																	void scanner_set_channel(unsigned char ch);
 void scanner_uart_push(unsigned char data);
 void pc_uart_push(unsigned char data);
 void nav_uart_push(unsigned char data);     
@@ -347,7 +348,8 @@ void *realloc(void *ptr, unsigned int size);
 void free(void *ptr);
 #pragma used-
 #pragma library stdlib.lib
-extern void pgmain_handler(unsigned char);	//running menu
+//#include "math.h"
+extern void pgmain_handler(unsigned char);	//running menu
 extern void pgrconfig_handler(unsigned char);	//main menu of R config
 extern void pgtconfig_handler(unsigned char);	//main menu of T config
 extern void pgchset_handler(unsigned char);	//menu of channel probe setup
@@ -408,10 +410,12 @@ unsigned char key;
 LABEL flash modify = {5,30,30,8,"正在更新数据..."};
 LABEL flash lbldbg = {1,10,30,8,strbuf};
 unsigned char nextwin = 0;
-int   curr_ch = 1;	//index of current channel in menu window
-int   curr_prb = 1;	//index of current probe selection in menu window
-int ch_to_search = 0;
-long dlg_cnt = 0;        //delay count time display
+int   curr_ch = 1;	//index of current channel in config menu window, 1 based
+int   curr_prb = 1;	//index of current probe selection in menu window 1 based
+int   curr_dispch = 1;  //index of start channel in main running window, 1 based
+int ch_to_search = 0;   //current channel , 0 based
+unsigned long dlg_cnt = 0;        //delay count time display
+unsigned long onesec_cnt = 0;
 unsigned char phase = 0;       //state machine index
 double valuep;
 /**************************************************************************************/
@@ -421,7 +425,12 @@ interrupt [15] void timer1_ovf_isr(void)
 {
 // Place your flash here
 }
-void InitLED()
+void dbgout(double val)
+{
+        sprintf(strbuf,"%f\r\n",val);
+        prints(strbuf,strlen(strbuf),3              );        
+}
+void InitLED()
 {
 /*
     PORTB.7=1;
@@ -431,6 +440,34 @@ interrupt [15] void timer1_ovf_isr(void)
     PORTD.7=1;
     PORTD.6=0; 
 */
+}   
+unsigned char nav1v = 1;
+void navto120mv()
+{               
+   nav1v = 0;  
+   dbgout(-0.12);      
+   nav_command(4);
+   sleepms(20000);            
+}           
+void navto1v()
+{            
+    nav1v = 1;
+    dbgout(-1.0);
+    nav_command(1);
+    sleepms(20000);
+    nav_command(3);
+    sleepms(20000);
+    nav_command(7);
+    sleepms(20000);
+    nav_command(6);
+    sleepms(20000);
+} 
+double mabs(double val)
+{
+        if(val < 0)
+                return -val;
+        else
+                return val;
 }
 unsigned char ToByte(char l, char h)
 {
@@ -465,12 +502,11 @@ char* tname2b(unsigned char i)
             namebuf[j] = tprbdata.name[i][j];
             if(namebuf[j] == '\0')
                 break;
-            if(namebuf[j] < '0' || namebuf[j] > '9')
-            {
-                namebuf[0] = '\0';
-                break;
-            }
-        }
+            if((namebuf[j] >= '0' && namebuf[j] <= '9') || (namebuf[j] >= 'A' && namebuf[j] <= 'Z'))
+                continue;
+            namebuf[0] = '\0';
+            break;
+        }
         return namebuf;
 }                                        
 char* rname2b(unsigned char i)
@@ -481,12 +517,11 @@ char* tname2b(unsigned char i)
             namebuf[j] = rprbdata.name[i][j];
             if(namebuf[j] == '\0')
                 break;
-            if(namebuf[j] < '0' || namebuf[j] > '9')
-            {
-                namebuf[0] = '\0';
-                break;
-            }
-        }
+            if((namebuf[j] >= '0' && namebuf[j] <= '9') || (namebuf[j] >= 'A' && namebuf[j] <= 'Z'))
+                continue;
+            namebuf[0] = '\0';
+            break;
+        }
         return namebuf;
 }                                        
 void sleepms(unsigned int ms)
@@ -515,10 +550,11 @@ unsigned char therm_state()
 	}
 	if(phase == 0)
 	{
-		if((tprbdata.type[i] <= 0x09) && (tprbdata.type[i] >= 0x03))
-		{
+		if( (tprbdata.type[i] >= 0x03) && (tprbdata.type[i] <= 0x09))
+		{              
 			scanner_set_channel(ch_to_search+1);	
-			dlg_cnt = 300000;
+			dlg_cnt = 100000;
+			onesec_cnt = 0;
 			phase = 1;
 			return 0;
 		}else{
@@ -528,10 +564,11 @@ unsigned char therm_state()
 	}
 	if(phase == 1)
 	{
-		rundata.reading[ch_to_search] = nav_read();
+		rundata.reading[ch_to_search] = nav_read();//-sysdata.V0;
                 sprintf(strbuf,"%2d;%f;",ch_to_search+1,rundata.reading[ch_to_search]);
                 prints(strbuf,strlen(strbuf),3              );
 				rundata.temperature[ch_to_search] = MValueToTValue(rundata.reading[ch_to_search], tprbdata.type[i]);
+//		if(ch_to_search==1) 		     rundata.temperature[ch_to_search] = 10;
                 sprintf(strbuf,"%f;\r\n",rundata.temperature[ch_to_search]);
                 prints(strbuf,strlen(strbuf),3              );
 		phase = 2;
@@ -566,56 +603,77 @@ unsigned char bore_state()
 			scanner_set_channel(ch_to_search+1);	
 			display_buttons('i',1);
 			display_buttons('j',0);
-			dlg_cnt =  300000 * sysdata.ktime;
+			dlg_cnt =  100000 * sysdata.ktime;
+			onesec_cnt = 0;
 			if(sysdata.kttmode == 1)
 				phase = 1;
 			else
 				phase = 2;
-			return 0;
-		}else{
+       			return 0;
+		}else{                           
 			rundata.temperature[ch_to_search] = -9999;
 			phase = 5;
 		}
 	}
 	if(phase == 1)  //-stdV in ktt mode
-	{
-		rundata.stdV = nav_read();
+	{                                                
+		rundata.stdV = mabs(nav_read());
 		display_buttons('i',0);
-		dlg_cnt =  300000 * sysdata.ktime;
+		dlg_cnt =  100000 * sysdata.ktime;
+		onesec_cnt = 0;
 		phase = 2;
 		return 0;
 	}
 	if(phase == 2) //final stdV 
 	{
 		if(sysdata.kttmode == 1)
-		{
-			rundata.stdV = (rundata.stdV + nav_read());
+		{          
+			rundata.stdV = (rundata.stdV + mabs(nav_read()));
 			phase = 3;
-		}else{
-			rundata.stdV = nav_read();
+		}else{                       
+			rundata.stdV = mabs(nav_read());
 			phase = 4;
 		}                              
-		display_buttons('j',0);
-		dlg_cnt = 300000 * sysdata.ktime;
+		display_buttons('j',1);
+		dlg_cnt = 100000 * sysdata.ktime;      
+		onesec_cnt = 0;
 		return 0;	
 	}
 	if(phase == 3)  //-V on rx in ktt mode
-	{
-		valuep = nav_read();
+	{                             
+		valuep = mabs(nav_read());
 		display_buttons('i',1);
-		dlg_cnt = 300000 * sysdata.ktime;
+		dlg_cnt = 100000 * sysdata.ktime;
+		onesec_cnt = 0;
 		phase = 4;
 		return 0;	
 	}
 	if(phase == 4) // final V on rx
 	{
-		if(sysdata.kttmode == 1){
-			valuep = (valuep + nav_read());
-		}else{
-			valuep = nav_read();
+		if(sysdata.kttmode == 1){       
+			valuep = (valuep + mabs(nav_read()));
+			dbgout(valuep);
+			if((valuep > 0.21) && (valuep < 2) && (nav1v == 0))
+			{
+        		        navto1v();     
+			}            
+			if((valuep < 0.21) && (valuep > 0.0002) && (nav1v == 1))
+			{
+			        navto120mv();
+			}
+		}else{               
+			valuep = mabs(nav_read());                      
+			if((valuep > 0.105) && (valuep < 1) && (nav1v == 0))
+			{
+        		        navto1v();     
+			}            
+			if((valuep < 0.105) && (valuep > 0.0001) && (nav1v == 1))
+			{
+			        navto120mv();
+			}
 		}
 		if(rundata.stdV != 0)
-		{       
+		{            
 			rundata.reading[ch_to_search] = valuep*sysdata.Rs1/rundata.stdV - sysdata.R0;
 			if(rundata.reading[ch_to_search] > 0)
 			{
@@ -626,7 +684,7 @@ unsigned char bore_state()
                                 sprintf(strbuf,"%f;\r\n",rundata.temperature[ch_to_search]);
                                 prints(strbuf,strlen(strbuf),3              );
 			}
-		}else{
+		}else{  
 		        rundata.temperature[ch_to_search] = -9999;
 		}
 		phase = 5;
@@ -637,6 +695,25 @@ unsigned char bore_state()
 		phase = 0;
 	}                 
 	return 1;
+}         
+LABEL flash statelbl = {1,100,55,16,strbuf};
+void updatestate()
+{
+        char star[6];
+        sprintf(star,"    ");
+        if(phase == 0)                sprintf(star,"*   ");
+        if(phase == 1)                sprintf(star,"**  ");
+        if(phase == 2)                sprintf(star,"*** ");        
+        if(phase == 3)                sprintf(star,"****");        
+                        if(sysdata.prbmode == 1){         
+                if(sysdata.kttmode == 1)                                                   
+                        sprintf(strbuf,"(ch%2i,%2d,%s)",ch_to_search+1,dlg_cnt/100000,star);
+                else
+                        sprintf(strbuf,"(ch%2i,%2d,%s)",ch_to_search+1,dlg_cnt/100000,star);                        
+        }else{                                                                      
+                sprintf(strbuf,"(ch:%2i,%2d,%s)",ch_to_search+1,dlg_cnt/100000,star);
+        }      
+        draw_label(&statelbl,1);
 }
 static unsigned char tA = 0xff;
 static unsigned char tB = 0xff;
@@ -651,11 +728,24 @@ void testB(unsigned char data)
 /**************************************************************************************/
 //                              Main Function Loop
 /**************************************************************************************/
-void main(void)
+extern double GetThmoVolt(double t,char type);      
+extern unsigned char databuf[12];
+extern unsigned char pos_databuf; //position in data buffer
+void main(void)
 {
     unsigned int i;  
     double dt;
-              // RS485 Node    
+    /*  just test algrithom 
+    sprintf(databuf,"9.99");    
+    pos_databuf = 4;
+    dt = buf2double();
+    rprbdata.type[0] = PRBTYPE_PT100;
+    rprbdata.param1[0] = 3.9083e-3;
+    rprbdata.param2[0] = -5.775e-7;
+    rprbdata.param3[0] = 100;//-4.183e-12;
+    dt = RValueToTValue(139.26, 0);//102
+    */
+    // RS485 Node    
     init_var();	//init data structure 
     // System Initialization
     Init_Port();
@@ -674,44 +764,27 @@ void testB(unsigned char data)
     /*********************************************************************/
     // intialize LED. 
     nextwin = 0; 
-    //init the DMM
-    nav_command(1);              
-    sleepms(2000);
-    nav_command(3);
-    sleepms(2000);
-    nav_command(7);
-    sleepms(2000);
-    nav_command(6);
-          if(sysdata.Rs1 < 0.01)
-    {
-        sysdata.Rs1 = 100;
-    }
-    sleepms(2000);
+        sleepms(2000);
     LCD_Init();
     wnd_msgbox(&bootup);
-    sleepms(2*300000); //wait until all the node is ready after power up        
-    if(key != '-'													  )
-    {
-        if(key == '1') //R0
-        {       
-                max_databuf = 10;                
-                sprintf(strbuf,"请输入铂电阻R0阻值");
-		sysdata.R0 = wnd_floatinput(sysdata.R0);
-        }
-        if(key == '2') //Rs1
-        {       
-                max_databuf = 10;                
-                sprintf(strbuf,"请输入内标准阻值");
-		sysdata.Rs1 = wnd_floatinput(sysdata.Rs1);
-        }
-    }
-        State_Init();	
-                    sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
+    //init the DMM
+    nav_command(1);              
+    sleepms(20000);
+    nav_command(3);
+    sleepms(20000);
+    nav_command(7);
+    sleepms(20000);
+    nav_command(6);
+    sleepms(20000);
+                         sleepms(2*100000); //wait until all the node is ready after power up        
+    State_Init();	
+        sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
         display_buttons('i',1);                               
-    display_buttons('j',1);
+    display_buttons('j',0);
     	 nextwin = 13;
 	 key = '-'													  ;
 	 curr_ch = 1; //channel for display
+	 curr_dispch = 1;
 	 while(1)
 	 {
  	 	if(nextwin != 0)
@@ -733,21 +806,17 @@ void testB(unsigned char data)
 				{
 					if(sysdata.prbmode == 1){
 						sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
-                                                display_buttons('j',1);
-                                                nav_command(4);
+                                                display_buttons('j',0);      
+                				display_buttons('i',1);
+                                                navto120mv();
 					}else{
 						sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
-                                                display_buttons('j',0);              
-                                                nav_command(1);
-                                                sleepms(2000);
-                                                nav_command(3);
-                                                sleepms(2000);
-                                                nav_command(7);
-                                                sleepms(2000);
-                                                nav_command(6);
-                                                sleepms(2000);
+                                                display_buttons('j',1);
+                				display_buttons('i',1);                                                              
+                                                navto1v();
 					}
 					dlg_cnt = 0;					
+					onesec_cnt = 0;
 					phase = 0;      //reset the state machine
 					display_buttons('i',1);
 				}
@@ -756,9 +825,10 @@ void testB(unsigned char data)
 					if(sysdata.prbmode == 1)
 					{
 						if((sysdata.kttmode == 1)){
-							sysdata.kttmode = 0;display_buttons('b',1);
+							sysdata.kttmode = 0; display_buttons('b',1);
+							display_buttons('i',1);
 						}else{
-							sysdata.kttmode = 1;display_buttons('b',0);
+							sysdata.kttmode = 1; display_buttons('b',0);
 							display_buttons('i',1);
 						}
 					}
@@ -768,7 +838,7 @@ void testB(unsigned char data)
 				        					display_buttons('c',1);
 					if(sysdata.prbmode == 0)
 					{                        
-					        i = sysdata.tid[ch_to_search];
+					        i = sysdata.tid[curr_dispch-1];
 					        if(i != 0xff)
 					        {
                 					if((tprbdata.type[i] >= 0x03) &&	                				   (tprbdata.type[i] <= 0x09))
@@ -787,15 +857,16 @@ void testB(unsigned char data)
 					display_buttons('d',1);
 					if(sysdata.prbmode == 1){
 					        sysdata.R0 = rundata.Rx;
-					}else{
+					}else{             
+					        //sysdata.V0 = nav_read();
 					        nav_command(8);
-					        sleepms(1000);
+					        sleepms(100000);
 					}
 					display_buttons('d',0);
 				}
 				if(curr_window == pgmain_handler)       //redraw the running window
 				{
-					pgmain_handler(0xff);
+					pgmain_handler(0xff);      
 				}
 			}else{
 				(*curr_window)(key);
@@ -804,11 +875,19 @@ void testB(unsigned char data)
 	  	}else{
 			if(curr_window != pgmain_handler)
 				continue;                               
-			if(dlg_cnt > 1)
-			{
+			                        			if(dlg_cnt > 1)
+			{         
+			        onesec_cnt++;
+			        if(onesec_cnt == (100000-10))
+			        {       
+        			        updatestate();
+        			}
+        			if(onesec_cnt == 100000)
+        			        onesec_cnt = 0 ;
 				dlg_cnt--;
 				continue;
-			}
+			}    
+			updatestate();
 			if((sysdata.prbmode == 0))			
 			{
 				if(therm_state() == 0)

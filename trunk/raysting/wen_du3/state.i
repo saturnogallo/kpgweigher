@@ -164,7 +164,7 @@ char highc(unsigned char x);
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
-typedef eeprom struct _SYSDATA
+typedef eeprom struct _SYSDATA
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
@@ -186,11 +186,12 @@ char highc(unsigned char x);
 extern SYSDATA eeprom sysdata;
 extern PRBDATA eeprom tprbdata;	//probe data for T mode
 extern PRBDATA eeprom rprbdata;	//probe data for R mode
-void State_Init();
+void State_Init();
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-extern void DBG(unsigned char);
+//#define ONESECBIT       14
+extern void DBG(unsigned char);
 void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
@@ -258,15 +259,16 @@ void prbsninput();
 extern MSG_HANDLER curr_window;
 extern MSG_HANDLER caller;
 extern unsigned char max_databuf;
-  																	  																	void scanner_set_channel(unsigned char ch);
+  																	  																	void scanner_set_channel(unsigned char ch);
 void scanner_uart_push(unsigned char data);
 void pc_uart_push(unsigned char data);
 void nav_uart_push(unsigned char data);     
 void nav_command(unsigned char cmd);
-extern unsigned char nextwin;  
-				                									extern int   curr_ch;	//index of current channel
+extern unsigned char nextwin;                                         //draw_label(&PRE##chvalue,SW_NORMAL);
+				                									extern int   curr_ch;	//index of current channel in configuation   menu
 extern int   curr_prb;	//index of current probe selection
-void State_Init() {
+extern int   curr_dispch; //start of current channel for display in main menu
+void State_Init() {
 	display_buttons('a',sysdata.prbmode);
 	display_buttons('b',sysdata.kttmode);
 	display_buttons('c',0); //probe type
@@ -274,29 +276,31 @@ extern int   curr_prb;	//index of current probe selection
 }
 char* getprbtype(unsigned char);
 LABEL flash pgmain_chs[] = {
-		{4, 4, 3,3,strbuf},
-		{1,2,30,3,strbuf},
-		{1,2,40,3,strbuf},
-		{1,2,50,3,strbuf}
+		{1,3, 3,5,strbuf},
+		{1,3,16,5,strbuf},
+		{1,3,29,5,strbuf},
+		{1,3,42,5,strbuf}
 	};
 LABEL flash pgmain_values[] = {
-		{4, 40,3,  7,strbuf},
-		{1,40,30,10,strbuf},
-		{1,40,40,10,strbuf},
-		{1,40,50,10,strbuf}
+		{1,40,3,10,strbuf},
+		{1,40,16,10,strbuf},
+		{1,40,29,10,strbuf},
+		{1,40,42,10,strbuf}
 	};
 LABEL flash pgmain_temps[] = {
-		{4, 140,3,  7,strbuf},
-		{1,140,30,10,strbuf},
-		{1,140,40,10,strbuf},
-		{1,140,50,10,strbuf}
+		{1,140,3, 10,strbuf},
+		{1,140,16,10,strbuf},
+		{1,140,29,10,strbuf},
+		{1,140,42,10,strbuf}
 };
-/*      Main display      */
-void pgmain_handler(unsigned char msg) {
-        unsigned char i,old_ch;	
+/*      Main display      */                          
+void pgmain_handler(unsigned char msg) {                                      
+        int max_option = 4;
+        unsigned char i,old_ch,isinit;	
                 unsigned char *cptr;
 	//LABEL flash usage = {LBL_HZ6X8,210,60,5,"usage"};
-        //Menu
+                             	isinit = 0;
+        //Menu
 	if(msg == 'T') {
 		if(sysdata.prbmode == 0)
 			nextwin = 4;
@@ -304,88 +308,157 @@ void pgmain_handler(unsigned char msg) {
 			nextwin = 3;
 		return;
 	}
-	if(msg == 0xff) {
-		LCD_Cls();
-		old_ch = curr_ch;
-		for(i=0;i<sizeof(pgmain_chs)/sizeof(LABEL);i++)//
-		{
-			sprintf(strbuf,"CH%02i:",curr_ch);
-			draw_label(&pgmain_chs[i],1);
-			curr_ch += 1 ;  if(curr_ch > 24){ curr_ch = 1;};
+        if(key == '1') //R0
+        {                                     
+                max_databuf = 10;                
+                if(sysdata.prbmode == 1)
+                {
+                        sprintf(strbuf,"请输入铂电阻R0阻值");
+	        	sysdata.R0 = wnd_floatinput(sysdata.R0);
+		        msg = 0xff;                         
+		}else{
+		        return;
+                        sprintf(strbuf,"请输入V0值");
+	        	sysdata.V0 = wnd_floatinput(sysdata.V0);
+                        msg = 0xff;
 		}
-		curr_ch = old_ch;
-		msg = 0xfe;
-	}
-	if(msg == 'U') {
-		curr_ch -= 1 ;  if(curr_ch == 0){  curr_ch = 24;  };	
-		old_ch = curr_ch;
-		for(i=0;i<sizeof(pgmain_chs)/sizeof(LABEL);i++)//
-		{
-			sprintf(strbuf,"CH%02i:",curr_ch);
-			draw_label(&pgmain_chs[i],1);
-			curr_ch += 1 ;  if(curr_ch > 24){ curr_ch = 1;};
-		}
-		curr_ch = old_ch;
-		msg = 0xfe;
+        }
+        if(key == '2') //Rs1
+        {       
+                if(sysdata.prbmode == 1)
+                {
+                        max_databuf = 10;                
+                        sprintf(strbuf,"请输入内标准阻值");
+		        sysdata.Rs1 = wnd_floatinput(sysdata.Rs1);
+        		msg = 0xff;		
+                }
+        }
+	if(msg == 'U') {    
+		curr_dispch -= 1 ;  if(curr_dispch == 0){  curr_dispch = 24;  };
+		msg = 0xff;
 	}
 	if(msg == 'D') {
-		curr_ch += 1 ;  if(curr_ch > 24){ curr_ch = 1;};
-		old_ch = curr_ch;
+		curr_dispch += 1 ;  if(curr_dispch > 24){ curr_dispch = 1;};
+		msg = 0xff;
+	}
+		if(msg == 0xff) {
+	        isinit = 1;
+		LCD_Cls();
+		old_ch = curr_dispch;     
+	        curr_dispch = curr_dispch - ((curr_dispch-1) % max_option);		 
 		for(i=0;i<sizeof(pgmain_chs)/sizeof(LABEL);i++)//
 		{
-			sprintf(strbuf,"CH%02i:",curr_ch);
-			draw_label(&pgmain_chs[i],1);
-			curr_ch += 1 ;  if(curr_ch > 24){ curr_ch = 1;};
+		        if(curr_dispch == old_ch)
+		        {
+        			sprintf(strbuf,"CH%02i:",curr_dispch);
+                                draw_label(&pgmain_chs[i],1);
+                                draw_label(&pgmain_chs[i],2);                                
+        		}
+        		else{
+        			sprintf(strbuf,"CH%02i:",curr_dispch);        			
+        			draw_label(&pgmain_chs[i],1);
+        		}
+			curr_dispch += 1 ;  if(curr_dispch > 24){ curr_dispch = 1;};
 		}
-		curr_ch = old_ch;
+		curr_dispch = old_ch;
 		msg = 0xfe;
 	}
-	if(msg == 0xfe) {
-		old_ch = curr_ch;
+		if(msg == 0xfe) {
+		old_ch = curr_dispch;          
+		curr_dispch = curr_dispch - ((curr_dispch-1) % max_option);		 
 		for(i=0;i<sizeof(pgmain_chs)/sizeof(LABEL);i++)//
 		{                         
 		        if(sysdata.prbmode == 0)
 		        {
-			        cptr = getprbtype(tprbdata.type[sysdata.tid[curr_ch-1]]);
-        			if((sysdata.tid[curr_ch - 1] == 0xff) ||        				(rundata.temperature[curr_ch - 1] < -9000) ||	        			(cptr[0] == 'P')){
-        				sprintf(strbuf," -------");
-	        			draw_label(&pgmain_values[i],1|4);
-		        		draw_label(&pgmain_temps[i],1|4);
+			        cptr = getprbtype(tprbdata.type[sysdata.tid[curr_dispch-1]]);
+        			if((sysdata.tid[curr_dispch - 1] == 0xff) ||	        			(cptr[0] == 'P')){
+               				sprintf(strbuf," -------  ");
+                                        if((curr_dispch-1 == ch_to_search) || (isinit == 1))
+                                        {
+                        			draw_label(&pgmain_values[i],1);
+		                		draw_label(&pgmain_temps[i],1);
+		                        }else{
+                        			draw_label(&pgmain_values[i],1|4);
+		                		draw_label(&pgmain_temps[i],1|4);
+		                        }
 			        }else{
-					sprintf(strbuf,"%8f",rundata.reading[curr_ch - 1]);
-					sprintf(strbuf+8," mV");
-					draw_label(&pgmain_values[i],1|4);
-				        sprintf(strbuf," %8f",rundata.temperature[curr_ch - 1]);
-        				sprintf(strbuf+8," C %c",cptr[0]);
-	        			draw_label(&pgmain_temps[i],1|4); 
+					sprintf(strbuf,"%8f",rundata.reading[curr_dispch - 1]);
+					if(curr_dispch-1 == ch_to_search)
+        					sprintf(strbuf+8,"*mV");
+                                        else                            
+                                                sprintf(strbuf+8," mV");
+                                        if((curr_dispch-1 == ch_to_search) || (isinit == 1))
+                                        {
+        					draw_label(&pgmain_values[i],1);
+        					if(rundata.temperature[curr_dispch - 1] < -9000)
+        					        sprintf(strbuf," OVER    ");
+        					else
+                				        sprintf(strbuf," %8f",rundata.temperature[curr_dispch - 1]);
+                				                        				sprintf(strbuf+8," ! %c",cptr[0]);                  
+                			        draw_label(&pgmain_temps[i],1); 
+                                        }else{                                            
+                                                draw_label(&pgmain_values[i],1|4);
+                				if(rundata.temperature[curr_dispch - 1] < -9000)
+                				{
+                				        sprintf(strbuf," OVER    ");
+                				}else{
+                				        sprintf(strbuf," %8f",rundata.temperature[curr_dispch - 1]);
+                				}
+        				        sprintf(strbuf+8," ! %c",cptr[0]);                                 
+	        			        draw_label(&pgmain_temps[i],1|4);                                                 
+                                        }
 				        if(pgmain_temps[i].type == 1)
         				        LCD_Rectange(221,pgmain_temps[i].y-2,221 + 12, pgmain_temps[i].y -2 +10);
         				else                                     //Hz12                            
                 				LCD_Rectange(221,pgmain_temps[i].y-2,221 + 12,pgmain_temps[i].y -2 + 16);	        			
 	                        }
 			}else{
-       			        cptr = getprbtype(rprbdata.type[sysdata.rid[curr_ch-1]]);
-        			if((sysdata.rid[curr_ch - 1] == 0xff) ||        				(rundata.temperature[curr_ch - 1] < -9000) ||	        			(cptr[0] != 'P'))
-	        		{
-        				sprintf(strbuf," -------");
-	        			draw_label(&pgmain_values[i],1|4);
-		        		draw_label(&pgmain_temps[i],1|4);
+       			        cptr = getprbtype(rprbdata.type[sysdata.rid[curr_dispch-1]]);
+        			if((sysdata.rid[curr_dispch - 1] == 0xff) ||        				(rundata.temperature[curr_dispch - 1] < -9000) ||	        			(cptr[0] != 'P'))
+	        		{                                           
+	        		        if(sysdata.rid[curr_dispch - 1] == 0xff)
+                				sprintf(strbuf," ------- ohm");
+                			if(rundata.temperature[curr_dispch - 1] < -9000)
+                        			sprintf(strbuf," NO READ    ");
+                                        else
+                                        	sprintf(strbuf," -------    ");
+                                        if((curr_dispch-1 == ch_to_search) || (isinit == 1))
+                                        {
+        	        			draw_label(&pgmain_values[i],1);
+                				sprintf(strbuf," -------  ");	        			
+		                		draw_label(&pgmain_temps[i],1);
+		                	}else{
+        	        			draw_label(&pgmain_values[i],1|4);
+                				sprintf(strbuf," -------  ");	        			
+		                		draw_label(&pgmain_temps[i],1|4);
+		                	}
 			        }else{
-					sprintf(strbuf,"%8f",rundata.reading[curr_ch - 1]);
-					sprintf(strbuf+8," ohm");
-	        			draw_label(&pgmain_values[i],1|4);
-		        		sprintf(strbuf," %8f",rundata.temperature[curr_ch - 1]);
-			        	sprintf(strbuf+8," C %c",cptr[0]);
-				        draw_label(&pgmain_temps[i],1|4);
+					sprintf(strbuf,"%8f",rundata.reading[curr_dispch - 1]);     
+					if(curr_dispch-1 == ch_to_search)
+        					sprintf(strbuf+8,"*ohm");
+                                        else
+        					sprintf(strbuf+8," ohm");        					
+                                        if((curr_dispch-1 == ch_to_search) || (isinit == 1))
+                                        {        					
+	        			        draw_label(&pgmain_values[i],1); 
+        		        		sprintf(strbuf," %8f",rundata.temperature[curr_dispch - 1]);
+	        		        	sprintf(strbuf+8," ! %c",cptr[0]);
+		        		        draw_label(&pgmain_temps[i],1);
+		        		 }else{
+	        			        draw_label(&pgmain_values[i],1|4); 
+        		        		sprintf(strbuf," %8f",rundata.temperature[curr_dispch - 1]);
+	        		        	sprintf(strbuf+8," ! %c",cptr[0]);
+		        		        draw_label(&pgmain_temps[i],1|4);
+		        		 }
 				        if(pgmain_temps[i].type == 1)
         				        LCD_Rectange(221,pgmain_temps[i].y-2,221+12,pgmain_temps[i].y -2 +10);
         				else                                     //Hz12                            
                 				LCD_Rectange(221,pgmain_temps[i].y-2,221+12,pgmain_temps[i].y -2 + 16);
         			}       			        
 	                }
-			curr_ch += 1 ;  if(curr_ch > 24){ curr_ch = 1;};
+			curr_dispch += 1 ;  if(curr_dispch > 24){ curr_dispch = 1;};
 		}
-		curr_ch = old_ch;
+		curr_dispch = old_ch;
 	}
 }
 //main configuration window of R
@@ -409,7 +482,7 @@ void pgcalibrate()
 	if(oldvalue == 0)
                 return;	
         wnd_msgbox(&pgr_calibrate);                        
-        sysdata.Rs1 = (oldvalue + sysdata.R0)*sysdata.Rs1/(rundata.Rx+sysdata.R0);
+        sysdata.Rs1 = (oldvalue + sysdata.R0)*sysdata.Rs1/(rundata.reading[curr_dispch-1]+sysdata.R0);
 }       
 //main menu of bore config
 void pgrconfig_handler(unsigned char msg) {
@@ -419,6 +492,7 @@ void pgrconfig_handler(unsigned char msg) {
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(pgr_options)/sizeof(LABEL);
 	if(msg == 'T' || msg == 'C' || msg == 'O') {
+	        sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
 		nextwin = 2;
 		return;
 	}
@@ -469,6 +543,7 @@ void pgtconfig_handler(unsigned char msg) {
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(pgt_options)/sizeof(LABEL);
 	if(msg == 'T' || msg == 'C' || msg == 'O') {
+	        sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
 		nextwin = 2;
 		return;
 	}
@@ -492,7 +567,7 @@ void pgtconfig_handler(unsigned char msg) {
 	return;
 }
 //channel probe setup
-LABEL flash pgch_banner =    {5,3,3,4,"通道设置"};
+LABEL flash pgch_banner =    {5,3,3,6,"选择要配置的通道"};
 LABEL flash pgch_chvalue = {1,130,3,2,strbuf};
 LABEL flash pgch_items[] = {
 	{1, 10, 30, 10, strbuf},
@@ -504,8 +579,8 @@ LABEL flash pgch_items[] = {
 };
 //select the channel to config
 void pgchset_handler(unsigned char msg) {
-	static unsigned int curr_pos = 0;
-	static unsigned int last_pos = 0;
+	static unsigned int curr_pos = 1; //absolute postion in options 1-24
+	static unsigned int last_pos = 1;
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(pgch_items)/sizeof(LABEL);
 	unsigned char min_index = 1;
@@ -533,18 +608,21 @@ void pgchset_handler(unsigned char msg) {
 		return;
 	}
 	if(msg >= '0' && msg <= '9') {
-		if((msg > '0') && (unsigned char)((msg-'0')*max_option) <= max_index)					{new_page = 1; curr_pos = (unsigned char)((msg-'1')*max_option)+1;};
-		msg = 0xfe;
+	/*
+		KEY_TABLE;
+		msg = MSG_REFRESH;
+	*/
 	}
 	if(msg == '.')
 	{                                    
 	        if(sysdata.prbmode == 0)
-	        {
+	        {                         
 		        sysdata.tid[curr_pos - 1] = 0xff;
 	        }else{
        		        sysdata.rid[curr_pos - 1] = 0xff;
 	        }
-		msg = 0xfe;
+		msg = 0xfe;        
+		new_page = 1; //refresh the whole page
 	}
 	if(msg == 0xff) {
 		LCD_Cls();
@@ -554,7 +632,7 @@ void pgchset_handler(unsigned char msg) {
 		msg = 0xfe;
 	}
 	if(msg == 0xfe) {      
-	        		sprintf(strbuf,"%i",curr_pos);draw_label(&pgch_chvalue,1);                		if(new_page == 1){		                	for(i = min_option; i <= max_option; i++){				                j = ((curr_pos-1)/max_option)*max_option + i;;
+	        		sprintf(strbuf,"%i",curr_pos);                		if(new_page == 1){		                	for(i = min_option; i <= max_option; i++){				                j = ((curr_pos-1)/max_option)*max_option + i;;
 		        if(sysdata.prbmode == 0)
         	        {
 				if(sysdata.tid[j-1] == 0xff){
@@ -598,8 +676,10 @@ void pgprbset_handler(unsigned char msg) {
 	int i,j;
 	unsigned char new_page = 1;
 	if(msg >= '0' && msg <= '9') {
-		if((msg > '0') && (unsigned char)((msg-'0')*max_option) <= max_index)					{new_page = 1; curr_pos = (unsigned char)((msg-'1')*max_option)+1;};
-		msg = 0xfe;
+	/*
+		KEY_TABLE;
+		msg = MSG_REFRESH;
+	*/
 	}
 	if(msg == 'C' || msg == 'T')
 	{
@@ -632,12 +712,12 @@ void pgprbset_handler(unsigned char msg) {
 		msg = 0xfe;
 	}
 	if(msg == 0xfe) {
-		sprintf(strbuf,"%i",curr_pos);draw_label(&pgprbset_chvalue,1);                		if(new_page == 1){		                	for(i = min_option; i <= max_option; i++){				                j = ((curr_pos-1)/max_option)*max_option + i;;	
+		sprintf(strbuf,"%i",curr_pos);                		if(new_page == 1){		                	for(i = min_option; i <= max_option; i++){				                j = ((curr_pos-1)/max_option)*max_option + i;;	
 		        if(sysdata.prbmode == 0)
 		        {
-			        sprintf(strbuf,"%i.%s",i,tname2b(j-1));
+			        sprintf(strbuf,"%i.%s",j,tname2b(j-1));
 		        }else{                                        
-        		        sprintf(strbuf,"%i.%s",i,rname2b(j-1));
+        		        sprintf(strbuf,"%i.%s",j,rname2b(j-1));
 		        }
         		draw_label(&(pgprbset_items[i-1]),1);
 		draw_label(&(pgprbset_items[i-1]),1);				        if((curr_pos-1) % max_option == (i-1))					        draw_label(&(pgprbset_items[i-1]),2);        			        }                                }else{	                		for(i = min_option; i <= max_option; i++) {        		        		if((last_pos-1) % max_option == (i-1)) 	draw_label(&(pgprbset_items[i-1]),2);				                if((curr_pos-1) % max_option == (i-1))	draw_label(&(pgprbset_items[i-1]),2);			                }		                }	;
@@ -667,21 +747,25 @@ void pgprblist_handler(unsigned char msg) {
 	unsigned char i,j;
 	unsigned char new_page = 1;
 	if(msg >= '0' && msg <= '9') {
-		if((msg > '0') && (unsigned char)((msg-'0')*max_option) <= max_index)					{new_page = 1; curr_pos = (unsigned char)((msg-'1')*max_option)+1;};
-		msg = 0xfe;
+	/*
+		KEY_TABLE;
+		msg = MSG_REFRESH;
+	*/
 	}
-	if(msg == 'C')
+	if(msg == 'T' || msg == 'C')
 	{
 		nextwin = 7;
 		return;
 	}
-	if(msg == 'T' || msg == 'O')
+	if(msg == 'O')
 	{                                      
 	        if(sysdata.prbmode == 0)
-	        {
-		        sysdata.tid[curr_ch-1] = curr_pos - 1;
+	        {                          
+       	                if(tprbdata.name[curr_pos-1][0] != '\0')           
+        		        sysdata.tid[curr_ch-1] = curr_pos - 1;
 	        }else{
-		        sysdata.rid[curr_ch-1] = curr_pos - 1;	        
+                        if(rprbdata.name[curr_pos-1][0] != '\0')           
+		                sysdata.rid[curr_ch-1] = curr_pos - 1;	        
 	        }
 		nextwin = 7;
 		return;
@@ -711,9 +795,10 @@ void pgprblist_handler(unsigned char msg) {
 		        sysdata.rid[curr_ch-1] = 0xff;	        
 	        }	        
        		msg = 0xfe;
+       		new_page = 1;
 	}
 	if(msg == 0xfe) {
-		sprintf(strbuf,"%i",curr_pos);draw_label(&prblist_chvalue,1);                		if(new_page == 1){		                	for(i = min_option; i <= max_option; i++){				                j = ((curr_pos-1)/max_option)*max_option + i;;  
+		sprintf(strbuf,"%i",curr_pos);                		if(new_page == 1){		                	for(i = min_option; i <= max_option; i++){				                j = ((curr_pos-1)/max_option)*max_option + i;;  
 		        if(sysdata.prbmode == 0)
 		        {	
 		                sprintf(strbuf,"%s",tname2b(j-1));
@@ -843,19 +928,21 @@ LABEL flash snlbl = {4,10,17,4,"1.序列号"};
 LABEL flash snval = {1,75,22,10,strbuf};
 LABEL flash typelbl = {4,10,31,3,"2.类型"};
 LABEL flash typeval = {1,59,36,10,strbuf};
-LABEL flash paramlbl1 = {4,130,31,3,"3.a"};
-LABEL flash paramval1 = {1,165,36,10,strbuf};
-LABEL flash paramlbl2 = {4,10,45,3,"4.b"};
-LABEL flash paramval2 = {1,45,50,10,strbuf};
-LABEL flash paramlbl3 = {4,130,45,3,"5.c"};
-LABEL flash paramval3 = {1,165,50,10,strbuf};
-//configuration of BORE probe parameter
+LABEL flash paramlbl1 = {4,130,31,3,"3."};
+LABEL flash paramval1 = {1,147,36,10,strbuf};
+LABEL flash paramlbl2 = {4,10,45,3,"4."};
+LABEL flash paramval2 = {1,27,50,10,strbuf};
+LABEL flash paramlbl3 = {4,130,45,3,"5."};
+LABEL flash paramval3 = {1,147,50,10,strbuf};
+LABEL flash paramlbl3b = {4,10,45,7,"3."};
+LABEL flash paramval3b = {1,27,50,10,strbuf};
+//configuration of BORE probe parameter
 void pgprbconfig_handler(unsigned char msg) {
-	if(msg == 'T' || msg == 'O') {
+	if( msg == 'O') {
 		nextwin = 10;
 		return;
 	}
-	if(msg == 'C') {
+	if(msg == 'T' || msg == 'C') {
 		nextwin = 10;
 		return;
 	}
@@ -883,15 +970,21 @@ void pgprbconfig_handler(unsigned char msg) {
         		//type
 	        	sprintf(strbuf,":%s",getprbtype(rprbdata.type[curr_prb-1]));
 		        draw_label(&typelbl,1);draw_label(&typeval,1);
-        		//param1
-        		sprintf(strbuf,":%7f",rprbdata.param1[curr_prb-1]);
-		        draw_label(&paramlbl1,1);draw_label(&paramval1,1);
-        		//param2
-	        	sprintf(strbuf,":%7f",rprbdata.param2[curr_prb-1]);
-        		draw_label(&paramlbl2,1);draw_label(&paramval2,1);
-	        	//param3
-		        sprintf(strbuf,":%7f",rprbdata.param3[curr_prb-1]);
-        		draw_label(&paramlbl3,1);draw_label(&paramval3,1);
+		        if(rprbdata.type[curr_prb-1] == 0xf1)
+		        {
+		                sprintf(strbuf,"R(0!):%7f",rprbdata.param3[curr_prb-1]);
+        		        draw_label(&paramlbl3b,1);draw_label(&paramval3b,1);
+        		}else{
+        		        //param1
+                		sprintf(strbuf,"a:%9.3E",rprbdata.param1[curr_prb-1]);
+	        	        draw_label(&paramlbl1,1);draw_label(&paramval1,1);
+        	        	//param2
+	        	        sprintf(strbuf,"b:%9.3E",rprbdata.param2[curr_prb-1]);
+                		draw_label(&paramlbl2,1);draw_label(&paramval2,1);
+	                	//param3
+		                sprintf(strbuf,"c:%9.3E",rprbdata.param3[curr_prb-1]);
+        		        draw_label(&paramlbl3,1);draw_label(&paramval3,1);
+        		                		}
                 }
 		return;
 	}
@@ -906,12 +999,18 @@ void pgprbconfig_handler(unsigned char msg) {
 		nextwin = 9;
 		return;
 	}
-	if(msg == '3' ){ 
-	        if(sysdata.prbmode == 1)
-	        {
-        		max_databuf = 8;
-	        	sprintf(strbuf,"输入系数a");
-		        rprbdata.param1[curr_prb-1] = wnd_floatinput(rprbdata.param1[curr_prb-1]);
+	if(msg == '3' ){                    
+		        if(sysdata.prbmode == 1)
+	        {              
+               		max_databuf = 10;
+	                if(rprbdata.type[curr_prb-1] == 0xf1)
+	                {
+        	                sprintf(strbuf,"输入R(0!)");                                              
+        	                rprbdata.param3[curr_prb-1] = wnd_floatinput(rprbdata.param1[curr_prb-1]);
+                        }else{
+        	        	sprintf(strbuf,"输入系数a");
+        	        	rprbdata.param1[curr_prb-1] = wnd_floatinput(rprbdata.param1[curr_prb-1]);
+        	        }
         		nextwin = 11;
         	}
 		return;
@@ -919,7 +1018,9 @@ void pgprbconfig_handler(unsigned char msg) {
 	if(msg == '4') {   
         	if(sysdata.prbmode == 1) 
         	{
-        		max_databuf = 8;
+	                if(rprbdata.type[curr_prb-1] == 0xf1)
+	                        return;
+        		max_databuf = 10;
 	        	sprintf(strbuf,"输入系数b");
 		        rprbdata.param2[curr_prb-1] = wnd_floatinput(rprbdata.param2[curr_prb-1]);
         		nextwin = 11;
@@ -928,9 +1029,11 @@ void pgprbconfig_handler(unsigned char msg) {
 	}
 	if(msg == '5') {     
 	        if(sysdata.prbmode == 1)
-	        {
-        		max_databuf = 8;
-		        sprintf(strbuf,"输入系数c");
+	        {       
+       	                if(rprbdata.type[curr_prb-1] == 0xf1)
+       	                        return;
+	                max_databuf = 10;       	                        
+       		        sprintf(strbuf,"输入系数c");
         		rprbdata.param3[curr_prb-1] = wnd_floatinput(rprbdata.param3[curr_prb-1]);
 		        nextwin = 11;
 	        }
@@ -960,25 +1063,25 @@ void pgboottype_handler(unsigned char msg) {
 	}
 	if(msg == '1') {
 		sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
-		display_buttons('j',0);
+		display_buttons('j',1);
 		nextwin = 2;
 		return;
 	}
 	if(msg == '2') {
 		sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
-		display_buttons('j',0);
+		display_buttons('j',1);
 		nextwin = 3;
 		return;
 	}
 	if(msg == '3') {
 		sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
-		display_buttons('j',1);
+		display_buttons('j',0);
 		nextwin = 2;
 		return;
 	}
 	if(msg == '4') {
 		sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
-		display_buttons('j',1);
+		display_buttons('j',0);
 		nextwin = 4;
 		return;
 	}

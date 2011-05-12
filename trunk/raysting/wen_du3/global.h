@@ -76,8 +76,8 @@ void sleepms(u16 ms);
 
 #define SET_PKTT     display_buttons(KEY_KTT,1)
 #define SET_NKTT     display_buttons(KEY_KTT,0)
-#define SET_TORX     display_buttons(KEY_RS,0)
-#define SET_TORS     display_buttons(KEY_RS,1)
+#define SET_TORX     display_buttons(KEY_RS,1)
+#define SET_TORS     display_buttons(KEY_RS,0)
                               
 double nav_read();
 
