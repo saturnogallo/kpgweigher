@@ -1,5 +1,6 @@
 #include "utili.h"
-#include "window.h"
+#include "window.h"  
+#include "stdlib.h"
 /*---------------ÑÓÊ±×Ó³ÌÐò----------------*/
 /*
 void delay1 (uint ms) 
@@ -36,7 +37,9 @@ extern uchar pos_databuf;
 extern uchar data_sign;
 extern u8 databuf[12];
 double buf2double()		
-{
+{                  
+        return atof(databuf);
+        /*
 	double tmp = 0.0;
 	uchar i = 0;
 	uchar pos = 0;
@@ -53,15 +56,19 @@ double buf2double()
 	if(data_sign == 1)
 	        tmp = -tmp;
        	return tmp;
+       	*/
 }
 int buf2byte()	    //convert rundata.tempbuf to byte (00-99)
-{
+{       
+        return atoi(databuf);
+        /*
 	int tmp = 0;
 	uchar i;
 	for(i=0;i<pos_databuf;i++) {
 		tmp = tmp * 10+(databuf[i] - '0');
 	}
 	return tmp;
+	*/
 }
 
 

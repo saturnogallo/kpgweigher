@@ -140,7 +140,7 @@ char highc(unsigned char x);
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
-typedef eeprom struct _SYSDATA
+typedef eeprom struct _SYSDATA
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
@@ -162,11 +162,12 @@ char highc(unsigned char x);
 extern SYSDATA eeprom sysdata;
 extern PRBDATA eeprom tprbdata;	//probe data for T mode
 extern PRBDATA eeprom rprbdata;	//probe data for R mode
-void State_Init();
+void State_Init();
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-extern void DBG(unsigned char);
+//#define ONESECBIT       14
+extern void DBG(unsigned char);
 void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
@@ -250,9 +251,11 @@ void LCD_Print6X8(unsigned char x, unsigned char y,unsigned char *s);
 unsigned char pos_databuf; //position in data buffer
 unsigned char max_databuf;
 unsigned char data_sign;   // sign of the data
-LABEL flash datalbl = {5,30,10,8,strbuf};
-LABEL flash databox = {5,30,30,8,databuf};
-void prbsninput()
+LABEL flash datalbl = {5,10,10,8,strbuf};
+LABEL flash datalbl2 = {1,140,54,8,"UP:+/-,DN:'E'"};
+LABEL flash datalbl3 = {1,140,54,8,"UP/DN:'A'-'Z'"};
+LABEL flash databox = {5,20,30,9,databuf};
+void prbsninput()
 {
 	unsigned char msg,len; 
 	databuf[0] = '\0';
@@ -266,6 +269,7 @@ LABEL flash databox = {5,30,30,8,databuf};
 		if(msg == 0xff) {
 			LCD_Cls();
 			draw_label(&datalbl,1);
+			draw_label(&datalbl3,1);
 			sprintf(databuf,"");
 			draw_inputbox(&databox);
 //			LCD_ShowCursor(databox.x,databox.y);
@@ -280,9 +284,11 @@ LABEL flash databox = {5,30,30,8,databuf};
         			msg = MSG_REFRESH;
                         }
                 */
+                        key = '-'													  ;
+                        return;
 		}
 		if(msg == 'C') {	                  
-				key = '-'													  ;
+		        key = '-'													  ;
 			return;
 		}
 		if(msg == 'D') {
@@ -339,7 +345,7 @@ LABEL flash databox = {5,30,30,8,databuf};
 			draw_label(&databox,1);
 //			LCD_ShowCursor(databox.x+pos_databuf*16,databox.y);
 		}
-				key = '-'													  ;
+		key = '-'													  ;
 	}
 //	LCD_HideCursor();
 }
@@ -376,29 +382,35 @@ LABEL flash databox = {5,30,30,8,databuf};
                         }
                 */
 		}
-		if(msg == 'D') {
+				if(msg == 'D') {
+		/*
 			if(pos_databuf == 0)
 			{
 				databuf[pos_databuf++] = '0';
 				databuf[pos_databuf] = '\0';
 			}
-			if(databuf[pos_databuf-1] == '0')
+
+			if(databuf[pos_databuf-1] == '0')
 				databuf[pos_databuf-1] = '9';
 			else
 				databuf[pos_databuf-1] -= 1;
-			msg = 0xfe;
+			msg = MSG_REFRESH;
+                */
 		}
 		if(msg == 'U') {
+		/*
 			if(pos_databuf == 0)
 			{
 				databuf[pos_databuf++] = '0';
 				databuf[pos_databuf] = '\0';
 			}
-			if(databuf[pos_databuf-1] == '9')
+
+			if(databuf[pos_databuf-1] == '9')
 				databuf[pos_databuf-1] = '0';
 			else
 				databuf[pos_databuf-1] += 1;
-			msg = 0xfe;
+			msg = MSG_REFRESH;
+                */
 		}
 		if(msg >= '0' && msg <= '9') {
         		if(pos_databuf < max_databuf)
@@ -428,7 +440,7 @@ LABEL flash databox = {5,30,30,8,databuf};
 double wnd_floatinput(double lastval)
 {
 	unsigned char msg;
-	databuf[0] = ' ';
+	databuf[0] = '+';
         databuf[1] = '\0';
         pos_databuf = 1;
         data_sign = 0;	
@@ -445,49 +457,63 @@ double wnd_floatinput(double lastval)
 		{
 			LCD_Cls();
 			draw_label(&datalbl,1);
+			draw_label(&datalbl2,1);			
 			draw_inputbox(&databox);
 //			LCD_ShowCursor(databox.x,databox.y);
 		}
 		if(msg == 'T')
 		{                                          
-		        if(data_sign == 0)     
-		        {
-		                data_sign  = 1;
-        			databuf[0] = '-';
-		        }else{
-		                data_sign  = 0;
-        			databuf[0] = '+';
-		        }
-                        if(pos_databuf == 1){
-	        	        databuf[pos_databuf] = '\0';
-	        	}
 		        msg = 0xfe;
-		}
+		}
+		if(msg == 'U') {                                
+		        if(pos_databuf == 1)
+		        {              
+		                if((data_sign & 0x01) == 0)      //no sign
+		                {
+		                        databuf[0] = '-';
+		                        data_sign |= 0x01;
+		                }else{
+		                        databuf[0] = '+';       //
+		                        data_sign ^= 0x01;
+		                }
+		        }else{
+                       		if((pos_databuf < max_databuf) && (databuf[pos_databuf-2] == 'E'))
+                		{                          
+			                if((data_sign & 0x08) == 0)         
+			                {
+               		        	        databuf[pos_databuf-1] = '-';
+               		        	        data_sign |= 0x08;
+               		                }else{
+               		        	        databuf[pos_databuf-1] = '+';
+               		        	        data_sign ^= 0x08;
+               		                }
+	        		}        
+		        	msg = 0xfe;
+		        }
+		        msg = 0xfe;
+		}
 		if(msg == 'D') {
-			if(pos_databuf == 1)
-			{
-				databuf[pos_databuf++] = '0';
-				databuf[pos_databuf] = '\0';
-			}
-			if(databuf[pos_databuf-1] == '0')
-				databuf[pos_databuf-1] = '9';
-			else
-				databuf[pos_databuf-1] -= 1;
-			msg = 0xfe;
-		}
-		if(msg == 'U') {
-			if(pos_databuf == 1)
-			{
-				databuf[pos_databuf++] = '0';
-				databuf[pos_databuf] = '\0';
-			}
-			if(databuf[pos_databuf-1] == '9')
-				databuf[pos_databuf-1] = '0';
-			else
-				databuf[pos_databuf-1] += 1;
-			msg = 0xfe;
-		}
-		if((msg >= '0' && msg <= '9') || msg == '.') {
+               		if((pos_databuf < max_databuf) && ((data_sign & 0x04) == 0))    //no E in string
+        		{
+        			databuf[pos_databuf++] = 'E';
+        			databuf[pos_databuf++] = '+';
+	        		databuf[pos_databuf] = '\0';                      
+	        		data_sign |= 0x04;
+		        	msg = 0xfe;
+		        }
+					msg = 0xfe;
+		}                                      
+		if( msg == '.')
+		{
+               		if((pos_databuf < max_databuf) && ((data_sign & 0x02) == 0))      //no dot in string
+        		{
+        			databuf[pos_databuf++] = msg;
+	        		databuf[pos_databuf] = '\0';                      
+	        		data_sign |= 0x02;
+		        	msg = 0xfe;
+		        }
+		}
+		if((msg >= '0' && msg <= '9')) {
                		if(pos_databuf < max_databuf)
         		{
         			databuf[pos_databuf++] = msg;

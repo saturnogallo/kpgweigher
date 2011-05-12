@@ -10,8 +10,11 @@ u8 databuf[12];
 u8 pos_databuf; //position in data buffer
 u8 max_databuf;
 u8 data_sign;   // sign of the data
-LABEL flash datalbl = {LBL_HZ16,30,10,8,strbuf};
-LABEL flash databox = {LBL_HZ16,30,30,8,databuf};
+LABEL flash datalbl = {LBL_HZ16,10,10,8,strbuf};
+LABEL flash datalbl2 = {LBL_HZ6X8,140,54,8,"UP:+/-,DN:'E'"};
+LABEL flash datalbl3 = {LBL_HZ6X8,140,54,8,"UP/DN:'A'-'Z'"};
+LABEL flash databox = {LBL_HZ16,20,30,9,databuf};
+
 
 void prbsninput()
 {
@@ -30,6 +33,7 @@ void prbsninput()
 		if(msg == MSG_INIT) {
 			LCD_Cls();
 			draw_label(&datalbl,SW_NORMAL);
+			draw_label(&datalbl3,SW_NORMAL);
 			sprintf(databuf,"");
 			draw_inputbox(&databox);
 //			LCD_ShowCursor(databox.x,databox.y);
@@ -44,9 +48,11 @@ void prbsninput()
         			msg = MSG_REFRESH;
                         }
                 */
+                        key = KEY_INVALID;
+                        return;
 		}
 		if(msg == KEY_CE) {	                  
-				key = KEY_INVALID;
+		        key = KEY_INVALID;
 			return;
 		}
 
@@ -106,7 +112,7 @@ void prbsninput()
 			draw_label(&databox,SW_NORMAL);
 //			LCD_ShowCursor(databox.x+pos_databuf*16,databox.y);
 		}
-				key = KEY_INVALID;
+		key = KEY_INVALID;
 	}
 //	LCD_HideCursor();
 }
@@ -148,7 +154,9 @@ uchar wnd_intinput(uchar lastval)
                         }
                 */
 		}
+		
 		if(msg == KEY_DN) {
+		/*
 			if(pos_databuf == 0)
 			{
 				databuf[pos_databuf++] = '0';
@@ -160,8 +168,10 @@ uchar wnd_intinput(uchar lastval)
 			else
 				databuf[pos_databuf-1] -= 1;
 			msg = MSG_REFRESH;
+                */
 		}
 		if(msg == KEY_UP) {
+		/*
 			if(pos_databuf == 0)
 			{
 				databuf[pos_databuf++] = '0';
@@ -173,6 +183,7 @@ uchar wnd_intinput(uchar lastval)
 			else
 				databuf[pos_databuf-1] += 1;
 			msg = MSG_REFRESH;
+                */
 		}
 		if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
         		if(pos_databuf < max_databuf)
@@ -203,7 +214,7 @@ double wnd_floatinput(double lastval)
 {
 	uchar msg;
 
-	databuf[0] = ' ';
+	databuf[0] = '+';
         databuf[1] = '\0';
         pos_databuf = 1;
         data_sign = 0;	
@@ -221,51 +232,66 @@ double wnd_floatinput(double lastval)
 		{
 			LCD_Cls();
 			draw_label(&datalbl,SW_NORMAL);
+			draw_label(&datalbl2,SW_NORMAL);			
 			draw_inputbox(&databox);
 //			LCD_ShowCursor(databox.x,databox.y);
 		}
 
 		if(msg == KEY_TAB)
 		{                                          
-		        if(data_sign == 0)     
-		        {
-		                data_sign  = 1;
-        			databuf[0] = '-';
-		        }else{
-		                data_sign  = 0;
-        			databuf[0] = '+';
-		        }
-                        if(pos_databuf == 1){
-	        	        databuf[pos_databuf] = '\0';
-	        	}
 		        msg = MSG_REFRESH;
-
+		}
+		if(msg == KEY_UP) {                                
+		        if(pos_databuf == 1)
+		        {              
+		                if((data_sign & 0x01) == 0)      //no sign
+		                {
+		                        databuf[0] = '-';
+		                        data_sign |= 0x01;
+		                }else{
+		                        databuf[0] = '+';       //
+		                        data_sign ^= 0x01;
+		                }
+		        }else{
+                       		if((pos_databuf < max_databuf) && (databuf[pos_databuf-2] == 'E'))
+                		{                          
+			                if((data_sign & 0x08) == 0)         
+			                {
+               		        	        databuf[pos_databuf-1] = '-';
+               		        	        data_sign |= 0x08;
+               		                }else{
+               		        	        databuf[pos_databuf-1] = '+';
+               		        	        data_sign ^= 0x08;
+               		                }
+	        		}        
+		        	msg = MSG_REFRESH;
+		        }
+		        msg = MSG_REFRESH;
 		}
 		if(msg == KEY_DN) {
-			if(pos_databuf == 1)
-			{
-				databuf[pos_databuf++] = '0';
-				databuf[pos_databuf] = '\0';
-			}
-			if(databuf[pos_databuf-1] == '0')
-				databuf[pos_databuf-1] = '9';
-			else
-				databuf[pos_databuf-1] -= 1;
+               		if((pos_databuf < max_databuf) && ((data_sign & 0x04) == 0))    //no E in string
+        		{
+        			databuf[pos_databuf++] = 'E';
+        			databuf[pos_databuf++] = '+';
+	        		databuf[pos_databuf] = '\0';                      
+	        		data_sign |= 0x04;
+		        	msg = MSG_REFRESH;
+		        }
+		
 			msg = MSG_REFRESH;
+		}                                      
+		if( msg == KEY_DOT)
+		{
+               		if((pos_databuf < max_databuf) && ((data_sign & 0x02) == 0))      //no dot in string
+        		{
+        			databuf[pos_databuf++] = msg;
+	        		databuf[pos_databuf] = '\0';                      
+	        		data_sign |= 0x02;
+		        	msg = MSG_REFRESH;
+		        }
+
 		}
-		if(msg == KEY_UP) {
-			if(pos_databuf == 1)
-			{
-				databuf[pos_databuf++] = '0';
-				databuf[pos_databuf] = '\0';
-			}
-			if(databuf[pos_databuf-1] == '9')
-				databuf[pos_databuf-1] = '0';
-			else
-				databuf[pos_databuf-1] += 1;
-			msg = MSG_REFRESH;
-		}
-		if((msg >= KEY_NUM0 && msg <= KEY_NUM9) || msg == KEY_DOT) {
+		if((msg >= KEY_NUM0 && msg <= KEY_NUM9)) {
                		if(pos_databuf < max_databuf)
         		{
         			databuf[pos_databuf++] = msg;

@@ -65,8 +65,10 @@ void nav_command(uchar cmd)
                sprintf(navcmd,"%%01;27\r");
         if(cmd == NAV_SLOWMODE)
                sprintf(navcmd,"%%01;27\r");
-        if(cmd == NAV_ZEROON)
-               sprintf(navcmd,"%%01:06\r");
+        if(cmd == NAV_ZEROON)    
+        {
+               sprintf(navcmd,"%%01;06\r");
+        }
         if(cmd == NAV_INIT) 
         {           
                 RESETNAV;

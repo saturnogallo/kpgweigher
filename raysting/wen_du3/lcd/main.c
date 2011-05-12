@@ -205,6 +205,7 @@ void main()
 
 	 key = KEY_INVALID;
 	 timeout = 0;
+
 	 while(1)
 	 {
 	 	parse_cmd();
@@ -252,7 +253,7 @@ void main()
 				srs2 = 0;
 				srs2 = 1;
 				sleepms(10000);
-				srs1 = 0;
+				srs2 = 0;
 			}
 						
 			if(in_leds == CLR_BTN1)
