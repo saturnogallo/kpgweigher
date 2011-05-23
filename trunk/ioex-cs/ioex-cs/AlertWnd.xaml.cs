@@ -60,7 +60,7 @@ namespace ioex_cs
             else
                 btn_show_alert.Style = this.FindResource("ButtonStyleOff") as Style;
 
-            if (!b_stop_onalert)
+            if (b_stop_onalert)
                 btn_stop_onalert.Style = this.FindResource("ButtonStyleOn") as Style;
             else
                 btn_stop_onalert.Style = this.FindResource("ButtonStyleOff") as Style;

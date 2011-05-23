@@ -27,6 +27,7 @@ namespace ioex_cs
         {
             Button b = sender as Button;
             App p = Application.Current as App;
+            Hide();
             if(b.Name == "btn_pwd")
             {
 

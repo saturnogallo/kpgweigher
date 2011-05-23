@@ -82,8 +82,8 @@ namespace ioex_cs
             prodwnd = new ProdWnd();
             prodnum = new ProdNum();
             agent = new NodeAgent();
-            singlewnd = new SingleMode();
-            runwnd = new RunMode();
+            singlewnd = new SingleMode(Int32.Parse(curr_cfg.Element("node_number").Value));
+            runwnd = new RunMode(Int32.Parse(curr_cfg.Element("node_number").Value));
 
             for (int i = 0; i < Int32.Parse(curr_cfg.Element("machine_number").Value); i++)
             {

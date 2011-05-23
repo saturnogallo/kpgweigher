@@ -29,9 +29,34 @@ namespace ioex_cs
         {
             return Application.Current as App;
         }
-        public RunMode()
+        private bool _contentLoaded2 = false;
+
+        /// <summary>
+        /// InitializeComponent
+        /// </summary>
+        [System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public void MyInitializeComponent(int nodenumber)
         {
-            InitializeComponent();
+            if (_contentLoaded2)
+            {
+                return;
+            }
+            _contentLoaded2 = true;
+
+            if (nodenumber <= 10)
+            {
+                System.Windows.Application.LoadComponent(this, new System.Uri("/ioex-cs;component/runmodewnd.xaml", System.UriKind.Relative));
+            }
+            else
+            {
+                System.Windows.Application.LoadComponent(this, new System.Uri("/ioex-cs;component/Resources/runmodewnd14.xaml", System.UriKind.Relative));
+            }
+
+        }
+
+        public RunMode(int nodenumber)
+        {
+            MyInitializeComponent(nodenumber);
 
             this.Loaded +=new RoutedEventHandler(RunMode_Loaded);
             uiTimer = new System.Windows.Forms.Timer();
@@ -325,6 +350,14 @@ namespace ioex_cs
                 if (param == "run_target")
                 {
                     pack.curr_cfg.target = double.Parse(data);
+                    foreach(byte n in pack.weight_nodes)
+                    {
+                        if((pack.agent.GetStatus(n) == NodeStatus.ST_IDLE))
+                        {
+                            if("0" != pack.agent.GetNodeReg(n,"target_weight"))
+                                pack.agent.SetNodeReg(n,"target_weight",Convert.ToUInt32(pack.curr_cfg.target/4));
+                        }
+                    }
                 }
                 if (param == "run_operator")
                 {
@@ -335,7 +368,7 @@ namespace ioex_cs
                     pack.SaveCurrentConfig();
                 if (param == "singlemode")
                 {
-                    if (data == Password.get_pwd("user"))
+                    if (Password.compare_pwd("user",data))
                     {
                         p.SwitchTo("configmenu");
                         return;

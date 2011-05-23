@@ -223,7 +223,8 @@ namespace ioex_cs
         private double _lastweight;
         public bool bRelease;
         public int cnt_match;
-        public const double INAVLID_WEIGHT = -1000000.0;
+        public const double INAVLID_WEIGHT = 1000000.0;
+        public const double NOREADING_WEIGHT = -100000.0;
         private int cnt_aderr; //count for ad error
         Random rand;
         public double weight
@@ -233,16 +234,18 @@ namespace ioex_cs
                     return rand.NextDouble()*20;
                 if (!this["mtrl_weight_gram"].HasValue)
                 {
-                    return WeighNode.INAVLID_WEIGHT;
+                    return WeighNode.NOREADING_WEIGHT;
                 }
                 UInt32 value = this["mtrl_weight_gram"].Value;
                 if(value >= 65521) //special message
                 {
-                    if (value == 65534) //still in progress
+                    if (value == 65531) //filtering
+                        return WeighNode.INAVLID_WEIGHT;
+                    if (value == 65534) //AD busy still in progress
                         return WeighNode.INAVLID_WEIGHT;
 
                     //try three times before an AD error is issued.
-                    if (cnt_aderr < 3)
+                    if (cnt_aderr < 10)
                     {
                         cnt_aderr++;
                         return WeighNode.INAVLID_WEIGHT;
@@ -262,7 +265,7 @@ namespace ioex_cs
                     }
                     if (value == 65530) //divide zero
                     {
-                        return -100000.0;
+                        return WeighNode.INAVLID_WEIGHT;
                         if (errlist.IndexOf("err_dz;") < 0)
                             errlist = errlist + "err_dz;";
                     }
@@ -706,8 +709,8 @@ namespace ioex_cs
                     throw new Exception("port is closed");
                 if (status == NodeStatus.ST_LOST)
                     return;
-                if(status == NodeStatus.ST_BUSY)
-                    throw new Exception("reenter when busy");
+                if (status == NodeStatus.ST_BUSY)
+                    StringResource.dolog("reenter when busy");
                 {
                     status = NodeStatus.ST_BUSY;
                     if (value.HasValue)
