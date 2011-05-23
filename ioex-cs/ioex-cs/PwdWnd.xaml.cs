@@ -40,7 +40,7 @@ namespace ioex_cs
             if (usr_input.SelectedItem is ListBoxItem)
             {
                 string user = (this.usr_input.SelectedItem as ListBoxItem).Name;
-                if (Password.get_pwd(user) == this.old_pwd_input.Password)
+                if (Password.compare_pwd(user,this.old_pwd_input.Password))
                 {
                     if (new_pwd_input1.Password == new_pwd_input2.Password)
                     {

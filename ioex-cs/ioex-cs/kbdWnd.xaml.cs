@@ -154,24 +154,44 @@ namespace ioex_cs
         {
             string llimit = StringResource.str(param+"_llimit");
             string ulimit = StringResource.str(param + "_ulimit");
+            
             if (data.ToString() == "")
             {
                 MessageBox.Show(StringResource.str("emptydata"));
                 return;
             }
-            if (llimit != "Invalid String Key")
+            try
             {
-                Int32 ll = Int32.Parse(llimit);
-                Int32 hl = Int32.Parse(ulimit);
-                
-                if (Int32.Parse(data.ToString()) < ll || Int32.Parse(data.ToString()) > hl)
+                if (llimit == "Invalid String Key") //no limits setting
                 {
-                    MessageBox.Show(StringResource.str("invaliddata")+llimit+StringResource.str("to")+ulimit);
+                    kbdhandler(param, data.ToString());
+                    Hide();
                     return;
                 }
-            }
 
-            kbdhandler(param, data.ToString());
+                if (llimit.IndexOf(".") < 0) //int case
+                {
+                        Int32 ll = Int32.Parse(llimit);
+                        Int32 hl = Int32.Parse(ulimit);
+
+                        if (Int32.Parse(data.ToString()) < ll || Int32.Parse(data.ToString()) > hl)
+                            throw new Exception("input out of range");
+                }
+                else
+                {
+                    double ll = double.Parse(llimit);
+                    double hl = double.Parse(ulimit);
+                    if (double.Parse(data.ToString()) < ll || double.Parse(data.ToString()) > hl)
+                        throw new Exception("input out of range");
+                }
+                kbdhandler(param, data.ToString());
+            }
+            catch(Exception err)
+            {
+                MessageBox.Show(err.Message);
+                return;
+            }
+            
             Hide();
         }
 

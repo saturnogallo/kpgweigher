@@ -6,7 +6,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="pack://siteOfOrigin:,,,/Resources/Lang/zh-CN.xaml"/>
+                <ResourceDictionary Source="/ioex-cs;component/Resources/lang/zh-CN.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

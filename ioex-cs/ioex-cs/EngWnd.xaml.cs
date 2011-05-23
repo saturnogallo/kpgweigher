@@ -23,17 +23,40 @@ namespace ioex_cs
         private int curr_sel = -1;
         private bool all_sel = false;
         public bool b_lockon = false;
+        private int use_cnt = 0;
         public EngConfigWnd()
         {
             InitializeComponent();
+        }
+        public bool Void()
+        {
+            DateTime dt = DateTime.Now;
+//            XElement cfg = p.curr_cfg;
+            if (!Password.compare_pwd("lock", "0"))
+            {
+                for (int i = 1; i < 120; i++)
+                {
+                    dt.AddDays(1);
+//                    if(cfg.nod("lock_on") == Password.MD5Value(dt.ToString("YYYYmmDD"),true)) //match some day in future
+                    {
+                        return true;
+                    }
+                }
+                //todo compare the license with date today
+                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_unlock"), "unlock", true, KbdData);
+            }
+            return false;
         }
         public void InitDisplay()
         {
             App p = Application.Current as App;
             
             XElement cfg = p.curr_cfg;
-            b_lockon = (cfg.Element("lock_on").Value == "ON");
+            
+            b_lockon = !Password.compare_pwd("lock","0");
+            
             p.agent.Stop();
+            UpdateDisplay(true);
         }
         public void UpdateDisplay(bool refresh)
         {
@@ -134,7 +157,7 @@ namespace ioex_cs
 
             if (param == "entersys")
             {
-                if (Password.get_pwd("system") == data)
+                if (Password.compare_pwd("system",data))
                 {
                     Type shellType = Type.GetTypeFromProgID("Shell.Application");
                     object shellObject = System.Activator.CreateInstance(shellType);
@@ -142,9 +165,20 @@ namespace ioex_cs
                 }
                 return;
             }
+            if (param == "quitlock")
+            {
+                if (Password.compare_pwd("lock", data))
+                {
+                    b_lockon = false;
+                    Password.set_pwd("lock", "0");
+                    UpdateDisplay(true);
+                }
+            }
             if (param == "enterlock")
             {
-                cfg.SetElementValue("lock_on", "ON"); //todo set the lock number on
+                //data should be expire date format 20200211
+                cfg.SetElementValue("lock_on", Password.MD5Value(data,true)); //todo set the lock number on
+                Password.set_pwd("lock", "020527");
                 p.SaveAppConfig();
                 UpdateDisplay(false);
             }
@@ -172,8 +206,9 @@ namespace ioex_cs
                 {
                     param = param.Remove(0, 4); 
                     n[param] = UInt32.Parse(data);
-                    n[param] = null;
-                    Thread.Sleep(100);
+                    Thread.Sleep(1000);
+                    
+                    
                     btn_refreshreg_Click(null, null);
                 }
             }
@@ -227,9 +262,8 @@ namespace ioex_cs
             XElement cfg = p.curr_cfg;
             if (b_lockon)
             {
-                cfg.SetElementValue("lock_on", "OFF");
-                p.SaveAppConfig();
-                UpdateDisplay(true);
+                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_locknum"), "quitlock", false, KbdData);
+
             }
             else
             {
@@ -352,10 +386,10 @@ namespace ioex_cs
             App p = Application.Current as App;
                 Button btn;
                 SubNode n = null;
-                Byte i = Convert.ToByte(curr_sel);
+                
                 if (curr_sel == -1)
                     return;
-
+                Byte i = Convert.ToByte(curr_sel);
                 if (i < 17)
                 {
                     btn = IdToButton(i.ToString());

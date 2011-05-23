@@ -12,6 +12,7 @@ namespace ioex_cs
     class NodeAgent
     {
         public static bool IsDebug = false;
+
         const byte INVALID_ENABLE = 2;
         internal List<WeighNode> weight_nodes; //list of all weight nodes
         internal List<SPort> allports; //list of all serial ports
@@ -39,6 +40,7 @@ namespace ioex_cs
         private double llim;
         public UIPacker packer; //reference to pack
         Random rand;
+        int checkcnt = 0;
         public double weight(byte addr)
         {
             if (nodemap.ContainsKey(addr))
@@ -144,7 +146,7 @@ namespace ioex_cs
                  if (ResultOut != "")
                  {
                      //MessageBox.Show("Failed to download config, please try again");
-                     throw new Exception("Failed to download config, please try again");
+                     throw new Exception("Failed to read config, please try again");
                  }
              }
              return nodemap[addr][regname].ToString();
@@ -291,11 +293,11 @@ namespace ioex_cs
                 Thread.Sleep(i);
                 i = i * 2;
                 j = j + 1;
-                if (i > 400)
+                if (i > 4000)
                 {
                     return false;
                 }
-                if(j % 3 == 2)
+                if(j % 6 == 5)
                     n[regname] = null; //ask for value again
             }
             return false;
@@ -313,7 +315,7 @@ namespace ioex_cs
                 i = i + (i+1)/2;
                 if (i>400)
                 {
-                    if (j > 3) //resend for 3 times
+                    if (j > 10) //resend for 3 times
                     {
                         n.status = NodeStatus.ST_LOST;
                         return false;
@@ -338,7 +340,6 @@ namespace ioex_cs
                 {
                     if (j > 3) //resend for 3 times
                     {
-                        n.status = NodeStatus.ST_LOST;
                         return false;
                     }
                     i = 4;
@@ -370,8 +371,13 @@ namespace ioex_cs
         private void TriggerPacker()
         {
             VibrateNode vn = (nodemap[packer.vib_addr] as VibrateNode);
-            vn["flag_enable"] = 10;
+            if ((packer.total_packs % (vn.intf_byte.feed_times + 1) != 0))
+                return;
             
+
+            
+            vn["flag_enable"] = 10;
+            WaitUntilFlagSent(vn);
         }
         private bool WaitUntilFlagSent(SubNode n)
         {
@@ -386,9 +392,10 @@ namespace ioex_cs
                 WaitForIdleQuick(n);
                 if (n[reg].HasValue)
                 {
-                    if (n[reg].Value != n.flag_cnt)
+                    uint lw_lb = n[reg].Value % 256;
+                    if (( lw_lb) != n.flag_cnt)
                     {
-                        n.flag_cnt = n[reg].Value;
+                        n.flag_cnt = lw_lb;
                         return true;
                     }
                 }
@@ -402,17 +409,18 @@ namespace ioex_cs
         private bool WaitPackerDone()
         {
             VibrateNode vn = (nodemap[packer.vib_addr] as VibrateNode);
-            vn["cs_sys_offset_cal_data_uw"] = null;
+            vn["cs_sys_offset_cal_data_lw"] = null;
             WaitForIdleQuick(vn);
-            if (vn["cs_sys_offset_cal_data_uw"].HasValue)
+            if (vn["cs_sys_offset_cal_data_lw"].HasValue)
             {
-                if((packer.total_packs % (vn.intf_byte.feed_times+1) == 0))
+                if((packer.total_packs % (vn.intf_byte.feed_times+1) != 0))
                 {
                     return true;
                 }
-                if(vn["cs_sys_offset_cal_data_uw"].Value != release_cnt)
+                uint lw_ub = vn["cs_sys_offset_cal_data_lw"].Value >>8;
+                if(lw_ub != release_cnt)
                 {
-                    release_cnt = vn["cs_sys_offset_cal_data_uw"].Value;
+                    release_cnt = lw_ub;
                     return true;
                 }
             }
@@ -422,7 +430,7 @@ namespace ioex_cs
                 if ((release_timeout % 100) == 49)
                 {
                     vn.status = NodeStatus.ST_IDLE;
-                    vn["cs_sys_offset_cal_data_uw"] = null;
+                    vn["cs_sys_offset_cal_data_lw"] = null;
                 }
             }
             else
@@ -434,14 +442,16 @@ namespace ioex_cs
         }
         private void ReleaseAction(byte[] addrs, double weight)
         {
+            string log = weight.ToString("F2") + "\t";
+/*
             string log2 = "";
             foreach (byte n in addrs)
             {
                 WeighNode wn = (nodemap[n] as WeighNode);
                 log2 = log2 + String.Format("({0}){1}\t", wn.node_id, wn.weight.ToString("F2"));
             }
-            string log = weight.ToString("F2") + "\t";
-/*
+
+
             foreach (byte n in addrs)
             {
                 WeighNode wn = (nodemap[n] as WeighNode);
@@ -978,7 +988,7 @@ namespace ioex_cs
             {
                 if (VibStatus == VIB_WORKING)
                 {
-                    if (WaitPackerDone())
+                    if (WaitPackerDone()) //check pack count
                     {
                         VibStatus = VIB_INIDLE;
                         Debug.WriteLine("inidle");
@@ -987,7 +997,7 @@ namespace ioex_cs
             }
             if (VibStatus == VIB_INIDLE)
             {
-                if (WaitPackerReady())
+                if (WaitPackerReady())//hw_status == 0
                 {
                     Debug.WriteLine("inready");
                     VibStatus = VIB_READY;
@@ -1003,7 +1013,7 @@ namespace ioex_cs
                 if (wn.status == NodeStatus.ST_LOST)
                     continue;
 
-                if (wn.weight < -1000) //invalid weight || wn.weight >= 65521
+                if (wn.weight < -1000 ) //invalid weight || wn.weight >= 65521
                 {
                     wn.Query();
                     WaitForIdleQuick(wn);
@@ -1016,8 +1026,10 @@ namespace ioex_cs
             {
                 if (wn.weight < -1000) //|| wn.weight >= 65521
                 {
-                    Debug.WriteLine("retry" + wn.node_id);
+                    Debug.WriteLine("re" + wn.node_id);
+                    Thread.Sleep(2);
                     ret = false;
+                    break;
                 }
             }
             return ret;
@@ -1087,6 +1099,15 @@ namespace ioex_cs
                                 Debug.Write(".");
                                 packer.NeedRefresh = true;
                             }
+                            else
+                            {
+                                
+                                if(checkcnt++ > 6)
+                                {
+                                    packer.NeedRefresh = true;
+                                    checkcnt = 0;
+                                }
+                            }
                         }
                         update_vibstatus();
                         continue;
@@ -1111,6 +1132,7 @@ namespace ioex_cs
                              ReleaseAction(release_addrs, release_weight); //send release command, send goon command and clear weight
                              packer.NeedRefresh = true;
                              TriggerPacker();
+                             Thread.Sleep(25); //wait until packer is working
                              VibStatus = VIB_WORKING;
                              Debug.WriteLine("packing");
                              while(VibStatus == VIB_WORKING && (CmdIn == ""))
@@ -1127,6 +1149,7 @@ namespace ioex_cs
                         packer.NeedRefresh = true;
                         CheckNodeStatus();//send goon for remaining nodes and check for overweight errors
                         vib_nodes[0]["flag_enable"] = 5; //more fill
+                        WaitUntilFlagSent(vib_nodes[0]);
                         clearweights();
                         Thread.Sleep(150);
                         clearweights();

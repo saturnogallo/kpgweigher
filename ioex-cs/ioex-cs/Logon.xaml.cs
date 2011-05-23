@@ -5,13 +5,17 @@ using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Resources;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Windows.Markup;
 using System.Windows.Shapes;
 using System.Xml.Linq;
+using System.Xml;
+using System.Security.Cryptography;
 using System.IO;
 using System.Threading;
 namespace ioex_cs
@@ -116,17 +120,19 @@ namespace ioex_cs
         static public void SetLanguage(string lang)
         {
             language = lang;
-            XDocument xml_doc;
-            xml_doc = XDocument.Load("Resources\\Lang\\"+lang+".xaml");
-            IEnumerable<XElement> elem = xml_doc.Elements().First().Elements();
+            App p = Application.Current as App;
+            Uri uri = new Uri("/ioex-cs;component/Resources/lang/" + lang + ".xaml", UriKind.Relative);
+            p.Resources.Source = uri;
+
+            ResourceDictionary rd = new ResourceDictionary();
+            rd.Source = uri;
+
             str_tbl.Clear();
-            foreach (XElement e in elem)
+            foreach (object e in rd.Keys)
             {
 
-                str_tbl[e.FirstAttribute.Value] = e.Value.ToString();
+                str_tbl[e.ToString()] = rd[e].ToString();
             }
-            App p = Application.Current as App;
-            p.Resources.Source = new Uri("pack://siteOfOrigin:,,,/Resources/Lang/"+lang+".xaml");
         }
         static StringResource()
         {
@@ -171,7 +177,32 @@ namespace ioex_cs
     public class Password
     {
         private static XmlConfig pwds;
+        static    public string MD5Value(String str, Boolean isStr)
+        {
+         MD5 md5 = new MD5CryptoServiceProvider();
+        byte[] md5ch;
+        if (isStr)
+         {
+            byte[] ch = System.Text.Encoding.Default.GetBytes(str);
+             md5ch = md5.ComputeHash(ch);
+         } 
+        else
+         {
+            if (!File.Exists(str))
+                return string.Empty;
+             FileStream fs = new FileStream(str, FileMode.Open, FileAccess.Read);
+             md5ch = md5.ComputeHash(fs);
+             fs.Close();
+         }
+         md5.Clear();
+        string strMd5 = "";
+        for (int i = 0; i < md5ch.Length - 1; i++ )
+         {
+             strMd5 += md5ch[i].ToString("x").PadLeft(2, '0');
+         }
+        return strMd5;
         
+        }
         static Password()
         {
             //load password.xml and fill in the username list
@@ -183,7 +214,12 @@ namespace ioex_cs
                 return pwds.Keys;
             }
         }
-        public static string get_pwd(string user){
+        public static bool compare_pwd(string user, string data)
+        {
+            return (get_pwd(user) == MD5Value(data + "1r%4#", true));
+
+        }
+        private static string get_pwd(string user){
                 XElement x = pwds.LoadConfig(user);
                 if (null == x)
                     return pwds.GetHashCode().ToString(); //just a difficult password to guess
@@ -193,7 +229,7 @@ namespace ioex_cs
         public static void set_pwd(string user,string value){
                 XElement x = new XElement("Item");
                 x.SetAttributeValue("Name", user);
-                x.SetValue(value);
+                x.SetValue(MD5Value(value + "1r%4#", true));
                 pwds.AddConfig(user,x);
                 pwds.SaveConfigToFile();
             
