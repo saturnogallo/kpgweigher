@@ -1,5 +1,47 @@
-2.pack talk
-3.apply to all may have some trouble
+2.pack talk //DONE
+3.apply to all may have some trouble //DONE
 4.auto launch
 
-5.gram is ok but decimal has problem
+* interface setting //DONE
+* apply to all //DONE
+* simulate run //DONE , occasionally die for slow response node in loop
+* wait for idle //DONE
+
+* setting of packer should be stored and loaded //DONE
+* operator selection and password input //DONE
+* input value range //DONE
+* flush database when stop //DONE
+
+
+1. 重量显示出现个位跳动，可能是上位机数据处理有点问题。//should be /64 for decimal
+2. 主振不振？ //flag_enable = 5, done
+3. Test mode reg1 & 2,在工程师界面里没有输入框？//added
+这是一个更新的寄存器定义文件。你看看每个寄存器的含义（改动的我用不同颜色标识出），包括诊断信息定义，以及test mode寄存器。
+我在工程师界面里面似乎没看到test_mode_reg1 和 test_mode_reg2. 建议加进去（能否改为直接16进制输入？）
+
+
+宋杰，
+ 
+我调试了新做的包装机接口。说明一下，以便你集成到你的程序里去。
+ 
+1. 包装机接口电路集成到了原来用来驱动主振电磁铁的电路板（RS485 Addr 11或15（14头））。你可以按以前的做法读板子的类型Board_ID来识别是称重板或者振动/接口板。
+ 
+对于振动/接口板（addr 11或15)
+2. 包装机接口控制字Config_reg. 这里使用了RS485._flash.target_weight寄存器。组合称输出的信号脉冲宽度可调（RS485._flash_cs_Filter_option, 单位10ms，你可以设置默认30，即300ms)。上位机程序写RS485._global.flag_enable = 9 （执行后寄存器自动变成0），来初始化包装机接口。 
+3. 上位机程序通过查询RS485._global.hw_status来判断包装机是否忙（0xff)或准备就绪(0x0). 只有包装机不忙的时候，才可以释放组合到的斗。
+4. 上位机程序放料后，要写RS485._global.flag_enable = 10 （执行后寄存器自动变成0），以便组合称发放料信号给包装机。
+ 
+你的程序平时只需：
+ 
+yourmainloop( ) 
+{
+   io_read(board_11, RS485._global.hw_status); 
+   if ((RS485._global.hw_status == PACKER_READY_ZERO) && （组合成功））
+   {
+          io_release_material( );
+          io_write( board_11, RS485._global.flag_enable, 10); // issue interface signals.
+   }
+ 
+   other_tasks( ); 
+}
+
