@@ -9,97 +9,582 @@ using System.Windows.Forms;
 using System.Diagnostics;
 namespace ioex_cs
 {
-    class NodeAgent
+    public class CombineEventArgs : EventArgs
     {
-        public static bool IsDebug = false;
+        public CombineEventArgs(byte packer_id, byte[] release_addrs, double weight)
+        {
+            this.packer_id = packer_id;
+            this.release_addrs = release_addrs;
+            this.weight = weight;
+        }
+        public byte packer_id;
+        public byte[] release_addrs;
+        public double weight;
+    }	//end of class CombineEventArgs
 
-        const byte INVALID_ENABLE = 2;
-        internal List<WeighNode> weight_nodes; //list of all weight nodes
-        internal List<SPort> allports; //list of all serial ports
-        internal Dictionary<byte, SubNode> nodemap;//map the address to node
-        internal List<VibrateNode> vib_nodes;
-        public bool bBootDone = false;
-        public bool bActionMode = false;
-        public SubNode missingnode;   //node used to find the newly installed board
+
+
+    class NodeCombination   //the class is used to do combinations and release action
+    {
         private byte[] release_addrs = null;
         private double release_weight;
-        private UInt32 release_cnt;
-        private UInt32 release_timeout = 0;
-        private byte addrIn;    //address used to store the incoming command address
-        private string CmdIn;   //string used to store the incoming command
-        public string ResultOut; //string used to store the feedback
-        private object InLock;
-        private object OutLock;
-        private Thread msg_loop;
-        private bool QueryLoopDone; //indicate the completion of loop query
-        public const int VIB_INIDLE = 0;
-        public const int VIB_READY = 1;
-        public const int VIB_WORKING = 2;
-        public const int VIB_ERROR = 3;
-        public int VibStatus;  
-        private double llim;
-        public UIPacker packer; //reference to pack
-        Random rand;
-        int checkcnt = 0;
-        public double weight(byte addr)
-        {
-            if (nodemap.ContainsKey(addr))
+        private VibStatus vibstate = VibStatus.VIB_INIDLE;
+        private double llim
+        { //low limit of packer setting
+            get
             {
-                return (nodemap[addr] as WeighNode).weight;
+                if (packer.curr_cfg.upper_var < packer.curr_cfg.lower_var)
+                    return packer.curr_cfg.upper_var / 2;
+                else
+                    return packer.curr_cfg.lower_var / 2;
+                
             }
-            return -9999.99;
+        } 
+        private UIPacker packer; //reference to pack
+        
+        private double uvar
+        {
+            get
+            {
+                return packer.curr_cfg.target + packer.curr_cfg.upper_var;
+            }
+        }
+        private double dvar
+        {
+            get
+            {
+                return packer.curr_cfg.target - packer.curr_cfg.lower_var;
+            }
+        }
+
+        private Random rand; //generate weight for debug use
+        public NodeAgent agent; //reference to agent
+        private Thread comb_loop; //thread for combination loop
+
+        public delegate void HitCombineEventHandler(object sender, CombineEventArgs ce);
+        public event HitCombineEventHandler HitEvent;
+
+        private bool bRun;
+        internal NodeCombination(UIPacker p)
+        {
+            packer = p;
+            agent = p.agent;
+            bRun = false;
+            bSimNodeValid = new Dictionary<byte,bool>();
+            foreach (byte i in packer.weight_nodes)
+                bSimNodeValid[i] = true;
+            bSimCombine = false;
+            rand = new Random();
+            comb_loop = new Thread(new ThreadStart(CombinationLoop));
+            comb_loop.IsBackground = true;
 
         }
-        public bool GetWNodeFlag(int addr, string flag)
+        public void Start()
         {
-            if (flag == "bRelease")
-            {
-                if (addr < 0 || addr > 254 || (!nodemap.ContainsKey((byte)addr)))
-                    return false;
-                return (nodemap[(byte)addr] as WeighNode).bRelease;
-            }
-            throw new NotImplementedException();
+            bRun = true;
+            comb_loop.Start();
         }
+        
+        public void Stop(int ms)
+        {
+            bRun = false;
+            Thread.Sleep(ms);
+//          comb_loop.Suspend();
+        }
+        public void Resume()
+        {
+            bRun = true;
+//          comb_loop.Resume();
+        }
+        public void ResetStatus()
+        {
+            agent.ClearWeights();
+            vibstate = agent.ResetVibStatus(packer.vib_addr);
+        }
+        public void CheckNodeStatus() //update node status after combination is completed
+        {
+            double wt;
+            foreach (byte addr in packer.weight_nodes)
+            {
+                if (agent.GetStatus(addr) == NodeStatus.ST_LOST || agent.GetStatus(addr) == NodeStatus.ST_DISABLED)
+                    continue;
+                //no match case
+                agent.IncMatchCount(addr);
+                //over_weight check
+                wt = agent.weight(addr);
+                if ((wt < packer.curr_cfg.target / 2) && (wt > -1000.0) && (wt < 65521))
+                    continue; //goon nodes
+                {
+                    double nw = wt;
+                    if (nw > (packer.curr_cfg.target - packer.curr_cfg.lower_var) && (nw < 65521))
+                    {
+                        if (AlertWnd.b_turnon_alert)
+                        {
+                            agent.SetOverWeight(addr, true);
+                            if (!AlertWnd.b_manual_reset) //auto reset
+                            {
+                                agent.Action(addr, "empty");
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (nw < 65521)
+                        {
+                            agent.SetOverWeight(addr,false);
+                        }
+                    }
+                }
+            }
+        }
+        private bool ProcessGoonNodes() //send command to nodes that needs to goon
+        {
+            foreach (byte addr in bSimNodeValid.Keys)
+            {
+                if (bSimNodeValid[addr] == false)
+                    continue;
+                if (agent.GetStatus(addr) == NodeStatus.ST_LOST || agent.GetStatus(addr) == NodeStatus.ST_DISABLED)
+                    continue;
+                double wt = agent.weight(addr);
+                if ((wt < packer.curr_cfg.target / 2) && (wt > -1000.0) && (wt < 65521))
+                {
+                    agent.Action(addr, "flag_goon"); //no match hit
+                }
+                bSimNodeValid[addr] = false;
+                return true;
+            }
+            return false;
+        }
+        public static void logTimeStick(TimeSpan ts1,string step)
+        {
+            TimeSpan ts2 = new TimeSpan(DateTime.Now.Ticks);
+            TimeSpan ts = ts2.Subtract(ts1).Duration();
+            Debug.WriteLine(step+ts.Milliseconds + "ms");
+            
+        }
+        private void CombinationLoop()
+        {
+            while (true)
+            {
+                if (!bRun)
+                {
+                    Thread.Sleep(100);
+                    continue;
+                }
+                
+                if (packer.status == PackerStatus.RUNNING)
+                {
+                    if (agent.bWeightReady)
+                    {
+                        TimeSpan ts1 = new TimeSpan(DateTime.Now.Ticks);
+                        bSimCombine = true;
+                        foreach(byte b in packer.weight_nodes)
+                            bSimNodeValid[b] = true;
+                        while (CheckCombination())
+                            ;
+                        bSimCombine = false;
+
+                        logTimeStick(ts1, "simu:");
+                        while (CheckCombination())
+                        {
+                            logTimeStick(ts1, "comb:");    
+                            HitEvent(this, new CombineEventArgs((byte)packer._pack_id, release_addrs, release_weight));
+                            
+                            while (vibstate != VibStatus.VIB_READY)
+                            {
+                                vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
+                                ProcessGoonNodes();
+                            }
+//                            logTimeStick(ts1, "vibr:");    
+                            ReleaseAction(release_addrs, release_weight); //send release command and clear weight, trigger the packer, goon the nodes
+//                            logTimeStick(ts1, "rele:");    
+                            vibstate = agent.TriggerPacker(packer.vib_addr);
+                            while (vibstate == VibStatus.VIB_WORKING)
+                            {
+                                vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
+                                ProcessGoonNodes();
+                            }
+//                            logTimeStick(ts1, "vibw:");    
+                            ProcessGoonNodes();
+                        }
+                        while (ProcessGoonNodes())
+                            ;
+                        CheckNodeStatus();
+
+                        agent.ClearWeights();
+                        agent.bWeightReady = false;
+                        agent.Action(packer.vib_addr, "fill");
+//                        logTimeStick(ts1, "fina:");    
+                    }
+                }
+                else
+                {
+                  
+                    if (vibstate != VibStatus.VIB_READY)
+                    {
+                        vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
+                        
+                    }
+                }
+                Thread.Sleep(10);
+            }
+        }
+        public double weight(byte addr)
+        {
+            return agent.weight(addr);
+        }
+        private void DoRelease(byte[] addrs, double weight)
+        {
+            if (bSimCombine)
+            {
+                foreach (byte addr in addrs)
+                    bSimNodeValid[addr] = false;
+            }
+            else
+            {
+                release_addrs = addrs;
+                release_weight = weight;
+            }
+            
+        }
+        private bool bSimCombine; //simulate the combination to see whether there is node need to goon ealier.
+        private Dictionary<byte,bool> bSimNodeValid; //array used to store the state of each node in simulation mode;
+        //one bucket combination
+        private bool CacuInvalidNode(int i)
+        {
+            if (agent.GetStatus(packer.weight_nodes[i]) == NodeStatus.ST_LOST)
+                return true;
+            if (agent.GetStatus(packer.weight_nodes[i]) == NodeStatus.ST_DISABLED)
+                return true;
+
+            if ((bSimCombine) && (!bSimNodeValid[packer.weight_nodes[i]]))
+                return true;
+            double wt = agent.weight(packer.weight_nodes[i]);
+            if (wt <= llim)
+                return true;
+            if (wt < 0)
+                return true;
+            if (wt >= 65521)
+                return true;
+            return false;
+
+        }
+        private bool Caculation1()
+        {
+            double sum = 0;
+            
+            for (int i = 0; i < packer.weight_nodes.Count; i++)
+            {
+                if (CacuInvalidNode(i))
+                    continue;
+                sum = agent.weight(packer.weight_nodes[i]);
+                if (sum > dvar && sum < uvar)
+                {
+                    DoRelease(new byte[] { packer.weight_nodes[i] }, sum);
+                    return true;
+                }
+            }
+            return false;
+        }
+        private bool Caculation2()
+        {
+            double sum = 0;
+
+            for (int i = 0; i < packer.weight_nodes.Count - 1; i++)
+            {
+                if (CacuInvalidNode(i))
+                    continue;
+
+                for (int j = i + 1; j < packer.weight_nodes.Count; j++)
+                {
+                    if (CacuInvalidNode(j))
+                        continue;
+
+                    sum = agent.weight(packer.weight_nodes[i]) + agent.weight(packer.weight_nodes[j]);
+                    if (sum > dvar && sum < uvar)
+                    {
+                        DoRelease(new byte[] { packer.weight_nodes[i], packer.weight_nodes[j]}, sum);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        private bool Caculation3()
+        {
+            double sum = 0;
+
+            for (int i = 0; i < packer.weight_nodes.Count - 2; i++)
+            {
+                if (CacuInvalidNode(i))
+                    continue;
+
+                for (int j = i + 1; j < packer.weight_nodes.Count - 1; j++)
+                {
+                    if (CacuInvalidNode(j))
+                        continue;
+
+
+                    for (int k = j + 1; k < packer.weight_nodes.Count; k++)
+                    {
+                        if (CacuInvalidNode(k))
+                            continue;
+
+
+                        sum = agent.weight(packer.weight_nodes[i]) + agent.weight(packer.weight_nodes[j]) + agent.weight(packer.weight_nodes[k]);
+                        if (sum > dvar && sum < uvar)
+                        {
+                            DoRelease(new byte[] { packer.weight_nodes[i], packer.weight_nodes[j], packer.weight_nodes[k] }, sum);
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        private bool Caculation4()
+        {
+            double sum = 0;
+
+            for (int i = 0; i < packer.weight_nodes.Count - 3; i++)
+            {
+                if (CacuInvalidNode(i))
+                    continue;
+
+
+                for (int j = i + 1; j < packer.weight_nodes.Count - 2; j++)
+                {
+                    if (CacuInvalidNode(j))
+                        continue;
+
+                    for (int k = j + 1; k < packer.weight_nodes.Count - 1; k++)
+                    {
+                        if (CacuInvalidNode(k))
+                            continue;
+
+                        for (int l = k + 1; l < packer.weight_nodes.Count; l++)
+                        {
+                            if (CacuInvalidNode(l))
+                                continue;
+
+                            sum = agent.weight(packer.weight_nodes[i]) + agent.weight(packer.weight_nodes[j]) + agent.weight(packer.weight_nodes[k]) + agent.weight(packer.weight_nodes[l]);
+                            if (sum > dvar && sum < uvar)
+                            {
+                                DoRelease(new byte[] { packer.weight_nodes[i], packer.weight_nodes[j], packer.weight_nodes[k], packer.weight_nodes[l] }, sum);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        private bool Caculation5()
+        {
+            double sum = 0;
+
+            for (int i = 0; i < packer.weight_nodes.Count - 4; i++)
+            {
+                if (CacuInvalidNode(i))
+                    continue;
+
+                for (int j = i + 1; j < packer.weight_nodes.Count - 3; j++)
+                {
+                    if (CacuInvalidNode(j))
+                        continue;
+
+                    for (int k = j + 1; k < packer.weight_nodes.Count - 2; k++)
+                    {
+                        if (CacuInvalidNode(k))
+                            continue;
+
+                        for (int l = k + 1; l < packer.weight_nodes.Count - 1; l++)
+                        {
+                            if (CacuInvalidNode(l))
+                                continue;
+
+                            for (int m = l + 1; m < packer.weight_nodes.Count; m++)
+                            {
+                                if (CacuInvalidNode(m))
+                                    continue;
+
+                                sum = agent.weight(packer.weight_nodes[i]) + agent.weight(packer.weight_nodes[j]) + agent.weight(packer.weight_nodes[k]) + agent.weight(packer.weight_nodes[l]) + agent.weight(packer.weight_nodes[m]);
+                                if (sum > dvar && sum < uvar)
+                                {
+                                    DoRelease(new byte[] { packer.weight_nodes[i], packer.weight_nodes[j], packer.weight_nodes[k], packer.weight_nodes[l], packer.weight_nodes[m] }, sum);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        private void ReleaseAction(byte[] addrs, double weight)
+        {
+            string log = weight.ToString("F2") + "\t";
+
+            log = weight.ToString("F2") + "\t";
+
+            foreach (byte n in addrs)
+            {
+                log = log + String.Format("({0}){1}\t", n, agent.weight(n));
+
+                agent.HitMatch(n);
+
+                agent.Action(n,"flag_release");
+            }
+            StringResource.dolog(log);
+            
+            onepack o = new onepack();
+            o.bucket = new byte[5];
+            o.bucket[1] = o.bucket[2] = o.bucket[3] = o.bucket[4] = o.bucket[0] = (byte)0;
+            int i = 0;
+            foreach (byte n in addrs)
+            {
+                o.bucket[i++] = n;
+            }
+            o.time = DateTime.Now;
+            o.weight = weight;
+            packer.AddNewPack(o);
+
+        }
+        public bool CheckCombination()  //return whether there is hit or not.
+        {
+
+            {
+
+
+                if (Caculation1() || Caculation2() || Caculation3() || Caculation4() || Caculation5())// || Caculation1() ||
+                {
+                    return true;
+
+                }
+                if (NodeAgent.IsDebug)
+                {
+                    if (rand.NextDouble() > 0.5)
+                    {
+                        DoRelease(new byte[] { packer.weight_nodes[1], packer.weight_nodes[2], packer.weight_nodes[3], packer.weight_nodes[4], packer.weight_nodes[5] }, 115);
+                        return true;
+                    }
+                    return false;
+                }
+
+
+                packer.last_one_pack.bucket = null;
+                return false;
+            }
+        }
+        
+ 
+
+    }
+    enum VibStatus
+    {
+        VIB_INIDLE = 0,
+        VIB_READY = 1,
+        VIB_WORKING = 2,
+        VIB_ERROR = 3
+
+    }
+    class NodeAgent
+    {
+        public static bool IsDebug = false; //debug mode or not
+
+        private List<WeighNode> weight_nodes; //list of all weight nodes, external access can only use map address
+        
+        internal List<SPort> allports; //list of all serial ports
+        private Dictionary<byte, SubNode> nodemap;//map the address to node
+        
+        public SubNode this[byte addr]{
+            get
+            {
+                if (nodemap.ContainsKey(addr))
+                    return nodemap[addr];
+                return null;
+            }
+        }
+        
+
+        public static bool bBootDone = false;  //whether it is in boot mode
+
+        private uint pack_cnt = 0; //hit counter for multiple pack one trigger case
+
+        public SubNode missingnode;   //node used to find the newly installed board
+
+        //the mechansium for inter process control
+        private static Mutex mut = new Mutex();
+
+        private Thread msg_loop;    //loop to handle the message
+        
+        public VibStatus vibstate;  
+        
+        //manage error list of the node
         public string GetErrors(byte addr)
         {
-            if (addr < 0 || addr > 254 || (!nodemap.ContainsKey(addr)))
-                return "";
-            return nodemap[addr].errlist;
+            return this[addr].errlist;
         }
         public void ClearErrors(byte addr)
         {
-            if (addr < 0 || addr > 254 || (!nodemap.ContainsKey(addr)))
-                return;
-            nodemap[addr].errlist = "";
+            this[addr].errlist = "";
+        }
+        public NodeStatus GetStatus(byte addr)
+        {
+            return nodemap[addr].status;
         }
         public void SetStatus(byte addr, NodeStatus ns)
         {
-            if (addr < 0 || addr > 254 || (!nodemap.ContainsKey(addr)))
-                return;
-            if(ns == NodeStatus.ST_LOST)
-                Action(addr, "disable");
+            if (ns == NodeStatus.ST_DISABLED)
+            {
+                this[addr].status = NodeStatus.ST_DISABLED;
+                this[addr].errlist = "";    
+            }
             if (ns == NodeStatus.ST_IDLE)
-                Action(addr, "enable");
-            
-        }
+            {
+                this[addr].status = NodeStatus.ST_IDLE;
+                this[addr].errlist = "";    
+            }
 
-        public NodeStatus GetStatus(byte addr)
-        {
-            if (addr < 0 || addr > 254 || (!nodemap.ContainsKey(addr)))
-                return NodeStatus.ST_IDLE;
-            return nodemap[addr].status;
         }
+        public int GetMatchCount(byte addr)
+        {
+            return (this[addr] as WeighNode).cnt_match;
+        }
+        public void IncMatchCount(byte addr)
+        {
+            WeighNode n = this[addr] as WeighNode;
+            n.cnt_match++;
+            if (n.cnt_match > 10)
+            {
+                if (AlertWnd.b_turnon_alert)
+                {
+                    if (!AlertWnd.b_manual_reset) //auto reset
+                    {
+                        if (n.errlist.IndexOf("err_om;") < 0)   //no matchinf for serveral times
+                            n.errlist = n.errlist + "err_om;";
+                    }
+                }
+            }
+        }
+        
         public void SetNodeReg(byte addr, string regname , UInt32 val)
         {
-            if (!nodemap.ContainsKey(addr))
-                return;
-            
-            Action(addr, "setreg:" + regname + ":"+val.ToString());
+            mut.WaitOne();
+                this[addr][regname] = val;
+
+            if (!WaitForIdle(this[addr]))
+            {
+                MessageBox.Show(StringResource.str("tryagain"));
+            }
+            mut.ReleaseMutex();
         }
         public void GetNodeElement(byte addr, ref XElement x)
         {
-            if (!nodemap.ContainsKey(addr))
-                return;
+            WaitForIdle(this[addr]);
+            if (this[addr].status != NodeStatus.ST_IDLE)
+                throw new Exception("Node cannot be operated now");
+
             string[] regs = { "magnet_freq", "magnet_amp", "magnet_time", "open_w", "delay_w", "open_s", "delay_s", "delay_f", 
                                 "motor_speed", "cs_filter", "cs_gain_wordrate","target_weight"};
             foreach (string reg in regs)
@@ -110,75 +595,236 @@ namespace ioex_cs
                     x.Add(new XElement(reg, "0"));
             }
         }
-        public bool search(SubNode n)
+        public VibStatus TriggerPacker(byte addr)
         {
-            n["addr"] = null;
-            if (!WaitForIdleQuick(n))
+            VibrateNode vn = (this[addr] as VibrateNode);
+            if (vn == null)
+                return VibStatus.VIB_ERROR;
+            pack_cnt++;
+            if ((pack_cnt % (vn.intf_byte.feed_times + 1) == 0))
             {
-                n.status = NodeStatus.ST_LOST;
-                return false;
+                vn["flag_enable"] = 10;
+                WaitUntilFlagSent(vn);
+                return VibStatus.VIB_WORKING;
             }
-             n["board_id"] = null;//get board type
-            WaitForIdleQuick(n);
-            return true;
+            else
+            {
+                return VibStatus.VIB_READY;
+            }
         }
-        public void InvalidNodeReg(byte addr, string regname)
+
+
+        //search whether the node is available
+        public bool search(byte addr)
         {
-            if (!nodemap.ContainsKey(addr))
-                return;
-            if (nodemap[addr].status == NodeStatus.ST_LOST)
-                return;
-            bActionMode = true;
-            nodemap[addr].status = NodeStatus.ST_IDLE;
-            nodemap[addr][regname] = null;
-            WaitForIdle(nodemap[addr]);
-            bActionMode = false;
+            SubNode n = this[addr] as SubNode;
+            bool ret = false;
+            if (mut.WaitOne())
+            {
+                n["addr"] = null;
+                if (!WaitForIdleQuick(n))
+                {
+                    n.status = NodeStatus.ST_LOST;
+                }
+                else
+                {
+                    n["board_id"] = null;//get board type
+                    ret = WaitForIdleQuick(n);
+                }
+                mut.ReleaseMutex();
+            }
+            
+            return ret;
+        }
+        public void ClearNodeReg(byte addr,string regname)
+        {
+            mut.WaitOne();
+            this[addr][regname] = null;
+            if (!WaitForIdle(this[addr]))
+            {
+                MessageBox.Show(StringResource.str("tryagain"));
+            }
+            mut.ReleaseMutex();
         }
         public string GetNodeReg(byte addr,string regname)
         {
-             if (!nodemap.ContainsKey(addr))
-                 return "";
-             if (nodemap[addr].status == NodeStatus.ST_LOST)
-                 return "";
-             if (!nodemap[addr][regname].HasValue)
-             {
-                 Action(addr, "getreg:" + regname);
-                 if (ResultOut != "")
-                 {
-                     //MessageBox.Show("Failed to download config, please try again");
-                     throw new Exception("Failed to read config, please try again");
-                 }
-             }
-             return nodemap[addr][regname].ToString();
-        }
-        public void Action(byte addr, string command)
-        {
-            if ((addr < 0x80) && (!nodemap.ContainsKey(addr)))
-                return;
-            bActionMode = true;
-            int tout = 0;
-            while (true)
+            while (this[addr].status == NodeStatus.ST_IDLE || this[addr].status == NodeStatus.ST_BUSY)
             {
-                tout = 0;
-                lock (InLock)
+                if (this[addr].status != NodeStatus.ST_IDLE)
                 {
-                    ResultOut = null;
-                    addrIn = addr;
-                    CmdIn = command;
+                    Thread.Sleep(10);
+                    continue;
                 }
-
-                while ((ResultOut == null) && (tout++ < 1000))
-                {
-                    //Thread.SpinWait(1);
-                    Thread.Sleep(2);
-                }
-                if (tout < 1000)
-                {
-                    bActionMode = false;
+                if (!this[addr][regname].HasValue)
+                    Action(addr, "getreg:" + regname);
+                if (this[addr][regname].HasValue)
+                    return nodemap[addr][regname].ToString();
+                Thread.Sleep(10);
+                continue;
+            }
+            return "";
+        }
+        
+        private byte flag_cmd(string action) //translate the action string to reg value
+        {
+            if (action == "stop")
+                return 0;
+            if (action == "start")
+                return 80;
+            if (action == "zero")
+                return 7;
+            if (action == "release")
+                return 4;
+            if (action == "empty")
+                return 4;
+            if (action == "pass")
+                return 3;
+            if (action == "fill")
+                return 5;
+            
+            return 0xff;
+        }
+        public void Action(byte addr, string cmd)
+        {
+            if (addr < 0x80)
+            {
+                SubNode node = this[addr];
+                if((this[addr].status == NodeStatus.ST_DISABLED))
                     return;
+                if(!(node is SubNode))
+                    return;
+                if (mut.WaitOne())
+                {
+                    try
+                    {
+                        WaitForIdle(node);
+                        if (cmd.IndexOf("getreg") == 0) //getreg:regname
+                        {
+                            node[cmd.Remove(0,"getreg:".Length)] = null;
+                            WaitForIdle(node);
+                        }
+                        if (flag_cmd(cmd) < 128)
+                        {
+                            node["flag_enable"] = flag_cmd(cmd);
+                            WaitUntilFlagSent(node);
+                        }
+                        if (cmd == "flag_goon")
+                        {
+                            node["flag_goon"] = 1;
+                            //WaitUntilFlagSent(node);
+                        }
+
+                        if (cmd == "flag_release")
+                        {
+                            node["flag_release"] = 1;
+                            WaitUntilFlagSent(node);
+                        }
+                        if ((cmd == "trigger") && (node is VibrateNode))
+                        {
+                            node["flag_enable"] = 10; //trigger the interface
+                            WaitUntilFlagSent(node);
+                        }
+                        if (cmd.IndexOf("interface") == 0) //command format interface1234
+                        {
+                            UInt32 val = UInt32.Parse(cmd.Remove(0, "interface".Length));
+                            node["target_weight"] = val;
+                            Thread.Sleep(25);
+                            
+                            node["flag_enable"] = 8; //initialize the interface
+                            WaitUntilFlagSent(node);
+                                
+                        }
+                        if (cmd.IndexOf("calib") == 0) //command format calib1300
+                        {
+                            byte slot = byte.Parse(cmd.Substring("calib".Length,1));
+                            UInt32 weight = UInt32.Parse(cmd.Remove(0, "calib1".Length));
+                            
+                            node["cs_mtrl"] = null;
+                            if (WaitForIdle(node))
+                            {
+                                if (slot == 0) //zero point calibration
+                                {
+                                    node["cs_zero"] = node["cs_mtrl"];
+                                    WaitUntilGetValue(node, "cs_zero", node["cs_mtrl"].Value);
+                                    
+                                }
+                                else
+                                {
+                                    node["cs_poise" + slot.ToString()] = node["cs_mtrl"];
+                                    WaitUntilGetValue(node, "cs_poise" + slot.ToString(), node["cs_mtrl"].Value);
+                                    node["poise_weight_gram" + slot.ToString()] = weight;
+                                    WaitUntilGetValue(node, "poise_weight_gram" + slot.ToString(), weight);
+                                }
+                            }
+                            else
+                            {
+                                MessageBox.Show(StringResource.str("tryagain"));
+                            }
+                        }
+
+                        if (cmd == "flash")
+                        {
+                            //wait until all data is programed.
+                            node["NumOfDataToBePgmed"] = 45;
+                            Thread.Sleep(1000);
+
+                            if (!WaitUntilGetValue(node, "NumOfDataToBePgmed", 0))
+                                throw new Exception("burnning failed.");
+                        }
+                        mut.ReleaseMutex();
+                    }
+                    catch (Exception exmsg)
+                    {
+                        mut.ReleaseMutex();
+                        Debug.WriteLine(DateTime.Now.ToString("G")+exmsg.Message);
+                    }
+                }
+                else
+                {
+                    throw new Exception("Timeout to conduct the action");
                 }
             }
-            
+            else
+            {
+                if (mut.WaitOne())
+                {
+                    try
+                    {
+
+                        if (cmd == "zero")
+                        {
+                             nodemap[1].writebyte_group_reg(addr, new string[] { "flag_enable" }, new byte[] { (byte)flag_cmd(cmd) });
+
+                        }
+                        if (cmd == "start" || cmd == "stop")
+                        {
+                            foreach (WeighNode wnode in weight_nodes)
+                            {
+                                wnode.writebyte_abs_reg(new string[] { "flag_enable" }, new byte[] { (byte)flag_cmd(cmd) });
+                                wnode.cnt_match = 0;
+                            }
+                        }
+                        if (cmd == "pass" || cmd == "fill" || cmd == "empty" || cmd == "release" || cmd=="goon")
+                        {
+                            foreach (WeighNode wnode in weight_nodes)
+                            {
+                                wnode.writebyte_abs_reg(new string[] { "flag_enable" }, new byte[] { (byte)flag_cmd(cmd) });
+                            }
+                        }
+                        mut.ReleaseMutex();
+                    }
+                    catch (Exception exmsg2)
+                    {
+                        mut.ReleaseMutex();
+                    }
+                }
+                else
+                {
+                    throw new Exception("Timeout to conduct the action");
+                }
+
+            }
+          
         }
         private void LoadConfiguration()
         {
@@ -218,37 +864,32 @@ namespace ioex_cs
                 string type = def_cfg.Element("node_type" + node).Value;
                 string com = def_cfg.Element("node_com" + node).Value;
                 
-                if (type == "vibrate")
-                {
-                    nodemap[byte.Parse(node)] = new VibrateNode(allports[byte.Parse(com)], byte.Parse(node));
-                    vib_nodes.Add(nodemap[byte.Parse(node)] as VibrateNode);
-                }
                 if (type == "weight")
                 {
                     nodemap[byte.Parse(node)] = new WeighNode(allports[byte.Parse(com)], byte.Parse(node));
                     weight_nodes.Add(nodemap[byte.Parse(node)] as WeighNode);
                 }
+                if (type == "vibrate")
+                {
+                    nodemap[byte.Parse(node)] = new VibrateNode(allports[byte.Parse(com)], byte.Parse(node));
+                }
+
             }
+            
             missingnode = new WeighNode(allports[0], byte.Parse(def_cfg.Element("def_addr").Value)); //36 is the default address of unassigned address board
+
+            
         }
-        public void progress(uint i)
-        {
-        }
+        public delegate void HitRefreshEventHandler(object sender);
+        public event HitRefreshEventHandler RefreshEvent;
+
         internal NodeAgent()
         {
             allports = new List<SPort>();
             weight_nodes = new List<WeighNode>();
-            vib_nodes = new List<VibrateNode>();
             nodemap = new Dictionary<byte, SubNode>();
-            rand = new Random();
-            CmdIn = null;
-            ResultOut = "done";
-            packer = null;
-            QueryLoopDone = true;
+            vibstate = VibStatus.VIB_INIDLE;
             
-            InLock = new object();
-            OutLock = new object();
-
 
             msg_loop = new Thread(new ThreadStart(MessageLoop));
             msg_loop.IsBackground = true;
@@ -260,7 +901,8 @@ namespace ioex_cs
         }
         public void Resume()
         {
-            msg_loop.Resume();
+            bBootDone = true;
+            //msg_loop.Resume();
         }
         public void Start()
         {
@@ -268,21 +910,27 @@ namespace ioex_cs
             
           
         }
-        public void Stop()
+        public void Stop(int ms)
         {
-            msg_loop.Suspend();
+            bBootDone = false;
+            Thread.Sleep(ms);
+//          msg_loop.Suspend();
         }
         
-        private bool WaitUntilGetValue(SubNode n, string regname, UInt32 val)
+        private bool WaitUntilGetValue(SubNode n, string regname, UInt32 val) //until means if timeout happens, node will be set to lost
         {
             int i = 5;
             int j = 0;
 
-            n.status = NodeStatus.ST_IDLE;
-            n[regname] = null;
-            Thread.Sleep(15);
+            if (n.status == NodeStatus.ST_LOST)
+                return false;
 
-            
+            if (n.status == NodeStatus.ST_DISABLED)
+                return false;
+
+            n[regname] = null;
+            Thread.Sleep(12);
+
             
             while (WaitForIdleQuick(n))
             {
@@ -290,14 +938,15 @@ namespace ioex_cs
                 {
                     return true;
                 }
-                Thread.Sleep(i);
+                Thread.Sleep(10);
                 i = i * 2;
                 j = j + 1;
-                if (i > 4000)
+                if (j > 240)
                 {
+                    n.status = NodeStatus.ST_LOST;
                     return false;
                 }
-                if(j % 6 == 5)
+                if(j % 40 == 39)
                     n[regname] = null; //ask for value again
             }
             return false;
@@ -311,19 +960,15 @@ namespace ioex_cs
             int j = 0;
             while (n.status == NodeStatus.ST_BUSY)
             {
-                Thread.Sleep(i);
-                i = i + (i+1)/2;
-                if (i>400)
+                Thread.Sleep(5);
+                //i = i + (i+1)/2;
+                if (i++ > 900)
                 {
-                    if (j > 10) //resend for 3 times
-                    {
-                        n.status = NodeStatus.ST_LOST;
                         return false;
-                    }
-                    i = 4;
-                    if(j % 4 == 3)
+                }else
+                {
+                    if(i % 60 == 59)
                         n.ResendCommand();
-                    j++;
                 }
             }
             return true;
@@ -334,86 +979,67 @@ namespace ioex_cs
             int j = 0;
             while (n.status == NodeStatus.ST_BUSY)
             {
-                Thread.Sleep(i);
-                i = i + (i + 1) / 2;
-                if (i > 10)
+                Thread.Sleep(2);
+                //i = i + (i + 1) / 2; //8,12,18,28,42,64,96,
+                if (i++ > 40)
                 {
-                    if (j > 3) //resend for 3 times
-                    {
-                        return false;
-                    }
-                    i = 4;
-                    if (j % 3 == 2)
-                        n.ResendCommand();
-                    j++;
+                    return false;
                 }
             }
             return true;
-        }
-        private void DoRelease(byte[] addrs, double weight)
-        {
-            release_addrs = addrs;
-            release_weight = weight;
-        }
-        private bool WaitPackerReady()
-        {
-            VibrateNode vn = (nodemap[packer.vib_addr] as VibrateNode);
-            vn["hw_status"] = null;
-
-            WaitForIdle(vn);
-            if ((!vn["hw_status"].HasValue) || (vn["hw_status"].Value != 0))
-            {
-                Thread.Sleep(20);//todo : add alert
-                return false;
-            }
-            return true;
-        }
-        private void TriggerPacker()
-        {
-            VibrateNode vn = (nodemap[packer.vib_addr] as VibrateNode);
-            if ((packer.total_packs % (vn.intf_byte.feed_times + 1) != 0))
-                return;
-            
-
-            
-            vn["flag_enable"] = 10;
-            WaitUntilFlagSent(vn);
         }
         private bool WaitUntilFlagSent(SubNode n)
         {
             if (IsDebug)
                 return true;
             string reg = "cs_sys_offset_cal_data_lw";
-            int k = 1000;
-            while(k-- > 0)
+            Thread.Sleep(5);
+            n[reg] = null;
+            WaitForIdleQuick(n);
+            if (n[reg].HasValue)
             {
-                Thread.Sleep(10);
-                n[reg] = null;
-                WaitForIdleQuick(n);
-                if (n[reg].HasValue)
-                {
-                    uint lw_lb = n[reg].Value % 256;
-                    if (( lw_lb) != n.flag_cnt)
-                    {
-                        n.flag_cnt = lw_lb;
-                        return true;
-                    }
-                }
-                Thread.Sleep(10);
-                n.ResendCommand();
-                
+                 uint lw_lb = n[reg].Value % 256;
+                 if ((lw_lb) != n.flag_cnt)
+                 {
+                    n.flag_cnt = lw_lb;
+                    return true;
+                 }
             }
-            n.status = NodeStatus.ST_LOST;
+            Debug.Write("lost" + n.node_id);
+//          n.status = NodeStatus.ST_LOST;
             return false;
         }
-        private bool WaitPackerDone()
+
+        private bool CheckPackerReady(byte addr)
         {
-            VibrateNode vn = (nodemap[packer.vib_addr] as VibrateNode);
+            VibrateNode vn = (this[addr] as VibrateNode);
+            if (vn == null)
+                return false;
+            if (IsDebug)
+                return true;
+
+            vn["hw_status"] = null;
+            
+            WaitForIdle(vn);
+            if ((!vn["hw_status"].HasValue) || (vn["hw_status"].Value != 0))
+            {
+                Thread.Sleep(10);//todo : add alert
+                return false;
+            }
+            return true;
+        }
+        private bool CheckPackerDone(byte addr)
+        {
+            if (IsDebug)
+                return true;
+            VibrateNode vn = (this[addr] as VibrateNode);
+            if (vn == null)
+                return false;
             vn["cs_sys_offset_cal_data_lw"] = null;
             WaitForIdleQuick(vn);
             if (vn["cs_sys_offset_cal_data_lw"].HasValue)
             {
-                if((packer.total_packs % (vn.intf_byte.feed_times+1) != 0))
+                if((pack_cnt % (vn.intf_byte.feed_times+1) != 0))
                 {
                     return true;
                 }
@@ -421,10 +1047,11 @@ namespace ioex_cs
                 if(lw_ub != release_cnt)
                 {
                     release_cnt = lw_ub;
+                    release_timeout = 0;
                     return true;
                 }
             }
-            if (release_timeout++ < 1000)
+            if (release_timeout++ < 400)
             {
                 Thread.Sleep(5);
                 if ((release_timeout % 100) == 49)
@@ -436,261 +1063,18 @@ namespace ioex_cs
             else
             {
                 release_timeout = 0;
-                VibStatus = VIB_READY; //retry by sending the command
+                vn["flag_enable"] = 10; //retry trigger packer
             }
             return false;
         }
-        private void ReleaseAction(byte[] addrs, double weight)
+
+
+
+        public VibStatus ResetVibStatus(byte addr)
         {
-            string log = weight.ToString("F2") + "\t";
-/*
-            string log2 = "";
-            foreach (byte n in addrs)
-            {
-                WeighNode wn = (nodemap[n] as WeighNode);
-                log2 = log2 + String.Format("({0}){1}\t", wn.node_id, wn.weight.ToString("F2"));
-            }
-
-
-            foreach (byte n in addrs)
-            {
-                WeighNode wn = (nodemap[n] as WeighNode);
-                log = log + String.Format("({0}#){1}\t", wn.node_id, wn.weight.ToString("F2"));
-            }
-  
-            StringResource.dolog(log);
- */
-            log = weight.ToString("F2") + "\t";
-            
-            foreach(byte n in addrs)
-            {
-                WeighNode wn = (nodemap[n] as WeighNode);
-                log = log + String.Format("({0}){1}\t", wn.node_id, wn.weight.ToString("F2"));
-                
-                wn.cnt_match = 0;
-                if(wn.errlist != "")
-                    wn.errlist.Replace("err_om;", "");
-
-                Debug.Write('(');
-                WaitUntilGetValue(wn, "flag_release", 0);
-                Debug.Write(')');
-
-                wn.bRelease = true;
-                wn["flag_release"] = 1; //release the packer
-                WaitUntilFlagSent(wn);
-            }
-            StringResource.dolog(log);
-            Thread.Sleep(150);
-            foreach (byte n in addrs)
-            {
-                WeighNode wn = (nodemap[n] as WeighNode);
-                wn.ClearWeight();
-            }
-            onepack o = new onepack();
-            o.bucket = new byte[5];
-            o.bucket[1] = o.bucket[2] = o.bucket[3] = o.bucket[4] = o.bucket[0] = (byte)0;
-            int i = 0;
-            foreach (byte n in addrs)
-            {
-                o.bucket[i++] = n;
-            }
-            o.time = DateTime.Now;
-            o.weight = weight;
-            packer.AddNewPack(o);
-            
-        }
-        //one bucket combination
-        private bool Caculation1()
-        {
-            double sum = 0;
-            double uvar = packer.curr_cfg.target + packer.curr_cfg.upper_var;
-            double dvar = packer.curr_cfg.target - packer.curr_cfg.lower_var;
-
-
-            for (int i = 0; i < weight_nodes.Count; i++)
-            {
-                if (weight_nodes[i].status == NodeStatus.ST_LOST)
-                    continue;
-                sum = weight_nodes[i].weight;
-                if (sum > dvar && sum < uvar)
-                {
-                    DoRelease(new byte[] { weight_nodes[i].node_id }, sum);
-                    return true;
-                }
-            }
-            return false;
-        }
-        private bool Caculation2()
-        {
-            double sum = 0;
-            double uvar = packer.curr_cfg.target + packer.curr_cfg.upper_var;
-            double dvar = packer.curr_cfg.target - packer.curr_cfg.lower_var;
-
-            for (int i = 0; i < weight_nodes.Count - 1; i++)
-            {
-                if (weight_nodes[i].status == NodeStatus.ST_LOST)
-                    continue;
-                if (weight_nodes[i].weight <= llim)
-                    continue;
-
-                for (int j = i + 1; j < weight_nodes.Count; j++)
-                {
-                    if (weight_nodes[j].status == NodeStatus.ST_LOST)
-                        continue;
-                    if (weight_nodes[j].weight <= llim)
-                        continue;
-
-                    sum = weight_nodes[i].weight + weight_nodes[j].weight;
-                    if (sum > dvar && sum < uvar)
-                    {
-                        DoRelease(new byte[] { weight_nodes[i].node_id, weight_nodes[j].node_id }, sum);
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-        private bool Caculation3()
-        {
-            double sum = 0;
-            double uvar = packer.curr_cfg.target + packer.curr_cfg.upper_var;
-            double dvar = packer.curr_cfg.target - packer.curr_cfg.lower_var;
-
-            for (int i = 0; i < weight_nodes.Count - 2; i++)
-            {
-                if (weight_nodes[i].status == NodeStatus.ST_LOST)
-                    continue;
-                if (weight_nodes[i].weight <= llim)
-                    continue;
-
-                for (int j = i + 1; j < weight_nodes.Count - 1; j++)
-                {
-                    if (weight_nodes[j].status == NodeStatus.ST_LOST)
-                        continue;
-                    if (weight_nodes[j].weight <= llim)
-                        continue;
-
-                    for (int k = j + 1; k < weight_nodes.Count; k++)
-                    {
-                        if (weight_nodes[k].status == NodeStatus.ST_LOST)
-                            continue;
-                        if (weight_nodes[k].weight <= llim)
-                            continue;
-
-                        sum = weight_nodes[i].weight + weight_nodes[j].weight + weight_nodes[k].weight;
-                        if (sum > dvar && sum < uvar)
-                        {
-                            DoRelease(new byte[] { weight_nodes[i].node_id, weight_nodes[j].node_id, weight_nodes[k].node_id }, sum);
-                            return true;
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-        private bool Caculation4()
-        {
-            double sum = 0;
-            double uvar = packer.curr_cfg.target + packer.curr_cfg.upper_var;
-            double dvar = packer.curr_cfg.target - packer.curr_cfg.lower_var;
-
-            for (int i = 0; i < weight_nodes.Count - 3; i++)
-            {
-                if (weight_nodes[i].status == NodeStatus.ST_LOST)
-                    continue;
-                if (weight_nodes[i].weight <= llim)
-                    continue;
-
-                for (int j = i + 1; j < weight_nodes.Count - 2; j++)
-                {
-                    if (weight_nodes[j].status == NodeStatus.ST_LOST)
-                        continue;
-                    if (weight_nodes[j].weight <= llim)
-                        continue;
-
-                    for (int k = j + 1; k < weight_nodes.Count - 1; k++)
-                    {
-                        if (weight_nodes[k].status == NodeStatus.ST_LOST)
-                            continue;
-                        if (weight_nodes[k].weight <= llim)
-                            continue;
-
-                        for (int l = k + 1; l < weight_nodes.Count; l++)
-                        {
-                            if (weight_nodes[l].status == NodeStatus.ST_LOST)
-                                continue;
-                            if (weight_nodes[l].weight <= llim)
-                                continue;
-
-                            sum = weight_nodes[i].weight + weight_nodes[j].weight + weight_nodes[k].weight + weight_nodes[l].weight;
-                            if (sum > dvar && sum < uvar)
-                            {
-                                DoRelease(new byte[] { weight_nodes[i].node_id, weight_nodes[j].node_id, weight_nodes[k].node_id, weight_nodes[l].node_id }, sum);
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-        private bool Caculation5()
-        {
-            double sum = 0;
-            double uvar = packer.curr_cfg.target + packer.curr_cfg.upper_var;
-            double dvar = packer.curr_cfg.target - packer.curr_cfg.lower_var;
-
-            for (int i = 0; i < weight_nodes.Count - 4; i++)
-            {
-                if (weight_nodes[i].status == NodeStatus.ST_LOST)
-                    continue;
-                if (weight_nodes[i].weight <= llim)
-                    continue;
-
-                for (int j = i + 1; j < weight_nodes.Count - 3; j++)
-                {
-                    if (weight_nodes[j].status == NodeStatus.ST_LOST)
-                        continue;
-                    if (weight_nodes[j].weight <= llim)
-                        continue;
-
-                    for (int k = j + 1; k < weight_nodes.Count - 2; k++)
-                    {
-                        if (weight_nodes[k].status == NodeStatus.ST_LOST)
-                            continue;
-                        if (weight_nodes[k].weight <= llim)
-                            continue;
-
-                        for (int l = k + 1; l < weight_nodes.Count - 1; l++)
-                        {
-                            if (weight_nodes[l].status == NodeStatus.ST_LOST)
-                                continue;
-                            if (weight_nodes[l].weight <= llim)
-                                continue;
-
-                            for (int m = l + 1; m < weight_nodes.Count; m++)
-                            {
-                                if (weight_nodes[m].status == NodeStatus.ST_LOST)
-                                    continue;
-                                if (weight_nodes[m].weight <= llim)
-                                    continue;
-
-                                sum = weight_nodes[i].weight + weight_nodes[j].weight + weight_nodes[k].weight + weight_nodes[l].weight + weight_nodes[m].weight;
-                                if (sum > dvar && sum < uvar)
-                                {
-                                    DoRelease(new byte[] { weight_nodes[i].node_id, weight_nodes[j].node_id, weight_nodes[k].node_id, weight_nodes[l].node_id, weight_nodes[m].node_id }, sum);
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
-        }
-        public void ResetStatus()
-        {
-            VibrateNode vn = (nodemap[packer.vib_addr] as VibrateNode);
+            VibrateNode vn = (this[addr] as VibrateNode);
+            if (vn == null)
+                return VibStatus.VIB_ERROR;
             if (vn["cs_sys_offset_cal_data_uw"].HasValue)
                 release_cnt = vn["cs_sys_offset_cal_data_uw"].Value;
             else
@@ -698,464 +1082,176 @@ namespace ioex_cs
                 release_cnt = 0;
                 //vn["cs_sys_offset_cal_data_uw"] = 0;
             }
-            release_addrs = null;
+            
             release_timeout = 0;
-            VibStatus = VIB_INIDLE;
-            SetResultOut("");
+            return VibStatus.VIB_INIDLE;
+            
         }
-        public void CheckNodeStatus()
+        public void SetVibIntf(byte vibaddr, Intf i)
         {
-            foreach (WeighNode n in weight_nodes)
+            VibrateNode vn = this[vibaddr] as VibrateNode;
+            vn.intf_byte = i;
+        }
+        public VibStatus UpdateVibStatus(byte vibaddr,VibStatus vibstate)
+        {
+            VibrateNode vn = this[vibaddr] as VibrateNode;
+            if (!vn.intf_byte.b_Handshake)
             {
-                if (n.status == NodeStatus.ST_LOST)
-                    continue;
-                //no match case
-                n.cnt_match++;
-                if (n.cnt_match > 10)
-                {
-                    if (AlertWnd.b_turnon_alert)
-                    {
-                        if (!AlertWnd.b_manual_reset) //auto reset
-                        {
-                            if (n.errlist.IndexOf("err_om;") < 0)   //no matchinf for serveral times
-                                n.errlist = n.errlist + "err_om;";
-                        }
-                    }
-                }
-                //over_weight case
-                if ((n.weight < packer.curr_cfg.target / 2) && (n.weight > -1000.0))
-                {
-                    n["flag_goon"] = 1;
-                    WaitUntilFlagSent(n);
-                }
-                else
-                {
-                    double nw = n.weight;
-                    if (nw > (packer.curr_cfg.target - packer.curr_cfg.lower_var) && nw < 65521)
-                    {
-                        if (AlertWnd.b_turnon_alert)
-                        {
-                            if (n.errlist.IndexOf("err_ow;") < 0)
-                                n.errlist = n.errlist + "err_ow;";
-
-                            if (!AlertWnd.b_manual_reset) //auto reset
-                            {
-                                n["flag_enable"] = 4;
-                                WaitUntilFlagSent(n);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (nw < 65521)
-                        {
-                            if (n.errlist != "")
-                                n.errlist.Replace("err_ow;", "");//reset overweight error
-                        }
-                    }
-                }
+                return VibStatus.VIB_READY;
             }
 
-        }
-        public bool CheckCombination()  //return whether there is hit or not.
-        {
-            if (NodeAgent.IsDebug)
+            VibStatus oldstate = vibstate;
+            mut.WaitOne();
+            if (vibstate == VibStatus.VIB_WORKING)
             {
-                if (rand.NextDouble() > 0.1)
-                {
-                    DoRelease(new byte[] { weight_nodes[1].node_id, weight_nodes[2].node_id, weight_nodes[3].node_id, weight_nodes[4].node_id, weight_nodes[5].node_id }, 115);
-                    return true;
-                }
-                return false;
-            }
-            else
-            {
-                llim = packer.curr_cfg.lower_var;
-                if (packer.curr_cfg.upper_var < llim)
-                    llim = packer.curr_cfg.upper_var;
-                llim = llim / 2;
-
-                if (Caculation3() || Caculation4() || Caculation5() || Caculation1() || Caculation2())
-                {
-                    return true;
-                    
-                }
                 
-                
-                packer.last_one_pack.bucket = null;
-                return false;
-            }       
+                if (CheckPackerDone(vibaddr)) //check botton pack count increase
+                {
+                    vibstate = VibStatus.VIB_INIDLE;
+                    Debug.WriteLine("idle");
+                }
+            }
+            if (vibstate == VibStatus.VIB_INIDLE)
+            {
+                if (CheckPackerReady(vibaddr))//hw_status == 0
+                {
+                    Debug.WriteLine("ready");
+                    vibstate = VibStatus.VIB_READY;
+                }
+            }
+            if (vibstate != oldstate)
+                RefreshEvent(this);
+            mut.ReleaseMutex();
+            return vibstate;
         }
-        
-        private void SetResultOut(string ret)
+       
+        private int check_weights_ready()
         {
-            lock(OutLock)
-            {
-                ResultOut = ret;
-            }
-        }
-
-        private void single_command(byte addr, string action)
-        {
-            string ret = "";
-            uint enable;
-            SubNode node = nodemap[addr];
-            if (action == "enable")
-            {
-                node.status = NodeStatus.ST_IDLE;
-                node.errlist = "";
-                SetResultOut("");
-                return;
-            }
-            if (node.status == NodeStatus.ST_LOST)
-            {
-                SetResultOut("lost_node");
-                return;
-            }
-            if (action.IndexOf("getreg") == 0)
-            {
-                string[] param = action.Split(':');
-                node[param[1]] = null;
-                if (!WaitForIdle(node))
-                    node.status = NodeStatus.ST_LOST;
-                SetResultOut("");
-                return;
-            }
-
-            if (action.IndexOf("setreg") == 0)
-            {
-                string[] param = action.Split(':');
-                node[param[1]] = UInt32.Parse(param[2]);
-                if(!WaitUntilGetValue(node, param[1], UInt32.Parse(param[2])))
-                    node.status = NodeStatus.ST_LOST;
-                SetResultOut("");
-                return;
-            }
-            if (action == "stop" || action == "start")
-            {
-                if (action == "stop")
-                    node["flag_enable"] = 0;
-                if (action == "start")
-                    node["flag_enable"] = 0x80;
-
-                WaitUntilFlagSent(node);
-                SetResultOut("");    
-                return;
-            }
-            if (action == "flash")
-            {
-                //wait until all data is programed.
-                node["NumOfDataToBePgmed"] = 45;
-                Thread.Sleep(1000);
-
-                if (!WaitUntilGetValue(node, "NumOfDataToBePgmed", 0))
-                    MessageBox.Show("burnning failed.");
-                SetResultOut("");
-                return;
-            }
-            if (action == "disable")
-            {
-                node.status = NodeStatus.ST_LOST;
-                node.errlist = "";
-                SetResultOut("");
-                return;
-            }
-
-            if ((node is WeighNode))
-            {
-                if (action == "goon")
-                {
-                    enable = 1;
-                    node["flag_goon"] = enable;
-                    WaitUntilFlagSent(node);
-                }
-                if (action == "zero" || action == "empty" || action == "stop" || action == "release" ||
-                    action == "pass" || action == "fill")
-                {
-                    enable = INVALID_ENABLE;
-                    if (action == "zero")
-                        enable = 7;
-                    if (action == "empty" || action == "stop" || action == "release")
-                        enable = 4;
-                    if (action == "pass")
-                        enable = 3;
-                    if (action == "fill")
-                        enable = 5;
-                    node["flag_enable"] = enable;
-                    WaitUntilFlagSent(node);
-                }
-                if (action.IndexOf("calib") == 0) //command format calib1300
-                {
-                    byte slot = byte.Parse(action.Substring("calib".Length, 1));
-                    UInt32 weight = UInt32.Parse(action.Remove(0, "calib1".Length));
-                    ret = "fail";
-                    node["cs_mtrl"] = null;
-                    if (WaitForIdle(node))
-                    {
-                        if (slot == 0) //zero point calibration
-                        {
-                            node["cs_zero"] = node["cs_mtrl"];
-                            ret = WaitUntilGetValue(node, "cs_zero", node["cs_mtrl"].Value) ? "" : "fail";
-                        }
-                        else
-                        {
-                            node["cs_poise" + slot.ToString()] = node["cs_mtrl"];
-                            if (!WaitUntilGetValue(node, "cs_poise" + slot.ToString(), node["cs_mtrl"].Value))
-                                node.status = NodeStatus.ST_LOST;
-                            node["poise_weight_gram" + slot.ToString()] = weight;
-                            if(!WaitUntilGetValue(node, "poise_weight_gram" + slot.ToString(), weight))
-                                node.status = NodeStatus.ST_LOST;
-                        }
-                    }
-                }
-                SetResultOut(ret);
-                return;
-            }
-            if (node is VibrateNode)
-            {
-
-                if (action == "trigger")
-                {
-                    node["flag_enable"] = 10; //trigger the interface
-                    WaitUntilFlagSent(node);
-                }
-                if (action.IndexOf("interface") == 0) //command format interface1234
-                {
-                    UInt32 val = UInt32.Parse(action.Remove(0, "interface".Length));
-                    node["target_weight"] = val;
-                    Thread.Sleep(25);
-                    //ret = WaitUntilGetValue(node, "target_weight", val) ? "" : "fail";
-                    node["flag_enable"] = 8; //initialize the interface
-                    WaitUntilFlagSent(node);
-                }
-
-                if (action == "fill")
-                {
-                    node["flag_enable"] = 5;
-                    WaitUntilFlagSent(node);
-                }
-                SetResultOut(ret);
-
-                return;
-            }
-        }
-        
-        private void group_command1(byte addr, string action) //command send to group address
-        {
-            string ret = "";
-            uint enable;
-            if (action == "zero" || action == "empty" || action == "stop" || action == "release" ||
-                action == "pass" || action == "fill" || action == "start")
-            {
-                enable = INVALID_ENABLE; //just invalid value
-                if (action == "start")
-                {
-                    enable = 1;
-                }
-                if (action == "stop")
-                {
-                    enable = 0;
-                }
-                if (action == "zero")
-                    enable = 7;
-                if (action == "empty" || action == "release")
-                    enable = 4;
-                if (action == "pass")
-                    enable = 3;
-                if (action == "fill")
-                    enable = 5;
-
-                vib_nodes[0].writebyte_group_reg(addr, new string[] { "flag_enable" }, new byte[] { (byte)enable });
-                foreach (WeighNode wnode in weight_nodes)
-                {
-                    if (action == "start")
-                        wnode.cnt_match = 0;
-                }
-                if (enable != INVALID_ENABLE)
-                {
-                    //todo send command to group //wnode["flag_enable"] = enable;
-                    ret = "done";
-                }
-            }
-
-            SetResultOut(ret);
-            return ;
-
-        }
-        private void update_vibstatus()
-        {
-            if (packer.status == PackerStatus.RUNNING)
-            {
-                if (VibStatus == VIB_WORKING)
-                {
-                    if (WaitPackerDone()) //check pack count
-                    {
-                        VibStatus = VIB_INIDLE;
-                        Debug.WriteLine("inidle");
-                    }
-                }
-            }
-            if (VibStatus == VIB_INIDLE)
-            {
-                if (WaitPackerReady())//hw_status == 0
-                {
-                    Debug.WriteLine("inready");
-                    VibStatus = VIB_READY;
-                }
-            }
-
-        }
-        private bool check_weights_ready()
-        {
-            bool ret = false;
+            int ret;
+            mut.WaitOne();
             foreach (WeighNode wn in weight_nodes)
             {
-                if (wn.status == NodeStatus.ST_LOST)
+                
+                if (wn.status == NodeStatus.ST_LOST || wn.status == NodeStatus.ST_DISABLED)
                     continue;
 
-                if (wn.weight < -1000 ) //invalid weight || wn.weight >= 65521
+                if (wn.weight < -1000 || (wn.weight >= 100000)) //invalid weight || wn.weight >= 65521
                 {
                     wn.Query();
                     WaitForIdleQuick(wn);
                 }
-                if (CmdIn != "")
-                    return false;
             }
-            ret = true;
             foreach (WeighNode wn in weight_nodes)
             {
-                if (wn.weight < -1000) //|| wn.weight >= 65521
-                {
-                    Debug.WriteLine("re" + wn.node_id);
-                    Thread.Sleep(2);
-                    ret = false;
-                    break;
-                }
+
+                if (wn.status == NodeStatus.ST_LOST || wn.status == NodeStatus.ST_DISABLED)
+                    continue;
             }
+            ret = weight_nodes.Count;
+            foreach (WeighNode wn in weight_nodes)
+            {
+                double wt = wn.weight;
+                if ((wt < -1000) || (wt >= 100000)) //invalid reading
+                {
+                    
+                        //Debug.Write(wn.node_id);
+                    
+                    continue; //break;
+                }
+                ret--;
+            }
+            mut.ReleaseMutex();
+            
+                
             return ret;
 
         }
-        private void clearweights()
+
+        public void ClearWeights()
         {
             foreach (WeighNode wnode in weight_nodes)
+            {
                 wnode.ClearWeight(); //clear the weight value
+            }
         }
+        public void HitMatch(byte addr)
+        {
+            WeighNode wn = (this[addr] as WeighNode);
+            wn.ClearWeight();
+            if (wn.cnt_match == -1)
+                throw new Exception("cannot have two hit in one loop");
+            wn.cnt_match = -1;
+            if (wn.errlist != "")
+                wn.errlist = wn.errlist.Replace("err_om;", "");
+        }
+        private UInt32 release_cnt;
+        private UInt32 release_timeout = 0;
+
+        public bool bWeightReady;
+        public double weight(byte addr)
+        {
+            if (this[addr] is WeighNode)
+            {
+                return (this[addr] as WeighNode).weight;
+            }
+            return WeighNode.INAVLID_WEIGHT;
+
+        }
+        public void SetOverWeight(byte addr, bool ow)
+        {
+
+            WeighNode n = this[addr] as WeighNode;
+            if (ow)
+            {
+                if (n.errlist.IndexOf("err_ow;") < 0)
+                    n.errlist = n.errlist + "err_ow;";
+            }
+            else
+            {
+                if (n.errlist != "")
+                    n.errlist = n.errlist.Replace("err_ow;", "");//reset overweight error
+
+            }
+
+        }
+
         public void MessageLoop()
         {
-            string action;
-            byte addr;
-            bool HasNewCmd;
-            SubNode node;
-            UInt32 enable = 0;
-            string ret = "";
-            
+            uint checkcnt = 0;
+            int notready = 0;
             try
             {
                 while (true)
                 {
-                    HasNewCmd = false;
-                    if (CmdIn != null && CmdIn != "") //new command available
-                        HasNewCmd = true;
-
-                    if (HasNewCmd) //new command available
+                    if (!bBootDone)
                     {
-                        lock (InLock)
-                        {
-                            addr = addrIn;
-                            action = CmdIn;
-                            CmdIn = "";
-                        }
-                        
-
-                        if (addr < 0x80)    //command to single node
-                        {
-                            single_command(addr, action);
-                            continue;
-                        }
-                        if (addr == 0x81 || addr == 0x82 || addr == 0x83 || addr == 0x80)
-                        { //group action address = 0xfe, mode is out first ,then query one by one.
-                           
-                            group_command1(addr, action);
-                            continue;
-                        }
-
-                        SetResultOut("");
+                        Thread.Sleep(10);
                         continue;
                     }
-                    if ((packer == null) || (packer.status == PackerStatus.INERROR))
-                    {
-                        SetResultOut("lost_packer");
-                        continue;
-                    }
-                    if (!bBootDone || bActionMode)
-                        continue;
 
-                    if (packer.status != PackerStatus.RUNNING)
+                    if (!bWeightReady)
                     {
-                        if (packer.NeedRefresh == false)
+//                        TimeSpan ts1 = new TimeSpan(DateTime.Now.Ticks);
+                        notready = check_weights_ready();
+//                        NodeCombination.logTimeStick(ts1, "check:");                        
+                        if (notready < 4)
                         {
-                            if (check_weights_ready())
-                            {
-                                Debug.Write(".");
-                                packer.NeedRefresh = true;
-                            }
-                            else
-                            {
-                                
-                                if(checkcnt++ > 6)
-                                {
-                                    packer.NeedRefresh = true;
-                                    checkcnt = 0;
-                                }
-                            }
+                            RefreshEvent(this);
+                            checkcnt = 0;
+                            bWeightReady = true;
                         }
-                        update_vibstatus();
-                        continue;
-                    }else{
-                        if (VibStatus != VIB_READY)
+                        else
                         {
-                            update_vibstatus();
-                            continue;
+//                          Thread.Sleep(150);
+//                            Debug.Write("[");
                         }
-                        clearweights();
-                        //running mode
-                        while ((!check_weights_ready()) && (CmdIn == ""))
-                        {
-                            
-                            Thread.Sleep(25);
-                        }
-                        if (CmdIn != "")
-                            continue;
-                        
-                        while(CheckCombination())
-                        {
-                             ReleaseAction(release_addrs, release_weight); //send release command, send goon command and clear weight
-                             packer.NeedRefresh = true;
-                             TriggerPacker();
-                             Thread.Sleep(25); //wait until packer is working
-                             VibStatus = VIB_WORKING;
-                             Debug.WriteLine("packing");
-                             while(VibStatus == VIB_WORKING && (CmdIn == ""))
-                             {
-                                 Thread.Sleep(25);
-                                 update_vibstatus();
-                             }
-                             if (CmdIn != "")
-                                 break;
-                        }
-                        if (CmdIn != "")
-                            continue;
-
-                        packer.NeedRefresh = true;
-                        CheckNodeStatus();//send goon for remaining nodes and check for overweight errors
-                        vib_nodes[0]["flag_enable"] = 5; //more fill
-                        WaitUntilFlagSent(vib_nodes[0]);
-                        clearweights();
-                        Thread.Sleep(150);
-                        clearweights();
-                        
-                        
                     }
+                    if (checkcnt++ > 100)
+                    {
+                        RefreshEvent(this);
+                        checkcnt = 0;
+                    }
+                    Thread.Sleep(10);
                 }
             }
             catch (Exception e)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using System.Windows;
+using System.Threading;
 namespace ioex_cs
 {
     enum PackerStatus : byte
@@ -59,7 +60,9 @@ namespace ioex_cs
 
     class UIPacker
     {
+        public bool bSimulate = false;
         public NodeAgent agent;
+        public NodeCombination nc;
         public int _pack_id;
         #region UI related variable
         
@@ -132,6 +135,7 @@ namespace ioex_cs
 
             _curr_cfg = new PackerConfig();
             packhist = new Queue<onepack>();
+            
         }
         public void BottomAction(string command)
         {
@@ -145,8 +149,7 @@ namespace ioex_cs
         {
             if (command == "clearweight")
             {
-                foreach (WeighNode wnode in agent.weight_nodes)
-                    wnode.ClearWeight(); //clear the weight value
+                agent.ClearWeights();
                 return;
             }
             agent.Action((byte)(0x80 + _pack_id), command);
@@ -170,7 +173,7 @@ namespace ioex_cs
 
         public void AddNewPack(onepack o)
         {
-            if (!App.bSimulate)
+            if (!bSimulate)
             {
                 total_packs++;
                 total_weights += o.weight;
@@ -190,7 +193,7 @@ namespace ioex_cs
             //update the speed
             long count = 0;
             DateTime lastmin = DateTime.Now;
-            lastmin = lastmin.Subtract(new TimeSpan(0, 1, 1));
+            lastmin = lastmin.Subtract(new TimeSpan(0, 1, 0));
             foreach (onepack op in packhist)
             {
                 if (op.time < lastmin)
@@ -204,20 +207,35 @@ namespace ioex_cs
                 }
             }
             speed = (UInt32)count;
-            if (App.bSimulate)
+            if (bSimulate)
                 return;
             if (total_packs % 100 == 1) //update record for every 100 packs
+            {
                 ProdHistory.UpdateRecord(this);
+                EngConfigWnd.DecreasePacker(100);
+            }
         }
 
         public void InitConfig()
         {
-            LoadConfig(all_conf.cfg_name);
+            weight_nodes.Clear();
+            all_conf.LoadConfig(all_conf.cfg_name);
+            XElement cfgNode = all_conf.Current;
+            _curr_cfg.FromElement(cfgNode);
+            foreach (string wnode in cfgNode.Element("WNodes").Value.ToString().Split(new char[] { ',' }))
+            {
+                weight_nodes.Add(byte.Parse(wnode));
+            }
+            vib_addr = byte.Parse(cfgNode.Element("VNode").Value.ToString());
+            bot_addr = byte.Parse(cfgNode.Element("BNode").Value.ToString());
+            nc = new NodeCombination(this);
         }
         public Intf getInterface()
         {
-            agent.InvalidNodeReg(bot_addr, "target_weight"); //the target_weight actually is interface for botton node
-            Intf intf_byte = new Intf(UInt16.Parse(agent.GetNodeReg(bot_addr, "target_weight")));
+            string val = agent.GetNodeReg(bot_addr, "target_weight");
+            if (val == "")
+                return new Intf(0);
+            Intf intf_byte = new Intf(UInt16.Parse(val));
             return intf_byte;
         }
         public void setInterface(Intf intf_byte)
@@ -229,16 +247,9 @@ namespace ioex_cs
         //packer and sub node will share the same configuration name
         public void LoadConfig(string cfgname)
         {
-            if ((Application.Current as App).curr_packer.status == PackerStatus.RUNNING)
+            if (status == PackerStatus.RUNNING)
                 return;
-            weight_nodes.Clear();
-            all_conf.LoadConfig(cfgname);
             XElement cfgNode = all_conf.Current;
-            _curr_cfg.FromElement(cfgNode);
-            foreach (string wnode in cfgNode.Element("WNodes").Value.ToString().Split(new char[] { ',' }))
-            {
-                weight_nodes.Add(byte.Parse(wnode));
-            }
             foreach (byte n in weight_nodes)
             {
                 if (!nodes_config.ContainsKey(n))
@@ -248,7 +259,6 @@ namespace ioex_cs
                     nodes_config[n].LoadConfig(cfgname);
                 }
             }
-            vib_addr = byte.Parse(cfgNode.Element("VNode").Value.ToString());
             if (!nodes_config.ContainsKey(vib_addr))
             {
                 nodes_config[vib_addr] = new XmlConfig("node_" + vib_addr + ".xml");
@@ -257,7 +267,7 @@ namespace ioex_cs
             }
             
 
-            bot_addr = byte.Parse(cfgNode.Element("BNode").Value.ToString());
+            
             if (!nodes_config.ContainsKey(bot_addr))
             {
                 nodes_config[bot_addr] = new XmlConfig("node_" + bot_addr + ".xml");
@@ -364,15 +374,25 @@ namespace ioex_cs
         {
             rStart = DateTime.Now;
             ProdHistory.InitNewRun(this);
-            agent.ResetStatus();
+            nc.ResetStatus();
             agent.Action((byte)(0x80+_pack_id), "start");//0x80 is group action
+            agent.Action(vib_addr, "start");
             status = PackerStatus.RUNNING;
         }
         public void StopRun()
         {
-            status = PackerStatus.IDLE;
+           
+            nc.Stop(3000);
+            agent.Stop(1000);
             
-            if (!App.bSimulate)
+            agent.Action((byte)(0x80 + _pack_id), "stop");
+            agent.Action(vib_addr, "stop");
+            Thread.Sleep(300);
+            status = PackerStatus.IDLE;
+            agent.Resume();
+            nc.Resume();
+            
+            if (!bSimulate)
             {
                 ProdHistory.UpdateRecord(this);
                 ResetHistory();
@@ -382,8 +402,6 @@ namespace ioex_cs
                 total_sim_packs = 0;
                 total_sim_weights = 0;
             }
-            agent.ResetStatus();
-            agent.Action((byte)(0x80 + _pack_id), "stop");
 
         }
 

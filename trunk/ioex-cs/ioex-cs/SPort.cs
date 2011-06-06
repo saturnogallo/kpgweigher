@@ -202,7 +202,7 @@ namespace ioex_cs
         private FrameBuffer ifrm;
         private SerialPort _serial;
         private Timer _timer;
-        byte[] rbuf = new byte[100];
+        byte[] rbuf = new byte[500];
         private void _checkport(object state)
         {
             int size = 0;

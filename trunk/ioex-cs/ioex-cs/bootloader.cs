@@ -84,10 +84,12 @@ namespace ioex_cs
         {
             
             byte[] page = new byte[130];
-
+            
             while (true)
             {
                 node.status = NodeStatus.ST_IDLE;
+                node["flag_enable"] = 0;
+                Thread.Sleep(100);
                 node["addr"] = null;
                 Thread.Sleep(100);
                 if (node["addr"].HasValue)
@@ -144,11 +146,8 @@ namespace ioex_cs
                         node.writebyte_abs_reg(new byte[] { (byte)2, (byte)3 }, new byte[] { (byte)page_addr, (byte)(page_addr >> 8) });
                         Thread.Sleep(10);       
                         byte b;
-                        b = (byte)page_addr;
-                        Debug.WriteLine(b.ToString());
                         b = (byte)(page_addr >> 8);
-                        Debug.WriteLine(b.ToString());
-                        //todo send data to node
+                        //send data to node
                         node.writeseq_abs_reg(4, page, count+2);
                         Thread.Sleep(20);       
                         node.writebyte_abs_reg(new byte[] { (byte)0 }, new byte[] { (byte)2, (byte)0 });//BOOT_CMD_PGM_PAGE =2

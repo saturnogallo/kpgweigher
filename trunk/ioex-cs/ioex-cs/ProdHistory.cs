@@ -159,13 +159,23 @@ namespace ioex_cs
         private void btnRet_Click(object sender, EventArgs e)
         {
             Hide();
+            App p = System.Windows.Application.Current as App;
+            p.SwitchTo("configmenu");
         }
 
         private void btnClr_Click(object sender, EventArgs e)
         {
-            App p = System.Windows.Application.Current as App;
-            p.curr_packer.total_packs = 0;
+            
+            curr_packer.total_packs = 0;
             MessageBox.Show(StringResource.str("done"));
+        }
+        private UIPacker curr_packer
+        {
+            get
+            {
+                App p = System.Windows.Application.Current as App;
+                return p.packers[0];
+            }
         }
     }
 }

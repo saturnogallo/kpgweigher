@@ -21,6 +21,14 @@ namespace ioex_cs
     {
         public ProdClickHandler phandler;
         private Dictionary<string, string> imglist;
+        private UIPacker curr_packer
+        {
+            get
+            {
+               App p = (Application.Current as App);
+                return p.packers[0];
+            }
+        }
         public ProdNum()
         {
             InitializeComponent();
@@ -30,11 +38,10 @@ namespace ioex_cs
         {
             this.phandler = h;
             this.wrapPanel1.Children.Clear();
-            App p = Application.Current as App;
             PackerConfig pcfg = new PackerConfig();
-            foreach (string id in p.curr_packer.all_conf.Keys)
+            foreach (string id in curr_packer.all_conf.Keys)
             {
-                pcfg.FromElement(XElement.Parse(p.curr_packer.all_conf[id]));
+                pcfg.FromElement(XElement.Parse(curr_packer.all_conf[id]));
                 FileInfo fi = new FileInfo("C:\\ioex\\prodpic\\"+pcfg.product_desc +".jpg");
                 imglist[id] = fi.FullName;
 
@@ -64,7 +71,6 @@ namespace ioex_cs
                 ib.ImageSource = new BitmapImage(new Uri(fi.FullName));
                 this.wrapPanel1.Children.Add(n);
             }
-
             this.Show();
         }
         private void ImageSelected(object sender, EventArgs arg)
@@ -84,16 +90,16 @@ namespace ioex_cs
         private void Delbtn_Click(object sender, EventArgs e)
         {
             string id = (sender as Button).Name.Remove(0, 2);
-            App p = Application.Current as App;
-            string lastcfg = p.curr_packer.all_conf.cfg_name;
-            if (id == p.curr_packer.all_conf.cfg_name)
+            
+            string lastcfg = curr_packer.all_conf.cfg_name;
+            if (id == curr_packer.all_conf.cfg_name)
             {
                 MessageBox.Show(StringResource.str("cfg_inuse"));
                 return;
             }
-            p.curr_packer.all_conf.RemoveConfig(id);
-            p.curr_packer.all_conf.LoadConfig(lastcfg);
-            p.curr_packer.all_conf.SaveConfigToFile();
+            curr_packer.all_conf.RemoveConfig(id);
+            curr_packer.all_conf.LoadConfig(lastcfg);
+            curr_packer.all_conf.SaveConfigToFile();
             Init(phandler,true);
         }
 

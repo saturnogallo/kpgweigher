@@ -6,13 +6,15 @@ using System.Xml.Linq;
 using System.Windows;
 using System.ComponentModel;
 using System.Threading;
+using System.Diagnostics;
 namespace ioex_cs
 {
     enum NodeStatus
     {
         ST_IDLE,
         ST_LOST,
-        ST_BUSY
+        ST_BUSY,
+        ST_DISABLED
     }
 
     enum NodeType : byte
@@ -223,8 +225,8 @@ namespace ioex_cs
         private double _lastweight;
         public bool bRelease;
         public int cnt_match;
-        public const double INAVLID_WEIGHT = 1000000.0;
-        public const double NOREADING_WEIGHT = -100000.0;
+        public const double INAVLID_WEIGHT =    1000000.0;
+        public const double NOREADING_WEIGHT = -10000.0;
         private int cnt_aderr; //count for ad error
         Random rand;
         public double weight
@@ -240,18 +242,22 @@ namespace ioex_cs
                 if(value >= 65521) //special message
                 {
                     if (value == 65531) //filtering
-                        return WeighNode.INAVLID_WEIGHT;
-                    if (value == 65534) //AD busy still in progress
-                        return WeighNode.INAVLID_WEIGHT;
-
-                    //try three times before an AD error is issued.
+                    {
+                        //Debug.Write("f"+this.node_id);
+                        return WeighNode.INAVLID_WEIGHT + 1;
+                    }
+                    if (value == 65534) //invalid weight
+                    {
+                        //Debug.Write("a" + this.node_id);
+                        return WeighNode.INAVLID_WEIGHT + 2;
+                    }
+                    //try 10 times before an AD error is issued.
                     if (cnt_aderr < 10)
                     {
                         cnt_aderr++;
-                        return WeighNode.INAVLID_WEIGHT;
-                    }
-                    cnt_aderr = 0;
 
+                        return WeighNode.INAVLID_WEIGHT + 3;
+                    }
                     if (value == 65529) //overweight
                     {
                         if (errlist.IndexOf("err_ow1;") < 0)
@@ -265,13 +271,14 @@ namespace ioex_cs
                     }
                     if (value == 65530) //divide zero
                     {
-                        return WeighNode.INAVLID_WEIGHT;
+                        return WeighNode.INAVLID_WEIGHT+4;
                         if (errlist.IndexOf("err_dz;") < 0)
                             errlist = errlist + "err_dz;";
                     }
                     _lastweight = value;
                     return _lastweight;
                 }
+                cnt_aderr = 0;
                 if (errlist != "")  //clear all the error message
                 {
                     errlist = errlist.Replace("65529;", "");
@@ -287,19 +294,19 @@ namespace ioex_cs
 //                if (_lastweight != w)
 //                    StringResource.dolog(w.ToString("F2") + "#" + this.node_id);
 
-                if (Math.Abs(_lastweight-w) > 0.1)
-                {
+//                if (Math.Abs(_lastweight-w) > 0.1)
+//                {
                     _lastweight = w;
-                }
-                
+//                }
                 return _lastweight; 
             }
         }
         public void ClearWeight()
         {
             curr_conf["mtrl_weight_gram"] = null;
-            _lastweight = -100000.0;
+            _lastweight = INAVLID_WEIGHT;
         }
+        
         public void Query()
         {
             if (NodeAgent.IsDebug)
@@ -540,10 +547,8 @@ namespace ioex_cs
             
             
             
-            if (NodeAgent.IsDebug)
-                status = NodeStatus.ST_IDLE;
-            else
-                status = NodeStatus.ST_IDLE;
+            status = NodeStatus.ST_IDLE;
+                
         }
         //write to group address
         public void writebyte_group_reg(byte group_addr, string[] regaddr, byte[] value)
@@ -592,6 +597,25 @@ namespace ioex_cs
             port.AddVCommand(buf);
 
         }
+        public void writebyte_abs_reg(string[] regaddr, byte[] value)
+        {
+            FrameBuffer ofrm = new FrameBuffer();
+            ofrm.cmd = (byte)'W';
+            ofrm.addr = this.node_id;
+            byte[] regbuffer = new byte[16];
+            byte[] valbuffer = new byte[16];
+            byte[] outbuffer = new byte[32];
+            int outptr = 0;
+            for (int i = 0; i < regaddr.GetLength(0); i++)
+            {
+                regbuffer[outptr] = reg_type_tbl[regaddr[i]].pos;
+                valbuffer[outptr] = (byte)value[i];
+                outptr++;
+            }
+            ofrm.generate_write_frame(outbuffer, regbuffer, valbuffer, 0, (byte)(outptr));
+            port.AddVCommand(outbuffer);
+        }
+
         //write to register with absolute address, for bootloader use
         public void writebyte_abs_reg(byte[] regaddr, byte[] value)
         {
@@ -707,54 +731,41 @@ namespace ioex_cs
                 }
                 if (port.Status == PortStatus.CLOSED)
                     throw new Exception("port is closed");
-                if (status == NodeStatus.ST_LOST)
+                if (status == NodeStatus.ST_DISABLED)
                     return;
-                if (status == NodeStatus.ST_BUSY)
-                    StringResource.dolog("reenter when busy");
+                if (status == NodeStatus.ST_LOST)
+                    return; //todo try the action at random level
+//                if (status == NodeStatus.ST_BUSY)
+//                    throw new Exception("reenter when busy");
+
                 {
                     status = NodeStatus.ST_BUSY;
                     if (value.HasValue)
                     {
-/*
-                        if (curr_conf[reg_name].HasValue)
+                       
+                        if (reg_type_tbl[reg_name].rw == 'v') //volatile value
                         {
-                          if (curr_conf[reg_name].Value == value.Value)
-                            {
-                                if (reg_type_tbl[reg_name].rw != 'v') //non volatile value
-                                {
-                                    status = NodeStatus.ST_IDLE;
-                                    return;
-                                }
-                            }
-                        }
- */
-                        if (reg_type_tbl[reg_name].rw != 'r')
-                        {
-                            if (reg_type_tbl[reg_name].rw == 'v') //volatile value
-                            {
                                 write_vregs(new string[] { reg_name }, new UInt32[] { value.Value });
-                                status = NodeStatus.ST_IDLE;
-                                return;
-                            }
-                            write_vregs(new string[] { reg_name }, new UInt32[] { value.Value });
                         }
-                    }
-                    else
-                    {   
-                        if(valfresh[reg_name])
+                        if (reg_type_tbl[reg_name].rw == 'b') //r+w
                         {
-                            status = NodeStatus.ST_IDLE;
-                            return;
+                                write_vregs(new string[] { reg_name }, new UInt32[] { value.Value });
+                                curr_conf[reg_name] = null;
+                                Thread.Sleep(2);
+                                read_regs(new string[] { reg_name });
+                                return;
                         }
-                    }
+                        status = NodeStatus.ST_IDLE;    //no response or action required r (read only), v mode
+                        return;
 
-                    if (reg_type_tbl[reg_name].rw != 'w') //read back mode r,b=r+w
-                    {
-                        curr_conf[reg_name] = null;
-                        read_regs(new string[] { reg_name });
-                    }else{
-                        status = NodeStatus.ST_IDLE;                
                     }
+                    if(valfresh[reg_name])
+                    {
+                        status = NodeStatus.ST_IDLE;
+                        return;
+                    }
+                    curr_conf[reg_name] = null;
+                    read_regs(new string[] { reg_name });
                 }
             }
         }
