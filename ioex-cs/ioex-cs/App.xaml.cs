@@ -16,20 +16,15 @@ namespace ioex_cs
     /// </summary>
     public partial class App : Application
     {
-        public static bool bSimulate = false;
         internal List<UIPacker> packers; //list of available packers , config in app_config.xml
-        internal NodeAgent agent;
-        internal UIPacker curr_packer { 
-            get { 
-                return packers[0]; 
-            } 
-        }
-        private XmlConfig app_cfg;     //configuration loaded from app_config.xml
+        internal NodeAgent agent; //agent to manage all the nodes
+ 
+        private XmlConfig app_cfg;     //configuration loaded from app_config.xml, fixed settings
         public XElement curr_cfg;   //current configuration
 
         //window list
-        private RunMode runwnd;
-        private SingleMode singlewnd;
+        public RunMode runwnd;
+        public SingleMode singlewnd;
         private ProdHistory histwnd;
         private Help helpwnd;
         private AlertWnd alertwnd;
@@ -37,11 +32,12 @@ namespace ioex_cs
         private PwdWnd pwdwnd;
         private ConfigMenuWnd configwnd;
         private BottomWnd bottomwnd;
+
         public ProdWnd prodwnd;
         public ProdNum prodnum;
         public kbd kbdwnd;
 
-        public string oper{
+        public string oper{ //global variable for operator setting.
             get{
                 try
                 {
@@ -56,40 +52,42 @@ namespace ioex_cs
                 SaveAppConfig();
             }
         }
-        public void InitAll()
-        {
-                alertwnd.UpdateUI(); //load alert configuration
-        }
+        
         public App()
         {
 
-            bSimulate = false;
+
             app_cfg = new XmlConfig("app_config.xml");
             app_cfg.LoadConfigFromFile();
 
             curr_cfg = app_cfg.Current;
 
-
+            agent = new NodeAgent();
             packers = new List<UIPacker>();
+            for (int i = 0; i < Int32.Parse(curr_cfg.Element("machine_number").Value); i++)
+            {
+                UIPacker p = new UIPacker(i, agent);
+                p.agent = agent;
+                p.InitConfig();
+                packers.Add(p);
+            }
+
+            singlewnd = new SingleMode(Int32.Parse(curr_cfg.Element("node_number").Value));
+            runwnd = new RunMode(Int32.Parse(curr_cfg.Element("node_number").Value));
+
             histwnd = new ProdHistory();
             helpwnd = new Help();
             kbdwnd = new kbd();
             bottomwnd = new BottomWnd();
             alertwnd = new AlertWnd();
+            alertwnd.UpdateUI(); //load alert configuration which is in app_config.xml too
+
             pwdwnd = new PwdWnd();
             engwnd = new EngConfigWnd();
             configwnd = new ConfigMenuWnd();
             prodwnd = new ProdWnd();
             prodnum = new ProdNum();
-            agent = new NodeAgent();
-            singlewnd = new SingleMode(Int32.Parse(curr_cfg.Element("node_number").Value));
-            runwnd = new RunMode(Int32.Parse(curr_cfg.Element("node_number").Value));
-
-            for (int i = 0; i < Int32.Parse(curr_cfg.Element("machine_number").Value); i++)
-            {
-                agent.packer = new UIPacker(i, agent);
-                packers.Add(agent.packer);
-            }
+            
 
         }
         public void SaveAppConfig()
@@ -158,6 +156,8 @@ namespace ioex_cs
             if (mode == "runmode")
             {
                 runwnd.Show();
+                if (runwnd.btn_allstart.Visibility == Visibility.Hidden)
+                    MessageBox.Show(StringResource.str("license"));
                 runwnd.UpdateUI("sys_config");
                 runwnd.BringIntoView();
                 return;

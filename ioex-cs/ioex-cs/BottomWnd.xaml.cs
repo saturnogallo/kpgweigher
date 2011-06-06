@@ -18,6 +18,14 @@ namespace ioex_cs
     /// </summary>
     public partial class BottomWnd : Window
     {
+        private UIPacker curr_packer
+        {
+            get
+            {
+                App p = Application.Current as App;
+                return p.packers[0];
+            }
+        }
         public BottomWnd()
         {
             InitializeComponent();
@@ -25,15 +33,16 @@ namespace ioex_cs
         }
         public void UpdateDisplay()
         {
-            App p = Application.Current as App;
-            Intf i = p.curr_packer.getInterface();
+            
+            Intf i = curr_packer.getInterface();
+            curr_packer.agent.SetVibIntf(curr_packer.vib_addr,i);
             intf_ckb_mem.IsChecked = i.b_Hasmem;
             intf_handshake.IsChecked = i.b_Handshake;
             intf_ckb_delay.Content = i.delay_length.ToString();
             intf_lb_feed_times.Content = (i.feed_times+1).ToString();
             intf_input_trigger.SelectedIndex = i.fmt_input;
             intf_output_trigger.SelectedIndex = i.fmt_output;
-            intf_pulse_width.Content = p.curr_packer.agent.GetNodeReg(p.curr_packer.bot_addr, "cs_filter").ToString();
+            intf_pulse_width.Content = curr_packer.agent.GetNodeReg(curr_packer.bot_addr, "cs_filter").ToString();
         }
         private void ApplySetting()
         {
@@ -48,8 +57,9 @@ namespace ioex_cs
             i.feed_times =Convert.ToUInt16(UInt16.Parse(intf_lb_feed_times.Content.ToString()) - 1);
             i.fmt_input = Convert.ToUInt16(intf_input_trigger.SelectedIndex);
             i.fmt_output = Convert.ToUInt16(intf_output_trigger.SelectedIndex);
-            p.curr_packer.setInterface(i);
-            p.curr_packer.agent.SetNodeReg(p.curr_packer.bot_addr, "cs_filter", Convert.ToUInt16(intf_pulse_width.Content));
+            curr_packer.setInterface(i);
+            curr_packer.agent.SetVibIntf(curr_packer.vib_addr, i);
+            curr_packer.agent.SetNodeReg(curr_packer.bot_addr, "cs_filter", Convert.ToUInt16(intf_pulse_width.Content));
         }
         private void btn_return_Click(object sender, RoutedEventArgs e)
         {
@@ -57,8 +67,8 @@ namespace ioex_cs
 
             ApplySetting();
             
-            p.curr_packer.agent.SetNodeReg(p.curr_packer.bot_addr, "cs_filter", Convert.ToUInt16(intf_pulse_width.Content));
-            p.curr_packer.SaveCurrentConfig();
+            curr_packer.agent.SetNodeReg(curr_packer.bot_addr, "cs_filter", Convert.ToUInt16(intf_pulse_width.Content));
+            curr_packer.SaveCurrentConfig();
             p.SwitchTo("configmenu");
             
         }
@@ -70,7 +80,7 @@ namespace ioex_cs
 
             ApplySetting();
             
-            p.curr_packer.SaveCurrentConfig();
+            curr_packer.SaveCurrentConfig();
             p.SwitchTo("runmode");
 
         }
@@ -123,7 +133,7 @@ namespace ioex_cs
         private void btn_run_Click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
-            p.curr_packer.BottomAction("trigger");
+            curr_packer.BottomAction("trigger");
         }
 
         private void intf_input_trigger_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)

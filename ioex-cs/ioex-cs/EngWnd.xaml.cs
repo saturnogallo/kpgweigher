@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml.Linq;
 using System.IO;
+using Microsoft.Win32;
 namespace ioex_cs
 {
     /// <summary>
@@ -22,30 +23,22 @@ namespace ioex_cs
     {
         private int curr_sel = -1;
         private bool all_sel = false;
-        public bool b_lockon = false;
-        private int use_cnt = 0;
+        public static bool b_lockon = false;
+
         public EngConfigWnd()
         {
             InitializeComponent();
-        }
-        public bool Void()
-        {
-            DateTime dt = DateTime.Now;
-//            XElement cfg = p.curr_cfg;
-            if (!Password.compare_pwd("lock", "0"))
+            b_lockon = !Password.compare_pwd("lock", "0");
+            
+            if (b_lockon)
             {
-                for (int i = 1; i < 120; i++)
+                packer_counter = int.Parse(GetRegistData("lock_on"));
+                if (!Password.compare_pwd("lock_on", GetRegistData("lock_on")) || (packer_counter < 1))
                 {
-                    dt.AddDays(1);
-//                    if(cfg.nod("lock_on") == Password.MD5Value(dt.ToString("YYYYmmDD"),true)) //match some day in future
-                    {
-                        return true;
-                    }
+                    (Application.Current as App).runwnd.Disable();
+                    (Application.Current as App).singlewnd.Disable();
                 }
-                //todo compare the license with date today
-                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_unlock"), "unlock", true, KbdData);
             }
-            return false;
         }
         public void InitDisplay()
         {
@@ -55,7 +48,11 @@ namespace ioex_cs
             
             b_lockon = !Password.compare_pwd("lock","0");
             
-            p.agent.Stop();
+            p.agent.Stop(500);
+            foreach (UIPacker pk in p.packers)
+            {
+                pk.nc.Stop(500);
+            }
             UpdateDisplay(true);
         }
         public void UpdateDisplay(bool refresh)
@@ -80,10 +77,7 @@ namespace ioex_cs
                 if (i < 17)
                 {
                     btn = IdToButton(i.ToString());
-                    if (p.agent.nodemap.ContainsKey(i))
-                    {
-                        n = p.agent.nodemap[i];
-                    }
+                    n = p.agent[i];
                 }
                 else
                 {
@@ -149,7 +143,51 @@ namespace ioex_cs
             if (id == "36") return nd_36;
             return null;
         }
-
+        public static void DecreasePacker(int i)
+        {
+            if (b_lockon)
+            {
+                packer_counter = packer_counter - i;
+                DeleteRegist("lock_on");
+                WTRegedit("lock_on", packer_counter.ToString());
+            }
+        }
+        private static int packer_counter;
+        
+        static EngConfigWnd()
+        {
+        }
+        private static string GetRegistData(string name)
+        {
+            string registData;
+            RegistryKey hkml = Registry.LocalMachine;
+            RegistryKey software = hkml.OpenSubKey("SOFTWARE", true);
+            RegistryKey aimdir = software.OpenSubKey("Microsoft", true);
+            registData = aimdir.GetValue(name).ToString();
+            return registData;
+        }
+        
+        private static void WTRegedit(string name, string tovalue)
+        {
+            RegistryKey hklm = Registry.LocalMachine;
+            RegistryKey software = hklm.OpenSubKey("SOFTWARE", true);
+            RegistryKey aimdir = software.CreateSubKey("Microsoft");
+            aimdir.SetValue(name, tovalue);
+        }
+        
+        private static void DeleteRegist(string name)
+        {
+            string[] aimnames;
+            RegistryKey hkml = Registry.LocalMachine;
+            RegistryKey software = hkml.OpenSubKey("SOFTWARE", true);
+            RegistryKey aimdir = software.OpenSubKey("Microsoft", true);
+            aimnames = aimdir.GetSubKeyNames();
+            foreach (string aimKey in aimnames)
+            {
+                if (aimKey == name)
+                    aimdir.DeleteSubKeyTree(name);
+            }
+        } 
         public void KbdData(string param, string data)
         {
             App p = Application.Current as App;
@@ -176,9 +214,12 @@ namespace ioex_cs
             }
             if (param == "enterlock")
             {
-                //data should be expire date format 20200211
-                cfg.SetElementValue("lock_on", Password.MD5Value(data,true)); //todo set the lock number on
+                //App should expire after desired packer number reached , data is the actual packer count
+                Password.set_pwd("lock_on", data);
+                DeleteRegist("lock_on");
+                WTRegedit("lock_on", data);
                 Password.set_pwd("lock", "020527");
+
                 p.SaveAppConfig();
                 UpdateDisplay(false);
             }
@@ -192,10 +233,8 @@ namespace ioex_cs
                 if (i < 17)
                 {
                     btn = IdToButton(i.ToString());
-                    if (p.agent.nodemap.ContainsKey(i))
-                    {
-                        n = p.agent.nodemap[i];
-                    }
+                    n = p.agent[i];
+
                 }
                 else
                 {
@@ -227,8 +266,8 @@ namespace ioex_cs
                         if (oldaddr == 36)
                             oldn = p.agent.missingnode;
                         else
-                            oldn= p.agent.nodemap[oldaddr];
-                        newn = p.agent.nodemap[newaddr];
+                            oldn= p.agent[oldaddr];
+                        newn = p.agent[newaddr];
                         newaddr += 0xC0;
                         newn.status = NodeStatus.ST_IDLE;
                         oldn["test_mode_reg2"] = newaddr;
@@ -262,7 +301,7 @@ namespace ioex_cs
             XElement cfg = p.curr_cfg;
             if (b_lockon)
             {
-                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_locknum"), "quitlock", false, KbdData);
+                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_unlocknum"), "quitlock", false, KbdData);
 
             }
             else
@@ -313,10 +352,8 @@ namespace ioex_cs
                 if (i < 17)
                 {
                     btn = IdToButton(i.ToString());
-                    if (p.agent.nodemap.ContainsKey(i))
-                    {
-                        n = p.agent.nodemap[i];
-                    }
+                    n = p.agent[i];
+
                 }
                 else
                 {
@@ -334,13 +371,16 @@ namespace ioex_cs
                     {
                         if ((curr_sel == n.node_id) || (all_sel == true))
                         {
+                            curr_sel = n.node_id;
                             btn.Template = this.FindResource("roundButtonsel2") as ControlTemplate;
                             btn.ApplyTemplate();
                             btn.Visibility = Visibility.Visible;
 
                             fwprgs_bar.Visibility = Visibility.Visible;
                             fwprgs_bar.Minimum = 0;
-                            fwprgs_bar.Maximum = 1000;
+                            FileInfo fwfi = new FileInfo("C:\\MAIN.bin");
+
+                            fwprgs_bar.Maximum = (int)(fwfi.Length/128);
                             
                             bootloader bl = new bootloader(n);
                             string ret = bl.download("C:\\MAIN.bin",fwprogress);
@@ -348,6 +388,7 @@ namespace ioex_cs
                             fwprgs_bar.Visibility = Visibility.Hidden;
                             if (ret != "")
                                 MessageBox.Show(StringResource.str("updatefwfail") +n.node_id.ToString() + "\r\n" + ret);
+                            curr_sel = lastcurr;
                             continue;
                         }
                     }
@@ -358,16 +399,11 @@ namespace ioex_cs
         }
         public void fwprogress(uint percent)
         {
-            if (fwprgs_bar.Maximum == 1000)
-                fwprgs_bar.Maximum = percent + 1;
-            else
+            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, (Action)delegate
             {
-                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, (Action)delegate
-                {
-                    btn_updatefw.Content = percent.ToString() + "Blocks";
+                    btn_updatefw.Content = curr_sel.ToString() + ":" + percent.ToString() + "Blocks";
                     fwprgs_bar.Value = percent;
-                });
-            }
+            });
         }
         private void btn_selectall_Click(object sender, RoutedEventArgs e)
         {
@@ -393,10 +429,8 @@ namespace ioex_cs
                 if (i < 17)
                 {
                     btn = IdToButton(i.ToString());
-                    if (p.agent.nodemap.ContainsKey(i))
-                    {
-                        n = p.agent.nodemap[i];
-                    }
+                    n = p.agent[i];
+
                 }
                 else
                 {
@@ -437,6 +471,10 @@ namespace ioex_cs
         {
             App p = Application.Current as App;
             p.agent.Resume();
+            foreach (UIPacker pk in p.packers)
+            {
+                pk.nc.Resume();
+            }
             this.Hide();
             p.SwitchTo("runmode");
         }
@@ -453,6 +491,8 @@ namespace ioex_cs
         {
             App p = Application.Current as App;
             p.agent.Resume();
+            foreach (UIPacker pk in p.packers)
+                pk.nc.Resume();
             this.Hide();
             p.SwitchTo("configmenu");
         }

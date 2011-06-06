@@ -48,14 +48,19 @@ namespace ioex_cs
             if (boot_ok == false)
             {
                 App p = Application.Current as App;
-                foreach (Window w in p.Windows)
-                    w.Close();
-                p.Shutdown();
-
+                MessageBox.Show(StringResource.str("bootfail"));
+                bootmsg.Clear();
+                bootup = new Thread(PackerBoot);
+                
+                bootup.IsBackground = false;
+                
+                bootup.Start();
+                uiTimer.Start();
             }
             else
             {
                 App p = (Application.Current as App);
+                
                 p.SwitchTo("runmode");
                 this.Visibility = Visibility.Hidden;
 
@@ -68,46 +73,65 @@ namespace ioex_cs
             {
                 //search for nodes
                 UpdateMessage(StringResource.str("search_newnode"));
+                p.agent.missingnode.status = NodeStatus.ST_IDLE;
                 p.agent.missingnode["addr"] = null;
-                
-                //check the availability of each board
-                foreach (SubNode n in p.agent.nodemap.Values)
-                {
-                    UpdateMessage(StringResource.str("search_node") + n.node_id);
-                    if (p.agent.search(n))
-                        UpdateMessage(StringResource.str("found_node") + n.node_id);
-                    else
-                        UpdateMessage(StringResource.str("fail"));
-                }
-                //start engine
-                p.agent.Start();
-                //load config for node
-                UpdateMessage(StringResource.str("init_nodereg"));
-                for (int i = 0; i < p.packers.Count; i++)
-                {
-                    p.packers[i].InitConfig();
-                }
+
                 boot_ok = true;
-                p.agent.bBootDone = true;
+                //check the availability of each board
+                foreach(UIPacker pk in p.packers)
+                {
+                    foreach (byte n in pk.weight_nodes)
+                    {
+                        pk.agent.SetStatus(n, NodeStatus.ST_IDLE);
+                        if (!pk.agent.search(n))
+                        {
+                            boot_ok = false;
+                            UpdateMessage( "\r\n" +  StringResource.str("search_node") + n + StringResource.str("fail") );
+                        }
+                        else
+                        {
+                            UpdateMessage(".");
+                        }
+                    }
+                    byte nvib = pk.vib_addr;
+                    pk.agent.SetStatus(nvib, NodeStatus.ST_IDLE);
+                    if (!pk.agent.search(nvib))
+                    {
+                        boot_ok = false;
+                        UpdateMessage("\r\n" + StringResource.str("search_node") + nvib + StringResource.str("fail"));
+                    }
+                    if (boot_ok)
+                    {
+                        //start engine
+                        pk.agent.Start();
+                        pk.nc.Start();
+                        //load config for node
+                        UpdateMessage("\r\n" + StringResource.str("init_nodereg"));
+                        pk.LoadConfig(pk.all_conf.cfg_name);
+                        pk.agent.SetVibIntf(pk.vib_addr, pk.getInterface());
+                        NodeAgent.bBootDone = true;
+                    }
+                }
             }
             catch (Exception ex)
             {
                 UpdateMessage(ex.Message);
+                boot_ok = false;
                 Thread.Sleep(3000);
             }
+            
         }
         public void UpdateMessage(string msg)
         {
             Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, (Action)delegate
             {
-                bootmsg.AppendText(msg + "\r\n");
+                bootmsg.AppendText(msg);
                 bootmsg.ScrollToEnd();
             });
             
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            (Application.Current as App).InitAll();
             boot_ok = false;
             bootup.Start();
             uiTimer.Start();
@@ -120,7 +144,7 @@ namespace ioex_cs
         static public void SetLanguage(string lang)
         {
             language = lang;
-            App p = Application.Current as App;
+            App p = (Application.Current as App);
             Uri uri = new Uri("/ioex-cs;component/Resources/lang/" + lang + ".xaml", UriKind.Relative);
             p.Resources.Source = uri;
 
@@ -177,7 +201,7 @@ namespace ioex_cs
     public class Password
     {
         private static XmlConfig pwds;
-        static    public string MD5Value(String str, Boolean isStr)
+        static    private string MD5Value(String str, Boolean isStr)
         {
          MD5 md5 = new MD5CryptoServiceProvider();
         byte[] md5ch;
@@ -208,6 +232,7 @@ namespace ioex_cs
             //load password.xml and fill in the username list
             pwds = new XmlConfig("password.xml");
             pwds.LoadConfigFromFile();
+            string a = MD5Value("0lock1r%4#", true);
         }
         public static IEnumerable<string> users {
             get{
@@ -216,7 +241,7 @@ namespace ioex_cs
         }
         public static bool compare_pwd(string user, string data)
         {
-            return (get_pwd(user) == MD5Value(data + "1r%4#", true));
+            return (get_pwd(user) == MD5Value(data + user + "1r%4#", true));
 
         }
         private static string get_pwd(string user){
@@ -225,11 +250,11 @@ namespace ioex_cs
                     return pwds.GetHashCode().ToString(); //just a difficult password to guess
                 else
                     return x.Value;
-            }
+        }
         public static void set_pwd(string user,string value){
                 XElement x = new XElement("Item");
                 x.SetAttributeValue("Name", user);
-                x.SetValue(MD5Value(value + "1r%4#", true));
+                x.SetValue(MD5Value(value + user +　"1r%4#", true));
                 pwds.AddConfig(user,x);
                 pwds.SaveConfigToFile();
             

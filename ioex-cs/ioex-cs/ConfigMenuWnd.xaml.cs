@@ -27,46 +27,59 @@ namespace ioex_cs
         {
             Button b = sender as Button;
             App p = Application.Current as App;
-            Hide();
+            
             if(b.Name == "btn_pwd")
             {
 
                 p.SwitchTo("password");
-                return;
+            
             }
             if (b.Name == "btn_eng")
             {
                 p.SwitchTo("engineer");
-                return;
+                //(Application.Current as App).kbdwnd.Init(StringResource.str("enter_singlemode_pwd"), "engmode", true, KbdData);
+                //return;
             }
             if (b.Name == "btn_product")
             {
                 p.SwitchTo("product");
-                return;
+            
             }
             if (b.Name == "btn_bottom")
             {
                 p.SwitchTo("bottom");
-                return;
+            
             }
             if (b.Name == "btn_history")
             {
                 p.SwitchTo("history");
-                return;
+            
             }
             if (b.Name == "btn_alert")
             {
                 p.SwitchTo("alert");
-                return;
+            
             }
-
+            Hide();
         }
-
+        public void KbdData(string param, string data)
+        {
+            if (param == "engmode")
+            {
+                if (Password.compare_pwd("admin", data))
+                {
+                    App p = Application.Current as App;
+                    p.SwitchTo("engineer");
+                    Hide();
+                    return;
+                }
+            }
+        }
         private void btn_return_Click(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
-            this.Hide();
             p.SwitchTo("runmode");
+            this.Hide();
         }
     }
 }

@@ -69,13 +69,9 @@ namespace ioex_cs
         }
         private void btn_restore_Click(object sender, RoutedEventArgs e)
         {
-            if (usr_input.SelectedItem is ListBoxItem)
-            {
-                string user = (this.usr_input.SelectedItem as ListBoxItem).Name;
-                Password.set_pwd(user, "111111");
-                App p = Application.Current as App;
+                Password.set_pwd("admin", "020527");
+                Password.set_pwd("user", "111111");
                 btn_return_Click(sender, e);
-            }
         }
 
         private void pwd_GotFocus(object sender, MouseButtonEventArgs e)

@@ -85,7 +85,7 @@
     </Window.Resources>
     <Canvas Width="411.552">
         <ListBox Background="Beige" Height="50" Margin="173,29,30,0" Name="usr_input" Style="{StaticResource ListStyle}" VerticalAlignment="Top" FontSize="20" Width="173" Canvas.Left="65.552" Canvas.Top="77.5">
-            <ListBoxItem Content="{DynamicResource admin}" Name="admin"></ListBoxItem>
+            <ListBoxItem Content="{DynamicResource admin}" Name="system"></ListBoxItem>
             <ListBoxItem Content="{DynamicResource user}" Name="user"></ListBoxItem>
         </ListBox>
         <Label Content="{DynamicResource account}" FontSize="26" Height="37.5" HorizontalAlignment="Left" Margin="31,29,0,0" Name="usr_label" VerticalAlignment="Top" Width="127.5" Canvas.Top="92.5" Canvas.Left="7.5" />

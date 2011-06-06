@@ -792,6 +792,7 @@
         <Label Canvas.Left="168" Canvas.Top="140.92" Height="28.58" Name="vib_lbl14" MouseLeftButtonUp="vibbucket_Click" Style="{StaticResource VibLabel}" Width="55.6">14</Label>
         <Button FocusVisualStyle="{x:Null}"  Canvas.Left="158" Canvas.Top="166.5" Height="0" Name="main_bucket" Template="{StaticResource MainBucket}" Width="0" />
         <Button FocusVisualStyle="{x:Null}"  Canvas.Left="22" Canvas.Top="448" Content="{DynamicResource cmd_zero}" Click="btn_action_Click" Height="30" Name="btn_zero" Style="{StaticResource ButtonStyle}" Width="100" />
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="22" Canvas.Top="684.373" Click="btn_action_Click" Content="{DynamicResource cmd_pack}" Height="30" Name="btn_pack" Style="{StaticResource ButtonStyle}" Width="100" />
         <Button FocusVisualStyle="{x:Null}"  Canvas.Left="22" Canvas.Top="494" Content="{DynamicResource cmd_mainvib}" Click="btn_action_Click" Height="30" Name="btn_mainvib" Style="{StaticResource ButtonStyle}" Width="100" />
         <Button FocusVisualStyle="{x:Null}"  Canvas.Left="185.537" Canvas.Top="410.931" Content="{DynamicResource cmd_run}" Click="btn_trial_Click" FontSize="36" Foreground="LightGray" Height="170" Name="btn_trial" Template="{StaticResource cfgBtn}" Width="176.649" />
         <Label Canvas.Left="163.347" Canvas.Top="682.154" Content="{DynamicResource totalweight}" FontSize="20" Height="39.996" Name="lbl_summary"  Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Foreground="Black" Width="120.036" />

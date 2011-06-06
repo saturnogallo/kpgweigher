@@ -9,11 +9,17 @@
     <s:String x:Key="auto_amp">自动振幅调节</s:String>
     <s:String x:Key="found_node">找到斗</s:String>
     <s:String x:Key="fail">失败</s:String>
+    <s:String x:Key="tryagain">本次操作失败，请重试。</s:String>
+    <s:String x:Key="stopping">正在停止运行</s:String>
+    <s:String x:Key="starting">正在启动运行</s:String>
     <s:String x:Key="init_nodereg">初始化各斗设置</s:String>
     <s:String x:Key="org_password">1旧密码</s:String>
     <s:String x:Key="new_password">1新密码</s:String>
     <s:String x:Key="enter_system">1请输入进入操作系统的密码</s:String>
     <s:String x:Key="enter_locknum">1请输入锁定数值</s:String>
+    <s:String x:Key="cmd_pack">包装</s:String>
+    <s:String x:Key="license">The license of the application needs update!</s:String>
+    <s:String x:Key="enter_unlocknum">1请输入解锁密码</s:String>
     <s:String x:Key="lockon">1锁定已开</s:String>
     <s:String x:Key="enter_newaddr">1请输入新地址</s:String>
     <s:String x:Key="enter_newvalue">1请输入新值</s:String>
@@ -104,8 +110,8 @@
     <s:String x:Key="ok">1确定</s:String>
     <s:String x:Key="clr">1清除</s:String>
 
-    <s:String x:Key="enter_run_time">1请输入主震时间(*0.1s)</s:String>
-    <s:String x:Key="grp_time">1主震时间(*0.1s)</s:String>
+    <s:String x:Key="enter_run_time">1请输入主震时间(*10ms)</s:String>
+    <s:String x:Key="grp_time">1主震时间(*10ms)</s:String>
     <s:String x:Key="enter_test_mode_reg1">1请输入寄存器1的值</s:String>
     <s:String x:Key="enter_test_mode_reg2">1请输入寄存器2的值</s:String>
     <s:String x:Key="enter_pwd">1请输入密码</s:String>
@@ -122,14 +128,14 @@
     <s:String x:Key="enter_cali0">1请输入校准砝码重量(克)</s:String>
     <s:String x:Key="enter_prd_no">1请输入产品号</s:String>
     <s:String x:Key="enter_motor_speed_input">1请输入开关马达速度</s:String>
-    <s:String x:Key="enter_col_otime_input">1请输入送料斗打开时间(*0.1s)</s:String>
+    <s:String x:Key="enter_col_otime_input">1请输入送料斗打开时间(*10ms)</s:String>
     <s:String x:Key="enter_sub_amp_input">1请输入震动斗振动幅度</s:String>
-    <s:String x:Key="enter_col_dtime_input">1请输入送料后延时(*0.1s)</s:String>
-    <s:String x:Key="enter_sub_time_input">1请输入震动斗震动时间(*0.1s)</s:String>
+    <s:String x:Key="enter_col_dtime_input">1请输入送料后延时(*10ms)</s:String>
+    <s:String x:Key="enter_sub_time_input">1请输入震动斗震动时间(*10ms)</s:String>
     <s:String x:Key="enter_sub_freq_input">1请输入清零间隔</s:String>
-    <s:String x:Key="enter_wei_otime_input">1请输入下料后延时(*0.1s)</s:String>
-    <s:String x:Key="enter_wei_dtime_input">1请输入下料前延时(*0.1s)</s:String>
-    <s:String x:Key="enter_openwei_input">1请输入下料斗打开时间(*0.1s)</s:String>
+    <s:String x:Key="enter_wei_otime_input">1请输入下料后延时(*10ms)</s:String>
+    <s:String x:Key="enter_wei_dtime_input">1请输入下料前延时(*10ms)</s:String>
+    <s:String x:Key="enter_openwei_input">1请输入下料斗打开时间(*10ms)</s:String>
 
     <s:String x:Key="quit_eng">1退出修改</s:String>
     <s:String x:Key="zero_complete">1清零操作完成</s:String>
@@ -158,10 +164,11 @@
     <s:String x:Key="sall_stop">1停止</s:String>
     <s:String x:Key="operator">1操作员</s:String>
     <s:String x:Key="intf_lb_feed_times">1灌装次数</s:String>
-    <s:String x:Key="intf_ckb_delay">1灌装延时(*0.2s)</s:String>
+    <s:String x:Key="intf_ckb_delay">1灌装延时(*20ms)</s:String>
     <s:String x:Key="intf_handshake">1从机模式</s:String>
     <s:String x:Key="intf_lb_input_fmt">1输入触发方式</s:String>
     <s:String x:Key="intf_ckb_mem">1记忆</s:String>
+    <s:String x:Key="bootfail">Boot up failed, please check connection and retry</s:String>
     <s:String x:Key="intf_lb_output_fmt">1输出触发方式</s:String>
     <s:String x:Key="intf_cmd_output_fmt">1低电平输出|正脉冲输出|负脉冲输出|高电平输出</s:String>
     <s:String x:Key="intf_cmd_input_fmt">1低电平输出|正脉冲输出|负脉冲输出|高电平输出</s:String>
@@ -169,7 +176,7 @@
 
     <s:String x:Key="enter_intf_lb_feed_times">1请输入灌装次数</s:String>
     <s:String x:Key="enter_intf_pulse_width">1请输入灌装脉冲宽度</s:String>
-    <s:String x:Key="enter_intf_ckb_delay">1请输入灌装延时(*0.2s)</s:String>
+    <s:String x:Key="enter_intf_ckb_delay">1请输入灌装延时(*20ms)</s:String>
     
     <s:String x:Key="grp_name">1当前设置名称</s:String>
     <s:String x:Key="grp_amp">1主震幅度</s:String>
@@ -178,20 +185,20 @@
     <s:String x:Key="grp_uvar">1上偏重量</s:String>
     <s:String x:Key="grp_dvar">1下偏重量</s:String>
 
-    <s:String x:Key="openwei">1下料斗打开时间(*0.1s)</s:String>
+    <s:String x:Key="openwei">1下料斗打开时间(*10ms)</s:String>
     <s:String x:Key="gain">1AD转换速度</s:String>
     <s:String x:Key="cs_filter">1AD滤波器选择</s:String>
-    <s:String x:Key="col_otime">1送料斗时间(*0.1s)</s:String>
-    <s:String x:Key="col_dtime">1送料后延时(*0.1s)</s:String>
+    <s:String x:Key="col_otime">1送料斗时间(*10ms)</s:String>
+    <s:String x:Key="col_dtime">1送料后延时(*10ms)</s:String>
     <s:String x:Key="sub_amp">1震动斗振动幅度</s:String>
     <s:String x:Key="sub_freq">1自动清零周期</s:String>
 
     <s:String x:Key="test_mode_reg1">1调试寄存器1</s:String>
     <s:String x:Key="test_mode_reg2">1调试寄存器2</s:String>
 
-    <s:String x:Key="sub_time">1震动斗振动时间(*0.1s)</s:String>
-    <s:String x:Key="wei_otime">1下料后时间(*0.1s)</s:String>
-    <s:String x:Key="wei_dtime">1下料前延时(*0.1s)</s:String>
+    <s:String x:Key="sub_time">1震动斗振动时间(*10ms)</s:String>
+    <s:String x:Key="wei_otime">1下料后时间(*10ms)</s:String>
+    <s:String x:Key="wei_dtime">1下料前延时(*10ms)</s:String>
     <s:String x:Key="motor_speed">1开关马达速度</s:String>
 
     <s:String x:Key="address">1节点地址</s:String>
