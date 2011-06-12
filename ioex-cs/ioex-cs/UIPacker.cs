@@ -152,6 +152,7 @@ namespace ioex_cs
                 agent.ClearWeights();
                 return;
             }
+            
             agent.Action((byte)(0x80 + _pack_id), command);
         }
         public void WeightAction(byte addr, string command)

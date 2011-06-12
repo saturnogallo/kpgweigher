@@ -29,10 +29,13 @@ namespace ioex_cs
             old_pwd_input.Password = "";
             new_pwd_input1.Password = "";
             new_pwd_input2.Password = "";
-            
-            this.Hide();
+
+
             if ((sender as Button).Name == "btn_ret_run")
+            {
                 p.SwitchTo("runmode");
+                Hide();
+            }
         }
 
         private void btn_modify_Click(object sender, RoutedEventArgs e)
@@ -69,7 +72,7 @@ namespace ioex_cs
         }
         private void btn_restore_Click(object sender, RoutedEventArgs e)
         {
-                Password.set_pwd("admin", "020527");
+//              Password.set_pwd("admin", "020527");
                 Password.set_pwd("user", "111111");
                 btn_return_Click(sender, e);
         }

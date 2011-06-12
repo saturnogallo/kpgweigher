@@ -85,16 +85,16 @@
     </Window.Resources>
     <Canvas Width="411.552">
         <ListBox Background="Beige" Height="50" Margin="173,29,30,0" Name="usr_input" Style="{StaticResource ListStyle}" VerticalAlignment="Top" FontSize="20" Width="173" Canvas.Left="65.552" Canvas.Top="77.5">
-            <ListBoxItem Content="{DynamicResource admin}" Name="system"></ListBoxItem>
+            <ListBoxItem Content="{DynamicResource admin}" Name="admin"></ListBoxItem>
             <ListBoxItem Content="{DynamicResource user}" Name="user"></ListBoxItem>
         </ListBox>
-        <Label Content="{DynamicResource account}" FontSize="26" Height="37.5" HorizontalAlignment="Left" Margin="31,29,0,0" Name="usr_label" VerticalAlignment="Top" Width="127.5" Canvas.Top="92.5" Canvas.Left="7.5" />
+        <Label Content="{DynamicResource account}" FontSize="26" Height="37.5" HorizontalAlignment="Left" Margin="31,29,0,0" Name="usr_label" VerticalAlignment="Top" Width="177.5" Canvas.Top="92.5" Canvas.Left="7.5" />
         <PasswordBox FocusVisualStyle="{x:Null}" Height="45" Margin="173,92,30,0" Name="old_pwd_input" GotFocus="new_pwd_input2_GotFocus" MouseLeftButtonUp="pwd_GotFocus" Style="{StaticResource PwdStyle}" VerticalAlignment="Top" FontSize="20" Width="173" Canvas.Top="97.5" Canvas.Left="68.5" />
-        <Label Content="{DynamicResource org_password}" FontSize="26" Height="45" HorizontalAlignment="Left" Margin="31,92,0,0" Name="label1" VerticalAlignment="Top" Width="127.5" Canvas.Left="7.5" Canvas.Top="97.5" />
+        <Label Content="{DynamicResource org_password}" FontSize="26" Height="45" HorizontalAlignment="Left" Margin="31,92,0,0" Name="label1" VerticalAlignment="Top" Width="177.5" Canvas.Left="7.5" Canvas.Top="97.5" />
         <PasswordBox FocusVisualStyle="{x:Null}" Margin="173,153,30,174" Name="new_pwd_input1" GotFocus="new_pwd_input2_GotFocus" MouseLeftButtonUp="pwd_GotFocus" Style="{StaticResource PwdStyle}" VerticalAlignment="Top" FontSize="20" Height="42.5" Canvas.Left="65.552" Width="173" Canvas.Top="110" />
-        <Label Content="{DynamicResource new_password}" FontSize="26" HorizontalAlignment="Left" Margin="31,153,0,167" VerticalAlignment="Top" Name="label2" Width="127.5" Height="40" Canvas.Left="7.5" Canvas.Top="112.5" />
+        <Label Content="{DynamicResource new_password}" FontSize="26" HorizontalAlignment="Left" Margin="31,153,0,167" VerticalAlignment="Top" Name="label2" Width="177.5" Height="40" Canvas.Left="7.5" Canvas.Top="112.5" />
         <PasswordBox FocusVisualStyle="{x:Null}" Height="42.5" Margin="173,0,30,117" GotFocus="new_pwd_input2_GotFocus" MouseLeftButtonUp="pwd_GotFocus" Name="new_pwd_input2" Style="{StaticResource PwdStyle}" VerticalAlignment="Bottom" FontSize="20" Canvas.Left="65.552" Canvas.Top="332.5" Width="173" />
-        <Label Content="{DynamicResource new_password2}" FontSize="26" Height="42.5" HorizontalAlignment="Left" Margin="31,0,0,117" Name="label3" VerticalAlignment="Bottom" Width="127.5" Canvas.Left="7.5" Canvas.Top="332.5" />
+        <Label Content="{DynamicResource new_password2}" FontSize="26" Height="42.5" HorizontalAlignment="Left" Margin="31,0,0,117" Name="label3" VerticalAlignment="Bottom" Width="177.5" Canvas.Left="7.5" Canvas.Top="332.5" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource modify_password}" Style="{StaticResource ButtonStyle}" Name="btn_modify" VerticalAlignment="Bottom" HorizontalAlignment="Left" Click="btn_modify_Click" Height="42.5" Width="136" Margin="18,0,0,55" Canvas.Left="13" Canvas.Top="432.5" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource find_password}" Style="{StaticResource ButtonStyle}" Name="btn_restore" VerticalAlignment="Bottom" Click="btn_restore_Click" Height="42.5" Margin="0,0,17,55" HorizontalAlignment="Right" Width="139" Canvas.Left="241.5" Canvas.Top="432.5" />
         <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="-57" Canvas.Top="645" Height="40" Name="btn_ret_config" Click="btn_return_Click" Margin="119,0,85,0" VerticalAlignment="Bottom" Width="0">回到运行</Button>

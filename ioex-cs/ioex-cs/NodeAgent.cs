@@ -146,9 +146,14 @@ namespace ioex_cs
                 if (agent.GetStatus(addr) == NodeStatus.ST_LOST || agent.GetStatus(addr) == NodeStatus.ST_DISABLED)
                     continue;
                 double wt = agent.weight(addr);
-                if ((wt < packer.curr_cfg.target / 2) && (wt > -1000.0) && (wt < 65521))
+                if ((wt < packer.curr_cfg.target / 2) && (wt > 0.0) && (wt < 65521))
                 {
                     agent.Action(addr, "flag_goon"); //no match hit
+                }
+                else
+                {
+                    if ((wt > packer.curr_cfg.target / 2 ) && (wt < 65521))
+                        wt = 100;
                 }
                 bSimNodeValid[addr] = false;
                 return true;
@@ -184,7 +189,6 @@ namespace ioex_cs
                             ;
                         bSimCombine = false;
 
-                        logTimeStick(ts1, "simu:");
                         while (CheckCombination())
                         {
                             logTimeStick(ts1, "comb:");    
@@ -630,6 +634,8 @@ namespace ioex_cs
                 {
                     n["board_id"] = null;//get board type
                     ret = WaitForIdleQuick(n);
+                    n["fw_rev_uw"] = null;//uw
+                    ret = WaitForIdleQuick(n);
                 }
                 mut.ReleaseMutex();
             }
@@ -652,8 +658,7 @@ namespace ioex_cs
             {
                 if (this[addr].status != NodeStatus.ST_IDLE)
                 {
-                    Thread.Sleep(10);
-                    continue;
+                    Thread.Sleep(20);
                 }
                 if (!this[addr][regname].HasValue)
                     Action(addr, "getreg:" + regname);
@@ -697,6 +702,7 @@ namespace ioex_cs
                 {
                     try
                     {
+                        Debug.WriteLine(node.node_id + ":" + cmd);
                         WaitForIdle(node);
                         if (cmd.IndexOf("getreg") == 0) //getreg:regname
                         {
@@ -791,6 +797,11 @@ namespace ioex_cs
                     try
                     {
 
+                        if (cmd == "grelease")
+                        {
+                            nodemap[1].writebyte_group_reg(addr, new string[] { "flag_enable" }, new byte[] { (byte)4 });
+
+                        }
                         if (cmd == "zero")
                         {
                              nodemap[1].writebyte_group_reg(addr, new string[] { "flag_enable" }, new byte[] { (byte)flag_cmd(cmd) });
@@ -992,7 +1003,7 @@ namespace ioex_cs
         {
             if (IsDebug)
                 return true;
-            string reg = "cs_sys_offset_cal_data_lw";
+            string reg = "flag_cnt";
             Thread.Sleep(5);
             n[reg] = null;
             WaitForIdleQuick(n);
@@ -1035,15 +1046,15 @@ namespace ioex_cs
             VibrateNode vn = (this[addr] as VibrateNode);
             if (vn == null)
                 return false;
-            vn["cs_sys_offset_cal_data_lw"] = null;
+            vn["pack_rel_cnt"] = null;
             WaitForIdleQuick(vn);
-            if (vn["cs_sys_offset_cal_data_lw"].HasValue)
+            if (vn["pack_rel_cnt"].HasValue)
             {
                 if((pack_cnt % (vn.intf_byte.feed_times+1) != 0))
                 {
                     return true;
                 }
-                uint lw_ub = vn["cs_sys_offset_cal_data_lw"].Value >>8;
+                uint lw_ub = vn["pack_rel_cnt"].Value;
                 if(lw_ub != release_cnt)
                 {
                     release_cnt = lw_ub;
@@ -1057,7 +1068,7 @@ namespace ioex_cs
                 if ((release_timeout % 100) == 49)
                 {
                     vn.status = NodeStatus.ST_IDLE;
-                    vn["cs_sys_offset_cal_data_lw"] = null;
+                    vn["pack_rel_cnt"] = null;
                 }
             }
             else
@@ -1075,12 +1086,12 @@ namespace ioex_cs
             VibrateNode vn = (this[addr] as VibrateNode);
             if (vn == null)
                 return VibStatus.VIB_ERROR;
-            if (vn["cs_sys_offset_cal_data_uw"].HasValue)
-                release_cnt = vn["cs_sys_offset_cal_data_uw"].Value;
+            if (vn["pack_rel_cnt"].HasValue)
+                release_cnt = vn["pack_rel_cnt"].Value;
             else
             {
                 release_cnt = 0;
-                //vn["cs_sys_offset_cal_data_uw"] = 0;
+                //vn["pack_rel_cnt"] = 0;
             }
             
             release_timeout = 0;

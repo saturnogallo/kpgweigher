@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("KingPak")]
 [assembly: AssemblyProduct("ioex-cs")]
-[assembly: AssemblyCopyright("Copyright © KingPak 2010")]
+[assembly: AssemblyCopyright("Copyright © KingPak 2011")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
