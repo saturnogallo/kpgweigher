@@ -181,7 +181,7 @@
     <s:String x:Key="grp_freq">主震频率</s:String>
     <s:String x:Key="grp_target">目标重量</s:String>
     <s:String x:Key="grp_uvar">上偏重量</s:String>
-    <s:String x:Key="grp_dvar">下偏重量</s:String>
+    <s:String x:Key="grp_dvar">下偏重量</s:String>  
 
     <s:String x:Key="openwei">下料斗打开时间(*10ms)</s:String>
     <s:String x:Key="gain">AD转换速度</s:String>
@@ -220,8 +220,7 @@
     <s:String x:Key="cmd_cali4">300g砝码</s:String>
     <s:String x:Key="cmd_cali5">500g砝码</s:String>
 
-    <s:String x:Key="err65529">超量程</s:String>
-    <s:String x:Key="err_ad">A/D信号溢出</s:String>
+    <s:String x:Key="err_ad">机械故障</s:String>
     <s:String x:Key="err_dz">除零错误</s:String>
    <s:String x:Key="err_ow1">A/D信号超重</s:String>
     <s:String x:Key="err_ow">超重</s:String>

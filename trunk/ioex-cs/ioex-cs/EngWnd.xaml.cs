@@ -39,6 +39,9 @@ namespace ioex_cs
                     (Application.Current as App).singlewnd.Disable();
                 }
             }
+            //check license key
+            Password.CheckLicense(GetRegistData("lic"));
+            
         }
         public void InitDisplay()
         {
@@ -157,14 +160,23 @@ namespace ioex_cs
         static EngConfigWnd()
         {
         }
-        private static string GetRegistData(string name)
+        public static string GetRegistData(string name)
         {
             string registData;
             RegistryKey hkml = Registry.LocalMachine;
             RegistryKey software = hkml.OpenSubKey("SOFTWARE", true);
             RegistryKey aimdir = software.OpenSubKey("Microsoft", true);
-            registData = aimdir.GetValue(name).ToString();
-            return registData;
+            try
+            {
+                if (!aimdir.GetValueNames().Contains(name))
+                    return "24785";
+                registData = aimdir.GetValue(name).ToString();
+                return registData;
+            }
+            catch
+            {
+                return "";
+            }
         }
         
         private static void WTRegedit(string name, string tovalue)

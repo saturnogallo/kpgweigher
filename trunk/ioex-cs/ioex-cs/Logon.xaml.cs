@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Resources;
 using System.Windows.Documents;
+using System.Management;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -27,7 +28,7 @@ namespace ioex_cs
     {
         private Thread bootup;
         System.Windows.Forms.Timer uiTimer;
-        private bool boot_ok;
+        private int boot_ok = 0;
         public LogonWindow()
         {
 
@@ -45,7 +46,7 @@ namespace ioex_cs
             if (bootup.IsAlive)
                 return;
             uiTimer.Stop();
-            if (boot_ok == false)
+            if (boot_ok == 0)
             {
                 App p = Application.Current as App;
                 MessageBox.Show(StringResource.str("bootfail"));
@@ -60,7 +61,7 @@ namespace ioex_cs
             else
             {
                 App p = (Application.Current as App);
-                
+                StringResource.SetLanguage();
                 p.SwitchTo("runmode");
                 this.Visibility = Visibility.Hidden;
 
@@ -71,36 +72,46 @@ namespace ioex_cs
             App p = (Application.Current as App);
             try
             {
+                UpdateMessage("App Version: 1.0.0.0\r\n");
                 //search for nodes
-                UpdateMessage(StringResource.str("search_newnode"));
+                //UpdateMessage(StringResource.str("search_newnode"));
+                
                 p.agent.missingnode.status = NodeStatus.ST_IDLE;
                 p.agent.missingnode["addr"] = null;
 
-                boot_ok = true;
+                boot_ok = 0;
                 //check the availability of each board
                 foreach(UIPacker pk in p.packers)
                 {
                     foreach (byte n in pk.weight_nodes)
                     {
+                        if ((n % 4) == 3)
+                            UpdateMessage("\r\n");
                         pk.agent.SetStatus(n, NodeStatus.ST_IDLE);
                         if (!pk.agent.search(n))
                         {
-                            boot_ok = false;
-                            UpdateMessage( "\r\n" +  StringResource.str("search_node") + n + StringResource.str("fail") );
+                            UpdateMessage(  StringResource.str("search_node") + n + StringResource.str("fail") + "\t\t");
                         }
                         else
                         {
-                            UpdateMessage(".");
+                            boot_ok++;
+                            UpdateMessage(n + ": ver " + pk.agent[n]["fw_rev_uw"].Value.ToString() + "\t\t");
+                            
                         }
                     }
                     byte nvib = pk.vib_addr;
                     pk.agent.SetStatus(nvib, NodeStatus.ST_IDLE);
                     if (!pk.agent.search(nvib))
                     {
-                        boot_ok = false;
-                        UpdateMessage("\r\n" + StringResource.str("search_node") + nvib + StringResource.str("fail"));
+                        UpdateMessage( StringResource.str("search_node") + nvib + StringResource.str("fail") + "\t\t");
                     }
-                    if (boot_ok)
+                    else
+                    {
+                        boot_ok++;
+                        UpdateMessage(nvib + ": ver " + pk.agent[nvib]["fw_rev_uw"].Value.ToString() + "\t\t");
+                    }
+                    Thread.Sleep(2000);
+                    if (boot_ok > 0)
                     {
                         //start engine
                         pk.agent.Start();
@@ -109,6 +120,7 @@ namespace ioex_cs
                         UpdateMessage("\r\n" + StringResource.str("init_nodereg"));
                         pk.LoadConfig(pk.all_conf.cfg_name);
                         pk.agent.SetVibIntf(pk.vib_addr, pk.getInterface());
+
                         NodeAgent.bBootDone = true;
                     }
                 }
@@ -116,7 +128,7 @@ namespace ioex_cs
             catch (Exception ex)
             {
                 UpdateMessage(ex.Message);
-                boot_ok = false;
+                boot_ok = 0;
                 Thread.Sleep(3000);
             }
             
@@ -132,7 +144,7 @@ namespace ioex_cs
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            boot_ok = false;
+            boot_ok = 0;
             bootup.Start();
             uiTimer.Start();
         }
@@ -163,8 +175,14 @@ namespace ioex_cs
             str_tbl = new Dictionary<string, string>();
             FileStream fsLog = new FileStream(System.Threading.Thread.GetDomain().BaseDirectory + "\\history.log", FileMode.Truncate, FileAccess.Write, FileShare.Read);
             fsLog.Close();
-
-            SetLanguage("zh-CN");
+            
+        }
+        static public void SetLanguage()
+        {
+             if (EngConfigWnd.GetRegistData("locale") == "")
+                SetLanguage("zh-CN");
+            else
+                SetLanguage(EngConfigWnd.GetRegistData("locale"));
         }
         static public void dolog(string log)
         {
@@ -227,12 +245,45 @@ namespace ioex_cs
         return strMd5;
         
         }
+
+
+        public static  void CheckLicense(string lic)
+        {
+            string cpuInfo = "";
+            
+            ManagementClass cimobject = new ManagementClass("Win32_Processor");
+            ManagementObjectCollection moc = cimobject.GetInstances();
+            foreach (ManagementObject mo in moc)
+            {
+                cpuInfo = mo.Properties["ProcessorId"].Value.ToString();
+                cpuInfo = cpuInfo.Substring(cpuInfo.Length - 6);
+                break;
+            }
+            
+            string HDid = "";
+            ManagementClass cimobject1 = new ManagementClass("Win32_DiskDrive");
+            ManagementObjectCollection moc1 = cimobject1.GetInstances();
+            foreach (ManagementObject mo in moc1)
+            {
+                HDid = (string)mo.Properties["Model"].Value;
+                HDid = HDid.Substring(HDid.Length - 6);
+                break;
+            }
+            
+
+            if (lic != MD5Value(cpuInfo + "255" + HDid, true))
+            {
+                //StringResource.dolog(MD5Value(cpuInfo + "255" + HDid, true));
+                MessageBox.Show("Please provide following string to vendor for a valid license : " + cpuInfo + HDid);
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+            }
+        }
         static Password()
         {
             //load password.xml and fill in the username list
             pwds = new XmlConfig("password.xml");
             pwds.LoadConfigFromFile();
-            string a = MD5Value("0lock1r%4#", true);
+            string a = MD5Value("0006FD2550811AS", true);
         }
         public static IEnumerable<string> users {
             get{

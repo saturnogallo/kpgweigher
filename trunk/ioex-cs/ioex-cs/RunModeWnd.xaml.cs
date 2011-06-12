@@ -158,6 +158,11 @@ namespace ioex_cs
             UIPacker p = curr_packer;
             if (lastcall != "")
             {
+                if (lastcall == "StartStop")
+                {
+                    ToggleStartStop();
+                }
+
                 if (lastcall == "UpdatePrdNo")
                 {
                     p.LoadConfig(p.curr_cfg.product_no);
@@ -178,10 +183,6 @@ namespace ioex_cs
                     {
                         RefreshRunNodeUI();
                     }
-                }
-                if (lastcall == "StartStop")
-                {
-                    ToggleStartStop();
                 }
                 lastcall = "";
 
@@ -319,11 +320,10 @@ namespace ioex_cs
             }
 
             btn_allstart.ApplyTemplate();
-            btn_allstart.Click += btn_start_click;
+            
         }
         private void btn_start_click(object sender, RoutedEventArgs e)
         {
-            btn_allstart.Click -= btn_start_click;
             lastcall = "StartStop";
             if (curr_packer.status == PackerStatus.RUNNING)
             {
@@ -636,6 +636,22 @@ namespace ioex_cs
         private void main_bucket_Click(object sender, RoutedEventArgs e)
         {
             //curr_packer.agent.TriggerPacker(curr_packer.vib_addr);
+        }
+
+        private void button1_Click(object sender, RoutedEventArgs e)
+        {
+            curr_packer.GroupAction("start");
+            while (true)
+            {
+                Thread.Sleep(500);
+                curr_packer.GroupAction("fill");
+                Thread.Sleep(500);
+                curr_packer.GroupAction("pass");
+                Thread.Sleep(1000);
+                curr_packer.GroupAction("release");
+                Thread.Sleep(500);
+                curr_packer.agent.Action(curr_packer.vib_addr,"fill");
+            }
         }
     }
 }

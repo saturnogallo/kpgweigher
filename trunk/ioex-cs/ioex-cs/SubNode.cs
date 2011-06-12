@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
 using System.Xml.Linq;
 using System.Windows;
 using System.ComponentModel;
@@ -457,7 +458,7 @@ namespace ioex_cs
         protected Dictionary<string, Nullable<UInt32>> curr_conf; //store the configuration string of each config name (<config_name, xml_value> pair>
 
         public UInt32 flag_cnt = 0;
-        static string reg_define_file = "node_define.xml";
+        static string reg_define_file = "ioex_cs.Resources.node_define.xml";// /ioex-cs;component/Resources/
         public byte node_id { get; set; }
         public NodeStatus status { get; set; }
 
@@ -483,7 +484,10 @@ namespace ioex_cs
             
             //load setting from xml file
             XDocument xml_doc;
-            xml_doc = XDocument.Load(reg_define_file);
+
+            StreamReader sr = new StreamReader(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(reg_define_file));
+            xml_doc = XDocument.Load(sr);
+            
             IEnumerable<XElement> regs = xml_doc.Descendants("reg");
             foreach (XElement reg in regs)
             {

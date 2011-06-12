@@ -74,7 +74,7 @@
                 <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/zh-CN.jpg" />
             </Rectangle.Fill>
         </Rectangle>
-        <TextBox Height="125" Margin="249,0,208,24" Name="bootmsg"  VerticalAlignment="Bottom" />
+        <TextBox Height="143" Margin="57.267,0,51.813,11" Name="bootmsg"  VerticalAlignment="Bottom" TextWrapping="Wrap" />
     </Grid>
     
 </Window>

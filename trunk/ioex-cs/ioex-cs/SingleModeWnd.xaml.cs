@@ -37,6 +37,9 @@ namespace ioex_cs
             App p = Application.Current as App;
             p.agent.Stop(500);
             curr_packer.nc.Stop(500);
+            if (lastcall == "StartStop")
+                ToggleStartStop();
+
             if (lastcall == "UpdateProdNo")
             {
                 
@@ -55,8 +58,6 @@ namespace ioex_cs
                 lastcall = "";
                 //MessageBox.Show(StringResource.str("cali_done"));
             }
-            if (lastcall == "StartStop")
-                ToggleStartStop();
             if (lastcall == "UpdateUI")
                 UpdateUI();
             if (lastcall == "ApplyToAll")
@@ -590,12 +591,12 @@ namespace ioex_cs
                 this.btn_trial.Content = StringResource.str("sall_stop");
 
             }
-            btn_trial.Click += btn_trial_Click;
 
         }
         private void btn_trial_Click(object sender, RoutedEventArgs e)
         {
-            btn_trial.Click -= btn_trial_Click;
+            if (lastcall != "")
+                return;
             lastcall = "StartStop";
             if(curr_packer.status == PackerStatus.RUNNING)
                 ShowStatus(StringResource.str("stopping"));

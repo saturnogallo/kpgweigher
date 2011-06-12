@@ -45,10 +45,6 @@ namespace ioex_cs
         }
         public UInt32 generate_read_frame(byte[] buf,byte[] readregs,int offset, byte len)
         {
-            if (len > 8)
-            {
-                throw new Exception("now much query at the same time");
-            }
             
             buf[1] = 0xfe;
             buf[2] = 0x68;
@@ -70,10 +66,6 @@ namespace ioex_cs
         }
         public UInt32 generate_write_frame(byte[] buf, byte[] writeregs, byte[] writeval, int offset, byte len)
         {
-            if (len > 8)
-            {
-                throw new Exception("now much query at the same time");
-            }
             buf[1] = 0xfe;
             buf[2] = 0x68;
             buf[3] = 0x00;

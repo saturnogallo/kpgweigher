@@ -36,9 +36,9 @@ namespace ioex_cs
             }
             if (b.Name == "btn_eng")
             {
-                p.SwitchTo("engineer");
-                //(Application.Current as App).kbdwnd.Init(StringResource.str("enter_singlemode_pwd"), "engmode", true, KbdData);
-                //return;
+//                p.SwitchTo("engineer");
+                (Application.Current as App).kbdwnd.Init(StringResource.str("enter_singlemode_pwd"), "engmode", true, KbdData);
+                return;
             }
             if (b.Name == "btn_product")
             {

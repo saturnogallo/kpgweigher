@@ -675,19 +675,19 @@
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource all_empty}" Style="{StaticResource ButtonStyle}" Margin="0,0,228.159,25.452" Name="btn_allempty"  Click="btn_empty_click" HorizontalAlignment="Right" Height="62" Width="155.031" Canvas.Left="43.969" Canvas.Top="608" BorderThickness="0" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource all_zero}" Style="{StaticResource ButtonStyle}" Margin="0,0,228.159,25.452" Name="btn_allzero" Click="btn_zero_click"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="62.149" Width="152" Canvas.Left="259" Canvas.Top="607.851" />
 
-        <Label FocusVisualStyle="{x:Null}"  Content="100.0" Style="{StaticResource LabelStyle1}" Margin="0,0,228.159,25.452" Name="lbl_weight" Foreground="Black" FontSize="36" HorizontalAlignment="Right" Height="50.8" Width="130" Canvas.Left="666" Canvas.Top="119" BorderThickness="0" />        
+        <Label FocusVisualStyle="{x:Null}"  Content="100.0" Style="{StaticResource LabelStyle1}" Margin="0,0,228.159,25.452" Name="lbl_weight" Foreground="Black" FontSize="36" HorizontalAlignment="Right" Height="65" Width="130" Canvas.Left="666" Canvas.Top="119" BorderThickness="0" />        
         <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource MainBucket}" Click="main_bucket_Click"  Name="main_bucket" Height="0" Canvas.Left="199" Canvas.Top="305" Width="0" />
         <Label Canvas.Left="506" Canvas.Top="20" Content="{DynamicResource product_no}" Height="50" Name="grp_lbl_prd_no" Style="{StaticResource LabelStyle}" Width="130" />
         <Label Canvas.Left="833" Canvas.Top="122.8" Content="dami" Height="47" Name="prd_desc" Style="{StaticResource LabelStyle}" HorizontalContentAlignment="Center" Width="128" />
         <Label Canvas.Left="506" Canvas.Top="119" Content="{DynamicResource grp_target}" Height="50" Name="grp_target_label" Style="{StaticResource LabelStyle}" Width="155" />
-        <Label Canvas.Left="511" Canvas.Top="181" Content="{DynamicResource grp_uvar}" Height="43" Name="grp_uvar_label" Style="{StaticResource LabelStyle1}" Width="102" Foreground="Black" />
-        <Label Canvas.Left="723" Canvas.Top="181" Content="{DynamicResource grp_dvar}" Height="39" Name="grp_dvar_label" Style="{StaticResource LabelStyle1}" Width="102" />
-        <Label Canvas.Left="521" Canvas.Top="241" Height="64" Name="lbl_status" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="52" FontWeight="Black" HorizontalContentAlignment="Center"  Width="440" Content=""></Label>
+        <Label Canvas.Left="511" Canvas.Top="181" Content="{DynamicResource grp_uvar}" Height="43" Name="grp_uvar_label" Style="{StaticResource LabelStyle1}" Width="114" Foreground="Black" />
+        <Label Canvas.Left="723" Canvas.Top="181" Content="{DynamicResource grp_dvar}" Height="39" Name="grp_dvar_label" Style="{StaticResource LabelStyle1}" Width="120" />
+        <Label Canvas.Left="521" Canvas.Top="241" Height="86" Name="lbl_status" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="52" FontWeight="Black" HorizontalContentAlignment="Center"  Width="440" Content=""></Label>
         <Label Canvas.Left="259" Canvas.Top="11.297" Height="64" Name="lbl_speed" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="211" Content="0"></Label>
         <Label Canvas.Left="13" Canvas.Top="17" Height="53" Name="title_speed" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="238" Content="{DynamicResource speed}" Foreground="Black" FontSize="30"></Label>
         
-        <Label Canvas.Left="626" Canvas.Top="181" Content="0.1" Height="43" Name="input_uvar" Style="{StaticResource LabelStyle1}" Width="84" Foreground="Black" />
-        <Label Canvas.Left="852" Canvas.Top="183" Content="0.1" Height="41" Name="input_dvar" Style="{StaticResource LabelStyle1}" Width="84" />
+        <Label Canvas.Left="626" Canvas.Top="181" Content="0.1" Height="58" Name="input_uvar" Style="{StaticResource LabelStyle1}" Width="84" Foreground="Black" />
+        <Label Canvas.Left="852" Canvas.Top="183" Content="0.1" Height="65" Name="input_dvar" Style="{StaticResource LabelStyle1}" Width="84" />
 
         <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource cfgBtn}" Click="btn_singlemode_click" Canvas.Left="650" Canvas.Top="337" Height="184" Name="btn_config" Width="183" FontSize="36" Foreground="LightGray" VerticalAlignment="Bottom" Content="{DynamicResource config}" />
         <Label Style="{StaticResource RectBtnBg}" Canvas.Left="650" Canvas.Top="24.449" Height="45.551" Width="146">123123</Label>
@@ -723,6 +723,6 @@
         <Label Canvas.Left="454" Canvas.Top="392.688" Content="{DynamicResource alert_force}" Height="29.997" Name="lbl_alert2" Width="143" FontSize="16" FontWeight="Heavy" MouseLeftButtonUp="lbl_alert_MouseLeftButtonUp" Visibility="Hidden"/>
         <Label Canvas.Left="454" Canvas.Top="428" Content="{DynamicResource alert_disable}" Height="30" Name="lbl_alert3" Width="143" FontSize="16" FontWeight="Heavy" MouseLeftButtonUp="lbl_alert_MouseLeftButtonUp" Visibility="Hidden"/>
         <Label Canvas.Left="454" Canvas.Top="463" Content="{DynamicResource alert_quit}" Height="30" Name="lbl_alert4" Width="134" FontSize="16" FontWeight="Heavy" MouseLeftButtonUp="lbl_alert_MouseLeftButtonUp" Visibility="Hidden"/>
-
+        <Button Canvas.Left="443" Canvas.Top="551" Height="81" Name="button1" Width="151" Click="button1_Click">Button</Button>
     </Canvas>
 </Window>
