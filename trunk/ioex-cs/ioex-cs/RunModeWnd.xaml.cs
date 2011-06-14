@@ -234,6 +234,8 @@ namespace ioex_cs
             else
             {
                 lbl_status.Foreground = Brushes.Red;
+                if (AlertWnd.b_turnon_alert && AlertWnd.b_stop_onalert && (curr_packer.status == PackerStatus.RUNNING))
+                    btn_start_click(null, null);
             }
 
         }
@@ -316,7 +318,7 @@ namespace ioex_cs
                 curr_packer.StartRun();
 
                 this.btn_allstart.Content = StringResource.str("all_stop");
-                btn_allstart.Template = this.FindResource("StartBtn2") as ControlTemplate;
+                btn_allstart.Style = this.FindResource("StartBtn2") as Style;
             }
 
             btn_allstart.ApplyTemplate();
@@ -423,8 +425,7 @@ namespace ioex_cs
                     pbtn.ToolTip = StringResource.str(err.Substring(0, err.IndexOf(';')));
                     lbl_status.Content = StringResource.str(err.Substring(0, err.IndexOf(';'))) + "\n";
                     lb.Content = StringResource.str(err.Substring(0, err.IndexOf(';')));//"ERR";
-                    if (AlertWnd.b_turnon_alert && AlertWnd.b_stop_onalert && pack.status == PackerStatus.RUNNING)
-                        btn_start_click(null, null);
+
                 }
                 pbtn.ApplyTemplate();
 

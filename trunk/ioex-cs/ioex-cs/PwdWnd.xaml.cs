@@ -36,6 +36,12 @@ namespace ioex_cs
                 p.SwitchTo("runmode");
                 Hide();
             }
+            if ((sender as Button).Name == "btn_ret_config")
+            {
+                p.SwitchTo("configmenu");
+                Hide();
+            }
+
         }
 
         private void btn_modify_Click(object sender, RoutedEventArgs e)

@@ -181,7 +181,7 @@
             this.btnRet.Location = new System.Drawing.Point(885, 705);
             this.btnRet.Margin = new System.Windows.Forms.Padding(2);
             this.btnRet.Name = "btnRet";
-            this.btnRet.Size = new System.Drawing.Size(128, 36);
+            this.btnRet.Size = new System.Drawing.Size(128, 52);
             this.btnRet.TabIndex = 12;
             this.btnRet.Text = "button1";
             this.btnRet.UseVisualStyleBackColor = true;
@@ -193,7 +193,7 @@
             this.btnClr.Location = new System.Drawing.Point(9, 705);
             this.btnClr.Margin = new System.Windows.Forms.Padding(2);
             this.btnClr.Name = "btnClr";
-            this.btnClr.Size = new System.Drawing.Size(130, 36);
+            this.btnClr.Size = new System.Drawing.Size(202, 52);
             this.btnClr.TabIndex = 13;
             this.btnClr.Text = "button1";
             this.btnClr.UseVisualStyleBackColor = true;

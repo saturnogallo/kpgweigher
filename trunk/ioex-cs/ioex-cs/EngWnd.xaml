@@ -227,7 +227,7 @@
     <Canvas>
         <Rectangle Canvas.Left="458" Canvas.Top="190" Height="470" Name="rectangle1" RadiusX="10" RadiusY="10" Stroke="Black" Width="508" />
         <Rectangle Canvas.Left="16.873" Canvas.Top="190" Height="470" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" Width="364" />
-        <Label Name="lbl_title" Content="{DynamicResource engineerpage}" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="70" FontWeight="Black" HorizontalContentAlignment="Center" Margin="41,12,63,0" Height="91.685" VerticalAlignment="Top" Canvas.Left="275.797" Canvas.Top="-12" Width="367.253"></Label>
+        <Label Name="lbl_title" Content="{DynamicResource engineerpage}" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="70" FontWeight="Black" HorizontalContentAlignment="Center" Margin="41,12,63,0" Height="91.685" VerticalAlignment="Top" Canvas.Left="-3" Canvas.Top="-12" Width="936.578"></Label>
         
             <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource entersystem}" Click="btn_entersys_Click" Style="{StaticResource ButtonStyleOn}" Margin="102.888,104.317,0,0" Name="btn_entersys" Foreground="Black" FontSize="40" Canvas.Left="280.084" Canvas.Top="-5.716" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="277.226" Height="61.447" />
             <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource locksystem}" Click="btn_locksys_Click" Style="{StaticResource ButtonStyleOn}" Margin="0,104.317,241.501,0" Name="btn_locksys" Foreground="Black" FontSize="40" Canvas.Left="52.873" Canvas.Top="-5.716" BorderThickness="0" VerticalAlignment="Top" Height="61.447" HorizontalAlignment="Right" Width="258.649" />
@@ -269,8 +269,8 @@
         </ListBox>
         <Label Background="#FFEEF2FB" Canvas.Left="648" Canvas.Top="172" Content="{DynamicResource setregs}" FontSize="24" Height="38" HorizontalContentAlignment="Center" Name="label1" Width="146" />
         <Button Canvas.Left="661.627" Canvas.Top="612" Content="{DynamicResource refresh}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_refreshreg" Style="{StaticResource ButtonStyle}" Width="100.03" Click="btn_refreshreg_Click" />
-        <Button Canvas.Left="316.797" Canvas.Top="682.154" Template="{StaticResource RetBtn2}" FocusVisualStyle="{x:Null}" Height="40" Name="btn_ret_run" Click="btn_ret_run_Click" Width="148.874">回到运行</Button>
-        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="512.435" Canvas.Top="682.154" Height="42.218" Name="btn_ret_config" Width="147.763" Click="btn_ret_config_Click">回到设置</Button>
+        <Button Canvas.Left="540.162" Canvas.Top="682.154" Template="{StaticResource RetBtn2}" FocusVisualStyle="{x:Null}" Height="40" Name="btn_ret_run" Click="btn_ret_run_Click" Width="148.616">回到运行</Button>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="330.099" Canvas.Top="679.936" Height="42.218" Name="btn_ret_config" Width="147.187" Click="btn_ret_config_Click">回到设置</Button>
         <ProgressBar Canvas.Left="45.728" Canvas.Top="281.513" Height="57.16" Name="fwprgs_bar" Visibility="Hidden" Width="308.664" />
     </Canvas>
 </Window>

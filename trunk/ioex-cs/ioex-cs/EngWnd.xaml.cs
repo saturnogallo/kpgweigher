@@ -169,7 +169,7 @@ namespace ioex_cs
             try
             {
                 if (!aimdir.GetValueNames().Contains(name))
-                    return "24785";
+                    return "0";
                 registData = aimdir.GetValue(name).ToString();
                 return registData;
             }

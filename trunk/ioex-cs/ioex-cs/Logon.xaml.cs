@@ -179,7 +179,7 @@ namespace ioex_cs
         }
         static public void SetLanguage()
         {
-             if (EngConfigWnd.GetRegistData("locale") == "")
+             if (EngConfigWnd.GetRegistData("locale") == "0")
                 SetLanguage("zh-CN");
             else
                 SetLanguage(EngConfigWnd.GetRegistData("locale"));
