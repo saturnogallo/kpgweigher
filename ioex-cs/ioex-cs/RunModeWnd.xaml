@@ -158,7 +158,7 @@
                 <Ellipse Name="inner" Width="160" Height="160" Canvas.Left="10" Canvas.Top="10" Fill="Purple">
 
                 </Ellipse>
-                <ContentPresenter Canvas.Left="60" Canvas.Top="70"/>
+                <ContentPresenter Canvas.Left="40" Canvas.Top="70"/>
 
 
             </Canvas>
@@ -221,50 +221,57 @@
 
         </Style>
 
-        <ControlTemplate x:Key="StartBtn" TargetType="{x:Type Button}">
-            <Canvas>
-                <Rectangle Name="outer" Width="200" Height="80" RadiusX="20" RadiusY="20">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="White" Offset="0" />
-                            <GradientStop Color="Black" Offset="0.5" />
-                        </LinearGradientBrush>
+        <Style x:Key="StartBtn" TargetType="{x:Type Button}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "20"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="18"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
 
-                    </Rectangle.Fill>
-                </Rectangle>
-                <Rectangle Name="inner" Width="180" Height="60" Canvas.Left="10" Canvas.Top="10" Fill="BlueViolet" RadiusX="10" RadiusY="10">
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="5" Background="BlueViolet">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Green"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
 
-                </Rectangle>
-                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Canvas.Top="10" Canvas.Left="20"/>
-            </Canvas>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsPressed"  Value = "True">
-                    <Setter TargetName="inner" Property="Fill" Value="Green"/>
-                </Trigger>
-            </ControlTemplate.Triggers>
-        </ControlTemplate>
-        <ControlTemplate x:Key="StartBtn2" TargetType="{x:Type Button}">
-            <Canvas>
-                <Rectangle Name="outer" Width="200" Height="80" RadiusX="20" RadiusY="20">
-                    <Rectangle.Fill>
-                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                            <GradientStop Color="White" Offset="0" />
-                            <GradientStop Color="Black" Offset="0.5" />
-                        </LinearGradientBrush>
 
-                    </Rectangle.Fill>
-                </Rectangle>
-                <Rectangle Name="inner" Width="180" Height="60" Canvas.Left="10" Canvas.Top="10" Fill="Green" RadiusX="10" RadiusY="10">
+        </Style>
+        <Style x:Key="StartBtn2" TargetType="{x:Type Button}">
+            <Setter Property = "Foreground" Value = "Black"/>
+            <Setter Property = "Background" Value = "Beige"/>
+            <Setter Property = "Height" Value = "20"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="18"/>
+            <Setter Property = "FontWeight" Value="Black"/>
+            <Setter Property = "FontFamily" Value="华文楷体"/>
 
-                </Rectangle>
-                <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Center" Canvas.Top="10" Canvas.Left="20"/>
-            </Canvas>
-            <ControlTemplate.Triggers>
-                <Trigger Property="IsPressed"  Value = "True">
-                    <Setter TargetName="inner" Property="Fill" Value="BlueViolet"/>
-                </Trigger>
-            </ControlTemplate.Triggers>
-        </ControlTemplate>
+            <Setter Property = "Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="5" Background="Green">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "BlueViolet"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <ControlTemplate x:Key="MainBucket" TargetType="{x:Type Button}">
             <Canvas>
                 <Ellipse Width="70" Fill="Purple" Height="70" Stroke="Black"></Ellipse>
@@ -670,8 +677,8 @@
         <Label Style="{StaticResource VibLabel}" Canvas.Left="174.707" Canvas.Top="326.821" Name="vib_lbl8" MouseLeftButtonUp="vibbucket_Click" Height="29" Width="24.293">8</Label>
         <Label Style="{StaticResource VibLabel}" Canvas.Left="183" Canvas.Top="297" Name="vib_lbl9" MouseLeftButtonUp="vibbucket_Click" Height="30" Width="27.063">9</Label>
         <Label Style="{StaticResource VibLabel}" Canvas.Left="204.347" Canvas.Top="278.655" Name="vib_lbl10" MouseLeftButtonUp="vibbucket_Click" Height="28.58" Width="32.653">10</Label>
-
-        <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource all_start}" Template="{StaticResource StartBtn}" Foreground="LightGray" FontSize="40" Margin="0,0,228.159,25.452" Name="btn_allstart" Click="btn_start_click" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="62" Width="150" Canvas.Left="646" Canvas.Top="594" />
+        <Label Canvas.Left="636.412" Canvas.Top="586.449" Height="83.551" Style="{StaticResource RectBtnBg}" Width="196.588">123123</Label>
+        <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource all_start}" Style="{StaticResource StartBtn}" Foreground="LightGray" FontSize="40" Margin="0,0,228.159,25.452" Name="btn_allstart" Click="btn_start_click" VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="68" Width="177" Canvas.Left="646" Canvas.Top="594" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource all_empty}" Style="{StaticResource ButtonStyle}" Margin="0,0,228.159,25.452" Name="btn_allempty"  Click="btn_empty_click" HorizontalAlignment="Right" Height="62" Width="155.031" Canvas.Left="43.969" Canvas.Top="608" BorderThickness="0" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource all_zero}" Style="{StaticResource ButtonStyle}" Margin="0,0,228.159,25.452" Name="btn_allzero" Click="btn_zero_click"  VerticalAlignment="Bottom" HorizontalAlignment="Right" Height="62.149" Width="152" Canvas.Left="259" Canvas.Top="607.851" />
 

@@ -156,22 +156,22 @@
       <Generator>MSBuild:Compile</Generator>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <None Include="RunModeWnd.xaml">
+    <Page Include="RunModeWnd.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </None>
-    <Page Include="Resources\RunModeWnd14.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
-    <None Include="SingleModeWnd.xaml">
-      <SubType>Designer</SubType>
+    <None Include="Resources\RunModeWnd14.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </None>
-    <Page Include="Resources\SingleModeWnd14.xaml">
+    <Page Include="SingleModeWnd.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <None Include="Resources\SingleModeWnd14.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
+    </None>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>

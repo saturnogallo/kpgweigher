@@ -99,6 +99,6 @@
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource find_password}" Style="{StaticResource ButtonStyle}" Name="btn_restore" VerticalAlignment="Bottom" Click="btn_restore_Click" Height="42.5" Margin="0,0,17,55" HorizontalAlignment="Right" Width="139" Canvas.Left="241.5" Canvas.Top="432.5" />
         <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="-57" Canvas.Top="645" Height="40" Name="btn_ret_config" Click="btn_return_Click" Margin="119,0,85,0" VerticalAlignment="Bottom" Width="0">回到运行</Button>
         <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Canvas.Left="122.5" Canvas.Top="644.988" Height="40.012" Name="btn_ret_run" Click="btn_return_Click" Margin="119,0,85,0" VerticalAlignment="Bottom" Width="0">回到运行</Button>
-        <Label Canvas.Left="62" Canvas.Top="0" Content="{DynamicResource pwdpage}" FontFamily="华文楷体" FontSize="48" FontWeight="Black" Foreground="ForestGreen" Height="92.5" HorizontalContentAlignment="Center" Name="lbl_title" Width="310.093" />
+        <Label Canvas.Left="-207.5" Canvas.Top="0" Content="{DynamicResource pwdpage}" FontFamily="华文楷体" FontSize="48" FontWeight="Black" Foreground="ForestGreen" Height="92.5" HorizontalContentAlignment="Center" Name="lbl_title" Width="840" />
     </Canvas>
 </Window>

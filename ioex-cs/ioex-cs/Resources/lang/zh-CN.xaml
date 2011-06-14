@@ -91,7 +91,7 @@
     <s:String x:Key="operator_no">操作员号</s:String>
     <s:String x:Key="enter_operator_no">请输入操作员号</s:String>
     <s:String x:Key="product_desc">产品描述</s:String>
-    <s:String x:Key="config">设置</s:String>
+    <s:String x:Key="config">主菜单</s:String>
     <s:String x:Key="preview">预览</s:String>
     <s:String x:Key="quit">取消</s:String>
     <s:String x:Key="product_config">产品号设置</s:String>

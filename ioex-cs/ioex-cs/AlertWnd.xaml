@@ -89,7 +89,7 @@
         </ControlTemplate>
     </Window.Resources>
     <Canvas>
-        <Label Name="lbl_title" Content="{DynamicResource alertpage}" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="70" FontWeight="Black" HorizontalContentAlignment="Center" Margin="41,12,63,0" Height="92.5" VerticalAlignment="Top" Canvas.Left="290" Canvas.Top="10" Width="295"></Label>
+        <Label Name="lbl_title" Content="{DynamicResource alertpage}" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="70" FontWeight="Black" HorizontalContentAlignment="Center" Margin="41,12,63,0" Height="92.5" VerticalAlignment="Top" Canvas.Left="-15" Canvas.Top="10" Width="955"></Label>
         <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource turnon_alert}" Click="btn_alert_Click" Style="{StaticResource ButtonStyleOn}" Margin="50,163.366,0,0" Name="btn_turnon_alert" Foreground="Black" FontSize="72" Canvas.Left="20" Canvas.Top="30" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="405" Height="122.5" />
         <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource stop_onalert}" Click="btn_alert_Click" Style="{StaticResource ButtonStyleOn}" Margin="50,163.366,0,0" Name="btn_stop_onalert" Foreground="Black" FontSize="72" Canvas.Left="505" Canvas.Top="30" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="405" Height="122.5" />
         <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource show_alert}" Click="btn_alert_Click" Style="{StaticResource ButtonStyleOn}" Margin="50,163.366,0,0" Name="btn_show_alert" Foreground="Black" FontSize="72" Canvas.Left="20" Canvas.Top="235" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="405" Height="122.5" />

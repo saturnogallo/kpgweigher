@@ -96,7 +96,7 @@
     <s:String x:Key="quit">CE</s:String>
     <s:String x:Key="product_config">Product</s:String>
     <s:String x:Key="bucket_config">Node parameter config</s:String>
-    <s:String x:Key="eng_config">Engineer</s:String>
+    <s:String x:Key="eng_config">Engineer Config</s:String>
     <s:String x:Key="bottom_config">Interface</s:String>
     <s:String x:Key="alert_config">Alert</s:String>
 

@@ -148,7 +148,7 @@
         </ControlTemplate>
         <ControlTemplate x:Key="RetBtn2" TargetType="{x:Type Button}">
             <Canvas>
-                <Rectangle Width="200" Height="80" >
+                <Rectangle Width="200" Height="70" >
                     <Rectangle.Fill>
                         <ImageBrush ImageSource="/ioex-cs;component/Resources/Image/ret2.gif"/>
                     </Rectangle.Fill>
