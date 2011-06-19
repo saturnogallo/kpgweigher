@@ -1,81 +1,45 @@
 #ifndef _DEFINE_H_
 #define _DEFINE_H_
 
-#define FIRMWARE_REV 0x10  /* Rev 1.0 */
+/*************************************************************************************
+*                           Firmware Version History
+* -----------------------------------------------------------------------------------
+* 0x16: 
+*
+*
+*************************************************************************************/
+#define FIRMWARE_REV 0x16 
 
-//My compile switches here: enabled when uncommented
-#define _50HZ_FILTER_           //50HZ AC power supply. uncommented if 60HZ.
-#define _DISABLE_WATCHDOG_    //uncommented to disable watchdog
-//#define _FORCE_INIT_EEPROM_  // force to initialize EEPROM.
-//#define _BOARD_TYPE_IS_VIBRATE_15
+/*************************************************************************************
+*                               Compile Switches
+*************************************************************************************/
+#define _DISABLE_WATCHDOG_                     //uncommented to disable watchdog
+//#define _FORCE_INIT_EEPROM_                  // force to initialize EEPROM.
+//#define _BOARD_TYPE_IS_VIBRATE_15            
 //#define _BOARD_TYPE_IS_VIBRATE_11
 
-#define i32 	long int
-#define i16 	int
-#define i8	char
-#define u32 	unsigned long int
-#define u16 	unsigned int
-#define u8	unsigned char
+/*************************************************************************************
+*                               Alias of Basic Types
+*************************************************************************************/
+#define i32 long int
+#define i16 int
+#define i8  char
+#define u32 unsigned long int
+#define u16 unsigned int
+#define u8  unsigned char
 
-#define MAX_RS485_ADDR 32
+/*************************************************************************************
+*                               Alias of Basic Results
+*************************************************************************************/
+#define NULL              0x0
+#define PASS              0x0        
+#define FAIL              0xff
+#define TRUE              1
+#define FALSE             0
 
-#define NULL 0x0
-#define PASS 0x0        
-#define FAIL 0xff
-#define TRUE 1
-#define FALSE 0
-#define GOT_DATA 0x0
-#define CS5532_BUSY 0xFF  
-#define SYS_GAIN_CAL_PREWORK_NOT_READY 1
-#define CS5532_SETUP_ERR 0x1
-#define CS5532_OFFSET_CAL_ERR 0x2
-#define CS5532_GAIN_CAL_ERR 0x3
-
-/*****************************************************************************************/
-//  Define MCU register bits
-/*****************************************************************************************/
-// define EEPROM Register bits
-#define EERIE 3
-#define EEMWE 2
-#define EEWE 1
-#define EERE 0
-#define SPI_SS PORTB.4               /* SPI slave slect pin */                                     
-#define P_SS 4                       /* slave_select: PORTB.4 */
-#define P_MOSI 5                     /* master_output_slave_input: PORTB.5 */
-#define P_MISO 6                     /* master_input_slave_output: PORTB.6 */
-#define P_SCK 7                      /* SPI clock: PORTB.7 */ 
-
-#define SPIE 7
-#define SPE 6 
-#define MSTR 4
-#define SPIF 7
-
-// define timer overflow mask bit
-#define TOV2 6
-#define TOV1 2
-#define TOV0 0
-
-// define watch dog register bits
-#define WDE 3
-#define WDCE 4
-
-// AD conversion indicators
-#define INVALID_DATA 0xfffe   // Adding material to lower bucket or releasing material.
-#define AD_BUSY 0xfffd
-#define AD_OVER_FLOW 0xfffc                     //65532
-#define FILTER_ONGOING 0xfffb 
-#define DIV_ERROR 0xfffa                         //65530
-#define OVERWEIGHT 0xfff9 
-#define MAX_VALID_DATA 0xfff0
-
-// 定义还有多少数据需要被写入EEPROM。
-#define NUM_OF_DATA_TO_BE_PGMED 0xFF
-
-void sleepus(u16);
-void sleepms(u16);
-void sleeps(u16);
-
-// 定义硬件管脚名称
+/*************************************************************************************
+*                               Hardware Abstract
+*************************************************************************************/
 #define PIN_RUN           PORTD.4        
 #define PIN_RxOK          PORTD.5
 #define PIN_TxOK          PORTD.6
@@ -85,45 +49,55 @@ void sleeps(u16);
 #define LED_OFF(x)        x = 1
 #define LED_FLASH(x)      x = ~x
 
-// 定义步进电机的驱动频率选项: 这些数值将被赋给定时器寄存器 TCNT
-// 0xF0: 2.3 cycle/s; 0xF2: 2.6; 0xF4: 3; 0xF5: 3.3; 0xF6: 3.6; 0xF7: 4 cycle/s 
+/*************************************************************************************
+*                               System Definitions
+*************************************************************************************/
+#define MAX_RS485_ADDR                  36   // Default addr of un-configured boards
+#define EEPROM_RS485ADDR              0x80   // Starting addr of board configuration 
+                                             // data in EEPROM.
+#define NUM_OF_DATA_TO_BE_PGMED       0xFF   // data to be programmed into EERPOM.
 
-#define CYCLE_0_5       0xB8
-#define CYCLE_0_6       0xC4
-#define CYCLE_0_7       0xCC
-#define CYCLE_0_8       0xD3
-#define CYCLE_0_9       0xD8
-#define CYCLE_1_0	0xDC
-#define CYCLE_1_2       0xE2
-#define CYCLE_1_5	0xE8
-#define CYCLE_2_0	0xEE
-#define CYCLE_2_3	0xF0  //0xF0->0xFB
-#define CYCLE_2_6	0xF2
-#define CYCLE_3_0	0xF4
-#define CYCLE_3_3	0xF5
-#define CYCLE_3_6	0xF6
-#define CYCLE_4_0	0xF7
-#define CYCLE_4_5	0xF8
-#define CYCLE_5_0	0xF9
-#define CYCLE_6_0	0xFA
-#define CYCLE_7_0	0xFB   
+/*------------------------------define motor pulse numbers---------------------------*/
+#define MOTOR_ONE_CYCLE_WITH_SENSOR    230 
+#define MOTOR_SHIFT_CYCLE_OPEN         100
+#define HALF_CYCLE_CLOSE_WITH_SENSOR   130
 
-//define motor pulse numbers
-#define MOTOR_ONE_CYCLE_WITH_SENSOR 230 
-#define MOTOR_ONE_CYCLE_NO_SENSOR 200 //originally s200        
-#define MOTOR_SHIFT_CYCLE_OPEN 100  // org 100
-#define HALF_CYCLE_CLOSE_WITH_SENSOR 130 //130
-#define HALF_CYCLE_CLOSE_NO_SENSOR 100
+/*-----------------------------------Board Property----------------------------------*/
+#define BOARD_TYPE_MASK               0xf0                          
+#define BOARD_TYPE_VIBRATE            0x00
+#define BOARD_TYPE_WEIGHT             0x10
+#define BOARD_TYPE_MOTOR              0x20
+#define BOARD_TYPE_INVALID            0xf0    
 
-// define motor's power modes. 
-#define KEEP_POWER_ON 0x1       // bit0  = 1
-#define POWER_OFF_AFTER_ROTATION 0x0  //bit0 = 0
+#define HW_ID_WEIGHT                  0x03   // Don't change, H/W dependant
+#define HW_ID_INTERFACE               0x02   // Don't change, H/W dependant 
 
-// RS485节点信息/参数在EEPROM中的存放地址
-#define EEPROM_BOOTFLAG_ADDR 0x40
-#define EEPROM_RS485ADDR 0x80
-#define UPGRADE_FIRMWARE 0xA
+#define BOARD_GROUP_MASK              0x0f
+#define BOARD_GROUP_A                 0x00
+#define BOARD_GROUP_B                 0x01
+#define BOARD_GROUP_C                 0x02
+#define BOARD_GROUP_D                 0x03
 
+/*************************************************************************************
+*                           Bootloader Related Definitions
+*************************************************************************************/
+#define EEPROM_BOOTFLAG_ADDR          0x40   // Address of boot flag in EEPROM
+#define UPGRADE_FIRMWARE              0x0A   // Firmware upgrade command word
+
+/*************************************************************************************
+*                              Weight Query Returns
+*************************************************************************************/
+#define INVALID_DATA                0xfffe   // 65534 
+#define AD_BUSY                     0xfffd   // 65533
+#define AD_OVER_FLOW                0xfffc   // 65532, most times Mechanical errors
+#define FILTER_ONGOING              0xfffb   // 65531, 
+#define DIV_ERROR                   0xfffa   // 65530, calibration data error
+#define OVERWEIGHT                  0xfff9   // 65529, 
+#define MAX_VALID_DATA              0xfff0
+
+/*************************************************************************************
+*                       RS485 Communication Protocol Definition
+*************************************************************************************/
 // bit 0:  "1" -> First Head Byte(0xfe) Found
 // bit 1:  "1" -> Frame header (0xfe/0x68) Found
 // bit 2:  "1" -> First Address Byte Received
@@ -136,7 +110,6 @@ void sleeps(u16);
 #define CM_INBUF_MAX    0x10          
 #define CM_OUTBUF_MAX   0x10
 
-// 定义RS485 通讯命令帧格式：
 typedef struct {
         u8      head_1;
         u8      head_2;
@@ -189,8 +162,6 @@ typedef struct {
         // Initialized as data saved in EEPROM, 
         // To get better linearity and higher accuracy, we need to have more than 1
         // poise data (saved in EEPROM). 5 at most. Data will be used in CS5532_Poise2Result(). 
-        // code is 
-        // not ready yet. 
         volatile u16     Poise_Weight_gram[5];     
         // CS5530 conversion of poise.  to get higher accuracy, we need to 
         // have more than 1 
@@ -262,23 +233,10 @@ typedef struct {
         // Please display 2 decimal digts on PC software.
         volatile u16     Mtrl_Weight_gram;       // integar part        
         volatile u8      Mtrl_Weight_decimal;    // decimal part: LSB: (1/64)g
-                
-        
+                       
         // Diagnostic resultm byte 1, polled by master
         volatile u8      diag_status1;
-        
-        // AD status polled by master board for error check, when set:
-        // Diagnostic result byte 2, polled by master.
-        volatile u8      diag_status2; 
-        
-        // hardware status, when set:
-        // bit 0: -> motor_s action fail
-        // bit 1: -> motor_w action fail
-        // bit 2: -> magnet action fail. reserved bit.
-        // bit 3: -> watchdog reset happened. Settings may be different from master board...
-        // bit 4: -> UART/Frame error.
-        // bit 7:5-> reserved for future use.   keep 0.
-        // maybe polled by master board as needed.        
+        volatile u8      diag_status2;         
         volatile u8      hw_status; 
         
         /**************************************************************/
@@ -287,8 +245,11 @@ typedef struct {
         // system powerup. Master board won't overwrite them.
         // master board need to do nothing regarding these 2 registers. 
         volatile u32     cs_sys_gain_cal_data;
-        volatile u32     cs_sys_offset_cal_data;
-        
+        //volatile u32     cs_sys_offset_cal_data;
+        volatile u8 ac_freq;
+        volatile u8 packer_intr_cnt;
+        volatile u8 flag_cmd_cnt;
+        volatile u8 packer_release_cnt;
         // Reserved for Future Use.
         // This variable is first initalized from EEPROM (equal to cs_zero)
         // sometimes "zero" point shifts and cs_zero/cs_poise needs to be re-adjusted.
@@ -335,8 +296,6 @@ typedef struct  { //status of magnet
       volatile u16 pulse_num;  //u16 changed to u32
       volatile u16 reserved; 
       volatile u16 half_period;
-      u8 amp_adj;
-      u8 time_adj;
 }S_MAGNET;
 
 typedef struct {
@@ -346,54 +305,27 @@ typedef struct {
         S_MAGNET _magnet;
 }NODE_CONFIG;       
 
+/*************************************************************************************
+*                                  Timer Definitions
+*************************************************************************************/
 typedef struct {
    u16 timerlen[8];                    /* Time to go before task will be scheduled */
    u8  status;                         /* boolean type variable, 1: in progress, 0: task completed */
-} OS_SCHEDULER;
+} OS_SCHEDULER;  
 
+/*************************************************************************************
+*                              Global Variables
+*************************************************************************************/
 extern OS_SCHEDULER os_sched; 
 extern NODE_CONFIG RS485;
-extern u8 debug_mode;  
-
-//typedef struct {
-// u8 addr;                  /* node addr, set by primary firmware before switching to boot firmware, default 0x0:broadcasting */
-// u8 baud_rate;             /* serial baud rate, set by primary firmware, default: 9600 bps */
-// u8 boot_cmd;              /* command to tell boot firmware to upgrade primary firmware or do other tasks */
-// u8 boot_status;           /* boot status set by boot loader for primary firmware */
-// u8 reserved;
-//} BOOT_CONFIG;             
+extern u8 debug_mode;             
 
 #define prints  mputs
 
-/******************************************************************/
-// OK... let's still use your definition.
 
-
-// I don't know what it means, let's align here, 
-// 0000b is for weigh_motor_viberate
-// 1000  without motor_s
-// 0100  without motor_w
-// 1100  without motor_sw
-// 1110  weight only
-// others....
-// your settings. 
-/******************************************************************/
-
-#define BOARD_TYPE_MASK         0xf0                          
-#define BOARD_TYPE_VIBRATE      0x00
-#define BOARD_TYPE_WEIGHT       0x10
-#define BOARD_TYPE_MOTOR        0x20
-#define BOARD_TYPE_INVALID      0xf0    
-
-#define HW_ID_WEIGHT            0x3     // Don't change, H/W dependant
-#define HW_ID_INTERFACE         0x2     // Don't change, H/W dependant 
-
-#define BOARD_GROUP_MASK        0x0f
-#define BOARD_GROUP_A           0x00
-#define BOARD_GROUP_B           0x01
-#define BOARD_GROUP_C           0x02
-#define BOARD_GROUP_D           0x03
-
+/*************************************************************************************
+*                                  Test Switches
+*************************************************************************************/
 // test mode register 1:
 #define TEST_BIT0               0b00000001
 #define TEST_BIT1               0b00000010
@@ -407,14 +339,11 @@ extern u8 debug_mode;
 #define TEST_BITS_765           0b11100000
 
 #define ENABLE_MULTI_POISES    (RS485._global.test_mode_reg1 & TEST_BIT7) == 0
-#define ENABLE_MOTOR_SENSORS   (RS485._global.test_mode_reg1 & TEST_BIT6) == 0
 #define TURN_OFF_WATCHDOG      (RS485._global.test_mode_reg1 & TEST_BIT5) == 1  
 #define DISPLAY_AD_RAW_DATA    (RS485._global.test_mode_reg1 & TEST_BIT4) == 1
-#define EN_EEPROM_WRITE        (RS485._global.test_mode_reg1 & TEST_BIT3) == 1
-#define EN_RUNTIME_ZERO_ADJUST (RS485._global.test_mode_reg1 & TEST_BIT2) == 1
-#define EN_RUNTIME_MAGNET_ADJ  (RS485._global.test_mode_reg1 & TEST_BIT1) == 1   
+#define EN_EEPROM_WRITE        (RS485._global.test_mode_reg1 & TEST_BIT3) == 1 
 
-#define CHANGE_RS485_ADDR    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0xC0
-#define CHANGE_BOARD_TYPE    (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x80
+#define CHANGE_RS485_ADDR      (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0xC0
+#define CHANGE_BOARD_TYPE      (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x80
 
 #endif

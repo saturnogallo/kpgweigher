@@ -3,7 +3,6 @@
 #include "command.h"
 
 extern u8 myaddr;              //RS485 address of this node.
-
 /****************************************************************************/
 // Global buffer to save data received or to be sent out.
 // UART Frame Format: 
@@ -205,6 +204,18 @@ void parse_node_frm(u8* ptr, u8 port)
                 j = 0;
                 while(j < infrm[port].datalen){  
                         *(ptr+infrm[port].databuf[j]) = infrm[port].databuf[j+1];
+                        
+                        /* add a counter to count how many flag_cmd received */
+                        if((infrm[port].databuf[j]> 64) && (infrm[port].databuf[j]< 69))
+                        {
+                            /* increase the 3rd byte to indicate receive another command */ 
+                            /*if((RS485._global.cs_sys_offset_cal_data & 0x00FF0000) == 0x00FF0000)
+                                RS485._global.cs_sys_offset_cal_data &= 0xFF00FFFF; 
+                            else 
+                                RS485._global.cs_sys_offset_cal_data += 0x10000; */
+                            RS485._global.flag_cmd_cnt++;    
+                        }
+                        
                         j = j+2;
                 }                              
         }             

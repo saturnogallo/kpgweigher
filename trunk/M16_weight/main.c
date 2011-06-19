@@ -33,19 +33,28 @@ Data Stack size     : 256
 #include "define.h"  
 #include "command.h" 
 
-#define ZERO_ADJUSTMENT_INTREVAL 200              /* reset weight every 200 releases */
-
+/*********************************************************************************************
+*                                     GLOBAL VARIABLES
+*********************************************************************************************/
 NODE_CONFIG RS485;                                /* structure of node */
 OS_SCHEDULER os_sched;
 
 u8 myaddr;                                        /* rs485 addr of current node */
 u8 hw_id;                                         /* hardwired board id (PORTC[7:6]) */
 bit freq_is_50HZ;                                 /* freq of AC power supply */
-bit run_time_adj_done;
-u16 last_weight, current_weight, weight_increment; /* initial weight before adding material*/  
 u16 release_times;                                /* how many times node has been released */
 u8 flag_turn_off_watchdog;
-    
+
+/* dynamic magnet amplitude adjustment */
+#define MAX_AMP_WEIGHT_RECORDS 25                  /* don't exceed 32 */
+bit run_time_adj_done; 
+u16 amp_weight[MAX_AMP_WEIGHT_RECORDS];
+u16 last_weight, current_weight, weight_gap;     /* initial weight before adding material*/  
+u8  local_magnet_amp;
+
+#define NOT_AVAILABLE 0xFF
+                                                   
+/* packer interface prototypes */    
 extern u8 Packer_Is_Busy();
 extern void Init_interface(); 
 extern void Tell_Packer_Weigher_Rdy();
@@ -105,12 +114,12 @@ interrupt [TIM2_OVF] void timer2_ovf_isr(void)
                    break;
                  case 4:                        // toggle OF PORTB.5, release done signal
                    PORTB.5 = ~PORTB.5; 
+                   //os_sched.timerlen[0] = 200;  /*start timer measuring packer response time*/
+                   //os_sched.status |=0x01;
                    break;
                  case 5:                        // toggle OE PORTB.6, force release signal
                    PORTB.6 = ~PORTB.6;
                    break;
-                 case 6:
-                   break;  
                  default:
                    break;            
                } 
@@ -337,21 +346,32 @@ void dead_loop(u16 refresh_cycle)
 /*****************************************************************************/
 //                     reset current weight to zero
 /*****************************************************************************/
+#define ERR_DATA_FAIL 1
+#define STATUS_OK 0
 u8 reset_weight()
 {    
-   u8 backup; 
+   u8 status;
    
-   backup = RS485._flash.cs_Filter_option;
-   RS485._flash.cs_Filter_option = 0; 
-   CS5532_PoiseWeight(); 
-   RS485._flash.cs_Filter_option = backup; 
-   
-   if(RS485._global.cs_mtrl < MAX_VALID_DATA) 
+   status = STATUS_OK;
+
+   // wait max 0.5 sec for valid data   
+   kick_off_timer(0, 50);   
+   while(CS5532_PoiseWeight() != DATA_VALID)
+   {
+      if(DELAY1_END) 
+      {
+         status = ERR_DATA_FAIL;
+         break;
+      }
+   }   
+   kill_timer(0);
+
+   if(status == STATUS_OK)
    {
       RS485._flash.cs_zero = RS485._global.cs_mtrl;
-      return 0;
    }
-   return 1; 
+      
+   return status;
 }
 
 /*******************************************************************************/
@@ -370,6 +390,12 @@ static u8 RSM_Flag = RM_READY_RELEASE;
 void release_material()
 {
     static u8 retry_cnt; 
+ 
+    // initialize: weight is zero after release.
+    last_weight = 0; 
+    current_weight = 0;
+    weight_gap = RS485._flash.target_weight;     
+    
     /************************************************************/   
     //start to open the lower bucket.
     /************************************************************/
@@ -400,10 +426,10 @@ void release_material()
     /************************************************************/      
     if(RSM_Flag == RM_WAIT_OPEN_W){      
        if(DELAY1_END){                        
-          if(ENABLE_MOTOR_SENSORS)
+          //if(ENABLE_MOTOR_SENSORS)
              Motor_Driver('W',HALF_CYCLE_CLOSE_WITH_SENSOR,POWER_OFF_AFTER_ROTATION);
-          else
-             Motor_Driver('W',HALF_CYCLE_CLOSE_NO_SENSOR,POWER_OFF_AFTER_ROTATION);
+          //else
+          //   Motor_Driver('W',HALF_CYCLE_CLOSE_NO_SENSOR,POWER_OFF_AFTER_ROTATION);
           
           RSM_Flag = RM_WAIT_SHIFT;     
        }
@@ -434,23 +460,27 @@ void release_material()
           RS485._magnet.half_period = release_times;  
           if(RS485._flash.magnet_freq)          
           {             
-             if ((release_times) > RS485._flash.magnet_freq)     /* weight needs to be reset again */
+             if ((release_times) >= RS485._flash.magnet_freq)       /* weight needs to be reset again */
              { 
                 release_times = 0;                                  /* reset counter */ 
-                kick_off_timer(0, 100);                              /* start timer service to wait for weight to be stable */
+                kick_off_timer(0, 100);                             /* start timer service to wait for weight to be stable */
                 RSM_Flag = RM_DELAY_BE4_RESET;                      /* move to next state */
                 retry_cnt = 0; 
              }
              else                                                   /* not a reset cycle */
              {  release_times++; 
                 RS485._global.flag_release = 0;                     /* set release complete flag */
+                if(RS485._global.flag_enable == ENABLE_ON)
+                    RS485._global.flag_goon = 1;                    /* automatically add material again after release*/
                 RSM_Flag = RM_READY_RELEASE;                        /* move to initial state */
              }
           } 
           else 
           {                                                         /* feature not enabled */
                 RS485._global.flag_release = 0;                     /* set release complete flag */
-                RSM_Flag = RM_READY_RELEASE;  
+                RSM_Flag = RM_READY_RELEASE;
+                if(RS485._global.flag_enable == ENABLE_ON)
+                    RS485._global.flag_goon = 1;                    /* automatically add material again after release*/                  
           }
        }
        return;
@@ -462,9 +492,11 @@ void release_material()
        if(DELAY1_END)
        {
          retry_cnt++; 
-         if((!reset_weight()) || (retry_cnt>10))    /* weight was reset successfully */
+         if((!reset_weight()) || (retry_cnt > 6))    /* weight was reset successfully */
          {                    
             RS485._global.flag_release = 0;        /* set release complete flag */
+            if(RS485._global.flag_enable == ENABLE_ON)
+                RS485._global.flag_goon = 1;              /* automatically add material again after release*/            
             RSM_Flag = RM_READY_RELEASE;
             retry_cnt = 0; 
          }
@@ -482,6 +514,29 @@ void release_material()
 // and "magnet_time"are adjusted accordingly.
 // This subroutine is enabled by Bit 1 of test_mode_reg1 (EN_RUNTIME_MAGNET_ADJ)
 /*******************************************************************************/
+#define SAFE_AMP 10
+#define REASONABLE_WEIGHT 4
+void auto_amp_adj(u16 weight_delta)
+{
+    u8 new_amp, index, i;
+    
+    index = local_magnet_amp >> 2;  
+    for(new_amp=0,i=1; i<MAX_AMP_WEIGHT_RECORDS; i++)
+    {    
+        if(amp_weight[i] == NOT_AVAILABLE)
+            continue;
+        else if(amp_weight[i] < weight_delta)     
+            new_amp = i;                      
+    }
+    if(amp_weight[new_amp+1] == NOT_AVAILABLE)
+        new_amp++;
+    
+    if(new_amp*4 > RS485._flash.magnet_amp+20)
+        local_magnet_amp=RS485._flash.magnet_amp+20; 
+    else
+       local_magnet_amp=new_amp<<2;
+
+} 
 
 /*******************************************************************************
 //                  Magnet State Machine
@@ -503,10 +558,6 @@ void release_material()
 #define MM_WAIT_ADDEND                7
 #define MM_WAIT_DELAYEND              9
 #define MM_CHECK_WEIGHT               10  
-#define MM_GET_PRE_FEED_WEIGHT        11
-#define MM_GET_PRE_FEED_WEIGHT_2ND    12
-#define MM_SET_MAGNET_AMP             13
-
 
 //Initialize state of Motor/Magnet/Weight State Machine.
 static u8  WSM_Flag = MM_ADD_MATERIAL; 
@@ -516,8 +567,13 @@ u8 magnet_add_material()
     //  start Magnet
     /**************************************************************/      
      // wait from magnet to feed material
-     if(WSM_Flag == MM_ADD_MATERIAL){ 			      
-        E_Magnet_Driver(RS485._flash.magnet_time); 
+     if(WSM_Flag == MM_ADD_MATERIAL){
+        local_magnet_amp = RS485._flash.magnet_amp;   			              
+        if(RS485._flash.target_weight)
+            auto_amp_adj(weight_gap); 
+        //RS485._global.hw_status = local_magnet_amp;
+        //if(weight_gap)            
+        E_Magnet_Driver(RS485._flash.magnet_time, local_magnet_amp); 
         WSM_Flag = MM_WAIT_ADDEND;
 	return WSM_Flag;
      }           
@@ -568,8 +624,11 @@ u8 magnet_add_material()
 // Every time only 1 bucket is allowed to be opened.       
 // State Flag: WSM_Flag
 /*******************************************************************************/          
+
 void motor_magnet_action()
 { 
+    u8 index;
+    
     /**************************************************************/ 
     // Start magnet to add material, if returned status is not
     // MM_PASS_MATERIAL, operation of adding mtrl not finished yet.
@@ -587,15 +646,7 @@ void motor_magnet_action()
         //need to check whether lower bucket is open
         //don't open upper bucket until lower bucket is closed
         if(!Motor_Is_Running())
-        {           
-           // Get weight before passing material into the lower bucket
-           CS5532_PoiseWeight();  
-           CS5532_Poise2Result(); 
-           if(RS485._global.cs_mtrl < MAX_VALID_DATA)
-              last_weight = RS485._global.Mtrl_Weight_gram; 
-           else
-              return;             
-              
+        {                                   
            Motor_Driver('S',MOTOR_SHIFT_CYCLE_OPEN, KEEP_POWER_ON);
            // upper motor is running now... enter next state,           
            WSM_Flag = MM_WAIT_OPEN;
@@ -630,10 +681,10 @@ void motor_magnet_action()
      {  
         if(DELAY2_END)
         {
-           if(ENABLE_MOTOR_SENSORS)
+           //if(ENABLE_MOTOR_SENSORS)
                 Motor_Driver('S',HALF_CYCLE_CLOSE_WITH_SENSOR, POWER_OFF_AFTER_ROTATION);                     
-           else
-                Motor_Driver('S',HALF_CYCLE_CLOSE_NO_SENSOR, POWER_OFF_AFTER_ROTATION);
+           //else
+           //     Motor_Driver('S',HALF_CYCLE_CLOSE_NO_SENSOR, POWER_OFF_AFTER_ROTATION);
            WSM_Flag = MM_WAIT_PASSEND;
         }
         return;                        
@@ -681,57 +732,56 @@ void motor_magnet_action()
         while(RS485._global.flag_goon == 0)
         {
            MYDEAD(0x2000);            
+           
            // test conditions of breaking out of this "while" loop.
            if((RS485._global.flag_enable != ENABLE_ON) || (RS485._global.flag_release))
+           {   
+               weight_gap = RS485._flash.target_weight; 
+               // re-add material. last amp forecast is out-of-date
+               /*if((WSM_Flag == MM_PASS_MATERIAL) && (RS485._flash.target_weight))
+               {   WSM_Flag = MM_ADD_MATERIAL;
+               }*/
                return; 
-                
+           }     
            // Update weight periodically
            if(hw_id == HW_ID_WEIGHT)                                      // if board has A/D on it, update weight
-           { 
-              CS5532_PoiseWeight();  
-              CS5532_Poise2Result();
-              
+           {              
+               CS5532_PoiseWeight();  
+               CS5532_Poise2Result();
               //############################################################
               //  Run time adjust magnet amplitude and working time
               //############################################################              
-              if((EN_RUNTIME_MAGNET_ADJ)&&(!run_time_adj_done))
+              if((RS485._flash.target_weight > 0) && (!run_time_adj_done))
               { 
-                 if(RS485._global.cs_mtrl < MAX_VALID_DATA)                         // if weight is valid, calculate 
-                 {                                                                  // increment. 
+                 if(RS485._global.cs_mtrl < MAX_VALID_DATA)
+                 {                                                                  
+                    /* log last weight_vs_amp record */
+                    last_weight = current_weight;
                     current_weight = RS485._global.Mtrl_Weight_gram;
+                    index = local_magnet_amp>>2;
                     if(current_weight>last_weight) 
-                       weight_increment = current_weight - last_weight; 
+                        amp_weight[index] = current_weight - last_weight; 
                     else
-                       weight_increment = 0; 
-                       
-                    if(weight_increment < (RS485._flash.target_weight >> 1))        // adjust magnet amp and/or working time
-                    {   
-                        if((RS485._magnet.amp_adj<10) || (RS485._magnet.amp_adj>127))  RS485._magnet.amp_adj += 2;
-                        if((RS485._magnet.time_adj<20)||(RS485._magnet.time_adj>127))  RS485._magnet.time_adj += 2; 
-                    }
-                    else if(weight_increment < ((RS485._flash.target_weight>>2)+(RS485._flash.target_weight>>1))) 
-                    {                  
-                        if((RS485._magnet.amp_adj<10) || (RS485._magnet.amp_adj>127))  RS485._magnet.amp_adj += 1;
-                        if((RS485._magnet.time_adj<20)||(RS485._magnet.time_adj>127))  RS485._magnet.time_adj += 1;
-                    }
-                    else if(RS485._flash.target_weight < ((weight_increment>>1)+(weight_increment>>2)))
-                    {
-                        if((RS485._magnet.time_adj>235)||(RS485._magnet.time_adj<128))   RS485._magnet.time_adj -= 2;
-                        if((RS485._magnet.amp_adj>245)||(RS485._magnet.amp_adj<128))   RS485._magnet.amp_adj -= 2;                     
-                    }
+                        amp_weight[index] = 0;
                     
-                    run_time_adj_done = TRUE;
-                 }    
-              } /*if(EN_RUNTIME_MAGNET_ADJ)*/
+                    /* calculate gap between current weight and target weight */    
+                    if(RS485._flash.target_weight > current_weight)
+                        weight_gap = RS485._flash.target_weight - current_weight;
+                    else
+                        weight_gap = 0;                    
+
+                    run_time_adj_done = TRUE; 
+                 } /* RS485._global.cs_mtrl < MAX_VALID_DATA*/   
+              }
               //############################################################
-              //  Run time adjust magnet amplitude and working time -- END
-              //############################################################              
-           }
-                                                  
-           // and we can start magnet to feed material to upper bucket.          
-           magnet_add_material();
-           Feed_Watchdog(); // feed watch dog in case that we exceed the timeout limit.                    
-        }    
+              //  Run time adjust magnet amplitude and working time
+              //############################################################                 
+           }           
+           // and we can start magnet to feed material to upper bucket.
+           if((run_time_adj_done) || (!RS485._flash.target_weight))
+               magnet_add_material();
+           Feed_Watchdog(); // feed watch dog in case that we exceed the timeout limit. 
+        } /* while */    
         
         // Get command from masterboard/PC to go on (add material)  
         //invalidate weight result.
@@ -746,6 +796,8 @@ void motor_magnet_action()
 /*******************************************************************************/
 void Init_Vars(void)
 {     
+     u8 i;
+     
      RS485._global.flag_enable = ENABLE_OFF;
      RS485._global.flag_disable = 0;        
      RS485._global.flag_reset = 0;  
@@ -767,8 +819,10 @@ void Init_Vars(void)
      flag_turn_off_watchdog = 0; //clear flag 
      os_sched.status = 0;  
      freq_is_50HZ = TRUE; 
-     RS485._magnet.amp_adj = 0; 
-     RS485._magnet.time_adj = 0;     
+     last_weight = 0; 
+     current_weight = 0;
+     for(i=0; i<MAX_AMP_WEIGHT_RECORDS;i++)
+         amp_weight[i] = NOT_AVAILABLE;      
 }
 
 /*******************************************************************************/
@@ -793,23 +847,23 @@ void Init_EEPROM_Para()
    //RS485._flash.board = BOARD_TYPE_VIBRATE;
    RS485._flash.board = BOARD_TYPE_WEIGHT;
    // Weight Calibration settings
-   RS485._flash.target_weight = 100;
-   RS485._flash.cs_zero = 0xBCE4;
-   RS485._flash.cs_poise[0] = 0xC1B8;
+   RS485._flash.target_weight = 0;
+   RS485._flash.cs_zero = 0x3EDA;
+   RS485._flash.cs_poise[0] = 0x43DB;
    RS485._flash.Poise_Weight_gram[0] = 50;
-   RS485._flash.cs_poise[1] = 0xC68F;
+   RS485._flash.cs_poise[1] = 0x48F9;
    RS485._flash.Poise_Weight_gram[1] = 100;
-   RS485._flash.cs_poise[2] = 0xD03B;
+   RS485._flash.cs_poise[2] = 0x531E;
    RS485._flash.Poise_Weight_gram[2] = 200;
-   RS485._flash.cs_poise[3] = 0xD9E9;
+   RS485._flash.cs_poise[3] = 0x5D4C;
    RS485._flash.Poise_Weight_gram[3] = 300;
-   RS485._flash.cs_poise[4] = 0xED47;
+   RS485._flash.cs_poise[4] = 0x719F;
    RS485._flash.Poise_Weight_gram[4] = 500;
    // Motor & Magnet settings
    //RS485._flash.magnet_freq = 9;
-   RS485._flash.magnet_amp = 55; 
+   RS485._flash.magnet_amp = 50; 
    RS485._flash.magnet_time = 10; 
-   RS485._flash.motor_speed = 2;
+   RS485._flash.motor_speed = 1;
    RS485._flash.delay_f = 10;
    RS485._flash.delay_w = 10;
    RS485._flash.delay_s = 10;
@@ -895,7 +949,7 @@ void init_cs5532(void)
    for(i=3;i>0;i--)                                         //Initialize AD. Try 3 times max. 
       if(CS5532_Init() == RESET_VALID)
       {          
-         temp = 4;                                          // 4: 6.25 Sps, 3: 12.5 sps
+         temp = 3;                                          // 4: 6.25 Sps, 3: 12.5 sps
          temp = (temp << 11) | 0x400;                       // unipolar
          if(freq_is_50HZ)
             ad_config_reg_msw = 0x08;                        // xianghua 0x8, 0x0
@@ -950,7 +1004,7 @@ u8 measure_AC_freq()
        if(!Magnet_Is_Running())                              // if Magnet is not running
        {
           kick_off_timer(OS_TIMER_TICK, 50);                // kick off 50*10ms timer service
-          E_Magnet_Driver(0);                                // measure AC power frequency. 
+          E_Magnet_Driver(0,0);                                // measure AC power frequency. 
        }
        else
          return freq_measured;  
@@ -975,7 +1029,8 @@ u8 measure_AC_freq()
        ana_isr_count = cur_ana_comp_isr_count - last_ana_comp_isr_count;
     else
        ana_isr_count = last_ana_comp_isr_count - cur_ana_comp_isr_count;
-    RS485._global.cs_sys_offset_cal_data = ana_isr_count << 1;  // copy the data to cal reg for debug purpose
+    //RS485._global.cs_sys_offset_cal_data = ana_isr_count << 1;  // copy the data to cal reg for debug purpose
+    RS485._global.ac_freq = ana_isr_count << 1; 
     
     if((ana_isr_count>22) && (ana_isr_count<29))      // AC power supply freq is 50HZ
     {
@@ -1015,12 +1070,11 @@ u8 measure_AC_freq()
 #define MEASURE_AC_FREQ_INTERVAL 10000     
 void main(void)
 {           
-   u8 flag_turn_off_watchdog; 
-   u8 i, AC_freq_measured;   
+   u8 i, AC_freq_measured; 
    u16 loopcnt; 
    bit ad_initialized_to_50HZ;    
    bit packer_interface_initialized;  
-   bit packer_timer_kicked; 
+   bit packer_timer_kicked;     
    u8  release_signal_not_sent; 
     
    packer_interface_initialized = FALSE;
@@ -1125,6 +1179,7 @@ void main(void)
            loopcnt++;
         RS485._global.cs_sys_gain_cal_data &= 0xFFFF; 
         RS485._global.cs_sys_gain_cal_data |= ((u32)loopcnt)<<16; 
+        
        /************************************************************/
        // Feed watchdog to avoid reset.Timeout limit is set to 1 sec
        /************************************************************/                                            
@@ -1134,6 +1189,15 @@ void main(void)
        /************************************************************/
        if(hw_id == HW_ID_INTERFACE)
        {                
+         /* intialize packer interface if not yet */
+         if(!packer_interface_initialized)
+         {
+            RS485._flash.target_weight = 0xD2; // use default, positive output pulse, high level input. 
+            RS485._flash.cs_Filter_option = 30; /*300 ms pulse width*/
+            Init_interface();
+            packer_interface_initialized = TRUE;
+         }
+         
          RS485._global.hw_status = Packer_Is_Busy();          
          if(Packer_Is_Busy())
          {  /* kick off timer for diagnostic */
@@ -1154,19 +1218,14 @@ void main(void)
              packer_timer_kicked = FALSE;
              RS485._global.diag_status2 &=0xFD;        /* clear packer diagostic flag */             
          }
-                          
-         /* intialize packer interface if not yet */
-         if(!packer_interface_initialized)
-         {
-            RS485._flash.target_weight = 0xD2; // use default, positive output pulse, high level input. 
-            RS485._flash.cs_Filter_option = 30; /*300 ms pulse width*/
-            Init_interface();
-            packer_interface_initialized = TRUE;
-         }
-
-         /* if a signal task has been scheduled, do it here */
-         if(release_signal_not_sent)        
-            release_signal_not_sent = Tell_Packer_Release_Done();
+         
+         /* if release signal not sent yet */
+         if(release_signal_not_sent)
+         {  release_signal_not_sent = Tell_Packer_Release_Done(); 
+            /* if signal has been sent, tell "flag enable" not to do again */
+            if(!release_signal_not_sent)
+               RS485._global.flag_enable = ENABLE_OFF;                      
+         }                   
                       
        }
        /************************************************************/
@@ -1215,7 +1274,6 @@ void main(void)
          else
             RS485._global.diag_status1 |= 0x80; 
        }
-
        /************************************************************/
        // Runtime Diagnose on addr, board and baudrate
        /************************************************************/       
@@ -1277,6 +1335,14 @@ void main(void)
          continue;
        } 
        /************************************************************/
+       // Invalid last weight if master asks current node to add 
+       // material. "Mtrl_Weight_gram" should be invalided before
+       // new weight is available.
+       /************************************************************/       
+       if(RS485._global.flag_goon)
+           RS485._global.Mtrl_Weight_gram = INVALID_DATA;
+       
+       /************************************************************/
        // Magnet/Motor actions. 
        // State range ENABLE_OFF< WSM_Flag <ENABLE_ON: mannual operation. 
        // Turn off watchdog in manual operation.
@@ -1291,7 +1357,7 @@ void main(void)
      	        motor_magnet_action();                
              RS485._global.Mtrl_Weight_gram = INVALID_DATA;
              //if there is release request pending, release material. 
-             while(RS485._global.flag_release)	  
+             while((RS485._global.flag_release) || (RSM_Flag != RM_READY_RELEASE))
                 release_material();       
           }            
           // flag_enable register represents different command 
@@ -1313,10 +1379,10 @@ void main(void)
                 Motor_Driver('S',MOTOR_SHIFT_CYCLE_OPEN,KEEP_POWER_ON);                         
                 while(Motor_Is_Running()) ;
                 sleepms(RS485._flash.open_s);
-                if(ENABLE_MOTOR_SENSORS)               		                                        
+                //if(ENABLE_MOTOR_SENSORS)               		                                        
                   Motor_Driver('S',HALF_CYCLE_CLOSE_WITH_SENSOR,POWER_OFF_AFTER_ROTATION); 
-                else
-                  Motor_Driver('S',HALF_CYCLE_CLOSE_NO_SENSOR,POWER_OFF_AFTER_ROTATION); 
+                //else
+                //  Motor_Driver('S',HALF_CYCLE_CLOSE_NO_SENSOR,POWER_OFF_AFTER_ROTATION); 
                 while(Motor_Is_Running()) ;	                                       
                 RS485._global.flag_enable = ENABLE_OFF;
                 break;
@@ -1333,7 +1399,7 @@ void main(void)
                 {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
                        break; 
                 }
-                E_Magnet_Driver(RS485._flash.magnet_time);  
+                E_Magnet_Driver(RS485._flash.magnet_time, RS485._flash.magnet_amp);  
                 while(Magnet_Is_Running())
                 {   if(Magnet_Is_Running() == 0xffff)            /* something wrong with magnet driver */
                        break; 
@@ -1345,7 +1411,12 @@ void main(void)
                 if(hw_id == HW_ID_WEIGHT)
                 {  for(i=20;i>0;i--)
                    {  if(!reset_weight())
+                      {
+                         /* save calibration data to EEPROM */
+                         RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);   
+                         RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;
                          break;
+                      }
                    }
                 }
                 RS485._global.flag_enable = ENABLE_OFF;
@@ -1381,9 +1452,13 @@ void main(void)
                 if(hw_id == HW_ID_INTERFACE)                   /* interface board */
                 {
                    if(!Packer_Is_Busy())
-                      release_signal_not_sent = Tell_Packer_Release_Done();
+                   {   release_signal_not_sent = Tell_Packer_Release_Done(); 
+                       if(!release_signal_not_sent)
+                           RS485._global.flag_enable = ENABLE_OFF;                   
+                   }
                 }
-                RS485._global.flag_enable = ENABLE_OFF;             
+                else  
+                   RS485._global.flag_enable = ENABLE_OFF;             
                 break;                
              //###########################################
              case ENABLE_WEIGHER_READY:
@@ -1426,8 +1501,8 @@ void main(void)
                 Feed_Watchdog();
                 motor_magnet_action();    // Complete this cycle before shutting down machine
              }
-             
-             while(RSM_Flag != RM_READY_RELEASE)
+             /* if we received a release command, or material is being released, complete it! */
+             while((RS485._global.flag_release) || (RSM_Flag != RM_READY_RELEASE))
              {
                 Feed_Watchdog();
                 release_material();      // Complete this cycle before shutting down machine            
@@ -1449,13 +1524,12 @@ void main(void)
        if(hw_id != HW_ID_WEIGHT) 
           continue; /* skip the operation below if board is not type_weight*/
           
-       if(RS485._global.flag_release){ 
+       if(RS485._global.flag_release)
+       { 
           //invalidate weight when doing material release actions.
           RS485._global.Mtrl_Weight_gram = INVALID_DATA; 
           release_material(); 	  
-          // initialize: weight is zero after release.
-          last_weight = 0; 
-          current_weight = 0; 
+
           //add material during idle/wait period of release state machine
           // to improve system speed. The 2 subrountines are state machines and 
           // they can run in parallel.

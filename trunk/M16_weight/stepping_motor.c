@@ -1,48 +1,54 @@
 #include <MEGA16.h>
-#include "define.h" 
+#include "motor.h"
 
-//delay after close signal is detected
+
+/*************************************************************************************
+*                               Global Variables used
+*************************************************************************************/
+extern bit freq_is_50HZ;                   // AC frequency, 1: 50Hz, 0:60Hz
+static u8 magnet_amp;                      // magnet amplitude, global within this file
+static u8 Timer1_flag; 
+static u8 ana_cmp_isr_counter;             //delay after close signal is detected
+
+/*************************************************************************************
+*                            Definitions Used
+*************************************************************************************/
 #define SHIFT_PULSE_INCNUM            0
 #define SHIFT_PULSE_DECNUM            0              
+#define SET_BY_ACINT                  1
+#define SET_BY_TMR1                   2
+#define ONE_PLS_CMPLT                 3
 
-/*****************************************************************************/
-//                       Hardware Related definition
-/*****************************************************************************/
+/*************************************************************************************
+*                           Hardware Abstract definition
+*************************************************************************************/
+#define WGHT_MOTORS_CLOSED       PIND.3 == 1    // sensor is read at PORTD[3:2]
+#define WGHT_MOTORW_CLOSED       PIND.2 == 1 
+#define INTF_MOTORS_CLOSED       PINC.1 == 1    // sensor is read at PORTC[1:0]
+#define INTF_MOTORW_CLOSED       PINC.0 == 1     
+#define BOARD_IS_INTERFACE       (hw_id == HW_ID_INTERFACE)
+#define BOARD_IS_WEIGHT          (hw_id == HW_ID_WEIGHT)
 
-#define WGHT_MOTORS_CLOSED   PIND.3 == 1           // weight board: sensor is read at PORTD[3:2]
-#define WGHT_MOTORW_CLOSED   PIND.2 == 1 
-#define INTF_MOTORS_CLOSED   PINC.1 == 1           // interface board: sensor is read at PORTC[1:0]
-#define INTF_MOTORW_CLOSED   PINC.0 == 1     
-#define BOARD_IS_INTERFACE   (hw_id == HW_ID_INTERFACE)
-#define BOARD_IS_WEIGHT      (hw_id == HW_ID_WEIGHT)
-
-#define MAGNET_PULSE_PORT       PORTB.1
-#define ENABLE_MOTOR_W	        PORTA.0 = 0         /* optocoupler, inverted logic */
-#define DISABLE_MOTOR_W	        PORTA.0 = 1
-#define ENABLE_MOTOR_S	        PORTA.1 = 0
-#define DISABLE_MOTOR_S	        PORTA.1 = 1
-#define MT_MODE_BIT0            PORTA.2
-#define MT_MODE_BIT1            PORTA.3 
-#define MOTOR_CLOCK_PIN         PORTA.4
-#define MOTOR_ROTATE_CLKWISE    PORTA.5 = 1
+#define MAGNET_PULSE_PORT        PORTB.1
+#define ENABLE_MOTOR_W	         PORTA.0 = 0    // optocoupler, inverted logic
+#define DISABLE_MOTOR_W	         PORTA.0 = 1
+#define ENABLE_MOTOR_S	         PORTA.1 = 0
+#define DISABLE_MOTOR_S	         PORTA.1 = 1
+#define MT_MODE_BIT0             PORTA.2
+#define MT_MODE_BIT1             PORTA.3 
+#define MOTOR_CLOCK_PIN          PORTA.4
+#define MOTOR_ROTATE_CLKWISE     PORTA.5 = 1
 #define MOTOR_ROTATE_ANTICLKWISE PORTA.5 = 0 
 
-#define TRIG_TRIAC()    PORTB.1 = 0 
-#define TRIG_CMPLT()    PORTB.1 = 1
+#define TRIG_TRIAC()             PORTB.1 = 0 
+#define TRIG_CMPLT()             PORTB.1 = 1
 
 flash u8 MOTOR_FREQ[]={CYCLE_1_5,CYCLE_2_0,CYCLE_2_3,CYCLE_2_6,CYCLE_3_0,CYCLE_3_3,CYCLE_3_6,CYCLE_4_0,CYCLE_4_5,CYCLE_5_0};        
-
-
-#define SET_BY_ACINT 1
-#define SET_BY_TMR1 2
-#define ONE_PLS_CMPLT 3
-
-u8 Timer1_flag; 
-u8 ana_cmp_isr_counter; 
  
-/*****************************************************************************/
-//  Generate a clock pulse to move stepping motor forward a step
-/*****************************************************************************/
+/*************************************************************************************
+*  @ Proc:  Motor_One_Step()
+*  @ Brief: Generate a clock pulse to drive stepping motor a step forward.
+*************************************************************************************/
 void Motor_One_Step()
 {
   u8 i;
@@ -52,29 +58,32 @@ void Motor_One_Step()
      MOTOR_CLOCK_PIN = 1; 
 }
  
-/*****************************************************************************/
-//              Analog Comparator interrupt service routine 
-// Interrupt when AC power supply cross zero (voltage)
-// As a method to control magnet magtitude (power supply), timer is started 
-// to delay for a certain before turns on Triac to drive magnet.
-// Triac automatically turns off when 220V AC power supply 
-//
-//     *  *
-//   *      *
-//  *-------|-*-----------*
-//  |       | | *        *|
-//  |       | |    *  *   |
-// ZC(Int)  | |ZC         |ZC(interrupt)
-//  |       | |
-//  |------>| |           
-//  | Delay | |
-//  |       | |
-//       -->| |<-- Triac On
-//  |       | |
-//          |<---- Trigger Triac on   
-//
-//  ZC: Zero Cross
-/*****************************************************************************/
+/*************************************************************************************
+*              Analog Comparator interrupt service routine 
+* Interrupt when AC power supply cross zero (voltage)
+* As a method to control magnet magtitude (power supply), timer is started 
+* to delay for a certain before turns on Triac to drive magnet.
+* Triac automatically turns off when 220V AC power supply 
+*
+*
+*       AC Peak Detection Interrupt
+*                  ^
+*     *  *         |
+*   *      *       |
+*  *---------*-----------*
+*      |     | *        *|
+*      |     |    *  *   |
+*   Det(Int) |ZC     |   | 
+*      |             |   |
+*      |------------>|   |        
+*      | Timer Delay |   |
+*      |             |   |
+*      |  Triac ON-->|   |<-- Triac ON
+*      |             |
+*                    |<---- Trigger Triac on   
+*
+*  ZC: Zero Cross
+*************************************************************************************/
 // 176: Max triac ON range: 0 ~ 165 degree. 0.87ms Triac ON time.
 // 181: Max triac ON range: 0 ~ 170 degree. 0.55ms Triac ON time 
 // 186: Max triac ON range: 0 ~ 175 degree. 0.3ms Triac ON time 
@@ -109,9 +118,27 @@ interrupt [ANA_COMP] void ana_comp_isr(void)
     TIFR |= 0x4;
     // Start Timer1 to delay a time before turning on Triac. 
     if(RS485._flash.board == BOARD_TYPE_VIBRATE)
-       temp =  (u16)RS485._flash.magnet_amp * 6 + 64166; 
-    else
-       temp =  (u16)RS485._flash.magnet_amp * 3 + 64166; 
+    {   
+        if(freq_is_50HZ)
+        {   if(RS485._flash.addr == 11)
+                temp =  (u16)magnet_amp * 6 + 64166; 
+            else if (RS485._flash.addr == 15)
+                temp =  (u16)magnet_amp * 2 + 64000;
+        }
+        else /* 60HZ */
+        {   if(RS485._flash.addr == 11)
+                temp =  (u16)magnet_amp * 6 + 64186; 
+            else if (RS485._flash.addr == 15)
+                temp =  (u16)magnet_amp * 2 + 64186;        
+        }     
+    }
+    else /* weight board */
+    {   if(freq_is_50HZ)
+            temp =  (u16)magnet_amp * 3 + 64166;      
+        else /* 60HZ */
+            temp =  (u16)magnet_amp * 3 + 64186;            
+    
+    }
     /* IMPORTANT NOTES: Because TCNT1 is a 16-bit register, writing to TCNT1 will be broken into 2 bytes.*/
     //TCNT1 = COUNTER_BASE + temp<<3 ;
     TCNT1 = temp;
@@ -204,7 +231,7 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
       // Motor to Move one step
       Motor_One_Step(); 
       // If Bit4 of test_mode_reg1 is unset, motor sensors are enabled. see "define.h".
-      if(ENABLE_MOTOR_SENSORS)
+      //if(ENABLE_MOTOR_SENSORS)
       {           
           // Adjust number of pulses to go.
           // if sensor detects closure action, motor is forced to run "SHIFT_PULSE_INCNUM" more pulses
@@ -251,7 +278,7 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
   // NO MORE PULSES.
   else // DEBUG INFORMATION IN STATUS REGISTER
   {  
-      if(ENABLE_MOTOR_SENSORS)
+      //if(ENABLE_MOTOR_SENSORS)
       {
           if(RS485._motor.phase && CLOSURE_DETECTED)
           {  if(RS485._motor.mode == 'S')
@@ -287,37 +314,22 @@ u8 read_ana_cmp_isr_counter()
 /*****************************************************************************/
 //                    Electrical magnet driver
 // Define E_magnet working time, unity is 20ms
-// Usage: E_Magnet_Driver(u16 arg)
+// Usage: E_Magnet_Driver(u16 pulse_num, u8 amp)
 /*****************************************************************************/
 #define MAX_AMP 100 
 #define MIN_VIBRATING_TIME 4
 
-void E_Magnet_Driver(u16 pls_num)
+void E_Magnet_Driver(u16 pls_num, u8 amp)
 {                                            
-   u8 temp;
    // Max amplitude is 85% duty based on experiment.OCR1A/ICR1 is pulse duty   
-   if(RS485._flash.magnet_amp > MAX_AMP)
-      RS485._flash.magnet_amp = MAX_AMP; 
+   magnet_amp = amp; 
+   if(amp > MAX_AMP)
+      magnet_amp = MAX_AMP; 
 
    // Initialize isr counter. 
    ana_cmp_isr_counter = 0;  
    // Magnet will work for pls_num * 20ms.   
    RS485._magnet.pulse_num = pls_num; 
-   
-   // adjust magnet time. variable is unsigned but used as signed one.
-   // treat RS485._magnet.pulse_num = 0 as a special case (measure AC freq)  
-   if((EN_RUNTIME_MAGNET_ADJ)&&(RS485._magnet.pulse_num))
-   {  if(RS485._magnet.time_adj < 128)       // positive, increase magnet working time
-        RS485._magnet.pulse_num += RS485._magnet.time_adj;
-      else    // negative, reduce magnet working time 
-      {
-         temp = ~RS485._magnet.time_adj + 1;
-         if(RS485._magnet.pulse_num > (u16)temp + MIN_VIBRATING_TIME)
-           RS485._magnet.pulse_num -= temp;
-         else
-           RS485._magnet.pulse_num = MIN_VIBRATING_TIME;
-      }   
-   } 
       
    // initialize Timer flag.
    Timer1_flag = ONE_PLS_CMPLT;   

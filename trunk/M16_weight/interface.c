@@ -119,12 +119,22 @@ interrupt [EXT_INT0] void ext_int0_isr(void)
      GIFR |= 0x40;                                 /* clear interrupt flag */
      return; 
    }
-   /*debug info: verify interrupt occurs correctly*/
-   RS485._global.cs_sys_offset_cal_data += 0x100; 
-   
+   /*debug info: packer request counter, byte 1 */
+   /*if((RS485._global.cs_sys_offset_cal_data & 0x0000FF00) == 0x0000FF00)
+        RS485._global.cs_sys_offset_cal_data &= 0xFFFF00FF; 
+   else
+        RS485._global.cs_sys_offset_cal_data += 0x100;*/    
+   RS485._global.packer_intr_cnt++;
+           
    /* clear interrupt flag,write "1" to bit 6 of GIFR. */
    GIFR |= 0x40;
-      
+   
+   // read out remaining timer
+   //RS485._global.cs_mtrl = os_sched.timerlen[0]; 
+   // kill timer 0. 
+   //os_sched.status &= 0xFE;
+   //os_sched.timerlen[0] = 0;
+   
    /* Set flag to indicate a request from packer is pending. */
    if(CONFIG_REG & ASYN_IF_MASK)                  /* Asyn setting, we should save pack request */
    {          
@@ -159,6 +169,8 @@ void Init_interface()
        
    packer_config = RS485._flash.target_weight; 
    interface_pulse_width = (u16)RS485._flash.cs_Filter_option ; /* max pulse width 256*10 ms = 2.56s */    
+   if(interface_pulse_width < 5)   /* minimum pulse width 50ms */
+      interface_pulse_width = 5;
    
    /* We need first to check if we are in handshake mode, if not, we will disable interrupt */
    if(!INTF_MODE_SHAKEHANDS)
@@ -334,6 +346,7 @@ void Tell_Packer_Force_Release()
 #define TASK_OF 4
 void send_packer_release_signal()
 {  
+   
    switch(CONFIG_REG & PACKER_OF_MASK)
    {
       case 0x0:                                   /* low to enable */      
@@ -372,16 +385,38 @@ u8 Tell_Packer_Release_Done()
 {
    u16 signal_delay;
    static u8 release_signal_not_sent_yet; 
+   static u8 wait_for_signal_complete; 
       
    /* Check if delay (releasing material <-> sending signal) is ongoing */   
-   if(os_sched.status & 0x4)                       /* Task 2(delay) is ongoing */
-      return 0xff;                                 /* return and check again later*/           
+   if(os_sched.status & 0x10)                      /* Task 2(feed delay) is ongoing */
+       return 0xff;                                /* return and check again later*/           
    else if(release_signal_not_sent_yet)            /* delay expires, and we do have signal to sent*/
    {
        send_packer_release_signal();               /* send packer release done signal*/   
        release_signal_not_sent_yet = FALSE;        /* clear flag */
-       return 0;                                   /* signal sent to packer, return (task done!) */
+       wait_for_signal_complete = TRUE; 
+       return 0xff;                                   /* signal sent to packer, return (task done!) */
    }
+   
+   /* wait for release signal to be sent out complete */   
+   if (wait_for_signal_complete)                        
+   {
+      if (os_sched.status & 0x10)      /* wait for pulse width to complete */
+          return 0xff;
+      else
+      {
+          wait_for_signal_complete = FALSE;
+          /*debug info: counter of signal, byte 4*/
+          /*if((RS485._global.cs_sys_offset_cal_data & 0xFF000000) == 0xFF000000)
+              RS485._global.cs_sys_offset_cal_data &= 0x00FFFFFF;
+          else
+              RS485._global.cs_sys_offset_cal_data += 0x1000000; */
+          RS485._global.packer_release_cnt++;   
+              
+          return 0x0;     
+      }
+   }
+     
    
    /* send out release_done signal or kick off timer to send signal later */  
    Intf.weigher_is_ready = FALSE;                  /* we are responding and completing this cycle, so clear flag for next cycle */      
@@ -399,18 +434,21 @@ u8 Tell_Packer_Release_Done()
       Intf.feed_counter = 0;                       /* reset counter */
 
       //if((CONFIG_REG & SIGNAL_DELAY_MASK)&&(CONFIG_REG & 0xF800)) /* add delay between releaseing material and sending out signal?  */
-      if(CONFIG_REG & 0xF800)
+      if(CONFIG_REG & 0xF800)    /* need delay before sending out signal */
       {   
          signal_delay = (CONFIG_REG & 0xF800)>>11;  /* 5 most significant bits:  get delay time */         
          signal_delay = signal_delay * 20;          /* X 20 */
          kick_off_timer(TASK_DELAY,signal_delay);   /* kickoff timer service 2 to start a delay, unit: 20*10ms */ 
-         release_signal_not_sent_yet = 0xff;        /* we haven't sent release_done signal to packer yet */
+         release_signal_not_sent_yet = 0xff;        /* we haven't sent release_done signal to packer yet */         
          return(0xff);                              /* return 0xff to tell caller we have something to do in the future.*/
       }
-      else
-      {   send_packer_release_signal();             /* send packer release done signal*/         
+      else                     /* send out signal immediately */
+      {   send_packer_release_signal();             /* send packer release done signal*/
+          wait_for_signal_complete = TRUE; 
+          return 0xff;         
       }
    }
+   
    return 0;
 }
                        

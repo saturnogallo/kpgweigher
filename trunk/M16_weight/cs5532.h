@@ -134,6 +134,11 @@
 #define WORD_RATE_400SPS 0xB
 #define WORD_RATE_200SPS 0xC
 
+#define DATA_VALID 0
+#define ERR_AD_BUSY 1 
+#define ERR_AD_OVER_FLOW 2
+#define ERR_FILTER_ONGOING 3
+
 
 //CS5532 subroutines
 u32 CS5532_Init(void);
@@ -152,7 +157,7 @@ u8 CS5532_SysOffsetCal(void);
 //extern void CS5532_ReadCal(unsigned int);
 //void CS5532_Test(void);
 void CS5532_Poise2Result(void);
-void CS5532_PoiseWeight(void); 
+u8 CS5532_PoiseWeight(void); 
 u8 CS5532_Cont_Conv_Stop();
 
 #endif
