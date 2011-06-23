@@ -33,7 +33,7 @@
     <s:String x:Key="admin">Administrator</s:String>
     <s:String x:Key="user">User</s:String>
     <s:String x:Key="emptydata">Input cannot be empty</s:String>
-    <s:String x:Key="engineerpage">Enigeer</s:String>
+    <s:String x:Key="engineerpage">Engineer</s:String>
     <s:String x:Key="entersystem">Enter Windows</s:String>
     <s:String x:Key="enter_system">Please input password to enter windows</s:String>
     <s:String x:Key="enter_locknum">Please enter lock number (total packs)</s:String>
@@ -56,7 +56,7 @@
     <s:String x:Key="pwdpage">Password config</s:String>
     <s:String x:Key="totalpack">Total packs</s:String>
     <s:String x:Key="lastweight">Last pack (gram)</s:String>
-    <s:String x:Key="speed">Speed(pack/sec)</s:String>
+    <s:String x:Key="speed">Speed(pack/min)</s:String>
     <s:String x:Key="pack">pack</s:String>
     <s:String x:Key="packpermin">pack/min</s:String>
     <s:String x:Key="backspace">BS</s:String>
@@ -96,7 +96,7 @@
     <s:String x:Key="quit">CE</s:String>
     <s:String x:Key="product_config">Product</s:String>
     <s:String x:Key="bucket_config">Node parameter config</s:String>
-    <s:String x:Key="eng_config">Engineer Config</s:String>
+    <s:String x:Key="eng_config">Engineer</s:String>
     <s:String x:Key="bottom_config">Interface</s:String>
     <s:String x:Key="alert_config">Alert</s:String>
 
@@ -221,7 +221,7 @@
     <s:String x:Key="cmd_cali5">500g</s:String>
 
     <s:String x:Key="err_ad">Mechanical fault</s:String>
-    <s:String x:Key="err_dz">Divide Zero</s:String>
+    <s:String x:Key="err_dz">Poise calibration fault</s:String>
     <s:String x:Key="err_ow1">A/D over weight</s:String>
     <s:String x:Key="err_ow">Over weight</s:String>
     <s:String x:Key="err_om">Too much no match</s:String>

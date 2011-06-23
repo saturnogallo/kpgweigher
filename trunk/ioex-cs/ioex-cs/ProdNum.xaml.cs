@@ -34,6 +34,14 @@ namespace ioex_cs
             InitializeComponent();
             imglist = new Dictionary<string, string>();
         }
+        private static string _baseDir = "";
+        public static string baseDir
+        {
+            get
+            {
+                return System.Threading.Thread.GetDomain().BaseDirectory;
+            }
+        }
         public void Init(ProdClickHandler h,bool CanDelete)
         {
             this.phandler = h;
@@ -42,7 +50,8 @@ namespace ioex_cs
             foreach (string id in curr_packer.all_conf.Keys)
             {
                 pcfg.FromElement(XElement.Parse(curr_packer.all_conf[id]));
-                FileInfo fi = new FileInfo("C:\\ioex\\prodpic\\"+pcfg.product_desc +".jpg");
+                
+                FileInfo fi = new FileInfo(ProdNum.baseDir +"\\prodpic\\"+pcfg.product_desc +".jpg");
                 imglist[id] = fi.FullName;
 
                 Label n = new Label();

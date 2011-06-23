@@ -831,6 +831,6 @@
         <Label Canvas.Left="454" Canvas.Top="392.688" Content="{DynamicResource alert_force}" Height="29.997" Name="lbl_alert2" Width="143" FontSize="16" FontWeight="Heavy" MouseLeftButtonUp="lbl_alert_MouseLeftButtonUp" Visibility="Hidden"/>
         <Label Canvas.Left="454" Canvas.Top="428" Content="{DynamicResource alert_disable}" Height="30" Name="lbl_alert3" Width="143" FontSize="16" FontWeight="Heavy" MouseLeftButtonUp="lbl_alert_MouseLeftButtonUp" Visibility="Hidden"/>
         <Label Canvas.Left="454" Canvas.Top="463" Content="{DynamicResource alert_quit}" Height="30" Name="lbl_alert4" Width="134" FontSize="16" FontWeight="Heavy" MouseLeftButtonUp="lbl_alert_MouseLeftButtonUp" Visibility="Hidden"/>
-<Button Canvas.Left="443" Canvas.Top="551" Height="81" Name="button1" Width="151" Click="button1_Click">Button</Button>
+        <Button Canvas.Left="443" Canvas.Top="551" Height="81" Name="button1" Width="151" Click="button1_Click" Visibility="Hidden">Button</Button>
     </Canvas>
 </Window>

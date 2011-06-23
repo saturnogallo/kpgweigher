@@ -29,7 +29,30 @@ namespace ioex_cs
                 return p.packers[0];
             }
         }
-        private string lastcall = "";
+        private Queue<string> lastcalls;
+        private string lastcall
+        {
+            get
+            {
+                if (lastcalls.Count == 0)
+                    return "";
+                else
+                    return lastcalls.Peek();
+            }
+            set
+            {
+                if (value == "")
+                {
+                    if (lastcalls.Count > 0)
+                        lastcalls.Dequeue();
+                }
+                else
+                {
+                    if(!lastcalls.Contains(value))
+                        lastcalls.Enqueue(value);
+                }
+            }
+        }
         private bool bSelectAll = false;
         private int curr_node_index { get; set; }
         private void HandleLongCommand()
@@ -38,44 +61,52 @@ namespace ioex_cs
             p.agent.Stop(500);
             curr_packer.nc.Stop(500);
             if (lastcall == "StartStop")
+            {
                 ToggleStartStop();
+                lastcall = "";
+            }
 
             if (lastcall == "UpdateProdNo")
             {
-                
-                
                 curr_packer.LoadConfig(curr_packer.curr_cfg.product_no);
                 curr_packer.SaveCurrentConfig();
-                
-                lastcall = "UpdateUI";
+                UpdateUI();
+                lastcall = "";
             }
             if (lastcall.IndexOf("cali") == 0)
             {
-                
-                
                 calibrate(lastcall);
-                
                 lastcall = "";
                 //MessageBox.Show(StringResource.str("cali_done"));
             }
             if (lastcall == "UpdateUI")
+            {
                 UpdateUI();
+                lastcall = "";
+            }
             if (lastcall == "ApplyToAll")
+            {
                 sub_applyall();
+                lastcall = "";
+            }
             if (lastcall == "select_prdno")
+            {
                 new_prd_Click(null, null);
+                lastcall = "";
+            }
             if (lastcall == "save_config")
             {
                 curr_packer.SaveCurrentConfig();
                 lastcall = "";
                 //MessageBox.Show(StringResource.str("store_done"));
             }
-            lastcall = "";
-            txt_oper.Visibility = Visibility.Hidden;
-            bg_oper.Visibility = Visibility.Hidden;
-            p.agent.Resume();
-            curr_packer.nc.Resume();
-
+            if (lastcall == "")
+            {
+                txt_oper.Visibility = Visibility.Hidden;
+                bg_oper.Visibility = Visibility.Hidden;
+                p.agent.Resume();
+                curr_packer.nc.Resume();
+            }
         }
         private bool _contentLoaded2 = false;
         
@@ -104,6 +135,7 @@ namespace ioex_cs
         public SingleMode(int nodenumber)
         {
             MyInitializeComponent(nodenumber);
+            lastcalls = new Queue<string>();
             curr_btn = null;
             last_btn = null;
             curr_node_index = -1;
@@ -112,7 +144,7 @@ namespace ioex_cs
             uiTimer.Interval = 100;
             uiTimer.Start();
             currentApp().packers[0].nc.HitEvent += new NodeCombination.HitCombineEventHandler(nc_HitEvent);
-            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
+//            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
         }
 
         public void agent_RefreshEvent(object sender)
@@ -157,9 +189,18 @@ namespace ioex_cs
         {
             if (!this.IsVisible)
                 return;
-
-            
-            if (curr_node_index == -1)
+            App p = Application.Current as App;
+            if (p.agent.bNeedRefresh)
+            {
+                p.agent.bNeedRefresh = false;
+                RefreshNodeUI();
+                if (curr_packer.status != PackerStatus.RUNNING)
+                {
+                    currentApp().agent.ClearWeights();
+                    currentApp().agent.bWeightReady = false;
+                }
+            }
+            if ((curr_node_index == -1))
             {
                 bucket_click(1);
             }else{
@@ -350,7 +391,7 @@ namespace ioex_cs
             lbl_currNode.Content = (curr_node_index).ToString();
             Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
             //load the corresponding pictiure.
-            (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("c:\\ioex\\prodpic\\" + curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
+            (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
             
         }
         private void node_reg(string regname)
@@ -595,8 +636,6 @@ namespace ioex_cs
         }
         private void btn_trial_Click(object sender, RoutedEventArgs e)
         {
-            if (lastcall != "")
-                return;
             lastcall = "StartStop";
             if(curr_packer.status == PackerStatus.RUNNING)
                 ShowStatus(StringResource.str("stopping"));
@@ -705,12 +744,20 @@ namespace ioex_cs
         private void btn_ret_config_Click(object sender, RoutedEventArgs e)
         {
             if (curr_packer.status != PackerStatus.RUNNING)
+            {
+                while (lastcall != "")
+                    this.uiTimer_Tick(null, null);
                 (Application.Current as App).SwitchTo("configmenu");
+            }
         }
         private void btn_ret_run_Click(object sender, RoutedEventArgs e)
         {
             if (curr_packer.status != PackerStatus.RUNNING)
+            {
+                while (lastcall != "")
+                    this.uiTimer_Tick(null, null);
                 (Application.Current as App).SwitchTo("runmode");
+            }
         }
         private void lbl_currNode_Click(object sender, RoutedEventArgs e)
         {

@@ -57,7 +57,7 @@ namespace ioex_cs
         {
 
             StringResource.SetLanguage();
-            app_cfg = new XmlConfig("app_config.xml");
+            app_cfg = new XmlConfig(ProdNum.baseDir +"\\app_config.xml");
             app_cfg.LoadConfigFromFile();
 
             curr_cfg = app_cfg.Current;

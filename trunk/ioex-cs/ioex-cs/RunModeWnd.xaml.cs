@@ -31,7 +31,29 @@ namespace ioex_cs
                 return p.packers[0];
             }
         }
-        private string lastcall = "";
+        private Queue<string> lastcalls;
+        private string lastcall{
+            get
+            {
+                if (lastcalls.Count == 0)
+                    return "";
+                else
+                    return lastcalls.Peek();
+            }
+            set
+            {
+                if (value == "")
+                {
+                    if(lastcalls.Count > 0)
+                        lastcalls.Dequeue();
+                }
+                else
+                {
+                    if(!lastcalls.Contains(value))
+                        lastcalls.Enqueue(value);
+                }
+            }
+        }
         private byte curr_node = 0xff;
         System.Windows.Forms.Timer uiTimer;
         private App currentApp()
@@ -66,14 +88,14 @@ namespace ioex_cs
         public RunMode(int nodenumber)
         {
             MyInitializeComponent(nodenumber);
-
+            lastcalls = new Queue<string>();
             this.Loaded +=new RoutedEventHandler(RunMode_Loaded);
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
             uiTimer.Interval = 200;
             
             currentApp().packers[0].nc.HitEvent += new NodeCombination.HitCombineEventHandler(nc_HitEvent);
-            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
+//            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
             uiTimer.Start();
         }
         public void Disable()
@@ -91,8 +113,6 @@ namespace ioex_cs
                     catch
                     {
                     }
-
-                
             }
         }
 
@@ -154,13 +174,19 @@ namespace ioex_cs
 
             if (!this.IsVisible)
                 return;
-
+            
             UIPacker p = curr_packer;
+            if (p.agent.bNeedRefresh && this.IsVisible)
+            {
+                p.agent.bNeedRefresh = false;
+                lastcall = "RefreshUI";
+            }
             if (lastcall != "")
             {
                 if (lastcall == "StartStop")
                 {
                     ToggleStartStop();
+                    lastcall = "";
                 }
 
                 if (lastcall == "UpdatePrdNo")
@@ -168,6 +194,7 @@ namespace ioex_cs
                     p.LoadConfig(p.curr_cfg.product_no);
                     UpdateUI("sys_config");
                     Thread.Sleep(2000);
+                    lastcall = "";
                 }
                 
                 if ((lastcall == "RefreshUI"))
@@ -183,9 +210,8 @@ namespace ioex_cs
                     {
                         RefreshRunNodeUI();
                     }
+                    lastcall = "";
                 }
-                lastcall = "";
-
                 txt_oper.Visibility = Visibility.Hidden;
                 bg_oper.Visibility = Visibility.Hidden;
                 return;
@@ -309,7 +335,7 @@ namespace ioex_cs
             {
                 curr_packer.StopRun();
                 this.btn_allstart.Content = StringResource.str("all_start");
-                btn_allstart.Template = this.FindResource("StartBtn") as ControlTemplate;
+                btn_allstart.Style = this.FindResource("StartBtn") as Style;
             }
             else
             {
@@ -343,7 +369,8 @@ namespace ioex_cs
             {
                 return;
             }
-
+            while (lastcall != "")
+                this.uiTimer_Tick(null, null);
             p.SwitchTo("history");
         }
 
@@ -400,7 +427,7 @@ namespace ioex_cs
                 this.prd_desc.Content = pack.curr_cfg.product_desc.ToString();
                 Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
                 //load the corresponding picture.
-                (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri("c:\\ioex\\prodpic\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
+                (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
 
             }
             if (param.IndexOf("wei_node") == 0)
@@ -511,6 +538,8 @@ namespace ioex_cs
                 {
                     if (Password.compare_pwd("user",data))
                     {
+                        while (lastcall != "")
+                            this.uiTimer_Tick(null, null);
                         p.SwitchTo("configmenu");
                         return;
                     }

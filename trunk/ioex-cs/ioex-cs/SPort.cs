@@ -297,6 +297,7 @@ namespace ioex_cs
             {
                 Status = PortStatus.IDLE;
             }
+            _serial.DiscardInBuffer();
             return _serial.IsOpen;            	
         }
         public void ResetInFlag()
