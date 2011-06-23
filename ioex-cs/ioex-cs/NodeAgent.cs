@@ -84,11 +84,14 @@ namespace ioex_cs
             bRun = true;
             comb_loop.Start();
         }
-        
+        private bool bRunCmd = false;
         public void Stop(int ms)
         {
             bRun = false;
-            Thread.Sleep(ms);
+            bRunCmd = true;
+            while (bRunCmd)
+                Thread.Sleep(10);
+            
 //          comb_loop.Suspend();
         }
         public void Resume()
@@ -146,7 +149,7 @@ namespace ioex_cs
                 if (agent.GetStatus(addr) == NodeStatus.ST_LOST || agent.GetStatus(addr) == NodeStatus.ST_DISABLED)
                     continue;
                 double wt = agent.weight(addr);
-                if ((wt < packer.curr_cfg.target / 2) && (wt > 0.0) && (wt < 65521))
+                if ((wt < packer.curr_cfg.target / 2) && (wt >= 0.0) && (wt < 65521))
                 {
                     agent.Action(addr, "flag_goon"); //no match hit
                 }
@@ -173,6 +176,8 @@ namespace ioex_cs
             {
                 if (!bRun)
                 {
+                    if (bRunCmd)
+                        bRunCmd = false;
                     Thread.Sleep(100);
                     continue;
                 }
@@ -191,7 +196,7 @@ namespace ioex_cs
 
                         while (CheckCombination())
                         {
-                            logTimeStick(ts1, "comb:");    
+                            //logTimeStick(ts1, "comb:");    
                             HitEvent(this, new CombineEventArgs((byte)packer._pack_id, release_addrs, release_weight));
                             
                             while (vibstate != VibStatus.VIB_READY)
@@ -199,16 +204,16 @@ namespace ioex_cs
                                 vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
                                 ProcessGoonNodes();
                             }
-//                            logTimeStick(ts1, "vibr:");    
+                            //logTimeStick(ts1, "vibr:");    
                             ReleaseAction(release_addrs, release_weight); //send release command and clear weight, trigger the packer, goon the nodes
-//                            logTimeStick(ts1, "rele:");    
+                            //logTimeStick(ts1, "rele:");    
                             vibstate = agent.TriggerPacker(packer.vib_addr);
                             while (vibstate == VibStatus.VIB_WORKING)
                             {
                                 vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
                                 ProcessGoonNodes();
                             }
-//                            logTimeStick(ts1, "vibw:");    
+                            //logTimeStick(ts1, "vibw:");    
                             ProcessGoonNodes();
                         }
                         while (ProcessGoonNodes())
@@ -218,7 +223,7 @@ namespace ioex_cs
                         agent.ClearWeights();
                         agent.bWeightReady = false;
                         agent.Action(packer.vib_addr, "fill");
-//                        logTimeStick(ts1, "fina:");    
+                        logTimeStick(ts1, "fina:");    
                     }
                 }
                 else
@@ -230,7 +235,7 @@ namespace ioex_cs
                         
                     }
                 }
-                Thread.Sleep(10);
+                Thread.Sleep(5);
             }
         }
         public double weight(byte addr)
@@ -698,6 +703,16 @@ namespace ioex_cs
                     return;
                 if(!(node is SubNode))
                     return;
+                if (cmd == "flag_goon") //no response is required so that no mutex is required
+                {
+                    node["flag_goon"] = 1;
+                    return;
+                }
+                if (cmd == "fill")
+                {
+                    node["flag_enable"] = flag_cmd(cmd);// no response is required so that no mutex is required
+                    return;
+                }
                 if (mut.WaitOne())
                 {
                     try
@@ -840,8 +855,8 @@ namespace ioex_cs
         private void LoadConfiguration()
         {
             //load current configuration
-            
-            XmlConfig app_cfg = new XmlConfig("app_config.xml");
+
+            XmlConfig app_cfg = new XmlConfig(ProdNum.baseDir + "\\app_config.xml");
             app_cfg.LoadConfigFromFile();
             
             XElement def_cfg = app_cfg.Current;
@@ -892,8 +907,11 @@ namespace ioex_cs
             
         }
         public delegate void HitRefreshEventHandler(object sender);
-        public event HitRefreshEventHandler RefreshEvent;
-
+        //public event HitRefreshEventHandler RefreshEvent;
+        private void RefreshEvent(object o)
+        {
+            bNeedRefresh = true;
+        }
         internal NodeAgent()
         {
             allports = new List<SPort>();
@@ -921,10 +939,13 @@ namespace ioex_cs
             
           
         }
+        private bool bBootCmd = false;
         public void Stop(int ms)
         {
             bBootDone = false;
-            Thread.Sleep(ms);
+            bBootCmd = true;
+            while(bBootCmd)
+                Thread.Sleep(10);
 //          msg_loop.Suspend();
         }
         
@@ -990,9 +1011,9 @@ namespace ioex_cs
             int j = 0;
             while (n.status == NodeStatus.ST_BUSY)
             {
-                Thread.Sleep(2);
+                Thread.Sleep(10);
                 //i = i + (i + 1) / 2; //8,12,18,28,42,64,96,
-                if (i++ > 40)
+                if (i++ > 8)
                 {
                     return false;
                 }
@@ -1139,7 +1160,10 @@ namespace ioex_cs
         private int check_weights_ready()
         {
             int ret;
+            TimeSpan ts1 = new TimeSpan(DateTime.Now.Ticks);
+            
             mut.WaitOne();
+               
             foreach (WeighNode wn in weight_nodes)
             {
                 
@@ -1149,9 +1173,13 @@ namespace ioex_cs
                 if (wn.weight < -1000 || (wn.weight >= 100000)) //invalid weight || wn.weight >= 65521
                 {
                     wn.Query();
+                    
                     WaitForIdleQuick(wn);
+                    //NodeCombination.logTimeStick(ts1, "ck2:");
                 }
             }
+            NodeCombination.logTimeStick(ts1, "ck:");
+            mut.ReleaseMutex();
             foreach (WeighNode wn in weight_nodes)
             {
 
@@ -1171,7 +1199,6 @@ namespace ioex_cs
                 }
                 ret--;
             }
-            mut.ReleaseMutex();
             
                 
             return ret;
@@ -1225,44 +1252,52 @@ namespace ioex_cs
             }
 
         }
+        public bool bNeedRefresh = false;
 
         public void MessageLoop()
         {
             uint checkcnt = 0;
-            int notready = 0;
+            int notready = 100;
             try
             {
                 while (true)
                 {
                     if (!bBootDone)
                     {
+                        if (bBootCmd)
+                        {
+                            bBootCmd = false;
+                        }
                         Thread.Sleep(10);
                         continue;
                     }
 
                     if (!bWeightReady)
                     {
-//                        TimeSpan ts1 = new TimeSpan(DateTime.Now.Ticks);
+                            
                         notready = check_weights_ready();
-//                        NodeCombination.logTimeStick(ts1, "check:");                        
+
+                        
                         if (notready < 4)
                         {
-                            RefreshEvent(this);
-                            checkcnt = 0;
+
                             bWeightReady = true;
+                            checkcnt = 0;
+                            RefreshEvent(this);
                         }
                         else
                         {
-//                          Thread.Sleep(150);
-//                            Debug.Write("[");
+                            //                          Thread.Sleep(150);
+                            Debug.Write("[");
                         }
                     }
-                    if (checkcnt++ > 100)
+                    if (checkcnt++ > 50)
                     {
-                        RefreshEvent(this);
+                        Debug.Write(".");
                         checkcnt = 0;
+                        RefreshEvent(this);
                     }
-                    Thread.Sleep(10);
+                    Thread.Sleep(20);
                 }
             }
             catch (Exception e)

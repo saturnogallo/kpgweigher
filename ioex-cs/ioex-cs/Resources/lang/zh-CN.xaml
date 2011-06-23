@@ -221,7 +221,7 @@
     <s:String x:Key="cmd_cali5">500g砝码</s:String>
 
     <s:String x:Key="err_ad">机械故障</s:String>
-    <s:String x:Key="err_dz">除零错误</s:String>
+    <s:String x:Key="err_dz">重量校准数据错误</s:String>
    <s:String x:Key="err_ow1">A/D信号超重</s:String>
     <s:String x:Key="err_ow">超重</s:String>
     <s:String x:Key="err_om">多次未组合</s:String>

@@ -128,8 +128,8 @@ namespace ioex_cs
             
             weight_nodes = new List<byte>();
             nodes_config = new Dictionary<byte, XmlConfig>();
-            
-            all_conf = new XmlConfig("pack_define"+pack_id.ToString()+".xml");
+
+            all_conf = new XmlConfig(ProdNum.baseDir + "\\pack_define" + pack_id.ToString() + ".xml");
             
             all_conf.LoadConfigFromFile();
 
@@ -255,14 +255,14 @@ namespace ioex_cs
             {
                 if (!nodes_config.ContainsKey(n))
                 {
-                    nodes_config[n] = new XmlConfig("node_" + n + ".xml");
+                    nodes_config[n] = new XmlConfig(ProdNum.baseDir + "\\node_" + n + ".xml");
                     nodes_config[n].LoadConfigFromFile();
                     nodes_config[n].LoadConfig(cfgname);
                 }
             }
             if (!nodes_config.ContainsKey(vib_addr))
             {
-                nodes_config[vib_addr] = new XmlConfig("node_" + vib_addr + ".xml");
+                nodes_config[vib_addr] = new XmlConfig(ProdNum.baseDir + "\\node_" + vib_addr + ".xml");
                 nodes_config[vib_addr].LoadConfigFromFile();
                 nodes_config[vib_addr].LoadConfig(cfgname);
             }
@@ -271,7 +271,7 @@ namespace ioex_cs
             
             if (!nodes_config.ContainsKey(bot_addr))
             {
-                nodes_config[bot_addr] = new XmlConfig("node_" + bot_addr + ".xml");
+                nodes_config[bot_addr] = new XmlConfig(ProdNum.baseDir + "\\node_" + bot_addr + ".xml");
                 nodes_config[bot_addr].LoadConfigFromFile();
                 nodes_config[bot_addr].LoadConfig(cfgname);
             }
@@ -382,7 +382,7 @@ namespace ioex_cs
         }
         public void StopRun()
         {
-           
+                       
             nc.Stop(3000);
             agent.Stop(1000);
             

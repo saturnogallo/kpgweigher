@@ -27,7 +27,7 @@ namespace ioex_cs
             InitializeComponent();
             imglist = new Dictionary<string, string>();
             
-            foreach (string f in Directory.GetFiles("c:\\ioex\\prodpic\\","*.jpg"))
+            foreach (string f in Directory.GetFiles(ProdNum.baseDir + "\\prodpic\\","*.jpg"))
             {
                 FileInfo fi = new FileInfo(f);
                 string nm = fi.Name.Remove(fi.Name.Length-4,4);

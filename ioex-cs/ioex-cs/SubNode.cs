@@ -272,7 +272,7 @@ namespace ioex_cs
                     }
                     if (value == 65530) //divide zero
                     {
-                        return WeighNode.INAVLID_WEIGHT+4;
+//                      return WeighNode.INAVLID_WEIGHT+4;
                         if (errlist.IndexOf("err_dz;") < 0)
                             errlist = errlist + "err_dz;";
                     }
@@ -312,7 +312,8 @@ namespace ioex_cs
         {
             if (NodeAgent.IsDebug)
                 return;
-            read_regs(new string[] { "mtrl_weight_gram", "mtrl_weight_decimal", "status1","status2" });
+            //read_regs(new string[] { "mtrl_weight_gram", "mtrl_weight_decimal", "status1","status2" });
+            read_regs(new string[] { "mtrl_weight_gram", "mtrl_weight_decimal" });
             if (!NodeAgent.IsDebug)
                 status = NodeStatus.ST_BUSY;
         }

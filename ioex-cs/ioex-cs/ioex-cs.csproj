@@ -247,6 +247,7 @@
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="History.log" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -270,20 +271,7 @@
     <EmbeddedResource Include="Resources\Image\en-US.JPG" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="app_config.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="node_1.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="password.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="pack_define.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <Content Include="password.xml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
