@@ -105,6 +105,7 @@ void CRunitemDialog::DoCacu()
 }
 void CRunitemDialog::Reset(int times)
 {
+	_times = times;
 	runcnt = times;
 	m_data.RemoveAll();
 	m_output.RemoveAll();
@@ -114,7 +115,7 @@ void CRunitemDialog::PrepareRun(int times)
 {
 	//step 1 load all the variables
 	//step 2 load the program
-	
+	_times = times;
 	CString cfg;
 	cfg.Format(_T("PTR=%i|"),times-runcnt);
 	m_prg.SetEnv(cfg);
@@ -129,7 +130,11 @@ void CRunitemDialog::PrepareRun(int times)
 }
 bool CRunitemDialog::IsAllDone()
 {
-		return (!IsValid() || (runcnt <= 0));
+	if(!IsValid())
+		return true;
+	if((_times > 0) && (runcnt <= 0))
+		return true;
+	return false;
 }
 bool CRunitemDialog::IsValid()
 {
@@ -181,7 +186,8 @@ bool CRunitemDialog::PostRun()
 		status.Format(_T("通道%i(第%i个读数):%s"),m_ch,runcnt,result);
 
 	}
-	runcnt--;
+	if(runcnt >= 0)
+		runcnt--;
 	return (false);
 }
 
