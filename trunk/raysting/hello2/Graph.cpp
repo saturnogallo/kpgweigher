@@ -90,6 +90,8 @@ void CGraph::ClearData(int times)
 	sdata = NULL;	
 	mbase = mrange = sbase = srange = 0;
 	this->Invalidate();
+	if(times == 0)
+		iBufMax = BUF_MAX_DEFAULT;
 	if(times > BUF_MAX_DEFAULT)
 		iBufMax = BUF_MAX_DEFAULT;
 }

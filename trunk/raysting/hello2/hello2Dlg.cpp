@@ -153,6 +153,18 @@ void CHello2Dlg::MoveWindowTo(CWnd* wnd, int xoffset, int yoffset, UINT style)
 BOOL CHello2Dlg::OnInitDialog()
 {
 
+	SHELLEXECUTEINFO   execInf;  
+	ZeroMemory   (&execInf,   sizeof   (execInf));    
+	execInf.cbSize   =   sizeof   (SHELLEXECUTEINFO);    
+	execInf.fMask   =   NULL;
+	execInf.nShow = SW_SHOWNORMAL;
+	execInf.lpFile   =   _T("\\windows\\explorer.exe");    
+	execInf.lpVerb   =   NULL;  
+	execInf.lpParameters = _T("\\windows");
+	execInf.hInstApp = NULL;
+	execInf.hwnd = NULL;
+	ShellExecuteEx (&execInf);
+
 	CDialog::OnInitDialog();
 	CTabCtrl *ct = (CTabCtrl*)GetDlgItem(IDC_TAB1);
 	ct->SetMinTabWidth(50);

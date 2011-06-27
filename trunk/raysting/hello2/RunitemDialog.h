@@ -104,7 +104,7 @@ public:
 protected:
 	int runcnt;
 	char status_now;
-	
+	int _times;
 
 	
 	// Generated message map functions
