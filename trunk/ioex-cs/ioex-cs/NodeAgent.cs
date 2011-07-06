@@ -763,19 +763,26 @@ namespace ioex_cs
                             node["cs_mtrl"] = null;
                             if (WaitForIdle(node))
                             {
-                                if (slot == 0) //zero point calibration
+                                if (node["cs_mtrl"].Value <= WeighNode.MAX_VALID_WEIGHT)
                                 {
-                                    node["cs_zero"] = node["cs_mtrl"];
-                                    WaitUntilGetValue(node, "cs_zero", node["cs_mtrl"].Value);
-                                    
+                                    if (slot == 0) //zero point calibration
+                                    {
+                                        node["cs_zero"] = node["cs_mtrl"];
+                                        WaitUntilGetValue(node, "cs_zero", node["cs_mtrl"].Value);
+                                    }
+                                    else
+                                    {
+                                        node["cs_poise" + slot.ToString()] = node["cs_mtrl"];
+                                        WaitUntilGetValue(node, "cs_poise" + slot.ToString(), node["cs_mtrl"].Value);
+                                        node["poise_weight_gram" + slot.ToString()] = weight;
+                                        WaitUntilGetValue(node, "poise_weight_gram" + slot.ToString(), weight);
+                                    }
                                 }
                                 else
                                 {
-                                    node["cs_poise" + slot.ToString()] = node["cs_mtrl"];
-                                    WaitUntilGetValue(node, "cs_poise" + slot.ToString(), node["cs_mtrl"].Value);
-                                    node["poise_weight_gram" + slot.ToString()] = weight;
-                                    WaitUntilGetValue(node, "poise_weight_gram" + slot.ToString(), weight);
+                                    MessageBox.Show(StringResource.str("tryagain"));
                                 }
+
                             }
                             else
                             {
@@ -989,7 +996,7 @@ namespace ioex_cs
         private bool WaitForIdle(SubNode n)
         {
             int i = 2;
-            int j = 0;
+            //int j = 0;
             while (n.status == NodeStatus.ST_BUSY)
             {
                 Thread.Sleep(5);
@@ -1008,7 +1015,7 @@ namespace ioex_cs
         private bool WaitForIdleQuick(SubNode n)
         {
             int i = 2;
-            int j = 0;
+            //int j = 0;
             while (n.status == NodeStatus.ST_BUSY)
             {
                 Thread.Sleep(10);

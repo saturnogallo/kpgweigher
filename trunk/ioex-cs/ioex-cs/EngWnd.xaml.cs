@@ -390,12 +390,11 @@ namespace ioex_cs
 
                             fwprgs_bar.Visibility = Visibility.Visible;
                             fwprgs_bar.Minimum = 0;
-                            FileInfo fwfi = new FileInfo("C:\\MAIN.bin");
 
-                            fwprgs_bar.Maximum = (int)(fwfi.Length/128);
+                            fwprgs_bar.Maximum = (int)(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("ioex_cs.Resources.MAIN.BIN").Length/128);
                             
                             bootloader bl = new bootloader(n);
-                            string ret = bl.download("C:\\MAIN.bin",fwprogress);
+                            string ret = bl.download(fwprogress);
                             btn_updatefw.Content = StringResource.str("updatefw");
                             fwprgs_bar.Visibility = Visibility.Hidden;
                             if (ret != "")

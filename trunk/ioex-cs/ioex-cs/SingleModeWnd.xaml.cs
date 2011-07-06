@@ -494,10 +494,17 @@ namespace ioex_cs
                         n.SetNodeReg((byte)curr_node_index, "poise_weight_gram" + i.ToString(), UInt32.Parse(data));
                         n.ClearNodeReg((byte)curr_node_index, "cs_mtrl");
                         string cs_mtrl_val = n.GetNodeReg((byte)curr_node_index, "cs_mtrl");
-                        n.SetNodeReg((byte)curr_node_index, "cs_poise" + i.ToString(), UInt32.Parse(cs_mtrl_val));
+                        UInt32 val = UInt32.Parse(cs_mtrl_val);
+                        if (val <= WeighNode.MAX_VALID_WEIGHT)
+                        {
+                            n.SetNodeReg((byte)curr_node_index, "cs_poise" + i.ToString(), UInt32.Parse(cs_mtrl_val));
+                            curr_packer.WeightAction((byte)curr_node_index, "flash");
+                        }
+                        else
+                        {
+                            MessageBox.Show(StringResource.str("tryagain"));
+                        }
                     }
-                    curr_packer.WeightAction((byte)curr_node_index, "flash");
-                    
                     return;
                 }
                 ShowStatus("modifying");
@@ -533,10 +540,18 @@ namespace ioex_cs
                     ShowStatus("calibrating");
                     n.ClearNodeReg((byte)curr_node_index, "cs_mtrl");
                     string cs_mtrl_val = n.GetNodeReg((byte)curr_node_index, "cs_mtrl");
-                    n.SetNodeReg((byte)curr_node_index, "cs_zero", UInt32.Parse(cs_mtrl_val));
-                    curr_packer.WeightAction((byte)curr_node_index, "flash");
-                    ShowStatus("modifying");
-                    lastcall = "UpdateUI";
+                    UInt32 val = UInt32.Parse(cs_mtrl_val);
+                    if (val <= WeighNode.MAX_VALID_WEIGHT)
+                    {
+                        n.SetNodeReg((byte)curr_node_index, "cs_zero", UInt32.Parse(cs_mtrl_val));
+                        curr_packer.WeightAction((byte)curr_node_index, "flash");
+                        ShowStatus("modifying");
+                    }
+                    else
+                    {
+                        MessageBox.Show(StringResource.str("tryagain"));
+                    }
+                    
                 }
             }
             if (calreg == "cali1" )
