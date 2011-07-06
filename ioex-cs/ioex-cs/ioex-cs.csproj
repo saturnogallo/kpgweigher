@@ -252,6 +252,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <EmbeddedResource Include="Resources\MAIN.BIN" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>

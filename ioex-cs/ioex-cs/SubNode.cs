@@ -228,6 +228,7 @@ namespace ioex_cs
         public int cnt_match;
         public const double INAVLID_WEIGHT =    1000000.0;
         public const double NOREADING_WEIGHT = -10000.0;
+        public const UInt32 MAX_VALID_WEIGHT = 65520;
         private int cnt_aderr; //count for ad error
         Random rand;
         public double weight

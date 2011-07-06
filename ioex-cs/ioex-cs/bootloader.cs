@@ -80,11 +80,11 @@ namespace ioex_cs
             } while ((uc == quitval));
             return uc;
         }
-        public string download(string fwfile,ShowProgressEvent progress)
+        public string download(ShowProgressEvent progress)
         {
             
             byte[] page = new byte[130];
-            
+
             while (true)
             {
                 node.status = NodeStatus.ST_IDLE;
@@ -119,12 +119,12 @@ namespace ioex_cs
             if ((node["board_id"] == null) || ('B' != node["board_id"].Value))
                 return "fail to enter bootloader mode";            
             
-            
+
             /* Node is waiting for firmware upgrade now*/
             UInt16 page_addr = 0;
             try
             {
-                using(FileStream fs = new FileStream(fwfile, FileMode.Open))
+                Stream fs = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("ioex_cs.Resources.MAIN.BIN");
                 {
                     progress((UInt16)(fs.Length >> 7 + 1));
                     int count;

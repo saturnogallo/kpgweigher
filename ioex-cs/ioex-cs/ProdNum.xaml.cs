@@ -34,7 +34,6 @@ namespace ioex_cs
             InitializeComponent();
             imglist = new Dictionary<string, string>();
         }
-        private static string _baseDir = "";
         public static string baseDir
         {
             get
