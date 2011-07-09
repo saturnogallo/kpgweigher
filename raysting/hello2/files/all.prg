@@ -56,7 +56,6 @@
 <SINGLE_VTEST(^1^)>
 {nav_read()}
 [t,0,0,^1^]
-
 //[c,"VRANGE@prg",120mv,f,^1^,"^1^@prg"/1000.0]
 ><
 
@@ -73,13 +72,6 @@
 [s,"rx@prg",1,OEXT,OHX1]
 [s,"rx@prg",0,FEXT,OHX1]
 ><
-<USE_EXT()>
-[s,"rx@prg",0,OEXT]
-[s,"rx@prg",1,FEXT]
-[j,"rx@prg",1,NOEXT]
-{TURNOFF_STD()}
-[NOEXT]
-><
 <TURNOFF_EXT()>
 [s,"rx@prg",1,FHX1,FEXT]
 [s,"rx@prg",0,FHX1,OEXT]
@@ -87,19 +79,21 @@
 
 //0,1,2,3,4,5 = 1,10,100,1k,10k,100k ohm
 <TURNOFF_STD()>
+[j,"rx@prg",1,NOALLOFF]
 [s,"prb_ref@prg",0,FH1]
 [s,"prb_ref@prg",1,FH2]
 [s,"prb_ref@prg",2,FH3]
 [s,"prb_ref@prg",3,FH4]
 [s,"prb_ref@prg",4,FH5]
 [s,"prb_ref@prg",5,FH6]
+[NOALLOFF]
 ><
 
 //0,1,2,3,4,5 = 1,10,100,1k,10k,100k ohm
 <TURNON_STD()>
 [w,0,0,rx]
 [j,"rx@prg",1,HASSTD]
-{TURNOFF_STD()}
+[j,"rx@prg",0,NOSTD]
 [HASSTD]
 [j,"rx@prg",0,NOSTD]
 [s,"prb_ref@prg",0,OH1,FH2,FH3,FH4,FH5,FH6]
@@ -108,8 +102,12 @@
 [s,"prb_ref@prg",3,OH4,FH2,FH3,FH1,FH5,FH6]
 [s,"prb_ref@prg",4,OH5,FH2,FH3,FH4,FH1,FH6]
 [s,"prb_ref@prg",5,OH6,FH2,FH3,FH4,FH5,FH1]
+[s,"rx@prg",1,FEXT]
+[j,0,0,NOEXT]
 [NOSTD]
-{USE_EXT()}
+[s,"rx@prg",0,OEXT]
+{TURNOFF_STD()}
+[NOEXT]
 ><
 <GETDEF_RSTD()>
 [v,"prb_ref@prg",0,DEF_RSTD,"u_1@prg"]
@@ -142,13 +140,14 @@
 
 //0,1,2,3,4,5,6 = 10mA, 3mA, 1mA, 0.1mA, 0.01mA, 0.005mA, 0.002mA
 <TURNTO_CURRENT()>
-[s,"prb_curr@prg",0,FKI2,FKI3,FKI4,FKI5,FKI6,FKI7,OKI1]
-[s,"prb_curr@prg",1,FKI1,FKI3,FKI4,FKI5,FKI6,FKI7,OKI2]
-[s,"prb_curr@prg",2,FKI2,FKI1,FKI4,FKI5,FKI6,FKI7,OKI3]
-[s,"prb_curr@prg",3,FKI2,FKI3,FKI1,FKI5,FKI6,FKI7,OKI4]
-[s,"prb_curr@prg",4,FKI2,FKI3,FKI4,FKI1,FKI6,FKI7,OKI5]
-[s,"prb_curr@prg",5,FKI2,FKI3,FKI4,FKI5,FKI1,FKI7,OKI6]
-[s,"prb_curr@prg",6,FKI2,FKI3,FKI4,FKI5,FKI6,FKI1,OKI7]
+[p,0,0,4]
+[s,"prb_curr@prg",0,OKI1,FKI2,FKI3,FKI4,FKI5,FKI6,FKI7]
+[s,"prb_curr@prg",1,OKI2,FKI1,FKI3,FKI4,FKI5,FKI6,FKI7]
+[s,"prb_curr@prg",2,OKI3,FKI2,FKI1,FKI4,FKI5,FKI6,FKI7]
+[s,"prb_curr@prg",3,OKI4,FKI2,FKI3,FKI1,FKI5,FKI6,FKI7]
+[s,"prb_curr@prg",4,OKI5,FKI2,FKI3,FKI4,FKI1,FKI6,FKI7]
+[s,"prb_curr@prg",5,OKI6,FKI2,FKI3,FKI4,FKI5,FKI1,FKI7]
+[s,"prb_curr@prg",6,OKI7,FKI2,FKI3,FKI4,FKI5,FKI6,FKI1]
 [s,"prb_sqrt@prg",0,FSQT]
 [s,"prb_sqrt@prg",1,OSQT]
 ><
@@ -165,13 +164,12 @@
 <AGAIN_RSTD_SIN_A(^1^)>
 {SHIFT_CHAN()}
 {TURNON_STD()}
-//{TURNTO_CURRENT()}
 {TURNOFF_EXT()}
 [p,0,0,"T_TIME@prg"]
 {SINGLE_VTEST(VSTD1)}
 
 {TURNON_EXT()}
-//{TURNOFF_STD()}
+{TURNOFF_STD()}
 [p,0,0,"T_TIME@prg"]
 {SINGLE_VTEST(VEXT1)}
 
@@ -204,14 +202,14 @@
 <RSTD_SIN_A(^1^)>
 {SHIFT_CHAN()}
 {TURNON_STD()}
-[s,0,0,OKTT]
 {TURNTO_CURRENT()}
+[s,0,0,OKTT]
 {TURNOFF_EXT()}
 [p,0,0,"T_TIME@prg"]
 {SINGLE_VTEST(VSTD1)}
 
 {TURNON_EXT()}
-//{TURNOFF_STD()}
+{TURNOFF_STD()}
 [p,0,0,"T_TIME@prg"]
 {SINGLE_VTEST(VEXT1)}
 
@@ -248,7 +246,7 @@
 {SINGLE_VTEST(VSTD3)}
 
 {TURNON_EXT()}
-//{TURNOFF_STD()}
+{TURNOFF_STD()}
 [p,0,0,"T_TIME@prg"]
 {SINGLE_VTEST(VEXT2)}
 
@@ -328,17 +326,33 @@
 {setrange()}
 [INITDONE]
 
-[j,prb_ref@prg,last_ref@prg,NORST]
+[j,"prb_ref@prg","last_ref@prg",NORST]
 [r,0,0,nothing]
 {nav_init()}
 {nav_slowmode()}
 {nav_aflton()}
 {setrange()}
-[v,0,0,last_ref,prb_ref@prg]
+[v,0,0,last_ref,"prb_ref@prg"]
 [NORST]
+[j,"PTR@prg",0,DOFIRST]
+[v,0,0,status,切换到通道"chid@prg"测量]
+[v,"flt_speed@prg",0,T_TIME,4]
+[v,"flt_speed@prg",0,I_TIME,4]
+[v,"flt_speed@prg",1,T_TIME,8]
+[v,"flt_speed@prg",1,I_TIME,8]
+[j,"lastch@prg","chid@prg",JUSTAGAIN]
+{RSTD_SIN_A(OUTPUT)}
+[j,0,0,AGAIN_END]
+[JUSTAGAIN]
+{AGAIN_RSTD_SIN_A(OUTPUT)}
+[AGAIN_END]
+[p,0,0,1]
+[j,0,0,ENDBORE]
+[DOFIRST]
 [c,0,0,i,PTR,1]
 {RSTD_SIN_A(OUTPUT)}
 [p,0,0,1]
+[ENDBORE]
 ><
 
 <thmo_test()>
@@ -353,19 +367,6 @@
 {nav_read()}
 [t,0,0,OUTPUT]
 [p,0,0,1]
-><
-<bore_again()>
-[v,0,0,status,切换到通道"chid@prg"测量]
-[v,"flt_speed@prg",0,T_TIME,8]
-[v,"flt_speed@prg",0,I_TIME,8]
-[v,"flt_speed@prg",1,T_TIME,16]
-[v,"flt_speed@prg",1,I_TIME,16]
-[j,"lastch@prg","chid@prg",JUSTAGAIN]
-{RSTD_SIN_A(OUTPUT)}
-[j,0,0,AGAIN_END]
-[JUSTAGAIN]
-{AGAIN_RSTD_SIN_A(OUTPUT)}
-[AGAIN_END]
 ><
 
 //internal calibration ^1^ return variable name
@@ -426,26 +427,36 @@
 
 <syscalib1()>
 [v,0,0,prb_ref,0]
+[v,0,0,prb_curr,0]
+[v,0,0,prb_sqrt,1]
 [v,0,0,status,开始校准1欧姆内标准]
 {syscaliball(SYSRES1)}
 ><
 <syscalib10()>
 [v,0,0,prb_ref,1]
+[v,0,0,prb_curr,0]
+[v,0,0,prb_sqrt,0]
 [v,0,0,status,开始校准10欧姆内标准]
 {syscaliball(SYSRES10)}
 ><
 <syscalib100()>
 [v,0,0,prb_ref,2]
+[v,0,0,prb_curr,0]
+[v,0,0,prb_sqrt,0]
 [v,0,0,status,开始校准100欧姆内标准]
 {syscaliball(SYSRES100)}
 ><
 <syscalib1k()>
 [v,0,0,prb_ref,3]
+[v,0,0,prb_curr,2]
+[v,0,0,prb_sqrt,0]
 [v,0,0,status,开始校准1K欧姆内标准]
 {syscaliball(SYSRES1K)}
 ><
 <syscalib10k()>
 [v,0,0,prb_ref,4]
+[v,0,0,prb_curr,3]
+[v,0,0,prb_sqrt,0]
 [v,0,0,status,开始校准10K欧姆内标准]
 {syscaliball(SYSRES10K)}
 ><
