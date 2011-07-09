@@ -21,13 +21,11 @@ CFilterDialog::CFilterDialog(CWnd* pParent /*=NULL*/)
 	: CDialog(CFilterDialog::IDD, pParent)
 {
 	//{{AFX_DATA_INIT(CFilterDialog)
-	m_average = _T("");
 	m_integral = 0;
 	m_interval = 0;
 	m_name = _T("");
 	m_response = 0;
 	m_thresh = 0.0;
-	m_speed = _T("");
 	//}}AFX_DATA_INIT
 }
 
@@ -36,8 +34,6 @@ void CFilterDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CFilterDialog)
-	DDX_CBString(pDX, IDC_FLT_CBAVG, m_average);
-	DDX_CBString(pDX, IDC_FLT_SPEED, m_speed);
 	DDX_Text(pDX, IDC_FLT_INTEGRAL, m_integral);
 	DDV_MinMaxInt(pDX, m_integral, 0, 100);
 	DDX_Text(pDX, IDC_FLT_INTERVAL, m_interval);

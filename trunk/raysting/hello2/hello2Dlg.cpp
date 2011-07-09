@@ -352,7 +352,11 @@ void CHello2Dlg::OnBtnRun()
 		
 		SendCmd(CMD_ABORT);
 	SendCmd(CMD_PAUSE);
-		m_graph.iBufMax = m_runcount;
+		
+	m_graph.iBufMax = m_runcount;
+		if(m_graph.iBufMax > BUF_MAX_DEFAULT)
+			m_graph.iBufMax = BUF_MAX_DEFAULT;
+		
 		LoadCurrentView();
 
 		CString def = CRunitemDialog::GetSingleSetting(SYS_DEFINFO,DEFAULT_RES);

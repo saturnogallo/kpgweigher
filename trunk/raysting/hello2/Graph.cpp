@@ -31,7 +31,7 @@ static double POS2VAL(double vup,int pup,double vrange,int prange,int val){
 	double dd =  (vup-(pup-val)*vrange/(double)prange);
 	return dd;
 }
-#define BUF_MAX_DEFAULT	30
+
 /////////////////////////////////////////////////////////////////////////////
 // CGraph
 CGraph::CGraph()
@@ -100,7 +100,6 @@ void CGraph::UpdateBaseRange(CList<double,double> *data, double &base,double &ra
 {
 	int num;
 	num = data->GetCount();
-	num = min(iBufMax,data->GetCount());
 	base = 0;
 	range = 0;
 	if(num == 0)
@@ -108,10 +107,18 @@ void CGraph::UpdateBaseRange(CList<double,double> *data, double &base,double &ra
 	
 	POSITION pos;
 	pos = data->GetHeadPosition();
-	base = 0;
 
+	int j=data->GetCount();
+	while(j > BUF_MAX_DEFAULT)
+	{
+		data->GetNext(pos);
+		j--;
+	}
+	base = 0;
+	num = 0;
 	do{
 		base = base + data->GetAt(pos);
+		num++;
 		if(pos == data->GetTailPosition())
 			break;
 		data->GetNext(pos);
@@ -120,6 +127,14 @@ void CGraph::UpdateBaseRange(CList<double,double> *data, double &base,double &ra
 	base = base/num;
 	
 	pos = data->GetHeadPosition();
+
+	j=data->GetCount();
+	while(j > BUF_MAX_DEFAULT)
+	{
+		data->GetNext(pos);
+		j--;
+	}
+
 	range = 0;
 
 	do{
@@ -347,9 +362,14 @@ void CGraph::DrawSeries(CDC* pDC,CList<double,double> *data,double base,double r
 	orgpt= axisRect.TopLeft()+CPoint(SHIFTTICK, axisRect.Height()/2);  
 	
 	pos = data->GetHeadPosition();
-	startpos = pos;
+	int j=data->GetCount();
+	while(j > BUF_MAX_DEFAULT)
+	{
+		data->GetNext(pos);
+		j--;
+	}
 	int x = 0;
-
+	startpos = pos;
 	do{
 		lastpt = orgpt + CPoint((axisRect.Width())*x/iBufMax,\
 			static_cast<int>((base - data->GetAt(pos))*maxRect.Height()/(2*range)));
@@ -372,9 +392,14 @@ void CGraph::DrawSeries(CDC* pDC,CList<double,double> *data,double base,double r
 	orgpt= axisRect.TopLeft()+CPoint(SHIFTTICK, axisRect.Height()/2);  
 	
 	pos = data->GetHeadPosition();
-	startpos = pos;
+	j=data->GetCount();
+	while(j > BUF_MAX_DEFAULT)
+	{
+		data->GetNext(pos);
+		j--;
+	}
 	x = 0;
-
+	startpos = pos;
 	do{
 		lastpt = orgpt + CPoint((axisRect.Width())*x/iBufMax,\
 			static_cast<int>((base - data->GetAt(pos))*maxRect.Height()/(2*range)));
