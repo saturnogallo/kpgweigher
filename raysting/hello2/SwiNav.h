@@ -7,7 +7,7 @@
 #include "TCHAR.h"
 #include "math.h"
 
-static const char* swi_reset = "OH3,FH1,FH2,FH4,FH5,FH6,OKI3,FKI1,FKI2,FKI4,FKI5,FKI6,FKI7,OHX1,FSQT,FEXT,FKTT,FCH1,OCH2";
+static const char* swi_reset = "OKI3,FKI1,FKI2,FKI4,FKI5,FKI6,FKI7,OH3,FH1,FH2,FH4,FH5,FH6,OHX1,FSQT,FEXT,FKTT,FCH1,OCH2";
 typedef struct _SWI_VAR{
 	bool rx;
 	bool rs;
@@ -25,20 +25,20 @@ typedef struct _RELAY{
 }RELAY;
 
 static RELAY switable[] = {
-{"KI2",'s',"ki",0,0x32,0x3b},
-{"KI1",'s',"ki",0,0x21,0x28},
-{"KI3",'s',"ki",1,0x3a,0x33},
-{"KI4",'s',"ki",0,0x02,0x0b},
-{"KI6",'s',"ki",0,0x25,0x2c},
-{"KI5",'s',"ki",0,0x24,0x2d},
-{"KI7",'s',"ki",0,0x2e,0x27},
+{"KI1",'n',"ki",0,0x21,0x28},
+{"KI2",'n',"ki",0,0x32,0x3b},
+{"KI3",'n',"ki",1,0x3a,0x33},
+{"KI4",'n',"ki",0,0x02,0x0b},
+{"KI6",'n',"ki",0,0x25,0x2c},
+{"KI5",'n',"ki",0,0x24,0x2d},
+{"KI7",'n',"ki",0,0x2e,0x27},
 
 
-{"H1",'s',"h",0, 0x20,0x29},
-{"H2",'s',"h",0, 0x42,0x43},
-{"H3",'s',"h",1, 0x16,0x1f},
-{"H4",'s',"h",0, 0x40,0x41},
-{"H5",'s',"h",0, 0x00,0x09},
+{"H1",'n',"h",0, 0x20,0x29},
+{"H2",'n',"h",0, 0x42,0x43},
+{"H3",'n',"h",1, 0x16,0x1f},
+{"H4",'n',"h",0, 0x40,0x41},
+{"H5",'n',"h",0, 0x00,0x09},
 //{"H6",'n',"h",0, 0xff,0xff},
 
 {"CH1",'n',"ch",1, 0x35,0x3c},

@@ -21,8 +21,6 @@ public:
 // Dialog Data
 	//{{AFX_DATA(CFilterDialog)
 	enum { IDD = IDD_FILTER2_CFG };
-	CString	m_average;
-	CString m_speed;
 	int		m_integral;
 	int		m_interval;
 	CString	m_name;

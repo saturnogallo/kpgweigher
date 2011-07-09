@@ -21,12 +21,9 @@ CProbeDialog::CProbeDialog(CWnd* pParent /*=NULL*/)
 {
 	//{{AFX_DATA_INIT(CProbeDialog)
 	m_coef = _T("");
-	m_convert = _T("");
 	m_3wire = FALSE;
 	m_name = _T("");
-	m_current = _T("");
 	m_serial = _T("");
-	m_ref = _T("");
 	m_sqrtcurr = FALSE;
 	//}}AFX_DATA_INIT
 }
@@ -37,13 +34,10 @@ void CProbeDialog::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CProbeDialog)
 	DDX_Text(pDX, IDC_PRB_COEF, m_coef);
-	DDX_CBString(pDX, IDC_PRB_CONVERT, m_convert);
 	DDX_Check(pDX, IDC_PRB_3WIRE, m_3wire);
 	DDX_LBString(pDX, IDC_PRB_LIST, m_name);
-	DDX_CBString(pDX, IDC_PRB_RCURR, m_current);
 	DDX_Text(pDX, IDC_PRB_SERIAL, m_serial);
 	DDV_MaxChars(pDX, m_serial, MAX_NAME_CHARS);
-	DDX_CBString(pDX, IDC_PRB_REFERENCE, m_ref);
 	DDX_Check(pDX, IDC_PRB_SQRTCURR, m_sqrtcurr);
 	//}}AFX_DATA_MAP
 }
@@ -93,9 +87,9 @@ void CProbeDialog::OnSelchangePrbList()
 	// TODO: Add your control notification handler code here
 	UpdateData();
 	m_cfg = m_setting.SelectParm((LPCTSTR)m_name);
-	MyWriteProfileString(_T("cfg"),_T("cur_probe"),m_name);
+//	msg.Format(_T("%s,%i,%i"),m_name,m_cfg.iCurrent,m_cfg.iReference);
+	UpdateData(FALSE);
 	CFGToSetting();
-	UpdateData(FALSE);	
 }
 
 int CProbeDialog::OnCreate(LPCREATESTRUCT lpCreateStruct) 

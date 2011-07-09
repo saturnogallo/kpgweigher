@@ -49,12 +49,9 @@ public:
 	//{{AFX_DATA(CProbeDialog)
 	enum { IDD = IDD_PROBE2_CFG };
 	CString	m_coef;
-	CString	m_convert;
 	BOOL	m_3wire;
 	CString	m_name;
-	CString	m_current;
 	CString	m_serial;
-	CString	m_ref;
 	BOOL	m_sqrtcurr;
 	//}}AFX_DATA
 

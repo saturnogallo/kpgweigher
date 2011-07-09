@@ -9,6 +9,7 @@
 /////////////////////////////////////////////////////////////////////////////
 // CGraph window
 #include "Afxtempl.h"
+#define BUF_MAX_DEFAULT	30
 class CGraph : public CStatic
 {
 // Construction

@@ -74,11 +74,11 @@ protected:
 		swprintf(m_cfg.sTitle,_T("%s"),m_name);
   };
 	void CFGToSetting(){
-		m_1ohm = m_cfg.d_1ohm;
-		m_10ohm = m_cfg.d_10ohm;
-		m_100ohm = m_cfg.d_100ohm;
-		m_1kohm = m_cfg.d_1kohm;
-		m_10kohm = m_cfg.d_10kohm;
+		m_1ohm = floor(m_cfg.d_1ohm* 1e7+0.5) / 1e7;
+		m_10ohm = floor(m_cfg.d_10ohm* 1e6+0.5) / 1e6;
+		m_100ohm = floor(m_cfg.d_100ohm* 1e5+0.5) / 1e5;
+		m_1kohm = floor(m_cfg.d_1kohm* 1e4+0.5) / 1e4;
+		m_10kohm = floor(m_cfg.d_10kohm* 1e3+0.5) / 1e3;
 		m_alpha1ohm = m_cfg.d_alpha1;
 		m_alpha10ohm = m_cfg.d_alpha10;
 		m_alpha100ohm = m_cfg.d_alpha100;
