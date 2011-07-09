@@ -46,6 +46,7 @@ void l_update_buffer(char *data,int length,DWORD userdata)
 				rl = switable[i];
 				if(a.Right(a.GetLength()-1).Compare(CString(rl.swiname)) == 0){
 					if(rl.type == 'n'){
+/*
 						if((rl.status == 1) && (a[0] == 'O')){
 							m_serial.SendData("UsUU",4);
 							m_serial.SendData(&rl.oaddr,1);
@@ -58,21 +59,21 @@ void l_update_buffer(char *data,int length,DWORD userdata)
 							m_serial.SendData("V",1);
 							Sleep(30);
 						}
-
+*/
 						if((a[0] == 'O') && (rl.oaddr != 0xff)){
 							m_serial.SendData("UsUU",4);
 							m_serial.SendData(&rl.oaddr,1);
 							m_serial.SendData("V",1);
-							Sleep(30);
 							switable[i].status = 1;
+							Sleep(30);
 						}
 
 						if((a[0] == 'F') && (rl.faddr != 0xff)){
 							m_serial.SendData("UsUU",4);
 							m_serial.SendData(&rl.faddr,1);
 							m_serial.SendData("V",1);
-							Sleep(30);
 							switable[i].status = 0;
+							Sleep(30);
 						}
 						break;
 					}
