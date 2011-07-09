@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  SJSERIAL                                                               07/09/2011 16:38:13 PAGE 1   
+C51 COMPILER V7.01  SJSERIAL                                                               07/09/2011 18:06:59 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE SJSERIAL
@@ -62,7 +62,7 @@ stmt level    source
   53          {
   54   1              if(spHead == spTail)
   55   1                      return FALSE;
-C51 COMPILER V7.01  SJSERIAL                                                               07/09/2011 16:38:13 PAGE 2   
+C51 COMPILER V7.01  SJSERIAL                                                               07/09/2011 18:06:59 PAGE 2   
 
   56   1              else 
   57   1                      return TRUE;

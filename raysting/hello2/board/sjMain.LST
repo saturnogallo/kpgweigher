@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 16:38:13 PAGE 1   
+C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 18:06:59 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
@@ -62,7 +62,7 @@ stmt level    source
   53                           55,  3 ,  1,   38,      34,  46,  42,  58,      56, 24,   //OHP 10-19 (pc addr)
   54                           255, 255,  37,  33,  45,   41,                                    //FHN 20-25  (pc addr)
   55                           255, 255,  36,  32,  44,   40,                    //OHN 26-31  (pc addr)
-C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 16:38:13 PAGE 2   
+C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 18:06:59 PAGE 2   
 
   56                           23,   21,  19,  17,  31,  255,                                    //FKN 32-37  (pc addr) ?(54)
   57                           22,   20,  18,  16,  30,  255,                    //OKN 38-42  (pc addr) ?(55)
@@ -126,7 +126,7 @@ stmt level    source
  115   1      
  116   1              exID = lut[SwiID];
  117   1              if(exID == 255)
-C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 16:38:13 PAGE 3   
+C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 18:06:59 PAGE 3   
 
  118   1                      return;
  119   1      
@@ -141,7 +141,7 @@ stmt level    source
  128          void swiReset()
  129          {
  130   1              unsigned char i;
- 131   1              for(i=0;i<LINIT;i++)
+ 131   1              for(i=0;i<sizeof(inittbl)/sizeof(unsigned char);i++)
  132   1              {
  133   2                      swiAction(inittbl[i]);
  134   2              }
@@ -190,7 +190,7 @@ stmt level    source
  177   1              IE = 0;//close int
  178   1      
  179   1              sjSerialInit();
-C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 16:38:13 PAGE 4   
+C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 18:06:59 PAGE 4   
 
  180   1              
  181   1      
@@ -254,7 +254,7 @@ stmt level    source
  239   7                                                      }
  240   6                                                      if(temp == QMARK)
  241   6                                                              continue;
-C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 16:38:13 PAGE 5   
+C51 COMPILER V7.01  SJMAIN                                                                 07/09/2011 18:06:59 PAGE 5   
 
  242   6                                                      swiAction(temp);
  243   6                                              }

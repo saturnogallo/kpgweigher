@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  UART                                                                   07/09/2011 16:38:13 PAGE 1   
+C51 COMPILER V7.01  UART                                                                   07/09/2011 18:06:59 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE UART
@@ -7,7 +7,7 @@ COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE UART.C OPTIMIZE(SIZE) BR
 
 stmt level    source
 
-   1          #include "reg52.h"
+   1          #include "AT89X52.h"
    2          // UART.C
    3          //
    4          // Generic software uart written in C, requiring a timer set to 3 times
@@ -62,12 +62,12 @@ stmt level    source
   53          extern void set_tx_pin_high();
   54          extern void timer_set(int baud_rate);
   55          extern void idle();
-C51 COMPILER V7.01  UART                                                                   07/09/2011 16:38:13 PAGE 2   
+C51 COMPILER V7.01  UART                                                                   07/09/2011 18:06:59 PAGE 2   
 
   56          
-  57          #define BAUD_RATE 9600//19200.0
+  57          #define BAUD_RATE 2400//19200.0
   58          
-  59          #define IN_BUF_SIZE 32
+  59          #define IN_BUF_SIZE 40
   60          
   61          #define TRUE 1
   62          #define FALSE 0
@@ -126,7 +126,7 @@ stmt level    source
  115   3                              if ( --timer_rx_ctr<=0 )
  116   3                              {
  117   4                                      flag_rx_waiting_for_stop_bit = FALSE;
-C51 COMPILER V7.01  UART                                                                   07/09/2011 16:38:13 PAGE 3   
+C51 COMPILER V7.01  UART                                                                   07/09/2011 18:06:59 PAGE 3   
 
  118   4                                      flag_rx_ready = FALSE;
  119   4                                      internal_rx_buffer &= 0xFF;
@@ -190,7 +190,7 @@ stmt level    source
  177   1              set_tx_pin_low();
  178   1      
  179   1      //  Sets the timer 1 to 3 times the baud rate(9600).(clock 11.0592M)
-C51 COMPILER V7.01  UART                                                                   07/09/2011 16:38:13 PAGE 4   
+C51 COMPILER V7.01  UART                                                                   07/09/2011 18:06:59 PAGE 4   
 
  180   1              //TH0 = 0xE0;//9600
  181   1              //TH0 = 0xC0;//4800
@@ -206,7 +206,7 @@ stmt level    source
  191          {
  192   1              char ch;
  193   1      
- 194   1              do
+ 194   1      //      do
  195   1              {
  196   2                      while ( qout==qin )
  197   2                      {
@@ -218,7 +218,7 @@ stmt level    source
  203   3                              qout = 0;
  204   3                      }
  205   2              }
- 206   1              while ( ch==0x0A || ch==0xC2 );
+ 206   1              //while ( ch==0x0A || ch==0xC2 );
  207   1              return( ch );
  208   1      }
  209          
@@ -254,17 +254,17 @@ stmt level    source
  239          {
  240                  flag_rx_off = TRUE;
  241          }
-C51 COMPILER V7.01  UART                                                                   07/09/2011 16:38:13 PAGE 5   
+C51 COMPILER V7.01  UART                                                                   07/09/2011 18:06:59 PAGE 5   
 
  242          */
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    348    ----
+   CODE SIZE        =    328    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =     49       1
+   DATA SIZE        =     57    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

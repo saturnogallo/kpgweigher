@@ -1,4 +1,4 @@
-#include "reg52.h"
+#include "AT89X52.h"
 // UART.C
 //
 // Generic software uart written in C, requiring a timer set to 3 times
@@ -54,9 +54,9 @@ extern void set_tx_pin_high();
 extern void timer_set(int baud_rate);
 extern void idle();
 
-#define BAUD_RATE 9600//19200.0
+#define BAUD_RATE 2400//19200.0
 
-#define IN_BUF_SIZE 32
+#define IN_BUF_SIZE 40
 
 #define TRUE 1
 #define FALSE 0
@@ -191,7 +191,7 @@ char iogetchar( void )
 {
 	char ch;
 
-	do
+//	do
 	{
 		while ( qout==qin )
 		{
@@ -203,7 +203,7 @@ char iogetchar( void )
 			qout = 0;
 		}
 	}
-	while ( ch==0x0A || ch==0xC2 );
+	//while ( ch==0x0A || ch==0xC2 );
 	return( ch );
 }
 

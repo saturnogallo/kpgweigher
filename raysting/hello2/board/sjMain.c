@@ -128,7 +128,7 @@ void swiAction(unsigned char SwiID)
 void swiReset()
 {
 	unsigned char i;
-	for(i=0;i<LINIT;i++)
+	for(i=0;i<sizeof(inittbl)/sizeof(unsigned char);i++)
 	{
 		swiAction(inittbl[i]);
 	}
