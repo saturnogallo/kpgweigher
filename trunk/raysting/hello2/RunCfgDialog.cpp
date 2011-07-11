@@ -91,7 +91,7 @@ BOOL CRunCfgDialog::OnInitDialog()
 	}
 	m_timestab.InsertItem(i,_T("Á¬Ðø"));
 	CSpinButtonCtrl *spin = (CSpinButtonCtrl*)GetDlgItem(IDC_SPIN1);
-	spin->SetRange(1,100);
+	spin->SetRange(0,100);
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
@@ -101,8 +101,8 @@ void CRunCfgDialog::OnDeltaposSpin1(NMHDR* pNMHDR, LRESULT* pResult)
 	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
 	// TODO: Add your control notification handler code here
 	m_times -= pNMUpDown->iDelta;
-	if(m_times <=0) m_times = 1;
-	if(m_times > 100) m_times = 100;
+	if(m_times < 0) m_times = 0;
+	if(m_times > 604800) m_times = 604800;
 
 	UpdateData(FALSE);
 	UPDATE_TIME;	

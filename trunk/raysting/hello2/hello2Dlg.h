@@ -16,7 +16,7 @@
 #include "CoefDialog.h"
 /////////////////////////////////////////////////////////////////////////////
 // CHello2Dlg ¶Ô»°¿ò
-#define RWIN_MAX	4
+#define RWIN_MAX	2
 #define CFGTYPE_NONE	0
 #define CFGTYPE_BORE	1
 #define CFGTYPE_THMO	2
@@ -91,6 +91,7 @@ protected:
 	afx_msg void OnLbnDblclkList4();
 	afx_msg void OnStnClickedRunGraph();
 	afx_msg void OnStnDblclickRunGraph();
+	afx_msg void OnBtnDisplay();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 public:
