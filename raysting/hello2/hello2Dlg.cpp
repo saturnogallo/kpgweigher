@@ -264,7 +264,7 @@ void CHello2Dlg::OnTimer(UINT nIDEvent)
 		beidle = true;
 		return;
 	}
-
+	
 	SendCmd(CMD_PAUSE);
 	if(!cur_prg->IsDone())
 	{
@@ -329,7 +329,10 @@ void CHello2Dlg::SendCmd(char cmd)
 		Sleep(10);
 	}
 }
-
+void CHello2Dlg::OnBtnDisplay() 
+{
+	OnStnDblclickRunGraph();
+}
 void CHello2Dlg::OnBtnRun() 
 {
 	// TODO: Add your control notification handler code here
@@ -356,6 +359,8 @@ void CHello2Dlg::OnBtnRun()
 	m_graph.iBufMax = m_runcount;
 		if(m_graph.iBufMax > BUF_MAX_DEFAULT)
 			m_graph.iBufMax = BUF_MAX_DEFAULT;
+	if(m_runcount <= 0)
+		m_graph.iBufMax = BUF_MAX_DEFAULT;
 		
 		LoadCurrentView();
 
@@ -525,6 +530,8 @@ void CHello2Dlg::Refresh()
 				break;
 			data->GetNext(pos);
 		}while(1);
+		if(m_history.GetCount() > 0)
+			m_history.SetCaretIndex(m_history.GetCount()-1,0);
 	}
 }
 void CHello2Dlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
@@ -619,7 +626,7 @@ void CHello2Dlg::OnLbnDblclkList3()
   
   CPoint pt;
   GetCursorPos(&pt);
-  
+  SetForegroundWindow();
   pM->TrackPopupMenu(TPM_LEFTALIGN,pt.x,pt.y,this);
   return;
 
@@ -817,7 +824,7 @@ void CHello2Dlg::OnStnDblclickRunGraph()
 	// TODO: 在此添加控件通知处理程序代码
   CMenu   mainmenu;    
   mainmenu.LoadMenu(IDR_SELPROBE);
-
+  m_graph.Invalidate();
   CMenu *pM = mainmenu.GetSubMenu(0);
   //remove the existing menu
   CString   str ;  
@@ -836,12 +843,10 @@ void CHello2Dlg::OnStnDblclickRunGraph()
   }
   m_cmdbase = ID_32772;
 
-  CRect rect;
-  m_chlist.GetClientRect(&rect);
   
   CPoint pt;
   GetCursorPos(&pt);
-
+	SetForegroundWindow();
     pM->TrackPopupMenu(TPM_LEFTALIGN,pt.x,pt.y,this);
 	return;
 /*  CString tt;
