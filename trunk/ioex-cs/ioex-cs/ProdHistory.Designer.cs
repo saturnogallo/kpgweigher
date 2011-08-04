@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ProdHistory));
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.mc_starttime = new System.Windows.Forms.MonthCalendar();
             this.mc_endtime = new System.Windows.Forms.MonthCalendar();
@@ -40,9 +41,12 @@
             this.lbl_prod = new System.Windows.Forms.Label();
             this.lb_prod = new System.Windows.Forms.ListBox();
             this.lbl_summary = new System.Windows.Forms.Label();
-            this.btnRet = new System.Windows.Forms.Button();
             this.btnClr = new System.Windows.Forms.Button();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.pictureBox2 = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             this.SuspendLayout();
             // 
             // dataGridView1
@@ -169,35 +173,46 @@
             this.lbl_summary.AutoSize = true;
             this.lbl_summary.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbl_summary.ForeColor = System.Drawing.Color.DarkGoldenrod;
-            this.lbl_summary.Location = new System.Drawing.Point(166, 705);
+            this.lbl_summary.Location = new System.Drawing.Point(12, 682);
             this.lbl_summary.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.lbl_summary.Name = "lbl_summary";
-            this.lbl_summary.Size = new System.Drawing.Size(0, 24);
+            this.lbl_summary.Size = new System.Drawing.Size(30, 24);
             this.lbl_summary.TabIndex = 11;
-            // 
-            // btnRet
-            // 
-            this.btnRet.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnRet.Location = new System.Drawing.Point(885, 705);
-            this.btnRet.Margin = new System.Windows.Forms.Padding(2);
-            this.btnRet.Name = "btnRet";
-            this.btnRet.Size = new System.Drawing.Size(128, 52);
-            this.btnRet.TabIndex = 12;
-            this.btnRet.Text = "button1";
-            this.btnRet.UseVisualStyleBackColor = true;
-            this.btnRet.Click += new System.EventHandler(this.btnRet_Click);
+            this.lbl_summary.Text = "    ";
             // 
             // btnClr
             // 
             this.btnClr.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnClr.Location = new System.Drawing.Point(9, 705);
+            this.btnClr.Location = new System.Drawing.Point(9, 717);
             this.btnClr.Margin = new System.Windows.Forms.Padding(2);
             this.btnClr.Name = "btnClr";
-            this.btnClr.Size = new System.Drawing.Size(202, 52);
+            this.btnClr.Size = new System.Drawing.Size(157, 52);
             this.btnClr.TabIndex = 13;
             this.btnClr.Text = "button1";
             this.btnClr.UseVisualStyleBackColor = true;
             this.btnClr.Click += new System.EventHandler(this.btnClr_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(696, 705);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(123, 51);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 14;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
+            // 
+            // pictureBox2
+            // 
+            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.pictureBox2.Location = new System.Drawing.Point(858, 705);
+            this.pictureBox2.Name = "pictureBox2";
+            this.pictureBox2.Size = new System.Drawing.Size(145, 51);
+            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox2.TabIndex = 15;
+            this.pictureBox2.TabStop = false;
+            this.pictureBox2.Click += new System.EventHandler(this.pictureBox2_Click);
             // 
             // ProdHistory
             // 
@@ -205,8 +220,9 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.LightGray;
             this.ClientSize = new System.Drawing.Size(1024, 768);
+            this.Controls.Add(this.pictureBox2);
+            this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.btnClr);
-            this.Controls.Add(this.btnRet);
             this.Controls.Add(this.lbl_summary);
             this.Controls.Add(this.lbl_prod);
             this.Controls.Add(this.lb_prod);
@@ -226,6 +242,8 @@
             this.TopMost = true;
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -245,7 +263,8 @@
         private System.Windows.Forms.Label lbl_prod;
         private System.Windows.Forms.ListBox lb_prod;
         private System.Windows.Forms.Label lbl_summary;
-        private System.Windows.Forms.Button btnRet;
         private System.Windows.Forms.Button btnClr;
+        private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.PictureBox pictureBox2;
     }
 }

@@ -55,7 +55,8 @@ namespace ioex_cs
         
         public App()
         {
-
+            if (Environment.CommandLine.IndexOf("/debug") > 0)
+                NodeAgent.IsDebug = true;
             StringResource.SetLanguage();
             app_cfg = new XmlConfig(ProdNum.baseDir +"\\app_config.xml");
             app_cfg.LoadConfigFromFile();

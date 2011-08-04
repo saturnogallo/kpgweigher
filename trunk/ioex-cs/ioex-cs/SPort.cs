@@ -40,7 +40,7 @@ namespace ioex_cs
         public FrameBuffer()
         {
             flag = RF_STATE.RF_IDLE;
-            data = new byte[16];
+            data = new byte[32];
             bufcnt = 0;
         }
         public UInt32 generate_read_frame(byte[] buf,byte[] readregs,int offset, byte len)
@@ -118,7 +118,14 @@ namespace ioex_cs
             }
             if (flag == RF_STATE.RF_DATALEN)
             {
-                data[bufcnt] = c;
+                try
+                {
+                    data[bufcnt] = c;
+                }
+                catch
+                {
+                    MessageBox.Show("so weird " + bufcnt.ToString() + ">" + data.Length);
+                }
                 bufcnt++;
                 if (datalen <= bufcnt)
                 {
@@ -128,13 +135,17 @@ namespace ioex_cs
             }
             if (flag == RF_STATE.RF_CMD)
             {
-                if (c > 0) //valid frame
+                if ((c > 0) && (c < data.Length)) //valid frame
                 {
                     bufcnt = 0;
                     datalen = c;
                     flag = RF_STATE.RF_DATALEN;
-                    return;
                 }
+                else
+                {
+                    flag = RF_STATE.RF_IDLE;
+                }
+                return;
             }
             if (flag == RF_STATE.RF_ADDRTO)
             {

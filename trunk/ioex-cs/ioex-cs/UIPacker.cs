@@ -324,19 +324,31 @@ namespace ioex_cs
             foreach (byte n in weight_nodes)
             {
                 sNode.RemoveAll();
-                agent.GetNodeElement(n,ref sNode);
-                nodes_config[n].AddConfig(all_conf.cfg_name, sNode);
-                nodes_config[n].SaveConfigToFile();
+                try
+                {
+                    agent.GetNodeElement(n, ref sNode);
+                    nodes_config[n].AddConfig(all_conf.cfg_name, sNode);
+                    nodes_config[n].SaveConfigToFile();
+                }
+                catch
+                {
+                }
             }
             sNode.RemoveAll();
-            agent.GetNodeElement(vib_addr, ref sNode);
-            nodes_config[vib_addr].AddConfig(all_conf.cfg_name, sNode);
-            nodes_config[vib_addr].SaveConfigToFile();
-            if (bot_addr != vib_addr)
+            try
             {
-                agent.GetNodeElement(bot_addr, ref sNode);
-                nodes_config[bot_addr].AddConfig(all_conf.cfg_name, sNode);
-                nodes_config[bot_addr].SaveConfigToFile();
+                agent.GetNodeElement(vib_addr, ref sNode);
+                nodes_config[vib_addr].AddConfig(all_conf.cfg_name, sNode);
+                nodes_config[vib_addr].SaveConfigToFile();
+                if (bot_addr != vib_addr)
+                {
+                    agent.GetNodeElement(bot_addr, ref sNode);
+                    nodes_config[bot_addr].AddConfig(all_conf.cfg_name, sNode);
+                    nodes_config[bot_addr].SaveConfigToFile();
+                }
+            }
+            catch
+            {
             }
         }
 
