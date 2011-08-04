@@ -453,11 +453,11 @@
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
-                                <PathFigure StartPoint="29.09,84.89" IsClosed="True">
-                                    <LineSegment Point="4.37,8.8"/>
-                                    <ArcSegment Point="115.62,8.8" Size="180,180" SweepDirection="Clockwise"/>
-                                    <LineSegment Point="90.90,84.89"/>
-                                    <ArcSegment Point="29.09,84.89" Size="120,120" SweepDirection="Counterclockwise"/>
+                                <PathFigure StartPoint="37.74,82.50" IsClosed="True">
+                                    <LineSegment Point="19.94,4.51"/>
+                                    <ArcSegment Point="100.05,4.51" Size="180,180" SweepDirection="Clockwise"/>
+                                    <LineSegment Point="82.25,82.50"/>
+                                    <ArcSegment Point="37.74,82.50" Size="120,120" SweepDirection="Counterclockwise"/>
                                 </PathFigure>
                             </PathGeometry.Figures>
                         </PathGeometry>
@@ -472,11 +472,11 @@
                     <Path.Data>
                         <PathGeometry>
                             <PathGeometry.Figures>
-                                <PathFigure StartPoint="29.09,84.89" IsClosed="True">
-                                    <LineSegment Point="4.37,8.8"/>
-                                    <ArcSegment Point="115.62,8.8" Size="180,180" SweepDirection="Clockwise"/>
-                                    <LineSegment Point="90.90,84.89"/>
-                                    <ArcSegment Point="29.09,84.89" Size="120,120" SweepDirection="Counterclockwise"/>
+                                <PathFigure StartPoint="37.74,82.50" IsClosed="True">
+                                    <LineSegment Point="19.94,4.51"/>
+                                    <ArcSegment Point="100.05,4.51" Size="180,180" SweepDirection="Clockwise"/>
+                                    <LineSegment Point="82.25,82.50"/>
+                                    <ArcSegment Point="37.74,82.50" Size="120,120" SweepDirection="Counterclockwise"/>
                                 </PathFigure>
                             </PathGeometry.Figures>
                         </PathGeometry>

@@ -39,13 +39,13 @@ namespace ioex_cs
         {
             InitializeComponent();
             this.BackColor = Color.FromArgb(0xFF, 0xEE, 0xF2, 0xFB);
-            btnRet.Text = StringResource.str("return");
             btnClr.Text = StringResource.str("clearpack");
             lb_oper.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             lb_prod.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             lb_prodno.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             mc_starttime.DateChanged += new DateRangeEventHandler(UpdateDataGrid);
             mc_endtime.DateChanged += new DateRangeEventHandler(UpdateDataGrid);
+            
             lbl_starttime.Text = StringResource.str("start_date");
             lbl_endtime.Text = StringResource.str("end_date");
             lbl_oper.Text = StringResource.str("operator");
@@ -176,6 +176,20 @@ namespace ioex_cs
                 App p = System.Windows.Application.Current as App;
                 return p.packers[0];
             }
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+            Hide();
+            App p = System.Windows.Application.Current as App;
+            p.SwitchTo("configmenu");
+        }
+
+        private void pictureBox2_Click(object sender, EventArgs e)
+        {
+            Hide();
+            App p = System.Windows.Application.Current as App;
+            p.SwitchTo("runmode");
         }
     }
 }

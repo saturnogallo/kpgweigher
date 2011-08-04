@@ -83,7 +83,7 @@
     <s:String x:Key="loading">Loading</s:String>
     <s:String x:Key="modifying">Modifying setting</s:String>
     <s:String x:Key="downloading">Downloading</s:String>
-    <s:String x:Key="clearpack">Reset total pack number</s:String>
+    <s:String x:Key="clearpack">Reset pack number</s:String>
     <s:String x:Key="done">Operation done</s:String>
     <s:String x:Key="login">Log in</s:String>
     <s:String x:Key="help">Help</s:String>

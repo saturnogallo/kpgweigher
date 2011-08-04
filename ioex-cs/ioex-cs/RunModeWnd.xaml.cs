@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using System.Diagnostics;
+using System.IO;
 namespace ioex_cs
 {
     /// <summary>
@@ -366,9 +367,7 @@ namespace ioex_cs
         {
             App p = currentApp();
             if (curr_packer.status == PackerStatus.RUNNING)
-            {
                 return;
-            }
             while (lastcall != "")
                 this.uiTimer_Tick(null, null);
             p.SwitchTo("history");
@@ -379,9 +378,8 @@ namespace ioex_cs
         {
             App p = currentApp();
             if (curr_packer.status == PackerStatus.RUNNING)
-            {
                 return;
-            }
+
             (Application.Current as App).kbdwnd.Init(StringResource.str("enter_singlemode_pwd"), "singlemode", true, KbdData);
             
         }
@@ -427,7 +425,10 @@ namespace ioex_cs
                 this.prd_desc.Content = pack.curr_cfg.product_desc.ToString();
                 Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
                 //load the corresponding picture.
-                (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
+                if(File.Exists(ProdNum.baseDir + "\\prodpic\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"))
+                    (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
+                else
+                    (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\1.jpg"));
 
             }
             if (param.IndexOf("wei_node") == 0)
@@ -482,15 +483,18 @@ namespace ioex_cs
         }
         private void grp_target_click(object sender, RoutedEventArgs e)
         {
-            grp_reg("run_target");
+            if (curr_packer.status != PackerStatus.RUNNING)
+                grp_reg("run_target");
         }
         private void grp_uvar_click(object sender, RoutedEventArgs e)
         {
-            grp_reg("run_uvar");
+            if (curr_packer.status != PackerStatus.RUNNING)
+                grp_reg("run_uvar");
         }
         private void grp_dvar_click(object sender, RoutedEventArgs e)
         {
-            grp_reg("run_dvar");
+            if (curr_packer.status != PackerStatus.RUNNING)
+                grp_reg("run_dvar");
         }
         private void weibucket_Click(object sender, RoutedEventArgs e)
         {
@@ -563,6 +567,9 @@ namespace ioex_cs
 
         private void prd_no_Click(object sender, RoutedEventArgs e)
         {
+            if (curr_packer.status == PackerStatus.RUNNING)
+                return;
+
             App p = Application.Current as App;
             if (curr_packer.status != PackerStatus.RUNNING)
                 p.prodnum.Init(prd_no_selected,false);
@@ -592,8 +599,10 @@ namespace ioex_cs
 
         private void prd_no_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+
             App p = Application.Current as App;
-            p.prodnum.Init(prd_no_selected,false);
+            if (curr_packer.status != PackerStatus.RUNNING)
+                p.prodnum.Init(prd_no_selected,false);
         }
         private void UpdateAlertWindow(bool visible)
         {

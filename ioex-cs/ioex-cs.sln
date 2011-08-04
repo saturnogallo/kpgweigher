@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "testonly", "testonly\teston
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ioex-setup-10t", "ioex-setup\ioex-setup.vdproj", "{A7CC8867-E7FD-42B1-8992-63500ACAC912}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ioex-setup-14t", "ioex-setup-14t\ioex-setup-14t.vdproj", "{539F6454-F355-435E-962F-C35294D97BBC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{A7CC8867-E7FD-42B1-8992-63500ACAC912}.Debug14|Any CPU.ActiveCfg = Debug
 		{A7CC8867-E7FD-42B1-8992-63500ACAC912}.Release|Any CPU.ActiveCfg = Release
 		{A7CC8867-E7FD-42B1-8992-63500ACAC912}.Release14|Any CPU.ActiveCfg = Release
+		{539F6454-F355-435E-962F-C35294D97BBC}.Debug|Any CPU.ActiveCfg = Debug
+		{539F6454-F355-435E-962F-C35294D97BBC}.Debug14|Any CPU.ActiveCfg = Debug
+		{539F6454-F355-435E-962F-C35294D97BBC}.Release|Any CPU.ActiveCfg = Release
+		{539F6454-F355-435E-962F-C35294D97BBC}.Release14|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

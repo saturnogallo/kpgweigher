@@ -165,6 +165,7 @@ namespace ioex_cs
         }
         public static void logTimeStick(TimeSpan ts1,string step)
         {
+            return;
             TimeSpan ts2 = new TimeSpan(DateTime.Now.Ticks);
             TimeSpan ts = ts2.Subtract(ts1).Duration();
             Debug.WriteLine(step+ts.Milliseconds + "ms");
@@ -505,7 +506,7 @@ namespace ioex_cs
         
         internal List<SPort> allports; //list of all serial ports
         private Dictionary<byte, SubNode> nodemap;//map the address to node
-        
+        private Dictionary<byte, DateTime> lastrelease; //map of the time of the last release        
         public SubNode this[byte addr]{
             get
             {
@@ -627,20 +628,22 @@ namespace ioex_cs
         public bool search(byte addr)
         {
             SubNode n = this[addr] as SubNode;
+            n.status = NodeStatus.ST_IDLE;
             bool ret = false;
             if (mut.WaitOne())
             {
                 n["addr"] = null;
-                if (!WaitForIdleQuick(n))
+                if (!WaitForIdleSlow(n))
                 {
                     n.status = NodeStatus.ST_LOST;
                 }
                 else
                 {
                     n["board_id"] = null;//get board type
-                    ret = WaitForIdleQuick(n);
+                    ret = WaitForIdleSlow(n);
                     n["fw_rev_uw"] = null;//uw
-                    ret = WaitForIdleQuick(n);
+                    ret = WaitForIdleSlow(n);
+                    ret = n["fw_rev_uw"].HasValue;
                 }
                 mut.ReleaseMutex();
             }
@@ -737,6 +740,7 @@ namespace ioex_cs
 
                         if (cmd == "flag_release")
                         {
+                            lastrelease[node.node_id] = DateTime.Now;
                             node["flag_release"] = 1;
                             WaitUntilFlagSent(node);
                         }
@@ -900,6 +904,7 @@ namespace ioex_cs
                 if (type == "weight")
                 {
                     nodemap[byte.Parse(node)] = new WeighNode(allports[byte.Parse(com)], byte.Parse(node));
+                    lastrelease[byte.Parse(node)] = DateTime.Now;
                     weight_nodes.Add(nodemap[byte.Parse(node)] as WeighNode);
                 }
                 if (type == "vibrate")
@@ -924,6 +929,7 @@ namespace ioex_cs
             allports = new List<SPort>();
             weight_nodes = new List<WeighNode>();
             nodemap = new Dictionary<byte, SubNode>();
+            lastrelease = new Dictionary<byte, DateTime>();
             vibstate = VibStatus.VIB_INIDLE;
             
 
@@ -943,8 +949,6 @@ namespace ioex_cs
         public void Start()
         {
             msg_loop.Start();
-            
-          
         }
         private bool bBootCmd = false;
         public void Stop(int ms)
@@ -1012,6 +1016,22 @@ namespace ioex_cs
             }
             return true;
         }
+        private bool WaitForIdleSlow(SubNode n)
+        {
+            int i = 2;
+            //int j = 0;
+            while (n.status == NodeStatus.ST_BUSY)
+            {
+                Thread.Sleep(10);
+                //i = i + (i + 1) / 2; //8,12,18,28,42,64,96,
+                if (i++ > 30)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private bool WaitForIdleQuick(SubNode n)
         {
             int i = 2;
@@ -1168,6 +1188,7 @@ namespace ioex_cs
         {
             int ret;
             TimeSpan ts1 = new TimeSpan(DateTime.Now.Ticks);
+            DateTime tnow = DateTime.Now;
             
             mut.WaitOne();
                
@@ -1176,7 +1197,9 @@ namespace ioex_cs
                 
                 if (wn.status == NodeStatus.ST_LOST || wn.status == NodeStatus.ST_DISABLED)
                     continue;
-
+                TimeSpan ts3 = DateTime.Now - lastrelease[wn.node_id];
+                if (ts3.TotalMilliseconds < 150)
+                    continue;
                 if (wn.weight < -1000 || (wn.weight >= 100000)) //invalid weight || wn.weight >= 65521
                 {
                     wn.Query();
@@ -1185,8 +1208,8 @@ namespace ioex_cs
                     //NodeCombination.logTimeStick(ts1, "ck2:");
                 }
             }
-            NodeCombination.logTimeStick(ts1, "ck:");
             mut.ReleaseMutex();
+
             foreach (WeighNode wn in weight_nodes)
             {
 
@@ -1197,6 +1220,12 @@ namespace ioex_cs
             foreach (WeighNode wn in weight_nodes)
             {
                 double wt = wn.weight;
+                TimeSpan ts4 = DateTime.Now - lastrelease[wn.node_id];
+                if (ts4.TotalMilliseconds < 150)
+                {
+                    ret--;
+                    continue;
+                }
                 if ((wt < -1000) || (wt >= 100000)) //invalid reading
                 {
                     
@@ -1206,10 +1235,9 @@ namespace ioex_cs
                 }
                 ret--;
             }
-            
-                
+            if(ret < 4)
+                NodeCombination.logTimeStick(ts1, "ck:");
             return ret;
-
         }
 
         public void ClearWeights()
@@ -1257,7 +1285,6 @@ namespace ioex_cs
                     n.errlist = n.errlist.Replace("err_ow;", "");//reset overweight error
 
             }
-
         }
         public bool bNeedRefresh = false;
 
@@ -1281,13 +1308,9 @@ namespace ioex_cs
 
                     if (!bWeightReady)
                     {
-                            
                         notready = check_weights_ready();
-
-                        
                         if (notready < 4)
                         {
-
                             bWeightReady = true;
                             checkcnt = 0;
                             RefreshEvent(this);

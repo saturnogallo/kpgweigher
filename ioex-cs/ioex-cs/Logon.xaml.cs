@@ -72,7 +72,7 @@ namespace ioex_cs
             App p = (Application.Current as App);
             try
             {
-                UpdateMessage("App Version: 1.0.0.0\r\n");
+                UpdateMessage("App Version: " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString() + "\r\n");
                 //search for nodes
                 //UpdateMessage(StringResource.str("search_newnode"));
                 
@@ -80,6 +80,7 @@ namespace ioex_cs
                 p.agent.missingnode["addr"] = null;
 
                 boot_ok = 0;
+                int tryfound;
                 //check the availability of each board
                 foreach(UIPacker pk in p.packers)
                 {
@@ -88,7 +89,14 @@ namespace ioex_cs
                         if ((n % 4) == 3)
                             UpdateMessage("\r\n");
                         pk.agent.SetStatus(n, NodeStatus.ST_IDLE);
-                        if (!pk.agent.search(n))
+                        tryfound = 3;
+                        while((!pk.agent.search(n)) && (tryfound > 0))
+                        {
+                            Thread.Sleep(500);
+                            tryfound--;
+                        }
+
+                        if (tryfound <= 0)
                         {
                             UpdateMessage(  StringResource.str("search_node") + n + StringResource.str("fail") + "\t\t");
                         }
@@ -101,7 +109,13 @@ namespace ioex_cs
                     }
                     byte nvib = pk.vib_addr;
                     pk.agent.SetStatus(nvib, NodeStatus.ST_IDLE);
-                    if (!pk.agent.search(nvib))
+                    tryfound = 3;
+                    while ((!pk.agent.search(nvib)) && (tryfound > 0) )
+                    {
+                        Thread.Sleep(500);
+                        tryfound--;
+                    }
+                    if(tryfound <= 0)
                     {
                         UpdateMessage( StringResource.str("search_node") + nvib + StringResource.str("fail") + "\t\t");
                     }
