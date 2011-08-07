@@ -95,7 +95,7 @@
     <size>16</size>
     <name>cs_zero</name>
     <offset>23</offset>
-    <rw>r</rw>
+    <rw>b</rw>
     <update>i</update>
   </reg>
   <reg>
@@ -228,42 +228,42 @@
     <size>16</size>
     <name>cs_mtrl</name>
     <offset>45</offset>
-    <rw>r</rw>
+    <rw>o</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>16</size>
     <name>mtrl_weight_gram</name>
     <offset>47</offset>
-    <rw>r</rw>
+    <rw>o</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>8</size>
     <name>mtrl_weight_decimal</name>
     <offset>49</offset>
-    <rw>r</rw>
+    <rw>o</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>8</size>
     <name>status1</name>
     <offset>50</offset>
-    <rw>r</rw>
+    <rw>o</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>8</size>
     <name>status2</name>
     <offset>51</offset>
-    <rw>r</rw>
+    <rw>o</rw>
     <update>p</update>
   </reg>
   <reg>
     <size>8</size>
     <name>hw_status</name>
     <offset>52</offset>
-    <rw>r</rw>
+    <rw>o</rw>
     <update>p</update>
   </reg>
   <reg>
@@ -281,18 +281,31 @@
     <update>i</update>
   </reg>
   <reg>
-    <size>16</size>
-    <name>cs_sys_offset_cal_data_uw</name>
+    <size>8</size>
+    <name>ac_freq</name>
     <offset>57</offset>
     <rw>r</rw>
     <update>i</update>
   </reg>
-
   <reg>
-    <size>16</size>
-    <name>cs_sys_offset_cal_data_lw</name>
+    <size>8</size>
+    <name>pack_int_cnt</name>
+    <offset>58</offset>
+    <rw>r</rw>
+    <update>i</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>flag_cnt</name>
     <offset>59</offset>
-    <rw>i</rw>
+    <rw>r</rw>
+    <update>i</update>
+  </reg>
+  <reg>
+    <size>8</size>
+    <name>pack_rel_cnt</name>
+    <offset>60</offset>
+    <rw>r</rw>
     <update>i</update>
   </reg>
   <reg>
