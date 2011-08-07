@@ -248,9 +248,9 @@ namespace ioex_cs
             if (p.status == PackerStatus.RUNNING)
             {
                 lbl_speed.Content = p.speed.ToString();
-                lbl_lastweight.Content = p.last_pack_weight.ToString("F2");
+                lbl_lastweight.Content = p.last_pack_weight.ToString("F1");
                 lbl_totalpack.Content = p.total_sim_packs.ToString();
-                lbl_totalweights.Content = p.total_sim_weights.ToString("F2");
+                lbl_totalweights.Content = p.total_sim_weights.ToString("F1");
             }
         }
         public void Disable()
@@ -611,6 +611,14 @@ namespace ioex_cs
             }
             
         }
+        private void prd_pic_selected(string item)
+        {
+            App p = Application.Current as App;
+            curr_packer.curr_cfg.product_desc = item;
+            ShowStatus("loading");
+            lastcall = "UpdateUI";
+        }
+
         private void prd_desc_selected(string item)
         {
             App p = Application.Current as App;
@@ -812,6 +820,13 @@ namespace ioex_cs
             {
                 n.SetNodeReg((byte)curr_node_index, "target_weight", 0);
             }
+        }
+
+        private void ellipseWithImageBrush_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            App p = Application.Current as App;
+            p.prodwnd.Init(prd_pic_selected);
+
         }
     }
 }

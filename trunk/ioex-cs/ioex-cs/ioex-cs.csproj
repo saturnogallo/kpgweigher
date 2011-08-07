@@ -43,7 +43,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;NODENUM10</DefineConstants>
+    <DefineConstants>NODENUM10</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
@@ -130,6 +130,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="kbdwnd2.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Logon.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -201,6 +205,9 @@
     <Compile Include="kbdWnd.xaml.cs">
       <DependentUpon>kbdWnd.xaml</DependentUpon>
     </Compile>
+    <Compile Include="kbdwnd2.xaml.cs">
+      <DependentUpon>kbdwnd2.xaml</DependentUpon>
+    </Compile>
     <Compile Include="NodeAgent.cs" />
     <Compile Include="ProdNum.xaml.cs">
       <DependentUpon>ProdNum.xaml</DependentUpon>
@@ -247,6 +254,7 @@
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram2.cd" />
     <None Include="History.log" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -272,6 +280,7 @@
     <EmbeddedResource Include="Resources\Image\en-US.JPG" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Notes.txt" />
     <Content Include="password.xml" />
   </ItemGroup>
   <ItemGroup>

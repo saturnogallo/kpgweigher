@@ -14,8 +14,10 @@
     <s:String x:Key="starting">Starting</s:String>
     <s:String x:Key="org_password">Old password</s:String>
     <s:String x:Key="fail">Fail</s:String>
+    <s:String x:Key="nextpage">Next Page</s:String>
+    <s:String x:Key="lastpage">Last Page</s:String>
     <s:String x:Key="new_password">New password</s:String>
-    <s:String x:Key="new_password2">Confirm pwd</s:String>
+    <s:String x:Key="new_password2">Confirm again</s:String>
     <s:String x:Key="find_password">Factory default</s:String>
     <s:String x:Key="modify_password">Modify</s:String>
     <s:String x:Key="password_config">Password</s:String>
@@ -36,11 +38,11 @@
     <s:String x:Key="engineerpage">Engineer</s:String>
     <s:String x:Key="entersystem">Enter Windows</s:String>
     <s:String x:Key="enter_system">Please input password to enter windows</s:String>
-    <s:String x:Key="enter_locknum">Please enter lock number (total packs)</s:String>
+    <s:String x:Key="enter_locknum">Please enter maximum pack number(=Unlock key)</s:String>
     <s:String x:Key="enter_unlocknum">Please enter password for unlock</s:String>
-    <s:String x:Key="lockon">Lock On</s:String>
-    <s:String x:Key="locksystem">Lock Func</s:String>
-    <s:String x:Key="language">Chinese</s:String>
+    <s:String x:Key="lockon">Disable Lock</s:String>
+    <s:String x:Key="locksystem">Enable Lock</s:String>
+    <s:String x:Key="language">Chinese UI</s:String>
     <s:String x:Key="changeaddr">Change Addr.</s:String>
     <s:String x:Key="updatefw">Burn Firmware</s:String>
     <s:String x:Key="updatefwcomplete">Firmware update completed.</s:String>
@@ -113,8 +115,8 @@
     <s:String x:Key="enter_test_mode_reg1">Enter value for register 1</s:String>
     <s:String x:Key="enter_test_mode_reg2">Enter value for register 2</s:String>
     <s:String x:Key="enter_pwd">Please enter password</s:String>
-    <s:String x:Key="enter_run_amp">Please enter duration of top vibrate</s:String>
-    <s:String x:Key="enter_run_freq">Please enter cycle for zero</s:String>
+    <s:String x:Key="enter_run_amp">Please enter amplitude of top vibrate</s:String>
+    <s:String x:Key="enter_run_freq">Please enter freq. of top vibrate</s:String>
     <s:String x:Key="enter_run_target">Please enter target weight (gram)</s:String>
     <s:String x:Key="enter_run_uvar">Please enter upper variation (gram)</s:String>
     <s:String x:Key="enter_run_dvar">Please enter lower variation (gram)</s:String>
@@ -126,14 +128,14 @@
     <s:String x:Key="enter_cali0">Please enter poise weight (gram) for calibration</s:String>
     <s:String x:Key="enter_prd_no">Please enter product number</s:String>
     <s:String x:Key="enter_motor_speed_input">Enter motor speed</s:String>
-    <s:String x:Key="enter_col_otime_input">Enter open duration of upper bucket(*10ms)</s:String>
-    <s:String x:Key="enter_sub_amp_input">Enter amplitude of vibrate</s:String>
-    <s:String x:Key="enter_col_dtime_input">Enter duration after releasing material (*10ms)</s:String>
-    <s:String x:Key="enter_sub_time_input">Enter duration of vibrate(*10ms)</s:String>
+    <s:String x:Key="enter_col_otime_input">Enter open time of pass bucket(*10ms)</s:String>
+    <s:String x:Key="enter_sub_amp_input">Enter amp. of sub vibrate</s:String>
+    <s:String x:Key="enter_col_dtime_input">Enter delay before weight (*10ms)</s:String>
+    <s:String x:Key="enter_sub_time_input">Enter time of sub vibrate(*20ms)</s:String>
     <s:String x:Key="enter_sub_freq_input">Enter cycles for zeroing</s:String>
-    <s:String x:Key="enter_wei_otime_input">Enter delay after passing material(*10ms)</s:String>
-    <s:String x:Key="enter_wei_dtime_input">Enter delay before passing material(*10ms)</s:String>
-    <s:String x:Key="enter_openwei_input">Enter duration for opening low bucket(*10ms)</s:String>
+    <s:String x:Key="enter_wei_otime_input">Enter delay after release(*10ms)</s:String>
+    <s:String x:Key="enter_wei_dtime_input">Enter delay after sub vibrate(*10ms)</s:String>
+    <s:String x:Key="enter_openwei_input">Enter open time of weight bucket(*10ms)</s:String>
     <s:String x:Key="license">Total pack number exceeds the limit, please contact with vendor to disable the limitation.</s:String>
     <s:String x:Key="quit_eng">Quit</s:String>
     <s:String x:Key="zero_complete">Zero completed.</s:String>
@@ -149,6 +151,8 @@
     <s:String x:Key="weight">Total weight(g)</s:String>
     <s:String x:Key="pack_num">Total packs</s:String>
     <s:String x:Key="notsame_pwd">Two new passwords are inconsistent</s:String>
+    <s:String x:Key="pwd_done">Password is modified successfully</s:String>
+    <s:String x:Key="pwd_restore_done">Password is restored successfully</s:String>
     <s:String x:Key="avgweight">Average (gram)</s:String>
     <s:String x:Key="gram">g</s:String>
     <s:String x:Key="packsetting">Pack setting</s:String>
@@ -177,8 +181,11 @@
     <s:String x:Key="enter_intf_ckb_delay">Please enter feed delay(*20ms)</s:String>
 
     <s:String x:Key="grp_name">Name</s:String>
-    <s:String x:Key="grp_amp">Main Amp.</s:String>
+    <s:String x:Key="grp_amp">Main Amplitude</s:String>
     <s:String x:Key="grp_freq">Main Freq.</s:String>
+    <s:String x:Key="target">Target</s:String>
+    <s:String x:Key="upper_var">Upper Var.</s:String>
+    <s:String x:Key="lower_var">Low Var.</s:String>
     <s:String x:Key="grp_target">Target</s:String>
     <s:String x:Key="grp_uvar">Upper Var.</s:String>
     <s:String x:Key="grp_dvar">Low Var.</s:String>
@@ -186,17 +193,17 @@
     <s:String x:Key="openwei">Release open(*10ms)</s:String>
     <s:String x:Key="gain">AD speed</s:String>
     <s:String x:Key="cs_filter">AD filter</s:String>
-    <s:String x:Key="col_otime">Pass open(*10ms)</s:String>
-    <s:String x:Key="col_dtime">Release Delay(*10ms)</s:String>
-    <s:String x:Key="sub_amp">Amplitude</s:String>
+    <s:String x:Key="col_otime">Pass bucket open(*10ms)</s:String>
+    <s:String x:Key="col_dtime">Pre weight Delay(*10ms)</s:String>
+    <s:String x:Key="sub_amp">Sub Amplitude</s:String>
     <s:String x:Key="sub_freq">Zero cycle</s:String>
 
     <s:String x:Key="test_mode_reg1">Register1</s:String>
     <s:String x:Key="test_mode_reg2">Register2</s:String>
 
-    <s:String x:Key="sub_time">Vibration (*10ms)</s:String>
+    <s:String x:Key="sub_time">Sub VIB(*10ms)</s:String>
     <s:String x:Key="wei_otime">Post release delay(*10ms)</s:String>
-    <s:String x:Key="wei_dtime">Pre release delay(*10ms)</s:String>
+    <s:String x:Key="wei_dtime">Post vibrate delay(*10ms)</s:String>
     <s:String x:Key="motor_speed">Motor speed</s:String>
 
     <s:String x:Key="address">Address</s:String>

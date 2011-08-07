@@ -8,6 +8,7 @@ using System.IO.Ports;
 using System.Text;
 using System.Xml.Linq;
 using System.Threading;
+
 using System.IO;
 namespace ioex_cs
 {
@@ -25,11 +26,12 @@ namespace ioex_cs
         //window list
         public RunMode runwnd;
         public SingleMode singlewnd;
-        private ProdHistory histwnd;
+        public ProdHistory histwnd;
+        public PwdWnd pwdwnd;
         private Help helpwnd;
         private AlertWnd alertwnd;
         private EngConfigWnd engwnd;
-        private PwdWnd pwdwnd;
+        
         private ConfigMenuWnd configwnd;
         private BottomWnd bottomwnd;
 
@@ -55,6 +57,13 @@ namespace ioex_cs
         
         public App()
         {
+            System.Diagnostics.Process[] pses = System.Diagnostics.Process.GetProcessesByName("ioex-cs");
+            if (pses.Length > 0) 
+            {
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+                return;
+            }
+            
             if (Environment.CommandLine.IndexOf("/debug") > 0)
                 NodeAgent.IsDebug = true;
             StringResource.SetLanguage();
@@ -100,6 +109,7 @@ namespace ioex_cs
         {
             if (mode == "history")
             {
+                histwnd.UpdateDisplay();
                 histwnd.UpdateList();
                 histwnd.Show();
                 histwnd.BringToFront();

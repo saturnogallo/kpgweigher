@@ -94,7 +94,7 @@
         <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource stop_onalert}" Click="btn_alert_Click" Style="{StaticResource ButtonStyleOn}" Margin="50,163.366,0,0" Name="btn_stop_onalert" Foreground="Black" FontSize="72" Canvas.Left="505" Canvas.Top="30" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="405" Height="122.5" />
         <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource show_alert}" Click="btn_alert_Click" Style="{StaticResource ButtonStyleOn}" Margin="50,163.366,0,0" Name="btn_show_alert" Foreground="Black" FontSize="72" Canvas.Left="20" Canvas.Top="235" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="405" Height="122.5" />
         <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource manual_reset}" Click="btn_alert_Click" Style="{StaticResource ButtonStyleOn}" Margin="50,163.366,0,0" Name="btn_manual_reset" Foreground="Black" FontSize="72" Canvas.Left="505" Canvas.Top="235" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="405" Height="122.5" />
-        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="267.5" Canvas.Top="602.5" Height="70" Name="btn_ret_config" Width="182.5" Click="btn_ret_config_Click">回到设置</Button>
-        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Canvas.Left="602.5" Canvas.Top="602.5" Height="39.996" Name="btn_ret_run" Width="150" Click="btn_ret_run_Click">回到运行</Button>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="267.5" Canvas.Top="602.5" Height="42" Name="btn_ret_config" Width="148" Click="btn_ret_config_Click">回到设置</Button>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Canvas.Left="602.5" Canvas.Top="602.5" Height="42" Name="btn_ret_run" Width="148" Click="btn_ret_run_Click">回到运行</Button>
     </Canvas>
 </Window>

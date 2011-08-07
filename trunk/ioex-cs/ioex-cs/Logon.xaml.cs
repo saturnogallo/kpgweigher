@@ -163,7 +163,7 @@ namespace ioex_cs
             uiTimer.Start();
         }
     }
-    public class StringResource
+    internal class StringResource
     {
         private static Dictionary<string, string> str_tbl;
         static public string language;
@@ -230,7 +230,7 @@ namespace ioex_cs
 
     }
 
-    public class Password
+    internal class Password
     {
         private static XmlConfig pwds;
         static    private string MD5Value(String str, Boolean isStr)

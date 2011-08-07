@@ -691,7 +691,7 @@
         <Label Canvas.Left="723" Canvas.Top="181" Content="{DynamicResource grp_dvar}" Height="39" Name="grp_dvar_label" Style="{StaticResource LabelStyle1}" Width="120" />
         <Label Canvas.Left="521" Canvas.Top="241" Height="86" Name="lbl_status" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="52" FontWeight="Black" HorizontalContentAlignment="Center"  Width="440" Content=""></Label>
         <Label Canvas.Left="259" Canvas.Top="11.297" Height="64" Name="lbl_speed" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="211" Content="0"></Label>
-        <Label Canvas.Left="13" Canvas.Top="17" Height="53" Name="title_speed" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="238" Content="{DynamicResource speed}" Foreground="Black" FontSize="30"></Label>
+        <Label Canvas.Left="13" Canvas.Top="17" Height="53" Name="title_speed" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="238" Content="{DynamicResource speed}" Foreground="Black" FontSize="30" MouseLeftButtonDown="title_speed_MouseDown" MouseLeftButtonUp="title_speed_MouseLeftButtonUp"></Label>
         
         <Label Canvas.Left="626" Canvas.Top="181" Content="0.1" Height="58" Name="input_uvar" Style="{StaticResource LabelStyle1}" Width="84" Foreground="Black" />
         <Label Canvas.Left="852" Canvas.Top="183" Content="0.1" Height="65" Name="input_dvar" Style="{StaticResource LabelStyle1}" Width="84" />

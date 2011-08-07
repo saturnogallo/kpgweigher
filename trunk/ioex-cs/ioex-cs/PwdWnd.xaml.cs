@@ -54,6 +54,7 @@ namespace ioex_cs
                     if (new_pwd_input1.Password == new_pwd_input2.Password)
                     {
                         Password.set_pwd(user, new_pwd_input1.Password);
+                        MessageBox.Show(StringResource.str("pwd_done"));
                         App p = Application.Current as App;
                         btn_return_Click(sender, e);
                     }else{
@@ -78,9 +79,10 @@ namespace ioex_cs
         }
         private void btn_restore_Click(object sender, RoutedEventArgs e)
         {
-//              Password.set_pwd("admin", "020527");
-                Password.set_pwd("user", "111111");
-                btn_return_Click(sender, e);
+            RunMode.Reset();
+            MessageBox.Show(StringResource.str("pwd_restore_done"));
+            btn_return_Click(sender, e);
+            
         }
 
         private void pwd_GotFocus(object sender, MouseButtonEventArgs e)

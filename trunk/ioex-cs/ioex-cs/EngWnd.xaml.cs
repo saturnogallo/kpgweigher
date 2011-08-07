@@ -14,6 +14,8 @@ using System.Windows.Shapes;
 using System.Xml.Linq;
 using System.IO;
 using Microsoft.Win32;
+using System.Diagnostics;
+
 namespace ioex_cs
 {
     /// <summary>
@@ -57,6 +59,7 @@ namespace ioex_cs
                 pk.nc.Stop(500);
             }
             UpdateDisplay(true);
+            p.histwnd.UpdateDisplay();
         }
         public void UpdateDisplay(bool refresh)
         {
@@ -207,11 +210,17 @@ namespace ioex_cs
 
             if (param == "entersys")
             {
-                if (Password.compare_pwd("system",data))
+                if (Password.compare_pwd("admin",data))
                 {
+                    Process app = new Process();
+                    app.StartInfo.FileName = "Explorer.exe";
+                    app.StartInfo.Arguments = "";
+                    app.Start();
+                    Thread.Sleep(2000);
                     Type shellType = Type.GetTypeFromProgID("Shell.Application");
                     object shellObject = System.Activator.CreateInstance(shellType);
                     shellType.InvokeMember("ToggleDesktop", System.Reflection.BindingFlags.InvokeMethod, null, shellObject, null);
+
                 }
                 return;
             }
@@ -230,7 +239,7 @@ namespace ioex_cs
                 Password.set_pwd("lock_on", data);
                 DeleteRegist("lock_on");
                 WTRegedit("lock_on", data);
-                Password.set_pwd("lock", "020527");
+                Password.set_pwd("lock", data);
 
                 p.SaveAppConfig();
                 UpdateDisplay(false);
@@ -325,9 +334,17 @@ namespace ioex_cs
         private void btn_language_Click(object sender, RoutedEventArgs e)
         {
             if (StringResource.language == "zh-CN")
+            {
                 StringResource.SetLanguage("en-US");
+                WTRegedit("locale", "en-US");
+                
+            }
             else
+            {
                 StringResource.SetLanguage("zh-CN");
+                WTRegedit("locale", "zh-CN");
+            }
+            UpdateDisplay(false);
         }
 
         private void nd_1_Click(object sender, RoutedEventArgs e)
@@ -508,7 +525,7 @@ namespace ioex_cs
             p.SwitchTo("configmenu");
         }
     }
-    public class PerReg
+    internal class PerReg
     {
         public string name { get; set; }
         public string address { get; set; }

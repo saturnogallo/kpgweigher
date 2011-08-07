@@ -4,18 +4,33 @@
     Title="Password Setup window" Height="768" Width="1024" Topmost="False" WindowStartupLocation="CenterScreen" WindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" Background="LightGray">
     <Window.Resources>
         <Style x:Key ="ButtonStyle" TargetType = "{x:Type Button}">
+
             <Setter Property = "Foreground" Value = "Black"/>
             <Setter Property = "Background" Value = "Beige"/>
             <Setter Property = "Height" Value = "30"/>
-            <Setter Property = "Width" Value = "90"/>
-            <Setter Property = "FontSize" Value="20"/>
+            <Setter Property = "Width" Value = "100"/>
+            <Setter Property = "FontSize" Value="18"/>
             <Setter Property = "FontWeight" Value="Black"/>
             <Setter Property = "FontFamily" Value="华文楷体"/>
-            <Setter Property = "BitmapEffect">
+
+            <Setter Property = "Template">
                 <Setter.Value>
-                    <DropShadowBitmapEffect Color="Black" Opacity="0.5" />
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"  BorderThickness="0" CornerRadius="15" Background="Goldenrod">
+                            <Border.BitmapEffect>
+                                <DropShadowBitmapEffect Color="#000" Direction="-90" ShadowDepth="5" Softness="0.1" Opacity="0.3"/>
+                            </Border.BitmapEffect>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed"  Value = "True">
+                                <Setter TargetName="Border" Property = "Background" Value = "Yellow"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
                 </Setter.Value>
             </Setter>
+
         </Style>
         <Style x:Key ="ListStyle" TargetType = "{x:Type ListBox}">
             <Setter Property = "Foreground" Value = "Black"/>
@@ -97,8 +112,8 @@
         <Label Content="{DynamicResource new_password2}" FontSize="26" Height="42.5" HorizontalAlignment="Left" Margin="31,0,0,117" Name="label3" VerticalAlignment="Bottom" Width="177.5" Canvas.Left="7.5" Canvas.Top="332.5" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource modify_password}" Style="{StaticResource ButtonStyle}" Name="btn_modify" VerticalAlignment="Bottom" HorizontalAlignment="Left" Click="btn_modify_Click" Height="42.5" Width="136" Margin="18,0,0,55" Canvas.Left="13" Canvas.Top="432.5" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource find_password}" Style="{StaticResource ButtonStyle}" Name="btn_restore" VerticalAlignment="Bottom" Click="btn_restore_Click" Height="42.5" Margin="0,0,17,55" HorizontalAlignment="Right" Width="139" Canvas.Left="241.5" Canvas.Top="432.5" />
-        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="-57" Canvas.Top="645" Height="40" Name="btn_ret_config" Click="btn_return_Click" Margin="119,0,85,0" VerticalAlignment="Bottom" Width="0">回到运行</Button>
-        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Canvas.Left="122.5" Canvas.Top="644.988" Height="40.012" Name="btn_ret_run" Click="btn_return_Click" Margin="119,0,85,0" VerticalAlignment="Bottom" Width="0">回到运行</Button>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="68" Canvas.Top="610" Height="42" Name="btn_ret_config" Click="btn_return_Click" VerticalAlignment="Bottom" Width="148">回到运行</Button>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Canvas.Left="263.552" Canvas.Top="609.5" Height="42.5" Name="btn_ret_run" Click="btn_return_Click" VerticalAlignment="Bottom" Width="148">回到运行</Button>
         <Label Canvas.Left="-207.5" Canvas.Top="0" Content="{DynamicResource pwdpage}" FontFamily="华文楷体" FontSize="48" FontWeight="Black" Foreground="ForestGreen" Height="92.5" HorizontalContentAlignment="Center" Name="lbl_title" Width="840" />
     </Canvas>
 </Window>

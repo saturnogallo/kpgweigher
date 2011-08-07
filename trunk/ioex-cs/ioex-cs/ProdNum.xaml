@@ -53,9 +53,12 @@
     </Window.Resources>
         <Grid>
             <Label Content="{DynamicResource selectprodnum}" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="52" FontWeight="Black" HorizontalContentAlignment="Center" Margin="41,12,63,0" Height="64" VerticalAlignment="Top"></Label>
-            <ScrollViewer CanContentScroll="True"  VerticalScrollBarVisibility="Visible"  Name="scrollViewer1" Margin="0,80,0,87.5" Focusable="False">
+            <ScrollViewer CanContentScroll="True"  VerticalScrollBarVisibility="Visible"  Name="scrollViewer1" Margin="0,120,0,87.5" Focusable="False">
                 <WrapPanel Height="Auto" Name="wrapPanel1" Width="950"></WrapPanel>
         </ScrollViewer>
-        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Height="39.996" HorizontalAlignment="Center" Margin="10,10,0,30" Name="btn_ret_run" VerticalAlignment="Bottom" Width="148.874" Click="btn_ret_run_Click_1"/>
+        <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Height="42" HorizontalAlignment="Center" Margin="10,10,0,30" Name="btn_ret_run" VerticalAlignment="Bottom" Width="148" Click="btn_ret_run_Click_1"/>
+        <Label Height="31.438" HorizontalAlignment="Right" Margin="0,82.882,154.332,0" Name="lbl_pglast" MouseLeftButtonUp="lbl_pglast_MouseLeftButtonUp" VerticalAlignment="Top" Width="115.749" Content="{DynamicResource lastpage}" FontSize="16" Foreground="Blue"></Label>
+        <Label Height="31.438" HorizontalAlignment="Right" Margin="0,82.882,11.432,0" Name="lbl_pgnext" MouseLeftButtonUp="lbl_pgnext_MouseLeftButtonUp" VerticalAlignment="Top" Width="132.897" Content="{DynamicResource nextpage}" FontSize="16" Foreground="Blue"></Label>
+
     </Grid>
 </Window>

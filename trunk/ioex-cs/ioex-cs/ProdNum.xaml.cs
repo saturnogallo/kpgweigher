@@ -58,10 +58,12 @@ namespace ioex_cs
                 n.Template = ct;
                 n.Name = "ID" + id;
                 //Product num: Pru
-                n.Content = String.Format("{0}:{1}\n{2}:{3}\n{4}:{5}",
+                n.Content = String.Format("{0}:{1}\n{2}:{3}\n{4}:{5}\n{6}:{7}\n{8}:{9}",
                     StringResource.str("product_no"),pcfg.product_no,
                     StringResource.str("product_desc"),pcfg.product_desc,
-                    StringResource.str("grp_target"),pcfg.target
+                    StringResource.str("grp_target"),pcfg.target,
+                    StringResource.str("grp_uvar"),pcfg.upper_var,
+                    StringResource.str("grp_dvar"),pcfg.lower_var
                     );
 
                 //n.Click += ImageSelected;
@@ -122,6 +124,16 @@ namespace ioex_cs
                 }
                 this.Hide();
             }
+        }
+
+        private void lbl_pglast_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            this.scrollViewer1.PageUp();
+        }
+
+        private void lbl_pgnext_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            this.scrollViewer1.PageDown();
         }
     }
 }
