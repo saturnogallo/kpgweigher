@@ -31,7 +31,7 @@ namespace ioex_cs
             foreach (string f in Directory.GetFiles(ProdNum.baseDir + "\\prodpic\\","*.jpg"))
             {
                 FileInfo fi = new FileInfo(f);
-                string nm = fi.Name.Remove(fi.Name.Length-4,4);
+                string nm = fi.Name.Remove(fi.Name.Length-4,4).Replace(' ','_');
                 imglist[nm] = fi.FullName;
                 Button n = new Button();
                 ControlTemplate ct = this.FindResource("imgBtn") as ControlTemplate;
@@ -45,7 +45,6 @@ namespace ioex_cs
                 ib.ImageSource = new BitmapImage(new Uri(fi.FullName));
                 this.wrapPanel1.Children.Add(n);
             }
-            
         }
         private Dictionary<string, string> imglist;
         public void Init(ProdClickHandler h)
@@ -65,6 +64,17 @@ namespace ioex_cs
         private void btn_ret_run_Click(object sender, RoutedEventArgs e)
         {
             this.Hide();
+        }
+
+
+        private void lbl_pglast_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            this.scrollViewer1.PageUp();
+        }
+
+        private void lbl_pgnext_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            this.scrollViewer1.PageDown();
         }
     }
 }

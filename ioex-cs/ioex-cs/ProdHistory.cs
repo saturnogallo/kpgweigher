@@ -21,7 +21,6 @@ namespace ioex_cs
         static private SQLiteConnection sql_con;
         static private SQLiteCommand sql_cmd;
         
-
         private SQLiteDataAdapter DB;
         private DataSet DS = new DataSet();
         private DataTable DT = new DataTable();
@@ -39,19 +38,23 @@ namespace ioex_cs
         {
             InitializeComponent();
             this.BackColor = Color.FromArgb(0xFF, 0xEE, 0xF2, 0xFB);
-            btnClr.Text = StringResource.str("clearpack");
+            
             lb_oper.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             lb_prod.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             lb_prodno.SelectedIndexChanged += new EventHandler(UpdateDataGrid);
             mc_starttime.DateChanged += new DateRangeEventHandler(UpdateDataGrid);
             mc_endtime.DateChanged += new DateRangeEventHandler(UpdateDataGrid);
-            
+            UpdateDisplay();
+            UpdateList();
+        }
+        public void UpdateDisplay()
+        {
+            btnClr.Text = StringResource.str("clearpack");
             lbl_starttime.Text = StringResource.str("start_date");
             lbl_endtime.Text = StringResource.str("end_date");
             lbl_oper.Text = StringResource.str("operator");
             lbl_prodno.Text = StringResource.str("product_no");
             lbl_prod.Text = StringResource.str("product_desc");
-            UpdateList();
         }
         public void UpdateList()
         {
@@ -102,7 +105,7 @@ namespace ioex_cs
             sql_con.Open();
 
             sql_cmd = sql_con.CreateCommand();
-            string cols = "select start_date, end_date, operator, product_no, product_desc, weight, pack_num from  mains ";
+            string cols = "select start_date, end_date, operator, product_no, product_desc, target, upper_var, lower_var, weight, pack_num from  mains ";
             DateTime s_dt = mc_starttime.SelectionStart;
             DateTime e_dt = mc_endtime.SelectionEnd;
             string CommandText = cols + String.Format("where start_date>='{0}-{1}-{2} 00:00:00' and end_date<='{3}-{4}-{5} 23:59:59'",
@@ -145,14 +148,14 @@ namespace ioex_cs
 
         static internal void UpdateRecord(UIPacker p)
         {
-            string txtUpdate = "update mains set end_date=\"" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\", weight=\"" + p.total_weights.ToString() + "\", pack_num=\"" + p.total_packs.ToString() + "\" where start_date=\"" + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "\"";
+            string txtUpdate = "update mains set end_date=\"" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\", weight=\"" + p.total_weights.ToString("F2") + "\", pack_num=\"" + p.total_packs.ToString() + "\" where start_date=\"" + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "\"";
             ExecuteQuery(txtUpdate);
         }
         static internal void InitNewRun(UIPacker p)
         {
-            string txtUpdate = "insert into mains (start_date,end_date,operator,product_no,product_desc,weight,pack_num) values ('";
+            string txtUpdate = "insert into mains (start_date,end_date,operator,product_no,product_desc,target,upper_var,lower_var,weight,pack_num) values ('";
 
-            txtUpdate = txtUpdate + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + (System.Windows.Application.Current as App).oper + "','" + p.curr_cfg.product_no + "(" + p.curr_cfg.product_desc + ")" + "','" + p.curr_cfg.product_desc + "',0,0)";
+            txtUpdate = txtUpdate + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + p.rStart.ToString("yyyy-MM-dd HH:mm:ss") + "','" + (System.Windows.Application.Current as App).oper + "','" + p.curr_cfg.product_no + "(" + p.curr_cfg.product_desc + ")" + "','" + p.curr_cfg.product_desc + "'," + p.curr_cfg.target.ToString() + "," + p.curr_cfg.upper_var.ToString() + "," + p.curr_cfg.lower_var.ToString() +",0,0)";
             ExecuteQuery(txtUpdate);
         }
 

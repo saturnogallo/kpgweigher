@@ -24,7 +24,7 @@ namespace ioex_cs
 
 
 
-    class NodeCombination   //the class is used to do combinations and release action
+    internal class NodeCombination   //the class is used to do combinations and release action
     {
         private byte[] release_addrs = null;
         private double release_weight;
@@ -115,29 +115,25 @@ namespace ioex_cs
                 agent.IncMatchCount(addr);
                 //over_weight check
                 wt = agent.weight(addr);
-                if ((wt < packer.curr_cfg.target / 2) && (wt > -1000.0) && (wt < 65521))
-                    continue; //goon nodes
+                double nw = wt;
+                if (nw > (packer.curr_cfg.target - packer.curr_cfg.lower_var) && (nw < 65521)) //has overweight
                 {
-                    double nw = wt;
-                    if (nw > (packer.curr_cfg.target - packer.curr_cfg.lower_var) && (nw < 65521))
+                    if (AlertWnd.b_turnon_alert)
                     {
-                        if (AlertWnd.b_turnon_alert)
+                        agent.SetOverWeight(addr, true);
+                        if (!AlertWnd.b_manual_reset) //auto reset
                         {
-                            agent.SetOverWeight(addr, true);
-                            if (!AlertWnd.b_manual_reset) //auto reset
-                            {
-                                agent.Action(addr, "empty");
-                            }
+                            agent.Action(addr, "empty");
                         }
                     }
-                    else
-                    {
-                        if (nw < 65521)
-                        {
-                            agent.SetOverWeight(addr,false);
-                        }
-                    }
+                    continue;
                 }
+                agent.SetOverWeight(addr, false);    
+
+                    
+
+                
+
             }
         }
         private bool ProcessGoonNodes() //send command to nodes that needs to goon
@@ -217,6 +213,7 @@ namespace ioex_cs
                             //logTimeStick(ts1, "vibw:");    
                             ProcessGoonNodes();
                         }
+ 
                         while (ProcessGoonNodes())
                             ;
                         CheckNodeStatus();
@@ -498,7 +495,7 @@ namespace ioex_cs
         VIB_ERROR = 3
 
     }
-    class NodeAgent
+    internal class NodeAgent
     {
         public static bool IsDebug = false; //debug mode or not
 

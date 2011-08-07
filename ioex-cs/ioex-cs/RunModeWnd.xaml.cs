@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.IO;
 namespace ioex_cs
 {
@@ -24,6 +25,12 @@ namespace ioex_cs
 
     public partial class RunMode : Window
     {
+        /// <summary>
+        /// 显示和隐藏鼠标指针.
+        /// </summary>
+        [DllImport("user32.dll", EntryPoint = "ShowCursor", CharSet = CharSet.Auto)]
+        public static extern int ShowCursor(int bShow);
+        private System.Windows.Forms.Timer tm_cursor;
         private UIPacker curr_packer
         {
             get
@@ -32,6 +39,7 @@ namespace ioex_cs
                 return p.packers[0];
             }
         }
+        private object ts_pwd = null;
         private Queue<string> lastcalls;
         private string lastcall{
             get
@@ -62,7 +70,7 @@ namespace ioex_cs
             return Application.Current as App;
         }
         private bool _contentLoaded2 = false;
-
+        private bool bShowCursor = true;
         /// <summary>
         /// InitializeComponent
         /// </summary>
@@ -83,7 +91,6 @@ namespace ioex_cs
             {
                 System.Windows.Application.LoadComponent(this, new System.Uri("/ioex-cs;component/Resources/runmodewnd14.xaml", System.UriKind.Relative));
             }
-
         }
 
         public RunMode(int nodenumber)
@@ -94,11 +101,39 @@ namespace ioex_cs
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
             uiTimer.Interval = 200;
-            
             currentApp().packers[0].nc.HitEvent += new NodeCombination.HitCombineEventHandler(nc_HitEvent);
 //            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
             uiTimer.Start();
+            tm_cursor = new System.Windows.Forms.Timer();
+            tm_cursor.Tick += new EventHandler(tm_cursor_Tick);
+            tm_cursor.Interval = 5000;
+            this.MouseLeftButtonDown += new MouseButtonEventHandler(RunMode_MouseMove);
+            //this.MouseMove += new MouseEventHandler(RunMode_MouseMove);
         }
+
+        void RunMode_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!bShowCursor)
+            {
+                ShowCursor(1);
+                bShowCursor = true;
+                if (curr_packer.status != PackerStatus.RUNNING)
+                    tm_cursor.Stop();
+                else
+                    tm_cursor.Start();
+            }
+        }
+
+        void tm_cursor_Tick(object sender, EventArgs e)
+        {
+            if (curr_packer.status == PackerStatus.RUNNING)
+            {
+                ShowCursor(0);
+                bShowCursor = false;
+            }
+            tm_cursor.Stop();
+        }
+
         public void Disable()
         {
             this.btn_allstart.Visibility = Visibility.Hidden;
@@ -241,13 +276,13 @@ namespace ioex_cs
                         btn.ApplyTemplate();
                     }
                     string err = agent.GetErrors(n);
-                    if(err != "")
+                    if(err != "" && AlertWnd.b_turnon_alert && AlertWnd.b_show_alert)
                         lbl_status.Content = n.ToString() + ":" + StringResource.str(err.Substring(0, err.IndexOf(';'))) + "\n";
                 }
                 if (pk.status == PackerStatus.RUNNING)
                 {
                     lbl_speed.Content = pk.speed.ToString();
-                    lbl_lastweight.Content = pk.last_pack_weight.ToString("F2");
+                    lbl_lastweight.Content = pk.last_pack_weight.ToString("F1");
                     lbl_totalpack.Content = pk.total_packs.ToString();
 
                     RefreshVibUI();
@@ -298,7 +333,7 @@ namespace ioex_cs
             if (p.status == PackerStatus.RUNNING)
             {
                 lbl_speed.Content = p.speed.ToString();
-                lbl_lastweight.Content = p.last_pack_weight.ToString("F2");
+                lbl_lastweight.Content = p.last_pack_weight.ToString("F1");
                 lbl_totalpack.Content = p.total_packs.ToString();
                 RefreshVibUI();
             }
@@ -330,7 +365,6 @@ namespace ioex_cs
         }
         private void ToggleStartStop()
         {
-            
             App p = currentApp();
             if (curr_packer.status == PackerStatus.RUNNING)
             {
@@ -361,7 +395,9 @@ namespace ioex_cs
             else
             {
                 lbl_status.Content = StringResource.str("starting");
+                tm_cursor.Start();
             }
+            
         }
         private void btn_history_click(object sender, RoutedEventArgs e)
         {
@@ -442,7 +478,7 @@ namespace ioex_cs
                 string err = pack.agent.GetErrors(n);
                 double wt = pack.agent.weight(n);
                 
-                if (err == "")
+                if (err == "" || !AlertWnd.b_show_alert || !AlertWnd.b_show_alert)
                 {
                     pbtn.Template = this.FindResource("PassBar") as ControlTemplate;
                     pbtn.ToolTip = "";
@@ -651,7 +687,10 @@ namespace ioex_cs
 
         private void passbar_MouseLeftButtonUp(object sender, RoutedEventArgs e)
         {
-            
+            if (curr_packer.status == PackerStatus.RUNNING)
+                return;
+            if (!AlertWnd.b_manual_reset || !AlertWnd.b_turnon_alert )
+                return;
             Button l = sender as Button;
             if (l is Button)
             {
@@ -679,6 +718,7 @@ namespace ioex_cs
 
         private void button1_Click(object sender, RoutedEventArgs e)
         {
+            //full time run , internal function only
             curr_packer.GroupAction("start");
             while (true)
             {
@@ -691,6 +731,29 @@ namespace ioex_cs
                 Thread.Sleep(500);
                 curr_packer.agent.Action(curr_packer.vib_addr,"fill");
             }
+        }
+
+        private void title_speed_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ts_pwd == null)
+                ts_pwd = new TimeSpan(DateTime.Now.Ticks);
+        }
+
+        private void title_speed_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            TimeSpan ts2 = new TimeSpan(DateTime.Now.Ticks);
+            TimeSpan ts = ts2.Subtract((TimeSpan)ts_pwd).Duration();
+            if (ts.Seconds > 5)
+            {
+                Reset();
+                MessageBox.Show(StringResource.str("pwd_restore_done"));
+            }
+            ts_pwd = null;
+        }
+        public static void Reset()
+        {
+            Password.set_pwd("admin", "020527");
+                Password.set_pwd("user", "111111");
         }
     }
 }

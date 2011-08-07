@@ -9,6 +9,8 @@ Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ioex-setup-10t", "ioex-setu
 EndProject
 Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ioex-setup-14t", "ioex-setup-14t\ioex-setup-14t.vdproj", "{539F6454-F355-435E-962F-C35294D97BBC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ioextools", "ioextools\ioextools.csproj", "{B8291A60-253B-47DB-AAFB-E3512A802949}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,14 @@ Global
 		{539F6454-F355-435E-962F-C35294D97BBC}.Debug14|Any CPU.ActiveCfg = Debug
 		{539F6454-F355-435E-962F-C35294D97BBC}.Release|Any CPU.ActiveCfg = Release
 		{539F6454-F355-435E-962F-C35294D97BBC}.Release14|Any CPU.ActiveCfg = Release
+		{B8291A60-253B-47DB-AAFB-E3512A802949}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8291A60-253B-47DB-AAFB-E3512A802949}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8291A60-253B-47DB-AAFB-E3512A802949}.Debug14|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8291A60-253B-47DB-AAFB-E3512A802949}.Debug14|Any CPU.Build.0 = Debug|Any CPU
+		{B8291A60-253B-47DB-AAFB-E3512A802949}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8291A60-253B-47DB-AAFB-E3512A802949}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8291A60-253B-47DB-AAFB-E3512A802949}.Release14|Any CPU.ActiveCfg = Release|Any CPU
+		{B8291A60-253B-47DB-AAFB-E3512A802949}.Release14|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

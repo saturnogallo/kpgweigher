@@ -15,7 +15,7 @@ namespace ioex_cs
         IDLE
     }
     
-    class PackerConfig
+    internal class PackerConfig
     {
         public string product_no;
         public string product_desc;
@@ -58,7 +58,7 @@ namespace ioex_cs
 
     }
 
-    class UIPacker
+    internal class UIPacker
     {
         public bool bSimulate = false;
         public NodeAgent agent;

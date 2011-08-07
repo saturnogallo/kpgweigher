@@ -220,6 +220,6 @@
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource alert_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Margin="0,310.062,38,296.726" Name="btn_alert" Style="{StaticResource ButtonStyle1}" HorizontalAlignment="Right" Width="404" />
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource password_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black"  HorizontalAlignment="Left" Margin="50,0,0,138.361" Name="btn_pwd" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Bottom" Width="404"/>
         <Button FocusVisualStyle="{x:Null}"  Content="{DynamicResource eng_config}" Click="lbl_sub_Click" BorderThickness="0" Canvas.Left="670" Canvas.Top="132" FontSize="72" Foreground="Black" Margin="0,0,38,138.361" Name="btn_eng" Style="{StaticResource ButtonStyle1}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="404"/>
-        <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource RetBtn2}" Height="50" Margin="378,0,310,40" Name="btn_return" Click="btn_return_Click" VerticalAlignment="Bottom">return</Button>
+        <Button FocusVisualStyle="{x:Null}"  Template="{StaticResource RetBtn2}" Height="42" Name="btn_return" Click="btn_return_Click" VerticalAlignment="Bottom" Margin="396.746,0,-396.746,53.344">return</Button>
     </Grid>
 </Window>
