@@ -755,8 +755,7 @@
         <Label Canvas.Left="440" Canvas.Top="96.657" Content="{DynamicResource grp_time}" Height="29.997" Name="label5" Style="{StaticResource MainLblStyle}" Width="142.976" />
         <Label Canvas.Left="584.386" Canvas.Top="96.657" Height="29.997"  Name="run_time" MouseLeftButtonUp="main_input_click" Style="{StaticResource InputStyle}" Width="94.435" />
         <Button Canvas.Left="22" Canvas.Top="392" Content="{DynamicResource cmd_selectall}" Click="btn_selectall_Click" FocusVisualStyle="{x:Null}" Height="30" Name="btn_selectall" Style="{StaticResource ButtonStyle}" Width="100" />
-        <Rectangle Canvas.Left="333.3" Canvas.Top="255.486" Height="78.345" Name="bg_oper" Stroke="Beige" RadiusX="30" RadiusY="30" Width="341.077" Fill="Beige" Opacity="0.8
-                   " Visibility="Hidden">
+        <Rectangle Canvas.Left="349.29" Canvas.Top="255" Height="78" Name="bg_oper" Stroke="Beige" RadiusX="30" RadiusY="30" Width="341.077" Fill="Beige" Opacity="0.8" Visibility="Hidden">
         </Rectangle>
         <Label Canvas.Left="356" Canvas.Top="273.634" Height="50" Name="txt_oper" Width="286" Opacity="1" FontSize="26" Foreground="Tomato" FontWeight="Black" Visibility="Hidden">Label</Label>
         <Label Canvas.Left="326" Canvas.Top="599.46" FontSize="20" Height="34.441" Name="lbl_speed" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="81.103">0</Label>

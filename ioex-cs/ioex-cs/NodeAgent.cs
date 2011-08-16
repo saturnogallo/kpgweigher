@@ -11,14 +11,16 @@ namespace ioex_cs
 {
     public class CombineEventArgs : EventArgs
     {
-        public CombineEventArgs(byte packer_id, byte[] release_addrs, double weight)
+        public CombineEventArgs(byte packer_id, byte[] release_addrs,double[] release_wts, double weight)
         {
             this.packer_id = packer_id;
             this.release_addrs = release_addrs;
+            this.release_wts = release_wts;
             this.weight = weight;
         }
         public byte packer_id;
         public byte[] release_addrs;
+        public double[] release_wts;
         public double weight;
     }	//end of class CombineEventArgs
 
@@ -27,8 +29,11 @@ namespace ioex_cs
     internal class NodeCombination   //the class is used to do combinations and release action
     {
         private byte[] release_addrs = null;
+        private double[] release_wts = null;
         private double release_weight;
+        public static int lastcomb_num = 4;
         private VibStatus vibstate = VibStatus.VIB_INIDLE;
+        public static Queue<CombineEventArgs> q_hits = new Queue<CombineEventArgs>();
         private double llim
         { //low limit of packer setting
             get
@@ -62,7 +67,7 @@ namespace ioex_cs
         private Thread comb_loop; //thread for combination loop
 
         public delegate void HitCombineEventHandler(object sender, CombineEventArgs ce);
-        public event HitCombineEventHandler HitEvent;
+        
 
         private bool bRun;
         internal NodeCombination(UIPacker p)
@@ -83,6 +88,7 @@ namespace ioex_cs
         {
             bRun = true;
             comb_loop.Start();
+            q_hits.Clear();
         }
         private bool bRunCmd = false;
         public void Stop(int ms)
@@ -128,12 +134,13 @@ namespace ioex_cs
                     }
                     continue;
                 }
-                agent.SetOverWeight(addr, false);    
-
-                    
-
-                
-
+                else
+                {
+                    if ((nw >= 0.0) && (nw < 65521))
+                    {
+                        agent.SetOverWeight(addr, false);
+                    }
+                }
             }
         }
         private bool ProcessGoonNodes() //send command to nodes that needs to goon
@@ -145,9 +152,10 @@ namespace ioex_cs
                 if (agent.GetStatus(addr) == NodeStatus.ST_LOST || agent.GetStatus(addr) == NodeStatus.ST_DISABLED)
                     continue;
                 double wt = agent.weight(addr);
-                if ((wt < packer.curr_cfg.target / 2) && (wt >= 0.0) && (wt < 65521))
+                if ((wt < (packer.curr_cfg.target / 2)) && (wt >= 0.0) && (wt < 65521))
                 {
                     agent.Action(addr, "flag_goon"); //no match hit
+                    
                 }
                 else
                 {
@@ -161,7 +169,6 @@ namespace ioex_cs
         }
         public static void logTimeStick(TimeSpan ts1,string step)
         {
-            return;
             TimeSpan ts2 = new TimeSpan(DateTime.Now.Ticks);
             TimeSpan ts = ts2.Subtract(ts1).Duration();
             Debug.WriteLine(step+ts.Milliseconds + "ms");
@@ -191,37 +198,39 @@ namespace ioex_cs
                             ;
                         bSimCombine = false;
 
+                        
                         while (CheckCombination())
                         {
-                            //logTimeStick(ts1, "comb:");    
-                            HitEvent(this, new CombineEventArgs((byte)packer._pack_id, release_addrs, release_weight));
-                            
+                            logTimeStick(ts1, "comb:");    
+
+                            q_hits.Enqueue(new CombineEventArgs((byte)packer._pack_id, release_addrs,release_wts, release_weight));
+                            //NodeCombination.lastcomb_num = release_addrs.Length;
                             while (vibstate != VibStatus.VIB_READY)
                             {
                                 vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
                                 ProcessGoonNodes();
                             }
-                            //logTimeStick(ts1, "vibr:");    
+                            logTimeStick(ts1, "vibr:");    
                             ReleaseAction(release_addrs, release_weight); //send release command and clear weight, trigger the packer, goon the nodes
-                            //logTimeStick(ts1, "rele:");    
+                            logTimeStick(ts1, "rele:");    
                             vibstate = agent.TriggerPacker(packer.vib_addr);
                             while (vibstate == VibStatus.VIB_WORKING)
                             {
                                 vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
                                 ProcessGoonNodes();
                             }
-                            //logTimeStick(ts1, "vibw:");    
+                            logTimeStick(ts1, "vibw:");    
                             ProcessGoonNodes();
                         }
- 
+                        
                         while (ProcessGoonNodes())
                             ;
                         CheckNodeStatus();
-
                         agent.ClearWeights();
+                        logTimeStick(ts1, "fina:");  
                         agent.bWeightReady = false;
                         agent.Action(packer.vib_addr, "fill");
-                        logTimeStick(ts1, "fina:");    
+                        
                     }
                 }
                 else
@@ -233,7 +242,7 @@ namespace ioex_cs
                         
                     }
                 }
-                Thread.Sleep(5);
+                Thread.Sleep(20);
             }
         }
         public double weight(byte addr)
@@ -251,8 +260,10 @@ namespace ioex_cs
             {
                 release_addrs = addrs;
                 release_weight = weight;
+                release_wts = new double[addrs.Length];
+                for (int i = 0; i < release_wts.Length; i++)
+                    release_wts[i] = agent.weight(addrs[i]);
             }
-            
         }
         private bool bSimCombine; //simulate the combination to see whether there is node need to goon ealier.
         private Dictionary<byte,bool> bSimNodeValid; //array used to store the state of each node in simulation mode;
@@ -461,16 +472,14 @@ namespace ioex_cs
         {
 
             {
-
-
-                if (Caculation1() || Caculation2() || Caculation3() || Caculation4() || Caculation5())// || Caculation1() ||
+                if (Caculation1() || Caculation2() || Caculation3() || Caculation4() || Caculation5())
                 {
                     return true;
 
                 }
                 if (NodeAgent.IsDebug)
                 {
-                    if (rand.NextDouble() > 0.5)
+                    if (rand.NextDouble() > 0.6)
                     {
                         DoRelease(new byte[] { packer.weight_nodes[1], packer.weight_nodes[2], packer.weight_nodes[3], packer.weight_nodes[4], packer.weight_nodes[5] }, 115);
                         return true;
@@ -706,6 +715,16 @@ namespace ioex_cs
                 if (cmd == "flag_goon") //no response is required so that no mutex is required
                 {
                     node["flag_goon"] = 1;
+                    (node as WeighNode).ClearWeight();
+                    Debug.WriteLine(node.node_id + ":" + cmd);
+                    return;
+                }
+                if (cmd == "flag_release")
+                {
+                    lastrelease[node.node_id] = DateTime.Now;
+                    node["flag_release"] = 1;
+                    (node as WeighNode).ClearWeight();
+                    Debug.WriteLine(node.node_id + ":" + cmd);
                     return;
                 }
                 if (cmd == "fill")
@@ -732,6 +751,7 @@ namespace ioex_cs
                         if (cmd == "flag_goon")
                         {
                             node["flag_goon"] = 1;
+                            (node as WeighNode).ClearWeight();
                             //WaitUntilFlagSent(node);
                         }
 
@@ -739,7 +759,9 @@ namespace ioex_cs
                         {
                             lastrelease[node.node_id] = DateTime.Now;
                             node["flag_release"] = 1;
-                            WaitUntilFlagSent(node);
+                            (node as WeighNode).ClearWeight();
+                            //Thread.Sleep(2);
+                            //WaitUntilFlagSent(node);
                         }
                         if ((cmd == "trigger") && (node is VibrateNode))
                         {
@@ -972,7 +994,7 @@ namespace ioex_cs
             Thread.Sleep(12);
 
             
-            while (WaitForIdleQuick(n))
+            while (WaitForIdleQuick(n,8))
             {
                 if (n[regname].HasValue && n[regname].Value == val)
                 {
@@ -1029,15 +1051,15 @@ namespace ioex_cs
             return true;
         }
 
-        private bool WaitForIdleQuick(SubNode n)
+        private bool WaitForIdleQuick(SubNode n, int to)
         {
             int i = 2;
             //int j = 0;
             while (n.status == NodeStatus.ST_BUSY)
             {
-                Thread.Sleep(10);
+                Thread.Sleep(2);
                 //i = i + (i + 1) / 2; //8,12,18,28,42,64,96,
-                if (i++ > 8)
+                if (i++ > to*5)
                 {
                     return false;
                 }
@@ -1051,7 +1073,7 @@ namespace ioex_cs
             string reg = "flag_cnt";
             Thread.Sleep(5);
             n[reg] = null;
-            WaitForIdleQuick(n);
+            WaitForIdleQuick(n,8);
             if (n[reg].HasValue)
             {
                  uint lw_lb = n[reg].Value % 256;
@@ -1092,7 +1114,7 @@ namespace ioex_cs
             if (vn == null)
                 return false;
             vn["pack_rel_cnt"] = null;
-            WaitForIdleQuick(vn);
+            WaitForIdleQuick(vn,8);
             if (vn["pack_rel_cnt"].HasValue)
             {
                 if((pack_cnt % (vn.intf_byte.feed_times+1) != 0))
@@ -1195,21 +1217,20 @@ namespace ioex_cs
                 if (wn.status == NodeStatus.ST_LOST || wn.status == NodeStatus.ST_DISABLED)
                     continue;
                 TimeSpan ts3 = DateTime.Now - lastrelease[wn.node_id];
-                if (ts3.TotalMilliseconds < 150)
+                if (ts3.TotalMilliseconds < 250)
                     continue;
                 if (wn.weight < -1000 || (wn.weight >= 100000)) //invalid weight || wn.weight >= 65521
                 {
                     wn.Query();
-                    
-                    WaitForIdleQuick(wn);
-                    //NodeCombination.logTimeStick(ts1, "ck2:");
+                    WaitForIdleQuick(wn,8);
+//                  NodeCombination.logTimeStick(ts1, "ck2:");
+                  Debug.Write(String.Format("{0},",wn.node_id));
                 }
             }
             mut.ReleaseMutex();
 
             foreach (WeighNode wn in weight_nodes)
             {
-
                 if (wn.status == NodeStatus.ST_LOST || wn.status == NodeStatus.ST_DISABLED)
                     continue;
             }
@@ -1217,12 +1238,14 @@ namespace ioex_cs
             foreach (WeighNode wn in weight_nodes)
             {
                 double wt = wn.weight;
+                /*
                 TimeSpan ts4 = DateTime.Now - lastrelease[wn.node_id];
                 if (ts4.TotalMilliseconds < 150)
                 {
                     ret--;
                     continue;
                 }
+                */
                 if ((wt < -1000) || (wt >= 100000)) //invalid reading
                 {
                     
@@ -1232,7 +1255,7 @@ namespace ioex_cs
                 }
                 ret--;
             }
-            if(ret < 4)
+            if(ret < NodeCombination.lastcomb_num)
                 NodeCombination.logTimeStick(ts1, "ck:");
             return ret;
         }
@@ -1306,7 +1329,7 @@ namespace ioex_cs
                     if (!bWeightReady)
                     {
                         notready = check_weights_ready();
-                        if (notready < 4)
+                        if (notready <= NodeCombination.lastcomb_num)
                         {
                             bWeightReady = true;
                             checkcnt = 0;

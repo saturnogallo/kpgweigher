@@ -60,8 +60,8 @@ namespace ioex_cs
             System.Diagnostics.Process[] pses = System.Diagnostics.Process.GetProcessesByName("ioex-cs");
             if (pses.Length > 0) 
             {
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
-                return;
+//                System.Diagnostics.Process.GetCurrentProcess().Kill();
+//              return;
             }
             
             if (Environment.CommandLine.IndexOf("/debug") > 0)
@@ -84,7 +84,8 @@ namespace ioex_cs
 
             singlewnd = new SingleMode(Int32.Parse(curr_cfg.Element("node_number").Value));
             runwnd = new RunMode(Int32.Parse(curr_cfg.Element("node_number").Value));
-
+            WeighNode.TARGET_PERCENT = Double.Parse(curr_cfg.Element("percent").Value);
+            
             histwnd = new ProdHistory();
             helpwnd = new Help();
             kbdwnd = new kbd();
@@ -176,6 +177,7 @@ namespace ioex_cs
             if (mode == "singlemode")
             {
                 singlewnd.Show();
+				singlewnd.UpdateUI();
                 singlewnd.BringIntoView();
                 return;
             }

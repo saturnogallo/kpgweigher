@@ -128,14 +128,14 @@
     <s:String x:Key="enter_cali0">Please enter poise weight (gram) for calibration</s:String>
     <s:String x:Key="enter_prd_no">Please enter product number</s:String>
     <s:String x:Key="enter_motor_speed_input">Enter motor speed</s:String>
-    <s:String x:Key="enter_col_otime_input">Enter open time of pass bucket(*10ms)</s:String>
+    <s:String x:Key="enter_col_otime_input">Enter delay time of pass bucket(*10ms)</s:String>
     <s:String x:Key="enter_sub_amp_input">Enter amp. of sub vibrate</s:String>
     <s:String x:Key="enter_col_dtime_input">Enter delay before weight (*10ms)</s:String>
     <s:String x:Key="enter_sub_time_input">Enter time of sub vibrate(*20ms)</s:String>
     <s:String x:Key="enter_sub_freq_input">Enter cycles for zeroing</s:String>
     <s:String x:Key="enter_wei_otime_input">Enter delay after release(*10ms)</s:String>
     <s:String x:Key="enter_wei_dtime_input">Enter delay after sub vibrate(*10ms)</s:String>
-    <s:String x:Key="enter_openwei_input">Enter open time of weight bucket(*10ms)</s:String>
+    <s:String x:Key="enter_openwei_input">Enter delay time of release bucket(*10ms)</s:String>
     <s:String x:Key="license">Total pack number exceeds the limit, please contact with vendor to disable the limitation.</s:String>
     <s:String x:Key="quit_eng">Quit</s:String>
     <s:String x:Key="zero_complete">Zero completed.</s:String>
@@ -190,10 +190,10 @@
     <s:String x:Key="grp_uvar">Upper Var.</s:String>
     <s:String x:Key="grp_dvar">Low Var.</s:String>
 
-    <s:String x:Key="openwei">Release open(*10ms)</s:String>
+    <s:String x:Key="openwei">Release delay(*10ms)</s:String>
     <s:String x:Key="gain">AD speed</s:String>
     <s:String x:Key="cs_filter">AD filter</s:String>
-    <s:String x:Key="col_otime">Pass bucket open(*10ms)</s:String>
+    <s:String x:Key="col_otime">Pass bucket delay(*10ms)</s:String>
     <s:String x:Key="col_dtime">Pre weight Delay(*10ms)</s:String>
     <s:String x:Key="sub_amp">Sub Amplitude</s:String>
     <s:String x:Key="sub_freq">Zero cycle</s:String>

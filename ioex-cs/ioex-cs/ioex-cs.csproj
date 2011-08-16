@@ -282,6 +282,8 @@
   <ItemGroup>
     <Resource Include="Notes.txt" />
     <Content Include="password.xml" />
+    <Resource Include="Resources\Image\back.png" />
+    <Resource Include="Resources\Image\next.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">

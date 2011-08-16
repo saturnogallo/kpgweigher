@@ -26,9 +26,9 @@ namespace ioex_cs
         {
             InitializeComponent();
             imglist = new Dictionary<string, string>();
-            if (Directory.Exists(ProdNum.baseDir + "\\prodpic"))
-                Directory.CreateDirectory(ProdNum.baseDir + "\\prodpic");
-            foreach (string f in Directory.GetFiles(ProdNum.baseDir + "\\prodpic\\","*.jpg"))
+            if (Directory.Exists(ProdNum.baseDir + "\\prodpic" + StringResource.language + "\\" ))
+                Directory.CreateDirectory(ProdNum.baseDir + "\\prodpic" + StringResource.language + "\\");
+            foreach (string f in Directory.GetFiles(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\", "*.jpg"))
             {
                 FileInfo fi = new FileInfo(f);
                 string nm = fi.Name.Remove(fi.Name.Length-4,4).Replace(' ','_');

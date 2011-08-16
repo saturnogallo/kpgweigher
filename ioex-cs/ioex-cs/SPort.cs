@@ -292,6 +292,8 @@ namespace ioex_cs
 
         public bool Open()
         {
+            if (NodeAgent.IsDebug)
+                return true;
             if (Status != PortStatus.CLOSED)
                 return true;
             try

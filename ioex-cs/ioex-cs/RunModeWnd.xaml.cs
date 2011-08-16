@@ -31,6 +31,7 @@ namespace ioex_cs
         [DllImport("user32.dll", EntryPoint = "ShowCursor", CharSet = CharSet.Auto)]
         public static extern int ShowCursor(int bShow);
         private System.Windows.Forms.Timer tm_cursor;
+        private Mutex hitmut = new Mutex();
         private UIPacker curr_packer
         {
             get
@@ -41,6 +42,7 @@ namespace ioex_cs
         }
         private object ts_pwd = null;
         private Queue<string> lastcalls;
+        
         private string lastcall{
             get
             {
@@ -101,13 +103,14 @@ namespace ioex_cs
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
             uiTimer.Interval = 200;
-            currentApp().packers[0].nc.HitEvent += new NodeCombination.HitCombineEventHandler(nc_HitEvent);
+
 //            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
             uiTimer.Start();
             tm_cursor = new System.Windows.Forms.Timer();
             tm_cursor.Tick += new EventHandler(tm_cursor_Tick);
             tm_cursor.Interval = 5000;
             this.MouseLeftButtonDown += new MouseButtonEventHandler(RunMode_MouseMove);
+            this.title_speed.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(this.title_speed_MouseDown);
             //this.MouseMove += new MouseEventHandler(RunMode_MouseMove);
         }
 
@@ -149,20 +152,6 @@ namespace ioex_cs
                     catch
                     {
                     }
-            }
-        }
-
-        public void nc_HitEvent(object sender, CombineEventArgs ce)
-        {
-            if (this.IsVisible)
-            {
-                try
-                {
-                    Dispatcher.Invoke(new Action<CombineEventArgs>(this.CombineNodeUI), System.Windows.Threading.DispatcherPriority.Background, new object[] { ce });
-                }
-                catch
-                {
-                }
             }
         }
 
@@ -208,10 +197,17 @@ namespace ioex_cs
             
             lbl_datetime.Content = DateTime.Now.ToLongDateString() + "  " + DateTime.Now.ToLongTimeString();
 
+            
             if (!this.IsVisible)
                 return;
-            
+         
+
             UIPacker p = curr_packer;
+            if (NodeCombination.q_hits.Count > 0)
+            {
+                CombineNodeUI(NodeCombination.q_hits.Dequeue());
+                return;
+            }
             if (p.agent.bNeedRefresh && this.IsVisible)
             {
                 p.agent.bNeedRefresh = false;
@@ -311,9 +307,19 @@ namespace ioex_cs
                 byte n = (byte)(RunMode.StringToId(param));
                 NodeAgent agent = currentApp().packers[ce.packer_id].agent;
 
-                double wt = agent.weight(n);
+                double wt = -100000;
+                for(int i=0;i<ce.release_addrs.Length;i++)
+                {
+                    if (ce.release_addrs[i] == n)
+                    {
+                        wt = ce.release_wts[i];
+                        break;
+                    }
+                }
+                
+                
                 if (wt > -1000 && wt < 65521)
-                    lb.Content = agent.weight(n).ToString("F1");
+                    lb.Content = wt.ToString("F1");
 
                 if (agent.GetStatus(n) == NodeStatus.ST_LOST || agent.GetStatus(n) == NodeStatus.ST_DISABLED)
                 {
@@ -337,7 +343,6 @@ namespace ioex_cs
                 lbl_totalpack.Content = p.total_packs.ToString();
                 RefreshVibUI();
             }
-
         }
         void  RunMode_Loaded(object sender, RoutedEventArgs e)
         {
@@ -365,12 +370,18 @@ namespace ioex_cs
         }
         private void ToggleStartStop()
         {
+            hitmut.WaitOne();
             App p = currentApp();
             if (curr_packer.status == PackerStatus.RUNNING)
             {
                 curr_packer.StopRun();
                 this.btn_allstart.Content = StringResource.str("all_start");
                 btn_allstart.Style = this.FindResource("StartBtn") as Style;
+                //show cursor;
+                tm_cursor.Stop();
+                ShowCursor(1);
+                bShowCursor = true;
+                
             }
             else
             {
@@ -383,6 +394,7 @@ namespace ioex_cs
             }
 
             btn_allstart.ApplyTemplate();
+            hitmut.ReleaseMutex();
             
         }
         private void btn_start_click(object sender, RoutedEventArgs e)
@@ -397,7 +409,6 @@ namespace ioex_cs
                 lbl_status.Content = StringResource.str("starting");
                 tm_cursor.Start();
             }
-            
         }
         private void btn_history_click(object sender, RoutedEventArgs e)
         {
@@ -461,10 +472,10 @@ namespace ioex_cs
                 this.prd_desc.Content = pack.curr_cfg.product_desc.ToString();
                 Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
                 //load the corresponding picture.
-                if(File.Exists(ProdNum.baseDir + "\\prodpic\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"))
-                    (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
+                if (File.Exists(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"))
+                    (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
                 else
-                    (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\1.jpg"));
+                    (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\default.jpg"));
 
             }
             if (param.IndexOf("wei_node") == 0)
@@ -563,7 +574,7 @@ namespace ioex_cs
                         if((pack.agent.GetStatus(n) == NodeStatus.ST_IDLE))
                         {
                             if("0" != pack.agent.GetNodeReg(n,"target_weight"))
-                                pack.agent.SetNodeReg(n,"target_weight",Convert.ToUInt32(pack.curr_cfg.target/3));
+                                pack.agent.SetNodeReg(n, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / WeighNode.TARGET_PERCENT));
                         }
                     }
                 }
@@ -684,11 +695,16 @@ namespace ioex_cs
                 UpdateAlertWindow(false);
             }
         }
-
+        private void looseFocus()
+        {
+        }
         private void passbar_MouseLeftButtonUp(object sender, RoutedEventArgs e)
         {
             if (curr_packer.status == PackerStatus.RUNNING)
+            {
+                looseFocus();
                 return;
+            }
             if (!AlertWnd.b_manual_reset || !AlertWnd.b_turnon_alert )
                 return;
             Button l = sender as Button;
@@ -738,16 +754,23 @@ namespace ioex_cs
             if (ts_pwd == null)
                 ts_pwd = new TimeSpan(DateTime.Now.Ticks);
         }
-
+        private int title_cnt = 0;
         private void title_speed_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (ts_pwd == null)
+                return;
+            title_cnt++;
+            if (title_cnt < 5)
+                return;
+
             TimeSpan ts2 = new TimeSpan(DateTime.Now.Ticks);
             TimeSpan ts = ts2.Subtract((TimeSpan)ts_pwd).Duration();
-            if (ts.Seconds > 5)
+            if (ts.Seconds < 6)
             {
                 Reset();
                 MessageBox.Show(StringResource.str("pwd_restore_done"));
             }
+            title_cnt = 0;
             ts_pwd = null;
         }
         public static void Reset()
