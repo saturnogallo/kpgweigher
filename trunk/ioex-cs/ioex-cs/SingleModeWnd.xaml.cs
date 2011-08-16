@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Text.RegularExpressions;
-
+using System.IO;
 
 namespace ioex_cs
 {
@@ -30,6 +30,7 @@ namespace ioex_cs
             }
         }
         private Queue<string> lastcalls;
+        
         private string lastcall
         {
             get
@@ -143,7 +144,6 @@ namespace ioex_cs
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
             uiTimer.Interval = 100;
             uiTimer.Start();
-            currentApp().packers[0].nc.HitEvent += new NodeCombination.HitCombineEventHandler(nc_HitEvent);
 //            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
         }
 
@@ -166,18 +166,6 @@ namespace ioex_cs
            }
         }
 
-        public void nc_HitEvent(object sender, CombineEventArgs ce)
-        {
-            if (this.Visibility == Visibility.Visible)
-            {
-                try{
-                    this.Dispatcher.Invoke(new Action<CombineEventArgs>(HitCombineNodeUI), new object[] { ce });
-                }
-                catch
-                {
-                }
-            }
-        }
         private App currentApp()
         {
             return (System.Windows.Application.Current as App);
@@ -190,6 +178,11 @@ namespace ioex_cs
             if (!this.IsVisible)
                 return;
             App p = Application.Current as App;
+            if (NodeCombination.q_hits.Count > 0)
+            {
+                HitCombineNodeUI(NodeCombination.q_hits.Dequeue());
+                return;
+            }
             if (p.agent.bNeedRefresh)
             {
                 p.agent.bNeedRefresh = false;
@@ -357,12 +350,13 @@ namespace ioex_cs
             
             
         }
-        private void UpdateUI()
+        public void UpdateUI()
         {
             App p = Application.Current as App;
             NodeAgent n = curr_packer.agent;
             byte vn = curr_packer.vib_addr;
-
+            if (curr_node_index < 0)
+                return;
              
             sub_freq_input.Content = n.GetNodeReg((byte)curr_node_index, "magnet_freq");
             sub_amp_input.Content = n.GetNodeReg((byte)curr_node_index, "magnet_amp");
@@ -391,8 +385,10 @@ namespace ioex_cs
             lbl_currNode.Content = (curr_node_index).ToString();
             Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
             //load the corresponding pictiure.
-            (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
-            
+            if (File.Exists(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + curr_packer.curr_cfg.product_desc.ToString() + ".jpg"))
+                (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + curr_packer.curr_cfg.product_desc.ToString() + ".jpg"));
+            else
+                (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\default.jpg"));
         }
         private void node_reg(string regname)
         {
@@ -470,7 +466,7 @@ namespace ioex_cs
                         if ((pack.agent.GetStatus(naddr) == NodeStatus.ST_IDLE))
                         {
                             if ("0" != pack.agent.GetNodeReg(naddr, "target_weight"))
-                                pack.agent.SetNodeReg(naddr, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / 4));
+                                pack.agent.SetNodeReg(naddr, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / WeighNode.TARGET_PERCENT));
                         }
                     }
                 }
@@ -814,7 +810,7 @@ namespace ioex_cs
             NodeAgent n = curr_packer.agent;
             if (cb_autoamp.IsChecked.HasValue && cb_autoamp.IsChecked.Value)
             {
-                n.SetNodeReg((byte)curr_node_index, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / 4.0)); 
+                n.SetNodeReg((byte)curr_node_index, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / WeighNode.TARGET_PERCENT)); 
             }
             else
             {

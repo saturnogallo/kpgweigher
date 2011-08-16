@@ -50,7 +50,7 @@ namespace ioex_cs
             {
                 pcfg.FromElement(XElement.Parse(curr_packer.all_conf[id]));
                 
-                FileInfo fi = new FileInfo(ProdNum.baseDir +"\\prodpic\\"+pcfg.product_desc +".jpg");
+                FileInfo fi = new FileInfo(ProdNum.baseDir +"\\prodpic\\"+ StringResource.language + "\\" + pcfg.product_desc +".jpg");
                 imglist[id] = fi.FullName;
 
                 Label n = new Label();

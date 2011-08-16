@@ -130,14 +130,14 @@
     <s:String x:Key="enter_cali0">请输入校准砝码重量(克)</s:String>
     <s:String x:Key="enter_prd_no">请输入产品号</s:String>
     <s:String x:Key="enter_motor_speed_input">请输入开关马达速度</s:String>
-    <s:String x:Key="enter_col_otime_input">请输入预存斗打开时间(*10ms)</s:String>
+    <s:String x:Key="enter_col_otime_input">请输入加料延时时间(*10ms)</s:String>
     <s:String x:Key="enter_sub_amp_input">请输入线振机振动幅度</s:String>
     <s:String x:Key="enter_col_dtime_input">请输入称重前延时(*10ms)</s:String>
     <s:String x:Key="enter_sub_time_input">请输入线振机振动时间(*10ms)</s:String>
     <s:String x:Key="enter_sub_freq_input">请输入清零间隔</s:String>
     <s:String x:Key="enter_wei_otime_input">请输入放料后延时(*10ms)</s:String>
     <s:String x:Key="enter_wei_dtime_input">请输入振动后延时(*10ms)</s:String>
-    <s:String x:Key="enter_openwei_input">请输入称重斗打开时间(*10ms)</s:String>
+    <s:String x:Key="enter_openwei_input">请输入放料延时时间(*10ms)</s:String>
     <s:String x:Key="license">总包数已超出设定，请与生产商联系，解除设定</s:String>
     <s:String x:Key="quit_eng">退出修改</s:String>
     <s:String x:Key="zero_complete">清零操作完成</s:String>
@@ -191,10 +191,10 @@
     <s:String x:Key="upper_var">上偏重量</s:String>
     <s:String x:Key="lower_var">下偏重量</s:String>
 
-    <s:String x:Key="openwei">称重斗打开(*10ms)</s:String>
+    <s:String x:Key="openwei">称重延时(*10ms)</s:String>
     <s:String x:Key="gain">AD转换速度</s:String>
     <s:String x:Key="cs_filter">AD滤波器选择</s:String>
-    <s:String x:Key="col_otime">预存斗打开(*10ms)</s:String>
+    <s:String x:Key="col_otime">加料延时(*10ms)</s:String>
     <s:String x:Key="col_dtime">称重前延时(*10ms)</s:String>
     <s:String x:Key="sub_amp">线振幅度</s:String>
     <s:String x:Key="sub_freq">自动清零周期(次)</s:String>

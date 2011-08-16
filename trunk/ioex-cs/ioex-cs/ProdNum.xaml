@@ -57,8 +57,7 @@
                 <WrapPanel Height="Auto" Name="wrapPanel1" Width="950"></WrapPanel>
         </ScrollViewer>
         <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn2}" Height="42" HorizontalAlignment="Center" Margin="10,10,0,30" Name="btn_ret_run" VerticalAlignment="Bottom" Width="148" Click="btn_ret_run_Click_1"/>
-        <Label Height="31.438" HorizontalAlignment="Right" Margin="0,82.882,154.332,0" Name="lbl_pglast" MouseLeftButtonUp="lbl_pglast_MouseLeftButtonUp" VerticalAlignment="Top" Width="115.749" Content="{DynamicResource lastpage}" FontSize="16" Foreground="Blue"></Label>
-        <Label Height="31.438" HorizontalAlignment="Right" Margin="0,82.882,11.432,0" Name="lbl_pgnext" MouseLeftButtonUp="lbl_pgnext_MouseLeftButtonUp" VerticalAlignment="Top" Width="132.897" Content="{DynamicResource nextpage}" FontSize="16" Foreground="Blue"></Label>
-
+        <Image Height="23.75" HorizontalAlignment="Right" Margin="0,90.57,160,0" Name="img_pglast" MouseLeftButtonUp="lbl_pglast_MouseLeftButtonUp" Stretch="Fill" VerticalAlignment="Top" Width="62.5" Source="/ioex-cs;component/Resources/Image/back.png" />
+        <Image Height="23.75" HorizontalAlignment="Right" Margin="0,90.57,34.5,0" Name="img_pgnext" MouseLeftButtonUp="lbl_pgnext_MouseLeftButtonUp" Stretch="Fill" VerticalAlignment="Top" Width="62.5" Source="/ioex-cs;component/Resources/Image/next.png" />
     </Grid>
 </Window>
