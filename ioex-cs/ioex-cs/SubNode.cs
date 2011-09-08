@@ -229,7 +229,7 @@ namespace ioex_cs
         public const double INAVLID_WEIGHT =    1000000.0;
         public const double NOREADING_WEIGHT = -10000.0;
         public const UInt32 MAX_VALID_WEIGHT = 65520;
-        public static double TARGET_PERCENT = 1.4;
+        
         private int cnt_aderr; //count for ad error
         Random rand;
         public double weight
@@ -461,6 +461,7 @@ namespace ioex_cs
         protected Dictionary<string, Nullable<UInt32>> curr_conf; //store the configuration string of each config name (<config_name, xml_value> pair>
 
         public UInt32 flag_cnt = 0;
+        public double percent = 0.0;
         static string reg_define_file = "ioex_cs.Resources.node_define.xml";// /ioex-cs;component/Resources/
         public byte node_id { get; set; }
         public NodeStatus status { get; set; }

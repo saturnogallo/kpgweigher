@@ -37,8 +37,8 @@ namespace ioex_cs
                 packer_counter = int.Parse(GetRegistData("lock_on"));
                 if (!Password.compare_pwd("lock_on", GetRegistData("lock_on")) || (packer_counter < 1))
                 {
-                    (Application.Current as App).runwnd.Disable();
-                    (Application.Current as App).singlewnd.Disable();
+                    (Application.Current as App).runwnd.Disable(Visibility.Hidden);
+                    (Application.Current as App).singlewnd.Disable(Visibility.Hidden);
                 }
             }
             //check license key
@@ -230,6 +230,9 @@ namespace ioex_cs
                 {
                     b_lockon = false;
                     Password.set_pwd("lock", "0");
+                    b_lockon = false;
+                    (Application.Current as App).runwnd.Disable(Visibility.Visible);
+                    (Application.Current as App).singlewnd.Disable(Visibility.Visible);
                     UpdateDisplay(true);
                 }
             }
@@ -240,8 +243,8 @@ namespace ioex_cs
                 DeleteRegist("lock_on");
                 WTRegedit("lock_on", data);
                 Password.set_pwd("lock", data);
-
                 p.SaveAppConfig();
+                b_lockon = true;
                 UpdateDisplay(false);
             }
             if (param.IndexOf("reg_") == 0)

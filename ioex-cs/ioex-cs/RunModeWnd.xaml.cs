@@ -137,9 +137,10 @@ namespace ioex_cs
             tm_cursor.Stop();
         }
 
-        public void Disable()
+        public void Disable(Visibility state)
         {
-            this.btn_allstart.Visibility = Visibility.Hidden;
+            this.btn_allstart.Visibility = state;
+            this.lbl_bgstart.Visibility = state;
         }
         public void agent_RefreshEvent(object sender)
         {
@@ -192,6 +193,7 @@ namespace ioex_cs
             }
 
         }
+        private static bool tmlock = false;
         void uiTimer_Tick(object sender, EventArgs e)
         {
             
@@ -200,12 +202,15 @@ namespace ioex_cs
             
             if (!this.IsVisible)
                 return;
-         
+            if (tmlock)
+                return;
+            tmlock = true;
 
             UIPacker p = curr_packer;
             if (NodeCombination.q_hits.Count > 0)
             {
                 CombineNodeUI(NodeCombination.q_hits.Dequeue());
+                tmlock = false;
                 return;
             }
             if (p.agent.bNeedRefresh && this.IsVisible)
@@ -246,8 +251,10 @@ namespace ioex_cs
                 }
                 txt_oper.Visibility = Visibility.Hidden;
                 bg_oper.Visibility = Visibility.Hidden;
+                tmlock = false;
                 return;
             }
+            tmlock = false;
         }
         public void RefreshRunNodeUI() //node ui update at run time
         {
@@ -370,31 +377,37 @@ namespace ioex_cs
         }
         private void ToggleStartStop()
         {
-            hitmut.WaitOne();
+            
+            
             App p = currentApp();
             if (curr_packer.status == PackerStatus.RUNNING)
             {
-                curr_packer.StopRun();
-                this.btn_allstart.Content = StringResource.str("all_start");
-                btn_allstart.Style = this.FindResource("StartBtn") as Style;
-                //show cursor;
-                tm_cursor.Stop();
-                ShowCursor(1);
-                bShowCursor = true;
-                
+                if (hitmut.WaitOne(1000))
+                {
+                    curr_packer.StopRun();
+                    this.btn_allstart.Content = StringResource.str("all_start");
+                    btn_allstart.Style = this.FindResource("StartBtn") as Style;
+                    //show cursor;
+                    tm_cursor.Stop();
+                    ShowCursor(1);
+                    bShowCursor = true;
+                    hitmut.ReleaseMutex();
+                    btn_allstart.ApplyTemplate();
+                }
             }
             else
             {
-                curr_packer.bSimulate = false;
-
-                curr_packer.StartRun();
-
-                this.btn_allstart.Content = StringResource.str("all_stop");
-                btn_allstart.Style = this.FindResource("StartBtn2") as Style;
+                if (hitmut.WaitOne(1000))
+                {
+                    curr_packer.bSimulate = false;
+                    curr_packer.StartRun();
+                    this.btn_allstart.Content = StringResource.str("all_stop");
+                    btn_allstart.Style = this.FindResource("StartBtn2") as Style;
+                    hitmut.ReleaseMutex();
+                    btn_allstart.ApplyTemplate();
+                }
             }
-
-            btn_allstart.ApplyTemplate();
-            hitmut.ReleaseMutex();
+            
             
         }
         private void btn_start_click(object sender, RoutedEventArgs e)
@@ -504,8 +517,8 @@ namespace ioex_cs
                 }
                 pbtn.ApplyTemplate();
 
-                
-                if (pack.agent.GetStatus(n) == NodeStatus.ST_LOST)
+
+                if (pack.agent.GetStatus(n) == NodeStatus.ST_LOST || pack.agent.GetStatus(n) == NodeStatus.ST_DISABLED)
                 {
                     btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
                 }
@@ -559,32 +572,35 @@ namespace ioex_cs
                 if (param == "run_uvar")
                 {
                     pack.curr_cfg.upper_var = double.Parse(data);
-                    
+                    pack.SaveCurrentConfig(4);
                 }
                 if (param == "run_dvar")
                 {
                     pack.curr_cfg.lower_var = double.Parse(data);
-                    
+                    pack.SaveCurrentConfig(4);
                 }
                 if (param == "run_target")
                 {
-                    pack.curr_cfg.target = double.Parse(data);
-                    foreach(byte n in pack.weight_nodes)
+                    double oldtarget = curr_packer.curr_cfg.target;
+                    pack.curr_cfg.target = Double.Parse(data);
+                    foreach (byte naddr in pack.weight_nodes)
                     {
-                        if((pack.agent.GetStatus(n) == NodeStatus.ST_IDLE))
+                        if ((pack.agent.GetStatus(naddr) == NodeStatus.ST_IDLE))
                         {
-                            if("0" != pack.agent.GetNodeReg(n,"target_weight"))
-                                pack.agent.SetNodeReg(n, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / WeighNode.TARGET_PERCENT));
+                            double per = Double.Parse(pack.agent.GetNodeReg(naddr, "target_weight")); ;
+                            if (per > 0.0001)
+                            {
+                                pack.agent.SetNodeReg(naddr, "target_weight", Convert.ToUInt32(pack.curr_cfg.target * per / oldtarget));
+                            }
                         }
                     }
+                    pack.SaveCurrentConfig(1+4);
                 }
                 if (param == "run_operator")
                 {
-
                     (Application.Current as App).oper = data;
+                    pack.SaveCurrentConfig(4);
                 }
-                if (param.IndexOf("run") == 0)
-                    pack.SaveCurrentConfig();
                 if (param == "singlemode")
                 {
                     if (Password.compare_pwd("user",data))
@@ -625,7 +641,7 @@ namespace ioex_cs
         {
             App p = Application.Current as App;
             curr_packer.curr_cfg.product_no = item;
-            curr_packer.SaveCurrentConfig();
+            curr_packer.SaveCurrentConfig(4);
             lastcall = "UpdatePrdNo";
             txt_oper.Content = StringResource.str("downloading");
             txt_oper.Visibility = Visibility.Visible;
@@ -682,10 +698,10 @@ namespace ioex_cs
                 }
                 if (l.Name == "lbl_alert3") //alert disable
                 {
-                    if (p.agent.GetStatus(id) == NodeStatus.ST_LOST)
+                    if ((p.agent.GetStatus(id) == NodeStatus.ST_LOST) || (p.agent.GetStatus(id) == NodeStatus.ST_DISABLED))
                         p.agent.SetStatus(id, NodeStatus.ST_IDLE);
                     else
-                        p.agent.SetStatus(id, NodeStatus.ST_LOST);
+                        p.agent.SetStatus(id, NodeStatus.ST_DISABLED);
                 }
                 if (l.Name == "lbl_alert4") //alert quit
                 {
@@ -717,7 +733,7 @@ namespace ioex_cs
                     curr_node = id;
                     if (AlertWnd.b_turnon_alert && AlertWnd.b_show_alert)
                     {
-                        if (p.agent.GetStatus(id) == NodeStatus.ST_LOST)
+                        if ((p.agent.GetStatus(id) == NodeStatus.ST_LOST) || (p.agent.GetStatus(id) == NodeStatus.ST_DISABLED))
                             lbl_alert3.Content = StringResource.str("alert_enable");
                         else
                             lbl_alert3.Content = StringResource.str("alert_disable");

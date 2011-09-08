@@ -95,7 +95,7 @@ namespace ioex_cs
         {
             bRun = false;
             bRunCmd = true;
-            while (bRunCmd)
+            while (bRunCmd && (ms-- > 0))
                 Thread.Sleep(10);
             
 //          comb_loop.Suspend();
@@ -122,7 +122,7 @@ namespace ioex_cs
                 //over_weight check
                 wt = agent.weight(addr);
                 double nw = wt;
-                if (nw > (packer.curr_cfg.target - packer.curr_cfg.lower_var) && (nw < 65521)) //has overweight
+                if (nw > (packer.curr_cfg.target * 0.66) && (nw < 65521)) //has overweight
                 {
                     if (AlertWnd.b_turnon_alert)
                     {
@@ -205,7 +205,7 @@ namespace ioex_cs
 
                             q_hits.Enqueue(new CombineEventArgs((byte)packer._pack_id, release_addrs,release_wts, release_weight));
                             //NodeCombination.lastcomb_num = release_addrs.Length;
-                            while (vibstate != VibStatus.VIB_READY)
+                            while ((vibstate != VibStatus.VIB_READY) && bRun)
                             {
                                 vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
                                 ProcessGoonNodes();
@@ -214,14 +214,17 @@ namespace ioex_cs
                             ReleaseAction(release_addrs, release_weight); //send release command and clear weight, trigger the packer, goon the nodes
                             logTimeStick(ts1, "rele:");    
                             vibstate = agent.TriggerPacker(packer.vib_addr);
-                            while (vibstate == VibStatus.VIB_WORKING)
+                            while ((vibstate == VibStatus.VIB_WORKING && bRun))
                             {
                                 vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
                                 ProcessGoonNodes();
                             }
                             logTimeStick(ts1, "vibw:");    
                             ProcessGoonNodes();
+                            if (!bRun)
+                                break;
                         }
+                        
                         
                         while (ProcessGoonNodes())
                             ;
@@ -583,17 +586,23 @@ namespace ioex_cs
                 }
             }
         }
-        
-        public void SetNodeReg(byte addr, string regname , UInt32 val)
-        {
-            mut.WaitOne();
-                this[addr][regname] = val;
 
-            if (!WaitForIdle(this[addr]))
+        public bool SetNodeReg(byte addr, string regname , UInt32 val)
+        {
+            if (!mut.WaitOne(3000))
             {
                 MessageBox.Show(StringResource.str("tryagain"));
+                return false;
             }
+            this[addr][regname] = val;
+            bool bDone = WaitForIdle(this[addr]);
             mut.ReleaseMutex();
+            if (!bDone)
+            {
+                MessageBox.Show(StringResource.str("tryagain"));
+                return false;
+            }
+            return true;
         }
         public void GetNodeElement(byte addr, ref XElement x)
         {
@@ -636,7 +645,7 @@ namespace ioex_cs
             SubNode n = this[addr] as SubNode;
             n.status = NodeStatus.ST_IDLE;
             bool ret = false;
-            if (mut.WaitOne())
+            if (mut.WaitOne(2000))
             {
                 n["addr"] = null;
                 if (!WaitForIdleSlow(n))
@@ -658,13 +667,18 @@ namespace ioex_cs
         }
         public void ClearNodeReg(byte addr,string regname)
         {
-            mut.WaitOne();
+            if (!mut.WaitOne(3000))
+            {
+                MessageBox.Show(StringResource.str("tryagain"));
+                return;
+            }
             this[addr][regname] = null;
-            if (!WaitForIdle(this[addr]))
+            bool bDone = WaitForIdle(this[addr]);
+            mut.ReleaseMutex();
+            if (!bDone)
             {
                 MessageBox.Show(StringResource.str("tryagain"));
             }
-            mut.ReleaseMutex();
         }
         public string GetNodeReg(byte addr,string regname)
         {
@@ -974,7 +988,7 @@ namespace ioex_cs
         {
             bBootDone = false;
             bBootCmd = true;
-            while(bBootCmd)
+            while(bBootCmd && (ms-- > 0))
                 Thread.Sleep(10);
 //          msg_loop.Suspend();
         }
@@ -1024,7 +1038,7 @@ namespace ioex_cs
             {
                 Thread.Sleep(5);
                 //i = i + (i+1)/2;
-                if (i++ > 900)
+                if (i++ > 190)
                 {
                         return false;
                 }else
@@ -1179,7 +1193,8 @@ namespace ioex_cs
             }
 
             VibStatus oldstate = vibstate;
-            mut.WaitOne();
+            if(!mut.WaitOne(300))
+                return vibstate;
             if (vibstate == VibStatus.VIB_WORKING)
             {
                 
@@ -1197,9 +1212,10 @@ namespace ioex_cs
                     vibstate = VibStatus.VIB_READY;
                 }
             }
+            mut.ReleaseMutex();
             if (vibstate != oldstate)
                 RefreshEvent(this);
-            mut.ReleaseMutex();
+            
             return vibstate;
         }
        
@@ -1208,8 +1224,6 @@ namespace ioex_cs
             int ret;
             TimeSpan ts1 = new TimeSpan(DateTime.Now.Ticks);
             DateTime tnow = DateTime.Now;
-            
-            mut.WaitOne();
                
             foreach (WeighNode wn in weight_nodes)
             {
@@ -1221,13 +1235,17 @@ namespace ioex_cs
                     continue;
                 if (wn.weight < -1000 || (wn.weight >= 100000)) //invalid weight || wn.weight >= 65521
                 {
-                    wn.Query();
-                    WaitForIdleQuick(wn,8);
+                    if (mut.WaitOne(300))
+                    {
+                        wn.Query();
+                        WaitForIdleQuick(wn, 8);
+                        mut.ReleaseMutex();
+                    }
 //                  NodeCombination.logTimeStick(ts1, "ck2:");
                   Debug.Write(String.Format("{0},",wn.node_id));
                 }
             }
-            mut.ReleaseMutex();
+            
 
             foreach (WeighNode wn in weight_nodes)
             {

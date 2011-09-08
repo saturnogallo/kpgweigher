@@ -84,7 +84,7 @@ namespace ioex_cs
 
             singlewnd = new SingleMode(Int32.Parse(curr_cfg.Element("node_number").Value));
             runwnd = new RunMode(Int32.Parse(curr_cfg.Element("node_number").Value));
-            WeighNode.TARGET_PERCENT = Double.Parse(curr_cfg.Element("percent").Value);
+            
             
             histwnd = new ProdHistory();
             helpwnd = new Help();

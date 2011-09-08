@@ -297,7 +297,7 @@ namespace ioex_cs
             //load password.xml and fill in the username list
             pwds = new XmlConfig("password.xml");
             pwds.LoadConfigFromFile();
-            string a = MD5Value("0106C2255SJ 8GB", true);
+            //string a = MD5Value("0106C2255SJ 8GB", true);
             //"0106C2255SJ 8GB"
             //""
         }

@@ -313,42 +313,54 @@ namespace ioex_cs
             }
         }
         //convert the current configuration into an XElement node
-        public void SaveCurrentConfig()
+        public void SaveCurrentConfig(byte group)
         {
             XElement cfgNode = new XElement("Item");
-            _curr_cfg.ToElement(ref cfgNode);
-
-            all_conf.AddConfig(all_conf.cfg_name, cfgNode);
-            all_conf.SaveConfigToFile();
             XElement sNode = new XElement("Item");
-            foreach (byte n in weight_nodes)
+            //group = pack|vib|sub
+            if (group > 3)
+            {
+                
+                _curr_cfg.ToElement(ref cfgNode);
+                all_conf.AddConfig(all_conf.cfg_name, cfgNode);
+                all_conf.SaveConfigToFile();
+            }
+
+            if ((group % 4) > 1)
             {
                 sNode.RemoveAll();
                 try
                 {
-                    agent.GetNodeElement(n, ref sNode);
-                    nodes_config[n].AddConfig(all_conf.cfg_name, sNode);
-                    nodes_config[n].SaveConfigToFile();
+                    agent.GetNodeElement(vib_addr, ref sNode);
+                    nodes_config[vib_addr].AddConfig(all_conf.cfg_name, sNode);
+                    nodes_config[vib_addr].SaveConfigToFile();
+                    if (bot_addr != vib_addr)
+                    {
+                        agent.GetNodeElement(bot_addr, ref sNode);
+                        nodes_config[bot_addr].AddConfig(all_conf.cfg_name, sNode);
+                        nodes_config[bot_addr].SaveConfigToFile();
+                    }
                 }
                 catch
                 {
                 }
             }
-            sNode.RemoveAll();
-            try
+            if ((group % 2) == 1)
             {
-                agent.GetNodeElement(vib_addr, ref sNode);
-                nodes_config[vib_addr].AddConfig(all_conf.cfg_name, sNode);
-                nodes_config[vib_addr].SaveConfigToFile();
-                if (bot_addr != vib_addr)
+                
+                foreach (byte n in weight_nodes)
                 {
-                    agent.GetNodeElement(bot_addr, ref sNode);
-                    nodes_config[bot_addr].AddConfig(all_conf.cfg_name, sNode);
-                    nodes_config[bot_addr].SaveConfigToFile();
+                    sNode.RemoveAll();
+                    try
+                    {
+                        agent.GetNodeElement(n, ref sNode);
+                        nodes_config[n].AddConfig(all_conf.cfg_name, sNode);
+                        nodes_config[n].SaveConfigToFile();
+                    }
+                    catch
+                    {
+                    }
                 }
-            }
-            catch
-            {
             }
         }
 
@@ -395,8 +407,8 @@ namespace ioex_cs
         public void StopRun()
         {
                        
-            nc.Stop(3000);
-            agent.Stop(1000);
+            nc.Stop(300);
+            agent.Stop(100);
             
             agent.Action((byte)(0x80 + _pack_id), "stop");
             agent.Action(vib_addr, "stop");

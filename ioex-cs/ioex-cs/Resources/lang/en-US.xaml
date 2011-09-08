@@ -110,6 +110,12 @@
     <s:String x:Key="ok">OK</s:String>
     <s:String x:Key="clr">CLR</s:String>
 
+    <s:String x:Key="enter_autoamp">Select target buckets num(0.1-10)</s:String>
+    <s:String x:Key="autoamp_llimit">0.1</s:String>
+    <s:String x:Key="autoamp_ulimit">10.0</s:String>
+    <s:String x:Key="autoamp_off">Auto Amp(OFF)</s:String>
+    <s:String x:Key="autoamp_on">Auto Amp,target:</s:String>
+
     <s:String x:Key="enter_run_time">Enter top vibrate duration(*10ms)</s:String>
     <s:String x:Key="grp_time">Top VIB(*10ms)</s:String>
     <s:String x:Key="enter_test_mode_reg1">Enter value for register 1</s:String>
@@ -184,11 +190,11 @@
     <s:String x:Key="grp_amp">Main Amplitude</s:String>
     <s:String x:Key="grp_freq">Main Freq.</s:String>
     <s:String x:Key="target">Target</s:String>
-    <s:String x:Key="upper_var">Upper Var.</s:String>
-    <s:String x:Key="lower_var">Low Var.</s:String>
+    <s:String x:Key="upper_var">Upper Var</s:String>
+    <s:String x:Key="lower_var">Low Var</s:String>
     <s:String x:Key="grp_target">Target</s:String>
-    <s:String x:Key="grp_uvar">Upper Var.</s:String>
-    <s:String x:Key="grp_dvar">Low Var.</s:String>
+    <s:String x:Key="grp_uvar">Upper Var</s:String>
+    <s:String x:Key="grp_dvar">Low Var</s:String>
 
     <s:String x:Key="openwei">Release delay(*10ms)</s:String>
     <s:String x:Key="gain">AD speed</s:String>

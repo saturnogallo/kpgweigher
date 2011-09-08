@@ -4,9 +4,9 @@
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
 "ProjectName" = "8:ioex-setup-10t"
-"LanguageId" = "3:1033"
+"LanguageId" = "3:0"
 "CodePage" = "3:1252"
-"UILanguageId" = "3:1033"
+"UILanguageId" = "3:0"
 "SccProjectName" = "8:"
 "SccLocalPath" = "8:"
 "SccAuxPath" = "8:"
@@ -46,6 +46,12 @@
         "Entry"
         {
         "MsmKey" = "8:_310B843704EB4AADBC54BA8319529F13"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_3374F07CB021414F8C2C86EAE9F56087"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -99,12 +105,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_AB0E0BFA58E341F6A2FB5D6C97B022A4"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_B25C872C8416405AB7FBBBC76D0F6DF2"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -142,13 +142,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_08B6EBA5D6BFB67D8FA9D70323454774"
+        "OwnerKey" = "8:_310B843704EB4AADBC54BA8319529F13"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_310B843704EB4AADBC54BA8319529F13"
+        "OwnerKey" = "8:_08B6EBA5D6BFB67D8FA9D70323454774"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -398,6 +398,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3374F07CB021414F8C2C86EAE9F56087"
+            {
+            "SourcePath" = "8:..\\ioex-cs\\prodpic\\default.JPG"
+            "TargetName" = "8:default.JPG"
+            "Tag" = "8:"
+            "Folder" = "8:_3DA3A8D3A9BF4702B4303C7CD514A46A"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_429DB1B938FD4D7F9736ABE3485E4E76"
             {
             "SourcePath" = "8:..\\ioex-cs\\bin\\Debug\\node_3.xml"
@@ -551,26 +571,6 @@
             "Hidden" = "11:FALSE"
             "System" = "11:FALSE"
             "Permanent" = "11:TRUE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AB0E0BFA58E341F6A2FB5D6C97B022A4"
-            {
-            "SourcePath" = "8:..\\ioex-cs\\prodpic\\Candy.jpg"
-            "TargetName" = "8:Candy.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_3DA3A8D3A9BF4702B4303C7CD514A46A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
@@ -745,6 +745,28 @@
                     "Property" = "8:_B4F8E3C4F6094FE29EA006BFD0244698"
                         "Folders"
                         {
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_2142C421C26F443B9B808D989C387E3E"
+                            {
+                            "Name" = "8:en-US"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_BC2BD73DD3944687B242E206B8D2E0CE"
+                                "Folders"
+                                {
+                                }
+                            }
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_E41506289B1348719D9B3126F6B4ED63"
+                            {
+                            "Name" = "8:zh-CN"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_B6EBAF3D5C55499996DEC11F36BC6BC8"
+                                "Folders"
+                                {
+                                }
+                            }
                         }
                     }
                 }
@@ -758,7 +780,7 @@
         }
         "MsiBootstrapper"
         {
-        "LangId" = "3:1033"
+        "LangId" = "3:0"
         "RequiresElevation" = "11:FALSE"
         }
         "Product"
@@ -766,7 +788,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:KCB10T"
         "ProductCode" = "8:{A897C732-9F12-41F6-B0A1-901DE253FD37}"
-        "PackageCode" = "8:{38ADAE87-02EA-4A3F-9AA3-3E7A45D95B16}"
+        "PackageCode" = "8:{F2E919BB-5C8F-42AC-8D97-EA1210466B1D}"
         "UpgradeCode" = "8:{B5CC1516-8606-4B45-8A90-7F10BDDDA0AE}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
@@ -893,20 +915,6 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_1EF71E84DB1B4AC4B438101DB1D2AC16"
-            {
-            "Name" = "8:Kingpak"
-            "Arguments" = "8:"
-            "Description" = "8:"
-            "ShowCmd" = "3:1"
-            "IconIndex" = "3:0"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_C1EACE1063EE4E789249B4FC89AEA888"
-            "Folder" = "8:_40434F9B8BEC48648D79C4E4876E7B11"
-            "WorkingFolder" = "8:_EDB9C053EF004EE0821BA161C753E1BC"
-            "Icon" = "8:"
-            "Feature" = "8:"
-            }
         }
         "UserInterface"
         {

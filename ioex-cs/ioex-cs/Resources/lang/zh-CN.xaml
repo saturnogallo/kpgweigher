@@ -187,6 +187,13 @@
     <s:String x:Key="grp_uvar">上偏重量</s:String>
     <s:String x:Key="grp_dvar">下偏重量</s:String>
 
+    <s:String x:Key="enter_autoamp">请选择目标斗数(0.1-10)</s:String>
+    <s:String x:Key="autoamp_llimit">0.1</s:String>
+    <s:String x:Key="autoamp_ulimit">10.0</s:String>
+    <s:String x:Key="autoamp_off">自动振幅(已关闭)</s:String>
+    <s:String x:Key="autoamp_on">自动振幅,目标斗数:</s:String>
+
+
     <s:String x:Key="target">目标重量</s:String>
     <s:String x:Key="upper_var">上偏重量</s:String>
     <s:String x:Key="lower_var">下偏重量</s:String>
