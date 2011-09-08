@@ -60,6 +60,7 @@ namespace ioex_cs
             curr_packer.setInterface(i);
             curr_packer.agent.SetVibIntf(curr_packer.vib_addr, i);
             curr_packer.agent.SetNodeReg(curr_packer.bot_addr, "cs_filter", Convert.ToUInt16(intf_pulse_width.Content));
+            UpdateDisplay();
         }
         private void btn_return_Click(object sender, RoutedEventArgs e)
         {
@@ -68,7 +69,7 @@ namespace ioex_cs
             ApplySetting();
             
             curr_packer.agent.SetNodeReg(curr_packer.bot_addr, "cs_filter", Convert.ToUInt16(intf_pulse_width.Content));
-            curr_packer.SaveCurrentConfig();
+            curr_packer.SaveCurrentConfig(2);
             p.SwitchTo("configmenu");
             
         }
@@ -80,7 +81,7 @@ namespace ioex_cs
 
             ApplySetting();
             
-            curr_packer.SaveCurrentConfig();
+            curr_packer.SaveCurrentConfig(2);
             p.SwitchTo("runmode");
 
         }
@@ -137,6 +138,11 @@ namespace ioex_cs
         }
 
         private void intf_input_trigger_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            ApplySetting();
+        }
+
+        private void intf_handshake_Click(object sender, RoutedEventArgs e)
         {
             ApplySetting();
         }    

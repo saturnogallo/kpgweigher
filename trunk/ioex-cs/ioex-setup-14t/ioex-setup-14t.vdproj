@@ -4,9 +4,9 @@
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
 "ProjectName" = "8:ioex-setup-14t"
-"LanguageId" = "3:1033"
+"LanguageId" = "3:0"
 "CodePage" = "3:1252"
-"UILanguageId" = "3:1033"
+"UILanguageId" = "3:0"
 "SccProjectName" = "8:"
 "SccLocalPath" = "8:"
 "SccAuxPath" = "8:"
@@ -22,12 +22,6 @@
         "Entry"
         {
         "MsmKey" = "8:_132E9BF9520E448B909093FCCD3267C0"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_17A9317B94534BE2B9086411A9ACAB7A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -81,18 +75,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_6A30F7DE00FCB224500124FD14C8D8A4"
-        "OwnerKey" = "8:_17A9317B94534BE2B9086411A9ACAB7A"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_6A30F7DE00FCB224500124FD14C8D8A4"
-        "OwnerKey" = "8:_B62A6D4DA80F4A1FB8EBF7B5229206C6"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_6E7C852633AF458FBA97069A940DA391"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -105,13 +87,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_89F5F3F506C840E8A68BE6D727A9B86D"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_7A6107CEB907E02FE56A22B11EEAB259"
+        "OwnerKey" = "8:_B62A6D4DA80F4A1FB8EBF7B5229206C6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_8C4007C07F0A409EBF85E7663E002469"
+        "MsmKey" = "8:_89F5F3F506C840E8A68BE6D727A9B86D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -135,7 +117,19 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_9DFA1713C012414DBF2A96BE9186B105"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_B62A6D4DA80F4A1FB8EBF7B5229206C6"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C92BFE6855AE4C7F9960911EC7CB7A9A"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -172,19 +166,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_6A30F7DE00FCB224500124FD14C8D8A4"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_B62A6D4DA80F4A1FB8EBF7B5229206C6"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_17A9317B94534BE2B9086411A9ACAB7A"
+        "OwnerKey" = "8:_7A6107CEB907E02FE56A22B11EEAB259"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -325,37 +313,6 @@
             "Hidden" = "11:FALSE"
             "System" = "11:FALSE"
             "Permanent" = "11:TRUE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_17A9317B94534BE2B9086411A9ACAB7A"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:ioex-cs, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_17A9317B94534BE2B9086411A9ACAB7A"
-                    {
-                    "Name" = "8:ioex-cs.exe"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:..\\ioex-cs\\bin\\Debug14\\ioex-cs.exe"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_DD363A610A3F4BDBB7F8718C840F0475"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
@@ -523,37 +480,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_6A30F7DE00FCB224500124FD14C8D8A4"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:SQLite.NET, Version=0.21.1869.3794, Culture=neutral, PublicKeyToken=c273bd375e695f9c"
-                "ScatterAssemblies"
-                {
-                    "_6A30F7DE00FCB224500124FD14C8D8A4"
-                    {
-                    "Name" = "8:SQLite.NET.DLL"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:SQLite.NET.DLL"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_DD363A610A3F4BDBB7F8718C840F0475"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6E7C852633AF458FBA97069A940DA391"
             {
             "SourcePath" = "8:..\\ioex-cs\\bin\\Debug14\\node_2.xml"
@@ -594,6 +520,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7A6107CEB907E02FE56A22B11EEAB259"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:SQLite.NET, Version=0.21.1869.3794, Culture=neutral, PublicKeyToken=c273bd375e695f9c"
+                "ScatterAssemblies"
+                {
+                    "_7A6107CEB907E02FE56A22B11EEAB259"
+                    {
+                    "Name" = "8:SQLite.NET.DLL"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:SQLite.NET.DLL"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_DD363A610A3F4BDBB7F8718C840F0475"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_89F5F3F506C840E8A68BE6D727A9B86D"
             {
             "SourcePath" = "8:..\\ioex-cs\\bin\\Debug14\\node_15.xml"
@@ -607,26 +564,6 @@
             "Hidden" = "11:FALSE"
             "System" = "11:FALSE"
             "Permanent" = "11:TRUE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_8C4007C07F0A409EBF85E7663E002469"
-            {
-            "SourcePath" = "8:..\\ioex-cs\\prodpic\\Candy.jpg"
-            "TargetName" = "8:Candy.jpg"
-            "Tag" = "8:"
-            "Folder" = "8:_5635F14131D749ADA97A0C44A1245C3A"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
             "SharedLegacy" = "11:FALSE"
             "PackageAs" = "3:1"
             "Register" = "3:1"
@@ -694,6 +631,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9DFA1713C012414DBF2A96BE9186B105"
+            {
+            "SourcePath" = "8:..\\ioex-cs\\prodpic\\default.JPG"
+            "TargetName" = "8:default.JPG"
+            "Tag" = "8:"
+            "Folder" = "8:_5635F14131D749ADA97A0C44A1245C3A"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_B62A6D4DA80F4A1FB8EBF7B5229206C6"
             {
             "AssemblyRegister" = "3:1"
@@ -709,6 +666,26 @@
                 }
             "SourcePath" = "8:..\\ioextools\\bin\\Debug\\ioextools.exe"
             "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_DD363A610A3F4BDBB7F8718C840F0475"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C92BFE6855AE4C7F9960911EC7CB7A9A"
+            {
+            "SourcePath" = "8:..\\ioex-cs\\bin\\Debug14\\ioex-cs.exe"
+            "TargetName" = "8:ioex-cs.exe"
             "Tag" = "8:"
             "Folder" = "8:_DD363A610A3F4BDBB7F8718C840F0475"
             "Condition" = "8:"
@@ -872,6 +849,28 @@
                     "Property" = "8:_3408AA9B408D46568E7EDBC9CB43FB91"
                         "Folders"
                         {
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_70A369DF63C4439183BC846A6BD4190F"
+                            {
+                            "Name" = "8:zh-CN"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_768FE4F834FA48D29C5F2D355D819A55"
+                                "Folders"
+                                {
+                                }
+                            }
+                            "{9EF0B969-E518-4E46-987F-47570745A589}:_BF85BB06B28B46FA8396AEC0FE78EFD6"
+                            {
+                            "Name" = "8:en-US"
+                            "AlwaysCreate" = "11:FALSE"
+                            "Condition" = "8:"
+                            "Transitive" = "11:FALSE"
+                            "Property" = "8:_ED3D455F46584B5BB0D3612389C81B9D"
+                                "Folders"
+                                {
+                                }
+                            }
                         }
                     }
                 }
@@ -885,7 +884,7 @@
         }
         "MsiBootstrapper"
         {
-        "LangId" = "3:1033"
+        "LangId" = "3:0"
         "RequiresElevation" = "11:FALSE"
         }
         "Product"
@@ -893,7 +892,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:KCB14T"
         "ProductCode" = "8:{4627B9F6-8EAA-46E1-ABCA-CAD3651DFB84}"
-        "PackageCode" = "8:{5C7EAFBC-51FA-40A0-B219-07953A9CE480}"
+        "PackageCode" = "8:{98A43CBC-E512-4701-8CC2-037E8A93CF91}"
         "UpgradeCode" = "8:{3740F55B-50CF-4317-A7F0-E5D1688564A0}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
@@ -1020,20 +1019,6 @@
         }
         "Shortcut"
         {
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_FCFFC0DBD71147C39F3E1FF547133BF6"
-            {
-            "Name" = "8:Kingpak"
-            "Arguments" = "8:"
-            "Description" = "8:"
-            "ShowCmd" = "3:1"
-            "IconIndex" = "3:0"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_17A9317B94534BE2B9086411A9ACAB7A"
-            "Folder" = "8:_652FC0BB4BDD43139419AE9B04C61B1C"
-            "WorkingFolder" = "8:_DD363A610A3F4BDBB7F8718C840F0475"
-            "Icon" = "8:"
-            "Feature" = "8:"
-            }
         }
         "UserInterface"
         {

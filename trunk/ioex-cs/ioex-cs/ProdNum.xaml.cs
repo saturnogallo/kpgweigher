@@ -49,8 +49,15 @@ namespace ioex_cs
             foreach (string id in curr_packer.all_conf.Keys)
             {
                 pcfg.FromElement(XElement.Parse(curr_packer.all_conf[id]));
-                
-                FileInfo fi = new FileInfo(ProdNum.baseDir +"\\prodpic\\"+ StringResource.language + "\\" + pcfg.product_desc +".jpg");
+                FileInfo fi;
+                if (File.Exists(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pcfg.product_desc + ".jpg"))
+                {
+                    fi = new FileInfo(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pcfg.product_desc + ".jpg");
+                }
+                else
+                {
+                    fi = new FileInfo(ProdNum.baseDir + "\\prodpic\\default.jpg");
+                }
                 imglist[id] = fi.FullName;
 
                 Label n = new Label();

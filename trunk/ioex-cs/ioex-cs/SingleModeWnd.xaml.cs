@@ -70,7 +70,7 @@ namespace ioex_cs
             if (lastcall == "UpdateProdNo")
             {
                 curr_packer.LoadConfig(curr_packer.curr_cfg.product_no);
-                curr_packer.SaveCurrentConfig();
+                curr_packer.SaveCurrentConfig(1+2+4);
                 UpdateUI();
                 lastcall = "";
             }
@@ -82,11 +82,13 @@ namespace ioex_cs
             }
             if (lastcall == "UpdateUI")
             {
+                
                 UpdateUI();
                 lastcall = "";
             }
             if (lastcall == "ApplyToAll")
             {
+                
                 sub_applyall();
                 lastcall = "";
             }
@@ -97,7 +99,7 @@ namespace ioex_cs
             }
             if (lastcall == "save_config")
             {
-                curr_packer.SaveCurrentConfig();
+                curr_packer.SaveCurrentConfig(1 + 2 + 4);
                 lastcall = "";
                 //MessageBox.Show(StringResource.str("store_done"));
             }
@@ -173,34 +175,45 @@ namespace ioex_cs
 
         private Button curr_btn;
         private Button last_btn;
+        private object tlock = new object();
+        private static bool tmlock = false;
         void uiTimer_Tick(object sender, EventArgs e)
         {
             if (!this.IsVisible)
                 return;
-            App p = Application.Current as App;
-            if (NodeCombination.q_hits.Count > 0)
-            {
-                HitCombineNodeUI(NodeCombination.q_hits.Dequeue());
+            if (tmlock)
                 return;
-            }
-            if (p.agent.bNeedRefresh)
+            tmlock = true;
+            
             {
-                p.agent.bNeedRefresh = false;
-                RefreshNodeUI();
-                if (curr_packer.status != PackerStatus.RUNNING)
+                App p = Application.Current as App;
+                if (NodeCombination.q_hits.Count > 0)
                 {
-                    currentApp().agent.ClearWeights();
-                    currentApp().agent.bWeightReady = false;
+                    HitCombineNodeUI(NodeCombination.q_hits.Dequeue());
+                    tmlock = false;
+                    return;
+                }
+                if (p.agent.bNeedRefresh)
+                {
+                    p.agent.bNeedRefresh = false;
+                    RefreshNodeUI();
+                    if (curr_packer.status != PackerStatus.RUNNING)
+                    {
+                        currentApp().agent.ClearWeights();
+                        currentApp().agent.bWeightReady = false;
+                    }
+                }
+                if ((curr_node_index == -1))
+                {
+                    bucket_click(1);
+                }
+                else
+                {
+                    if (lastcall != "")
+                        HandleLongCommand();
                 }
             }
-            if ((curr_node_index == -1))
-            {
-                bucket_click(1);
-            }else{
-                if (lastcall != "")
-                    HandleLongCommand();
-            }
-
+            tmlock = false;
         }
         private void RefreshNodeUI()
         {
@@ -223,7 +236,7 @@ namespace ioex_cs
                             lb.Content = "ERR";
                     }
 
-                    if (agent.GetStatus(n) == NodeStatus.ST_LOST)
+                    if (agent.GetStatus(n) == NodeStatus.ST_LOST || agent.GetStatus(n) == NodeStatus.ST_DISABLED)
                     {
                         btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
                     }
@@ -246,9 +259,9 @@ namespace ioex_cs
                 lbl_totalweights.Content = p.total_sim_weights.ToString("F1");
             }
         }
-        public void Disable()
+        public void Disable(Visibility state)
         {
-            btn_trial.Visibility = Visibility.Hidden;
+            btn_trial.Visibility = state;
         }
         private void HitCombineNodeUI(CombineEventArgs ce)
         {
@@ -368,8 +381,18 @@ namespace ioex_cs
             col_otime_input.Content = n.GetNodeReg((byte)curr_node_index, "open_s");
             openwei_input.Content = n.GetNodeReg((byte)curr_node_index, "delay_f");
 
-            string a = n.GetNodeReg((byte)curr_node_index, "target_weight");
-            cb_autoamp.IsChecked = !(a == "0");
+            double amp = Double.Parse(n.GetNodeReg((byte)curr_node_index, "target_weight"));
+            if (amp > 0.0001)
+                amp = curr_packer.curr_cfg.target / amp;
+            cb_autoamp.IsChecked = (amp > 0.0001);
+            if (amp > 0.0001)
+            {
+                cb_autoamp.Content = StringResource.str("autoamp_on") + amp.ToString("F1");
+            }
+            else
+            {
+                cb_autoamp.Content = StringResource.str("autoamp_off");
+            }
 
             motor_speed_input.Content = n.GetNodeReg((byte)curr_node_index, "motor_speed");
 
@@ -458,15 +481,31 @@ namespace ioex_cs
                 {
                     n.SetNodeReg(curr_packer.vib_addr, "magnet_amp", UInt32.Parse(data));
                 }
+                if (param == "autoamp")
+                {
+                    double amp = Double.Parse(data);
+                    if (amp <= 0.0001)
+                    {
+                        n.SetNodeReg((byte)curr_node_index, "target_weight", 0);
+                        cb_autoamp.IsChecked = false;
+                    }else{
+                        n.SetNodeReg((byte)curr_node_index, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / amp));
+                        cb_autoamp.IsChecked = true;
+                    }
+                }
                 if (param == "target")
                 {
+                    double oldtarget = curr_packer.curr_cfg.target;
                     curr_packer.curr_cfg.target = Double.Parse(data);
                     foreach (byte naddr in pack.weight_nodes)
                     {
                         if ((pack.agent.GetStatus(naddr) == NodeStatus.ST_IDLE))
                         {
-                            if ("0" != pack.agent.GetNodeReg(naddr, "target_weight"))
-                                pack.agent.SetNodeReg(naddr, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / WeighNode.TARGET_PERCENT));
+                            double per = Double.Parse(pack.agent.GetNodeReg(naddr, "target_weight")); ;
+                            if (per > 0.0001)
+                            {
+                                pack.agent.SetNodeReg(naddr, "target_weight", Convert.ToUInt32(pack.curr_cfg.target*per / oldtarget));
+                            }
                         }
                     }
                 }
@@ -700,24 +739,30 @@ namespace ioex_cs
             byte cn = (byte)curr_node_index;
 
             string[] regs = { "magnet_freq", "magnet_amp", "magnet_time", "open_w", "delay_w", "open_s", "delay_s", "delay_f", "motor_speed", "target_weight", "cs_filter", "cs_gain_wordrate" };
-            bool star = true;            
-            foreach (string reg in regs)
+            bool star = true;
+            foreach (byte n in curr_packer.weight_nodes) 
             {
-                UInt32 val = UInt32.Parse(curr_packer.agent.GetNodeReg(cn, reg));
-                foreach (byte n in curr_packer.weight_nodes)
+                foreach (string reg in regs)
                 {
+                    
                     if (agent.GetStatus(n) == NodeStatus.ST_LOST)
                         continue;
-                    if (n == cn)
+                    if (agent.GetStatus(n) == NodeStatus.ST_DISABLED)
                         continue;
 
-                    curr_packer.agent.SetNodeReg(n, reg, val);
+                    if (n == cn)
+                        continue;
+                    UInt32 val = UInt32.Parse(curr_packer.agent.GetNodeReg(cn, reg));
+                    if (!curr_packer.agent.SetNodeReg(n, reg, val))
+                    {
+                        return;
+                    }
 
                     if (star)
                     {
                         Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, (Action)delegate
                         {
-                            txt_oper.Content = StringResource.str("modifying") +" *";
+                            txt_oper.Content = StringResource.str("modifying") +" "+n.ToString()+"*";
                         });
 
                     }
@@ -725,7 +770,7 @@ namespace ioex_cs
                     {
                         Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Background, (Action)delegate
                         {
-                            txt_oper.Content = StringResource.str("modifying") + " ";
+                            txt_oper.Content = StringResource.str("modifying") + " " + n.ToString();
                         });
                     }
                     star = !star;
@@ -738,6 +783,8 @@ namespace ioex_cs
         private void btn_sub_applyall_Click(object sender, RoutedEventArgs e)
         {
             //apply for other nodes.
+            if (lastcall != "")
+                return;
             ShowStatus("modifying");
             lastcall = "ApplyToAll";
         }
@@ -805,16 +852,14 @@ namespace ioex_cs
         {
             if (curr_node_index < 0)
                 return;
-            App p = (Application.Current as App);
-            UIPacker pack = curr_packer;
-            NodeAgent n = curr_packer.agent;
-            if (cb_autoamp.IsChecked.HasValue && cb_autoamp.IsChecked.Value)
+            App p = Application.Current as App;
+            if (!cb_autoamp.IsChecked.Value)
             {
-                n.SetNodeReg((byte)curr_node_index, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / WeighNode.TARGET_PERCENT)); 
+                KbdData("autoamp", "0");
             }
             else
             {
-                n.SetNodeReg((byte)curr_node_index, "target_weight", 0);
+                p.kbdwnd.Init(StringResource.str("enter_autoamp"), "autoamp", false, KbdData);
             }
         }
 

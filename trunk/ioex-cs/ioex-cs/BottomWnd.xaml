@@ -48,8 +48,8 @@
         </Grid.RowDefinitions>
         <Rectangle Margin="18,32,38,98" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" Grid.RowSpan="2" />
         <Label Content="{DynamicResource intf_lb_input_fmt}" HorizontalAlignment="Left" Margin="134.61,134,0,106" FontSize="26" Name="intf_lb_input_fmt_label" Width="186" />
-        <CheckBox  FocusVisualStyle="{x:Null}" Content="{DynamicResource intf_ckb_mem}" Margin="343.552,95,0,0" Name="intf_ckb_mem" Grid.Row="1" FontSize="26" Height="46.018" VerticalAlignment="Top" MouseLeftButtonUp="intf_input_trigger_MouseLeftButtonUp" HorizontalAlignment="Left" Width="192.448" />
-        <CheckBox  FocusVisualStyle="{x:Null}" Content="{DynamicResource intf_handshake}" HorizontalAlignment="Left" Margin="170.565,94,0,0" Name="intf_handshake" Width="150.045" Grid.Row="1" FontSize="26" Height="42.018" VerticalAlignment="Top" MouseLeftButtonUp="intf_input_trigger_MouseLeftButtonUp" />
+        <CheckBox  FocusVisualStyle="{x:Null}" Content="{DynamicResource intf_ckb_mem}" Margin="343.552,95,0,0" Name="intf_ckb_mem" Grid.Row="1" FontSize="26" Height="46.018" Click="intf_handshake_Click" VerticalAlignment="Top"  HorizontalAlignment="Left" Width="192.448" />
+        <CheckBox  FocusVisualStyle="{x:Null}" Content="{DynamicResource intf_handshake}" HorizontalAlignment="Left" Margin="170.565,94,0,0" Click="intf_handshake_Click" Name="intf_handshake" Width="150.045" Grid.Row="1" FontSize="26" Height="42.018" VerticalAlignment="Top" />
         <Label Content="{DynamicResource intf_lb_output_fmt}" HorizontalAlignment="Right" Margin="0,134,253.77,106" Name="intf_lb_output_fmt_label" Width="200.06" FontSize="26" />
         <Label  FocusVisualStyle="{x:Null}" Height="44.062" HorizontalAlignment="Right" Style="{StaticResource InputStyle}" MouseLeftButtonUp="TextBox_GotFocus" Margin="0,92,80.831,0"  Name="intf_ckb_delay" VerticalAlignment="Top" Width="165" Grid.Row="1" FontSize="20" />
         <Label Content="{DynamicResource intf_ckb_delay}" Height="46.062" HorizontalAlignment="Right" Margin="0,90,244.42,0" Name="intf_ckb_delay_label" VerticalAlignment="Top" Width="234.421" Grid.Row="1" FontSize="26" />
