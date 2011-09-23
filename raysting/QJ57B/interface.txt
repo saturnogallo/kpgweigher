@@ -1,0 +1,58 @@
+命令格式:
+来自主机:
+1.切换屏幕
+2.写入BORE参数(探头位置，哪个值)
+3.写入TC参数(探头位置，哪个值)
+4.写入各通道探头ID
+4.更新当前状态（包括各个通道的当前读数，LED灯，等待时间，当前处理的通道，正在做什么,当前模式，切换时间）
+5.查询当前状态(屏幕)
+
+来自从机:
+1.更新BORE参数(探头位置，哪个值)
+2.写入TC参数(探头位置，哪个值)
+2.5写入切换时间，各个通道探头ID，校准值
+3.用户命令(进行校准操作,单向，置零，模式切换)
+4.报告状态(屏幕)
+
+
+details:
+register index of lcd board
+#define IRUN_MODE		0 //BORE or THERM mode	1 is thermal mode
+#define IRUN_KTT		1 //KTT or not
+#define IRUN_KTIME		2 //time for switch
+#define IRUN_CURR_CH	3 //current channel of measuring on main screen
+#define IRUN_CURR_PG	4 //current page of display
+#define IRUN_LED		5 //current LED status
+#define IRUN_TICK		6 //time tick for switching waiting
+#define IRUN_CURR_ACT	7 //current action is going on		
+#define IRUN_NEW_PG		8 //new page switch to
+#incoming command write base from main board
+#define DCMD_POS_MASK		0xE0
+#define DCMD_POS_PARAM1		0x20
+#define DCMD_POS_PARAM2		0x40
+#define DCMD_POS_PARAM3		0x60
+#define DCMD_POS_READING	0x80
+#define DCMD_POS_PRBNAME	0xA0
+#define DCMD_POS_VREADING	0x80
+
+#define ICMD_POS_MASK		0xE0
+#define ICMD_POS_PTYPE		0x20
+#define ICMD_POS_IRUN		0x40
+#define ICMD_POS_CHPRB		0x60
+
+
+register index of main board
+#define SRUN_MODE	1 //switch therm vs bore mode
+#define SRUN_KTT	2 //switch KTT mode
+#define SRUN_PRBTYPE	3 //switch probe type
+#define SRUN_RMZERO	4 //remove zero action
+#define SRUN_NEWKTT	5 //new KTT value
+#define SRUN_CALIB	6 //do calibration
+#define SRUN_SET_MODE	7 //set therm or bore mode
+#define SRUN_SET_PRBT	8 //set probe type
+#define SRUN_CHPRB_BASE	32 //set probe id for channel
+#define SRUN_PRBP1_BASE 64 //set for param 1 for 24 channel
+#define SRUN_PRBP2_BASE 96 //set for param 2 for 24 channel
+#define SRUN_PRBP3_BASE 128 //set for param 3 for 24 channel
+#define SRUN_PRBTP_BASE 160 //set for probe type for 24 channel
+#define SRUN_PRBNM_BASE 192 //set for probe name for 24 channel
