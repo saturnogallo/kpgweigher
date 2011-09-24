@@ -36,17 +36,17 @@ char highc(uchar x);
 //'l'
 
 
-#define PG_START     	1
-#define PG_MAIN      	2
-#define PG_RCONFIG   	3
-#define PG_TCONFIG   	4
-#define PG_CALIBRATION	5
-#define PG_KTIME     	6
-#define PG_CHSET     	7
-#define PG_PRBLIST   	8
-#define PG_PRBTYPELIST	9
-#define PG_PRBSET 	10
-#define PG_PRBCONFIG	11
+#define PG_START     	        1
+#define PG_MAIN      	        2
+#define PG_CFGPRB_SELECT        3
+#define PG_CFGPRB_SET  	        4
+#define PG_NOUSE1	        5
+#define PG_CFGCH_PRBLIST   	6
+#define PG_CFGCH_SELECT   	7       //select channel to config
+#define PG_NOUSE2           	8
+#define PG_PRBTYPELIST	        9
+#define PG_NOUSE3 	        10
+#define PG_NOUSE4       	11
 //#define PG_TPRBCONFIG	12
 #define PG_BOOTTYPE	13
 
