@@ -17,16 +17,9 @@ u8 volatile tx_wr_index;
 u8 volatile tx_rd_index;
 u8 volatile tx_counter;
 
-//#ifndef _OLD_FASHION_CMD_PROCESS_
-//u8 volatile rx_buffer[RX_BUFFER_SIZE];
-// define index for Receiver
 u8 volatile rx_wr_index;
 u8 volatile rx_rd_index;
 u8 volatile rx_counter;
-//#endif
-
-// This flag is set on USART Receiver buffer overflow
-bit rx_buffer_overflow; 
 
 extern u8 debug_mode;
      
@@ -49,18 +42,8 @@ interrupt [USART_RXC] void usart_rx_isr(void)
    // check if error happened.
    if((status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN))==0)
    {   
-//#ifdef _OLD_FASHION_CMD_PROCESS_
-       cm_pushc(data,0);
-       //hw_status &=0xEF;
-//#else       
-      // rx_buffer[rx_wr_index++]= data;
-      // if(rx_wr_index >= RX_BUFFER_SIZE)
-      //    rx_wr_index=0;
-      // rx_counter++;
-//#endif    
+       cm_pushc(data,0);  
    }      
-   //else
-      //hw_status |= HW_STATUS_UART_ERROR;      
 }
 
 /****************************************************************************/
@@ -125,15 +108,13 @@ void UART_Init(void)
     PORTB.0 = 0;
  
  // Reset UART buffer and flag;
-    rx_buffer_overflow = 0;
     tx_wr_index=0;
     tx_rd_index=0;
     tx_counter=0;
-//#ifndef _OLD_FASHION_CMD_PROCESS_
     rx_wr_index=0;
     rx_rd_index=0;
     rx_counter=0;
-//#endif    
+  
     
  // USART initialization
  // Communication Parameters: 8 Data, 1 Stop, No Parity
@@ -199,7 +180,7 @@ void putchar(char c)
 /****************************************************************************/
 // mputs(): UART prints a data array
 /****************************************************************************/
-void mputs(u8 *buf, u8 size, u8 port)
+void prints(u8 *buf, u8 size, u8 port)
 {
     while(size-- > 0)
       putchar(*buf++);    

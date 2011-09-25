@@ -4,17 +4,25 @@
 /*************************************************************************************
 *                           Firmware Version History
 * -----------------------------------------------------------------------------------
-* 0x16: 
-*
-*
+* 0x16:
+* 0x17: change TRIAC trigger pulse width from 0.31ms to 0.07ms. 
+* 0x18: 1) adjust magnet amplitude in ana_comp_isr to reduce weight at zero amp
+*       2) skip magnet drive if current weight exceeds or equal to target.
+*       3) dump runtime amplitude to hw_status for monitor purpose.
+* 0x1A: 1) resolved a bug in main subroutine:
+           if(RS485._global.flag_release){} else{} branch.
+* 0x1B: 1)   
+
+* 0x1D: 1) change weight limit to target_weight  
+* 0x1E: 1) fix interface timing with packer
+* 0x1F  1) fix packer delay issue
 *************************************************************************************/
-#define FIRMWARE_REV 0x16 
+#define FIRMWARE_REV 0x1F 
 
 /*************************************************************************************
 *                               Compile Switches
 *************************************************************************************/
 #define _DISABLE_WATCHDOG_                     //uncommented to disable watchdog
-//#define _FORCE_INIT_EEPROM_                  // force to initialize EEPROM.
 //#define _BOARD_TYPE_IS_VIBRATE_15            
 //#define _BOARD_TYPE_IS_VIBRATE_11
 
@@ -294,7 +302,8 @@ typedef struct {
 typedef struct  { //status of magnet
       // define pulse numbers to drive the electrical magnet.
       volatile u16 pulse_num;  //u16 changed to u32
-      volatile u16 reserved; 
+      volatile u8  rsm_state;  /* debug information */
+      volatile u8  wsm_state;  /* debug information */
       volatile u16 half_period;
 }S_MAGNET;
 
@@ -313,16 +322,32 @@ typedef struct {
    u8  status;                         /* boolean type variable, 1: in progress, 0: task completed */
 } OS_SCHEDULER;  
 
+#define AC_FREQ_TIMER                   0x07          
+#define PACKER_RESP_TIMER               0x06
+#define ERROR_SIGNAL_TIMER              0x05  
+#define SIGNAL_PLS_WIDTH_TIMER          0x04
+#define READY_SIGNAL_TIMER              0x03
+#define FEED_DELAY_TIMER                0x02
+#define WSM_TIMER                       0x01
+#define RSM_TIMER                       0x00
+
+#define MASK_MEAS_AC_FREQ               0x80
+#define MSAK_PACKER_TIMER               0x60
+
+#define TIMER_AC_FREQ_ONGOING          (os_sched.status & MASK_MEAS_AC_FREQ)
+#define TIMER_PACKER_RESP_ONGIONG      (os_sched.status & MSAK_PACKER_TIMER)
+
+#define DELAY1_END !(os_sched.status & 0x1)   // used in release_material()
+#define DELAY2_END !(os_sched.status & 0x2)   // used in magnet_add_material()
+                                              // and motor_magnet_action()
+                                              
 /*************************************************************************************
 *                              Global Variables
 *************************************************************************************/
+extern void kick_off_timer(u8 task_id, u16 timer_len);
 extern OS_SCHEDULER os_sched; 
 extern NODE_CONFIG RS485;
-extern u8 debug_mode;             
-
-#define prints  mputs
-
-
+extern u8 debug_mode;
 /*************************************************************************************
 *                                  Test Switches
 *************************************************************************************/
