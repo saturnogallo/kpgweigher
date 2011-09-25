@@ -246,17 +246,38 @@ u8 Packer_Is_Busy()
        if ((CONFIG_REG & PACKER_IF_MASK) == 0x00)
        {  /* Release material only when falling edge detected (new reqeust). */
           /* edge flag is cleared when responding to packer (Tell_Packer_Release_Done) */
-          if((!PIN_PACKER_REQ) && (Intf.pack_reqs_pending & 0x1))    /* bit 0: falling edge flag */
-             return PACKER_READY;
+          //if((!PIN_PACKER_REQ) && (Intf.pack_reqs_pending & 0x1))    /* bit 0: falling edge flag */
+          if(!PIN_PACKER_REQ)
+          {  if((Intf.pack_reqs_pending & 0x1))
+                 return PACKER_READY;
+             else
+             {
+                sleepms(150);
+                if(!PIN_PACKER_REQ)
+                   return PACKER_READY;
+                else
+                   return PACKER_BUSY;
+             }
+          }
           else
              return PACKER_BUSY;
        }          
        /* Packer request is configured as high valid */             
        else if ((CONFIG_REG & PACKER_IF_MASK) == 0x60)
-       {  /* Release material only when input valid and risking edge detected (new reqeust). */
+       {  /* Release material only when input valid and rising edge detected (new reqeust). */
           /* edge flag is cleared when responding to packer (Tell_Packer_Release_Done) */
-          if((PIN_PACKER_REQ) && (Intf.pack_reqs_pending & 0x2))     /* bit 1: rising edge flag */
-             return PACKER_READY;
+          //if((PIN_PACKER_REQ) && (Intf.pack_reqs_pending & 0x2))     /* bit 1: rising edge flag */
+          if(PIN_PACKER_REQ)
+          {  if((Intf.pack_reqs_pending & 0x2))
+                return PACKER_READY;
+             else
+             {  sleepms(150);
+                if(PIN_PACKER_REQ)
+                   return PACKER_READY;
+                else
+                   return PACKER_BUSY;             
+             }
+          }
           else 
              return PACKER_BUSY;
        }       
@@ -388,7 +409,7 @@ u8 Tell_Packer_Release_Done()
    static u8 wait_for_signal_complete; 
       
    /* Check if delay (releasing material <-> sending signal) is ongoing */   
-   if(os_sched.status & 0x10)                      /* Task 2(feed delay) is ongoing */
+   if(os_sched.status & 0x4)                       /* Task 2(feed delay) is ongoing */
        return 0xff;                                /* return and check again later*/           
    else if(release_signal_not_sent_yet)            /* delay expires, and we do have signal to sent*/
    {

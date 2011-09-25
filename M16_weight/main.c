@@ -84,9 +84,6 @@ extern void Tell_Packer_Force_Release();
 // Support up to 8 (0-7) timer services. timerlen[] store counters for different 
 // timer tasks.  Timer task 7 is reserved for OS timer tick. 
 /*****************************************************************************/
-#define DELAY1_END !(os_sched.status & 0x1)   // used in release_material()
-#define DELAY2_END !(os_sched.status & 0x2)   // used in magnet_add_material()
-                                              // and motor_magnet_action()
 #define OS_TIMER_TICK 7 
 #define PACKER_TIMER 6
 interrupt [TIM2_OVF] void timer2_ovf_isr(void)
@@ -390,11 +387,12 @@ static u8 RSM_Flag = RM_READY_RELEASE;
 void release_material()
 {
     static u8 retry_cnt; 
- 
+    RS485._magnet.rsm_state = RSM_Flag; 
+    
     // initialize: weight is zero after release.
     last_weight = 0; 
     current_weight = 0;
-    weight_gap = RS485._flash.target_weight;     
+    weight_gap = RS485._flash.target_weight; 
     
     /************************************************************/   
     //start to open the lower bucket.
@@ -426,11 +424,7 @@ void release_material()
     /************************************************************/      
     if(RSM_Flag == RM_WAIT_OPEN_W){      
        if(DELAY1_END){                        
-          //if(ENABLE_MOTOR_SENSORS)
-             Motor_Driver('W',HALF_CYCLE_CLOSE_WITH_SENSOR,POWER_OFF_AFTER_ROTATION);
-          //else
-          //   Motor_Driver('W',HALF_CYCLE_CLOSE_NO_SENSOR,POWER_OFF_AFTER_ROTATION);
-          
+          Motor_Driver('W',HALF_CYCLE_CLOSE_WITH_SENSOR,POWER_OFF_AFTER_ROTATION);
           RSM_Flag = RM_WAIT_SHIFT;     
        }
        return;
@@ -514,11 +508,9 @@ void release_material()
 // and "magnet_time"are adjusted accordingly.
 // This subroutine is enabled by Bit 1 of test_mode_reg1 (EN_RUNTIME_MAGNET_ADJ)
 /*******************************************************************************/
-#define SAFE_AMP 10
-#define REASONABLE_WEIGHT 4
 void auto_amp_adj(u16 weight_delta)
 {
-    u8 new_amp, index, i;
+    u8 new_amp, index, i, max_amp;
     
     index = local_magnet_amp >> 2;  
     for(new_amp=0,i=1; i<MAX_AMP_WEIGHT_RECORDS; i++)
@@ -530,9 +522,11 @@ void auto_amp_adj(u16 weight_delta)
     }
     if(amp_weight[new_amp+1] == NOT_AVAILABLE)
         new_amp++;
+
+    max_amp = RS485._flash.magnet_amp+20;
     
-    if(new_amp*4 > RS485._flash.magnet_amp+20)
-        local_magnet_amp=RS485._flash.magnet_amp+20; 
+    if(new_amp*4 > max_amp)
+        local_magnet_amp = max_amp; 
     else
        local_magnet_amp=new_amp<<2;
 
@@ -562,18 +556,24 @@ void auto_amp_adj(u16 weight_delta)
 //Initialize state of Motor/Magnet/Weight State Machine.
 static u8  WSM_Flag = MM_ADD_MATERIAL; 
 u8 magnet_add_material()
-{   
+{    
+    u16 temp;
     /**************************************************************/
     //  start Magnet
-    /**************************************************************/      
+    /**************************************************************/          
      // wait from magnet to feed material
      if(WSM_Flag == MM_ADD_MATERIAL){
         local_magnet_amp = RS485._flash.magnet_amp;   			              
         if(RS485._flash.target_weight)
             auto_amp_adj(weight_gap); 
-        //RS485._global.hw_status = local_magnet_amp;
-        //if(weight_gap)            
-        E_Magnet_Driver(RS485._flash.magnet_time, local_magnet_amp); 
+        /* log actual amp to hw_status register for monitor */
+        RS485._global.hw_status = local_magnet_amp;  
+
+        temp = RS485._flash.target_weight;
+        /* stop adding material when current weight exceeds target weight */
+        if((temp==0)||(temp > current_weight))
+            E_Magnet_Driver(RS485._flash.magnet_time, local_magnet_amp); 
+            
         WSM_Flag = MM_WAIT_ADDEND;
 	return WSM_Flag;
      }           
@@ -603,6 +603,7 @@ u8 magnet_add_material()
      }
    
    // other states.
+   RS485._magnet.wsm_state = WSM_Flag;
     return WSM_Flag;
 }
 
@@ -628,7 +629,7 @@ u8 magnet_add_material()
 void motor_magnet_action()
 { 
     u8 index;
-    
+    RS485._magnet.wsm_state = WSM_Flag;
     /**************************************************************/ 
     // Start magnet to add material, if returned status is not
     // MM_PASS_MATERIAL, operation of adding mtrl not finished yet.
@@ -738,9 +739,9 @@ void motor_magnet_action()
            {   
                weight_gap = RS485._flash.target_weight; 
                // re-add material. last amp forecast is out-of-date
-               /*if((WSM_Flag == MM_PASS_MATERIAL) && (RS485._flash.target_weight))
+               if((WSM_Flag == MM_PASS_MATERIAL) && (RS485._flash.target_weight))
                {   WSM_Flag = MM_ADD_MATERIAL;
-               }*/
+               }
                return; 
            }     
            // Update weight periodically
@@ -1535,7 +1536,13 @@ void main(void)
           // they can run in parallel.
           magnet_add_material();  	  
           continue;
-       }else{            
+       }else if(RS485._global.flag_enable == ENABLE_ON){
+          // originally there was a bug, when master sends "flag_enable" commands 
+          // less than ENABLE_ON very fast, after executing 
+          // if((RS485._global.flag_enable > ENABLE_OFF)&&(RS485._global.flag_enable < ENABLE_ON)) 
+          // and before if(RS485._global.flag_enable == ENABLE_OFF), RS485._global.flag_enable may 
+          // be set again by interrupt subroutine. It may go here. So we add a test here. 
+          
     	  // weight measurement is embedded at the end of motor_magnet_action().
     	  // if no go on command received, code won't break out of motor_magnet_action().
     	  // motor_magnet_action() will continuously output weight values.

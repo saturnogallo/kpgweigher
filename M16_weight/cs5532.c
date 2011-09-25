@@ -431,9 +431,5 @@ void CS5532_Poise2Result()
    // master board won't find this node if Mtrl_Weight_gram is always 0xffff.
    // Bad calibartion data will make Mtrl_Weight_gram always bad.
    // so we set Mtrl_Weight_gram to a different data to indicate calibration error.
-   /***************************************************************/                      
-   // if bit2 of test_mode_reg1 is set, AD output is sent to master board / PC.
-   if(DISPLAY_AD_RAW_DATA)
-        RS485._global.Mtrl_Weight_gram =  RS485._global.cs_mtrl;
    return;
 }
