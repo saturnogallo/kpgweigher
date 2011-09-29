@@ -235,73 +235,80 @@ namespace ioex_cs
         public double weight
         {
             get{
-                if (NodeAgent.IsDebug)
-                    return rand.NextDouble()*20;
-                if (!this["mtrl_weight_gram"].HasValue)
+                try
+                {
+                    if (NodeAgent.IsDebug)
+                        return rand.NextDouble() * 20;
+                    if ((!this["mtrl_weight_gram"].HasValue) || (!this["mtrl_weight_gram"].HasValue))
+                    {
+                        return WeighNode.NOREADING_WEIGHT;
+                    }
+                    UInt32 value = this["mtrl_weight_gram"].Value;
+                    if (value >= 65521) //special message
+                    {
+                        if (value == 65531) //filtering
+                        {
+                            //Debug.Write("f"+this.node_id);
+                            return WeighNode.INAVLID_WEIGHT + 1;
+                        }
+                        if (value == 65534) //invalid weight
+                        {
+                            //Debug.Write("a" + this.node_id);
+                            return WeighNode.INAVLID_WEIGHT + 2;
+                        }
+                        //try 10 times before an AD error is issued.
+                        if (cnt_aderr < 10)
+                        {
+                            cnt_aderr++;
+
+                            return WeighNode.INAVLID_WEIGHT + 3;
+                        }
+                        if (value == 65529) //overweight
+                        {
+                            if (errlist.IndexOf("err_ow1;") < 0)
+                                errlist = errlist + "err_ow1;";
+
+                        }
+                        if (value == 65532) //AD overflow
+                        {
+                            if (errlist.IndexOf("err_ad;") < 0)
+                                errlist = errlist + "err_ad;";
+                        }
+                        if (value == 65530) //divide zero
+                        {
+                            //                      return WeighNode.INAVLID_WEIGHT+4;
+                            if (errlist.IndexOf("err_dz;") < 0)
+                                errlist = errlist + "err_dz;";
+                        }
+                        _lastweight = value;
+                        return _lastweight;
+                    }
+                    cnt_aderr = 0;
+                    if (errlist != "")  //clear all the error message
+                    {
+                        errlist = errlist.Replace("65529;", "");
+                        errlist = errlist.Replace("65532;", "");
+                        errlist = errlist.Replace("65530;", "");
+                        errlist = errlist.Replace("err_ow1;", "");
+                        errlist = errlist.Replace("err_ad;", "");
+                        errlist = errlist.Replace("err_dz;", "");
+
+                    }
+                    bRelease = false;
+                    double w = (double)(this["mtrl_weight_gram"].Value) + (double)this["mtrl_weight_decimal"].Value / (double)64.0;
+                    //                if (_lastweight != w)
+                    //                    StringResource.dolog(w.ToString("F2") + "#" + this.node_id);
+
+                    //                if (Math.Abs(_lastweight-w) > 0.1)
+                    //                {
+                    _lastweight = w;
+                    //                }
+                    return _lastweight;
+                }
+                catch
                 {
                     return WeighNode.NOREADING_WEIGHT;
                 }
-                UInt32 value = this["mtrl_weight_gram"].Value;
-                if(value >= 65521) //special message
-                {
-                    if (value == 65531) //filtering
-                    {
-                        //Debug.Write("f"+this.node_id);
-                        return WeighNode.INAVLID_WEIGHT + 1;
-                    }
-                    if (value == 65534) //invalid weight
-                    {
-                        //Debug.Write("a" + this.node_id);
-                        return WeighNode.INAVLID_WEIGHT + 2;
-                    }
-                    //try 10 times before an AD error is issued.
-                    if (cnt_aderr < 10)
-                    {
-                        cnt_aderr++;
-
-                        return WeighNode.INAVLID_WEIGHT + 3;
-                    }
-                    if (value == 65529) //overweight
-                    {
-                        if (errlist.IndexOf("err_ow1;") < 0)
-                            errlist = errlist + "err_ow1;";
-                        
-                    }
-                    if (value == 65532) //AD overflow
-                    {
-                        if (errlist.IndexOf("err_ad;") < 0)
-                            errlist = errlist + "err_ad;";
-                    }
-                    if (value == 65530) //divide zero
-                    {
-//                      return WeighNode.INAVLID_WEIGHT+4;
-                        if (errlist.IndexOf("err_dz;") < 0)
-                            errlist = errlist + "err_dz;";
-                    }
-                    _lastweight = value;
-                    return _lastweight;
-                }
-                cnt_aderr = 0;
-                if (errlist != "")  //clear all the error message
-                {
-                    errlist = errlist.Replace("65529;", "");
-                    errlist = errlist.Replace("65532;", "");
-                    errlist = errlist.Replace("65530;", "");
-                    errlist = errlist.Replace("err_ow1;", "");
-                    errlist = errlist.Replace("err_ad;", "");
-                    errlist = errlist.Replace("err_dz;", "");
-
-                }
-                bRelease = false;
-                double w = (double)(this["mtrl_weight_gram"].Value) +(double)this["mtrl_weight_decimal"].Value / (double)64.0;
-//                if (_lastweight != w)
-//                    StringResource.dolog(w.ToString("F2") + "#" + this.node_id);
-
-//                if (Math.Abs(_lastweight-w) > 0.1)
-//                {
-                    _lastweight = w;
-//                }
-                return _lastweight; 
             }
         }
         public void ClearWeight()
