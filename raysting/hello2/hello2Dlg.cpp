@@ -221,15 +221,18 @@ BOOL CHello2Dlg::OnInitDialog()
 	m_cfgtab.SetCurSel(0);
 	curview = 0;
 
+
 	
-	
-	LoadCurrentView();
-	m_chlist.SetCurSel(curview);
 	thread_cmd = CMD_ABORT;
 	cur_prg = NULL;
 	hThread = CreateThread(NULL,NULL,OneRunThread,this ,0,&dwThreadId);
 	// TODO: Add extra initialization here
 	SetTimer(1,TIMER_LEN,NULL);
+
+	LoadCurrentView();
+
+//	m_chlist.SetCurSel(curview);
+
 	return TRUE;  // 除非设置了控件的焦点，否则返回 TRUE
 }
 
@@ -273,7 +276,12 @@ void CHello2Dlg::OnTimer(UINT nIDEvent)
 		beidle = true;
 		return;
 	}
-	m_ridlgs[lastid]->PostRun(); //store the result of current run
+	if(lastid < 900)
+	{
+		m_ridlgs[lastid]->PostRun(); //store the result of current run
+	}else{
+		lastid = 0;
+	}
 	//one run is done
 	//check all done
 	bool alldone = true;
@@ -300,6 +308,11 @@ void CHello2Dlg::OnTimer(UINT nIDEvent)
 					
 
 		cur_prg = &(m_ridlgs[lastid]->m_prg);
+		if(m_cfgtype == CFGTYPE_BORE)
+			CTesterProgram::m_swinav.scan('#',m_ridlgs[lastid]->m_ch);
+		else
+			CTesterProgram::m_swinav.scan('!',m_ridlgs[lastid]->m_ch);
+
 		m_ridlgs[lastid]->PrepareRun(m_runcount);
 		if(m_graph.ch != curview)
 		{
@@ -333,6 +346,11 @@ void CHello2Dlg::OnBtnDisplay()
 {
 	OnStnDblclickRunGraph();
 }
+void CHello2Dlg::dbg(CString str)
+{
+//	char c = str[0];
+//	CTesterProgram::m_swinav.log(&c,1);
+}
 void CHello2Dlg::OnBtnRun() 
 {
 	// TODO: Add your control notification handler code here
@@ -346,6 +364,7 @@ void CHello2Dlg::OnBtnRun()
 					m_ridlgs[i]->m_prg.Abort();
 				}
 				CTesterProgram::m_swinav.reset_swi();
+				CTesterProgram::m_swinav.scan('*',0);
 				m_running = false;
 		}else{
 			SendCmd(CMD_GOON);
@@ -354,6 +373,7 @@ void CHello2Dlg::OnBtnRun()
 	}else{	//start the running program
 		
 		SendCmd(CMD_ABORT);
+		
 	SendCmd(CMD_PAUSE);
 		
 	m_graph.iBufMax = m_runcount;
@@ -380,12 +400,14 @@ void CHello2Dlg::OnBtnRun()
 						m_ridlgs[i]->GetCFGSetting());
 			}
 		}
-		lastid = 0;
+		lastid = 999;
+		
 		cur_prg = &(m_ridlgs[start]->m_prg);
 
 		m_running = true;
 	}
 	SET_RUN_TEXT;	
+	
 }
 
 //show the coef dialog
@@ -433,6 +455,8 @@ void CHello2Dlg::ShowCFG(CWnd* target)
 }
 void CHello2Dlg::LoadCurrentView()
 {
+	if ((m_cfgtype != CFGTYPE_THMO) && (m_cfgtype != CFGTYPE_BORE))
+		return;
 	//display the current view base on the selection
 	int curch = m_chlist.GetCurSel();
 	
@@ -441,35 +465,64 @@ void CHello2Dlg::LoadCurrentView()
 	//clear the channel list first
 	while(m_chlist.GetCount() > 0)
 		m_chlist.DeleteString(0);
-
+	
 	//fill in the channel list
 	for(int i=0;i<sizeof(m_ridlgs)/sizeof(CRunitemDialog*);i++){
 		CString name;
 		name.Format(_T("CH%i"),i+1);
-		if (curcfg == CFGTYPE_BORE)
+		
+		if ((curcfg == CFGTYPE_BORE) && (i<12)) //12 ch at max for BORE
 		{
 			if(m_ridlgs[i]->IsValid() && m_ridlgs[i]->cfg_now == CFGTYPE_BORE)
 			{
-				name.Format(_T("CH%i:%s▼"),i+1,m_ridlgs[i]->m_prbid);
+				if((i+1) < 10)
+					name.Format(_T("CH0%i:%s▼"),i+1,m_ridlgs[i]->m_prbid);
+				else
+					name.Format(_T("CH%i:%s▼"),i+1,m_ridlgs[i]->m_prbid);
 			}else{
-				name.Format(_T("CH%i:关闭 ▼"),i+1);
+				if((i+1) < 10)
+					name.Format(_T("CH0%i:关闭 ▼"),i+1);
+				else
+					name.Format(_T("CH%i:关闭 ▼"),i+1);
 			}
+			m_chlist.AddString(name);
+			m_chlist.SetCurSel(max(0,curch));
+			
 		}
 		if (curcfg == CFGTYPE_THMO)
 		{
 			if(m_ridlgs[i]->IsValid() && m_ridlgs[i]->cfg_now == CFGTYPE_THMO)
 			{
-				name.Format(_T("CH%i:%s型▼"),i+1,m_ridlgs[i]->m_prbid);
+				if((i+1) < 10)
+					name.Format(_T("CH0%i:%s型▼"),i+1,m_ridlgs[i]->m_prbid);
+				else
+					name.Format(_T("CH%i:%s型▼"),i+1,m_ridlgs[i]->m_prbid);
 			}else{
-				name.Format(_T("CH%i:关闭▼"),i+1);
+				if((i+1) < 10)
+					name.Format(_T("CH0%i:关闭▼"),i+1);
+				else
+					name.Format(_T("CH%i:关闭▼"),i+1);
 			}
+			m_chlist.AddString(name);
+			m_chlist.SetCurSel(max(0,curch));
 		}
-		m_chlist.AddString(name);
-		m_chlist.SetCurSel(max(0,curch));
 	}
+	
 	curview = max(0,curch);
 	GetDlgItem(IDC_MAIN_STATUS)->SetWindowText(m_ridlgs[curview]->m_prg.mystate);
 	Refresh();
+	
+	if(m_chlist.GetScrollBarCtrl(SB_VERT))
+	{
+		if(m_cfgtype == CFGTYPE_BORE)
+		{
+			m_chlist.GetScrollBarCtrl(SB_VERT)->ShowWindow(SW_HIDE);
+			//m_chlist.EnableScrollBarCtrl(SB_VERT,FALSE);
+		}else{	
+			m_chlist.GetScrollBarCtrl(SB_VERT)->ShowWindow(SW_SHOWNORMAL);
+			//m_chlist.EnableScrollBarCtrl(SB_VERT,TRUE);
+		}
+	}
 }
 void CHello2Dlg::Refresh()
 {

@@ -25,7 +25,7 @@ static void www()
 	} 
 	CTesterProgram::swifree = false;
 }
-char szTarget[256];
+static char szTarget[256];
 
 static void wchar2szTarget(CString str)
 {
