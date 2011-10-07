@@ -145,7 +145,16 @@ bool CRunitemDialog::IsCacu()
 	return (cfg_now == CFGTYPE_CACU);
 }
 
+static char szTarget[256];
 
+static void wchar2szTarget(CString str)
+{
+	sprintf(szTarget,"");
+ 	int len = WideCharToMultiByte(CP_ACP, 0, str, -1, NULL, 0, NULL, NULL);
+    memset(szTarget, 0, len + 1);
+	WideCharToMultiByte (CP_ACP, 0,str, -1, szTarget, len, NULL,NULL);
+
+}
 bool CRunitemDialog::PostRun()
 {
 	//a reading has been available, need upload the diagram and global channel result
@@ -153,17 +162,25 @@ bool CRunitemDialog::PostRun()
 	result = m_prg.GetEnv(_T("OUTPUT"));
 	
 	double d_ret = wcstod(result,NULL);
-	
+	double rv;
+	rv = d_ret;
 	
 	if(cfg_now == CFGTYPE_BORE)
 	{
 		m_output.AddTail(d_ret);	
+		
 		result.Format(_T("%.4f ¦¸"),CGraph::GetAverage(&m_output));
 		m_smalltxt = result;
 		double cc[16];
+		
 		CProbeDialog::GetCoef(m_prbid,cc);
 		d_ret = RValueToTValue(d_ret,cc);
-		
+
+		CString tv;
+		tv.Format(_T("%i:%.4fohm:%.4fC\r\n"),m_ch,rv,d_ret);
+		wchar2szTarget(tv);
+		CTesterProgram::m_swinav.log(szTarget,strlen(szTarget));
+
 		m_data.AddTail(d_ret);
 		result.Format(_T("%.4f ¡æ"),CGraph::GetAverage(&m_data));
 		m_bigtxt = result;
@@ -176,8 +193,12 @@ bool CRunitemDialog::PostRun()
 		m_output.AddTail(d_ret);	
 		result.Format(_T("%.4f mV"),CGraph::GetAverage(&m_output)*1000);
 		m_smalltxt = result;
-		
 		d_ret = MValueToTValue(d_ret,m_prbid.GetAt(0));
+
+		CString tv;
+		tv.Format(_T("%i:%.4fV:%.4fC\r\n"),m_ch,rv,d_ret);
+		wchar2szTarget(tv);
+		CTesterProgram::m_swinav.log(szTarget,strlen(szTarget));
 
 		m_data.AddTail(d_ret);
 		result.Format(_T("%.4f ¡æ"),CGraph::GetAverage(&m_data));

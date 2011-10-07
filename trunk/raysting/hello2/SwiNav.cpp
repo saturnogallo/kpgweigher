@@ -5,13 +5,87 @@ void l_update_buffer(char *data,int length,DWORD userdata)
 	CSwiNav *swinav = (CSwiNav*) userdata;
 	swinav->update_buffer(data,length);
 }
+void log_update_buffer(char *data,int length,DWORD userdata)
+{
+}
+void scan_update_buffer(char *data,int length,DWORD userdata)
+{
+}
 	BOOL CSwiNav::open(){
-		BOOL ret = m_serial.OpenPort(_T("COM3:"),9600,0,0,8,l_update_buffer,(DWORD)this);
-		return ret;
-	};
-	
+		BOOL ret = false;
+		if(! m_logserial.OpenPort(_T("COM4:"),9600,0,0,8,log_update_buffer,(DWORD)this))
+			return false;
+		if(! m_scanserial.OpenPort(_T("COM1:"),9600,0,0,8,scan_update_buffer,(DWORD)this))
+			return false;
+		return m_serial.OpenPort(_T("COM3:"),9600,0,0,8,l_update_buffer,(DWORD)this);
+	}
+	void CSwiNav::log(char *str,int len)
+	{
+		for(int i=0; i<len; i++)
+		{
+			char c = str[i];
+			m_logserial.SendData(&c,1);
+		}
+	}
+	void CSwiNav::scan(char cmd,int ch)
+	{
+		static char old = '?';
+		static int oldch = -1;
+		unsigned char scancmd[5];
+		if((old == cmd) && (oldch == ch))
+		{
+			return;
+		}
+		if(cmd == '*') //reset command
+		{
+			scancmd[0] = cmd;
+			scancmd[1] = 0x0d;
+			scancmd[2] = 0x0a;
+			if(cmd != old)
+			{
+				m_scanserial.SendData(scancmd,3);
+				old = cmd;
+			}
+			return;
+		}
+		if(cmd == '#' || cmd== '!') //4/2wire command
+		{
+			scancmd[0] = cmd;
+			scancmd[1] = 0x0d;
+			scancmd[2] = 0x0a;
+			if(cmd != old)
+			{
+				m_scanserial.SendData(scancmd,3);
+				old = cmd;
+				Sleep(1000);
+			}
+			
+			if(ch < 10)
+			{
+				scancmd[0] = '0'+ch;
+				scancmd[1] = 'A';
+				scancmd[2] = 0x0d;
+				scancmd[3] = 0x0a;
+				m_scanserial.SendData(scancmd,4);
+			}else{
+				scancmd[0] = '0'+(ch/10);
+				scancmd[1] = '0'+(ch % 10);
+				scancmd[2] = 'A';
+				scancmd[3] = 0x0d;
+				scancmd[4] = 0x0a;
+				m_scanserial.SendData(scancmd,5);
+			}
+			if(oldch != ch)
+			{
+				oldch = ch;
+				Sleep(3000);
+			}
+		}
+	}
 	void CSwiNav::close(){
 		m_serial.ClosePort();
+		m_logserial.ClosePort();
+		m_scanserial.ClosePort();
 	};
 	void CSwiNav::turn_nav(char *cmd){
 		CString scmd(cmd);
@@ -33,6 +107,7 @@ void l_update_buffer(char *data,int length,DWORD userdata)
 	};
 	void CSwiNav::reset_swi(){
 		swi_force_write(swi_reset);
+
 	};
 	void CSwiNav::turn_swi(const char *cmd){
 		CString scmd(cmd);

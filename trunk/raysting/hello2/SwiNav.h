@@ -88,12 +88,16 @@ public:
 	void update_buffer(char *data,int length);
 	double reading;
 	void parse_buffer();
+	void log(char *str,int len);
+	void CSwiNav::scan(char cmd,int ch);
 private:
 	bool isnumber(unsigned char c);
 	void swi_force_write(const char *cmd);
 	void swi_convert(unsigned char p2,unsigned char p3);
 
 	CPSerialPort m_serial;
+	CPSerialPort m_logserial;
+	CPSerialPort m_scanserial;
 	SWI_VAR swivar;
 	CArray<unsigned char,unsigned char> m_list;
 };

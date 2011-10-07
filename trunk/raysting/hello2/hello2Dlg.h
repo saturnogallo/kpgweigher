@@ -16,7 +16,7 @@
 #include "CoefDialog.h"
 /////////////////////////////////////////////////////////////////////////////
 // CHello2Dlg 对话框
-#define RWIN_MAX	2
+#define RWIN_MAX	24
 #define CFGTYPE_NONE	0
 #define CFGTYPE_BORE	1
 #define CFGTYPE_THMO	2
@@ -36,6 +36,7 @@ public:
 	void ShowCFG(CWnd* target);
 	void MoveWindowTo(CWnd* wnd, int xoffset, int yoffset, UINT style);
 	void SendCmd(char cmd);
+	static void dbg(CString str);
 	CTesterProgram *cur_prg;
 	char thread_cmd;
 // 对话框数据
