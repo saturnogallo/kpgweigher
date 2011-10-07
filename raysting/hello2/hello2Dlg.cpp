@@ -457,6 +457,7 @@ void CHello2Dlg::LoadCurrentView()
 {
 	if ((m_cfgtype != CFGTYPE_THMO) && (m_cfgtype != CFGTYPE_BORE))
 		return;
+	
 	//display the current view base on the selection
 	int curch = m_chlist.GetCurSel();
 	
@@ -619,7 +620,11 @@ void CHello2Dlg::OnTcnSelchangeTab1(NMHDR *pNMHDR, LRESULT *pResult)
 void CHello2Dlg::OnLbnSelchangeList3()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	LoadCurrentView();
+	// LoadCurrentView();
+	int curch = m_chlist.GetCurSel();
+	curview = max(0,curch);
+	GetDlgItem(IDC_MAIN_STATUS)->SetWindowText(m_ridlgs[curview]->m_prg.mystate);
+	Refresh();
 }
 
 void CHello2Dlg::OnLbnDblclkList3()
