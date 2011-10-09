@@ -359,14 +359,17 @@
 [j,"PTR@prg",0,DOTHMOINIT]
 [j,0,0,INITTHMODONE]
 [DOTHMOINIT]
+[s,0,0,OKI3,FKI2,FKI1,FKI4,FKI5,FKI6,FKI7]
+[s,0,0,FEXT,OHX1]
+[s,0,0,FH1,FH2,OH3,FH4,FH5,FH6]
 {nav_120mv()}
+[c,0,0,i,PTR,1]
 [INITTHMODONE]
 
 {SHIFT_CHAN()}
-[p,0,0,1]
+[p,0,0,4]
 {nav_read()}
 [t,0,0,OUTPUT]
-[p,0,0,1]
 ><
 
 //internal calibration ^1^ return variable name
