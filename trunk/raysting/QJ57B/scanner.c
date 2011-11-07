@@ -8,12 +8,8 @@ u8 scancmd[5];
 u8 eeprom scanner_type = 1; //1: MI, 2: GUIDLINE
 void scanner_set_mode()
 {                            
-        if (IS_BORE_MODE)
-        {
-            scancmd[0] = '#';
-        }else{
-            scancmd[0]= '!';
-        }
+        scancmd[0] = '#';
+        //scancmd[0]= '!';
         scancmd[1] = 0x0D;
         scancmd[2] = 0x0A;
         prints(scancmd,3,PORT_SCANNER);    
@@ -50,7 +46,7 @@ void scanner_set_channel(uchar ch)
 }
                             
 //incoming data handler of scanner
-void scanner_uart_push(uchar data)
+void scanner_uart_push(uchar dat)
 {
 }                        
 /**********************************
@@ -199,12 +195,13 @@ void navto1v()
 static uchar rlybuf[4] = {'U','s','U','U'};
 #define SEND_RLYHEAD         prints(rlybuf,6,PORT_RELAY);
 #define SEND_RLYTAIL         turn_relay('V')
-void relay_uart_push(uchar data)
+void relay_uart_push(uchar dat)
 {
 }
 void turn_relay(uchar reg)
 {           
      prints(&reg,1,PORT_RELAY);
+     sleepms(2000);
 }                                
 
 /**********************************

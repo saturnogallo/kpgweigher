@@ -3,13 +3,10 @@
 
 #include "typedef.h"
 
-#define LCD_WIDTH      		32      //显示区宽度 16 * 8 = 128 dot
-#define LCD_HEIGHT		64	//64 dot
+#define LCD_WIDTH      		(uint)32      //显示区宽度 16 * 8 = 128 dot
+#define LCD_HEIGHT		(uint)64	//64 dot
 #define LCD_TEXT_HOME_ADDR     	0x0000  //文本显示区首地址
-#define LCD_GRAPH_HOME_ADDR     ((LCD_HEIGHT/8)*30)  //图形显示区首地址   =240
-
-#define LCD_DATA_BUS    PORTB
-//#define LCD_DATA_BUS   		P2      //MCU P1<------> LCM
+#define LCD_GRAPH_HOME_ADDR     ((LCD_HEIGHT/8)*LCD_WIDTH)  //图形显示区首地址
 
 // ASCII字符控制代码解释定义
 #define STX	0x02
@@ -57,19 +54,19 @@
 					// D0-D2：定义D0-D7位；D3：1置位；0：清除
 
 
-//void LCD_Busy (uchar autowr) ;    //测状态
-//uchar LCD_BusyStatus () ;    //测状态
-//void LCD_CheckBusy1(void) ;
+void LCD_Busy (uchar autowr) ;    //测状态
+uchar LCD_BusyStatus (uchar autowr) ;    //测状态
+void LCD_CheckBusy1(void) ;
 //void LCD_CheckBusy2(void) ;
 //void LCD_CheckBusy3(void) ;
-//void LCD_Write1 (uchar dat,uchar comm) ;       //写一个数据和一个命令
-//void LCD_Write2 (uchar datl,uchar dath,uchar comm) ;  //写两个数据和一个命令
-//void LCD_WriteInt (uint dat,uchar comm) ;       //写一个16进制数据和一个命令
-//void LCD_AutoWrite (uchar dat) ;               //自动写数据
-//uchar LCD_Read(void) ;
+void LCD_Write1 (uchar dat,uchar comm) ;       //写一个数据和一个命令
+void LCD_Write2 (uchar datl,uchar dath,uchar comm) ;  //写两个数据和一个命令
+void LCD_WriteInt (uint dat,uchar comm) ;       //写一个16进制数据和一个命令
+void LCD_AutoWrite (uchar dat) ;               //自动写数据
+uchar LCD_Read(void) ;
 //uchar LCD_AutoRead(void) ;
-//void LCD_Comm (uchar comm) ;       //写命令
-//void LCD_Data (uchar dat) ;       //写数据
+void LCD_Comm (uchar comm) ;       //写命令
+void LCD_Data (uchar dat) ;       //写数据
 void LCD_Init (void) ;
 void LCD_Cls (void) ;
 void LCD_ClsBlock(uchar x1,uchar y1,uchar x2,uchar y2);
@@ -79,12 +76,12 @@ void LCD_ClsBlock(uchar x1,uchar y1,uchar x2,uchar y2);
 //void LCD_Putpixel(uchar x,uchar y) ;
 void LCD_ShowCursor(uchar x,uchar y) ;/*光标*/
 void LCD_HideCursor(void) ;
-//void LCD_LineH(uchar y) ;
-//void LCD_LineV(uchar x,uchar y1,uchar y2) ;
-//void LCD_LineXX(uchar x1,uchar x2,uchar y);
+void LCD_LineH(uchar y) ;
+void LCD_LineV(uchar x,uchar y1,uchar y2) ;
+void LCD_LineXX(uchar x1,uchar x2,uchar y);
 void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2);
 //void LCD_Line(uchar x0,uchar y0,uchar x1,uchar y1) ;
-//void LCD_PutImg(uchar x,uchar y,uchar w,uchar h,flash uchar *img) ;
+void LCD_PutImg(uchar x,uchar y,uchar w,uchar h,flash uchar *img) ;
 //void LCD_PrintNumStr(uchar x,uchar y,uchar *s) ;
 //void LCD_TextPutchar(uchar x,uchar y,uchar c) ;
 //void LCD_TextPrint(uchar x,uchar y,char *s) ;
@@ -92,15 +89,15 @@ void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2);
 //void LCD_GrapPutchar(uchar x,uchar y,uchar num) ;
 //void LCD_GrapPrint(uchar x,uchar y,uchar code *s) ;
 //void LCD_Linexy(uchar x0,uchar y0,uchar xt,uchar yt) ;
-//void LCD_PrintBlackBlock(uchar x,uchar y,bool not_empty);
+void LCD_PrintBlackBlock(uchar x,uchar y,bool not_empty);
 //void LCD_PrintWord(uchar x,uchar y,uint16 n,uchar start) ;
 //void LCD_PrintHex(uchar x,uchar y,uchar hex) ;
 //void LCD_TextPrintWord(uchar x,uchar y,uint16 n,uchar start) ;
 void LCD_ReverseRect(uchar x,uchar y,uchar w,uchar h);
 void LCD_PrintHz12(uchar x,uchar y,uchar *s);
 void LCD_PrintHz16(uchar x,uchar y,uchar *s);
-//void LCD_Print24X32(uchar x, uchar y,uchar *s);
+void LCD_Print24X32(uchar x, uchar y,uchar *s);
 void LCD_Print6X8(uchar x, uchar y,uchar *s);
-
+void LCD_Print8X16(uchar x, uchar y,uchar *s);
 
 #endif

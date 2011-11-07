@@ -36,18 +36,18 @@ Data Stack size     : 1024
 #include "uart.h"
 #include "stdlib.h"
 //#include "math.h"
-extern void pgmain_handler(uchar);	//running menu
-extern void pgrconfig_handler(uchar);	//main menu of R config
-extern void pgtconfig_handler(uchar);	//main menu of T config
-extern void pgchset_handler(uchar);	//menu of channel probe setup
-extern void pgprblist_handler(uchar);	//list of probe selection
-extern void pgprbtypelist_handler(uchar); //select probe type
-extern void pgprbset_handler(uchar);	//menu of probe setup
-extern void pgprbconfig_handler(uchar);  //config of probe
-extern void pgboottype_handler(uchar msg) ; //boot up config
+extern void pg_main_handler(uchar);	
+extern void pg_ch_sel_handler(uchar);	
+extern void pg_prb_sel_handler(uchar);	
+extern void pg_prb_param_handler(uchar);	
+extern void pg_system_handler(uchar);	
+extern void pg_boot_handler(uchar); 
 extern void com1_putstr(char *s);
 extern unsigned int strlen(char *s);
 RUNDATA rundata;
+SYSDATA eeprom sysdata;
+PRBDATA eeprom prbdata;
+/*
 SYSDATA eeprom sysdata = {
 	0,0,100,3,
 	{0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
@@ -57,7 +57,7 @@ SYSDATA eeprom sysdata = {
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
 	1,1};
-PRBDATA	eeprom tprbdata = {
+PRBDATA	eeprom prbdata = {
        {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
@@ -77,38 +77,17 @@ PRBDATA	eeprom tprbdata = {
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff}
 };
-PRBDATA	eeprom rprbdata = {
-       {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
-	{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
-	{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
-	{25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
-	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
-	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0},	
-	{"11","","","","","","","",
-	"","","","","","","","",
-	"","","","","","","",""},
-       {0x03,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff}
-};
-
+*/
 char  strbuf[50];        //buffer for menu display
 uchar key;
 
-
-
-LABEL flash bootup = {LBL_HZ16,30,30,7,"正在启动..."};
+LABEL flash bootup = {LBL_HZ16,0,10,7,"正在启动..."};
+LABEL flash bootup1 = {LBL_HZ16,0,40,7,"更新数据..."};
 LABEL flash modify = {LBL_HZ16,30,30,8,"正在更新数据..."};
 
 LABEL flash lbldbg = {LBL_HZ6X8,10,30,8,strbuf};
 
-void testA(uchar data)
+void testA(uchar i)
 {
 }
 
@@ -177,11 +156,161 @@ void init_var()
 {                          
 }
 LABEL flash statelbl = {LBL_HZ6X8,100,55,16,strbuf};
-int ch_to_search=0;
-int curr_prb=0;
-int curr_dispch=0;
-int curr_ch = 0;
+int ch_to_search=1; //1 based index
+int last_ch_to_search = 0;
 int nextwin=0;
+uint dlg_cnt,onesec_cnt;
+
+uchar phase = 0;
+//several phase define
+//0: switch to new channel and capture prepare if required
+//10: get vrs, 
+//20: get vrx,
+//30: prepare track
+//40: TRACK P irx
+//50: TRACK N irx
+//60: update reading
+uchar track_state()
+{
+/*                  
+    uchar i;
+	
+	i = sysdata.id[ch_to_search-1];   
+	if(i == INVALID_PROBE)
+	{
+        	rundata.temperature[ch_to_search-1] = -9999;
+        	rundata.reading[ch_to_search-1] = -9999;
+        	phase = 60;
+	}
+	if(phase == 0)
+	{
+		if(ch_to_search == last_ch_to_search) //not new channel
+		{
+			phase = 40;
+			return 0;
+		}
+		scanner_set_channel(ch_to_search);
+ 	    navto1v();                                     
+        turn_k(800); //1:1 mode                       
+        relaystate(RLYMODE_VRS);  
+		dlg_cnt = 1;
+		phase = 10;
+		return 0;
+	}
+	if(phase == 10)
+	{
+	   //update vrs
+        relaystate(RLYMODE_VRS + irx);
+		dlg_cnt = 1;
+		phase = 20;
+		return 0;
+	}
+	if(phase == 20)
+	{
+        vrs = nav_read_stable();
+        if((vrs > 10.0)||(vrs < -10.0))
+		{
+			phase = 59;
+            return 0;
+		}
+        //update vrx
+        relaystate(RLYMODE_VRX + irx);  		
+		dlg_cnt = 1;
+		phase = 30;
+		return 0;
+	}
+	if(phase == 30)
+	{
+	   vrx = nav_read_stable();
+        if((vrx > 10.0)||(vrx < -10.0))
+		{
+			phase = 59;
+            return 0;
+		}
+        //update k
+        turn_k(k_pos + calc_capture_nextk());		
+        navto120mv();                                     
+		dlg_cnt = 0;
+		phase = 40;
+		return 0;
+	}
+	if(phase == 40)
+	{
+        relaystate(RLYMODE_TRACKP + irx);       
+		dlg_cnt = 5;
+		if(rundata.kttmode)
+			phase = 50;
+		else
+			phase = 55;
+		return 0;
+	}
+	if(phase == 50)
+	{
+		vcross_p = nav_read_stable();
+        if((vcross_p > 10.0)||(vcross_p < -10.0))
+		{
+			phase = 59;
+            return 0;
+		}
+        relaystate(RLYMODE_TRACKN + irx); 
+		dlg_cnt = 5;
+		phase = 55;
+		return 0;
+	}
+	if(phase == 55)
+	{
+		vcross_n = nav_read_stable();
+        if((vcross_n > 10.0)||(vcross_n < -10.0))
+		{
+			phase = 59;
+			return 0;
+		}
+		if(!rundata.kttmode)
+		{
+			vcross_p = vcross_n;
+			vcross_n = -vcross_n;
+		}
+		newN = calc_track_nextk();
+        if(newN > 0)                 
+        {
+                if(newN >= 64)   //too big changes
+				{
+					phase = 40;
+                    return 0;
+				}
+                turn_k(k_pos + newN);  
+				phase = 40;
+				return 0;
+        }        
+		rundata.reading[ch_to_search-1] = rx;
+		rundata.temperature[ch_to_search-1] = RValueToTValue(rx,sysdata.id[ch_to_search-1]);
+        phase = 60;
+		return 0;
+	}
+	if(phase == 59)
+	{
+		rundata.reading[ch_to_search-1] = -9999;
+		rundata.temperature[ch_to_search-1] = -9999;
+		phase = 60;
+	}
+	if(phase == 60)
+	{
+		pg_main_handler(MSG_REFRESH);
+		phase = 0;
+	}
+*/	
+	return 1;
+}
+
+void updatestate()
+{
+        char star[6];
+        sprintf(star,"    ");
+                
+        sprintf(strbuf,"(ch%2i,%2d,%2i)",ch_to_search+1,dlg_cnt/ONESEC,phase);                        
+        draw_label(&statelbl,SW_NORMAL);
+}
+
 /**************************************************************************************/
 //                              Main Function Loop
 /**************************************************************************************/
@@ -189,39 +318,82 @@ extern u8 databuf[12];
 extern u8 pos_databuf; //position in data buffer
 void main(void)
 {
-    u16 i;  
+    u16 i;     
 // RS485 Node    
     init_var();	//init data structure 
 //  System Initialization
     Init_Port();
 //  Init_Timers();
-//  Init_Ex_Interrupt();
+    Init_Ex_Interrupt();
     Init_UART();  
     Enable_XMEM();
-    Init_554();                
+    Init_554();    
+    LCD_Init();            
     Key_Init();    
     // Global enable interrupts
     WDTCR = 0x00; //disable dog watch
     #asm("sei")                 
     /*********************************************************************/
-    // System hardware dection
+    // System hardware detection
     /*********************************************************************/
-    while(1)
-    {
-        sleepms(10000);
-    }
+    nextwin = PG_BOOT;
+	scanner_set_mode();
+	 while(1)
+	 {
+ 	 	if(nextwin != 0)
+		{
+			SwitchWindow(nextwin);
+			(*curr_window)(MSG_INIT);
+			nextwin = 0;
+		}
+		if(key != KEY_INVALID)
+		{
+			(*curr_window)(key);
+			key = KEY_INVALID;
+			continue;
+		}		
+		if(curr_window != pg_main_handler)
+			continue;   		
+		if(dlg_cnt > 1)
+		{         
+		        onesec_cnt++;
+		        if(onesec_cnt == (ONESEC-10))
+		        {       
+       			        updatestate();
+       			}
+       			if(onesec_cnt == ONESEC)
+       			        onesec_cnt = 0 ;
+			dlg_cnt--;
+			continue;
+		}    
+		updatestate();
+		if(track_state() == 0)
+			continue;
+        //shift to next channel
+        while(true)
+        {
+            ch_to_search += 1;
+        	if(ch_to_search > MAX_CH_NUM)
+        	{
+	        	ch_to_search = 1;
+	        	break;
+	        }           
+	        i = sysdata.id[ch_to_search-1];
+       		if(i == INVALID_PROBE)
+   		        continue;
+       		if((prbdata.type[i] == PRBTYPE_PT25) || (prbdata.type[i] == PRBTYPE_PT100))
+       		    break;
+		}	
+	 }
 }      
 
 WINDOW flash wins[]={
-	{PG_MAIN,	pgmain_handler},	//running menu
-	{PG_RCONFIG,	pgrconfig_handler},	//main menu of R config
-	{PG_TCONFIG,	pgtconfig_handler},	//main menu of T config
-	{PG_CHSET,	pgchset_handler},	//menu of channel probe setup
-	{PG_PRBLIST,	pgprblist_handler},	//list of probe selection
-	{PG_PRBTYPELIST,pgprbtypelist_handler}, //select probe type
-	{PG_PRBSET,	pgprbset_handler},	//menu of probe setup
-	{PG_PRBCONFIG,	pgprbconfig_handler},  //config of r probe
-	{PG_BOOTTYPE,	pgboottype_handler}	//config of t probe
+	{PG_MAIN,		pg_main_handler},	
+	{PG_CH_SEL,		pg_ch_sel_handler},	
+	{PG_PRB_SEL,	        pg_prb_sel_handler},
+	{PG_PRB_PARAM,	        pg_prb_param_handler},
+	{PG_SYSTEM,		pg_system_handler},	
+	{PG_BOOT,	        pg_boot_handler}
 };
 
 

@@ -6,52 +6,66 @@
 //                              Initialize Port A-G
 /**************************************************************************************/
 void Init_Port()
-{
+{                       
+   //PORTxn: 1: pull up enable, 0 off
+   //DDxn: 1: output, 0, input
  // Input/Output Ports initialization
  // Port A initialization
  // Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T 
+ // PORTAAD MULTIPLEX
     PORTA=0x00;
     DDRA=0x00;                            
 
  // Port B initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=Out 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=1 
-    PORTB=0x00;
+ // LCD DATA USE
+    PORTB=0xFF;
     DDRB=0x00;
 
  // Port C initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=Out Func2=Out Func1=Out Func0=Out 
  // State7=1 State6=1 State5=1 State4=1 State3=0 State2=0 State1=0 State0=0 
  // PORTC[7:4]: chip select of 16C554 channels.
+ // PORTC[0-3]: BUS ADDRESS
     PORTC=0xF0;
     DDRC=0xFF;
 
  // Port D initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T 
-    PORTD=0x00;
-    DDRD=0x00;
+ // PORTD2 : RXD1
+ // PORTD3 : TXD1
+ // OTHERS : FOR LCD CONTROL
+    PORTD=0xFF;
+    DDRD=0xFB;
 
  // Port E initialization
  // Func7=In Func6=In Func5=In Func4=In Func3=In Func2=Out Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=0 State1=T State0=T 
  // PORTE.0: Input (M_RXD0)
  // PORTE.1: output (M_TXD0)
- // PORTE.2: output (16C554 INTC#)
+ // PORTE.2: output (16C554 INTN#)
  // PORTE.3: output (16C554 reset)
+ // PORTE.4-7: input (INTA-D from )
     PORTE=0x06;
     DDRE=0x0E;
 
  // Port F initialization
  // Input 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=Out State0=Out
- // PORTF[3:0]: LED[4:1]
+ // PORTF[3:0]: LED[4:1]    
+ // PORTF4-7: JTAG
+ // PORTF0-3: LED
     PORTF=0x0F;
     DDRF=0x0F;
 
  // Port G initialization
- // Input 
+ // Input        
+ // PORTG0-1: IOR/W
+ // PORTG3-4: NO USE
+ // PORTG2  : ALE
     PORTG=0x00;
     DDRG=0x00;
 }
