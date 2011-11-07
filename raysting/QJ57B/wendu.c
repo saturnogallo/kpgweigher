@@ -4,6 +4,11 @@
 #include "math.h"
 #define logl log
 #define powl pow
+double CeliusToF(double c)
+{                         
+        return c*1.8+32.0;
+	//convert C temp to F temp
+}
 double PT100RToTValue(double r,double r0)
 {
         double ac,bc,cc,tlow,tup,rnew,tnew;
@@ -35,16 +40,16 @@ double RValueToTValue(double r, u8 prbid)
 	double ac,bc,cc,tlow,tup,rnew,tnew;
 	int count;
 
-	ac = rprbdata.param1[prbid];
-	bc = rprbdata.param2[prbid];
-	cc = rprbdata.param3[prbid];
+	ac = prbdata.paramA[prbid];
+	bc = prbdata.paramB[prbid];
+	cc = prbdata.paramC[prbid];
 
-	if(rprbdata.type[prbid] == PRBTYPE_PT100)
+	if(prbdata.type[prbid] == PRBTYPE_PT100)
 		return PT100RToTValue(r, cc);
-	if(rprbdata.type[prbid] != PRBTYPE_PT25)
+	if(prbdata.type[prbid] != PRBTYPE_PT25)
 		return -9999.999;
-        if(rprbdata.rtp[prbid] > 0.1)
-                r = r/rprbdata.rtp[prbid];
+        if(prbdata.rtp[prbid] > 0.1)
+                r = r/prbdata.rtp[prbid];
         else
 		r = r/25.0;
 
@@ -163,7 +168,7 @@ flash double NHigh[]={0.000000000000E+00,0.259293946010E-01,0.157101418800E-04,0
 flash double JLow[]={0.000000000000E+00,0.503811878150E-01,0.304758369300E-04,-0.856810657200E-07,0.132281952950E-09,-0.170529583370E-12,0.209480906970E-15,-0.125383953360E-18,0.156317256970E-22};
 flash double JHigh[]={0.296456256810E+03,-0.149761277860E+01,0.317871039240E-02,-0.318476867010E-05,0.157208190040E-08,-0.306913690560E-12};
 
-flash double BLow[]={0.000000000000E+00,0.586655087100E-01,0.450322755820E-04,0.289084072120E-07,-0.330568966520E-09,0.650244032700E-12,-0.191974955040E-15,-0.125366004970E-17,0.214892175690E-20,-0.143880417820E-23,0.359608994810E-27};
+flash double BLow[]={0.000000000000E+00,-0.24650818346E-03,0.59040421171E-05,-0.13257931636E-08,0.15668291901E-11,-0.16944529240E-14,0.62990347094E-18};
 flash double BHigh[]={-0.389381686210E+01,0.285717474700E-01,-0.848851047850E-04,0.157852801640E-06,-0.168353448640E-09,0.111097940130E-12,-0.445154310330E-16,0.989756408210E-20,-0.937913302890E-24};
 
 flash double EHigh[]={0.000000000000E+00,0.586655087100E-01,0.450322755820E-04,0.289084072120E-07,-0.330568966520E-09,0.650244032700E-12,-0.191974955040E-15,-0.125366004970E-17,0.214892175690E-20,-0.143880417820E-23,0.359608994810E-27};	
@@ -284,7 +289,7 @@ double MValueToTValue(double r,char type)
 			tlow =  -270;	tup = 1000;
 			break;
 		case 'B': 	
-			tlow =  0;	tup = 1280;
+			tlow =  0;	tup = 1800;
 			break;
 		case 'J': 	
 			tlow =  -210;	tup = 1200;

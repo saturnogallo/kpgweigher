@@ -16,33 +16,14 @@
 #define SPORT0       4
 #define SPORT1       5                     
             
-#define MARK_HEAD        0xAA
-#define MARK_TAIL        0x55
-
-#define STATUS_IDLE      0xF0
-#define STATUS_ERR       0xF1
-#define STATUS_DRAW      0xF2
-#define STATUS_DONE      0xF3
-       
-#define CMDO_DISPLAYBTN  0x02
-#define CMDO_LCD_INIT    0x03
-#define CMDO_LCD_CLS     0x04
-#define CMDO_LCD_REVERSE 0x05
-#define CMDO_LCD_CLSBLK  0x06
-#define CMDO_LCD_RECT    0x07
-#define CMDO_LCD_HZ12    0x08
-#define CMDO_LCD_HZ16    0x09
-#define CMDO_LCD_68      0x10
-#define CMDO_LCD_816     0x11
-#define CMDO_TOIDLE      0x12
 
 #define DEBUG        0
 /*
         Port related definition
 */ 
-void kbd_uart_push(uchar);
 
-#define cm0_push(data)  kbd_uart_push(data)
+void testA(uchar); //dummy handler
+#define cm0_push(data)  testA(data)
 #define PORT_KBD        SPORT0
 
 void scanner_uart_push(uchar);
@@ -60,11 +41,10 @@ void nav_uart_push(uchar);
 
 void relay_uart_push(uchar);
 #define cm_pushC(data)  relay_uart_push(data)
-#define PORT_RELAY      SPORTA
+#define PORT_RELAY          SPORTA
 
-void testA(uchar);
 #define cm_pushD(data)  testA(data)
-//#define PORT_B          SPORTB
+//#define PORT_POWER          SPORTB
 // Hardware related
 
 #define MASK_TMR0_INT()  TIMSK &= 0xFE  
@@ -75,11 +55,6 @@ void testA(uchar);
                             
 void sleepms(u16 ms);
 
-#define SET_PKTT     display_buttons(KEY_KTT,1)
-#define SET_NKTT     display_buttons(KEY_KTT,0)
-#define SET_TORX     display_buttons(KEY_RS,1)
-#define SET_TORS     display_buttons(KEY_RS,0)
-                              
 double nav_read();
 
 void scanner_set_mode();
