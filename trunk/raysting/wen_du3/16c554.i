@@ -232,9 +232,9 @@ interrupt [9] void ext_int7_isr(void)
 void Reset_554(void)
 {
    // reset 16C554. Reset pin of 16C554 is connected to PB0 of MEGA64
-      PORTB.0 = 1;                                                         
+      PORTE.3 = 1;                                                         
       sleepms(500);    // Delay
-      PORTB.0 = 0;     // Recover from reset
+      PORTE.3 = 0;          
       sleepms(500);    // Delay
 }
 /********************************************************************************/
@@ -248,11 +248,11 @@ void Init_554(void)
    /********************************************************************/         
    // Set Baud rate: 115200bps (0x4), 57600bps (0x8), 38400bps (0xC)
       (*(volatile unsigned char *)(0x7000+0x300))  = 0x80;
-      (*(volatile unsigned char *)(0x7000+0x000)) = 0x30          ;
+      (*(volatile unsigned char *)(0x7000+0x000)) = 0x04          ;
       (*(volatile unsigned char *)(0x7000+0x100)) = 0x0;     
       // Set Line Control Register:
    // 8 data bits, 1 stop bit, Even Parity, LCR7 = 1 to access divisor latches.
-      (*(volatile unsigned char *)(0x7000+0x300))  = 0b00011011   ;
+      (*(volatile unsigned char *)(0x7000+0x300))  = 0b00011011    ;
    // Set FIFO Control Register:
    // Enable FIFO, Clear buffer, reset counter, trigger level at 14 bytes.
       (*(volatile unsigned char *)(0x7000+0x200))  = 0b00000111   ;
@@ -269,11 +269,11 @@ void Init_554(void)
    // Set Baud rate: 115200bps (0x4), 57600bps (0x8), 38400bps (0xC)
    // LCR.7 must be set to "1" before setting baud rate
       (*(volatile unsigned char *)(0xB000+0x300))  = 0x80;
-      (*(volatile unsigned char *)(0xB000+0x000)) = 0x30          ;
+      (*(volatile unsigned char *)(0xB000+0x000)) = 0x04          ;
       (*(volatile unsigned char *)(0xB000+0x100)) = 0x0;     
       // Set Line Control Register:
    // 8 data bits, 1 stop bit, Even Parity, LCR7 = 1 to access divisor latches.
-      (*(volatile unsigned char *)(0xB000+0x300))  = 0b00011011   ;
+      (*(volatile unsigned char *)(0xB000+0x300))  = 0b00011011    ;
    // Set FIFO Control Register:
    // Enable FIFO, Clear buffer, reset counter, trigger level at 14 bytes.
       (*(volatile unsigned char *)(0xB000+0x200))  = 0b00000111   ;
@@ -289,11 +289,11 @@ void Init_554(void)
    /********************************************************************/         
    // Set Baud rate: 115200bps (0x4), 57600bps (0x8), 38400bps (0xC)
       (*(volatile unsigned char *)(0xD000+0x300))  = 0x80;
-      (*(volatile unsigned char *)(0xD000+0x000)) = 0x30          ;
+      (*(volatile unsigned char *)(0xD000+0x000)) = 0x04          ;
       (*(volatile unsigned char *)(0xD000+0x100)) = 0x0;     
       // Set Line Control Register:
    // 8 data bits, 1 stop bit, Even Parity, LCR7 = 1 to access divisor latches.
-      (*(volatile unsigned char *)(0xD000+0x300))  = 0b00011011   ;
+      (*(volatile unsigned char *)(0xD000+0x300))  = 0b00011011    ;
    // Set FIFO Control Register:
    // Enable FIFO, Clear buffer, reset counter, trigger level at 14 bytes.
       (*(volatile unsigned char *)(0xD000+0x200))  = 0b00000111   ;
@@ -309,11 +309,11 @@ void Init_554(void)
    /********************************************************************/         
    // Set Baud rate: 115200bps (0x4), 57600bps (0x8), 38400bps (0xC)
       (*(volatile unsigned char *)(0xE000+0x300))  = 0x80;
-      (*(volatile unsigned char *)(0xE000+0x000)) = 0x30          ;
+      (*(volatile unsigned char *)(0xE000+0x000)) = 0x04          ;
       (*(volatile unsigned char *)(0xE000+0x100)) = 0x0;     
       // Set Line Control Register:
    // 8 data bits, 1 stop bit, Even Parity, LCR7 = 1 to access divisor latches.
-      (*(volatile unsigned char *)(0xE000+0x300))  = 0b00011011   ;
+      (*(volatile unsigned char *)(0xE000+0x300))  = 0b00011011    ;
    // Set FIFO Control Register:
    // Enable FIFO, Clear buffer, reset counter, trigger level at 14 bytes.
       (*(volatile unsigned char *)(0xE000+0x200))  = 0b00000111   ;
@@ -336,7 +336,8 @@ void Init_554(void)
 void prints(unsigned char *str, unsigned char length, char uart_port)
 {           
     unsigned char len, i;
-    len = length & 0x0F;        //15bytes at most
+    //len = length & 0x0F;        //15bytes at most 
+    len = length; 
     switch(uart_port)
     {
        case 0:

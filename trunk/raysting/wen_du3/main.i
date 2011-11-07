@@ -166,7 +166,8 @@ char highc(unsigned char x);
 {
 	double param1[24];
 	double param2[24];
-	double param3[24];
+	double param3[24];                      
+	double rtp[24];
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
@@ -321,7 +322,7 @@ double RValueToTValue(double r, unsigned char prbid);
 double MValueToTValue(double r,char type);
 double GetWr(double t);
 double GetT(double w);
-  																	void scanner_set_channel(unsigned char ch);
+  																		void scanner_set_channel(unsigned char ch);
 void scanner_uart_push(unsigned char data);
 void pc_uart_push(unsigned char data);
 void nav_uart_push(unsigned char data);     
@@ -380,6 +381,9 @@ PRBDATA	eeprom tprbdata = {
 	{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
+	{25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
+	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
+	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0},	
 	{"11","","","","","","","",
 	"","","","","","","","",
 	"","","","","","","",""},
@@ -397,6 +401,9 @@ PRBDATA	eeprom rprbdata = {
 	{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
+	{25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
+	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
+	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0},	
 	{"11","","","","","","","",
 	"","","","","","","","",
 	"","","","","","","",""},
@@ -734,8 +741,7 @@ extern unsigned char pos_databuf; //position in data buffer
 void main(void)
 {
     unsigned int i;  
-    double dt;
-    /*  just test algrithom 
+    /*  just test algrithom 
     sprintf(databuf,"9.99");    
     pos_databuf = 4;
     dt = buf2double();
@@ -759,6 +765,15 @@ void main(void)
     // Global enable interrupts
     WDTCR = 0x00; //disable dog watch
     #asm("sei")                 
+    databuf[0] = 'A';
+    databuf[1] = '5';
+    databuf[2] = '?';            
+    while(1)
+    {
+            prints(databuf,3,2);
+            prints(databuf,3,3              );        
+            sleepms(20000);            
+    }
     /*********************************************************************/
     // System hardware dection
     /*********************************************************************/

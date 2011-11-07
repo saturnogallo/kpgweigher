@@ -372,10 +372,10 @@ void LCD_PrintChar(uchar cmd, uchar x,uchar y,uchar *s)
         pos = 1;
         while(*s)
         {      
-                lcdcmd[pos + 3] = *s++;
+                lcdcmd[(uchar)(pos + 3)] = *s++;
                 pos = pos + 1;
         }      
-        lcdcmd[pos+3] = 0x00;
+        lcdcmd[(uchar)(pos+3)] = 0x00;
         lcdcmd[3] = pos;
         pos = pos + 4;
         sendcmd(pos);

@@ -136,7 +136,8 @@ char highc(unsigned char x);
 {
 	double param1[24];
 	double param2[24];
-	double param3[24];
+	double param3[24];                      
+	double rtp[24];
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
@@ -255,7 +256,7 @@ LABEL flash datalbl = {5,10,10,8,strbuf};
 LABEL flash datalbl2 = {1,140,54,8,"UP:+/-,DN:'E'"};
 LABEL flash datalbl3 = {1,140,54,8,"UP/DN:'A'-'Z'"};
 LABEL flash databox = {5,20,30,9,databuf};
-void prbsninput()
+void prbsninput()
 {
 	unsigned char msg,len; 
 	databuf[0] = '\0';

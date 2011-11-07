@@ -160,7 +160,8 @@ char highc(unsigned char x);
 {
 	double param1[24];
 	double param2[24];
-	double param3[24];
+	double param3[24];                      
+	double rtp[24];
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
@@ -259,7 +260,7 @@ void prbsninput();
 extern MSG_HANDLER curr_window;
 extern MSG_HANDLER caller;
 extern unsigned char max_databuf;
-  																	  																	void scanner_set_channel(unsigned char ch);
+  																		  																		void scanner_set_channel(unsigned char ch);
 void scanner_uart_push(unsigned char data);
 void pc_uart_push(unsigned char data);
 void nav_uart_push(unsigned char data);     
@@ -300,7 +301,11 @@ LABEL flash pgmain_temps[] = {
                 unsigned char *cptr;
 	//LABEL flash usage = {LBL_HZ6X8,210,60,5,"usage"};
                              	isinit = 0;
-        //Menu
+        //Menu         
+        if(msg == 'C') {
+                nextwin = 13;
+                return;
+        }
 	if(msg == 'T') {
 		if(sysdata.prbmode == 0)
 			nextwin = 4;
@@ -475,7 +480,6 @@ LABEL flash pgr_options[] = {
 void pgcalibrate()
 {                             
         double oldvalue = 0;  
-        unsigned int cnt;
         max_databuf = 10;
 	sprintf(strbuf,"请输入外标准(CH1)阻值");
 	oldvalue = wnd_floatinput(oldvalue);
@@ -491,10 +495,15 @@ void pgrconfig_handler(unsigned char msg) {
 	static unsigned char last_sel = 1;
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(pgr_options)/sizeof(LABEL);
-	if(msg == 'T' || msg == 'C' || msg == 'O') {
+	if(msg == 'T') {
 	        sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
 		nextwin = 2;
 		return;
+	}                                    
+	if(msg == 'C')
+	{                
+	        nextwin = 13;
+	        return;
 	}
 	if(msg == 0xff) {
 		LCD_Cls();
@@ -542,11 +551,16 @@ void pgtconfig_handler(unsigned char msg) {
 	static unsigned char last_sel = 1;
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(pgt_options)/sizeof(LABEL);
-	if(msg == 'T' || msg == 'C' || msg == 'O') {
+	if(msg == 'T') {
 	        sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
 		nextwin = 2;
 		return;
-	}
+	}              
+	if(msg == 'C')
+	{                
+	        nextwin = 13;
+	        return;
+	}	
 	if(msg == 0xff) {
 		LCD_Cls();
 		draw_label(&pgt_banner, 1);
@@ -587,7 +601,7 @@ void pgchset_handler(unsigned char msg) {
 	unsigned char max_index = 24;//rundata.scanmode;
 	unsigned char new_page = 0;
 	int i,j;
-	if(msg == 'T' || msg == 'C') {
+	if(msg == 'C') {
 		if(sysdata.prbmode == 1)
 			nextwin = 3;
 		else
@@ -680,8 +694,8 @@ void pgprbset_handler(unsigned char msg) {
 		KEY_TABLE;
 		msg = MSG_REFRESH;
 	*/
-	}
-	if(msg == 'C' || msg == 'T')
+	}                             
+		if(msg == 'C')
 	{
 		if(sysdata.prbmode == 0)
 			nextwin = 4;
@@ -752,7 +766,7 @@ void pgprblist_handler(unsigned char msg) {
 		msg = MSG_REFRESH;
 	*/
 	}
-	if(msg == 'T' || msg == 'C')
+	if(msg == 'C')
 	{
 		nextwin = 7;
 		return;
@@ -831,34 +845,42 @@ void pgprbtypelist_handler(unsigned char msg) {
 	unsigned char max_option = sizeof(tplist_options)/sizeof(LABEL);
 	unsigned char i;
 	if(msg >= '1' && msg <= '9') {
+	        curr_sel = msg - '1' + 1;
+	        msg = 'O';
+	}
+	if(msg == 'C' ) {
+		nextwin = 11;
+		return;
+	}                   
+	if(msg == 'O')
+	{
 	        if(sysdata.prbmode == 0)
 	        {
-        		switch(msg)
+        		switch(curr_sel)
 	        	{
-		        	case '1':
+		        	case 1:
         			       return;
-	        		case '2':
+	        		case 2:
 			               return;
         			default:
-	        		       tprbdata.type[curr_prb-1] = msg-'3'+0x03;
+	        		       tprbdata.type[curr_prb-1] = curr_sel - 3+0x03;
 		        	       break;
         		}            
         	}else{
-        		switch(msg)
+        		switch(curr_sel)
 	        	{
-		        	case '1':
+		        	case 1:
 			               rprbdata.type[curr_prb-1] = 0xf1;
         			       break;
-	        		case '2':
-		        	       rprbdata.type[curr_prb-1] = 0xf2;
+	        		case 2:
+                       	               sprintf(strbuf,"输入Rtp:");                                              
+        	                       rprbdata.rtp[curr_prb-1] = wnd_floatinput(rprbdata.rtp[curr_prb-1]);
+		        	       rprbdata.type[curr_prb-1] = 0xf2;        	                       
 			               break;
         			default:
                                        return; 
         		}            
         	}
-	        msg = 'O';
-	}
-	if(msg == 'T' || msg == 'C' || msg == 'O') {
 		nextwin = 11;
 		return;
 	}
@@ -938,11 +960,7 @@ LABEL flash paramlbl3b = {4,10,45,7,"3."};
 LABEL flash paramval3b = {1,27,50,10,strbuf};
 //configuration of BORE probe parameter
 void pgprbconfig_handler(unsigned char msg) {
-	if( msg == 'O') {
-		nextwin = 10;
-		return;
-	}
-	if(msg == 'T' || msg == 'C') {
+	if( msg == 'C') {
 		nextwin = 10;
 		return;
 	}
@@ -965,12 +983,18 @@ void pgprbconfig_handler(unsigned char msg) {
         		draw_label(&pgprbcfg_banner,1);
 	        	//name            
 		        strbuf[0]=':';
-        		sprintf(strbuf,":%s",rname2b(curr_prb-1));
-	        	draw_label(&snlbl,1);draw_label(&snval,1);
-        		//type
-	        	sprintf(strbuf,":%s",getprbtype(rprbdata.type[curr_prb-1]));
-		        draw_label(&typelbl,1);draw_label(&typeval,1);
-		        if(rprbdata.type[curr_prb-1] == 0xf1)
+		        if(rprbdata.type[curr_prb-1] != 0xf2)
+		        {
+        		        sprintf(strbuf,":%s",rname2b(curr_prb-1));
+        	        	draw_label(&snlbl,1);draw_label(&snval,1);
+        	        }else{
+               		        sprintf(strbuf,":%s Rtp:%7f",rname2b(curr_prb-1),rprbdata.rtp[curr_prb-1]);
+        	        	draw_label(&snlbl,1);draw_label(&snval,1);
+        	        }
+               		//type	        	
+                       	sprintf(strbuf,":%s",getprbtype(rprbdata.type[curr_prb-1]));
+	                draw_label(&typelbl,1);draw_label(&typeval,1);
+	                		        if(rprbdata.type[curr_prb-1] == 0xf1)
 		        {
 		                sprintf(strbuf,"R(0!):%7f",rprbdata.param3[curr_prb-1]);
         		        draw_label(&paramlbl3b,1);draw_label(&paramval3b,1);
@@ -984,7 +1008,7 @@ void pgprbconfig_handler(unsigned char msg) {
 	                	//param3
 		                sprintf(strbuf,"c:%9.3E",rprbdata.param3[curr_prb-1]);
         		        draw_label(&paramlbl3,1);draw_label(&paramval3,1);
-        		                		}
+        		}
                 }
 		return;
 	}
@@ -1048,13 +1072,25 @@ LABEL flash boot_options[] = {
  	{5, 10,45,7,"3.热电偶测量"},
  	{5, 130,45,7,"4.热电偶配置"}
 };       
-//boot up menu
+//boot up menu                               
+extern unsigned char eeprom scanner_type;
 void pgboottype_handler(unsigned char msg) {
 	unsigned char i;
 	static unsigned char curr_sel = 1;
 	static unsigned char last_sel = 1;
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(boot_options)/sizeof(LABEL);
+	if(msg == '5') { //select scanner type
+       		max_databuf = 4; //2 char at max
+		sprintf(strbuf,"Scanner(1:MI,2:GUIDLINE)");    
+		i = scanner_type;
+		i = wnd_intinput(i); 
+		if(i == 1 || i == 2)
+		        scanner_type = i;
+		else
+		        scanner_type = 1;
+	        msg = 0xff;
+	}
 	if(msg == 0xff) {
 		LCD_Cls();
 		draw_label(&boot_banner, 1);
@@ -1084,7 +1120,7 @@ void pgboottype_handler(unsigned char msg) {
 		display_buttons('j',0);
 		nextwin = 4;
 		return;
-	}
+	}                      
 	if(msg == 0xfe) {
 		if(last_sel == curr_sel)                                        return;        			for(i = min_option;i <= max_option; i++){	        			if(last_sel == i)       draw_label(&boot_options[i-1], 2);        				if(curr_sel == i)	draw_label(&boot_options[i-1], 2);        			};
 	}

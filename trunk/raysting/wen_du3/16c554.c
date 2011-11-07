@@ -30,8 +30,8 @@
 #define IER_DATA 0b00000001
 // LCR.7 must be cleared to 0 when accessing RBR/THR/IER
 // LCR.7 must be set to 1 when accessing divisor latch
-#define LCR_DATA 0b00011011   // Even Parity 8 data bit, 1 stop bit
-#define DLL_DATA 0x30          // 115200bps: DLL = 0x4, 57600bps: DLL= 0x8, 38400 0xC: 9600 : 0x30  
+#define LCR_DATA 0b00011011    // Even Parity 8 data bit, 1 stop bit
+#define DLL_DATA 0x04          // 115200bps: DLL = 0x4, 57600bps: DLL= 0x8, 38400 0xC: 9600 : 0x30  
 #define DLM_DATA 0x0
 #define MCR_DATA 0b00001000
 
@@ -129,9 +129,9 @@ interrupt [EXT_INT7] void ext_int7_isr(void)
 void Reset_554(void)
 {
    // reset 16C554. Reset pin of 16C554 is connected to PB0 of MEGA64
-      PORTB.0 = 1;                                                         
+      PORTE.3 = 1;                                                         
       sleepms(500);    // Delay
-      PORTB.0 = 0;     // Recover from reset
+      PORTE.3 = 0;          
       sleepms(500);    // Delay
 }
 /********************************************************************************/
@@ -255,7 +255,8 @@ void Init_554(void)
 void prints(u8 *str, u8 length, char uart_port)
 {           
     u8 len, i;
-    len = length & 0x0F;        //15bytes at most
+    //len = length & 0x0F;        //15bytes at most 
+    len = length; 
     switch(uart_port)
     {
        case SPORTA:
