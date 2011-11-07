@@ -7,6 +7,7 @@ static double reading = -1000;
 static char navread[20];
 static char navread2[20];
 u8 scancmd[5];
+u8 eeprom scanner_type = 1; //1: MI, 2: GUIDLINE
 void scanner_set_mode()
 {                            
         if (IS_BORE_MODE)
@@ -20,23 +21,36 @@ void scanner_set_mode()
         prints(scancmd,3,PORT_SCANNER);    
 }
 void scanner_set_channel(uchar ch)
-{               
-        if(ch < 10)
-        {
-                scancmd[0] = (ch + '0');
-                scancmd[1] = 'A';                
-                scancmd[2] = 0x0D;
-                scancmd[3] = 0x0A;
-                prints(scancmd,4,PORT_SCANNER);    
-                return;
-        }              
-        
-        scancmd[0] = (u8)(ch / 10) + '0';
-        ch = ch % 10;
-        scancmd[1] = ch + '0';
-        scancmd[2] = 'A'; scancmd[3] = 0x0D; scancmd[4] = 0x0A;
-        prints(scancmd,5,PORT_SCANNER);
+{       
+        if(scanner_type == 1) //MI
+        {        
+                if(ch < 10)
+                {
+                        scancmd[0] = (ch + '0');
+                        scancmd[1] = 'A';                
+                        scancmd[2] = 0x0D;
+                        scancmd[3] = 0x0A;
+                        prints(scancmd,4,PORT_SCANNER);    
+                        return;
+                }else{              
+                        scancmd[0] = (u8)(ch / 10) + '0';
+                        ch = ch % 10;
+                        scancmd[1] = ch + '0';
+                        scancmd[2] = 'A'; scancmd[3] = 0x0D; scancmd[4] = 0x0A;
+                        prints(scancmd,5,PORT_SCANNER);
+                }
+        }
+        if(scanner_type == 2) //guidline
+        {               
+                        scancmd[0] = 'A';
+                        scancmd[1] = (u8)(ch / 10) + '0';
+                        ch = ch % 10;
+                        scancmd[2] = ch + '0';
+                        scancmd[3] = 0x0D; scancmd[4] = 0x0A;
+                        prints(scancmd,5,PORT_SCANNER);
+        }
 }
+
                             
 //incoming data handler of scanner
 void scanner_uart_push(uchar data)

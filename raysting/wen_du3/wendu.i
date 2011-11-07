@@ -115,7 +115,8 @@ char highc(unsigned char x);
 {
 	double param1[24];
 	double param2[24];
-	double param3[24];
+	double param3[24];                      
+	double rtp[24];
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
@@ -253,11 +254,13 @@ double RValueToTValue(double r, unsigned char prbid)
 	cc = rprbdata.param3[prbid];
 	if(rprbdata.type[prbid] == 0xf1)
 		return PT100RToTValue(r, cc);
-	else if(rprbdata.type[prbid] == 0xf2)
-		r = r/25.0;
-	else
+	if(rprbdata.type[prbid] != 0xf2)
 		return -9999.999;
-		//set the search range of T between GetT(r) +/- 1 degree
+        if(rprbdata.rtp[prbid] > 0.1)
+                r = r/rprbdata.rtp[prbid];
+        else
+		r = r/25.0;
+		//set the search range of T between GetT(r) +/- 1 degree
 	tlow = GetT(r) - 1; 
 	tup = tlow + 2;
 	count = 0;

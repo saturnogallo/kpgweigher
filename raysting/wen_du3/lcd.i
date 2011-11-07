@@ -221,7 +221,8 @@ char highc(unsigned char x);
 {
 	double param1[24];
 	double param2[24];
-	double param3[24];
+	double param3[24];                      
+	double rtp[24];
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
@@ -637,10 +638,10 @@ void LCD_PrintChar(unsigned char cmd, unsigned char x,unsigned char y,unsigned c
         pos = 1;
         while(*s)
         {      
-                lcdcmd[pos + 3] = *s++;
+                lcdcmd[(unsigned char)(pos + 3)] = *s++;
                 pos = pos + 1;
         }      
-        lcdcmd[pos+3] = 0x00;
+        lcdcmd[(unsigned char)(pos+3)] = 0x00;
         lcdcmd[3] = pos;
         pos = pos + 4;
         sendcmd(pos);

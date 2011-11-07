@@ -103,7 +103,8 @@ char highc(unsigned char x);
 {
 	double param1[24];
 	double param2[24];
-	double param3[24];
+	double param3[24];                      
+	double rtp[24];
 	char  name[24][8];	        //probe serials
 	unsigned char type[24];		//probe type
 }PRBDATA;
@@ -161,7 +162,7 @@ signed char scanf(char flash *fmtstr,...);
 signed char sscanf(char *str, char flash *fmtstr,...);
                                                #pragma used-
 #pragma library stdio.lib
-  																	void scanner_set_channel(unsigned char ch);
+  																		void scanner_set_channel(unsigned char ch);
 void scanner_uart_push(unsigned char data);
 void pc_uart_push(unsigned char data);
 void nav_uart_push(unsigned char data);     
@@ -192,6 +193,7 @@ static double reading = -1000;
 static char navread[20];
 static char navread2[20];
 unsigned char scancmd[5];
+unsigned char eeprom scanner_type = 1; //1: MI, 2: GUIDLINE
 void scanner_set_mode()
 {                            
         if (sysdata.prbmode == 1)
@@ -205,23 +207,36 @@ void scanner_set_mode()
         prints(scancmd,3,2);    
 }
 void scanner_set_channel(unsigned char ch)
-{               
-        if(ch < 10)
-        {
-                scancmd[0] = (ch + '0');
-                scancmd[1] = 'A';                
-                scancmd[2] = 0x0D;
-                scancmd[3] = 0x0A;
-                prints(scancmd,4,2);    
-                return;
-        }              
-                scancmd[0] = (unsigned char)(ch / 10) + '0';
-        ch = ch % 10;
-        scancmd[1] = ch + '0';
-        scancmd[2] = 'A'; scancmd[3] = 0x0D; scancmd[4] = 0x0A;
-        prints(scancmd,5,2);
+{       
+        if(scanner_type == 1) //MI
+        {        
+                if(ch < 10)
+                {
+                        scancmd[0] = (ch + '0');
+                        scancmd[1] = 'A';                
+                        scancmd[2] = 0x0D;
+                        scancmd[3] = 0x0A;
+                        prints(scancmd,4,2);    
+                        return;
+                }else{              
+                        scancmd[0] = (unsigned char)(ch / 10) + '0';
+                        ch = ch % 10;
+                        scancmd[1] = ch + '0';
+                        scancmd[2] = 'A'; scancmd[3] = 0x0D; scancmd[4] = 0x0A;
+                        prints(scancmd,5,2);
+                }
+        }
+        if(scanner_type == 2) //guidline
+        {               
+                        scancmd[0] = 'A';
+                        scancmd[1] = (unsigned char)(ch / 10) + '0';
+                        ch = ch % 10;
+                        scancmd[2] = ch + '0';
+                        scancmd[3] = 0x0D; scancmd[4] = 0x0A;
+                        prints(scancmd,5,2);
+        }
 }
-                            //incoming data handler of scanner
+                            //incoming data handler of scanner
 void scanner_uart_push(unsigned char data)
 {
 }                                 

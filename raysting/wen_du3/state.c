@@ -95,7 +95,11 @@ void pgmain_handler(uchar msg) {
 	//LABEL flash usage = {LBL_HZ6X8,210,60,5,"usage"};
                              
 	isinit = 0;
-        //Menu
+        //Menu         
+        if(msg == KEY_CE) {
+                nextwin = PG_BOOTTYPE;
+                return;
+        }
 	if(msg == KEY_TAB) {
 		if(IS_THERM_MODE)
 			nextwin = PG_TCONFIG;
@@ -280,7 +284,6 @@ LABEL flash pgr_options[] = {
 void pgcalibrate()
 {                             
         double oldvalue = 0;  
-        uint cnt;
         window_setup(10);
 	sprintf(strbuf,"请输入外标准(CH1)阻值");
 	oldvalue = wnd_floatinput(oldvalue);
@@ -298,10 +301,15 @@ void pgrconfig_handler(uchar msg) {
 	uchar min_option = 1;
 	uchar max_option = sizeof(pgr_options)/sizeof(LABEL);
 
-	if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
+	if(msg == KEY_TAB) {
 	        SET_BORE_MODE;
 		nextwin = PG_MAIN;
 		return;
+	}                                    
+	if(msg == KEY_CE)
+	{                
+	        nextwin = PG_BOOTTYPE;
+	        return;
 	}
 	if(msg == MSG_INIT) {
 		LCD_Cls();
@@ -350,11 +358,16 @@ void pgtconfig_handler(uchar msg) {
 	static uchar last_sel = 1;
 	uchar min_option = 1;
 	uchar max_option = sizeof(pgt_options)/sizeof(LABEL);
-	if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
+	if(msg == KEY_TAB) {
 	        SET_THERM_MODE;
 		nextwin = PG_MAIN;
 		return;
-	}
+	}              
+	if(msg == KEY_CE)
+	{                
+	        nextwin = PG_BOOTTYPE;
+	        return;
+	}	
 	if(msg == MSG_INIT) {
 		LCD_Cls();
 		draw_label(&pgt_banner, SW_NORMAL);
@@ -396,7 +409,7 @@ void pgchset_handler(uchar msg) {
 	uchar max_index = MAX_CH_NUM;//rundata.scanmode;
 	uchar new_page = 0;
 	int i,j;
-	if(msg == KEY_TAB || msg == KEY_CE) {
+	if(msg == KEY_CE) {
 		if(IS_BORE_MODE)
 			nextwin = PG_RCONFIG;
 		else
@@ -491,8 +504,9 @@ void pgprbset_handler(uchar msg) {
 		KEY_TABLE;
 		msg = MSG_REFRESH;
 	*/
-	}
-	if(msg == KEY_CE || msg == KEY_TAB)
+	}                             
+	
+	if(msg == KEY_CE)
 	{
 		if(IS_THERM_MODE)
 			nextwin = PG_TCONFIG;
@@ -563,7 +577,7 @@ void pgprblist_handler(uchar msg) {
 		msg = MSG_REFRESH;
 	*/
 	}
-	if(msg == KEY_TAB || msg == KEY_CE)
+	if(msg == KEY_CE)
 	{
 		nextwin = PG_CHSET;
 		return;
@@ -642,35 +656,43 @@ void pgprbtypelist_handler(uchar msg) {
 	uchar max_option = sizeof(tplist_options)/sizeof(LABEL);
 	uchar i;
 	if(msg >= KEY_NUM1 && msg <= KEY_NUM9) {
+	        curr_sel = msg - KEY_NUM1 + 1;
+	        msg = KEY_OK;
+	}
+
+	if(msg == KEY_CE ) {
+		nextwin = PG_PRBCONFIG;
+		return;
+	}                   
+	if(msg == KEY_OK)
+	{
 	        if(IS_THERM_MODE)
 	        {
-        		switch(msg)
+        		switch(curr_sel)
 	        	{
-		        	case KEY_NUM1:
+		        	case 1:
         			       return;
-	        		case KEY_NUM2:
+	        		case 2:
 			               return;
         			default:
-	        		       tprbdata.type[curr_prb-1] = msg-KEY_NUM3+PRBTYPE_K;
+	        		       tprbdata.type[curr_prb-1] = curr_sel - 3+PRBTYPE_K;
 		        	       break;
         		}            
         	}else{
-        		switch(msg)
+        		switch(curr_sel)
 	        	{
-		        	case KEY_NUM1:
+		        	case 1:
 			               rprbdata.type[curr_prb-1] = PRBTYPE_PT100;
         			       break;
-	        		case KEY_NUM2:
-		        	       rprbdata.type[curr_prb-1] = PRBTYPE_PT25;
+	        		case 2:
+                       	               sprintf(strbuf,"输入Rtp:");                                              
+        	                       rprbdata.rtp[curr_prb-1] = wnd_floatinput(rprbdata.rtp[curr_prb-1]);
+		        	       rprbdata.type[curr_prb-1] = PRBTYPE_PT25;        	                       
 			               break;
         			default:
                                        return; 
         		}            
         	}
-	        msg = KEY_OK;
-	}
-
-	if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
 		nextwin = PG_PRBCONFIG;
 		return;
 	}
@@ -754,11 +776,7 @@ LABEL flash paramval3b = {LBL_HZ6X8,27,50,10,strbuf};
 
 //configuration of BORE probe parameter
 void pgprbconfig_handler(uchar msg) {
-	if( msg == KEY_OK) {
-		nextwin = PG_PRBSET;
-		return;
-	}
-	if(msg == KEY_TAB || msg == KEY_CE) {
+	if( msg == KEY_CE) {
 		nextwin = PG_PRBSET;
 		return;
 	}
@@ -781,11 +799,18 @@ void pgprbconfig_handler(uchar msg) {
         		draw_label(&pgprbcfg_banner,SW_NORMAL);
 	        	//name            
 		        strbuf[0]=':';
-        		sprintf(strbuf,":%s",rname2b(curr_prb-1));
-	        	draw_label(&snlbl,SW_NORMAL);draw_label(&snval,SW_NORMAL);
-        		//type
-	        	sprintf(strbuf,":%s",getprbtype(rprbdata.type[curr_prb-1]));
-		        draw_label(&typelbl,SW_NORMAL);draw_label(&typeval,SW_NORMAL);
+		        if(rprbdata.type[curr_prb-1] != PRBTYPE_PT25)
+		        {
+        		        sprintf(strbuf,":%s",rname2b(curr_prb-1));
+        	        	draw_label(&snlbl,SW_NORMAL);draw_label(&snval,SW_NORMAL);
+        	        }else{
+               		        sprintf(strbuf,":%s Rtp:%7f",rname2b(curr_prb-1),rprbdata.rtp[curr_prb-1]);
+        	        	draw_label(&snlbl,SW_NORMAL);draw_label(&snval,SW_NORMAL);
+        	        }
+               		//type	        	
+                       	sprintf(strbuf,":%s",getprbtype(rprbdata.type[curr_prb-1]));
+	                draw_label(&typelbl,SW_NORMAL);draw_label(&typeval,SW_NORMAL);
+	                
 		        if(rprbdata.type[curr_prb-1] == PRBTYPE_PT100)
 		        {
 		                sprintf(strbuf,"R(0!):%7f",rprbdata.param3[curr_prb-1]);
@@ -800,7 +825,6 @@ void pgprbconfig_handler(uchar msg) {
 	                	//param3
 		                sprintf(strbuf,"c:%9.3E",rprbdata.param3[curr_prb-1]);
         		        draw_label(&paramlbl3,SW_NORMAL);draw_label(&paramval3,SW_NORMAL);
-        		        
         		}
                 }
 		return;
@@ -868,13 +892,25 @@ LABEL flash boot_options[] = {
  	{LBL_HZ16, 10,45,7,"3.热电偶测量"},
  	{LBL_HZ16, 130,45,7,"4.热电偶配置"}
 };       
-//boot up menu
+//boot up menu                               
+extern u8 eeprom scanner_type;
 void pgboottype_handler(uchar msg) {
 	uchar i;
 	static uchar curr_sel = 1;
 	static uchar last_sel = 1;
 	uchar min_option = 1;
 	uchar max_option = sizeof(boot_options)/sizeof(LABEL);
+	if(msg == KEY_NUM5) { //select scanner type
+       		window_setup(4); //2 char at max
+		sprintf(strbuf,"Scanner(1:MI,2:GUIDLINE)");    
+		i = scanner_type;
+		i = wnd_intinput(i); 
+		if(i == 1 || i == 2)
+		        scanner_type = i;
+		else
+		        scanner_type = 1;
+	        msg = MSG_INIT;
+	}
 
 	if(msg == MSG_INIT) {
 		LCD_Cls();
@@ -905,7 +941,7 @@ void pgboottype_handler(uchar msg) {
 		SET_TORS;
 		nextwin = PG_TCONFIG;
 		return;
-	}
+	}                      
 	if(msg == MSG_REFRESH) {
 		REFRESH_OPTIONS(boot_);
 	}

@@ -71,7 +71,8 @@ typedef eeprom struct _PRBDATA
 {
 	double param1[PRBS_PER_SECTOR];
 	double param2[PRBS_PER_SECTOR];
-	double param3[PRBS_PER_SECTOR];
+	double param3[PRBS_PER_SECTOR];                      
+	double rtp[PRBS_PER_SECTOR];
 	char  name[PRBS_PER_SECTOR][8];	        //probe serials
 	uchar type[PRBS_PER_SECTOR];		//probe type
 }PRBDATA;
