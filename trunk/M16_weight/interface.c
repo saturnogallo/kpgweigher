@@ -73,20 +73,59 @@
 #include <mega16.h>
 #include "define.h"
 
-#define MAX_SVS_NUM 8 
-#define PACKER_OF_MASK      0x0018
-#define PACKER_IF_MASK      0x0060  
-#define NEED_HANDSHAKE      (packer_config & 0x0080)
-#define ASYN_IF_MASK        0x0002
-#define INIT_MASK           0x0001 
-#define SIGNAL_DELAY_MASK   0x0004
+#define MAX_SVS_NUM           8 
+  
+#define NEED_HANDSHAKE        (packer_config & 0x0080)
+#define ASYN_IF_MASK          0x0002
+#define INIT_MASK             0x0001 
+#define SIGNAL_DELAY_MASK     0x0004
 #define INTF_MODE_SHAKEHANDS  (CONFIG_REG & 0x80)
-#define CONFIG_REG      packer_config
+#define CONFIG_REG            packer_config
+#define CFG_MEM_PACK_REQ      (CONFIG_REG & ASYN_IF_MASK)
 
-u16 packer_config; 
-u16 interface_pulse_width; 
-extern void kick_off_timer(u8 task_id, u16 timer_len); 
+#define PACKER_IF_MASK        0x0060
+#define IF_CFG_LOW            0x0000
+#define IF_CFG_RISING_EDGE    0x0020
+#define IF_CFG_FALLING_EDGE   0x0040
+#define IF_CFG_HIGH           0x0060
+#define IF_CFG                (CONFIG_REG & PACKER_IF_MASK)
 
+#define PACKER_OF_MASK        0x0018
+#define OF_CFG_LOW            0x0000
+#define OF_CFG_NEG_PULSE      0x0008
+#define OF_CFG_POS_PULSE      0x0010
+#define OF_CFG_HIGH           0x0018
+#define OF_CFG                (CONFIG_REG & PACKER_OF_MASK)
+
+#define PIN_FEED_PACKER       PORTB.5
+#define PIN_RFU               PORTB.7
+#define PIN_PACKER_REQ        PIND.2
+
+#define IF_PIN_HIGH           (PIN_PACKER_REQ)
+#define IF_PIN_LOW            (!PIN_PACKER_REQ)
+
+#define TASK_OF               4
+ 
+#define PACKER_BUSY           0xFF
+#define PACKER_READY          0x0
+
+#define LOW_LEVEL             0
+#define HIGH_LEVEL            1
+
+#define PENDING_REQ           3
+#define INT_RISING_EDGE       2
+#define INT_FALLING_EDGE      1
+#define NO_PENDING_REQ        0
+
+#define RISING_EDGE_OCCURED   (Intf.pack_reqs_pending & INT_RISING_EDGE)
+#define FALLING_EDGE_OCCURED  (Intf.pack_reqs_pending & INT_FALLING_EDGE)
+
+#define LEVEL_TEST_WAIT_TIME  150   /* 150 ms */
+
+/******************************************************************************************************/
+//                                  Global variables
+/******************************************************************************************************/
+extern void kick_off_timer(u8 task_id, u16 timer_len);
 typedef struct {
    volatile u8 pack_reqs_pending;              /* flag to indicate whether there is any 
                                                    pending reuqests from packer */                              
@@ -96,135 +135,149 @@ typedef struct {
    volatile u8 feed_counter;                   /* recorde how many times feed has been done */
    
 }INTERFACE;
-
-INTERFACE Intf;     
-
-#define PIN_PACKER_REQ PIND.2
-#define PENDING_REQ 0x3
-#define NO_PENDING_REQ 0x0 
-#define PACKER_BUSY 0xFF
-#define PACKER_READY 0x0
+INTERFACE Intf;                                /* packer interface global variables */
+u16 packer_config;                             /* configuration of packer interface, passed from PC */ 
+u16 interface_pulse_width;                    
+     
+/******************************************************************************************************/
+//                 de-assert OF (output signal -- feeding is done) signal 
+/******************************************************************************************************/
+void deassert_of()
+{
+   switch(OF_CFG)
+   {
+      case OF_CFG_LOW: 
+          PIN_FEED_PACKER = HIGH_LEVEL; 
+          PIN_RFU = HIGH_LEVEL;                  
+          break;    
+      case OF_CFG_NEG_PULSE:
+          kill_timer(TASK_OF);
+          PIN_FEED_PACKER = HIGH_LEVEL; 
+          PIN_RFU = HIGH_LEVEL; 
+          break;
+      case OF_CFG_POS_PULSE:                                         
+          kill_timer(TASK_OF);
+          PIN_FEED_PACKER = LOW_LEVEL;
+          PIN_RFU = LOW_LEVEL;
+          break;                      
+      case OF_CFG_HIGH:
+          PIN_FEED_PACKER = LOW_LEVEL; 
+          PIN_RFU = LOW_LEVEL; 
+          break;
+      default: 
+          break;         
+   }
+}
 
 /******************************************************************************************************/
 // External Interrupt 0 service routine: feed request from packer
-// Interrupt trigger type: Edge trigger. 
-// Mark "Intf.pack_reqs_pending" to indicate whether packer is requesting feeding.
-//    bit 1 = 1: rising edge detected; bit 0 = 1 falling edge detected; 
+// Interrupt trigger type: Edge trigger.  
+// Flag "Intf.pack_reqs_pending" to indicate whether packer is requesting feeding.
+//      bit 1 = 1: rising edge detected; bit 0 = 1 falling edge detected; 
+// Counter "RS485._global.packer_intr_cnt" is used to monitor occurance of packer request signal.
 /******************************************************************************************************/
 interrupt [EXT_INT0] void ext_int0_isr(void)
-{                     
+{  
+   RS485._global.packer_intr_cnt++;                /* interrupt counter for debug monitor */
+   GIFR |= 0x40;                                   /* clear interrupt flag */
    if(hw_id != HW_ID_INTERFACE)                    /* board is not interface board */
    {
      GICR &= 0xBF;                                 /* clear bit 6 to disable int 0 */
-     GIFR |= 0x40;                                 /* clear interrupt flag */
      return; 
+   } 
+   /***********************************************************************/
+   /* If packer request has been de-asserted, then last OF signal has been 
+      acknowledged by packer, then we should deassert OF signal. */
+   if(IF_PIN_HIGH)                                 /* risking edge interrupt */
+   {   if((IF_CFG == IF_CFG_LOW) || 
+          (IF_CFG == IF_CFG_RISING_EDGE))
+           deassert_of();
    }
-   /*debug info: packer request counter, byte 1 */
-   /*if((RS485._global.cs_sys_offset_cal_data & 0x0000FF00) == 0x0000FF00)
-        RS485._global.cs_sys_offset_cal_data &= 0xFFFF00FF; 
-   else
-        RS485._global.cs_sys_offset_cal_data += 0x100;*/    
-   RS485._global.packer_intr_cnt++;
-           
-   /* clear interrupt flag,write "1" to bit 6 of GIFR. */
-   GIFR |= 0x40;
-   
-   // read out remaining timer
-   //RS485._global.cs_mtrl = os_sched.timerlen[0]; 
-   // kill timer 0. 
-   //os_sched.status &= 0xFE;
-   //os_sched.timerlen[0] = 0;
-   
-   /* Set flag to indicate a request from packer is pending. */
-   if(CONFIG_REG & ASYN_IF_MASK)                  /* Asyn setting, we should save pack request */
+   else                                            /* falling edge interrupt */
+   {   if((IF_CFG == IF_CFG_HIGH) || 
+          (IF_CFG == IF_CFG_FALLING_EDGE) )
+           deassert_of();
+   }
+   /***********************************************************************/
+   /* If weigher is configured to memorized any packer requests when not 
+      ready, or it is ready, set flag to indicate a request from packer 
+      is pending. Flag is cleared outside of this ISR */
+   if((CFG_MEM_PACK_REQ)||(Intf.weigher_is_ready))
    {          
-       if(PIN_PACKER_REQ)                         /* Current input level is high */
-         Intf.pack_reqs_pending |= 0x02;          /* Set bit 1 to indicate rising edge */ 
+       if(IF_PIN_HIGH)                               /* Current input level is high */
+         Intf.pack_reqs_pending |= INT_RISING_EDGE;  /* Set bit 1 to indicate rising edge */ 
        else
-         Intf.pack_reqs_pending |= 0x01;          /* Set bit 0 to indicate falling edge */ 
+         Intf.pack_reqs_pending |= INT_FALLING_EDGE; /* Set bit 0 to indicate falling edge */ 
    }
-   else
-   {                                              /* feed is set synchronized with IF singal*/
-      if(!Intf.weigher_is_ready)
-         Intf.pack_reqs_pending = 0;              /* ignore feed request */ 
-      else                                        /* cnt edge cnt accordingly */
-      {  if(PIN_PACKER_REQ)                     
-            Intf.pack_reqs_pending |= 0x02;       /* Set bit 1 to indicate rising edge */ 
-         else
-            Intf.pack_reqs_pending |= 0x01;       /* Set bit 0 to indicate falling edge */ 
-      }
-   }
-   
+   /***********************************************************************/   
    Intf.feed_counter = 0;                         /* reset feed counter */
 }
 
 /******************************************************************************************************/
 // Initialize interface pins
 // This procedure should be called after PC download interface settings to masterboard 
-// If level trigger rather than edge trigger, use polling instead of interrupt.
 /******************************************************************************************************/
 void Init_interface()
 {      
-   static u8 not_poweron_initialization;
-       
-   packer_config = RS485._flash.target_weight; 
-   interface_pulse_width = (u16)RS485._flash.cs_Filter_option ; /* max pulse width 256*10 ms = 2.56s */    
-   if(interface_pulse_width < 5)   /* minimum pulse width 50ms */
-      interface_pulse_width = 5;
+   /* Create a flag to indicate initialization is poweron initialization,
+      or user initialization (configuration from user interface) */
+   static u8 user_initialization;
    
-   /* We need first to check if we are in handshake mode, if not, we will disable interrupt */
+   /* Get configuration data from IO registers */    
+   packer_config = RS485._flash.target_weight; 
+   /* max pulse width 255*10 ms = 2.55s, minimum pulse width 10ms */
+   interface_pulse_width = (u16)RS485._flash.cs_Filter_option ;     
+   if(interface_pulse_width < 1)
+      interface_pulse_width = 1;
+  
    if(!INTF_MODE_SHAKEHANDS)
    {
-      GICR &= 0xBF;                              /* clear bit 6 to disable int 0 */
-      DDRD.2 = 0;                                /* PORTD.2 as input (int0)*/
-      
-      DDRB |= 0xF0;                              /* set PORTB[7:4] as output */ 
-      PORTB |= 0xF0;                             /* output high to shut down interface */          
+      DDRD.2 = 0;                   /* PORTD.2 as input (int0)*/   
+      DDRB |= 0xF0;                 /* set PORTB[7:4] as output*/
+      PORTB |= 0xF0;                /* output high to shut down interface */          
       return;
    }
-   
-   /* set initial states of interface signal */
-   DDRB |= 0xF0;                                  /* set PORTB[7:4] as output */    
-   switch(CONFIG_REG & PACKER_OF_MASK)            
+   /***********************************************************************/     
+   /* configure input (IF), enable interrupt to monitor state change */
+   if(!user_initialization)   /* first time (poweron) initialization */
+   {  /* Settings for IF1, use External interrupt 0*/
+      DDRD.2 = 0;             /* set PORTD.2 (INT0)  as input */
+      MCUCR &=0xFB;           /* Interrupt triggered when PORTD.2 toggles */
+      MCUCR |=0x1; 
+      GIFR &= 0xBF;           /* Clear interupt flag (INTF0: bit 6) */
+      GICR |= 0x40;           /* Enable INT0 interrupt */ 
+      
+      /* Initialize packer flag for the first time, for non-powerup 
+         initializations, use last state */
+      Intf.pack_reqs_pending = NO_PENDING_REQ;      
+      user_initialization = TRUE;                            
+   }
+   /***********************************************************************/        
+   /* Configure output signals */
+   DDRB |= 0xF0;                    /*configure pins as output */             
+   switch(OF_CFG)            
    {
-      case 0x0:                                   /* low or negative pulse to enable */
-      case 0x8:
-          PORTB &= 0x0F;                          /* output low to close relay */
-          break;
-      case 0x10:
-      case 0x18:                                  /* high or positive pulse to enable */
-          PORTB |= 0xF0;                          /* output high to open relay */
-          break;
+      case OF_CFG_LOW:
+      case OF_CFG_NEG_PULSE:
+           PORTB |= 0xF0;           /* output high */
+           break;
+      case OF_CFG_POS_PULSE: 
+      case OF_CFG_HIGH:
+           PORTB &= 0x0F;           /* output low */
+           break;
       default: 
           break;                                                            
-
    }
-     
-   if(!not_poweron_initialization)
-   {  /* Settings for IF1, use External interrupt 0*/
-      /* PORTD.2 has been set as input in Init_Port() */  
-      DDRD.2=0;          /* set PORTD.2 (INT0)  as input */
-      /* set to edge (rising/falling) trigger */
-      MCUCR &=0xFB;      /* Interrupt triggered when PORTD.2 toggles */
-      MCUCR |=0x1; 
-      GIFR &= 0xBF;      /* Clear interupt flag (INTF0: bit 6) */
-      GICR |= 0x40;      /* Enable INT0 interrupt */ 
-      
-      /* Initialize packer flag for the first time, for non-powerup initializations, use last state */
-      Intf.pack_reqs_pending = NO_PENDING_REQ;   
-      
-      not_poweron_initialization = TRUE;                            
-   }
-
-   /*Initialize interface variables*/
+   /***********************************************************************/   
+   /* Initialize interface variables */
    Intf.max_feed_counter = 1 + ((CONFIG_REG & 0x0700) >> 8); 
    Intf.feed_counter = 0;
 
-   if(CONFIG_REG & INIT_MASK)
-      Intf.pack_reqs_pending = PENDING_REQ;      /* set pending flag so that weigher won't wait */
+   if(CONFIG_REG & INIT_MASK)                  /* weigher is to initialize the handshake */
+      Intf.pack_reqs_pending = PENDING_REQ;    /* set pending flag so that weigher won't wait */
    
-   Intf.weigher_is_ready = 0;                    /* initialize weigher status */      
-   Intf.multi_feed_inprogress = FALSE; 
+   Intf.weigher_is_ready = FALSE;              /* initialize weigher status, not ready yet */      
+   Intf.multi_feed_inprogress = FALSE;         /* not a multi_feed*/
 }
 
 /******************************************************************************************************/
@@ -235,70 +288,65 @@ void Init_interface()
 /******************************************************************************************************/
 u8 Packer_Is_Busy()
 {  
+    u8 ret_status;
+    
+    ret_status = PACKER_READY;
+    
+    /********************************************************************************/
     /* if in shakehands mode and no requests from packer is pending.*/
     /* variable "pack_reqs_pending" is set by ISR, it is declared as volatile type.*/
-    if(INTF_MODE_SHAKEHANDS) 
-    {
-       if(Intf.multi_feed_inprogress)            /* packer needs multiple feeds, no need to wait */
-          return PACKER_READY;
-              
-       /* Packer request is configured as low valid */           
-       if ((CONFIG_REG & PACKER_IF_MASK) == 0x00)
-       {  /* Release material only when falling edge detected (new reqeust). */
+    if((INTF_MODE_SHAKEHANDS) && (!Intf.multi_feed_inprogress)) 
+    {  
+       ret_status = PACKER_BUSY;
+       switch(IF_CFG)   
+       {
+       /******************************************************************/       
+       case IF_CFG_LOW:
+          /* Packer request is configured as low valid */           
+          /* Release material only when falling edge detected (new reqeust). */
           /* edge flag is cleared when responding to packer (Tell_Packer_Release_Done) */
-          //if((!PIN_PACKER_REQ) && (Intf.pack_reqs_pending & 0x1))    /* bit 0: falling edge flag */
-          if(!PIN_PACKER_REQ)
-          {  if((Intf.pack_reqs_pending & 0x1))
-                 return PACKER_READY;
+          if(IF_PIN_LOW)
+          {  
+             if(FALLING_EDGE_OCCURED)  ret_status = PACKER_READY;
              else
              {
-                sleepms(150);
-                if(!PIN_PACKER_REQ)
-                   return PACKER_READY;
-                else
-                   return PACKER_BUSY;
+                sleepms(LEVEL_TEST_WAIT_TIME);
+                if(IF_PIN_LOW)   ret_status = PACKER_READY;
              }
           }
-          else
-             return PACKER_BUSY;
-       }          
-       /* Packer request is configured as high valid */             
-       else if ((CONFIG_REG & PACKER_IF_MASK) == 0x60)
-       {  /* Release material only when input valid and rising edge detected (new reqeust). */
+       break;          
+       /******************************************************************/
+       case IF_CFG_HIGH:
+          /* Packer request is configured as high valid */             
+          /* Release material only when input valid and rising edge detected (new reqeust). */
           /* edge flag is cleared when responding to packer (Tell_Packer_Release_Done) */
-          //if((PIN_PACKER_REQ) && (Intf.pack_reqs_pending & 0x2))     /* bit 1: rising edge flag */
-          if(PIN_PACKER_REQ)
-          {  if((Intf.pack_reqs_pending & 0x2))
-                return PACKER_READY;
+          if(IF_PIN_HIGH)
+          {  
+             if((RISING_EDGE_OCCURED))   ret_status = PACKER_READY;
              else
-             {  sleepms(150);
-                if(PIN_PACKER_REQ)
-                   return PACKER_READY;
-                else
-                   return PACKER_BUSY;             
+             {  sleepms(LEVEL_TEST_WAIT_TIME);
+                if(IF_PIN_HIGH)   ret_status = PACKER_READY;           
              }
           }
-          else 
-             return PACKER_BUSY;
-       }       
-       /* packer request is configured as rising edge valid */           
-       else if ((CONFIG_REG & PACKER_IF_MASK) == 0x20)
-       {  if(Intf.pack_reqs_pending & 0x2)
-             return PACKER_READY; 
-          else
-             return PACKER_BUSY; 
-       }
-       /* packer request is configured as falling edge valid */           
-       else 
-       {
-          if(Intf.pack_reqs_pending & 0x1)
-             return PACKER_READY; 
-          else
-             return PACKER_BUSY;        
-       } 
-    }
-    else  /* no shakehands, don't care about packer */
-       return PACKER_READY;
+          break;       
+       /******************************************************************/
+       case IF_CFG_RISING_EDGE:
+          /* packer request is configured as rising edge valid */           
+          if(RISING_EDGE_OCCURED)  ret_status = PACKER_READY; 
+          break;
+       /******************************************************************/
+       case IF_CFG_FALLING_EDGE:
+          /* packer request is configured as falling edge valid */           
+          if(FALLING_EDGE_OCCURED)  ret_status = PACKER_READY; 
+          break;
+       /******************************************************************/
+       default:
+          break;
+       } /* end of switch */
+       /*****************************************************************************/
+    } /* end of if */
+           
+    return ret_status;
 }
  
 /******************************************************************************************************/
@@ -311,15 +359,15 @@ u8 Packer_Is_Busy()
 #define TASK_OR 3
 void Tell_Packer_Weigher_Rdy()
 {  
-   switch(CONFIG_REG & PACKER_OF_MASK)
+   switch(OF_CFG)
    {
-      case 0x0:                                   /* low to enable */
-      case 0x8:
-          PIN_WEIGHER_READY = 0;
+      case OF_CFG_LOW:                                   /* low to enable */
+      case OF_CFG_NEG_PULSE:
+          PIN_WEIGHER_READY = LOW_LEVEL;
           break;
-      case 0x10:
-      case 0x18:                                  /* high to enable */
-          PIN_WEIGHER_READY = 1;
+      case OF_CFG_POS_PULSE:
+      case OF_CFG_HIGH:                                  /* high to enable */
+          PIN_WEIGHER_READY = HIGH_LEVEL;
           break;
       default: 
           break;         
@@ -337,15 +385,15 @@ void Tell_Packer_Weigher_Rdy()
 #define TASK_OE 5     
 void Tell_Packer_Force_Release()
 {  
-   switch(CONFIG_REG & PACKER_OF_MASK)
+   switch(OF_CFG)
    {
-      case 0x0:                                   /* low to enable */
-      case 0x8:
-          PIN_FORCE_RELEASE = 0;
+      case OF_CFG_LOW: 
+      case OF_CFG_NEG_PULSE:
+          PIN_FORCE_RELEASE = LOW_LEVEL;
           break;
-      case 0x10:
-      case 0x18:                                  /* high to enable */
-          PIN_FORCE_RELEASE = 1;
+      case OF_CFG_POS_PULSE:
+      case OF_CFG_HIGH:
+          PIN_FORCE_RELEASE = HIGH_LEVEL;
           break;
       default: 
           break;         
@@ -363,26 +411,27 @@ void Tell_Packer_Force_Release()
 /******************************************************************************************************/
 //  send out release_done signal to packer
 /**************************************************/
-#define PIN_FEED_PACKER PORTB.5
-#define TASK_OF 4
 void send_packer_release_signal()
-{  
-   
-   switch(CONFIG_REG & PACKER_OF_MASK)
+{   
+   switch(OF_CFG)
    {
-      case 0x0:                                   /* low to enable */      
-          PIN_FEED_PACKER = 0;                    /* assert low until packer response */              
-          //break;
-      case 0x8:                                   /* negative pulse to enable */
-          PIN_FEED_PACKER = 0;                    /* assert low first */
+      case OF_CFG_LOW:                            /* low to enable */      
+          PIN_FEED_PACKER = LOW_LEVEL;            /* assert low until packer response */ 
+          PIN_RFU = LOW_LEVEL;             
+          break;
+      case OF_CFG_NEG_PULSE:                      /* negative pulse to enable */
+          PIN_FEED_PACKER = LOW_LEVEL;            /* assert low first */
+          PIN_RFU = LOW_LEVEL;
           kick_off_timer(TASK_OF, interface_pulse_width);/* back to high when timeout*/
           break;
-      case 0x18:                                  /* high to enable */
-          PIN_FEED_PACKER = 1;                    /* assert high until packer response */
-          //break;
-      case 0x10:
-          PIN_FEED_PACKER = 1;                    /* assert high first */
+      case OF_CFG_POS_PULSE:                      /* high to enable */
+          PIN_FEED_PACKER = HIGH_LEVEL;           /* assert high until packer response */
+          PIN_RFU = HIGH_LEVEL;
           kick_off_timer(TASK_OF, interface_pulse_width);/* back to low when timeout*/
+          break;
+      case OF_CFG_HIGH:
+          PIN_FEED_PACKER = HIGH_LEVEL;            /* assert high first */
+          //PIN_RFU = LOW_LEVEL; 
           break;
       default: 
           break;         
@@ -401,44 +450,44 @@ void send_packer_release_signal()
 // and complete remaining actions in it if delay expires.
 /***************************************************************/
 #define TASK_DELAY 2
+#define TASK_NOT_FINISHED 0xff
+#define TASK_DONE 0x0
 
 u8 Tell_Packer_Release_Done()
 {
-   u16 signal_delay;
+   u16 signal_delay; 
    static u8 release_signal_not_sent_yet; 
    static u8 wait_for_signal_complete; 
       
+   /************************************************************************/
    /* Check if delay (releasing material <-> sending signal) is ongoing */   
    if(os_sched.status & 0x4)                       /* Task 2(feed delay) is ongoing */
-       return 0xff;                                /* return and check again later*/           
+       return TASK_NOT_FINISHED;                   /* return and check again later*/           
+   /************************************************************************/
+   /* if OF signal has not been sent yet, send it and wait for it to complete */
    else if(release_signal_not_sent_yet)            /* delay expires, and we do have signal to sent*/
    {
        send_packer_release_signal();               /* send packer release done signal*/   
        release_signal_not_sent_yet = FALSE;        /* clear flag */
        wait_for_signal_complete = TRUE; 
-       return 0xff;                                   /* signal sent to packer, return (task done!) */
+       return TASK_NOT_FINISHED;                   /* signal sent to packer, return (task done!) */
    }
    
-   /* wait for release signal to be sent out complete */   
+   /************************************************************************/   
+   /* wait for release signal to complete */   
    if (wait_for_signal_complete)                        
    {
-      if (os_sched.status & 0x10)      /* wait for pulse width to complete */
-          return 0xff;
+      if (os_sched.status & 0x10)                   /* wait for pulse width to complete */
+          return TASK_NOT_FINISHED;
       else
       {
           wait_for_signal_complete = FALSE;
-          /*debug info: counter of signal, byte 4*/
-          /*if((RS485._global.cs_sys_offset_cal_data & 0xFF000000) == 0xFF000000)
-              RS485._global.cs_sys_offset_cal_data &= 0x00FFFFFF;
-          else
-              RS485._global.cs_sys_offset_cal_data += 0x1000000; */
-          RS485._global.packer_release_cnt++;   
-              
-          return 0x0;     
+          RS485._global.packer_release_cnt++;               
+          return TASK_DONE;     
       }
    }
      
-   
+   /************************************************************************/      
    /* send out release_done signal or kick off timer to send signal later */  
    Intf.weigher_is_ready = FALSE;                  /* we are responding and completing this cycle, so clear flag for next cycle */      
    Intf.feed_counter++;                            /* how many times weigher has feed packer in this cycle */
@@ -446,30 +495,31 @@ u8 Tell_Packer_Release_Done()
    {  
       Intf.pack_reqs_pending = PENDING_REQ;        /* so we don't have to wait for acknowledge signal from packer to proceed */
       Intf.multi_feed_inprogress = TRUE;              
-      //send_packer_release_signal();              /* send packer release done signal*/
-      return 0;                                    /* task done, return */
+      return TASK_DONE;                            /* task done, return */
    }
    else                                            /* last feed, already gave packer what it claims */
    {  Intf.pack_reqs_pending = NO_PENDING_REQ;     /* Now need to await packer's feedback to continue. */   
       Intf.multi_feed_inprogress = FALSE;
       Intf.feed_counter = 0;                       /* reset counter */
 
-      //if((CONFIG_REG & SIGNAL_DELAY_MASK)&&(CONFIG_REG & 0xF800)) /* add delay between releaseing material and sending out signal?  */
-      if(CONFIG_REG & 0xF800)    /* need delay before sending out signal */
+      if(CONFIG_REG & 0xF800)                        /* need delay before sending out signal */
       {   
          signal_delay = (CONFIG_REG & 0xF800)>>11;  /* 5 most significant bits:  get delay time */         
          signal_delay = signal_delay * 20;          /* X 20 */
          kick_off_timer(TASK_DELAY,signal_delay);   /* kickoff timer service 2 to start a delay, unit: 20*10ms */ 
-         release_signal_not_sent_yet = 0xff;        /* we haven't sent release_done signal to packer yet */         
-         return(0xff);                              /* return 0xff to tell caller we have something to do in the future.*/
+         release_signal_not_sent_yet = TRUE;        /* we haven't sent release_done signal to packer yet */         
+         return(TASK_NOT_FINISHED);                 /* return 0xff to tell caller we have something to do in the future.*/
       }
-      else                     /* send out signal immediately */
-      {   send_packer_release_signal();             /* send packer release done signal*/
+      else                                          /* send out signal immediately */
+      {   
+          if(os_sched.status & 0x4)
+              kill_timer(TASK_DELAY);               /* kill timer in case any prior task is in progress */
+          send_packer_release_signal();             /* send packer release done signal*/
           wait_for_signal_complete = TRUE; 
-          return 0xff;         
+          return TASK_NOT_FINISHED;         
       }
    }
    
-   return 0;
+   return TASK_DONE;
 }
                        
