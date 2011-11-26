@@ -1,6 +1,9 @@
 // global.h    
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_             
+                       
+#define _TEST_UARTS_
+
 
 #define i32    long int
 #define i16    int
@@ -241,4 +244,8 @@ void Tell_Packer_Weigher_Rdy();
 u8 Tell_Packer_Release_Done();
 extern u16 packer_config;
 void nfu_process_node_feedback();
+
+extern void led_on(u8 i);
+extern void led_off(u8 i);
+extern void led_flash(u8 i); 
 #endif

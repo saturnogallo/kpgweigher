@@ -691,15 +691,67 @@ void report_loop(){
 }
 
 /**************************************************************************************/
+// LED subroutines: led_on(i), led_off(i) and led_flash(i)
+// i = 0~3 --> LED1-4  
+/**************************************************************************************/
+void led_on(u8 i)
+{
+   if(i<4) PORTF &= (~(1<<i));
+}
+ 
+void led_off(u8 i)
+{
+   if(i<4) PORTF |= (1<<i);
+}
+
+void led_flash(u8 i)
+{
+    if(i<4) PORTF ^= (1<<i);
+}
+
+/**************************************************************************************/
 //
 /**************************************************************************************/
+#ifdef _TEST_UARTS_ 
+void test_uarts(void)
+(
+    char stra[] = "Test 16C554 channel A: \r\n";   
+    char strb[] = "Test 16C554 channel B: \r\n";
+    char strc[] = "Test 16C554 channel C: \r\n";
+    char strd[] = "Test 16C554 channel D: \r\n";
+    char strp[] = "Test COM2: \r\n";                                  
+  
+    /* Test 16C554: 115200bps, Even Parity 8 data bit, 1 stop bit */          
+    prints(stra, sizeof(stra), SPORTA);
+    led_flash(0);
+    sleepms(300);
+         
+    prints(strb, sizeof(strb), SPORTB);
+    led_flash(1);
+    sleepms(300);
+         
+    prints(strc, sizeof(strc), SPORTC);
+    led_flash(2);
+    sleepms(300);
+                  
+    prints(strd, sizeof(strd), SPORTD);
+    led_flash(3);
+    sleepms(300);
+                  
+    /* test COM2: Communication Parameters: 8 Data, 1 Stop, No Parity */
+    prints(strp, sizeof(strp), SPORTPC);
+}
+#endif
+
+
 void node_fw_upgrade_state_machine();
 
 void main(void)
 {
     
     u16 tick = 0;
-	dsm_cmd_received = 0;                        /* no debug command arrives */
+    
+    dsm_cmd_received = 0;                        /* no debug command arrives */
     system.flag_report = MY_ADDR;                //will be set to STATE_DONE_OK once node search is done.
     // RS485 Node    
     init_var();	//init data structure 
@@ -727,13 +779,9 @@ void main(void)
     // not sure if RS485 nodes are ready to accept cmd, 
     // Master board delays for some time here. otherwise first several cmds
     // may be lost.    
-    // intialize LED. 
-    PORTB.7=1;
-    PORTB.6=1;
-    PORTB.5=1;
-    PORTB.4=1;
-    PORTD.7=1;
-    PORTD.6=0; 
+    // initialize LED. 
+    led_on(0);
+        
     sleepms(800); //wait until all the node is ready after power up    
     find_nodes(); //query regroup all nodes;
     system.flag_report = STATE_DONE_OK;	//search action is done
@@ -744,7 +792,11 @@ void main(void)
          
     //loop of each group; 
     while(1)
-    {
+    { 
+    
+#ifdef _TEST_UARTS_
+       test_uarts();
+#endif
        /* f/w upgrade */               
        if(dsm_cmd_received)
        { node_fw_upgrade_state_machine();
@@ -852,16 +904,19 @@ int calcrc(unsigned char *ptr, int count)
 void node_fw_upgrade_state_machine(void)
 {
   u16 crc, crc_pc, addr_backup;   
-  u8 temp, reset_cmd; 
+  char temp, reset_cmd; 
   static u8 fail_counter;  
   static u8 nfu_state;
   static u32 count;  
-  static u8 query_counts;    
+  static u8 query_counts;             
   
   if(!dsm_cmd_received)
     return;
 
-  if(dsm_rcmd == 1) /* upgrade firmware */
+  /*********************************************************************************************/
+  //  "CMD1 ": upgrade firmware of RS485 nodes
+  /*********************************************************************************************/     
+  if(dsm_rcmd == 1)
   {  
        /************************************************************/
        // master board needs to know what is going on in node board.
@@ -1017,7 +1072,7 @@ void node_fw_upgrade_state_machine(void)
           {  
              if(boot_comm.page_addr == addr_backup ) /* data read out matches with what was written */
              {   nfu_state = NFU_NCMD_SEND_PAGE_DATA; /* move to next state */   
-                 LED_FLASH(PORTB.5);    
+                 led_flash(1);    
              }
           }
           boot_comm.page_addr = addr_backup;  /* restore original address, resend page address */
@@ -1027,15 +1082,16 @@ void node_fw_upgrade_state_machine(void)
        // Send data to node to fill a flash page 
        /*********************************************************************/                 
        case NFU_NCMD_SEND_PAGE_DATA:
-          /* fill in data, 128 bytes + 2 CRC bytes */               
-          cm_block_write(dsm_rpara, BL_REG_PAGE_BUF, 130, x_modem_databuf, SPORTD);   
+          /* fill in data, 128 bytes + 2 CRC bytes */                       
+          cm_block_write(dsm_rpara, BL_REG_PAGE_BUF, 130, x_modem_databuf, SPORTD); 
+                      
           sleepms(100);
           /* read first byte back to make sure data was sent out correctly */
           if(nfu_readb_until_return(dsm_rpara, BL_REG_PAGE_BUF, 1, SPORTD))
           { 
               if(boot_comm.page_buffer == x_modem_databuf[0])
               {  nfu_state = NFU_NCMD_SEND_PGM_CMD;
-                 LED_FLASH(PORTB.6);
+                 led_flash(2);
               }           
           }
           break;
@@ -1064,7 +1120,7 @@ void node_fw_upgrade_state_machine(void)
             switch(boot_comm.upgrade_cmd)
             {
                case PGM_CURRENT_PAGE:        /* command not served yet */ 
-                  LED_FLASH(PORTD.7); 
+                  led_flash(0); 
                   sleepms(50);               /* wait a while before next query */
                   break;
                case BE_IDLE:
@@ -1082,14 +1138,14 @@ void node_fw_upgrade_state_machine(void)
                   break;
                case CRC_ERR: 
                   nfu_state = NFU_NCMD_SEND_PAGE_ADDR;       /* retry */
-                  LED_ON(PORTB.4);      
+                  led_on(3);      
 	          break; 
 	       case PGM_ERR:
                   nfu_state = NFU_NCMD_SEND_PAGE_ADDR;        /* retry */
-                  LED_ON(PORTB.4); 
+                  led_on(3);; 
 	          break;
 	       default:
-	           LED_ON(PORTB.4);  
+	           led_on(3);;  
 	          break;
 	     }
 	  }
@@ -1177,149 +1233,12 @@ void node_fw_upgrade_state_machine(void)
           break;        
      } /* end of switch */
   } /* end of if(dsm_rcmd == 1) */
-  
+  /*********************************************************************************************/
+  //  reset master board
+  /*********************************************************************************************/
+  if(dsm_rcmd == 2) 
+  {
+      Turn_on_Watchdog(); 
+  }  
 }
-
-
-
-
-/*
-
-void push_debug(u8 data)
-{               
-        u8 i;
-        if(data == 'L'){                      
-            d_putstr("system :");
-            d_mputs((u8*)&system,sizeof(SYSTEM));
-            d_putstr("\r\n");
-            sleepms(5000);
-            for(i = 0;i < MAX_NODE_NUM;i++){      
-               if((RS485_Node[i].board_property & BOARD_TYPE_MASK) ==  BOARD_TYPE_INVALID)        continue;
-                d_putstr("node ");  d_putchar2(i);  d_putstr(":");
-                 d_mputs((u8*)&RS485_Node[i],sizeof(NODE));
-                d_putstr("\r\n");   sleepms(5000);
-            }
-            for(i = 0;i < MAX_VIBR_NUM;i++){        
-                if((vibrator[i].board_property & BOARD_TYPE_MASK) ==  BOARD_TYPE_INVALID)        continue;
-                d_putstr("vibr ");  d_putchar2(i);   d_putstr(":");
-                d_mputs((u8*)&vibrator[i],sizeof(NODE));
-                d_putstr("\r\n");    sleepms(5000);                
-            }                   
-            for(i = 0; i < (SPORTD+1);i++){
-                d_putstr("port_node "); d_putchar2(i);d_putstr(":");
-                d_mputs((u8*)&port_node[i],sizeof(u8));
-                d_putstr("\r\n");    sleepms(5000);                
-
-                d_putstr("port_tout "); d_putchar2(i);d_putstr(":");
-                d_mputs((u8*)&port_timeout[i],sizeof(u16));
-                d_putstr("\r\n");    sleepms(5000);                
-
-                d_putstr("port_wait "); d_putchar2(i);d_putstr(":");
-                d_mputs((u8*)&RWait[i],sizeof(u8));
-                d_putstr("\r\n");    sleepms(5000);                
-
-            }                   
-            d_putstr("hasnode : ");
-            d_mputs((u8*)&has_node,sizeof(u8));
-            d_putstr("\r\n");    sleepms(5000);  
-            return;       
-        }       
-                
-        if(data == 'R'){
-                d_putstr("\r\nrelease node 0 (index not addr)");
-                set_cmd(NREG_RELEASE,0);                
-                return;                
-        }
-
-        if(data == 'G'){
-                d_putstr("\r\ngo on node 0 (index not addr)");
-                set_cmd(NREG_GOON,0);                
-                return;                
-        }
-        if(data == 'M'){
-                d_putstr("\r\ndisable node 0 (index not addr)");
-                unset_cmd(NREG_ENABLE,0);
-                return;
-        }
-        if(data == 'N'){
-                d_putstr("\r\nenable node 0 (index not addr)");
-                set_cmd(NREG_ENABLE,0);                      
-                return;        
-        }                                                                              
-        if(data == 'Q'){    
-                init_var(); 
-                find_nodes(); 
-                d_putstr("\rquery nodes done");
-                return;
-        }                      
-        if(data == 'S'){                        
-                d_putstr("\rstart machine\r\n");
-                system.flag_start_machine[0] = 0x10;
-                system.flag_start_machine[1] = 0x10;
-                system.flag_start_machine[2] = 0x10;                
-                system.flag_start_machine[3] = 0x10;        
-                return;
-        }   
-        if(data == 'P'){        
-                d_putstr("\rreport node 24(0x18)\r\n");
-                system.flag_report = 24;
-                return;
-        }               
-        if(data == 'O'){
-                d_putstr("\rgoon group 0\r\n");
-                system.flag_goon[0] = 1;
-                return;
-        }              
-        if(data == 'H'){
-                d_putstr("\rsearch group 0\r\n");
-                system.flag_search[0] = 1;
-                return;
-        }                                            
-                    
-
-        d_putstr("L:list all the register\r\n");
-        d_putstr("M:disable node\r\nN:enable node\r\nQ:query nodes\r\nG:go on\r\nP:report node 24\r\nO:goon group 0\r\nH:search group0");
-
-}
-/**************************************************************************************/
-//
-/**************************************************************************************/
-/*
-void debug_getc(u8 data){
-        static u8 dtpos = 0;
-        static u8 dtval = 0;
-        static u8 dtvah = 0;   
-        if(dtpos == 0)  { // high byte recieved. 
-                dtvah = ishexchar(data);
-                if(dtvah != 0xff)
-                        dtpos = 1;
-        }else{
-                dtval = ishexchar(data);
-                if(dtval != 0xff){
-                        d_putchar((dtvah << 4)|dtval);
-                        cm_pushPC((dtvah << 4)|dtval);
-                }
-                dtpos = 0;
-        }        
-} 
-
-/**************************************************************************************/
-//
-/**************************************************************************************/                                   
-/*
-void debug(u8 data){               
-                if((data>= 'G') && (data <='Z')){    
-                        push_debug(data);       
-                        return;
-                }
-                if((data >= 'a') && (data <= 'z')){                                             
-                        return;
-                }
-                if(0xff == ishexchar(data))
-                        return;
-                debug_getc(data);
-}
-
-
-*/
 
