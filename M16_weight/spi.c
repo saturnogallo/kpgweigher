@@ -19,6 +19,7 @@ Code by             : fd_lxh@yahoo.com.cn
 /********************************************************************************/
 sfrb DDR_SPI=0x17;                   /* SPI pins shared with PORT B[7:4] */
                                      /* 0x17 is the addr of DDRB */
+#define SPI_SS PORTB.4               /* SS pin */
 
 /********************************************************************************/
 //            MEAG16 SPI Master Initialization

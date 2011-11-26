@@ -23,7 +23,7 @@ bit extra_pulse_sent;
 #define NUM_OF_EXTRA_PULSES             100
 
 /* Used by Magnet Driver */
-#define MAX_AMP                         100
+#define MAX_AMP                         200
 
 /* Valid Timer1 Flag */              
 #define SET_BY_ACINT                      1
@@ -136,13 +136,13 @@ interrupt [ANA_COMP] void ana_comp_isr(void)
           {   
               if(freq_is_50HZ)
               {   if(RS485._flash.addr == 11)
-                      temp =  (u16)magnet_amp * 6 + DELAY_11P9MS_MAX; 
+                      temp =  (u16)magnet_amp * 16 + DELAY_11P9MS_MAX;      /*orginally 6 */
                   else if (RS485._flash.addr == 15)
                       temp =  (u16)magnet_amp * 2 + 64000;
               }
               else /* 60HZ */
               {   if(RS485._flash.addr == 11)
-                      temp =  (u16)magnet_amp * 6 + 64186; 
+                      temp =  (u16)magnet_amp * 16 + 64186; 
                   else if (RS485._flash.addr == 15)
                       temp =  (u16)magnet_amp * 2 + 64186;        
               }     

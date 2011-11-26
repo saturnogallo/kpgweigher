@@ -15,9 +15,13 @@
 
 * 0x1D: 1) change weight limit to target_weight  
 * 0x1E: 1) fix interface timing with packer
-* 0x1F  1) fix packer delay issue
+* 0x1F  1) fix packer delay issue   
+* 0x20: 1) improvement for central magnet
+* 0x21: 1) fix for packer interface (interrupt may be disabled when slave mode is disabled)
+*       2) fix a bug that when reset weight, updated cs_poise[] may not be programmed
+*          into EEPROM and only cs_zero is updated.
 *************************************************************************************/
-#define FIRMWARE_REV 0x1F 
+#define FIRMWARE_REV 0x21 
 
 /*************************************************************************************
 *                               Compile Switches
@@ -99,7 +103,7 @@
 #define AD_BUSY                     0xfffd   // 65533
 #define AD_OVER_FLOW                0xfffc   // 65532, most times Mechanical errors
 #define FILTER_ONGOING              0xfffb   // 65531, 
-#define DIV_ERROR                   0xfffa   // 65530, calibration data error
+#define BAD_CALIBRATION             0xfffa   // 65530, calibration data error
 #define OVERWEIGHT                  0xfff9   // 65529, 
 #define MAX_VALID_DATA              0xfff0
 
@@ -318,8 +322,8 @@ typedef struct {
 *                                  Timer Definitions
 *************************************************************************************/
 typedef struct {
-   u16 timerlen[8];                    /* Time to go before task will be scheduled */
-   u8  status;                         /* boolean type variable, 1: in progress, 0: task completed */
+   volatile u16 timerlen[8];     /* Time to go before task will be scheduled */
+   volatile u8  status;          /* boolean type variable, 1: in progress, 0: task completed */
 } OS_SCHEDULER;  
 
 #define AC_FREQ_TIMER                   0x07          

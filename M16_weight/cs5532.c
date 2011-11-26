@@ -220,46 +220,55 @@ u16 read_ad_data()
 /********************************************************************************/    
 #define MAX_BUF_SIZE 8  //average buffer size, must be times of 8.  xianghua 64
 #define SAMPLE_SIZE 4  
-#define TOLERANCE (5 * SAMPLE_SIZE) /*xianghua, org: 4 */
+#define MAX_TOLERANCE 32  
+#define MIN_TOLERANCE 3
 
 u8 CS5532_PoiseWeight()
 {       
-   static u16 Raw_DataBuf[MAX_BUF_SIZE];                  // data buffer contains raw data from A/D 
+   static u16 Raw_DataBuf[MAX_BUF_SIZE];       // data buffer contains raw data from A/D 
    static u8 cur_data_index, data_counts;      // variables associated to Raw_DataBuf
-   
-   u16 SortBuf[MAX_BUF_SIZE];
    u16 latest_n_average, temp; 
    u32 sum;
-   u8 i, j;  
-       
+   u8 i, j, tolerance, setting;  
+
+   /*************************************************************/   
+   // Get user tolerance setting for filering
    /*************************************************************/
-   // read a data sample, return error if result is invalid
+   if(RS485._flash.cs_gain_wordrate < MIN_TOLERANCE)
+      setting = MIN_TOLERANCE; 
+   else if(RS485._flash.cs_gain_wordrate > MAX_TOLERANCE)
+      setting = MAX_TOLERANCE; 
+   else
+      setting = RS485._flash.cs_gain_wordrate;    
+   tolerance = setting * SAMPLE_SIZE; 
+              
+   /*************************************************************/
+   // read a AD conversion, return error if result is invalid
    /*************************************************************/    
    temp = read_ad_data();
-   if(temp == AD_BUSY)                         // A/D conversion not completed yet, wait, use last data value. 
+   if(temp == AD_BUSY)               // Conversion not completed yet 
       return ERR_AD_BUSY;
-   if(temp == AD_OVER_FLOW)                   
-   {
-      RS485._global.cs_mtrl = temp;            // invalidate "cs_mtrl"      
-      return ERR_AD_OVER_FLOW;                 // return if data is invalid
+   else if(temp == AD_OVER_FLOW)                   
+   {                                           
+      RS485._global.cs_mtrl = temp;  // Invalidate "cs_mtrl" and return      
+      return ERR_AD_OVER_FLOW;
    }  
    /*************************************************************/
-   // push data to queue, report FILTER_ONGOING if 
-   // data queued is not enough for average filtering. 
+   // Queue data. Report FILTER_ONGOING if queue is not full yet. 
    /*************************************************************/  
-   Raw_DataBuf[cur_data_index++] = temp;             // queue raw data              
-   if(cur_data_index >= MAX_BUF_SIZE)
-       cur_data_index = 0;  
-   if(data_counts < SAMPLE_SIZE)                   // no enough filter data, so we report filter_ongoing            
+   Raw_DataBuf[cur_data_index++] = temp;              
+   if(cur_data_index >= MAX_BUF_SIZE)  
+       cur_data_index = 0; 
+        
+   if(data_counts < SAMPLE_SIZE) /* insufficent data samples */            
    {   
        data_counts++;        
-       RS485._global.cs_mtrl = FILTER_ONGOING;  // no valid data yet.
+       RS485._global.cs_mtrl = FILTER_ONGOING;
        return ERR_FILTER_ONGOING;                                          
    }    
    /*************************************************************/
-   // Calculate deviation to test if weight is stable
+   // Calculate deviation to test if readings are stable
    /*************************************************************/      
-   //calculate average over last n samples
    for(i=0, sum = 0; i<SAMPLE_SIZE; i++)
    {  
       if(cur_data_index>i)                      
@@ -287,48 +296,16 @@ u8 CS5532_PoiseWeight()
    /*************************************************************/     
    // if weight is not stable, return to get new sample
    /*************************************************************/   
-   if(sum > TOLERANCE)
+   if(sum > tolerance)
    {
        RS485._global.cs_mtrl = FILTER_ONGOING;  // data is not stable
        data_counts = SAMPLE_SIZE;
        return ERR_FILTER_ONGOING;      
    }   
-   else if(data_counts < MAX_BUF_SIZE) // no enough data samples for further filtering
-   {   
-       data_counts++; 
-       RS485._global.cs_mtrl = latest_n_average; 
-       return DATA_VALID;               
-   }
-   /*************************************************************/
-   // Medium Value Filtering
-   // First copy data to sort buffer and sort data (Min in Buf[0])
-   /*************************************************************/
-   for(j=0; j<MAX_BUF_SIZE; j++)
-      SortBuf[j] = Raw_DataBuf[j];             
-   for(i=0; i<(MAX_BUF_SIZE>>1); i++)            // sort data buffer. min at buf[0].
-   {  for(j=0; j < MAX_BUF_SIZE-1-i; j++)
-      {  
-         if(SortBuf[j] > SortBuf[j+1])         // swap data, max to higher address
-         {  temp = SortBuf[j+1];
-            SortBuf[j+1] = SortBuf[j];
-            SortBuf[j] = temp;            
-         }                                       
-      }      
-   }
-        
-   /*********************************************************/
-   // Medium Filtering, excludes high end (1/8 of queue size)
-   // and low end data (1/8 of queue size)
-   // Calculate average over medium parts (3/4 of queue size).
-   /*********************************************************/   
-   sum = 0;
-   i = MAX_BUF_SIZE >> 3; 
-   for(j=i;j<MAX_BUF_SIZE-i; j++)
-       sum+= SortBuf[j];
-   i = MAX_BUF_SIZE- (MAX_BUF_SIZE >>2);
-   RS485._global.cs_mtrl = (sum/i) & 0xFFFF;  
-   
-   return DATA_VALID;
+   else
+   {   RS485._global.cs_mtrl = latest_n_average; 
+       return DATA_VALID;
+   }   
 }                                                                   
 
 /*****************************************************************************/
@@ -352,84 +329,78 @@ u8 CS5532_PoiseWeight()
 /***************************************************************************/
 void CS5532_Poise2Result()
 {  
-   u8 min_delta_index;     // index of poise with min delta from material weight.
-   u16 temp2;
+   u8 i, min_delta_index;
+   u16 temp2, delta, min_delta;
    u32 temp1,temp3, temp4;
-   u16 delta, min_delta;
-   u8 i;             
-
-   // check if error happened in CS5532_PoiseWeight()
+   
+   /*************************************************************/
+   // return if weight is invalid
+   /*************************************************************/      
    if(RS485._global.cs_mtrl > MAX_VALID_DATA)
-   { // result is invalid. 
-     // pass fail code to variable Weight_gram, which will be read by master board.
-     RS485._global.Mtrl_Weight_gram =  RS485._global.cs_mtrl;                
-     return;      
+   {  
+      RS485._global.Mtrl_Weight_gram =  RS485._global.cs_mtrl;                
+      return;      
    }       
-  
+
+   /*************************************************************/
+   // adjust cs_poise if cs_zero has changed
+   /*************************************************************/
+   for(i=0;i<5;i++)
+      RS485._flash.cs_poise[i] += RS485._flash.cs_zero - RS485._global.old_cs_zero;       
+   RS485._global.old_cs_zero = RS485._flash.cs_zero;   
+
+   /*************************************************************/
+   // Search the poise which is most close to cs_mtrl  
+   /*************************************************************/
+   min_delta = 0xffff;
+   min_delta_index = 0;
+   for(i=0;i<5;i++)
+   { 
+      if(RS485._global.cs_mtrl > RS485._flash.cs_poise[i])
+         delta =  RS485._global.cs_mtrl -  RS485._flash.cs_poise[i];
+      else
+         delta =  RS485._flash.cs_poise[i] - RS485._global.cs_mtrl;      
+      if (delta < min_delta)
+      {   
+          min_delta = delta ; 
+          min_delta_index = i;
+      }      
+   }
+
+   /*************************************************************/
+   // Return if calibration data is incorrect(cs_poise < cs_zero) 
+   /*************************************************************/      
+   if(RS485._flash.cs_poise[min_delta_index] < RS485._flash.cs_zero)
+   {   
+      RS485._global.Mtrl_Weight_gram =  BAD_CALIBRATION;
+      RS485._global.diag_status1 |= 0x40;
+      return;   
+   }
+   else
+      temp2 = RS485._flash.cs_poise[min_delta_index] - RS485._flash.cs_zero;  
+
    if(RS485._global.cs_mtrl < RS485._flash.cs_zero)
       temp1 = 0;
    else
-      temp1 = RS485._global.cs_mtrl - RS485._flash.cs_zero;                       
+      temp1 = RS485._global.cs_mtrl - RS485._flash.cs_zero;
 
-   /***************************************************************/
-   //adjust cs_poise based on comparison between cs_zero and old_cs_zero
-   if(RS485._flash.cs_zero > RS485._global.old_cs_zero)
-   {
-      delta = RS485._flash.cs_zero - RS485._global.old_cs_zero; 
-      for(i=0;i<5;i++)
-         RS485._flash.cs_poise[i] += delta;
-   }
-   if(RS485._flash.cs_zero < RS485._global.old_cs_zero)
-   {
-      delta = RS485._global.old_cs_zero - RS485._flash.cs_zero; 
-      for(i=0;i<5;i++)
-         RS485._flash.cs_poise[i] -= delta;   
-   }   
-   RS485._global.old_cs_zero = RS485._flash.cs_zero;   
-   
-   /***************************************************************/
-   // Search the poise which is most close to cs_mtrl
-   if(!ENABLE_MULTI_POISES) 
-      min_delta_index = 0;
-   else
-   {  min_delta = 0xffff;
-      for(i=0;i<5;i++)
-      { 
-         if(RS485._global.cs_mtrl > RS485._flash.cs_poise[i])
-            delta =  RS485._global.cs_mtrl -  RS485._flash.cs_poise[i];
-         else
-            delta =  RS485._flash.cs_poise[i] - RS485._global.cs_mtrl;      
-         if (delta < min_delta)
-         {   min_delta = delta ; min_delta_index = i; }      
-      }
-   }          
-
-   /***************************************************************/        
-   if(RS485._flash.cs_poise[min_delta_index] < RS485._flash.cs_zero)
-      temp2 = 0;
-   else
-      temp2 = RS485._flash.cs_poise[min_delta_index] - RS485._flash.cs_zero;  
-        
+   /*************************************************************/
+   // Convert readings to engineering weight 
+   /*************************************************************/         
    // compiler default: u16*u16 = u16       
    // so we use u16 * u32 = u32 here
    temp3 = RS485._flash.Poise_Weight_gram[min_delta_index] * temp1;                                                         
    temp3 = temp3 << 6;   // X64. so unity is 1/64g      	
-        
-   if(temp2 != 0)
-   {
-      temp4 =  temp3/temp2;
-      RS485._global.Mtrl_Weight_gram = (temp4 >> 6);
-      if(RS485._global.Mtrl_Weight_gram==0xffff)
-          RS485._global.Mtrl_Weight_gram= OVERWEIGHT;
-      RS485._global.Mtrl_Weight_decimal = temp4 & 0x3F;
-      RS485._global.diag_status1 &= 0xBF;          // clear bit 6 error flag      
-   }   
-   else
-   {  RS485._global.Mtrl_Weight_gram =  DIV_ERROR; // indicate bad calibration
-      RS485._global.diag_status1 |= 0x40;          // set bit 6 error flag
-   }                           
-   // master board won't find this node if Mtrl_Weight_gram is always 0xffff.
-   // Bad calibartion data will make Mtrl_Weight_gram always bad.
-   // so we set Mtrl_Weight_gram to a different data to indicate calibration error.
-   return;
+   temp4 =  temp3/temp2;
+
+   RS485._global.Mtrl_Weight_gram = (temp4 >> 6);
+   if(RS485._global.Mtrl_Weight_gram > MAX_VALID_DATA)
+   {   
+       RS485._global.Mtrl_Weight_gram = BAD_CALIBRATION;
+       RS485._global.diag_status1 |= 0x40;   
+       return;
+   }        
+   RS485._global.Mtrl_Weight_decimal = temp4 & 0x3F; 
+   RS485._global.diag_status1 &= 0xBF;   
+   
 }
