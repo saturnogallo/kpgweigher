@@ -191,18 +191,47 @@ void cm_forward(u8 *infrm, u8 oport)
    prints((infrm+FRM_POS_CKSUM),1,oport);
 
 }
+// #define _BL_DEBUG_
 void cm_ack(u8 port)
 {                      
+#ifdef _BL_DEBUG_
+   u8 i;         
+#endif
+   
    outfrm[port].cksum = checksum((u8*)(&outfrm[port]),6)+checksum( outfrm[port].databuf, outfrm[port].datalen);
    /* output header */
    prints((u8*)(&outfrm[port]),6,port);
+   
+#ifdef _BL_DEBUG_
+   /*debug*/
+   putchar(outfrm[port].head_1);
+   putchar(outfrm[port].head_2);
+   putchar(outfrm[port].addr_from);
+   putchar(outfrm[port].addr_to);
+   putchar(outfrm[port].cmd);
+   putchar(outfrm[port].datalen);
+#endif
+   
    /* output data buf */
    if(outfrm[port].datalen > 0)
    {
         prints(outfrm[port].databuf, outfrm[port].datalen, port);
-   }
+   } 
+   
+   /*debug*/
+#ifdef _BL_DEBUG_
+   for(i=0; i<outfrm[port].datalen; i++)
+    putchar(outfrm[port].databuf[i]);
+#endif
+   
    /* output checksum */
-   prints((u8*)&(outfrm[port].cksum),1,port);   
+   prints((u8*)&(outfrm[port].cksum),1,port); 
+   
+   /*debug */  
+#ifdef _BL_DEBUG_
+   putchar(outfrm[port].cksum); 
+#endif
+   
 }
 /****************************************************************************/
 //                     RS485 Frame Analysis 
@@ -573,7 +602,14 @@ void nfu_process_node_feedback()
 /**********************************************************************************************************/
 void cm_pushPC(u8 c)
 {
-                      
+#ifdef _TEST_UARTS_
+     if(c=='0')
+        led_off(0);
+     if(c=='1')
+        led_on(0);
+     if(c=='F')
+        led_flash(0);
+#endif                      
       if(RFlagPC == RF_DATABUF)               {     //checksum found
                 infrmPC[FRM_POS_CKSUM] = c;
                 infrmPC[FRM_POS_HEAD2] = 0x68;                
@@ -634,6 +670,15 @@ void cm_pushPC(u8 c)
 /**********************************************************************************************************/
 void cm_pushA(u8 c)
 {
+#ifdef _TEST_UARTS_
+     if(c=='0')
+        led_off(0);
+     if(c=='1')
+        led_on(0);
+     if(c=='F')
+        led_flash(0);
+#endif               
+
       if(RFlagA == RF_DATABUF)               {     //checksum found
                 infrmA[FRM_POS_CKSUM] = c;
                 infrmA[FRM_POS_HEAD2] = 0x68;                
@@ -694,6 +739,15 @@ void cm_pushA(u8 c)
 /**********************************************************************************************************/
 void cm_pushB(u8 c)
 {
+#ifdef _TEST_UARTS_
+     if(c=='0')
+        led_off(1);
+     if(c=='1')
+        led_on(1);
+     if(c=='F')
+        led_flash(1);
+#endif               
+
       if(RFlagB == RF_DATABUF)               {     //checksum found
                 infrmB[FRM_POS_CKSUM] = c;
                 infrmB[FRM_POS_HEAD2] = 0x68;                
@@ -754,6 +808,15 @@ void cm_pushB(u8 c)
 /**********************************************************************************************************/
 void cm_pushC(u8 c)
 {
+#ifdef _TEST_UARTS_
+     if(c=='0')
+        led_off(2);
+     if(c=='1')
+        led_on(2);
+     if(c=='F')
+        led_flash(2);
+#endif               
+
       if(RFlagC == RF_DATABUF)               {     //checksum found
                 infrmC[FRM_POS_CKSUM] = c;
                 infrmC[FRM_POS_HEAD2] = 0x68;                
@@ -814,6 +877,14 @@ void cm_pushC(u8 c)
 /**********************************************************************************************************/
 void cm_pushD(u8 c)
 {
+ #ifdef _TEST_UARTS_
+     if(c=='0')
+        led_off(3);
+     if(c=='1')
+        led_on(3);
+     if(c=='F')
+        led_flash(3);
+#endif               
 
       if(RFlagD == RF_DATABUF)               {     //checksum found
                 infrmD[FRM_POS_CKSUM] = c;

@@ -16,7 +16,7 @@
 //   A0   <---> A8
 //   A1   <---> A9
 //   A2   <---> A10
-// RESET  <---> PB0
+// RESET  <---> PE3
 // INTN#  <---> PE2
 
 // Coded by: fd_lxh@yahoo.com.cn
@@ -145,11 +145,11 @@ interrupt [EXT_INT7] void ext_int7_isr(void)
 void Reset_554(void)
 {
    // reset 16C554. Reset pin of 16C554 is connected to PB0 of MEGA64
-      PORTB.0 = 1;                                                         
+      PORTE.3 = 1;                                                         
    // Delay  
       sleepms(500);
    // Recover from reset
-      PORTB.0 = 0;          
+      PORTE.3 = 0;          
    // Delay
       sleepms(500);
 }

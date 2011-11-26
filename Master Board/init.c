@@ -15,43 +15,45 @@ void Init_Port()
     DDRA=0x00;
 
  // Port B initialization
- // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=Out 
+ // Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=1 
- // Use PORTB[7:4] as LED output, 0 -> LED ON
-    PORTB=0x01;
-    DDRB=0xF1;
+    PORTB=0x00;
+    DDRB=0x00;
 
  // Port C initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=Out Func2=Out Func1=Out Func0=Out 
  // State7=1 State6=1 State5=1 State4=1 State3=0 State2=0 State1=0 State0=0 
+ // PORTC[7:4]: chip select of 16C554 channels.
     PORTC=0xF0;
     DDRC=0xFF;
 
  // Port D initialization
- // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=In 
+ // Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T 
- // Use PORTD[7:6] as LED output, 0 -> LED ON 
- // PORTD.0-1 are set as input of external interrupt 0/1 (see interrupt.c)
     PORTD=0x00;
-    DDRD=0xF0;
+    DDRD=0x00;
 
  // Port E initialization
  // Func7=In Func6=In Func5=In Func4=In Func3=In Func2=Out Func1=In Func0=In 
  // State7=T State6=T State5=T State4=T State3=T State2=0 State1=T State0=T 
-    PORTE=0x00;
-    DDRE=0x04;
+ // PORTE.0: Input (M_RXD0)
+ // PORTE.1: output (M_TXD0)
+ // PORTE.2: output (16C554 INTC#)
+ // PORTE.3: output (16C554 reset)
+    PORTE=0x06;
+    DDRE=0x0E;
 
  // Port F initialization
  // Input 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T 
-    PORTF=0x00;
-    DDRF=0x00;
+ // PORTF[3:0]: LED[4:1]
+    PORTF=0x0F;
+    DDRF=0x0F;
 
  // Port G initialization
- // Func4=out Func3=out Func2=out Func1=out Func0=out 
- // State4=0 State3=0 State2=0 State1=0 State0=0 
-    PORTG=0xFF;
-    DDRG=0x1F;
+ // Input 
+    PORTG=0x00;
+    DDRG=0x00;
 }
 
 /**************************************************************************************/

@@ -370,7 +370,7 @@ void x_modem_protocol_rsm(u8 data)
 		if(data == XMODEM_EOT)                             /* End of transfer */
 		{
 		    x_modem_file_transfer_complete = 1; 
-		    PORTD.7 = 0;
+		    led_on(0);
 		}
 		break;
 
