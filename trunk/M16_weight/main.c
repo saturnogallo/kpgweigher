@@ -51,6 +51,7 @@ bit run_time_adj_done;
 u16 amp_weight[MAX_AMP_WEIGHT_RECORDS];
 u16 last_weight, current_weight, weight_gap;     /* initial weight before adding material*/  
 u8  local_magnet_amp;
+u16 local_target;
 
 #define NOT_AVAILABLE 0xFF
                                                    
@@ -367,8 +368,11 @@ u8 reset_weight()
    kill_timer(0);
 
    if(status == STATUS_OK)
+   {   
+      // update cs_zero and cs_poise[]
       RS485._flash.cs_zero = RS485._global.cs_mtrl;
-            
+      CS5532_Poise2Result();
+   }         
    return status;
 }
 
@@ -393,7 +397,7 @@ void release_material()
     // initialize: weight is zero after release.
     last_weight = 0; 
     current_weight = 0;
-    weight_gap = RS485._flash.target_weight; 
+    weight_gap = local_target; 
     
     /************************************************************/   
     //start to open the lower bucket.
@@ -559,12 +563,12 @@ u8 magnet_add_material()
      // wait from magnet to feed material
      if(WSM_Flag == MM_ADD_MATERIAL){
         local_magnet_amp = RS485._flash.magnet_amp;   			              
-        if(RS485._flash.target_weight)
+        if(local_target)
             auto_amp_adj(weight_gap); 
         /* log actual amp to hw_status register for monitor */
         RS485._global.hw_status = local_magnet_amp;  
 
-        temp = RS485._flash.target_weight;
+        temp = local_target;
         /* stop adding material when current weight exceeds target weight */
         if((temp==0)||(temp > current_weight))
             E_Magnet_Driver(RS485._flash.magnet_time, local_magnet_amp); 
@@ -729,9 +733,9 @@ void motor_magnet_action()
            // test conditions of breaking out of this "while" loop.
            if((RS485._global.flag_enable != ENABLE_ON) || (RS485._global.flag_release))
            {   
-               weight_gap = RS485._flash.target_weight; 
+               weight_gap = local_target; 
                // re-add material. last amp forecast is out-of-date
-               if((WSM_Flag == MM_PASS_MATERIAL) && (RS485._flash.target_weight))
+               if((WSM_Flag == MM_PASS_MATERIAL) && (local_target))
                {   WSM_Flag = MM_ADD_MATERIAL;
                }
                return; 
@@ -747,7 +751,7 @@ void motor_magnet_action()
               //############################################################
               //  Run time adjust magnet amplitude and working time
               //############################################################              
-              if((RS485._flash.target_weight > 0) && (!run_time_adj_done))
+              if((local_target > 0) && (!run_time_adj_done))
               { 
                  if(RS485._global.cs_mtrl < MAX_VALID_DATA)
                  {                                                                  
@@ -762,8 +766,8 @@ void motor_magnet_action()
                         amp_weight[index] = 0;
                     
                     /* calculate gap between current weight and target weight */    
-                    if(RS485._flash.target_weight > current_weight)
-                        weight_gap = RS485._flash.target_weight - current_weight;
+                    if(local_target > current_weight)
+                        weight_gap = local_target - current_weight;
                     else
                         weight_gap = 0;                    
 
@@ -775,7 +779,7 @@ void motor_magnet_action()
               //############################################################                 
            }           
            // and we can start magnet to feed material to upper bucket.
-           if((run_time_adj_done) || (!RS485._flash.target_weight))
+           if((run_time_adj_done) || (!local_target))
                magnet_add_material();
            Feed_Watchdog(); // feed watch dog in case that we exceed the timeout limit. 
         } /* while */    
@@ -1073,6 +1077,7 @@ void main(void)
    bit packer_interface_initialized;  
    bit packer_timer_kicked;     
    u8  release_signal_not_sent; 
+   u8  group;
     
    packer_interface_initialized = FALSE;
    release_signal_not_sent = FALSE; 
@@ -1275,7 +1280,18 @@ void main(void)
        // Runtime Diagnose on addr, board and baudrate
        /************************************************************/       
         Validate_EEPROM_Data(); 
-        myaddr = RS485._flash.addr;         
+        myaddr = RS485._flash.addr; 
+       /************************************************************/
+       // Set local target weight per group.  
+       /************************************************************/       
+       group = myaddr % 3;
+       if(group == 0)
+           local_target = RS485._flash.target_weight;
+       else if (group == 1)
+           local_target = RS485._flash.target_weight + (RS485._flash.target_weight>>2); 
+       else
+           local_target = RS485._flash.target_weight - (RS485._flash.target_weight>>2);                                                                
+                
        /************************************************************/
        // program all configuration settings into EEPROM  
        // program will not go down unless program job done.
@@ -1491,7 +1507,7 @@ void main(void)
        // repeatedly checked.
        /************************************************************/              
        if(RS485._global.flag_enable == ENABLE_OFF){        
-          //RS485._global.flag_goon = 0; //clear goon symbol                
+          RS485._global.flag_goon = 0; //clear goon symbol                
           if(hw_id == HW_ID_WEIGHT)    // board has A/D on it.
           {   
              while(WSM_Flag != MM_ADD_MATERIAL)
