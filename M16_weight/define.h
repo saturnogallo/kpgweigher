@@ -20,6 +20,8 @@
 * 0x21: 1) fix for packer interface (interrupt may be disabled when slave mode is disabled)
 *       2) fix a bug that when reset weight, updated cs_poise[] may not be programmed
 *          into EEPROM and only cs_zero is updated.
+*       3) target weight per group instead of unique target weight.
+*       4) reposition motor before release if motor is not in the right position.
 *************************************************************************************/
 #define FIRMWARE_REV 0x21 
 

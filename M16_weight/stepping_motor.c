@@ -42,37 +42,6 @@ bit extra_pulse_sent;
 #define CLEAR_MAGNET_ERROR_BIT        RS485._global.diag_status1 &= 0xFE
 #define RETURN_TO_SENSOR              (RS485._motor.pulse_num < 50)
 
-/*************************************************************************************
-*                           Hardware Abstract definition
-*************************************************************************************/
-#define WGHT_MOTORS_CLOSED       PIND.3 == 1    // sensor is read at PORTD[3:2]
-#define WGHT_MOTORW_CLOSED       PIND.2 == 1 
-#define INTF_MOTORS_CLOSED       PINC.1 == 1    // sensor is read at PORTC[1:0]
-#define INTF_MOTORW_CLOSED       PINC.0 == 1     
-#define BOARD_IS_INTERFACE       (hw_id == HW_ID_INTERFACE)
-#define BOARD_IS_WEIGHT          (hw_id == HW_ID_WEIGHT)
-
-#define MAGNET_PULSE_PORT        PORTB.1
-#define ENABLE_MOTOR_W	         PORTA.0 = 0    // optocoupler, inverted logic
-#define DISABLE_MOTOR_W	         PORTA.0 = 1
-#define ENABLE_MOTOR_S	         PORTA.1 = 0
-#define DISABLE_MOTOR_S	         PORTA.1 = 1
-#define MT_MODE_BIT0             PORTA.2
-#define MT_MODE_BIT1             PORTA.3 
-#define MOTOR_CLOCK_PIN          PORTA.4
-#define MOTOR_ROTATE_CLKWISE     PORTA.5 = 1
-#define MOTOR_ROTATE_ANTICLKWISE PORTA.5 = 0 
-
-#define TRIG_TRIAC()             PORTB.1 = 0 
-#define SHUTDOWN_TRIAC()         PORTB.1 = 1
-#define DISABLE_TIMER1_INT()     TIMSK &= 0xFB
-#define ENABLE_TIMER1_INT()      TIMSK |= 0x4
-#define STOP_TIMER1_CNT()        TCCR1B = 0x0
-#define START_TIMER1_CNT()       TCCR1B = 0x3
-#define DISABLE_TIMER0_INT()     TIMSK &= 0xFE
-#define ENABLE_TIMER0_INT()      TIMSK |= 0x1 
-#define STOP_TIMER0_CNT()        TCCR0=0x00
-#define START_TIMER0_CNT()       TCCR0=0x05
 
 flash u8 MOTOR_FREQ[]={CYCLE_1_5,CYCLE_2_0,CYCLE_2_3,CYCLE_2_6,CYCLE_3_0,CYCLE_3_3,CYCLE_3_6,CYCLE_4_0,CYCLE_4_5,CYCLE_5_0};        
  
