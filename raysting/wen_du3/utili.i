@@ -87,7 +87,11 @@ void kbd_uart_push(unsigned char);
 //#define PORT_B          SPORTB
 // Hardware related
                             void sleepms(unsigned int ms);
-                              double nav_read();
+//PORTB.7 RX, PORTB.6 RS, PORTB.5 1MA, PORTB.4. 0.1MA,
+//PORTB.3 PT100, PORTB.2 PT1000, PORTB.1 CH1,  PORB.0 CH2    
+//#define SET_TORX     display_buttons(KEY_RS,1)
+//#define SET_TORS     display_buttons(KEY_RS,0)
+                              double nav_read();
 void scanner_set_mode();
 void delay (unsigned int us) ;
 void delay1 (unsigned int ms);
@@ -99,7 +103,7 @@ char highc(unsigned char x);
 /*
  *	Probe data structure definition
  */
-typedef eeprom struct _PRBDATA
+typedef eeprom struct _PRBDATA
 {
 	double param1[24];
 	double param2[24];
@@ -112,12 +116,13 @@ char highc(unsigned char x);
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
-	double          Rs1; //jiao-zheng zhi
+	double          Rs1; //jiao-zheng zhi for PT100
 	int             ktime;//time for switch
 	unsigned char 	        tid[24];	//probe index of each channel for T mode
 	unsigned char           rid[24];        //probe index of each channel for R mode
 	unsigned char           prbmode;
-	unsigned char           kttmode;                    
+	unsigned char           kttmode;      
+	double          Rs2; //for PT1000              
 }SYSDATA;               
 typedef struct _RUNDATA
 {
@@ -134,9 +139,11 @@ extern PRBDATA eeprom rprbdata;	//probe data for R mode
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-//#define ONESECBIT       14
+//#define ONESECBIT       14
 extern void DBG(unsigned char);
-void SwitchWindow(unsigned char page);
+extern void navto120mv();
+extern void navto1v();
+void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
 // CodeVisionAVR C Compiler
@@ -163,7 +170,7 @@ signed char sscanf(char *str, char flash *fmtstr,...);
                                                #pragma used-
 #pragma library stdio.lib
 // global.h    
-                                                                                                          typedef void (*MSG_HANDLER)(unsigned char key);
+                                                                                                          typedef void (*MSG_HANDLER)(unsigned char key);
 typedef void (*MSG_HANDLER)(unsigned char key);
 typedef void (*MSG_HANDLER)(unsigned char key);
 typedef flash struct typWINDOW

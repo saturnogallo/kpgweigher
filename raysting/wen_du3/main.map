@@ -2,7 +2,7 @@ CodeVisionAVR C Compiler V1.25.3 Standard
 (C) Copyright 1998-2007 Pavel Haiduc, HP InfoTech s.r.l.
 http://www.hpinfotech.com
 
-File: c:\Code\GoogleCode\g_lxhbucket\raysting\RT2010\main.c
+File: c:\code\googlecode\g_lxhbucket\raysting\rt2010\main.c
 Global variables memory map:
 
 Variable                          Address   Size
@@ -47,21 +47,21 @@ navread2_G9                                                           76Eh     2
 scancmd                                                               782h      5
 navcmd_G9                                                             787h     12
 navtime                                                               793h      4
-curr_sel_S4B                                                          797h      1
-last_sel_S4B                                                          798h      1
-curr_sel_S4C                                                          799h      1
-last_sel_S4C                                                          79Ah      1
-curr_pos_S4D                                                          79Bh      2
-last_pos_S4D                                                          79Dh      2
-curr_pos_S4E                                                          79Fh      2
-last_pos_S4E                                                          7A1h      2
-curr_pos_S4F                                                          7A3h      2
-last_pos_S4F                                                          7A5h      2
-curr_sel_S50                                                          7A7h      2
-last_sel_S50                                                          7A9h      2
+curr_sel_S4C                                                          797h      1
+last_sel_S4C                                                          798h      1
+curr_sel_S4D                                                          799h      1
+last_sel_S4D                                                          79Ah      1
+curr_pos_S4E                                                          79Bh      2
+last_pos_S4E                                                          79Dh      2
+curr_pos_S4F                                                          79Fh      2
+last_pos_S4F                                                          7A1h      2
+curr_pos_S50                                                          7A3h      2
+last_pos_S50                                                          7A5h      2
+curr_sel_S51                                                          7A7h      2
+last_sel_S51                                                          7A9h      2
 PRBSTR                                                                7ABh      7
-curr_sel_S53                                                          7B2h      1
-last_sel_S53                                                          7B3h      1
+curr_sel_S54                                                          7B2h      1
+last_sel_S54                                                          7B3h      1
 *curr_window                                                          7B4h      2
 databuf                                                               7B6h     12
 pos_databuf                                                           7C2h      1

@@ -112,13 +112,17 @@ void kbd_uart_push(unsigned char);
 //#define PORT_B          SPORTB
 // Hardware related
                             void sleepms(unsigned int ms);
-                              double nav_read();
+//PORTB.7 RX, PORTB.6 RS, PORTB.5 1MA, PORTB.4. 0.1MA,
+//PORTB.3 PT100, PORTB.2 PT1000, PORTB.1 CH1,  PORB.0 CH2    
+//#define SET_TORX     display_buttons(KEY_RS,1)
+//#define SET_TORS     display_buttons(KEY_RS,0)
+                              double nav_read();
 void scanner_set_mode();
 /*********************************************************************************/
 //                              16C554 Header file
 /*********************************************************************************/
 // global.h    
-                                                                                                          // Registers of 16C554
+                                                                                                          // Registers of 16C554
 // Registers for UART A
 // Registers for UART B
 // Registers for UART C
@@ -128,7 +132,7 @@ extern void Init_554(void);
 void prints(unsigned char*, unsigned char, char);
                                 // uart.h
 // global.h    
-                                                                                                          void d_mputs(unsigned char *buf, unsigned char size);
+                                                                                                          void d_mputs(unsigned char *buf, unsigned char size);
 void d_putchar2(char);    
 void d_putchar(char);
 void d_putstr(flash unsigned char *ptr);
@@ -141,6 +145,85 @@ void putchar2(char);
 void putstr(flash unsigned char *ptr);    
 void mputs(unsigned char *buf, unsigned char size);
 unsigned char ishexchar(unsigned char dat);
+// global.h    
+                                                                                                          void delay (unsigned int us) ;
+void delay (unsigned int us) ;
+void delay (unsigned int us) ;
+void delay1 (unsigned int ms);
+char lowc(unsigned char x);
+char highc(unsigned char x);
+//'k'
+//'l'
+//#define PG_TPRBCONFIG	12
+/*
+ *	Probe data structure definition
+ */
+typedef eeprom struct _PRBDATA
+{
+	double param1[24];
+	double param2[24];
+	double param3[24];                      
+	double rtp[24];
+	char  name[24][8];	        //probe serials
+	unsigned char type[24];		//probe type
+}PRBDATA;
+typedef eeprom struct _SYSDATA
+{
+	double          R0;  //zero offset
+	double          V0;  //zero offset
+	double          Rs1; //jiao-zheng zhi for PT100
+	int             ktime;//time for switch
+	unsigned char 	        tid[24];	//probe index of each channel for T mode
+	unsigned char           rid[24];        //probe index of each channel for R mode
+	unsigned char           prbmode;
+	unsigned char           kttmode;      
+	double          Rs2; //for PT1000              
+}SYSDATA;               
+typedef struct _RUNDATA
+{
+	double  reading[24];		  //reading on each channel
+	double  temperature[24];	  //temperature result on each channel
+	double 	Rx;		  //final result
+	double  stdV;		  //voltage on stdV;
+}RUNDATA;
+extern RUNDATA rdata;
+extern SYSDATA eeprom sysdata;
+extern PRBDATA eeprom tprbdata;	//probe data for T mode
+extern PRBDATA eeprom rprbdata;	//probe data for R mode
+void State_Init();
+void display_buttons(unsigned char pos,unsigned char val);           
+double buf2double();
+int buf2byte();
+//#define ONESECBIT       14
+extern void DBG(unsigned char);
+extern void navto120mv();
+extern void navto1v();
+void SwitchWindow(unsigned char page);
+char* rname2b(unsigned char i);
+char* tname2b(unsigned char i);
+// CodeVisionAVR C Compiler
+// (C) 1998-2006 Pavel Haiduc, HP InfoTech S.R.L.
+// Prototypes for standard I/O functions
+// CodeVisionAVR C Compiler
+// (C) 1998-2002 Pavel Haiduc, HP InfoTech S.R.L.
+// Variable length argument list macros
+typedef char *va_list;
+#pragma used+
+char getchar(void);
+void putchar(char c);
+void puts(char *str);
+void putsf(char flash *str);
+char *gets(char *str,unsigned int len);
+void printf(char flash *fmtstr,...);
+void sprintf(char *str, char flash *fmtstr,...);
+void snprintf(char *str, unsigned int size, char flash *fmtstr,...);
+void vprintf (char flash * fmtstr, va_list argptr);
+void vsprintf (char *str, char flash * fmtstr, va_list argptr);
+void vsnprintf (char *str, unsigned int size, char flash * fmtstr, va_list argptr);
+signed char scanf(char flash *fmtstr,...);
+signed char sscanf(char *str, char flash *fmtstr,...);
+                                               #pragma used-
+#pragma library stdio.lib
 // LCR.7 must be cleared to 0 when accessing RBR/THR/IER
 // LCR.7 must be set to 1 when accessing divisor latch
 /********************************************************************************/
@@ -233,9 +316,9 @@ void Reset_554(void)
 {
    // reset 16C554. Reset pin of 16C554 is connected to PB0 of MEGA64
       PORTE.3 = 1;                                                         
-      sleepms(500);    // Delay
+      sleepms(5*(unsigned int)10000);    // Delay
       PORTE.3 = 0;          
-      sleepms(500);    // Delay
+      sleepms(5*(unsigned int)10000);    // Delay
 }
 /********************************************************************************/
 //                             Initialize 16C554 
@@ -248,7 +331,7 @@ void Init_554(void)
    /********************************************************************/         
    // Set Baud rate: 115200bps (0x4), 57600bps (0x8), 38400bps (0xC)
       (*(volatile unsigned char *)(0x7000+0x300))  = 0x80;
-      (*(volatile unsigned char *)(0x7000+0x000)) = 0x04          ;
+      (*(volatile unsigned char *)(0x7000+0x000)) = 0x30          ;
       (*(volatile unsigned char *)(0x7000+0x100)) = 0x0;     
       // Set Line Control Register:
    // 8 data bits, 1 stop bit, Even Parity, LCR7 = 1 to access divisor latches.
@@ -269,7 +352,7 @@ void Init_554(void)
    // Set Baud rate: 115200bps (0x4), 57600bps (0x8), 38400bps (0xC)
    // LCR.7 must be set to "1" before setting baud rate
       (*(volatile unsigned char *)(0xB000+0x300))  = 0x80;
-      (*(volatile unsigned char *)(0xB000+0x000)) = 0x04          ;
+      (*(volatile unsigned char *)(0xB000+0x000)) = 0x30          ;
       (*(volatile unsigned char *)(0xB000+0x100)) = 0x0;     
       // Set Line Control Register:
    // 8 data bits, 1 stop bit, Even Parity, LCR7 = 1 to access divisor latches.
@@ -289,7 +372,7 @@ void Init_554(void)
    /********************************************************************/         
    // Set Baud rate: 115200bps (0x4), 57600bps (0x8), 38400bps (0xC)
       (*(volatile unsigned char *)(0xD000+0x300))  = 0x80;
-      (*(volatile unsigned char *)(0xD000+0x000)) = 0x04          ;
+      (*(volatile unsigned char *)(0xD000+0x000)) = 0x30          ;
       (*(volatile unsigned char *)(0xD000+0x100)) = 0x0;     
       // Set Line Control Register:
    // 8 data bits, 1 stop bit, Even Parity, LCR7 = 1 to access divisor latches.
@@ -309,7 +392,7 @@ void Init_554(void)
    /********************************************************************/         
    // Set Baud rate: 115200bps (0x4), 57600bps (0x8), 38400bps (0xC)
       (*(volatile unsigned char *)(0xE000+0x300))  = 0x80;
-      (*(volatile unsigned char *)(0xE000+0x000)) = 0x04          ;
+      (*(volatile unsigned char *)(0xE000+0x000)) = 0x30          ;
       (*(volatile unsigned char *)(0xE000+0x100)) = 0x0;     
       // Set Line Control Register:
    // 8 data bits, 1 stop bit, Even Parity, LCR7 = 1 to access divisor latches.

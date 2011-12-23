@@ -91,7 +91,11 @@ void kbd_uart_push(unsigned char);
 //#define PORT_B          SPORTB
 // Hardware related
                             void sleepms(unsigned int ms);
-                              double nav_read();
+//PORTB.7 RX, PORTB.6 RS, PORTB.5 1MA, PORTB.4. 0.1MA,
+//PORTB.3 PT100, PORTB.2 PT1000, PORTB.1 CH1,  PORB.0 CH2    
+//#define SET_TORX     display_buttons(KEY_RS,1)
+//#define SET_TORS     display_buttons(KEY_RS,0)
+                              double nav_read();
 void scanner_set_mode();
 /**************************************************************************************/
 //                              Initialize Port A-G
@@ -107,8 +111,8 @@ void Init_Port()
  // Port B initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=Out 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=1 
-    PORTB=0x00;
-    DDRB=0x00;
+    PORTB=0xFF;
+    DDRB=0xFF;
  // Port C initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=Out Func2=Out Func1=Out Func0=Out 
  // State7=1 State6=1 State5=1 State4=1 State3=0 State2=0 State1=0 State0=0 

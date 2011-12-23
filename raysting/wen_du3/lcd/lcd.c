@@ -232,12 +232,12 @@ void LCD_CheckBusy2(void)
 } 
 */
 /* 数据自动写判别 */
-/*
+
 void LCD_CheckBusy3(void) 
 {
 	while ((LCD_BusyStatus()&8)!=8) {}
 }
-*/
+
 /*------------写命令或数据到LCD--------------*/
 void LCD_Write1 (uchar dat,uchar comm)       //写一个数据和一个命令
 {
@@ -262,7 +262,7 @@ void LCD_WriteInt (uint dat,uchar comm)       //写一个16进制数据和一个命令
 void LCD_AutoWrite (uchar dat)               //自动写数据
 {
   	LCD_CE = 0;
-  	LCD_Busy (1);
+ 	LCD_CheckBusy3();// 	LCD_Busy (1);
   	LCD_CD=0;
   	LCD_RD=1;
   	LCD_DATA_BUS=dat;
@@ -275,7 +275,8 @@ uchar LCD_Read(void)
 	uchar dat;
   	LCD_CE = 0;
 	LCD_CheckBusy1();
-	LCD_CD=0;
+	LCD_CD = 0;
+	LCD_WR = 1;
 	LCD_DATA_BUS = 0xff;
 	LCD_RD=0;
 	dat=LCD_DATA_BUS;
@@ -302,7 +303,7 @@ uchar LCD_AutoRead(void)
 void LCD_Comm (uchar comm)       //写命令
 {
   	LCD_CE = 0;
-  	LCD_Busy (0);
+	LCD_CheckBusy1();//  	LCD_Busy (0);
   	LCD_CD=1;
   	LCD_RD=1;
   	LCD_DATA_BUS=comm;
@@ -312,7 +313,7 @@ void LCD_Comm (uchar comm)       //写命令
 void LCD_Data (uchar dat)       //写数据
 {
   	LCD_CE = 0;
-  	LCD_Busy (0);
+ 	LCD_CheckBusy1();// 	LCD_Busy (0);
   	LCD_CD=0;
   	LCD_RD=1;
   	LCD_DATA_BUS=dat;
@@ -329,9 +330,11 @@ void LCD_Init (void)
   	//LCD_FS=0;
   	//LCD_CE=0;
   	
-  	//LCD_CE = 0;
+  	LCD_CE = 1;
   	LCD_WR=1;
   	LCD_RD=1;
+	LCD_FS=0;
+
   	LCD_WriteInt(LCD_TEXT_HOME_ADDR,0x40); 	//文本显示区首地址
   	LCD_WriteInt(LCD_GRAPH_HOME_ADDR,0x42); //图形显示区首地址
   	LCD_Write2(LCD_WIDTH,0x00,0x41);        //文本显示区宽度
@@ -354,9 +357,9 @@ void LCD_Cls(void)
 	//LCD_Write2(0x00,0x00,LC_ADD_POS);// 置地址指针为从零开始
   	LCD_WriteInt(LCD_TEXT_HOME_ADDR,LC_ADD_POS);
 	LCD_Comm(LC_AUT_WR);		// 自动写
-	for(i=0;i< 144*LCD_WIDTH;i++)	// 清一屏
+	for(i=0;i< (LCD_HEIGHT+8)*LCD_WIDTH;i++)	// 清一屏
 	{
-		LCD_Data(0x00);		// 写数据0x00
+		LCD_AutoWrite(0x00);		// 写数据0x00
 	}
 	LCD_Comm(LC_AUT_OVR);		// 自动写结束
 	LCD_Write2(0x00,0x00,LC_ADD_POS);// 重置地址指针
@@ -381,10 +384,12 @@ void LCD_ClsBlock(uchar x1,uchar y1,uchar x2,uchar y2)
   	{
   		LCD_WriteInt(addr,0x24);
 		LCD_Comm(0xb0);
+		LCD_CheckBusy1();
     		for(i=0;i<w;i++)
     		{
 	 		LCD_AutoWrite(0x00);
     		}
+		LCD_CheckBusy3();
 		LCD_Comm(0xb2);
 		addr += LCD_WIDTH;
   	}
@@ -461,13 +466,14 @@ void LCD_PutImg(uchar x,uchar y,uchar w,uchar h,uchar *img)
   	uchar data i,j;
   	uchar data c;
 	
-	addr = LCD_GRAPH_HOME_ADDR + LCD_WIDTH * y + (x >> 3);
+	addr = LCD_GRAPH_HOME_ADDR + LCD_WIDTH * y + (x / 8);
 	
   	//LCD_CE = 0;
   	for(j=0;j<h;j++)
   	{
   		LCD_WriteInt(addr,0x24);
 		LCD_Comm(0xb0);
+		LCD_CheckBusy1();
     		for(i=0;i<w;i++)
     		{
     			c = img[j*w+i] ;
@@ -476,6 +482,7 @@ void LCD_PutImg(uchar x,uchar y,uchar w,uchar h,uchar *img)
 	  		//LCD_WriteInt(addr +i,0x24);	//+ LCD_WIDTH *j
       			//LCD_Write1(c,0xc0);
     		}
+		LCD_CheckBusy3();
 		LCD_Comm(0xb2);
 		addr += LCD_WIDTH;
   	}

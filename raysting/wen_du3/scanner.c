@@ -21,7 +21,16 @@ void scanner_set_mode()
         prints(scancmd,3,PORT_SCANNER);    
 }
 void scanner_set_channel(uchar ch)
-{       
+{                           
+        if(ch == 1)
+        {                 
+                SET_TOCH1;
+        }                 
+        if(ch == 2)
+        {              
+                SET_TOCH2;
+                return;
+        }
         if(scanner_type == 1) //MI
         {        
                 if(ch < 10)
