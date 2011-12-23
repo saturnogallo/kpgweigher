@@ -6,7 +6,7 @@
 #define LCD_WIDTH      		32      //显示区宽度 16 * 8 = 128 dot
 #define LCD_HEIGHT		64	//64 dot
 #define LCD_TEXT_HOME_ADDR     	0x0000  //文本显示区首地址
-#define LCD_GRAPH_HOME_ADDR     ((LCD_HEIGHT/8)*30)  //图形显示区首地址
+#define LCD_GRAPH_HOME_ADDR     ((LCD_HEIGHT/8)*LCD_WIDTH)  //图形显示区首地址
 #define LCD_DATA_BUS   		P2      //MCU P1<------> LCM
 
 // ASCII字符控制代码解释定义

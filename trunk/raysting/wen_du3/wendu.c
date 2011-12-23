@@ -40,7 +40,9 @@ double RValueToTValue(double r, u8 prbid)
 	cc = rprbdata.param3[prbid];
 
 	if(rprbdata.type[prbid] == PRBTYPE_PT100)
-		return PT100RToTValue(r, cc);
+		return PT100RToTValue(r, cc);  
+	if(rprbdata.type[prbid] == PRBTYPE_PT1000)
+		return PT100RToTValue(r, cc);		
 	if(rprbdata.type[prbid] != PRBTYPE_PT25)
 		return -9999.999;
         if(rprbdata.rtp[prbid] > 0.1)
@@ -207,36 +209,36 @@ double GetThmoVolt(double t,char type)
 	int len = 0;
 	switch(type)
 	{
-		case 'T': 	
+		case PRBTYPE_T: 	
 			coef = (t < 0) ? TLow : THigh;
 			len = (t < 0) ? TLowLen : THighLen;
 			break;
-		case 'K': 	
+		case PRBTYPE_K: 	
 			coef = (t < 0) ? KLow : KHigh;
 			len = (t < 0) ? KLowLen : KHighLen;
 			break;
-		case 'N': 	
+		case PRBTYPE_N: 	
 			coef = (t < 0) ? NLow : NHigh;
 			len = (t < 0) ? NLowLen : NHighLen;
 			break;
-		case 'E': 	
+		case PRBTYPE_E: 	
 			coef = (t < 0) ? ELow : EHigh;
 			len = (t < 0) ? ELowLen : EHighLen;
 			break;
-		case 'B': 	
+		case PRBTYPE_B: 	
 			coef = (t < 630.615) ? BLow : BHigh;
 			len = (t < 630.615) ? BLowLen : BHighLen;
 			break;
-		case 'J': 	
+		case PRBTYPE_J: 	
 			coef = (t < 760) ? JLow : JHigh;
 			len = (t < 760) ? JLowLen : JHighLen;
 			break;
 
-		case 'S': 	
+		case PRBTYPE_S: 	
 			coef = (t < 1064.18) ? SLow : ((t < 1664.5) ? SMed : SHigh);
 			len = (t < 1064.18) ? SLowLen : ((t < 1664.5) ? SMedLen : SHighLen);
 			break;
-		case 'R': 	
+		case PRBTYPE_R: 	
 			coef = (t < 1064.18) ? RLow : ((t < 1664.5) ? RMed : RHigh);
 			len = (t < 1064.18) ? RLowLen : ((t < 1664.5) ? RMedLen : RHighLen);
 			break;
@@ -247,7 +249,7 @@ double GetThmoVolt(double t,char type)
 		return 0.0;
 
 	result = coef[0];
-	if(type == 'K')
+	if(type == PRBTYPE_K)
 	{
 		result = result+(0.118597600000E+00)*exp((-0.118343200000E-03)*(t-0.126968600000E+03)*(t-0.126968600000E+03));
 	}
@@ -268,38 +270,37 @@ double MValueToTValue(double r,char type)
 	double rnew;
 	double tnew;
 	int count = 0;
-
 	switch(type)
 	{
-		case 'T': 	
+		case PRBTYPE_T: 	
 			tlow =  -270;	tup = 400;
 			break;
-		case 'K': 	
+		case PRBTYPE_K: 	
 			tlow =  -270;	tup = 1372;
 			break;
-		case 'N': 	
+		case PRBTYPE_N: 	
 			tlow =  -270;	tup = 1300;
 			break;
-		case 'E': 	
+		case PRBTYPE_E: 	
 			tlow =  -270;	tup = 1000;
 			break;
-		case 'B': 	
+		case PRBTYPE_B: 	
 			tlow =  0;	tup = 1800;
 			break;
-		case 'J': 	
+		case PRBTYPE_J: 	
 			tlow =  -210;	tup = 1200;
 			break;
-		case 'S': 	
+		case PRBTYPE_S: 	
 			tlow =  -50;	tup = 1768;
 			break;
-		case 'R': 	
+		case PRBTYPE_R: 	
 			tlow =  -50;	tup = 1768;
 			break;
 		default:
 			return -9999.9999;
 	}	
 
-	while((tup - tlow > 0.00005) || (count++ < 100))
+	while((tup - tlow > 0.00005) && (count++ < 100))
 	{
 		tnew = (tlow+tup)/2.0;
 		rnew = GetThmoVolt(tnew,type);

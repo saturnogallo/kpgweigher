@@ -76,8 +76,20 @@ void sleepms(u16 ms);
 
 #define SET_PKTT     display_buttons(KEY_KTT,1)
 #define SET_NKTT     display_buttons(KEY_KTT,0)
-#define SET_TORX     display_buttons(KEY_RS,1)
-#define SET_TORS     display_buttons(KEY_RS,0)
+
+//PORTB.7 RX, PORTB.6 RS, PORTB.5 1MA, PORTB.4. 0.1MA,
+//PORTB.3 PT100, PORTB.2 PT1000, PORTB.1 CH1,  PORB.0 CH2    
+#define RLYDELAY     60*ONEMS
+#define SET_TORS     {PORTB.7 = 0; sleepms(RLYDELAY);PORTB.7 = 1;PORTB = 0xff;}
+#define SET_TORX     {PORTB.6 = 0; sleepms(RLYDELAY);PORTB.6 = 1;PORTB = 0xff;}   
+#define SET_TOCH2    {PORTB.5 = 0; sleepms(RLYDELAY);PORTB.5 = 1;PORTB = 0xff;}
+#define SET_TOCH1    {PORTB.4 = 0; sleepms(RLYDELAY);PORTB.4 = 1;PORTB = 0xff;}      
+#define SET_TOPT1000 {PORTB.3 = 0; sleepms(RLYDELAY);PORTB.3 = 1;PORTB = 0xff;}
+#define SET_TOPT100  {PORTB.2 = 0; sleepms(RLYDELAY);PORTB.2 = 1;PORTB = 0xff;}
+#define SET_TO1MA    {PORTB.1 = 0; sleepms(RLYDELAY);PORTB.1 = 1;PORTB = 0xff;}
+#define SET_TOP1MA   {PORTB.0 = 0; sleepms(RLYDELAY);PORTB.0 = 1;PORTB = 0xff;}
+//#define SET_TORX     display_buttons(KEY_RS,1)
+//#define SET_TORS     display_buttons(KEY_RS,0)
                               
 double nav_read();
 

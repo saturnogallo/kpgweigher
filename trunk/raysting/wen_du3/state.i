@@ -144,7 +144,11 @@ void kbd_uart_push(unsigned char);
 //#define PORT_B          SPORTB
 // Hardware related
                             void sleepms(unsigned int ms);
-                              double nav_read();
+//PORTB.7 RX, PORTB.6 RS, PORTB.5 1MA, PORTB.4. 0.1MA,
+//PORTB.3 PT100, PORTB.2 PT1000, PORTB.1 CH1,  PORB.0 CH2    
+//#define SET_TORX     display_buttons(KEY_RS,1)
+//#define SET_TORS     display_buttons(KEY_RS,0)
+                              double nav_read();
 void scanner_set_mode();
 void delay (unsigned int us) ;
 void delay1 (unsigned int ms);
@@ -156,7 +160,7 @@ char highc(unsigned char x);
 /*
  *	Probe data structure definition
  */
-typedef eeprom struct _PRBDATA
+typedef eeprom struct _PRBDATA
 {
 	double param1[24];
 	double param2[24];
@@ -169,12 +173,13 @@ char highc(unsigned char x);
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
-	double          Rs1; //jiao-zheng zhi
+	double          Rs1; //jiao-zheng zhi for PT100
 	int             ktime;//time for switch
 	unsigned char 	        tid[24];	//probe index of each channel for T mode
 	unsigned char           rid[24];        //probe index of each channel for R mode
 	unsigned char           prbmode;
-	unsigned char           kttmode;                    
+	unsigned char           kttmode;      
+	double          Rs2; //for PT1000              
 }SYSDATA;               
 typedef struct _RUNDATA
 {
@@ -191,9 +196,11 @@ extern PRBDATA eeprom rprbdata;	//probe data for R mode
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-//#define ONESECBIT       14
+//#define ONESECBIT       14
 extern void DBG(unsigned char);
-void SwitchWindow(unsigned char page);
+extern void navto120mv();
+extern void navto1v();
+void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
 // CodeVisionAVR C Compiler
@@ -219,16 +226,8 @@ signed char scanf(char flash *fmtstr,...);
 signed char sscanf(char *str, char flash *fmtstr,...);
                                                #pragma used-
 #pragma library stdio.lib
-void SectorErase(unsigned int sector_addr);
-void SectorErase(unsigned int sector_addr);
-unsigned char byte_read(unsigned int byte_addr);
-void byte_write(unsigned int byte_addr, unsigned char original_data);
-void LoadFromEEPROM();
-void SaveToEEPROM();
-void LoadProbeData();
-void SaveProbeData();
-// global.h    
-                                                                                                          typedef void (*MSG_HANDLER)(unsigned char key);
+// global.h    
+                                                                                                          typedef void (*MSG_HANDLER)(unsigned char key);
 typedef void (*MSG_HANDLER)(unsigned char key);
 typedef void (*MSG_HANDLER)(unsigned char key);
 typedef flash struct typWINDOW
@@ -260,7 +259,7 @@ void prbsninput();
 extern MSG_HANDLER curr_window;
 extern MSG_HANDLER caller;
 extern unsigned char max_databuf;
-  																		  																		void scanner_set_channel(unsigned char ch);
+  																			  																			void scanner_set_channel(unsigned char ch);
 void scanner_uart_push(unsigned char data);
 void pc_uart_push(unsigned char data);
 void nav_uart_push(unsigned char data);     
@@ -314,31 +313,47 @@ LABEL flash pgmain_temps[] = {
 		return;
 	}
         if(key == '1') //R0
-        {                                     
-                max_databuf = 10;                
-                if(sysdata.prbmode == 1)
+        {
+/*                                             
+                window_setup(10);                
+                if(IS_BORE_MODE)
                 {
                         sprintf(strbuf,"请输入铂电阻R0阻值");
 	        	sysdata.R0 = wnd_floatinput(sysdata.R0);
-		        msg = 0xff;                         
+		        msg = MSG_INIT;                         
 		}else{
 		        return;
                         sprintf(strbuf,"请输入V0值");
 	        	sysdata.V0 = wnd_floatinput(sysdata.V0);
-                        msg = 0xff;
+                        msg = MSG_INIT;
 		}
+*/		
         }
         if(key == '2') //Rs1
-        {       
-                if(sysdata.prbmode == 1)
+        {   
+/*            
+                if(IS_BORE_MODE)
                 {
-                        max_databuf = 10;                
-                        sprintf(strbuf,"请输入内标准阻值");
+                        window_setup(10);                
+                        sprintf(strbuf,"请输入PT100内标准阻值");
 		        sysdata.Rs1 = wnd_floatinput(sysdata.Rs1);
-        		msg = 0xff;		
+        		msg = MSG_INIT;		
                 }
+*/
         }
-	if(msg == 'U') {    
+        if(key == '3') //Rs2
+        {       
+/*        
+                if(IS_BORE_MODE)
+                {
+                        window_setup(10);                
+                        sprintf(strbuf,"请输入PT1000内标准阻值");
+		        sysdata.Rs2 = wnd_floatinput(sysdata.Rs2);
+        		msg = MSG_INIT;		
+                }
+*/                
+        }
+        	if(msg == 'U') {    
 		curr_dispch -= 1 ;  if(curr_dispch == 0){  curr_dispch = 24;  };
 		msg = 0xff;
 	}
@@ -471,9 +486,9 @@ LABEL flash pgr_banner = {5,3,3,7,"铂电阻参数配置"};
 LABEL flash pgr_calibrate = {5,30,30,8,"内标准校准中..."};
 LABEL flash pgr_klbl = {1, 88,28, 3,strbuf}; //ktime label
 LABEL flash pgr_options[] = {
-	{5, 10,23,6,"1.电流换向"},
+	{5, 10,23,7,"1.电流换向"},
 	{5,130,23,7,"2.内标准校准"},
-	{5, 10,45,8,"3.通道探头选择"},
+	{5, 10,45,7,"3.通道探头选择"},
 	{5,130,45,7,"4.设置探头参数"}
 };
 //LABEL flash usage = {LBL_HZ6X8,100,55,5,"usage"};
@@ -485,18 +500,30 @@ void pgcalibrate()
 	oldvalue = wnd_floatinput(oldvalue);
 	if(oldvalue == 0)
                 return;	
-        wnd_msgbox(&pgr_calibrate);                        
-        sysdata.Rs1 = (oldvalue + sysdata.R0)*sysdata.Rs1/(rundata.reading[curr_dispch-1]+sysdata.R0);
+        wnd_msgbox(&pgr_calibrate);   
+        if(rprbdata.type[sysdata.rid[curr_dispch-1]] == 0xf3)
+                sysdata.Rs2 = (oldvalue + sysdata.R0)*sysdata.Rs2/(rundata.reading[curr_dispch-1]+sysdata.R0);
+        else      
+                sysdata.Rs1 = (oldvalue + sysdata.R0)*sysdata.Rs1/(rundata.reading[curr_dispch-1]+sysdata.R0);
+        if((sysdata.Rs1 > 101) || (sysdata.Rs1 < 99))      
+        {
+                sysdata.Rs1 = 100;                         
+        }
+        if((sysdata.Rs2 > 1010) || (sysdata.Rs2 < 990))                      
+        {
+                sysdata.Rs2 = 1000;                          
+        }
 }       
 //main menu of bore config
 void pgrconfig_handler(unsigned char msg) {
 	unsigned char i;
 		static unsigned char curr_sel = 1;
-	static unsigned char last_sel = 1;
+	static unsigned char last_sel = 0xff;
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(pgr_options)/sizeof(LABEL);
 	if(msg == 'T') {
-	        sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
+	        sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);{PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};navto1v();display_buttons('i',1);;          
+	        {PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};
 		nextwin = 2;
 		return;
 	}                                    
@@ -507,11 +534,32 @@ void pgrconfig_handler(unsigned char msg) {
 	}
 	if(msg == 0xff) {
 		LCD_Cls();
+		last_sel = 0xff;
 		draw_label(&pgr_banner, 1);
 		for(i = min_option;i <= max_option; i++) {                                        draw_label(&pgr_options[i-1], 1);			        }	;
 		sprintf(strbuf,"(%i)",sysdata.ktime);
 		draw_label(&pgr_klbl, 1);
 		msg = 0xfe;
+	}                                 
+	if(msg == 'D')
+	{                
+	        last_sel = curr_sel;
+	        curr_sel++;
+	        if(curr_sel > max_option)
+	                curr_sel = 1;
+	        msg = 0xfe;
+	}
+	if(msg == 'U')
+	{                
+	        last_sel = curr_sel;
+	        curr_sel--;
+	        if(curr_sel == 0)
+	                curr_sel = max_option;
+	        msg = 0xfe;
+	}
+	if(msg == 'O')
+	{
+	        msg = curr_sel + '0';
 	}
 	if(msg == '1') {
 		max_databuf = 4; //4 char at max
@@ -548,11 +596,11 @@ LABEL flash pgt_options[] = {
 void pgtconfig_handler(unsigned char msg) {
 	unsigned char i;
 	static unsigned char curr_sel = 1;
-	static unsigned char last_sel = 1;
+	static unsigned char last_sel = 0xff;
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(pgt_options)/sizeof(LABEL);
 	if(msg == 'T') {
-	        sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
+	        sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);{PORTB.6 = 0; sleepms(60*(unsigned int)10000);PORTB.6 = 1;PORTB = 0xff;}   ;navto120mv();display_buttons('i',1);;
 		nextwin = 2;
 		return;
 	}              
@@ -563,10 +611,31 @@ void pgtconfig_handler(unsigned char msg) {
 	}	
 	if(msg == 0xff) {
 		LCD_Cls();
+		last_sel = 0xff;
 		draw_label(&pgt_banner, 1);
 		for(i = min_option;i <= max_option; i++) {                                        draw_label(&pgt_options[i-1], 1);			        }	;
 		msg = 0xfe;
 	}
+	if(msg == 'D')
+	{                
+	        last_sel = curr_sel;
+	        curr_sel++;
+	        if(curr_sel > max_option)
+	                curr_sel = 1;
+	        msg = 0xfe;
+	}
+	if(msg == 'U')
+	{                
+	        last_sel = curr_sel;
+	        curr_sel--;
+	        if(curr_sel == 0)
+	                curr_sel = max_option;
+	        msg = 0xfe;
+	}
+	if(msg == 'O')
+	{
+	        msg = curr_sel + '0';
+	}	
 	if(msg == '1') {
 		nextwin = 7;
 		return;
@@ -639,7 +708,7 @@ void pgchset_handler(unsigned char msg) {
 		new_page = 1; //refresh the whole page
 	}
 	if(msg == 0xff) {
-		LCD_Cls();
+		LCD_Cls();         
 		draw_label(&pgch_banner, 1);
 		curr_pos = 1;
 		new_page = 1;
@@ -711,7 +780,7 @@ void pgprbset_handler(unsigned char msg) {
 	}
 	if(msg == 0xff)
 	{
-		LCD_Cls();
+		LCD_Cls();         
 		draw_label(&pgprbset_banner, 1);
 		curr_pos = 1;
 		new_page = 1;
@@ -827,28 +896,40 @@ void pgprblist_handler(unsigned char msg) {
 //select probe type list
 LABEL flash tplist_banner = {5,3,3,8,strbuf};
 LABEL flash tplist_options[] = {
-	{1,10,20,8,"1.PT100"},
-	{1,80,20,8,"2.PT25"},
+	{1,10,20,8,"0.PT1000"},
+	{1,80,20,8,"1.PT100"},
+	{1,150,20,8,"2.PT25"},	
 	{1,10,30,8,"3.K-TYPE"},
 	{1,80,30,8,"4.N-TYPE"},
 	{1,150,30,8,"5.E-TYPE"},
 	{1,10,40,8,"6.B-TYPE"},
 	{1,80,40,8,"7.J-TYPE"},
 	{1,150,40,8,"8.S-TYPE"},
-	{1,10,50,8,"9.R-TYPE"}
-};                            
+        {1,10,50,8,"9.T-TYPE"},
+	{1,10,50,8,"*.R-TYPE"}
+};                            
 //select probe type thermo
 void pgprbtypelist_handler(unsigned char msg) {
 	static int curr_sel = 1;
-	static int last_sel = 1;
+	static int last_sel = 0xff;
 	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(tplist_options)/sizeof(LABEL);
-	unsigned char i;
-	if(msg >= '1' && msg <= '9') {
-	        curr_sel = msg - '1' + 1;
+	unsigned char i;                     
+	if(msg == '.')
+	{
+	        curr_sel = 10;
 	        msg = 'O';
 	}
-	if(msg == 'C' ) {
+	if(msg >= '1' && msg <= '9') {
+	        curr_sel = (unsigned char)(msg - '1' + 1) ;
+	        msg = 'O';
+	}
+        if (msg == '0')
+        {
+                curr_sel = 0;
+                msg = 'O';
+        }
+	if(msg == 'C' ) {
 		nextwin = 11;
 		return;
 	}                   
@@ -857,7 +938,9 @@ void pgprbtypelist_handler(unsigned char msg) {
 	        if(sysdata.prbmode == 0)
 	        {
         		switch(curr_sel)
-	        	{
+	        	{                   
+	        	        case 0:
+	        	               return;
 		        	case 1:
         			       return;
 	        		case 2:
@@ -868,7 +951,10 @@ void pgprbtypelist_handler(unsigned char msg) {
         		}            
         	}else{
         		switch(curr_sel)
-	        	{
+	        	{            
+	        	        case 0:
+	        	               rprbdata.type[curr_prb-1] = 0xf3;
+	        	               break;
 		        	case 1:
 			               rprbdata.type[curr_prb-1] = 0xf1;
         			       break;
@@ -912,14 +998,20 @@ char PRBSTR[7];
 char* getprbtype(unsigned char prbtype)
 {
 	switch(prbtype)
-	{
+	{                           
+	        case 0xf3:
+		        sprintf(PRBSTR,"PT1000");
+		        return PRBSTR;
 		case 0xf2: 	
 		        sprintf(PRBSTR,"PT  25");
 		        return PRBSTR;
 		case 0xf1:
 		        sprintf(PRBSTR,"PT 100");
 		        return PRBSTR;
-		case 0x03:
+		case 0x09:
+		        sprintf(PRBSTR,"T TYPE");
+		        return PRBSTR;
+		case 0x03:
 		        sprintf(PRBSTR,"K TYPE");
 		        return PRBSTR;
 		case 0x04:
@@ -937,7 +1029,7 @@ char* getprbtype(unsigned char prbtype)
 		case 0x08:
 		        sprintf(PRBSTR,"S TYPE");
 		        return PRBSTR;
-		case 0x09:
+		case 0x0A:
 		        sprintf(PRBSTR,"R TYPE");
 		        return PRBSTR;
 	}
@@ -987,14 +1079,14 @@ void pgprbconfig_handler(unsigned char msg) {
 		        {
         		        sprintf(strbuf,":%s",rname2b(curr_prb-1));
         	        	draw_label(&snlbl,1);draw_label(&snval,1);
-        	        }else{
+        	        }else{  //PT1000 or PT100
                		        sprintf(strbuf,":%s Rtp:%7f",rname2b(curr_prb-1),rprbdata.rtp[curr_prb-1]);
         	        	draw_label(&snlbl,1);draw_label(&snval,1);
         	        }
                		//type	        	
                        	sprintf(strbuf,":%s",getprbtype(rprbdata.type[curr_prb-1]));
 	                draw_label(&typelbl,1);draw_label(&typeval,1);
-	                		        if(rprbdata.type[curr_prb-1] == 0xf1)
+	                		        if(rprbdata.type[curr_prb-1] != 0xf2)
 		        {
 		                sprintf(strbuf,"R(0!):%7f",rprbdata.param3[curr_prb-1]);
         		        draw_label(&paramlbl3b,1);draw_label(&paramval3b,1);
@@ -1027,7 +1119,7 @@ void pgprbconfig_handler(unsigned char msg) {
 		        if(sysdata.prbmode == 1)
 	        {              
                		max_databuf = 10;
-	                if(rprbdata.type[curr_prb-1] == 0xf1)
+	                if(rprbdata.type[curr_prb-1] != 0xf2)
 	                {
         	                sprintf(strbuf,"输入R(0!)");                                              
         	                rprbdata.param3[curr_prb-1] = wnd_floatinput(rprbdata.param1[curr_prb-1]);
@@ -1044,7 +1136,9 @@ void pgprbconfig_handler(unsigned char msg) {
         	{
 	                if(rprbdata.type[curr_prb-1] == 0xf1)
 	                        return;
-        		max_databuf = 10;
+	                if(rprbdata.type[curr_prb-1] == 0xf3)
+	                        return;
+        		max_databuf = 10;
 	        	sprintf(strbuf,"输入系数b");
 		        rprbdata.param2[curr_prb-1] = wnd_floatinput(rprbdata.param2[curr_prb-1]);
         		nextwin = 11;
@@ -1055,6 +1149,8 @@ void pgprbconfig_handler(unsigned char msg) {
 	        if(sysdata.prbmode == 1)
 	        {       
        	                if(rprbdata.type[curr_prb-1] == 0xf1)
+       	                        return;     
+       	                if(rprbdata.type[curr_prb-1] == 0xf3)
        	                        return;
 	                max_databuf = 10;       	                        
        		        sprintf(strbuf,"输入系数c");
@@ -1077,8 +1173,8 @@ extern unsigned char eeprom scanner_type;
 void pgboottype_handler(unsigned char msg) {
 	unsigned char i;
 	static unsigned char curr_sel = 1;
-	static unsigned char last_sel = 1;
-	unsigned char min_option = 1;
+	static unsigned char last_sel = 0xff;
+	unsigned char min_option = 1;
 	unsigned char max_option = sizeof(boot_options)/sizeof(LABEL);
 	if(msg == '5') { //select scanner type
        		max_databuf = 4; //2 char at max
@@ -1093,31 +1189,50 @@ void pgboottype_handler(unsigned char msg) {
 	}
 	if(msg == 0xff) {
 		LCD_Cls();
+		last_sel = 0xff;
 		draw_label(&boot_banner, 1);
 		for(i = min_option;i <= max_option; i++) {                                        draw_label(&boot_options[i-1], 1);			        }	;
 		msg = 0xfe;
 	}
+	if(msg == 'D')
+	{                
+	        last_sel = curr_sel;
+	        curr_sel++;
+	        if(curr_sel > max_option)
+	                curr_sel = 1;
+	        msg = 0xfe;
+	}
+	if(msg == 'U')
+	{                
+	        last_sel = curr_sel;
+	        curr_sel--;
+	        if(curr_sel == 0)
+	                curr_sel = max_option;
+	        msg = 0xfe;
+	}
+	if(msg == 'O')
+	{
+	        msg = curr_sel + '0';
+	}
 	if(msg == '1') {
-		sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
-		display_buttons('j',1);
+		sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);{PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};navto1v();display_buttons('i',1);;
+		{PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};
 		nextwin = 2;
 		return;
 	}
 	if(msg == '2') {
-		sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
-		display_buttons('j',1);
+		sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);{PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};navto1v();display_buttons('i',1);;
+		{PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};
 		nextwin = 3;
 		return;
 	}
 	if(msg == '3') {
-		sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
-		display_buttons('j',0);
+		sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);{PORTB.6 = 0; sleepms(60*(unsigned int)10000);PORTB.6 = 1;PORTB = 0xff;}   ;navto120mv();display_buttons('i',1);;
 		nextwin = 2;
 		return;
 	}
 	if(msg == '4') {
-		sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
-		display_buttons('j',0);
+		sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);{PORTB.6 = 0; sleepms(60*(unsigned int)10000);PORTB.6 = 1;PORTB = 0xff;}   ;navto120mv();display_buttons('i',1);;
 		nextwin = 4;
 		return;
 	}                      

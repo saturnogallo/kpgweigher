@@ -56,7 +56,7 @@ SYSDATA eeprom sysdata = {
 	{0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-	1,1};
+	1,1,1000};
 PRBDATA	eeprom tprbdata = {
        {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
@@ -129,11 +129,17 @@ interrupt [TIM1_OVF] void timer1_ovf_isr(void)
 }
 void dbgout(double val)
 {
-        sprintf(strbuf,"%f\r\n",val);
-        prints(strbuf,strlen(strbuf),PORT_PC);        
+//        sprintf(strbuf,"%f\r\n",val);
+//        prints(strbuf,strlen(strbuf),PORT_PC);        
+}      
+void sdbgout(flash char *l)
+{           
+        sprintf(strbuf,"%s",l);
+prints(strbuf,strlen(strbuf),PORT_PC); 
 }
 void InitLED()
-{
+{         
+    PORTB = 0xFF;
 /*
     PORTB.7=1;
     PORTB.6=1;
@@ -147,23 +153,15 @@ uchar nav1v = 1;
 void navto120mv()
 {               
    nav1v = 0;  
-   dbgout(-0.12);      
    nav_command(NAV_120MV);
-   sleepms(20000);            
+   sleepms(200*ONEMS);            
 }           
 
 void navto1v()
 {            
     nav1v = 1;
-    dbgout(-1.0);
-    nav_command(NAV_INIT);
-    sleepms(20000);
     nav_command(NAV_1V);
-    sleepms(20000);
-    nav_command(NAV_SLOWMODE);
-    sleepms(20000);
-    nav_command(NAV_AFLTON);
-    sleepms(20000);
+    sleepms(200*ONEMS);
 } 
 double mabs(double val)
 {
@@ -239,9 +237,14 @@ char* rname2b(u8 i)
         return namebuf;
 }                                        
 void sleepms(u16 ms)
-{
+{             
+    uint p;
     while(ms-- > 0)
-        ;
+    {
+        p = 24;//80;
+        while(p-- > 0)
+                ;
+    }
 }
 
 
@@ -249,7 +252,11 @@ void sleepms(u16 ms)
 //      board init related function.
 /**************************************************************************************/
 void init_var()
-{                          
+{            
+        if((sysdata.Rs1 > 101) || (sysdata.Rs1 < 99))      
+                sysdata.Rs1 = 100;                         
+        if((sysdata.Rs2 > 1010) || (sysdata.Rs2 < 990))                      
+                sysdata.Rs2 = 1000;                                         
 }
 //state machine of therm type
 //phase 0 : search the current channel and switch to it if apply, add delay, to phase 1, otherwise to phase 2
@@ -259,6 +266,8 @@ uchar therm_state()
 {                  
         uchar i;
 	i = sysdata.tid[ch_to_search];   
+	if(phase > 2)
+	        phase = 0;
 	if(i == INVALID_PROBE)
 	{
         	rundata.temperature[ch_to_search] = -9999;
@@ -269,7 +278,7 @@ uchar therm_state()
 		if( (tprbdata.type[i] >= PRBTYPE_K) && (tprbdata.type[i] <= PRBTYPE_R))
 		{              
 			scanner_set_channel(ch_to_search+1);	
-			dlg_cnt = ONESEC;
+			dlg_cnt = 6*ONESEC;
 			onesec_cnt = 0;
 			phase = 1;
 			return 0;
@@ -308,6 +317,8 @@ uchar bore_state()
 {
         uchar i;
 	i = sysdata.rid[ch_to_search];   
+	if(phase > 5)
+	        phase = 0;
 	if(i == INVALID_PROBE)
 	{
         	rundata.temperature[ch_to_search] = -9999;
@@ -315,11 +326,31 @@ uchar bore_state()
 	}
 	if(phase == 0)
 	{
-		if((rprbdata.type[i] <= PRBTYPE_PT25) && (rprbdata.type[i] >= PRBTYPE_PT100))
+		if((rprbdata.type[i] <= PRBTYPE_MAX) && (rprbdata.type[i] >= PRBTYPE_MIN))
 		{
 			scanner_set_channel(ch_to_search+1);	
 			SET_PKTT;
-			SET_TORS;
+			SET_TORS;                            
+                        
+			if(rprbdata.type[i] == PRBTYPE_PT100)
+			{                       
+			        SET_TOPT100;
+			        SET_TO1MA;			     
+			        PORTF = 0x0f;   
+			}
+			if(rprbdata.type[i] == PRBTYPE_PT25)
+			{
+			        SET_TOPT100;
+			        SET_TO1MA;
+			        PORTF = 0x0f;
+			}
+			        
+			if(rprbdata.type[i] == PRBTYPE_PT1000)
+			{
+			        SET_TOP1MA;
+       			        SET_TOPT1000;
+       			        PORTF = 0x00;
+			}
 			dlg_cnt =  ONESEC * sysdata.ktime;
 			onesec_cnt = 0;
 			if(IS_MODE_KTT)
@@ -352,7 +383,8 @@ uchar bore_state()
 			rundata.stdV = mabs(nav_read());
 			phase = 4;
 		}                              
-		SET_TORX;
+		SET_TORX;     
+		
 		dlg_cnt = ONESEC * sysdata.ktime;      
 		onesec_cnt = 0;
 		return 0;	
@@ -371,6 +403,7 @@ uchar bore_state()
 		if(IS_MODE_KTT){       
 			valuep = (valuep + mabs(nav_read()));
 			dbgout(valuep);
+/*			
 			if((valuep > 0.21) && (valuep < 2) && (nav1v == 0))
 			{
         		        navto1v();     
@@ -379,8 +412,10 @@ uchar bore_state()
 			{
 			        navto120mv();
 			}
+*/			
 		}else{               
 			valuep = mabs(nav_read());                      
+/*			
 			if((valuep > 0.105) && (valuep < 1) && (nav1v == 0))
 			{
         		        navto1v();     
@@ -389,10 +424,14 @@ uchar bore_state()
 			{
 			        navto120mv();
 			}
+*/			
 		}
 		if(rundata.stdV != 0)
-		{            
-			rundata.reading[ch_to_search] = valuep*sysdata.Rs1/rundata.stdV - sysdata.R0;
+		{                           
+                        if(rprbdata.type[sysdata.rid[ch_to_search]] == PRBTYPE_PT1000)                       
+              			rundata.reading[ch_to_search] = valuep*sysdata.Rs2/rundata.stdV - sysdata.R0;
+                        else
+        			rundata.reading[ch_to_search] = valuep*sysdata.Rs1/rundata.stdV - sysdata.R0;
 			if(rundata.reading[ch_to_search] > 0)
 			{
                                 sprintf(strbuf,"%2d;%f;",ch_to_search+1,rundata.Rx);
@@ -415,7 +454,7 @@ uchar bore_state()
 	}                 
 	return 1;
 }         
-LABEL flash statelbl = {LBL_HZ6X8,100,55,16,strbuf};
+LABEL flash statelbl = {LBL_HZ6X8,50,55,26,strbuf};
 
 void updatestate()
 {
@@ -425,7 +464,13 @@ void updatestate()
         if(phase == 1)                sprintf(star,"**  ");
         if(phase == 2)                sprintf(star,"*** ");        
         if(phase == 3)                sprintf(star,"****");        
+        if(IS_BORE_MODE){                 
+                sprintf(strbuf,"(%s:ch%2i,%d,%s)",rname2b(sysdata.rid[ch_to_search]),ch_to_search+1, dlg_cnt/ONESEC,star);        
+        }else{
+                sprintf(strbuf,"(%s:ch%2i,%d,%s)",tname2b(sysdata.tid[ch_to_search]),ch_to_search+1, dlg_cnt/ONESEC,star);                
+        }
                 
+/*                
         if(IS_BORE_MODE){         
                 if(IS_MODE_KTT)                                                   
                         sprintf(strbuf,"(ch%2i,%2d,%s)",ch_to_search+1,dlg_cnt/ONESEC,star);
@@ -434,6 +479,7 @@ void updatestate()
         }else{                                                                      
                 sprintf(strbuf,"(ch:%2i,%2d,%s)",ch_to_search+1,dlg_cnt/ONESEC,star);
         }      
+*/        
         draw_label(&statelbl,SW_NORMAL);
 }
 static uchar tA = 0xff;
@@ -453,18 +499,10 @@ extern double GetThmoVolt(double t,char type);
 extern u8 databuf[12];
 extern u8 pos_databuf; //position in data buffer
 void main(void)
-{
-    u16 i;  
-    /*  just test algrithom 
-    sprintf(databuf,"9.99");    
-    pos_databuf = 4;
-    dt = buf2double();
-    rprbdata.type[0] = PRBTYPE_PT100;
-    rprbdata.param1[0] = 3.9083e-3;
-    rprbdata.param2[0] = -5.775e-7;
-    rprbdata.param3[0] = 100;//-4.183e-12;
-    dt = RValueToTValue(139.26, 0);//102
-    */
+{                            
+   
+    u16 i;                                      
+    u8 shortcut = KEY_INVALID;  
     // RS485 Node    
     init_var();	//init data structure 
     // System Initialization
@@ -485,26 +523,22 @@ void main(void)
     // intialize LED. 
     nextwin = 0; 
     
-    sleepms(2000);
+    sleepms(20*ONEMS);
     LCD_Init();
     wnd_msgbox(&bootup);
     //init the DMM
     nav_command(NAV_INIT);              
-    sleepms(20000);
-    nav_command(NAV_1V);
-    sleepms(20000);
+    sleepms(200*ONEMS);                                
+    navto1v();
     nav_command(NAV_SLOWMODE);
-    sleepms(20000);
+    sleepms(200*ONEMS);
     nav_command(NAV_AFLTON);
-    sleepms(20000);
+    sleepms(200*ONEMS);
                      
-    sleepms(2*ONESEC); //wait until all the node is ready after power up        
+    sleepms(2*ONEMS); //wait until all the node is ready after power up        
     State_Init();	
     
     SET_BORE_MODE;
-    
-    SET_PKTT;                               
-    SET_TORS;
     
 	 nextwin = PG_BOOTTYPE;
 	 key = KEY_INVALID;
@@ -522,35 +556,33 @@ void main(void)
 		if(key != KEY_INVALID)
 		{
 			if((key == KEY_BTN1)||(key == KEY_BTN2)||(key == KEY_BTN3)||(key == KEY_BTN4))
-			{
+			{                      
+			        shortcut = key;          
+                                //processing shortcut key
 				if(curr_window == pgmain_handler)
 				{
 					LCD_Cls();
 					wnd_msgbox(&modify);
 				}
-				if(key == KEY_BTN1) //mode switch
+				if(shortcut == KEY_BTN1) //mode switch
 				{
+               			        SET_TOP1MA;
+	                	        SET_TOPT1000;                				
 					if(IS_BORE_MODE){
 						SET_THERM_MODE;
-                                                SET_TORS;      
-                				SET_PKTT;
-                                                navto120mv();
 					}else{
 						SET_BORE_MODE;
-                                                SET_TORX;
-                				SET_PKTT;                                                              
-                                                navto1v();
 					}
 					dlg_cnt = 0;					
 					onesec_cnt = 0;
 					phase = 0;      //reset the state machine
-
-					SET_PKTT;
 				}
-				if(key == KEY_BTN2) //auto ktt or not
+				if(shortcut == KEY_BTN2) //auto ktt or not
 				{
 					if(IS_BORE_MODE)
 					{
+                      			        SET_TOP1MA;
+	                        	        SET_TOPT1000;                				
 						if((IS_MODE_KTT)){
 							CLR_MODE_KTT;
 							SET_PKTT;
@@ -558,11 +590,13 @@ void main(void)
 							SET_MODE_KTT;
 							SET_PKTT;
 						}
+        					dlg_cnt = 0;					
+	        				onesec_cnt = 0;
+		        			phase = 0;      //reset the state machine
 					}
 				}
-				if(key == KEY_BTN3) //thermal probe type
+				if(shortcut == KEY_BTN3) //thermal probe type
 				{                            
-				        
 					display_buttons(KEY_BTN3,1);
 					if(IS_THERM_MODE)
 					{                        
@@ -576,13 +610,15 @@ void main(void)
 				                			tprbdata.type[i] = PRBTYPE_K;
 					                	else
 						                	tprbdata.type[i] +=1;
-        					        }
+        					        }                                                                                 
+        					        if(rundata.reading[curr_dispch-1] > -9000)
+                                                       		rundata.temperature[curr_dispch-1] = MValueToTValue(rundata.reading[curr_dispch-1], tprbdata.type[i]);
         					}
                                         }
 					display_buttons(KEY_BTN3,0);
 					
 				}
-				if(key == KEY_BTN4) //remove zero
+				if(shortcut == KEY_BTN4) //remove zero
 				{
 					display_buttons(KEY_BTN4,1);
 					if(IS_BORE_MODE){
@@ -590,7 +626,7 @@ void main(void)
 					}else{             
 					        //sysdata.V0 = nav_read();
 					        nav_command(NAV_ZEROON);
-					        sleepms(ONESEC);
+					        sleepms(1000*ONEMS);
 					}
 					display_buttons(KEY_BTN4,0);
 				}
@@ -598,6 +634,8 @@ void main(void)
 				{
 					pgmain_handler(MSG_INIT);      
 				}
+			        shortcut = KEY_INVALID;
+			        			        
 			}else{
 				(*curr_window)(key);
 			}
@@ -605,15 +643,12 @@ void main(void)
 	  	}else{
 			if(curr_window != pgmain_handler)
 				continue;                               
-			
-                        
 			if(dlg_cnt > 1)
 			{         
 			        onesec_cnt++;
 			        if(onesec_cnt == (ONESEC-10))
 			        {       
         			        updatestate();
-
         			}
         			if(onesec_cnt == ONESEC)
         			        onesec_cnt = 0 ;
@@ -628,8 +663,10 @@ void main(void)
 			}else{
 				if(bore_state() == 0)
 				        continue;
-			}
-                        //shift to next channel
+			}     
+			
+                        //shift to next channel 
+                       
                         while(true)
                         {
                                 ch_to_search += 1;
@@ -651,7 +688,7 @@ void main(void)
        					if((tprbdata.type[i] >= PRBTYPE_K) && (tprbdata.type[i] <= PRBTYPE_R))
        					        break;
 	        		}else{
-       		        		if((rprbdata.type[i] <= PRBTYPE_PT25) && (rprbdata.type[i] >= PRBTYPE_PT100))
+       		                        if((rprbdata.type[i] <= PRBTYPE_MAX) && (rprbdata.type[i] >= PRBTYPE_MIN))
        		        		        break;
 	        		}
 	                }

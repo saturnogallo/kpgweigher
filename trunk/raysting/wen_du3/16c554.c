@@ -25,13 +25,13 @@
 #include "global.h"
 #include "16c554.h"
 #include "uart.h" 
-
+#include "utili.h"
 #define FCR_DATA 0b00000111   // FIFO trigger level: 1 byte
 #define IER_DATA 0b00000001
 // LCR.7 must be cleared to 0 when accessing RBR/THR/IER
 // LCR.7 must be set to 1 when accessing divisor latch
 #define LCR_DATA 0b00011011    // Even Parity 8 data bit, 1 stop bit
-#define DLL_DATA 0x04          // 115200bps: DLL = 0x4, 57600bps: DLL= 0x8, 38400 0xC: 9600 : 0x30  
+#define DLL_DATA 0x30          // 115200bps: DLL = 0x4, 57600bps: DLL= 0x8, 38400 0xC: 9600 : 0x30  
 #define DLM_DATA 0x0
 #define MCR_DATA 0b00001000
 
@@ -130,9 +130,9 @@ void Reset_554(void)
 {
    // reset 16C554. Reset pin of 16C554 is connected to PB0 of MEGA64
       PORTE.3 = 1;                                                         
-      sleepms(500);    // Delay
+      sleepms(5*ONEMS);    // Delay
       PORTE.3 = 0;          
-      sleepms(500);    // Delay
+      sleepms(5*ONEMS);    // Delay
 }
 /********************************************************************************/
 //                             Initialize 16C554 

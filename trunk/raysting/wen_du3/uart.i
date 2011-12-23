@@ -94,7 +94,11 @@ void kbd_uart_push(unsigned char);
 //#define PORT_B          SPORTB
 // Hardware related
                             void sleepms(unsigned int ms);
-                              double nav_read();
+//PORTB.7 RX, PORTB.6 RS, PORTB.5 1MA, PORTB.4. 0.1MA,
+//PORTB.3 PT100, PORTB.2 PT1000, PORTB.1 CH1,  PORB.0 CH2    
+//#define SET_TORX     display_buttons(KEY_RS,1)
+//#define SET_TORS     display_buttons(KEY_RS,0)
+                              double nav_read();
 void scanner_set_mode();
 void d_mputs(unsigned char *buf, unsigned char size);
 void d_putchar2(char);    
@@ -113,7 +117,7 @@ unsigned char ishexchar(unsigned char dat);
 //                              16C554 Header file
 /*********************************************************************************/
 // global.h    
-                                                                                                          // Registers of 16C554
+                                                                                                          // Registers of 16C554
 // Registers for UART A
 // Registers for UART B
 // Registers for UART C
@@ -122,7 +126,7 @@ unsigned char ishexchar(unsigned char dat);
 extern void Init_554(void);
 void prints(unsigned char*, unsigned char, char);
                                 // global.h    
-                                                                                                          //extern u8 dsm_rcmd, dsm_rpara,dsm_cmd_received;    /* debug state machine */
+                                                                                                          //extern u8 dsm_rcmd, dsm_rpara,dsm_cmd_received;    /* debug state machine */
 //extern u8 x_modem_databuf[];                       /* store data sent from PC */
 //extern u8 x_modem_one_pack_received;               /* tell main loop one pack has been received */
 //extern u8 x_modem_file_being_transferred;  

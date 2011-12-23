@@ -114,7 +114,11 @@ void kbd_uart_push(unsigned char);
 //#define PORT_B          SPORTB
 // Hardware related
                             void sleepms(unsigned int ms);
-                              double nav_read();
+//PORTB.7 RX, PORTB.6 RS, PORTB.5 1MA, PORTB.4. 0.1MA,
+//PORTB.3 PT100, PORTB.2 PT1000, PORTB.1 CH1,  PORB.0 CH2    
+//#define SET_TORX     display_buttons(KEY_RS,1)
+//#define SET_TORS     display_buttons(KEY_RS,0)
+                              double nav_read();
 void scanner_set_mode();
 void d_mputs(unsigned char *buf, unsigned char size);
 void d_putchar2(char);    
@@ -140,7 +144,7 @@ extern void Init_ADC(void);
 //                              16C554 Header file
 /*********************************************************************************/
 // global.h    
-                                                                                                          // Registers of 16C554
+                                                                                                          // Registers of 16C554
 // Registers for UART A
 // Registers for UART B
 // Registers for UART C
@@ -149,8 +153,8 @@ extern void Init_ADC(void);
 extern void Init_554(void);
 void prints(unsigned char*, unsigned char, char);
                                 // global.h    
-                                                                                                          // global.h    
-                                                                                                          void delay (unsigned int us) ;
+                                                                                                          // global.h    
+                                                                                                          void delay (unsigned int us) ;
 void delay (unsigned int us) ;
 void delay (unsigned int us) ;
 void delay1 (unsigned int ms);
@@ -162,7 +166,7 @@ char highc(unsigned char x);
 /*
  *	Probe data structure definition
  */
-typedef eeprom struct _PRBDATA
+typedef eeprom struct _PRBDATA
 {
 	double param1[24];
 	double param2[24];
@@ -175,12 +179,13 @@ char highc(unsigned char x);
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
-	double          Rs1; //jiao-zheng zhi
+	double          Rs1; //jiao-zheng zhi for PT100
 	int             ktime;//time for switch
 	unsigned char 	        tid[24];	//probe index of each channel for T mode
 	unsigned char           rid[24];        //probe index of each channel for R mode
 	unsigned char           prbmode;
-	unsigned char           kttmode;                    
+	unsigned char           kttmode;      
+	double          Rs2; //for PT1000              
 }SYSDATA;               
 typedef struct _RUNDATA
 {
@@ -197,9 +202,11 @@ extern PRBDATA eeprom rprbdata;	//probe data for R mode
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-//#define ONESECBIT       14
+//#define ONESECBIT       14
 extern void DBG(unsigned char);
-void SwitchWindow(unsigned char page);
+extern void navto120mv();
+extern void navto1v();
+void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
 // CodeVisionAVR C Compiler
@@ -226,7 +233,7 @@ signed char sscanf(char *str, char flash *fmtstr,...);
                                                #pragma used-
 #pragma library stdio.lib
 // global.h    
-                                                                                                          typedef void (*MSG_HANDLER)(unsigned char key);
+                                                                                                          typedef void (*MSG_HANDLER)(unsigned char key);
 typedef void (*MSG_HANDLER)(unsigned char key);
 typedef void (*MSG_HANDLER)(unsigned char key);
 typedef flash struct typWINDOW
@@ -313,7 +320,7 @@ void LCD_Print6X8(unsigned char x, unsigned char y,unsigned char *s);
 void Key_Init();
 void Key_Scan();
 // global.h    
-                                                                                                          // CodeVisionAVR C Compiler
+                                                                                                          // CodeVisionAVR C Compiler
 // (C) 1998-2002 Pavel Haiduc, HP InfoTech S.R.L.
 // Variable length argument list macros
 double RValueToTValue(double r, unsigned char prbid);
@@ -322,7 +329,7 @@ double RValueToTValue(double r, unsigned char prbid);
 double MValueToTValue(double r,char type);
 double GetWr(double t);
 double GetT(double w);
-  																		void scanner_set_channel(unsigned char ch);
+  																			void scanner_set_channel(unsigned char ch);
 void scanner_uart_push(unsigned char data);
 void pc_uart_push(unsigned char data);
 void nav_uart_push(unsigned char data);     
@@ -370,7 +377,7 @@ SYSDATA eeprom sysdata = {
 	{0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-	1,1};
+	1,1,1000};
 PRBDATA	eeprom tprbdata = {
        {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
@@ -434,11 +441,17 @@ interrupt [15] void timer1_ovf_isr(void)
 }
 void dbgout(double val)
 {
-        sprintf(strbuf,"%f\r\n",val);
-        prints(strbuf,strlen(strbuf),3              );        
+//        sprintf(strbuf,"%f\r\n",val);
+//        prints(strbuf,strlen(strbuf),PORT_PC);        
+}      
+void sdbgout(flash char *l)
+{           
+        sprintf(strbuf,"%s",l);
+prints(strbuf,strlen(strbuf),3              ); 
 }
 void InitLED()
-{
+{         
+    PORTB = 0xFF;
 /*
     PORTB.7=1;
     PORTB.6=1;
@@ -452,22 +465,14 @@ unsigned char nav1v = 1;
 void navto120mv()
 {               
    nav1v = 0;  
-   dbgout(-0.12);      
    nav_command(4);
-   sleepms(20000);            
+   sleepms(200*(unsigned int)10000);            
 }           
 void navto1v()
 {            
     nav1v = 1;
-    dbgout(-1.0);
-    nav_command(1);
-    sleepms(20000);
     nav_command(3);
-    sleepms(20000);
-    nav_command(7);
-    sleepms(20000);
-    nav_command(6);
-    sleepms(20000);
+    sleepms(200*(unsigned int)10000);
 } 
 double mabs(double val)
 {
@@ -532,15 +537,24 @@ char* tname2b(unsigned char i)
         return namebuf;
 }                                        
 void sleepms(unsigned int ms)
-{
+{             
+    unsigned int p;
     while(ms-- > 0)
-        ;
+    {
+        p = 24;//80;
+        while(p-- > 0)
+                ;
+    }
 }
 /**************************************************************************************/
 //      board init related function.
 /**************************************************************************************/
 void init_var()
-{                          
+{            
+        if((sysdata.Rs1 > 101) || (sysdata.Rs1 < 99))      
+                sysdata.Rs1 = 100;                         
+        if((sysdata.Rs2 > 1010) || (sysdata.Rs2 < 990))                      
+                sysdata.Rs2 = 1000;                                         
 }
 //state machine of therm type
 //phase 0 : search the current channel and switch to it if apply, add delay, to phase 1, otherwise to phase 2
@@ -550,6 +564,8 @@ unsigned char therm_state()
 {                  
         unsigned char i;
 	i = sysdata.tid[ch_to_search];   
+	if(phase > 2)
+	        phase = 0;
 	if(i == 0xff)
 	{
         	rundata.temperature[ch_to_search] = -9999;
@@ -557,10 +573,10 @@ unsigned char therm_state()
 	}
 	if(phase == 0)
 	{
-		if( (tprbdata.type[i] >= 0x03) && (tprbdata.type[i] <= 0x09))
+		if( (tprbdata.type[i] >= 0x03) && (tprbdata.type[i] <= 0x0A))
 		{              
 			scanner_set_channel(ch_to_search+1);	
-			dlg_cnt = 100000;
+			dlg_cnt = 6*100000;
 			onesec_cnt = 0;
 			phase = 1;
 			return 0;
@@ -598,6 +614,8 @@ unsigned char bore_state()
 {
         unsigned char i;
 	i = sysdata.rid[ch_to_search];   
+	if(phase > 5)
+	        phase = 0;
 	if(i == 0xff)
 	{
         	rundata.temperature[ch_to_search] = -9999;
@@ -605,11 +623,29 @@ unsigned char bore_state()
 	}
 	if(phase == 0)
 	{
-		if((rprbdata.type[i] <= 0xf2) && (rprbdata.type[i] >= 0xf1))
+		if((rprbdata.type[i] <= 0xf3) && (rprbdata.type[i] >= 0xf1))
 		{
 			scanner_set_channel(ch_to_search+1);	
 			display_buttons('i',1);
-			display_buttons('j',0);
+			{PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};                            
+                        			if(rprbdata.type[i] == 0xf1)
+			{                       
+			        {PORTB.2 = 0; sleepms(60*(unsigned int)10000);PORTB.2 = 1;PORTB = 0xff;};
+			        {PORTB.1 = 0; sleepms(60*(unsigned int)10000);PORTB.1 = 1;PORTB = 0xff;};			     
+			        (*(unsigned char *) 0x62) = 0x0f;   
+			}
+			if(rprbdata.type[i] == 0xf2)
+			{
+			        {PORTB.2 = 0; sleepms(60*(unsigned int)10000);PORTB.2 = 1;PORTB = 0xff;};
+			        {PORTB.1 = 0; sleepms(60*(unsigned int)10000);PORTB.1 = 1;PORTB = 0xff;};
+			        (*(unsigned char *) 0x62) = 0x0f;
+			}
+			        			if(rprbdata.type[i] == 0xf3)
+			{
+			        {PORTB.0 = 0; sleepms(60*(unsigned int)10000);PORTB.0 = 1;PORTB = 0xff;};
+       			        {PORTB.3 = 0; sleepms(60*(unsigned int)10000);PORTB.3 = 1;PORTB = 0xff;};
+       			        (*(unsigned char *) 0x62) = 0x00;
+			}
 			dlg_cnt =  100000 * sysdata.ktime;
 			onesec_cnt = 0;
 			if(sysdata.kttmode == 1)
@@ -641,8 +677,8 @@ unsigned char bore_state()
 			rundata.stdV = mabs(nav_read());
 			phase = 4;
 		}                              
-		display_buttons('j',1);
-		dlg_cnt = 100000 * sysdata.ktime;      
+		{PORTB.6 = 0; sleepms(60*(unsigned int)10000);PORTB.6 = 1;PORTB = 0xff;}   ;     
+				dlg_cnt = 100000 * sysdata.ktime;      
 		onesec_cnt = 0;
 		return 0;	
 	}
@@ -660,6 +696,7 @@ unsigned char bore_state()
 		if(sysdata.kttmode == 1){       
 			valuep = (valuep + mabs(nav_read()));
 			dbgout(valuep);
+/*			
 			if((valuep > 0.21) && (valuep < 2) && (nav1v == 0))
 			{
         		        navto1v();     
@@ -668,8 +705,10 @@ unsigned char bore_state()
 			{
 			        navto120mv();
 			}
+*/			
 		}else{               
 			valuep = mabs(nav_read());                      
+/*			
 			if((valuep > 0.105) && (valuep < 1) && (nav1v == 0))
 			{
         		        navto1v();     
@@ -678,10 +717,14 @@ unsigned char bore_state()
 			{
 			        navto120mv();
 			}
+*/			
 		}
 		if(rundata.stdV != 0)
-		{            
-			rundata.reading[ch_to_search] = valuep*sysdata.Rs1/rundata.stdV - sysdata.R0;
+		{                           
+                        if(rprbdata.type[sysdata.rid[ch_to_search]] == 0xf3)                       
+              			rundata.reading[ch_to_search] = valuep*sysdata.Rs2/rundata.stdV - sysdata.R0;
+                        else
+        			rundata.reading[ch_to_search] = valuep*sysdata.Rs1/rundata.stdV - sysdata.R0;
 			if(rundata.reading[ch_to_search] > 0)
 			{
                                 sprintf(strbuf,"%2d;%f;",ch_to_search+1,rundata.Rx);
@@ -703,7 +746,7 @@ unsigned char bore_state()
 	}                 
 	return 1;
 }         
-LABEL flash statelbl = {1,100,55,16,strbuf};
+LABEL flash statelbl = {1,50,55,26,strbuf};
 void updatestate()
 {
         char star[6];
@@ -712,14 +755,21 @@ LABEL flash statelbl = {1,100,55,16,strbuf};
         if(phase == 1)                sprintf(star,"**  ");
         if(phase == 2)                sprintf(star,"*** ");        
         if(phase == 3)                sprintf(star,"****");        
-                        if(sysdata.prbmode == 1){         
-                if(sysdata.kttmode == 1)                                                   
-                        sprintf(strbuf,"(ch%2i,%2d,%s)",ch_to_search+1,dlg_cnt/100000,star);
+        if(sysdata.prbmode == 1){                 
+                sprintf(strbuf,"(%s:ch%2i,%d,%s)",rname2b(sysdata.rid[ch_to_search]),ch_to_search+1, dlg_cnt/100000,star);        
+        }else{
+                sprintf(strbuf,"(%s:ch%2i,%d,%s)",tname2b(sysdata.tid[ch_to_search]),ch_to_search+1, dlg_cnt/100000,star);                
+        }
+                /*                
+        if(IS_BORE_MODE){         
+                if(IS_MODE_KTT)                                                   
+                        sprintf(strbuf,"(ch%2i,%2d,%s)",ch_to_search+1,dlg_cnt/ONESEC,star);
                 else
-                        sprintf(strbuf,"(ch%2i,%2d,%s)",ch_to_search+1,dlg_cnt/100000,star);                        
+                        sprintf(strbuf,"(ch%2i,%2d,%s)",ch_to_search+1,dlg_cnt/ONESEC,star);                        
         }else{                                                                      
-                sprintf(strbuf,"(ch:%2i,%2d,%s)",ch_to_search+1,dlg_cnt/100000,star);
+                sprintf(strbuf,"(ch:%2i,%2d,%s)",ch_to_search+1,dlg_cnt/ONESEC,star);
         }      
+*/        
         draw_label(&statelbl,1);
 }
 static unsigned char tA = 0xff;
@@ -739,18 +789,9 @@ extern double GetThmoVolt(double t,char type);
 extern unsigned char databuf[12];
 extern unsigned char pos_databuf; //position in data buffer
 void main(void)
-{
-    unsigned int i;  
-    /*  just test algrithom 
-    sprintf(databuf,"9.99");    
-    pos_databuf = 4;
-    dt = buf2double();
-    rprbdata.type[0] = PRBTYPE_PT100;
-    rprbdata.param1[0] = 3.9083e-3;
-    rprbdata.param2[0] = -5.775e-7;
-    rprbdata.param3[0] = 100;//-4.183e-12;
-    dt = RValueToTValue(139.26, 0);//102
-    */
+{                            
+       unsigned int i;                                      
+    unsigned char shortcut = '-'													  ;  
     // RS485 Node    
     init_var();	//init data structure 
     // System Initialization
@@ -765,37 +806,25 @@ void main(void)
     // Global enable interrupts
     WDTCR = 0x00; //disable dog watch
     #asm("sei")                 
-    databuf[0] = 'A';
-    databuf[1] = '5';
-    databuf[2] = '?';            
-    while(1)
-    {
-            prints(databuf,3,2);
-            prints(databuf,3,3              );        
-            sleepms(20000);            
-    }
     /*********************************************************************/
     // System hardware dection
     /*********************************************************************/
     // intialize LED. 
     nextwin = 0; 
-        sleepms(2000);
+        sleepms(20*(unsigned int)10000);
     LCD_Init();
     wnd_msgbox(&bootup);
     //init the DMM
     nav_command(1);              
-    sleepms(20000);
-    nav_command(3);
-    sleepms(20000);
+    sleepms(200*(unsigned int)10000);                                
+    navto1v();
     nav_command(7);
-    sleepms(20000);
+    sleepms(200*(unsigned int)10000);
     nav_command(6);
-    sleepms(20000);
-                         sleepms(2*100000); //wait until all the node is ready after power up        
+    sleepms(200*(unsigned int)10000);
+                         sleepms(2*(unsigned int)10000); //wait until all the node is ready after power up        
     State_Init();	
-        sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
-        display_buttons('i',1);                               
-    display_buttons('j',0);
+        sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);{PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};navto1v();display_buttons('i',1);;
     	 nextwin = 13;
 	 key = '-'													  ;
 	 curr_ch = 1; //channel for display
@@ -811,34 +840,33 @@ void main(void)
 		if(key != '-'													  )
 		{
 			if((key == 'a')||(key == 'b')||(key == 'c')||(key == 'd'))
-			{
+			{                      
+			        shortcut = key;          
+                                //processing shortcut key
 				if(curr_window == pgmain_handler)
 				{
 					LCD_Cls();
 					wnd_msgbox(&modify);
 				}
-				if(key == 'a') //mode switch
+				if(shortcut == 'a') //mode switch
 				{
+               			        {PORTB.0 = 0; sleepms(60*(unsigned int)10000);PORTB.0 = 1;PORTB = 0xff;};
+	                	        {PORTB.3 = 0; sleepms(60*(unsigned int)10000);PORTB.3 = 1;PORTB = 0xff;};                				
 					if(sysdata.prbmode == 1){
-						sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);
-                                                display_buttons('j',0);      
-                				display_buttons('i',1);
-                                                navto120mv();
+						sysdata.prbmode = 0; scanner_set_mode(); display_buttons('a',1);{PORTB.6 = 0; sleepms(60*(unsigned int)10000);PORTB.6 = 1;PORTB = 0xff;}   ;navto120mv();display_buttons('i',1);;
 					}else{
-						sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);
-                                                display_buttons('j',1);
-                				display_buttons('i',1);                                                              
-                                                navto1v();
+						sysdata.prbmode = 1; scanner_set_mode(); display_buttons('a',0);{PORTB.7 = 0; sleepms(60*(unsigned int)10000);PORTB.7 = 1;PORTB = 0xff;};navto1v();display_buttons('i',1);;
 					}
 					dlg_cnt = 0;					
 					onesec_cnt = 0;
 					phase = 0;      //reset the state machine
-					display_buttons('i',1);
 				}
-				if(key == 'b') //auto ktt or not
+				if(shortcut == 'b') //auto ktt or not
 				{
 					if(sysdata.prbmode == 1)
 					{
+                      			        {PORTB.0 = 0; sleepms(60*(unsigned int)10000);PORTB.0 = 1;PORTB = 0xff;};
+	                        	        {PORTB.3 = 0; sleepms(60*(unsigned int)10000);PORTB.3 = 1;PORTB = 0xff;};                				
 						if((sysdata.kttmode == 1)){
 							sysdata.kttmode = 0; display_buttons('b',1);
 							display_buttons('i',1);
@@ -846,28 +874,33 @@ void main(void)
 							sysdata.kttmode = 1; display_buttons('b',0);
 							display_buttons('i',1);
 						}
+        					dlg_cnt = 0;					
+	        				onesec_cnt = 0;
+		        			phase = 0;      //reset the state machine
 					}
 				}
-				if(key == 'c') //thermal probe type
+				if(shortcut == 'c') //thermal probe type
 				{                            
-				        					display_buttons('c',1);
+					display_buttons('c',1);
 					if(sysdata.prbmode == 0)
 					{                        
 					        i = sysdata.tid[curr_dispch-1];
 					        if(i != 0xff)
 					        {
-                					if((tprbdata.type[i] >= 0x03) &&	                				   (tprbdata.type[i] <= 0x09))
+                					if((tprbdata.type[i] >= 0x03) &&	                				   (tprbdata.type[i] <= 0x0A))
 		                			{
-			                			if(tprbdata.type[i] == 0x09)
+			                			if(tprbdata.type[i] == 0x0A)
 				                			tprbdata.type[i] = 0x03;
 					                	else
 						                	tprbdata.type[i] +=1;
-        					        }
+        					        }                                                                                 
+        					        if(rundata.reading[curr_dispch-1] > -9000)
+                                                       		rundata.temperature[curr_dispch-1] = MValueToTValue(rundata.reading[curr_dispch-1], tprbdata.type[i]);
         					}
                                         }
 					display_buttons('c',0);
 									}
-				if(key == 'd') //remove zero
+				if(shortcut == 'd') //remove zero
 				{
 					display_buttons('d',1);
 					if(sysdata.prbmode == 1){
@@ -875,7 +908,7 @@ void main(void)
 					}else{             
 					        //sysdata.V0 = nav_read();
 					        nav_command(8);
-					        sleepms(100000);
+					        sleepms(1000*(unsigned int)10000);
 					}
 					display_buttons('d',0);
 				}
@@ -883,20 +916,21 @@ void main(void)
 				{
 					pgmain_handler(0xff);      
 				}
-			}else{
+			        shortcut = '-'													  ;
+			        			        			}else{
 				(*curr_window)(key);
 			}
 			key = '-'													  ;
 	  	}else{
 			if(curr_window != pgmain_handler)
 				continue;                               
-			                        			if(dlg_cnt > 1)
+			if(dlg_cnt > 1)
 			{         
 			        onesec_cnt++;
 			        if(onesec_cnt == (100000-10))
 			        {       
         			        updatestate();
-        			}
+        			}
         			if(onesec_cnt == 100000)
         			        onesec_cnt = 0 ;
 				dlg_cnt--;
@@ -910,9 +944,9 @@ void main(void)
 			}else{
 				if(bore_state() == 0)
 				        continue;
-			}
-                        //shift to next channel
-                        while(1)
+			}     
+			                        //shift to next channel 
+                                               while(1)
                         {
                                 ch_to_search += 1;
         			if(ch_to_search >= 24)
@@ -930,10 +964,10 @@ void main(void)
 	        		        continue;
 	        		if(sysdata.prbmode == 0)
 	        		{   
-       					if((tprbdata.type[i] >= 0x03) && (tprbdata.type[i] <= 0x09))
+       					if((tprbdata.type[i] >= 0x03) && (tprbdata.type[i] <= 0x0A))
        					        break;
 	        		}else{
-       		        		if((rprbdata.type[i] <= 0xf2) && (rprbdata.type[i] >= 0xf1))
+       		                        if((rprbdata.type[i] <= 0xf3) && (rprbdata.type[i] >= 0xf1))
        		        		        break;
 	        		}
 	                }

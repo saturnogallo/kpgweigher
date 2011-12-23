@@ -17,8 +17,8 @@ void Init_Port()
  // Port B initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=In Func0=Out 
  // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=1 
-    PORTB=0x00;
-    DDRB=0x00;
+    PORTB=0xFF;
+    DDRB=0xFF;
 
  // Port C initialization
  // Func7=Out Func6=Out Func5=Out Func4=Out Func3=Out Func2=Out Func1=Out Func0=Out 

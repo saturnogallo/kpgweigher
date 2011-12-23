@@ -53,20 +53,26 @@ char highc(uchar x);
 /*
  *	Probe data structure definition
  */
-#define PRBS_PER_SECTOR	24
+#define PRBS_PER_SECTOR	 24
 #define THERM_PRB_OFFSET 24	//offset for therm probe position
 
 #define PRBTYPE_PT100	0xf1
 #define PRBTYPE_PT25	0xf2
-#define PRBTYPE_K	0x03
+#define PRBTYPE_PT1000  0xf3
+#define PRBTYPE_MAX     PRBTYPE_PT1000
+#define PRBTYPE_MIN     PRBTYPE_PT100
+
+#define PRBTYPE_K       0x03
 #define PRBTYPE_N	0x04
 #define PRBTYPE_E	0x05
 #define PRBTYPE_B	0x06
 #define PRBTYPE_J	0x07
 #define PRBTYPE_S	0x08
-#define PRBTYPE_R	0x09
+#define PRBTYPE_T	0x09
+#define PRBTYPE_R	0x0A
 #define PRBTYPE_BIT	0x10
 #define PRBTYPE_INVALID	0x80
+
 typedef eeprom struct _PRBDATA
 {
 	double param1[PRBS_PER_SECTOR];
@@ -82,9 +88,9 @@ typedef eeprom struct _PRBDATA
 #define CLR_MODE_KTT	sysdata.kttmode = 0; display_buttons(KEY_BTN2,1)
 
 #define IS_BORE_MODE	sysdata.prbmode == 1
-#define SET_BORE_MODE	sysdata.prbmode = 1; scanner_set_mode(); display_buttons(KEY_BTN1,0)
+#define SET_BORE_MODE	sysdata.prbmode = 1; scanner_set_mode(); display_buttons(KEY_BTN1,0);SET_TORS;navto1v();SET_PKTT;
 #define IS_THERM_MODE	sysdata.prbmode == 0
-#define SET_THERM_MODE	sysdata.prbmode = 0; scanner_set_mode(); display_buttons(KEY_BTN1,1)
+#define SET_THERM_MODE	sysdata.prbmode = 0; scanner_set_mode(); display_buttons(KEY_BTN1,1);SET_TORX;navto120mv();SET_PKTT;
 
 #define INC_DISPCH	curr_dispch += 1 ;  if(curr_dispch > MAX_CH_NUM){ curr_dispch = 1;}
 #define DEC_DISPCH	curr_dispch -= 1 ;  if(curr_dispch == 0){  curr_dispch = MAX_CH_NUM;  }
@@ -100,12 +106,13 @@ typedef eeprom struct _SYSDATA
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
-	double          Rs1; //jiao-zheng zhi
+	double          Rs1; //jiao-zheng zhi for PT100
 	int             ktime;//time for switch
 	uchar 	        tid[MAX_CH_NUM];	//probe index of each channel for T mode
 	uchar           rid[MAX_CH_NUM];        //probe index of each channel for R mode
 	uchar           prbmode;
-	uchar           kttmode;                    
+	uchar           kttmode;      
+	double          Rs2; //for PT1000              
 }SYSDATA;               
 
 typedef struct _RUNDATA
@@ -128,12 +135,13 @@ void display_buttons(uchar pos,uchar val);
 
 double buf2double();
 int buf2byte();
-
+#define ONEMS                     (u16)10000
 #define ONESEC	        100000
 //#define ONESECBIT       14
 
 extern void DBG(uchar);
-
+extern void navto120mv();
+extern void navto1v();
 void SwitchWindow(uchar page);
 
 char* rname2b(u8 i);

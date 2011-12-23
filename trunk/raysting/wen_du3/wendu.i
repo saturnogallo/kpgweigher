@@ -87,10 +87,14 @@ void kbd_uart_push(unsigned char);
 //#define PORT_B          SPORTB
 // Hardware related
                             void sleepms(unsigned int ms);
-                              double nav_read();
+//PORTB.7 RX, PORTB.6 RS, PORTB.5 1MA, PORTB.4. 0.1MA,
+//PORTB.3 PT100, PORTB.2 PT1000, PORTB.1 CH1,  PORB.0 CH2    
+//#define SET_TORX     display_buttons(KEY_RS,1)
+//#define SET_TORS     display_buttons(KEY_RS,0)
+                              double nav_read();
 void scanner_set_mode();
 // global.h    
-                                                                                                          // CodeVisionAVR C Compiler
+                                                                                                          // CodeVisionAVR C Compiler
 // (C) 1998-2002 Pavel Haiduc, HP InfoTech S.R.L.
 // Variable length argument list macros
 typedef char *va_list;
@@ -99,7 +103,7 @@ double MValueToTValue(double r,char type);
 double GetWr(double t);
 double GetT(double w);
 // global.h    
-                                                                                                          void delay (unsigned int us) ;
+                                                                                                          void delay (unsigned int us) ;
 void delay (unsigned int us) ;
 void delay (unsigned int us) ;
 void delay1 (unsigned int ms);
@@ -111,7 +115,7 @@ char highc(unsigned char x);
 /*
  *	Probe data structure definition
  */
-typedef eeprom struct _PRBDATA
+typedef eeprom struct _PRBDATA
 {
 	double param1[24];
 	double param2[24];
@@ -124,12 +128,13 @@ char highc(unsigned char x);
 {
 	double          R0;  //zero offset
 	double          V0;  //zero offset
-	double          Rs1; //jiao-zheng zhi
+	double          Rs1; //jiao-zheng zhi for PT100
 	int             ktime;//time for switch
 	unsigned char 	        tid[24];	//probe index of each channel for T mode
 	unsigned char           rid[24];        //probe index of each channel for R mode
 	unsigned char           prbmode;
-	unsigned char           kttmode;                    
+	unsigned char           kttmode;      
+	double          Rs2; //for PT1000              
 }SYSDATA;               
 typedef struct _RUNDATA
 {
@@ -146,9 +151,11 @@ extern PRBDATA eeprom rprbdata;	//probe data for R mode
 void display_buttons(unsigned char pos,unsigned char val);           
 double buf2double();
 int buf2byte();
-//#define ONESECBIT       14
+//#define ONESECBIT       14
 extern void DBG(unsigned char);
-void SwitchWindow(unsigned char page);
+extern void navto120mv();
+extern void navto1v();
+void SwitchWindow(unsigned char page);
 char* rname2b(unsigned char i);
 char* tname2b(unsigned char i);
 // CodeVisionAVR C Compiler
@@ -253,7 +260,9 @@ double RValueToTValue(double r, unsigned char prbid)
 	bc = rprbdata.param2[prbid];
 	cc = rprbdata.param3[prbid];
 	if(rprbdata.type[prbid] == 0xf1)
-		return PT100RToTValue(r, cc);
+		return PT100RToTValue(r, cc);  
+	if(rprbdata.type[prbid] == 0xf3)
+		return PT100RToTValue(r, cc);		
 	if(rprbdata.type[prbid] != 0xf2)
 		return -9999.999;
         if(rprbdata.rtp[prbid] > 0.1)
@@ -356,7 +365,7 @@ flash double RHigh[]={0.152232118209E+03,-0.268819888545E+00,0.171280280471E-03,
 flash double NHigh[]={0.000000000000E+00,0.259293946010E-01,0.157101418800E-04,0.438256272370E-07,-0.252611697940E-09,0.643118193390E-12,-0.100634715190E-14,0.997453389920E-18,-0.608632456070E-21,0.208492293390E-24,-0.306821961510E-28};
 flash double JLow[]={0.000000000000E+00,0.503811878150E-01,0.304758369300E-04,-0.856810657200E-07,0.132281952950E-09,-0.170529583370E-12,0.209480906970E-15,-0.125383953360E-18,0.156317256970E-22};
 flash double JHigh[]={0.296456256810E+03,-0.149761277860E+01,0.317871039240E-02,-0.318476867010E-05,0.157208190040E-08,-0.306913690560E-12};
-flash double BLow[]={0.000000000000E+00,0.586655087100E-01,0.450322755820E-04,0.289084072120E-07,-0.330568966520E-09,0.650244032700E-12,-0.191974955040E-15,-0.125366004970E-17,0.214892175690E-20,-0.143880417820E-23,0.359608994810E-27};
+flash double BLow[]={0.000000000000E+00,-0.24650818346E-03,0.59040421171E-05,-0.13257931636E-08,0.15668291901E-11,-0.16944529240E-14,0.62990347094E-18};
 flash double BHigh[]={-0.389381686210E+01,0.285717474700E-01,-0.848851047850E-04,0.157852801640E-06,-0.168353448640E-09,0.111097940130E-12,-0.445154310330E-16,0.989756408210E-20,-0.937913302890E-24};
 flash double EHigh[]={0.000000000000E+00,0.586655087100E-01,0.450322755820E-04,0.289084072120E-07,-0.330568966520E-09,0.650244032700E-12,-0.191974955040E-15,-0.125366004970E-17,0.214892175690E-20,-0.143880417820E-23,0.359608994810E-27};	
 flash double ELow[]={0.000000000000E+00,0.586655087080E-01,0.454109771240E-04,-0.779980486860E-06,-0.258001608430E-07,-0.594525830570E-09,-0.932140586670E-11,-0.102876055340E-12,-0.803701236210E-15,-0.439794973910E-17,-0.164147763550E-19,-0.396736195160E-22,-0.558273287210E-25,-0.346578420130E-28};	
@@ -388,35 +397,35 @@ flash int KHighLen = sizeof(KHigh)/sizeof(double);
 	int len = 0;
 	switch(type)
 	{
-		case 'T': 	
+		case 0x09: 	
 			coef = (t < 0) ? TLow : THigh;
 			len = (t < 0) ? TLowLen : THighLen;
 			break;
-		case 'K': 	
+		case 0x03: 	
 			coef = (t < 0) ? KLow : KHigh;
 			len = (t < 0) ? KLowLen : KHighLen;
 			break;
-		case 'N': 	
+		case 0x04: 	
 			coef = (t < 0) ? NLow : NHigh;
 			len = (t < 0) ? NLowLen : NHighLen;
 			break;
-		case 'E': 	
+		case 0x05: 	
 			coef = (t < 0) ? ELow : EHigh;
 			len = (t < 0) ? ELowLen : EHighLen;
 			break;
-		case 'B': 	
+		case 0x06: 	
 			coef = (t < 630.615) ? BLow : BHigh;
 			len = (t < 630.615) ? BLowLen : BHighLen;
 			break;
-		case 'J': 	
+		case 0x07: 	
 			coef = (t < 760) ? JLow : JHigh;
 			len = (t < 760) ? JLowLen : JHighLen;
 			break;
-		case 'S': 	
+		case 0x08: 	
 			coef = (t < 1064.18) ? SLow : ((t < 1664.5) ? SMed : SHigh);
 			len = (t < 1064.18) ? SLowLen : ((t < 1664.5) ? SMedLen : SHighLen);
 			break;
-		case 'R': 	
+		case 0x0A: 	
 			coef = (t < 1064.18) ? RLow : ((t < 1664.5) ? RMed : RHigh);
 			len = (t < 1064.18) ? RLowLen : ((t < 1664.5) ? RMedLen : RHighLen);
 			break;
@@ -426,7 +435,7 @@ flash int KHighLen = sizeof(KHigh)/sizeof(double);
 	if (len == 0)
 		return 0.0;
 	result = coef[0];
-	if(type == 'K')
+	if(type == 0x03)
 	{
 		result = result+(0.118597600000E+00)*exp((-0.118343200000E-03)*(t-0.126968600000E+03)*(t-0.126968600000E+03));
 	}
@@ -445,36 +454,36 @@ flash int KHighLen = sizeof(KHigh)/sizeof(double);
 	double rnew;
 	double tnew;
 	int count = 0;
-	switch(type)
+	switch(type)
 	{
-		case 'T': 	
+		case 0x09: 	
 			tlow =  -270;	tup = 400;
 			break;
-		case 'K': 	
+		case 0x03: 	
 			tlow =  -270;	tup = 1372;
 			break;
-		case 'N': 	
+		case 0x04: 	
 			tlow =  -270;	tup = 1300;
 			break;
-		case 'E': 	
+		case 0x05: 	
 			tlow =  -270;	tup = 1000;
 			break;
-		case 'B': 	
-			tlow =  0;	tup = 1280;
+		case 0x06: 	
+			tlow =  0;	tup = 1800;
 			break;
-		case 'J': 	
+		case 0x07: 	
 			tlow =  -210;	tup = 1200;
 			break;
-		case 'S': 	
+		case 0x08: 	
 			tlow =  -50;	tup = 1768;
 			break;
-		case 'R': 	
+		case 0x0A: 	
 			tlow =  -50;	tup = 1768;
 			break;
 		default:
 			return -9999.9999;
 	}	
-	while((tup - tlow > 0.00005) || (count++ < 100))
+	while((tup - tlow > 0.00005) && (count++ < 100))
 	{
 		tnew = (tlow+tup)/2.0;
 		rnew = GetThmoVolt(tnew,type);
