@@ -8,6 +8,8 @@
     <s:String x:Key="search_node">Search node</s:String>
     <s:String x:Key="auto_amp">Auto amplitude</s:String>
     <s:String x:Key="found_node">Found</s:String>
+    <s:String x:Key="put_poise">Please confirm poise is in bucket for calibration.</s:String>
+    <s:String x:Key="put_empty">Please confirm bucket is empty for calibration.</s:String>
     <s:String x:Key="init_nodereg">Initializing settings</s:String>
     <s:String x:Key="tryagain">The operation failed, please try again</s:String>
     <s:String x:Key="stopping">Stopping</s:String>
@@ -118,6 +120,7 @@
 
     <s:String x:Key="enter_run_time">Enter top vibrate duration(*10ms)</s:String>
     <s:String x:Key="grp_time">Top VIB(*10ms)</s:String>
+    <s:String x:Key="enter_sub_filter_input">Enter value for filter parameter</s:String>
     <s:String x:Key="enter_test_mode_reg1">Enter value for register 1</s:String>
     <s:String x:Key="enter_test_mode_reg2">Enter value for register 2</s:String>
     <s:String x:Key="enter_pwd">Please enter password</s:String>
@@ -208,6 +211,7 @@
     <s:String x:Key="test_mode_reg2">Register2</s:String>
 
     <s:String x:Key="sub_time">Sub VIB(*10ms)</s:String>
+    <s:String x:Key="sub_filter">Filter</s:String>
     <s:String x:Key="wei_otime">Post release delay(*10ms)</s:String>
     <s:String x:Key="wei_dtime">Post vibrate delay(*10ms)</s:String>
     <s:String x:Key="motor_speed">Motor speed</s:String>
@@ -265,6 +269,8 @@
     <s:String x:Key="sub_freq_input_ulimit">65535</s:String>
     <s:String x:Key="sub_amp_input_llimit">0</s:String>
     <s:String x:Key="sub_amp_input_ulimit">65535</s:String>
+    <s:String x:Key="sub_filter_input_llimit">0</s:String>
+    <s:String x:Key="sub_filter_input_ulimit">255</s:String>
     <s:String x:Key="sub_time_input_llimit">0</s:String>
     <s:String x:Key="sub_time_input_ulimit">65535</s:String>
     <s:String x:Key="wei_otime_input_llimit">0</s:String>

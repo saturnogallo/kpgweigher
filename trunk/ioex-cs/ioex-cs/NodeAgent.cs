@@ -201,28 +201,31 @@ namespace ioex_cs
                         
                         while (CheckCombination())
                         {
-                            logTimeStick(ts1, "comb:");    
 
-                            q_hits.Enqueue(new CombineEventArgs((byte)packer._pack_id, release_addrs,release_wts, release_weight));
-                            //NodeCombination.lastcomb_num = release_addrs.Length;
+                            
                             while ((vibstate != VibStatus.VIB_READY) && bRun)
                             {
                                 vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
                                 ProcessGoonNodes();
                             }
-                            logTimeStick(ts1, "vibr:");    
-                            ReleaseAction(release_addrs, release_weight); //send release command and clear weight, trigger the packer, goon the nodes
-                            logTimeStick(ts1, "rele:");    
-                            vibstate = agent.TriggerPacker(packer.vib_addr);
+                            if (bRun)
+                                ReleaseAction(release_addrs, release_weight); //send release command and clear weight, trigger the packer, goon the nodes
+                            
+                            if (bRun)
+                                vibstate = agent.TriggerPacker(packer.vib_addr);
+
                             while ((vibstate == VibStatus.VIB_WORKING && bRun))
                             {
                                 vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
                                 ProcessGoonNodes();
                             }
-                            logTimeStick(ts1, "vibw:");    
-                            ProcessGoonNodes();
-                            if (!bRun)
+                            q_hits.Enqueue(new CombineEventArgs((byte)packer._pack_id, release_addrs, release_wts, release_weight));
+
+                            if (bRun)
+                                ProcessGoonNodes();
+                            else
                                 break;
+                            
                         }
                         
                         

@@ -708,7 +708,7 @@
         <Ellipse Width="50" Height="17" Fill="Black" StrokeThickness="0" Canvas.Left="875" Canvas.Top="110"/>
             
         <Rectangle Width="10" Height="20" Fill="Black" Stroke="Black" StrokeThickness="0" Canvas.Left="895" Canvas.Top="99" />
-        <Label Canvas.Left="43.969" Canvas.Top="689" Height="41" Name="lbl_datetime" Width="367.031" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="16">Label</Label>
+        <Label Canvas.Left="43.969" Canvas.Top="689" Height="41" Name="lbl_datetime" Width="367.031" HorizontalAlignment="Center" HorizontalContentAlignment="Center" FontSize="16" MouseLeftButtonUp="lbl_datetime_MouseLeftButtonUp">Label</Label>
         <Label Canvas.Left="506" Canvas.Top="69" Content="{DynamicResource operator_no}" Height="50" Name="label1" Style="{StaticResource LabelStyle}" Width="155" />
         <Button Canvas.Left="650" Canvas.Top="76" FocusVisualStyle="{x:Null}" FontSize="36" Foreground="Black" Height="43" Name="operator_no" Style="{StaticResource ButtonStyle1}" Width="146" Click="operator_no_Click">01</Button>
         <Label Canvas.Left="259" Canvas.Top="60.296" Content="0.0" Height="64" Name="lbl_lastweight" Opacity="0.9" OpacityMask="Beige" Style="{StaticResource TotalStyle}" Width="202" />
