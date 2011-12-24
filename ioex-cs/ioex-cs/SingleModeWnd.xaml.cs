@@ -374,7 +374,7 @@ namespace ioex_cs
             sub_freq_input.Content = n.GetNodeReg((byte)curr_node_index, "magnet_freq");
             sub_amp_input.Content = n.GetNodeReg((byte)curr_node_index, "magnet_amp");
             sub_time_input.Content = n.GetNodeReg((byte)curr_node_index, "magnet_time");
-
+            sub_filter_input.Content = n.GetNodeReg((byte)curr_node_index, "cs_gain_wordrate");
             wei_otime_input.Content = n.GetNodeReg((byte)curr_node_index, "open_w");
             wei_dtime_input.Content = n.GetNodeReg((byte)curr_node_index, "delay_w");
             col_dtime_input.Content = n.GetNodeReg((byte)curr_node_index, "delay_s");
@@ -444,6 +444,11 @@ namespace ioex_cs
                 {
                     n.SetNodeReg((byte)curr_node_index, "magnet_time", UInt32.Parse(data));
                 }
+                if (param == "sub_filter_input")
+                {
+                    n.SetNodeReg((byte)curr_node_index, "cs_gain_wordrate", UInt32.Parse(data));
+                }
+
                 if (param == "wei_otime_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "open_w", UInt32.Parse(data));
@@ -520,7 +525,10 @@ namespace ioex_cs
 
                 if (param == "cali1" || param == "cali2" || param == "cali3" || param == "cali4" || param == "cali5")
                 {
+                    string msg = StringResource.str("put_poise")+"("+data+StringResource.str("gram")+")";
                     
+                    if (MessageBox.Show(msg, "", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
+                        return;
                     ShowStatus("calibrating");
                     int i = RunMode.StringToId(param) - 1;
                     if (curr_node_index >= 0)
@@ -569,9 +577,13 @@ namespace ioex_cs
             App p = Application.Current as App;
             if (calreg == "cali0")
             {
+
                 NodeAgent n = curr_packer.agent;
                 if (curr_node_index >= 0)
                 {
+                    if (MessageBox.Show(StringResource.str("put_empty"), "", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
+                        return;
+
                     ShowStatus("calibrating");
                     n.ClearNodeReg((byte)curr_node_index, "cs_mtrl");
                     string cs_mtrl_val = n.GetNodeReg((byte)curr_node_index, "cs_mtrl");

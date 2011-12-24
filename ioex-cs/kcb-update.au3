@@ -19,7 +19,7 @@ EndIf
 	
 if $type <> "" Then
 	SplashTextOn("KCB Upgrade", "Installing " & $type & " new version", -1, -1, -1, -1, 4, "", 24)
-	ShellExecuteWait("msiexec.exe", "/i """ & @ScriptDir & "\\" & $type & "\\ioex-setup.msi""" & " /passive")
+;	ShellExecuteWait("msiexec.exe", "/i """ & @ScriptDir & "\\" & $type & "\\ioex-setup.msi""" & " /passive")
 	RunWait("""" & @ScriptDir & "\\" & $type & "\\action.bat""",@ScriptDir,@SW_HIDE)
 EndIf
 
@@ -35,7 +35,8 @@ Func uninstall($pcode, $tvalue)
 		if $var <> "" Then
 			$type = $tvalue
 			SplashTextOn("KCB Upgrade", "Uninstalling " & $type & " old version " & $var, -1, -1, -1, -1, 4, "", 24)
-			ShellExecuteWait("msiexec.exe", "/x " & $pcode & " /passive")
+;			ShellExecuteWait("msiexec.exe", "/x " & $pcode & " /passive")
+			$var = ""
 		EndIf
 		if $var = "" Then
 			ExitLoop

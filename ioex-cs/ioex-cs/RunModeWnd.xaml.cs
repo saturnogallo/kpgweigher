@@ -794,5 +794,14 @@ namespace ioex_cs
             Password.set_pwd("admin", "020527");
                 Password.set_pwd("user", "111111");
         }
+
+        private void lbl_datetime_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Process app = new Process();
+            app.StartInfo.FileName = "rundll32.exe";
+            app.StartInfo.Arguments = "shell32.dll,Control_RunDLL timedate.cpl,,1";
+            app.Start();
+            Thread.Sleep(2000);
+        }
     }
 }

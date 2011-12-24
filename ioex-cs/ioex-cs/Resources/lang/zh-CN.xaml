@@ -7,6 +7,8 @@
     <s:String x:Key="waitpack">等待包装机响应</s:String>
     <s:String x:Key="search_node">搜索斗</s:String>
     <s:String x:Key="auto_amp">自动振幅调节</s:String>
+    <s:String x:Key="put_poise">请确认校准砝码已被放置.</s:String>
+    <s:String x:Key="put_empty">请确认斗已清空准备校准.</s:String>
     <s:String x:Key="found_node">找到斗</s:String>
     <s:String x:Key="init_nodereg">初始化各斗设置</s:String>
     <s:String x:Key="tryagain">本次操作失败，请重试。</s:String>
@@ -114,6 +116,7 @@
 
     <s:String x:Key="enter_run_time">请输入主振时间(*10ms)</s:String>
     <s:String x:Key="grp_time">主振时间(*10ms)</s:String>
+    <s:String x:Key="enter_sub_filter_input">请输入滤波参数的值</s:String>
     <s:String x:Key="enter_test_mode_reg1">请输入寄存器1的值</s:String>
     <s:String x:Key="enter_test_mode_reg2">请输入寄存器2的值</s:String>
     <s:String x:Key="enter_pwd">请输入密码</s:String>
@@ -210,6 +213,7 @@
     <s:String x:Key="test_mode_reg2">调试寄存器2</s:String>
 
     <s:String x:Key="sub_time">线振时间(*20ms)</s:String>
+    <s:String x:Key="sub_filter">滤波参数</s:String>
     <s:String x:Key="wei_otime">放料后延时(*10ms)</s:String>
     <s:String x:Key="wei_dtime">振料后延时(*10ms)</s:String>
     <s:String x:Key="motor_speed">开关马达速度</s:String>
@@ -267,6 +271,8 @@
     <s:String x:Key="sub_freq_input_ulimit">65535</s:String>
     <s:String x:Key="sub_amp_input_llimit">0</s:String>
     <s:String x:Key="sub_amp_input_ulimit">65535</s:String>
+    <s:String x:Key="sub_filter_input_llimit">0</s:String>
+    <s:String x:Key="sub_filter_input_ulimit">255</s:String>
     <s:String x:Key="sub_time_input_llimit">0</s:String>
     <s:String x:Key="sub_time_input_ulimit">65535</s:String>
     <s:String x:Key="wei_otime_input_llimit">0</s:String>
