@@ -21,6 +21,7 @@ namespace ioex_cs
     public partial class SingleMode : Window
     {
         System.Windows.Forms.Timer uiTimer;
+
         private UIPacker curr_packer
         {
             get
@@ -431,47 +432,56 @@ namespace ioex_cs
                 
                 UIPacker pack = curr_packer;
                 NodeAgent n = curr_packer.agent;
-                
                 if (param == "sub_freq_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "magnet_freq", UInt32.Parse(data));
+                    apply_regs.Insert(0, "magnet_freq");
                 }
                 if (param == "sub_amp_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "magnet_amp", UInt32.Parse(data));
+                    apply_regs.Insert(0, "magnet_amp");
                 }
                 if (param == "sub_time_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "magnet_time", UInt32.Parse(data));
+                    apply_regs.Insert(0, "magnet_time");
                 }
                 if (param == "sub_filter_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "cs_gain_wordrate", UInt32.Parse(data));
+                    apply_regs.Insert(0, "cs_gain_wordrate");
                 }
 
                 if (param == "wei_otime_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "open_w", UInt32.Parse(data));
+                    apply_regs.Insert(0, "open_w");
                 }
                 if (param == "wei_dtime_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "delay_w", UInt32.Parse(data));
+                    apply_regs.Insert(0, "delay_w");
                 }
                 if (param == "col_dtime_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "delay_s", UInt32.Parse(data));
+                    apply_regs.Insert(0, "delay_s");
                 }
                 if (param == "col_otime_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "open_s", UInt32.Parse(data));
+                    apply_regs.Insert(0, "open_s");
                 }
                 if (param == "openwei_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "delay_f", UInt32.Parse(data));
+                    apply_regs.Insert(0, "delay_f");
                 }
                 if (param == "motor_speed_input")
                 {
                     n.SetNodeReg((byte)curr_node_index, "motor_speed", UInt32.Parse(data));
+                    apply_regs.Insert(0, "motor_speed");
                 }
                 if (param == "run_freq")
                 {
@@ -743,6 +753,7 @@ namespace ioex_cs
             bg_oper.Visibility = Visibility.Visible;
 
         }
+        private List<string> apply_regs = new List<string>();
         private void sub_applyall()
         {
             App p = Application.Current as App;
@@ -750,13 +761,11 @@ namespace ioex_cs
             NodeAgent agent = pack.agent;
             byte cn = (byte)curr_node_index;
 
-            string[] regs = { "magnet_freq", "magnet_amp", "magnet_time", "open_w", "delay_w", "open_s", "delay_s", "delay_f", "motor_speed", "target_weight", "cs_filter", "cs_gain_wordrate" };
             bool star = true;
             foreach (byte n in curr_packer.weight_nodes) 
             {
-                foreach (string reg in regs)
+                foreach (string reg in apply_regs.Distinct())
                 {
-                    
                     if (agent.GetStatus(n) == NodeStatus.ST_LOST)
                         continue;
                     if (agent.GetStatus(n) == NodeStatus.ST_DISABLED)
@@ -786,11 +795,9 @@ namespace ioex_cs
                         });
                     }
                     star = !star;
-
-
                 }
             }
-            
+            apply_regs.Clear();   
         }
         private void btn_sub_applyall_Click(object sender, RoutedEventArgs e)
         {

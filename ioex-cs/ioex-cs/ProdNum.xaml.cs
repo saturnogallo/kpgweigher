@@ -48,7 +48,7 @@ namespace ioex_cs
             PackerConfig pcfg = new PackerConfig();
             foreach (string id in curr_packer.all_conf.Keys)
             {
-                pcfg.FromElement(XElement.Parse(curr_packer.all_conf[id]));
+                pcfg.FromElement(curr_packer.all_conf[id]);
                 FileInfo fi;
                 if (File.Exists(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pcfg.product_desc + ".jpg"))
                 {

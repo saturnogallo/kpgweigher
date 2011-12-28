@@ -232,7 +232,7 @@ namespace ioex_cs
 
     internal class Password
     {
-        private static XmlConfig pwds;
+        private static SqlConfig pwds;
         static    private string MD5Value(String str, Boolean isStr)
         {
          MD5 md5 = new MD5CryptoServiceProvider();
@@ -295,7 +295,8 @@ namespace ioex_cs
         static Password()
         {
             //load password.xml and fill in the username list
-            pwds = new XmlConfig("password.xml");
+            //pwds = new XmlConfig("password.xml");
+            pwds = new SqlConfig("password");
             pwds.LoadConfigFromFile();
             //string a = MD5Value("0106C2255SJ 8GB", true);
             //"0106C2255SJ 8GB"
@@ -316,7 +317,7 @@ namespace ioex_cs
                 if (null == x)
                     return pwds.GetHashCode().ToString(); //just a difficult password to guess
                 else
-                    return x.Value;
+                    return x.Element("sn").Value;
         }
         public static void set_pwd(string user,string value){
                 XElement x = new XElement("Item");
