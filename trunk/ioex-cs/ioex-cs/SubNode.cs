@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.IO;
@@ -8,6 +9,7 @@ using System.Windows;
 using System.ComponentModel;
 using System.Threading;
 using System.Diagnostics;
+using Finisar.SQLite;
 namespace ioex_cs
 {
     enum NodeStatus
@@ -338,6 +340,190 @@ namespace ioex_cs
         }
     }
     /*
+     * Manage Sqlite based config file
+     * All configure table has following structure 
+     * id value group 
+     * for current configuration id='current' grp='current'
+     */
+    internal class SqlConfig
+    {
+        static private SQLiteConnection sql_con;
+        static private SQLiteCommand sql_cmd;
+
+        private SQLiteDataAdapter DB;
+        private DataSet DS = new DataSet();
+        private DataTable DT = new DataTable();
+
+        private string sql_tbl;
+        static void SetConnection()
+        {
+             sql_con = new SQLiteConnection("Data Source=Config.db;Version=3;New=False;Compress=True;");;
+        }
+        private Dictionary<string, XElement> curr_conf; //store all the configuration string
+        public string cfg_name; //store the config name of current selection
+        private string[] regs;
+        public SqlConfig(string sql_tbl)
+        {
+            curr_conf = new Dictionary<string, XElement>();
+            this.sql_tbl = sql_tbl;
+        }
+        
+        public bool LoadConfigFromFile()
+        {
+            try
+            {
+                string CommandText;
+                SetConnection();
+                sql_con.Open();
+
+                //retrieve all the regs
+                CommandText = "select distinct id from data where tbl='" + this.sql_tbl + "'";
+                DB = new SQLiteDataAdapter(CommandText, sql_con);
+                DS.Reset();
+                DB.Fill(DS);
+                regs = new string[DS.Tables[0].Rows.Count];
+                int i = 0;
+                foreach (DataRow dr in DS.Tables[0].Rows)
+                {
+                    if ((dr[0].ToString() != "current") && (dr[0].ToString() != "null"))
+                        regs[i++] = dr[0].ToString();
+                }
+                //retrieve all the names
+                CommandText = "select distinct grp from data where tbl='" + this.sql_tbl+"'";
+                DB = new SQLiteDataAdapter(CommandText, sql_con);
+                DS.Reset();
+                DB.Fill(DS);
+                XElement xe = new XElement("Item");
+                foreach (DataRow dr in DS.Tables[0].Rows)
+                {
+                    if (dr[0].ToString() != "current")
+                        curr_conf[dr[0].ToString()] = LoadDBConfig(dr[0].ToString());
+                }
+
+                
+                //retrieve current configure
+                CommandText = "select value from data where grp='current' and tbl='"+this.sql_tbl+"'";
+                DB = new SQLiteDataAdapter(CommandText, sql_con);
+                DS.Reset();
+                DB.Fill(DS);
+                if (DS.Tables[0].Rows.Count > 0)
+                    cfg_name = DS.Tables[0].Rows[0][0].ToString();
+                else
+                    cfg_name = "default";
+
+                sql_con.Close();
+                
+
+                return true;
+            }
+            catch (System.Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return false;
+            }
+        }
+        public bool SaveConfigToFile()
+        {
+            try{
+            //save the current configuration 
+            SetConnection();
+            sql_con.Open();
+            
+            sql_cmd = new SQLiteCommand();
+            sql_cmd.Connection = sql_con;
+            sql_cmd.CommandText = "replace into data(id,value,grp,tbl) values('current','" + cfg_name + "','current','"+this.sql_tbl+"')";
+            sql_cmd.ExecuteNonQuery();
+            sql_con.Close();
+            return true;
+            }
+            catch (System.Exception e)
+            {
+                MessageBox.Show(e.Message);
+                return false;
+            }
+        }
+        public void AddConfig(string cfgname, XElement e)
+        {
+            SetConnection();
+            sql_con.Open();
+            sql_cmd = new SQLiteCommand();
+            sql_cmd.Connection = sql_con;
+            foreach (string reg in regs)
+            {
+                if (reg == null)
+                    continue;
+                sql_cmd.CommandText = "replace into data(id,value,grp,tbl) values('" + reg + "','" + e.Element(reg).Value + "','" + cfgname + "','" + this.sql_tbl + "')";
+                sql_cmd.ExecuteNonQuery();
+            }
+            sql_con.Close();
+            curr_conf[cfgname] = e;
+            return;
+        }
+        public XElement LoadConfig(string newcfg)
+        {
+            if (curr_conf.ContainsKey(newcfg))
+            {
+                cfg_name = newcfg;
+                return curr_conf[newcfg];
+            }
+            return null;
+        }
+        private XElement LoadDBConfig(string newcfg)
+        {
+//            SetConnection();
+//            sql_con.Open();
+            //retrieve all the names
+            string CommandText = "select id,value from data where grp='" + newcfg + "' and tbl='" + this.sql_tbl + "'";
+            SQLiteDataAdapter DB2 = new SQLiteDataAdapter(CommandText, sql_con);
+            DataSet DS2 = new DataSet();
+            DS2.Reset();
+            DB2.Fill(DS2);
+            XElement xe = new XElement("Item");
+            foreach (string reg in regs)
+            {
+                xe.Add(reg, "0");
+            }
+            foreach (DataRow dr in DS2.Tables[0].Rows)
+            {
+                if (regs.Contains(dr[0].ToString()))
+                    xe.SetElementValue(dr[0].ToString(), dr[1].ToString());
+            }
+            //sql_con.Close();
+            return xe;           
+        }
+        public void RemoveConfig(string oldcfg)
+        {
+            SetConnection();
+            sql_con.Open();
+            sql_cmd = new SQLiteCommand("delete from data where grp='"+ oldcfg +"' and tbl='" + this.sql_tbl+ "'");
+            sql_cmd.Connection = sql_con;
+            sql_cmd.ExecuteNonQuery();
+            sql_con.Close();
+            curr_conf.Remove(oldcfg);
+        }
+        public XElement Current
+        {
+            get
+            {
+                return LoadConfig(cfg_name);
+            }
+        }
+        public IEnumerable<String> Keys
+        {
+            get
+            {
+                return curr_conf.Keys;
+            }
+        }
+        public XElement this[string val]
+        {
+            get
+            {
+                return curr_conf[val];
+            }
+        }
+    }
+    /*
      * Manage XML file based config file, see app_config.xml for details
      * <Item Name="Id">1
      *  <value>xxx</value>
@@ -445,7 +631,6 @@ namespace ioex_cs
                 return curr_conf[val];
             }
         }
-
     }
     
     internal struct RegType

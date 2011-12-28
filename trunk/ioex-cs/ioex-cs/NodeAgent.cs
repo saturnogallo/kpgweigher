@@ -209,25 +209,22 @@ namespace ioex_cs
                                 ProcessGoonNodes();
                             }
                             if (bRun)
-                                ReleaseAction(release_addrs, release_weight); //send release command and clear weight, trigger the packer, goon the nodes
-                            
-                            if (bRun)
-                                vibstate = agent.TriggerPacker(packer.vib_addr);
-
-                            while ((vibstate == VibStatus.VIB_WORKING && bRun))
                             {
-                                vibstate = agent.UpdateVibStatus(packer.vib_addr,vibstate);
-                                ProcessGoonNodes();
+                                ReleaseAction(release_addrs, release_weight); //send release command and clear weight, trigger the packer, goon the nodes
+                                vibstate = agent.TriggerPacker(packer.vib_addr);
+                                while ((vibstate == VibStatus.VIB_WORKING && bRun))
+                                {
+                                    vibstate = agent.UpdateVibStatus(packer.vib_addr, vibstate);
+                                    ProcessGoonNodes();
+                                }
+                                q_hits.Enqueue(new CombineEventArgs((byte)packer._pack_id, release_addrs, release_wts, release_weight));
                             }
-                            q_hits.Enqueue(new CombineEventArgs((byte)packer._pack_id, release_addrs, release_wts, release_weight));
-
-                            if (bRun)
-                                ProcessGoonNodes();
-                            else
+                            if (!bRun)
                                 break;
-                            
+                            ProcessGoonNodes();
                         }
-                        
+                        if (!bRun)
+                            continue;
                         
                         while (ProcessGoonNodes())
                             ;
@@ -903,7 +900,8 @@ namespace ioex_cs
         {
             //load current configuration
 
-            XmlConfig app_cfg = new XmlConfig(ProdNum.baseDir + "\\app_config.xml");
+            //XmlConfig app_cfg = new XmlConfig(ProdNum.baseDir + "\\app_config.xml");
+            SqlConfig app_cfg = new SqlConfig("app");
             app_cfg.LoadConfigFromFile();
             
             XElement def_cfg = app_cfg.Current;

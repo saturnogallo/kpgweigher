@@ -20,7 +20,7 @@ namespace ioex_cs
         internal List<UIPacker> packers; //list of available packers , config in app_config.xml
         internal NodeAgent agent; //agent to manage all the nodes
  
-        private XmlConfig app_cfg;     //configuration loaded from app_config.xml, fixed settings
+        private SqlConfig app_cfg;     //configuration loaded from app_config.xml, fixed settings
         public XElement curr_cfg;   //current configuration
 
         //window list
@@ -67,7 +67,8 @@ namespace ioex_cs
             if (Environment.CommandLine.IndexOf("/debug") > 0)
                 NodeAgent.IsDebug = true;
             StringResource.SetLanguage();
-            app_cfg = new XmlConfig(ProdNum.baseDir +"\\app_config.xml");
+            //app_cfg = new XmlConfig(ProdNum.baseDir +"\\app_config.xml");
+            app_cfg = new SqlConfig("app");
             app_cfg.LoadConfigFromFile();
 
             curr_cfg = app_cfg.Current;
