@@ -158,6 +158,15 @@ u8 CS5532_SysOffsetCal(void);
 //void CS5532_Test(void);
 void CS5532_Poise2Result(void);
 u8 CS5532_PoiseWeight(void); 
-u8 CS5532_Cont_Conv_Stop();
+u8 CS5532_Cont_Conv_Stop();  
+u8 load_mfg_calibration();
+u8 save_mfg_calibration();
+u8 valid_user_calibration();
+void flush_data_buffer();
+
+#ifdef _DEBUG_WEIGHT_ 
+void enable_data_printing();
+void disable_data_printing();
+#endif
 
 #endif

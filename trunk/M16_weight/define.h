@@ -21,9 +21,11 @@
 *       2) fix a bug that when reset weight, updated cs_poise[] may not be programmed
 *          into EEPROM and only cs_zero is updated.
 *       3) target weight per group instead of unique target weight.
-*       4) reposition motor before release if motor is not in the right position.
+*       4) reposition motor before release if motor is not in the right position. 
+* 0x22: 1) remove "target-weight-per-group" logic. This is implemented in software 
+* 0X24: 1) Add more calibration data point. 
 *************************************************************************************/
-#define FIRMWARE_REV 0x21 
+#define FIRMWARE_REV 0x24 
 
 /*************************************************************************************
 *                               Compile Switches
@@ -31,6 +33,8 @@
 #define _DISABLE_WATCHDOG_                     //uncommented to disable watchdog
 //#define _BOARD_TYPE_IS_VIBRATE_15            
 //#define _BOARD_TYPE_IS_VIBRATE_11
+
+#define NUM_OF_CAL_POINT 10
 
 /*************************************************************************************
 *                               Alias of Basic Types
@@ -67,6 +71,7 @@
 *                               System Definitions
 *************************************************************************************/
 #define MAX_RS485_ADDR                  36   // Default addr of un-configured boards
+#define EEPROM_MFG_ADDR               0xC0   // Starting addr of MFG calibration data
 #define EEPROM_RS485ADDR              0x80   // Starting addr of board configuration 
                                              // data in EEPROM.
 #define NUM_OF_DATA_TO_BE_PGMED       0xFF   // data to be programmed into EERPOM.
@@ -106,7 +111,8 @@
 #define AD_OVER_FLOW                0xfffc   // 65532, most times Mechanical errors
 #define FILTER_ONGOING              0xfffb   // 65531, 
 #define BAD_CALIBRATION             0xfffa   // 65530, calibration data error
-#define OVERWEIGHT                  0xfff9   // 65529, 
+#define OVERWEIGHT                  0xfff9   // 65529,
+#define NEGATIVE_WEIGHT             0xfff8   // 65528, weight value is negative 
 #define MAX_VALID_DATA              0xfff0
 
 /*************************************************************************************
@@ -176,10 +182,10 @@ typedef struct {
         // Initialized as data saved in EEPROM, 
         // To get better linearity and higher accuracy, we need to have more than 1
         // poise data (saved in EEPROM). 5 at most. Data will be used in CS5532_Poise2Result(). 
-        volatile u16     Poise_Weight_gram[5];     
+        //volatile u16     Poise_Weight_gram[5];     
         // CS5530 conversion of poise.  to get higher accuracy, we need to 
         // have more than 1 
-        volatile u16     cs_poise[5];
+        volatile u16     cs_poise[10];
         // CS5530 conversion when no material is in.
         volatile u16     cs_zero;                    
         // target weight(unity: gram) of each node. pre-set by master board
@@ -187,8 +193,8 @@ typedef struct {
         volatile u16     target_weight;
         // max offset allowed from target(unity: g), pre-set by master board   
         //volatile u16     offset_up;     changed to 2 u8 words (addr_copy1, board_copy1)
-        volatile u8 addr_copy1;
-        volatile u8 board_copy1;
+        volatile u8      addr_copy1;
+        volatile u8      board_copy1;
         
         /**************************************************************/             
 
@@ -218,16 +224,16 @@ typedef struct {
         volatile u8      delay_w;	
         // Suspend bucket delay
         volatile u8      delay_s;	
-	// Delay for feeding pool (top bucket) motor
-	volatile u8	open_s;		 
-	// Delay for weighing pool (bottom bucket) motor
-	volatile u8	open_w;	   
+	  // Delay for feeding pool (top bucket) motor
+	  volatile u8	 open_s;		 
+	  // Delay for weighing pool (bottom bucket) motor
+	  volatile u8	 open_w;	   
 	
-	// Reserved for Future Use
-	volatile u8      check_sum;
-	volatile u8      rom_para_valid; 
-	volatile u8      addr_copy2;
-	volatile u8      board_copy2;
+	  // Reserved for Future Use
+	  volatile u8      check_sum;
+	  volatile u8      rom_para_valid; 
+	  volatile u8      addr_copy2;
+	  volatile u8      board_copy2;
 
 } S_FLASH;
 
@@ -260,21 +266,12 @@ typedef struct {
         // master board need to do nothing regarding these 2 registers. 
         volatile u32     cs_sys_gain_cal_data;
         //volatile u32     cs_sys_offset_cal_data;
-        volatile u8 ac_freq;
-        volatile u8 packer_intr_cnt;
-        volatile u8 flag_cmd_cnt;
-        volatile u8 packer_release_cnt;
-        // Reserved for Future Use.
-        // This variable is first initalized from EEPROM (equal to cs_zero)
-        // sometimes "zero" point shifts and cs_zero/cs_poise needs to be re-adjusted.
-        // In PC software, user can click "Reset to Zero" to force actual weight(unity: gram) to zero.
-        // Software in RS-485 nodes calculates delta between "cs_zero" and "old_cs_zero"
-        // and adjust cs_poise[5] accordingly. After that "old_cs_zero" is set equal to "cs_zero".
-        // Users don't need to do weight calibration again.
-        // Clicking button "Write_to_EEPROM" will save new data into EEPROM.
-        // After node powerup, "old_cs_zero" will be initialzed equal to cs_zero value in EEPROM.
+        volatile u8      ac_freq;
+        volatile u8      packer_intr_cnt;
+        volatile u8      flag_cmd_cnt;
+        volatile u8      packer_release_cnt;
         
-        volatile u16     old_cs_zero;  // initially it is variable "reserved3"; 
+        volatile u16     new_cs_zero;  // initially it is variable "reserved3"; 
         
         /**************************************************************/
         // Control bytes from Master Board. only write is needed
@@ -313,12 +310,28 @@ typedef struct  { //status of magnet
       volatile u16 half_period;
 }S_MAGNET;
 
+/**************************************************************/
+//  When
+/**************************************************************/
+typedef struct { 
+  u16 reserved1;                  // reserved for future use. 
+  u16 mfg_cs[NUM_OF_CAL_POINT];   // factory calibration data -- AD readings
+  u16 mfg_cs_zero;                // factory calibration data -- AD reading at zero gram
+  u16 mfg_checksum;               // checksum + mfg_gram + mfg_cs + mfg_cs_zero = 0
+  
+  u16 reserved2;
+  u16 new_cs_zero;                // AD readings corresponding to user set zero-gram.
+} S_ROM;
+
 typedef struct {
         S_FLASH _flash;
         S_GLOBAL _global;  
         S_MOTOR _motor;
         S_MAGNET _magnet;
+        S_ROM _rom;
 }NODE_CONFIG;       
+
+
 
 /*************************************************************************************
 *                                  Timer Definitions

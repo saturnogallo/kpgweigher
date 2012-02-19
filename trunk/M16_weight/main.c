@@ -44,6 +44,8 @@ u8 hw_id;                                         /* hardwired board id (PORTC[7
 bit freq_is_50HZ;                                 /* freq of AC power supply */
 u16 release_times;                                /* how many times node has been released */
 u8 flag_turn_off_watchdog;
+u8 numOfMfgDataToBePgm;
+
 
 /* dynamic magnet amplitude adjustment */
 #define MAX_AMP_WEIGHT_RECORDS 25                  /* don't exceed 32 */
@@ -58,9 +60,12 @@ u16 local_target;
 /* packer interface prototypes */    
 extern u8 Packer_Is_Busy();
 extern void Init_interface(); 
-extern void Tell_Packer_Weigher_Rdy();
-extern u8 Tell_Packer_Release_Done();   
+
+extern u8 Tell_Packer_Release_Done(); 
+#if 0  
 extern void Tell_Packer_Force_Release();
+extern void Tell_Packer_Weigher_Rdy();
+#endif
 
 /*****************************************************************************/                                            
 #define ENABLE_OFF              0    // stop machine.
@@ -75,6 +80,14 @@ extern void Tell_Packer_Force_Release();
 #define ENABLE_PACKER_RELEASE   10   // send release signal to packer 
 #define ENABLE_WEIGHER_READY    11   // send weigher ready signal to packer
 #define ENABLE_FORCE_RELEASE    12   // send signal to indicate "force release"
+#define ENABLE_LOAD_MFG_CAL     13   // use factory calibration data
+#define ENABLE_SAVE_MFG_CAL     14   // save user calibration data as MFG CAL data
+
+#ifdef _DEBUG_WEIGHT_
+#define ENABLE_DATA_PRINTING    78
+#define DISABLE_DATA_PRINTING   79
+#endif
+
 #define ENABLE_ON               80   // machine is fully running now
 /*****************************************************************************/
 
@@ -369,8 +382,9 @@ u8 reset_weight()
 
    if(status == STATUS_OK)
    {   
-      // update cs_zero and cs_poise[]
-      RS485._flash.cs_zero = RS485._global.cs_mtrl;
+      // update user defined "cs_zero"
+      RS485._rom.new_cs_zero = RS485._global.cs_mtrl;       
+      //update weight
       CS5532_Poise2Result();
    }         
    return status;
@@ -716,7 +730,8 @@ void motor_magnet_action()
      {     
         // Set flag to inform master board new weight is being calculated
         RS485._global.flag_goon = 0;
-        RS485._global.Mtrl_Weight_gram = INVALID_DATA ;  
+        RS485._global.Mtrl_Weight_gram = INVALID_DATA ; 
+        flush_data_buffer(); 
         WSM_Flag = MM_ADD_MATERIAL;
                         
         // Idle here if no command from master board asking me to go on.
@@ -743,7 +758,9 @@ void motor_magnet_action()
            if(hw_id == HW_ID_WEIGHT)                                      // if board has A/D on it, update weight
            {              
                /* polling when no valid weight is available */
+#ifndef _DEBUG_WEIGHT_               
                if(RS485._global.Mtrl_Weight_gram > MAX_VALID_DATA)
+#endif
                {    
                     CS5532_PoiseWeight();  
                     CS5532_Poise2Result();
@@ -786,7 +803,8 @@ void motor_magnet_action()
         
         // Get command from masterboard/PC to go on (add material)  
         //invalidate weight result.
-        RS485._global.Mtrl_Weight_gram = INVALID_DATA;                 
+        RS485._global.Mtrl_Weight_gram = INVALID_DATA;
+        flush_data_buffer();                 
         return;
      }              
 }                     
@@ -811,19 +829,21 @@ void Init_Vars(void)
      RS485._global.hw_status = 0; 
      RS485._global.test_mode_reg1 = 0;            
      RS485._global.test_mode_reg2 = 0;                 
-     RS485._flash.board &= (BOARD_GROUP_MASK | BOARD_TYPE_MASK);    
-     // Backup cs_zero, user may reset weight to zero if there is zero point shift.
-     // In that case, cs_poise needs to be adjusted accordingly.
-     // We will use the delta between cs_zero and old_cs_zero to do the adjustment.
-     RS485._global.old_cs_zero = RS485._flash.cs_zero; 
+     
+     RS485._flash.board &= (BOARD_GROUP_MASK | BOARD_TYPE_MASK);  
  
-     flag_turn_off_watchdog = 0; //clear flag 
+     flag_turn_off_watchdog = 0; //clear flag  
+     numOfMfgDataToBePgm = 0;
      os_sched.status = 0;  
      freq_is_50HZ = TRUE; 
      last_weight = 0; 
      current_weight = 0;
      for(i=0; i<MAX_AMP_WEIGHT_RECORDS;i++)
-         amp_weight[i] = NOT_AVAILABLE;      
+         amp_weight[i] = NOT_AVAILABLE;     
+
+#ifdef _DEBUG_WEIGHT_ 
+     disable_data_printing();        
+#endif
 }
 
 /*******************************************************************************/
@@ -849,17 +869,17 @@ void Init_EEPROM_Para()
    RS485._flash.board = BOARD_TYPE_WEIGHT;
    // Weight Calibration settings
    RS485._flash.target_weight = 0;
-   RS485._flash.cs_zero = 0x3EDA;
-   RS485._flash.cs_poise[0] = 0x43DB;
-   RS485._flash.Poise_Weight_gram[0] = 50;
-   RS485._flash.cs_poise[1] = 0x48F9;
-   RS485._flash.Poise_Weight_gram[1] = 100;
-   RS485._flash.cs_poise[2] = 0x531E;
-   RS485._flash.Poise_Weight_gram[2] = 200;
-   RS485._flash.cs_poise[3] = 0x5D4C;
-   RS485._flash.Poise_Weight_gram[3] = 300;
-   RS485._flash.cs_poise[4] = 0x719F;
-   RS485._flash.Poise_Weight_gram[4] = 500;
+   RS485._flash.cs_zero = 0x4DB1;
+   RS485._flash.cs_poise[0] = 0x4FB8;
+   RS485._flash.cs_poise[1] = 0x52C1;
+   RS485._flash.cs_poise[2] = 0x57DD;
+   RS485._flash.cs_poise[3] = 0x6209;
+   RS485._flash.cs_poise[4] = 0x6C35; 
+   RS485._flash.cs_poise[5] = 0x7662;
+   RS485._flash.cs_poise[6] = 0x8091;
+   RS485._flash.cs_poise[7] = 0x94E8;
+   RS485._flash.cs_poise[8] = 0xA945;
+   RS485._flash.cs_poise[9] = 0xB373;
    // Motor & Magnet settings
    //RS485._flash.magnet_freq = 9;
    RS485._flash.magnet_amp = 50; 
@@ -880,7 +900,7 @@ void Init_EEPROM_Para()
    RS485._flash.addr = 0xB;
    RS485._flash.board = BOARD_TYPE_VIBRATE;
 #endif
-   
+
    //backup key parameters
    RS485._flash.addr_copy1 = RS485._flash.addr;
    RS485._flash.addr_copy2 = RS485._flash.addr;
@@ -1077,7 +1097,6 @@ void main(void)
    bit packer_interface_initialized;  
    bit packer_timer_kicked;     
    u8  release_signal_not_sent; 
-   u8  group;
     
    packer_interface_initialized = FALSE;
    release_signal_not_sent = FALSE; 
@@ -1089,7 +1108,8 @@ void main(void)
    Init_Timers();                                            // Timer (Interrupt) initialization
    vInitEeprom();                                            // Initialize EEPROM   
                                                              // Initialize System global variables (read from EEPROM)
-   bReadDataFromEeprom(EEPROM_RS485ADDR,(u8*)&RS485._flash, sizeof(S_FLASH));   
+   bReadDataFromEeprom(EEPROM_RS485ADDR,(u8*)&RS485._flash, sizeof(S_FLASH));      
+   bReadDataFromEeprom(EEPROM_MFG_ADDR,(u8*)&RS485._rom, sizeof(S_ROM));
    Init_Vars();                                              // Must be placed after "bReadDataFromEeprom()"
                                                              // because of RS485._flash.cs_zero.   
    query_fw_version();                                       // FW rev, LSB of "cs_sys_gain_cal_data".    
@@ -1129,15 +1149,22 @@ void main(void)
    //if RS485 addr is invalid(new board), Use default addr: 0x30
    if((RS485._flash.addr == 0) || (RS485._flash.addr > MAX_RS485_ADDR))
         RS485._flash.addr = MAX_RS485_ADDR;        
-   myaddr = RS485._flash.addr;         
+   myaddr = RS485._flash.addr;                                                 
    
+   /*************************************************************************/ 
+   // if user calibration data is invalid, load factory calibration data.
+   /*************************************************************************/ 
+   if(valid_user_calibration() == FAIL)
+       load_mfg_calibration();
+       
    kick_off_timer(OS_TIMER_TICK, 1); // kick off 10ms OS timer tick,
+   
    /*************************************************************************/ 
    //                          Task State Machine
    /*************************************************************************/          
    loopcnt = 0; 
-   AC_freq_measured = FALSE; 
-   
+   AC_freq_measured = FALSE;  
+          
    while(1) 
    {                       
        /************************************************************/
@@ -1284,14 +1311,8 @@ void main(void)
        /************************************************************/
        // Set local target weight per group.  
        /************************************************************/       
-       group = myaddr % 3;
-       if(group == 0)
-           local_target = RS485._flash.target_weight;
-       else if (group == 1)
-           local_target = RS485._flash.target_weight + (RS485._flash.target_weight>>2); 
-       else
-           local_target = RS485._flash.target_weight - (RS485._flash.target_weight>>2);                                                                
-                
+       local_target = RS485._flash.target_weight;
+        
        /************************************************************/
        // program all configuration settings into EEPROM  
        // program will not go down unless program job done.
@@ -1307,6 +1328,17 @@ void main(void)
        }
        else
           RS485._global.test_mode_reg1 &= 0xF7;   /* disable EEPROM programming*/
+       
+       /* program factory calibration data */
+       if((numOfMfgDataToBePgm > 0) && (numOfMfgDataToBePgm <= sizeof(S_ROM)))
+       {  
+          numOfMfgDataToBePgm = bWriteData2Eeprom(
+              EEPROM_MFG_ADDR + sizeof(S_ROM) - numOfMfgDataToBePgm,
+              (u8*)&RS485._rom + sizeof(S_ROM) - numOfMfgDataToBePgm, 
+              numOfMfgDataToBePgm
+          );
+       }  
+          
        /************************************************************/
        // Test Mode(test_mode_reg2): when set:
        // Bit[7:6] = 11, Bit[5:0]as new RS485 addr.
@@ -1353,8 +1385,10 @@ void main(void)
        // new weight is available.
        /************************************************************/       
        if(RS485._global.flag_goon)
+       {    
            RS485._global.Mtrl_Weight_gram = INVALID_DATA;
-       
+           flush_data_buffer();
+       }
        /************************************************************/
        // Magnet/Motor actions. 
        // State range ENABLE_OFF< WSM_Flag <ENABLE_ON: mannual operation. 
@@ -1423,12 +1457,12 @@ void main(void)
                    {  if(reset_weight() == STATUS_OK)
                       {
                          /* adjust poise because cs_zero has changed */
-                         CS5532_Poise2Result();
-                         if(RS485._global.Mtrl_Weight_gram < MAX_VALID_DATA)
+                         //CS5532_Poise2Result();
+                         if(RS485._global.cs_mtrl < MAX_VALID_DATA)
                          {
                             /* save calibration data to EEPROM */
-                            RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);   
-                            RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;
+                            numOfMfgDataToBePgm = sizeof(RS485._rom.new_cs_zero);   
+                            //RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;
                          }
                          break;
                       }
@@ -1476,6 +1510,7 @@ void main(void)
                    RS485._global.flag_enable = ENABLE_OFF;             
                 break;                
              //###########################################
+#if 0
              case ENABLE_WEIGHER_READY:
                 if(hw_id == HW_ID_INTERFACE)                   /* interface board */
                 {
@@ -1490,8 +1525,35 @@ void main(void)
                       Tell_Packer_Force_Release();
                 }
                 RS485._global.flag_enable = ENABLE_OFF;             
-                break; 
-             //###########################################
+                break;
+#endif    
+             //########################################### 
+             case ENABLE_LOAD_MFG_CAL:
+                if(hw_id == HW_ID_WEIGHT) 
+                {  
+                   if(load_mfg_calibration() == PASS)
+                      RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
+                }    
+                RS485._global.flag_enable = ENABLE_OFF;
+                break;
+             //########################################### 
+             case ENABLE_SAVE_MFG_CAL:
+                if(hw_id == HW_ID_WEIGHT) 
+                {   if(save_mfg_calibration()==PASS)
+                        numOfMfgDataToBePgm = sizeof(S_ROM);                  
+                }
+                RS485._global.flag_enable = ENABLE_OFF;
+                break;
+#ifdef _DEBUG_WEIGHT_                 
+             case ENABLE_DATA_PRINTING:                
+                enable_data_printing();
+                RS485._global.flag_enable = ENABLE_OFF;
+                break;             
+             case DISABLE_DATA_PRINTING:                
+                disable_data_printing();
+                RS485._global.flag_enable = ENABLE_OFF;
+                break;
+#endif                 
              default:
                 break;                                                      
           }
