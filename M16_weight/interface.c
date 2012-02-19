@@ -357,6 +357,7 @@ u8 Packer_Is_Busy()
 /******************************************************************************************************/
 #define PIN_WEIGHER_READY PORTB.4
 #define TASK_OR 3
+#if 0
 void Tell_Packer_Weigher_Rdy()
 {  
    switch(OF_CFG)
@@ -375,7 +376,7 @@ void Tell_Packer_Weigher_Rdy()
    Intf.weigher_is_ready = TRUE;                    /* flag to inform interrupt 0 */
    kick_off_timer(TASK_OR, interface_pulse_width);  /* start timer to generate pulse OR1. */   
 }
-
+#endif
 /******************************************************************************************************/
 // When material in a bucket is force released due to some reasons (for example overweight), master 
 // issues command to call this subroutine to send out signal indicating current activity is a force 
@@ -383,6 +384,7 @@ void Tell_Packer_Weigher_Rdy()
 /******************************************************************************************************/
 #define PIN_FORCE_RELEASE PORTB.6
 #define TASK_OE 5     
+#if 0
 void Tell_Packer_Force_Release()
 {  
    switch(OF_CFG)
@@ -401,7 +403,7 @@ void Tell_Packer_Force_Release()
 
    kick_off_timer(TASK_OE, interface_pulse_width);  /* start timer to generate pulse OR1. */   
 }
-
+#endif
 /******************************************************************************************************/
 // Inform packer that weigher has completed release of material       
 // In some applications, material is packed after multiple feeds. Therefore packer will acknowledge
