@@ -383,7 +383,8 @@ u8 reset_weight()
    if(status == STATUS_OK)
    {   
       // update user defined "cs_zero"
-      RS485._rom.new_cs_zero = RS485._global.cs_mtrl;       
+      RS485._rom.new_cs_zero = RS485._global.cs_mtrl;
+      RS485._global.new_cs_zero = RS485._rom.new_cs_zero;       
       //update weight
       CS5532_Poise2Result();
    }         
@@ -476,6 +477,7 @@ void release_material()
              { 
                 release_times = 0;                                  /* reset counter */ 
                 retry_cnt = 0;
+                flush_data_buffer();                                /* flush AD buffer */
                 kick_off_timer(0, 100);                             /* start timer service to wait for weight to be stable */
                 RSM_Flag = RM_DELAY_BE4_RESET;                      /* move to next state */
                 return;
