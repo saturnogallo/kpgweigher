@@ -40,7 +40,7 @@ bit extra_pulse_sent;
 
 #define SET_MAGNET_ERROR_BIT          RS485._global.diag_status1 |= 0x1
 #define CLEAR_MAGNET_ERROR_BIT        RS485._global.diag_status1 &= 0xFE
-#define RETURN_TO_SENSOR              (RS485._motor.pulse_num < 50)
+#define RETURN_TO_SENSOR              (RS485._motor.pulse_num < (HALF_CYCLE_CLOSE_WITH_SENSOR-20))
 
 
 flash u8 MOTOR_FREQ[]={CYCLE_1_5,CYCLE_2_0,CYCLE_2_3,CYCLE_2_6,CYCLE_3_0,CYCLE_3_3,CYCLE_3_6,CYCLE_4_0,CYCLE_4_5,CYCLE_5_0};        
@@ -220,62 +220,66 @@ interrupt [TIM0_OVF] void timer0_ovf_isr(void)
       if(keep_poweron == FALSE)
       {   
           /* --------adjust remaining pulse number --------*/      
+          sensor_reached = FALSE;
           if(RS485._motor.mode == 'W')
-          {  
-              if(RETURN_TO_SENSOR)
-              {   if((BOARD_IS_INTERFACE) && (INTF_MOTORW_CLOSED)) 
-                     RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
-                  if((BOARD_IS_WEIGHT) && (WGHT_MOTORW_CLOSED))
-                     RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;                     
+          { 
+              if(((BOARD_IS_INTERFACE) && (INTF_MOTORW_CLOSED)) ||
+                ((BOARD_IS_WEIGHT) && (WGHT_MOTORW_CLOSED)))
+              {                  
+                  if(RETURN_TO_SENSOR)
+                  {   
+                      RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
+                      sensor_reached = TRUE;
+                  }
               }
           }
           if(RS485._motor.mode == 'S')
-          {   if(RETURN_TO_SENSOR)
-              {   if((BOARD_IS_INTERFACE) && (INTF_MOTORS_CLOSED))
-                     RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
-                  if((BOARD_IS_WEIGHT) && (WGHT_MOTORS_CLOSED))                        
-                     RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;                     
-              }
+          {   
+              if(((BOARD_IS_INTERFACE) && (INTF_MOTORS_CLOSED)) ||
+                 ((BOARD_IS_WEIGHT) && (WGHT_MOTORS_CLOSED)))
+              {  
+                  if(RETURN_TO_SENSOR)
+                  {
+                      RS485._motor.pulse_num = SHIFT_PULSE_INCNUM;
+                      sensor_reached = TRUE;
+                  }
+              }            
           }
-          /* ------------- Detect Sensors --------------*/  
-          if((BOARD_IS_WEIGHT) && ((WGHT_MOTORW_CLOSED)||(WGHT_MOTORS_CLOSED)))
-              sensor_reached = TRUE; 
-          else if((BOARD_IS_INTERFACE) && ((WGHT_MOTORW_CLOSED)||(WGHT_MOTORS_CLOSED)))
-              sensor_reached = TRUE;                                          
+
+          // if motor stops before arriving at sensor, give more pulses 
+          if((!sensor_reached)&&(!RS485._motor.pulse_num))
+          {
+             if(!extra_pulse_sent)
+             {   
+                /* issue more pulses to try again */
+                extra_pulse_sent = TRUE;
+                RS485._motor.pulse_num = NUM_OF_EXTRA_PULSES; 
+                return;
+             }          
+          }                                        
       } /* if(keep_poweron == FALSE) */             
   }  /* if (RS485._motor.pulse_num)*/ 
   else 
-  {  
-      if(sensor_reached)
-      {  
-          if(RS485._motor.mode == 'S')
-              RS485._global.diag_status1 &= 0xF7;
-          if(RS485._motor.mode == 'W')        
-              RS485._global.diag_status1 &= 0xFB;
-      }
-      else
-      {   
-          if(extra_pulse_sent == FALSE)
-          {   
-              /* issue more pulses to try again */
-              extra_pulse_sent = TRUE;
-              RS485._motor.pulse_num = NUM_OF_EXTRA_PULSES; 
-              return;
-          }
-          else
-          {
-              if(RS485._motor.mode == 'S')
-                 RS485._global.diag_status1 |= 0x8;
-              if(RS485._motor.mode == 'W')
-                 RS485._global.diag_status1 |= 0x4;
-          }                     
-      } 
-          
+  {         
       // No more pulse needed. Power off motor driver accordingly. 
       if(!keep_poweron)
       {   
           DISABLE_MOTOR_W; 
           DISABLE_MOTOR_S;
+          if(sensor_reached)
+          {  
+              if(RS485._motor.mode == 'S')
+                  RS485._global.diag_status1 &= 0xF7;
+              if(RS485._motor.mode == 'W')        
+                  RS485._global.diag_status1 &= 0xFB;
+          }
+          else       
+          {
+              if(RS485._motor.mode == 'S')
+                 RS485._global.diag_status1 |= 0x8;
+              if(RS485._motor.mode == 'W')
+                 RS485._global.diag_status1 |= 0x4;
+          }   
       }      
       
       // stop timer 0 
@@ -388,6 +392,10 @@ void Motor_Driver(u8 MotorMode,u8 pulsenum,u8 powerdown)
    }   
    // Stepping motor driver needs 40us max to wake up from power saving mode.
    for(i=128;i>0;i--);
+   
+   // reset flag. This flag indicates if extra pulses have been sent to reset
+   // motor start point. 
+   extra_pulse_sent = FALSE;
              
    // Define Timer0 interrupt frequency           
    TCNT0 = MOTOR_FREQ[RS485._flash.motor_speed]; 
