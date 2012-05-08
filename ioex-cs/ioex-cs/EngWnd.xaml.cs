@@ -76,7 +76,6 @@ namespace ioex_cs
                 btn_locksys.Style = this.FindResource("ButtonStyleOn") as Style;
                 btn_locksys.Content = StringResource.str("locksystem");
             }
-
             for (Byte i = 1; i < 18; i++)
             {
                 n = null;
@@ -251,9 +250,10 @@ namespace ioex_cs
             {
                 Button btn;
                 SubNode n = null;
-                Byte i = Convert.ToByte(curr_sel);
                 if (curr_sel == -1)
                     return;
+                Byte i = Convert.ToByte(curr_sel);
+
                 if (i < 17)
                 {
                     btn = IdToButton(i.ToString());
@@ -309,10 +309,114 @@ namespace ioex_cs
                         }
                     }
                 }
+               
                 MessageBox.Show(StringResource.str("change_addr_fail"));
+            }
+            if (param != "cali0" && (param.IndexOf("cali")==0)) //cali1 to cali10
+            {
+
+                string msg = StringResource.str("put_poise") + "(" + data + StringResource.str("gram") + ")";
+
+                if (MessageBox.Show(msg, "", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
+                    return;
+                NodeAgent n = p.agent;
+                int i = RunMode.StringToId(param) - 1;
+                if (curr_sel >= 0)
+                {
+                    n.ClearNodeReg((byte)curr_sel, "cs_mtrl");
+                    string cs_mtrl_val = n.GetNodeReg((byte)curr_sel, "cs_mtrl");
+                    UInt32 val;
+                    if (UInt32.TryParse(cs_mtrl_val,out val))
+                    {
+                        if (val <= WeighNode.MAX_VALID_WEIGHT)
+                        {
+                            if(i < 5)
+                                n.SetNodeReg((byte)curr_sel, "poise_weight_gram" + i.ToString(), UInt32.Parse(cs_mtrl_val));
+                            else
+                                n.SetNodeReg((byte)curr_sel, "cs_poise" + (i-5).ToString(), UInt32.Parse(cs_mtrl_val));
+                            n.Action((byte)curr_sel, "flash");
+                            MessageBox.Show(StringResource.str("calidone"));
+                            label3_MouseLeftButtonUp(null, null);
+                            return;
+                        }
+                    }
+                    MessageBox.Show(StringResource.str("tryagain"));
+                    
+                }
+                return;
             }
         }
 
+        private void calibrate(string calreg)
+        {
+            App p = Application.Current as App;
+            Byte i = Convert.ToByte(curr_sel);
+            if (curr_sel == -1)
+                return;
+            if (calreg == "cali0")
+            {
+                NodeAgent n = p.agent;
+                if (curr_sel >= 0)
+                {
+                    if (MessageBox.Show(StringResource.str("put_empty"), "", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
+                        return;
+
+                    n.ClearNodeReg(i, "cs_mtrl");
+                    string cs_mtrl_val = n.GetNodeReg(i, "cs_mtrl");
+                    UInt32 val = UInt32.Parse(cs_mtrl_val);
+                    if (val <= WeighNode.MAX_VALID_WEIGHT)
+                    {
+                        n.SetNodeReg(i, "cs_zero", UInt32.Parse(cs_mtrl_val));
+                        n.Action(i, "flash");
+                        MessageBox.Show(StringResource.str("calidone"));
+                        label3_MouseLeftButtonUp(null, null);
+                    }
+                    else
+                    {
+                        MessageBox.Show(StringResource.str("tryagain"));
+                    }
+
+                }
+            }
+            if (calreg == "empty")
+            {
+                NodeAgent n = p.agent;
+                if (curr_sel >= 0)
+                {
+                    n.Action(i, "empty");
+                }
+                return;
+            }
+            if (calreg == "cali1")
+                KbdData(calreg, "20");
+            if (calreg == "cali2")
+                KbdData(calreg, "50");
+            if (calreg == "cali3")
+                KbdData(calreg, "100");
+            if (calreg == "cali4")
+                KbdData(calreg, "200");
+            if (calreg == "cali5")
+                KbdData(calreg, "300");
+            if (calreg == "cali6")
+                KbdData(calreg, "400");
+            if (calreg == "cali7")
+                KbdData(calreg, "500");
+            if (calreg == "cali8")
+                KbdData(calreg, "700");
+            if (calreg == "cali9")
+                KbdData(calreg, "900");
+            if (calreg == "cali10")
+                KbdData(calreg, "1000");
+            //p.WeightAction(i, "query"); //update the readings
+        }
+        private void btn_cali_Click(object sender, RoutedEventArgs e)
+        {
+            string calreg = (sender as Button).Name.Remove(0, 4); //remove "btn_" string
+
+                calibrate(calreg);
+
+
+        }
 
         private void btn_entersys_Click(object sender, RoutedEventArgs e)
         {
@@ -526,6 +630,17 @@ namespace ioex_cs
                 pk.nc.Resume();
             this.Hide();
             p.SwitchTo("configmenu");
+        }
+
+        private void label3_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            App p = Application.Current as App;
+            if (curr_sel == -1)
+                return;
+            Byte i = Convert.ToByte(curr_sel);
+
+            p.agent.Action(i,"query");
+            label3.Content = p.agent.weight(i).ToString("F2");
         }
     }
     internal class PerReg

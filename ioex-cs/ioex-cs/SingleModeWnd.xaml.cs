@@ -70,16 +70,10 @@ namespace ioex_cs
 
             if (lastcall == "UpdateProdNo")
             {
-                curr_packer.LoadConfig(curr_packer.curr_cfg.product_no);
+                curr_packer.LoadPackConfig(curr_packer.curr_cfg.product_no,false);
                 curr_packer.SaveCurrentConfig(1+2+4);
                 UpdateUI();
                 lastcall = "";
-            }
-            if (lastcall.IndexOf("cali") == 0)
-            {
-                calibrate(lastcall);
-                lastcall = "";
-                //MessageBox.Show(StringResource.str("cali_done"));
             }
             if (lastcall == "UpdateUI")
             {
@@ -147,26 +141,6 @@ namespace ioex_cs
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
             uiTimer.Interval = 100;
             uiTimer.Start();
-//            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
-        }
-
-        public void agent_RefreshEvent(object sender)
-        {
-            if(this.Visibility == Visibility.Visible)
-            {
-                try
-                {
-                    this.Dispatcher.Invoke(new Action(RefreshNodeUI), new object[] { });
-                }
-                catch
-                {
-                }
-                if (curr_packer.status != PackerStatus.RUNNING)
-                {
-                    currentApp().agent.ClearWeights();
-                    currentApp().agent.bWeightReady = false;
-                }
-           }
         }
 
         private App currentApp()
@@ -229,11 +203,11 @@ namespace ioex_cs
                     NodeAgent agent = currentApp().packers[pk._pack_id].agent;
 
                     double wt = agent.weight(n);
-                    if (wt > -1000 && wt < 65521)
+                    if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
                         lb.Content = agent.weight(n).ToString("F1");
                     else
                     {
-                        if (wt >= 65521 && wt < 65537)
+                        if (wt > WeighNode.MAX_VALID_WEIGHT && wt < 65537)
                             lb.Content = "ERR";
                     }
 
@@ -277,7 +251,7 @@ namespace ioex_cs
                 if (!ce.release_addrs.Contains(n))
                     continue;
                 double wt = agent.weight(n);
-                if (wt > -1000 && wt < 65521)
+                if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
                     lb.Content = agent.weight(n).ToString("F1");
 
                 if (agent.GetStatus(n) == NodeStatus.ST_LOST || agent.GetStatus(n) == NodeStatus.ST_DISABLED)
@@ -382,18 +356,6 @@ namespace ioex_cs
             col_otime_input.Content = n.GetNodeReg((byte)curr_node_index, "open_s");
             openwei_input.Content = n.GetNodeReg((byte)curr_node_index, "delay_f");
 
-            double amp = Double.Parse(n.GetNodeReg((byte)curr_node_index, "target_weight"));
-            if (amp > 0.0001)
-                amp = curr_packer.curr_cfg.target / amp;
-            cb_autoamp.IsChecked = (amp > 0.0001);
-            if (amp > 0.0001)
-            {
-                cb_autoamp.Content = StringResource.str("autoamp_on") + amp.ToString("F1");
-            }
-            else
-            {
-                cb_autoamp.Content = StringResource.str("autoamp_off");
-            }
 
             motor_speed_input.Content = n.GetNodeReg((byte)curr_node_index, "motor_speed");
 
@@ -405,6 +367,16 @@ namespace ioex_cs
             btn_target.Content = curr_packer.curr_cfg.target.ToString() +StringResource.str("gram");
             btn_uvar.Content = curr_packer.curr_cfg.upper_var.ToString() + StringResource.str("gram");
             btn_dvar.Content = curr_packer.curr_cfg.lower_var.ToString() + StringResource.str("gram");
+
+            cb_autoamp.IsChecked = (curr_packer.curr_cfg.target_comb > 0);
+            if (cb_autoamp.IsChecked.Value)
+            {
+                cb_autoamp.Content = StringResource.str("autoamp_on") + curr_packer.curr_cfg.target_comb.ToString();
+            }
+            else
+            {
+                cb_autoamp.Content = StringResource.str("autoamp_off");
+            }
 
             lbl_currNode.Content = (curr_node_index).ToString();
             Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
@@ -427,6 +399,7 @@ namespace ioex_cs
         {
             //update the display based on keyboard input
             App p = Application.Current as App;
+            bool bNeedUpdateComb = false; //whether target weight of each node is required
             try
             {
                 
@@ -498,31 +471,14 @@ namespace ioex_cs
                 }
                 if (param == "autoamp")
                 {
-                    double amp = Double.Parse(data);
-                    if (amp <= 0.0001)
-                    {
-                        n.SetNodeReg((byte)curr_node_index, "target_weight", 0);
-                        cb_autoamp.IsChecked = false;
-                    }else{
-                        n.SetNodeReg((byte)curr_node_index, "target_weight", Convert.ToUInt32(pack.curr_cfg.target / amp));
-                        cb_autoamp.IsChecked = true;
-                    }
+                    curr_packer.curr_cfg.target_comb  = Double.Parse(data);
+                    cb_autoamp.IsChecked = (curr_packer.curr_cfg.target_comb > 1);
+                    bNeedUpdateComb = true;
                 }
                 if (param == "target")
                 {
-                    double oldtarget = curr_packer.curr_cfg.target;
                     curr_packer.curr_cfg.target = Double.Parse(data);
-                    foreach (byte naddr in pack.weight_nodes)
-                    {
-                        if ((pack.agent.GetStatus(naddr) == NodeStatus.ST_IDLE))
-                        {
-                            double per = Double.Parse(pack.agent.GetNodeReg(naddr, "target_weight")); ;
-                            if (per > 0.0001)
-                            {
-                                pack.agent.SetNodeReg(naddr, "target_weight", Convert.ToUInt32(pack.curr_cfg.target*per / oldtarget));
-                            }
-                        }
-                    }
+                    bNeedUpdateComb = true;
                 }
                 if (param == "uvar")
                 {
@@ -533,44 +489,18 @@ namespace ioex_cs
                     curr_packer.curr_cfg.lower_var = Double.Parse(data);
                 }
 
-                if (param == "cali1" || param == "cali2" || param == "cali3" || param == "cali4" || param == "cali5")
-                {
-                    string msg = StringResource.str("put_poise")+"("+data+StringResource.str("gram")+")";
-                    
-                    if (MessageBox.Show(msg, "", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
-                        return;
-                    ShowStatus("calibrating");
-                    int i = RunMode.StringToId(param) - 1;
-                    if (curr_node_index >= 0)
-                    {
-                         
-                        n.SetNodeReg((byte)curr_node_index, "poise_weight_gram" + i.ToString(), UInt32.Parse(data));
-                        n.ClearNodeReg((byte)curr_node_index, "cs_mtrl");
-                        string cs_mtrl_val = n.GetNodeReg((byte)curr_node_index, "cs_mtrl");
-                        UInt32 val = UInt32.Parse(cs_mtrl_val);
-                        if (val <= WeighNode.MAX_VALID_WEIGHT)
-                        {
-                            n.SetNodeReg((byte)curr_node_index, "cs_poise" + i.ToString(), UInt32.Parse(cs_mtrl_val));
-                            curr_packer.WeightAction((byte)curr_node_index, "flash");
-                        }
-                        else
-                        {
-                            MessageBox.Show(StringResource.str("tryagain"));
-                        }
-                    }
-                    return;
-                }
+           
                 ShowStatus("modifying");
+                if (bNeedUpdateComb)
+                    curr_packer.UpdateEachNodeTarget();
                 lastcall = "UpdateUI";
             }
             catch (System.Exception e)
             {
                 //MessageBox.Show("Invalid Parameter");
-                
                 return;
             }
         }
-
         private void input_GotFocus(object sender, RoutedEventArgs e)
         {
             App p = Application.Current as App;
@@ -581,56 +511,6 @@ namespace ioex_cs
             }
             string regname = (sender as Label).Name;
             p.kbdwnd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
-        }
-        private void calibrate(string calreg)
-        {
-            App p = Application.Current as App;
-            if (calreg == "cali0")
-            {
-
-                NodeAgent n = curr_packer.agent;
-                if (curr_node_index >= 0)
-                {
-                    if (MessageBox.Show(StringResource.str("put_empty"), "", MessageBoxButton.OKCancel) == MessageBoxResult.Cancel)
-                        return;
-
-                    ShowStatus("calibrating");
-                    n.ClearNodeReg((byte)curr_node_index, "cs_mtrl");
-                    string cs_mtrl_val = n.GetNodeReg((byte)curr_node_index, "cs_mtrl");
-                    UInt32 val = UInt32.Parse(cs_mtrl_val);
-                    if (val <= WeighNode.MAX_VALID_WEIGHT)
-                    {
-                        n.SetNodeReg((byte)curr_node_index, "cs_zero", UInt32.Parse(cs_mtrl_val));
-                        curr_packer.WeightAction((byte)curr_node_index, "flash");
-                        ShowStatus("modifying");
-                    }
-                    else
-                    {
-                        MessageBox.Show(StringResource.str("tryagain"));
-                    }
-                    
-                }
-            }
-            if (calreg == "cali1" )
-                KbdData(calreg, "50");
-            if (calreg == "cali2")
-                KbdData(calreg, "100");
-            if (calreg == "cali3")
-                KbdData(calreg, "200");
-            if (calreg == "cali4")
-                KbdData(calreg, "300");
-            if (calreg == "cali5")
-                KbdData(calreg, "500");
-            curr_packer.WeightAction((byte)curr_node_index, "query"); //update the readings
-        }
-        private void btn_cali_Click(object sender, RoutedEventArgs e)
-        {
-            string calreg = (sender as Button).Name.Remove(0,4); //remove "btn_" string
-            
-
-            ShowStatus("modifying");
-            lastcall = calreg;                
-
         }
 
         private void btn_action_Click(object sender, RoutedEventArgs e)
@@ -809,7 +689,7 @@ namespace ioex_cs
         }
         public void new_prd_no_input(string param, string data)
         {
-            if (curr_packer.all_conf.Keys.Contains<string>(data))
+            if (curr_packer.pkg_confs.Keys.Contains<string>(data))
             {
                 MessageBox.Show(StringResource.str("used_prdno"));
                 lastcall = "select_prdno";

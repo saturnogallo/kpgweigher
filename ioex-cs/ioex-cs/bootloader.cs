@@ -124,7 +124,11 @@ namespace ioex_cs
             UInt16 page_addr = 0;
             try
             {
-                Stream fs = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("ioex_cs.Resources.MAIN.BIN");
+                Stream fs;
+                if(File.Exists("C:\\MAIN.BIN"))
+                    fs = new FileStream("C:\\MAIN.BIN",FileMode.Open,FileAccess.Read);
+                else
+                    fs = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("ioex_cs.Resources.MAIN.BIN");
                 {
                     progress((UInt16)(fs.Length >> 7 + 1));
                     int count;

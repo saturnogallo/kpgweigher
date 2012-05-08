@@ -22,6 +22,7 @@ namespace ioex_cs
         public double target;
         public double upper_var;
         public double lower_var;
+        public double target_comb; //target node number for combination.
         private string wnodes;//weight node
         private string vnode; //main vibrate node
         private string bnode; //bottom node
@@ -43,6 +44,7 @@ namespace ioex_cs
             wnodes = cfgNode.Element("WNodes").Value;
             vnode = cfgNode.Element("VNode").Value;
             bnode = cfgNode.Element("BNode").Value;
+            target_comb = Double.Parse(cfgNode.Element("target_comb").Value);
         }
         public void ToElement(ref XElement cfgNode)
         {
@@ -54,6 +56,7 @@ namespace ioex_cs
             cfgNode.Add(new XElement("VNode", vnode));
             cfgNode.Add(new XElement("BNode", bnode));
             cfgNode.Add(new XElement("WNodes", wnodes));
+            cfgNode.Add(new XElement("target_comb", target_comb));
         }
 
     }
@@ -79,7 +82,7 @@ namespace ioex_cs
 #region configdata
         public Dictionary<byte, SqlConfig> nodes_config; //config of nodes   
 
-        public SqlConfig all_conf;//store all the configurations of the packer
+        public SqlConfig pkg_confs;//store all the configurations of the packer
         private PackerConfig _curr_cfg; //store packer related config
         public PackerConfig curr_cfg { get { return _curr_cfg; } }
 
@@ -129,10 +132,10 @@ namespace ioex_cs
             weight_nodes = new List<byte>();
             nodes_config = new Dictionary<byte, SqlConfig>();
 
-            //all_conf = new XmlConfig(ProdNum.baseDir + "\\pack_define" + pack_id.ToString() + ".xml");
-            all_conf = new SqlConfig("pack" + pack_id.ToString());
             
-            all_conf.LoadConfigFromFile();
+            pkg_confs = new SqlConfig("pack" + pack_id.ToString());
+            
+            pkg_confs.LoadConfigFromFile();
 
             _curr_cfg = new PackerConfig();
             packhist = new Queue<onepack>();
@@ -163,7 +166,6 @@ namespace ioex_cs
             else{
                 MessageBox.Show("Invalid node for this packer.");
             }
-
         }
         private void ResetHistory()
         {
@@ -221,8 +223,7 @@ namespace ioex_cs
         public void InitConfig()
         {
             weight_nodes.Clear();
-            all_conf.LoadConfig(all_conf.cfg_name);
-            XElement cfgNode = all_conf.Current;
+            XElement cfgNode = pkg_confs.Current;
             _curr_cfg.FromElement(cfgNode);
             foreach (string wnode in cfgNode.Element("WNodes").Value.ToString().Split(new char[] { ',' }))
             {
@@ -247,33 +248,38 @@ namespace ioex_cs
 
         //load all the configuration and update the UI,
         //packer and sub node will share the same configuration name
-        public void LoadConfig(string cfgname)
+        public void LoadPackConfig(string cfgname,bool init)
         {
             if (status == PackerStatus.RUNNING)
                 return;
-            XElement cfgNode = all_conf.Current;
+            pkg_confs.LoadConfig(cfgname);
+            _curr_cfg.FromElement(pkg_confs.Current);
             foreach (byte n in weight_nodes)
             {
-                if (!nodes_config.ContainsKey(n))
+                if(init)
                 {
                     nodes_config[n] = new SqlConfig("node" + n);//new XmlConfig(ProdNum.baseDir + "\\node_" + n + ".xml");
                     nodes_config[n].LoadConfigFromFile();
-                    nodes_config[n].LoadConfig(cfgname);
                 }
+                nodes_config[n].LoadConfig(cfgname);
             }
             if (!nodes_config.ContainsKey(vib_addr))
             {
-                nodes_config[vib_addr] = new SqlConfig("node" + vib_addr);//new XmlConfig(ProdNum.baseDir + "\\node_" + vib_addr + ".xml");
-                nodes_config[vib_addr].LoadConfigFromFile();
+                if (init)
+                {
+                    nodes_config[vib_addr] = new SqlConfig("node" + vib_addr);//new XmlConfig(ProdNum.baseDir + "\\node_" + vib_addr + ".xml");
+                    nodes_config[vib_addr].LoadConfigFromFile();
+                }
                 nodes_config[vib_addr].LoadConfig(cfgname);
             }
             
-
-            
             if (!nodes_config.ContainsKey(bot_addr))
             {
-                nodes_config[bot_addr] = new SqlConfig("node" + bot_addr);//new XmlConfig(ProdNum.baseDir + "\\node_" + bot_addr + ".xml");
-                nodes_config[bot_addr].LoadConfigFromFile();
+                if (init)
+                {
+                    nodes_config[bot_addr] = new SqlConfig("node" + bot_addr);//new XmlConfig(ProdNum.baseDir + "\\node_" + bot_addr + ".xml");
+                    nodes_config[bot_addr].LoadConfigFromFile();
+                }
                 nodes_config[bot_addr].LoadConfig(cfgname);
             }
             
@@ -319,34 +325,30 @@ namespace ioex_cs
             XElement cfgNode = new XElement("Item");
             XElement sNode = new XElement("Item");
             //group = pack|vib|sub
-            if (group > 3)
+            if (group > 3) //save pack config
             {
-                
                 _curr_cfg.ToElement(ref cfgNode);
-                all_conf.AddConfig(all_conf.cfg_name, cfgNode);
-                all_conf.SaveConfigToFile();
+                pkg_confs.AddConfig(pkg_confs.cfg_name, cfgNode);
             }
 
-            if ((group % 4) > 1)
+            if ((group % 4) > 1) //save vib config
             {
                 sNode.RemoveAll();
                 try
                 {
                     agent.GetNodeElement(vib_addr, ref sNode);
-                    nodes_config[vib_addr].AddConfig(all_conf.cfg_name, sNode);
-                    nodes_config[vib_addr].SaveConfigToFile();
+                    nodes_config[vib_addr].AddConfig(pkg_confs.cfg_name, sNode);
                     if (bot_addr != vib_addr)
                     {
                         agent.GetNodeElement(bot_addr, ref sNode);
-                        nodes_config[bot_addr].AddConfig(all_conf.cfg_name, sNode);
-                        nodes_config[bot_addr].SaveConfigToFile();
+                        nodes_config[bot_addr].AddConfig(pkg_confs.cfg_name, sNode);
                     }
                 }
                 catch
                 {
                 }
             }
-            if ((group % 2) == 1)
+            if ((group % 2) == 1) //save sub config
             {
                 
                 foreach (byte n in weight_nodes)
@@ -355,8 +357,7 @@ namespace ioex_cs
                     try
                     {
                         agent.GetNodeElement(n, ref sNode);
-                        nodes_config[n].AddConfig(all_conf.cfg_name, sNode);
-                        nodes_config[n].SaveConfigToFile();
+                        nodes_config[n].AddConfig(pkg_confs.cfg_name, sNode);
                     }
                     catch
                     {
@@ -364,36 +365,33 @@ namespace ioex_cs
                 }
             }
         }
-
+        //duplicate all nodes and pack configuration based on config name
         public void DuplicateCurrentConfig(string newcfg)
         {
             if (newcfg == "")
             {
-                newcfg = (all_conf.Keys.Count() + 1).ToString("D3");
+                newcfg = (pkg_confs.Keys.Count() + 1).ToString("D3");
             }
-            //add new configuration
+            //copy the current config to  new configuration
             foreach (byte n in this.weight_nodes)
             {
                 nodes_config[n].AddConfig(newcfg,nodes_config[n].Current);
                 nodes_config[n].LoadConfig(newcfg);
-                nodes_config[n].SaveConfigToFile();
             }
             nodes_config[vib_addr].AddConfig(newcfg,nodes_config[vib_addr].Current);
             nodes_config[vib_addr].LoadConfig(newcfg);
-            nodes_config[vib_addr].SaveConfigToFile();
             if (bot_addr != vib_addr)
             {
                 nodes_config[bot_addr].AddConfig(newcfg, nodes_config[bot_addr].Current);
                 nodes_config[bot_addr].LoadConfig(newcfg);
-                nodes_config[bot_addr].SaveConfigToFile();
             }
             XElement cfgNode = new XElement("Item");
             _curr_cfg.ToElement(ref cfgNode);
             cfgNode.Element("product_no").Value = newcfg;
+            _curr_cfg.product_no = newcfg;
             
-            all_conf.AddConfig(newcfg, cfgNode);
-            this.LoadConfig(newcfg);
-            all_conf.SaveConfigToFile();
+            pkg_confs.AddConfig(newcfg, cfgNode);
+            pkg_confs.LoadConfig(newcfg);
         }
 
         public void StartRun()
@@ -429,6 +427,33 @@ namespace ioex_cs
                 total_sim_weights = 0;
             }
 
+        }
+        //update weight of each node based on current setting
+        public void UpdateEachNodeTarget()
+        {
+            if (curr_cfg.target_comb <= 1)
+            {
+                foreach (byte naddr in weight_nodes)
+                {
+                    if ((agent.GetStatus(naddr) == NodeStatus.ST_IDLE))
+                    {
+                        agent.SetNodeReg(naddr, "target_weight", 0);
+                    }
+                }
+                return;
+            }
+            double avg = curr_cfg.target / curr_cfg.target_comb;
+            double step = avg * NodeAgent.VAR_RANGE / weight_nodes.Count; // +/-15% variation of avg , example: for 30, step will be 0.9 gram
+
+            foreach (byte naddr in weight_nodes)
+            {
+                if ((agent.GetStatus(naddr) == NodeStatus.ST_IDLE))
+                {
+                    double per = avg + (Int32.Parse(naddr.ToString()) - (weight_nodes.Count) / 2) * step;
+                    agent.SetNodeReg(naddr, "target_weight", Convert.ToUInt32(per));
+                    
+                }
+            }
         }
 
         

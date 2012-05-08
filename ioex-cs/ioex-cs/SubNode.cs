@@ -246,7 +246,7 @@ namespace ioex_cs
                         return WeighNode.NOREADING_WEIGHT;
                     }
                     UInt32 value = this["mtrl_weight_gram"].Value;
-                    if (value >= 65521) //special message
+                    if (value > WeighNode.MAX_VALID_WEIGHT) //special message
                     {
                         if (value == 65531) //filtering
                         {
@@ -426,7 +426,7 @@ namespace ioex_cs
         {
             try{
             //save the current configuration 
-            SetConnection();
+            //SetConnection();
             sql_con.Open();
             
             sql_cmd = new SQLiteCommand();
@@ -444,7 +444,7 @@ namespace ioex_cs
         }
         public void AddConfig(string cfgname, XElement e)
         {
-            SetConnection();
+            //SetConnection();
             sql_con.Open();
             sql_cmd = new SQLiteCommand();
             sql_cmd.Connection = sql_con;
@@ -463,7 +463,12 @@ namespace ioex_cs
         {
             if (curr_conf.ContainsKey(newcfg))
             {
-                cfg_name = newcfg;
+                if (cfg_name != newcfg)
+                {
+                    cfg_name = newcfg;
+                    SaveConfigToFile();
+                }
+                
                 return curr_conf[newcfg];
             }
             return null;
@@ -493,7 +498,7 @@ namespace ioex_cs
         }
         public void RemoveConfig(string oldcfg)
         {
-            SetConnection();
+            //SetConnection();
             sql_con.Open();
             sql_cmd = new SQLiteCommand("delete from data where grp='"+ oldcfg +"' and tbl='" + this.sql_tbl+ "'");
             sql_cmd.Connection = sql_con;
