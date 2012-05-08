@@ -30,9 +30,14 @@ namespace ioex_cs
         /// </summary>
         [DllImport("user32.dll", EntryPoint = "ShowCursor", CharSet = CharSet.Auto)]
         public static extern int ShowCursor(int bShow);
-        private System.Windows.Forms.Timer tm_cursor;
-        private Mutex hitmut = new Mutex();
-        private UIPacker curr_packer
+        private System.Windows.Forms.Timer tm_cursor; //timer for cursor hiding
+        private bool bShowCursor = true;
+
+        private object ts_pwd = null;   //timespan for reset password check
+
+        private Mutex hitmut = new Mutex(); //mutex for weight display refresh
+
+        private UIPacker curr_packer    //get current packer instance
         {
             get
             {
@@ -40,11 +45,11 @@ namespace ioex_cs
                 return p.packers[0];
             }
         }
-        private object ts_pwd = null;
-        private Queue<string> lastcalls;
+
+        private Queue<string> lastcalls;//buffer of calls
         
         private string lastcall{
-            get
+            get //peek the lastcall
             {
                 if (lastcalls.Count == 0)
                     return "";
@@ -53,14 +58,14 @@ namespace ioex_cs
             }
             set
             {
-                if (value == "")
+                if (value == "")    //throw away the top call
                 {
                     if(lastcalls.Count > 0)
                         lastcalls.Dequeue();
                 }
                 else
                 {
-                    if(!lastcalls.Contains(value))
+                    if(!lastcalls.Contains(value)) //no duplicate calls in the list
                         lastcalls.Enqueue(value);
                 }
             }
@@ -71,8 +76,9 @@ namespace ioex_cs
         {
             return Application.Current as App;
         }
+        #region initialize
         private bool _contentLoaded2 = false;
-        private bool bShowCursor = true;
+
         /// <summary>
         /// InitializeComponent
         /// </summary>
@@ -102,18 +108,20 @@ namespace ioex_cs
             this.Loaded +=new RoutedEventHandler(RunMode_Loaded);
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
-            uiTimer.Interval = 200;
-
-//            currentApp().agent.RefreshEvent += new NodeAgent.HitRefreshEventHandler(agent_RefreshEvent);
+            uiTimer.Interval = 200; //200ms for UI update
             uiTimer.Start();
+
             tm_cursor = new System.Windows.Forms.Timer();
             tm_cursor.Tick += new EventHandler(tm_cursor_Tick);
             tm_cursor.Interval = 5000;
             this.MouseLeftButtonDown += new MouseButtonEventHandler(RunMode_MouseMove);
             this.title_speed.MouseLeftButtonDown += new System.Windows.Input.MouseButtonEventHandler(this.title_speed_MouseDown);
-            //this.MouseMove += new MouseEventHandler(RunMode_MouseMove);
         }
-
+        void RunMode_Loaded(object sender, RoutedEventArgs e)
+        {
+        }
+        #endregion
+        #region mouse hide after 5 seconds in running mode
         void RunMode_MouseMove(object sender, MouseEventArgs e)
         {
             if (!bShowCursor)
@@ -121,41 +129,35 @@ namespace ioex_cs
                 ShowCursor(1);
                 bShowCursor = true;
                 if (curr_packer.status != PackerStatus.RUNNING)
-                    tm_cursor.Stop();
+                    tm_cursor.Stop();   //no more hide required for not running status
                 else
-                    tm_cursor.Start();
+                    tm_cursor.Start();  //wait 5 seconds for hide
             }
         }
 
         void tm_cursor_Tick(object sender, EventArgs e)
         {
-            if (curr_packer.status == PackerStatus.RUNNING)
+            if (curr_packer.status == PackerStatus.RUNNING) //in running status, hide the cursor after 5 seconds
             {
                 ShowCursor(0);
                 bShowCursor = false;
             }
             tm_cursor.Stop();
         }
+        #endregion
+        private void title_speed_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (ts_pwd == null)
+                ts_pwd = new TimeSpan(DateTime.Now.Ticks);
+        }
 
+        //hide start button for nonvalid license
         public void Disable(Visibility state)
         {
             this.btn_allstart.Visibility = state;
             this.lbl_bgstart.Visibility = state;
         }
-        public void agent_RefreshEvent(object sender)
-        {
-            if (this.IsVisible)
-            {
-                    try
-                    {
-                        lastcall = "RefreshUI";//Dispatcher.Invoke(new Action(RefreshNodeUI), System.Windows.Threading.DispatcherPriority.Background, new object[] { });
-                    }
-                    catch
-                    {
-                    }
-            }
-        }
-
+        #region refresh UI
         public void RefreshVibUI()
         {
             UIPacker p = curr_packer;
@@ -164,14 +166,13 @@ namespace ioex_cs
                 main_bucket.Template = this.FindResource("MainBucket") as ControlTemplate;
                 main_bucket.ApplyTemplate();
             }
-            else
+            if (p.agent.vibstate == VibStatus.VIB_WORKING)
             {
-                if (p.status != PackerStatus.RUNNING)
-                    lbl_status.Content = StringResource.str("waitpack");
                 main_bucket.Template = this.FindResource("MainBucketAct") as ControlTemplate;
                 main_bucket.ApplyTemplate();
-            }
 
+                lbl_status.Content = StringResource.str("waitpack");
+            }
         }
         public void RefreshNodeUI()
         {
@@ -179,9 +180,126 @@ namespace ioex_cs
             lbl_status.Content = "";
             foreach (byte n in p.weight_nodes)
             {
-                UpdateUI("wei_node" + n);
+                UpdateNodeUI(n);
             }
+            if (lbl_status.Content.ToString() != "")
+            {
+                lbl_status.Foreground = Brushes.Red;
+                return;
+            }
+            lbl_status.Foreground = Brushes.Green;
             RefreshVibUI();
+            if (lbl_status.Content.ToString() == "")
+            {
+                lbl_status.Content = StringResource.str("normal");
+            }
+        }
+        public void UpdateSysConfigUI()
+        {
+            App p = currentApp();
+            UIPacker pack = curr_packer;
+            this.input_uvar.Content = pack.curr_cfg.upper_var.ToString() + StringResource.str("gram");
+
+            this.input_dvar.Content = pack.curr_cfg.lower_var.ToString() + StringResource.str("gram");
+
+            this.lbl_weight.Content = pack.curr_cfg.target.ToString() + StringResource.str("gram");
+
+            this.prd_no.Content = pack.curr_cfg.product_no.ToString();
+
+            this.operator_no.Content = p.oper;
+
+            this.prd_desc.Content = pack.curr_cfg.product_desc.ToString();
+
+            ImageBrush ib = (this.FindName("ellipseWithImageBrush") as Rectangle).Fill as ImageBrush;
+            //load the corresponding picture.
+            string path_to_jpg = ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pack.curr_cfg.product_desc.ToString() + ".jpg";
+
+            if (File.Exists(path_to_jpg))
+                ib.ImageSource = new BitmapImage(new Uri(path_to_jpg));
+            else
+                ib.ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\default.jpg"));
+        }
+        public void UpdateNodeUI(byte n)
+        {
+            App p = currentApp();
+            UIPacker pack = curr_packer;
+
+            //display the variable based on current setting
+                Label lb = this.FindName("wei_node"+n) as Label;
+                Button btn = this.FindName("bucket" + n) as Button;
+                Button pbtn = this.FindName("pass" + n) as Button;
+
+                string err = pack.agent.GetErrors(n);
+                double wt = -1000;
+                string ct="";
+
+                if (err == "")
+                {
+                    wt = pack.agent.weight(n);
+                    ct = wt.ToString("F1");
+                    pbtn.Template = this.FindResource("PassBar") as ControlTemplate;
+                    pbtn.ToolTip = "";
+                    pbtn.ApplyTemplate();
+                }
+                else
+                {   if (AlertWnd.b_show_alert && AlertWnd.b_turnon_alert)
+                    {
+                        pbtn.Template = this.FindResource("PassBarError") as ControlTemplate;
+                        pbtn.ToolTip = StringResource.str(err.Substring(0, err.IndexOf(';')));
+                        lbl_status.Content = StringResource.str(err.Substring(0, err.IndexOf(';'))) + "\n";
+                        lb.Content = StringResource.str(err.Substring(0, err.IndexOf(';')));//"ERR";
+                        pbtn.ApplyTemplate();
+                    }
+                }
+
+                if (pack.agent.GetStatus(n) == NodeStatus.ST_LOST || pack.agent.GetStatus(n) == NodeStatus.ST_DISABLED)
+                {
+                    btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
+                    btn.ApplyTemplate();
+                }
+                if (pack.agent.GetStatus(n) == NodeStatus.ST_IDLE)
+                {
+                    btn.Template = this.FindResource("WeightBar") as ControlTemplate;
+                    btn.ApplyTemplate();
+                }
+                if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
+                    lb.Content = ct;
+        }
+        public void RefreshRunNodeUI() //node ui update at run time
+        {
+            lbl_status.Content = "";
+            foreach (UIPacker pk in currentApp().packers)
+            {
+                foreach (byte naddr in pk.weight_nodes)
+                {
+                    string param = "wei_node" + naddr.ToString();
+                    Label lb = this.FindName(param) as Label;
+                    Button btn = this.FindName(param.Replace("wei_node", "bucket")) as Button;
+                    byte n = (byte)(RunMode.StringToId(param));
+                    NodeAgent agent = pk.agent;
+
+                    double wt = agent.weight(n);
+                    if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
+                        lb.Content = agent.weight(n).ToString("F1");
+
+                    if (agent.GetStatus(n) == NodeStatus.ST_LOST || agent.GetStatus(n) == NodeStatus.ST_DISABLED)
+                    {
+                        btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
+                        btn.ApplyTemplate();
+                    }
+                    string err = agent.GetErrors(n);
+                    if (err != "" && AlertWnd.b_turnon_alert && AlertWnd.b_show_alert)
+                        lbl_status.Content = n.ToString() + ":" + StringResource.str(err.Substring(0, err.IndexOf(';'))) + "\n";
+                }
+                if (pk.status == PackerStatus.RUNNING)
+                {
+                    lbl_speed.Content = pk.speed.ToString();
+                    lbl_lastweight.Content = pk.last_pack_weight.ToString("F1");
+                    lbl_totalpack.Content = pk.total_packs.ToString();
+
+                    RefreshVibUI();
+                }
+            }
             if (lbl_status.Content.ToString() == "")
             {
                 lbl_status.Content = StringResource.str("normal");
@@ -190,9 +308,63 @@ namespace ioex_cs
             else
             {
                 lbl_status.Foreground = Brushes.Red;
+                if (AlertWnd.b_turnon_alert && AlertWnd.b_stop_onalert && (curr_packer.status == PackerStatus.RUNNING))
+                    btn_start_click(null, null);
             }
 
         }
+        //update UI when a packer is hitted
+        public void CombineNodeUI(CombineEventArgs ce)
+        {
+            foreach (byte naddr in currentApp().packers[ce.packer_id].weight_nodes)
+            {
+                string param = "wei_node" + naddr.ToString();
+                Label lb = this.FindName(param) as Label;
+                Button btn = this.FindName(param.Replace("wei_node", "bucket")) as Button;
+                
+                NodeAgent agent = currentApp().packers[ce.packer_id].agent;
+
+                //update weight first
+                double wt = -100000;
+                for (int i = 0; i < ce.release_addrs.Length; i++)
+                {
+                    if (ce.release_addrs[i] == naddr)
+                    {
+                        wt = ce.release_wts[i];
+                        break;
+                    }
+                }
+
+                if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
+                    lb.Content = wt.ToString("F1");
+
+                //update status display
+                if (agent.GetStatus(naddr) == NodeStatus.ST_LOST || agent.GetStatus(naddr) == NodeStatus.ST_DISABLED)
+                {
+                    btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
+                }
+                else if (naddr != curr_packer.vib_addr)
+                {
+                    if (ce.release_addrs.Contains(naddr))
+                        btn.Template = this.FindResource("WeightBarRelease") as ControlTemplate;
+                    else
+                    {
+                        btn.Template = this.FindResource("WeightBar") as ControlTemplate;
+                    }
+                }
+                btn.ApplyTemplate();
+            }
+            //Update speed information
+            UIPacker p = currentApp().packers[ce.packer_id];
+            if (p.status == PackerStatus.RUNNING)
+            {
+                lbl_speed.Content = p.speed.ToString();
+                lbl_lastweight.Content = p.last_pack_weight.ToString("F1");
+                lbl_totalpack.Content = p.total_packs.ToString();
+                RefreshVibUI();
+            }
+        }
+#endregion
         private static bool tmlock = false;
         void uiTimer_Tick(object sender, EventArgs e)
         {
@@ -213,7 +385,7 @@ namespace ioex_cs
                 tmlock = false;
                 return;
             }
-            if (p.agent.bNeedRefresh && this.IsVisible)
+            if(p.agent.bNeedRefresh && this.IsVisible)
             {
                 p.agent.bNeedRefresh = false;
                 lastcall = "RefreshUI";
@@ -228,8 +400,8 @@ namespace ioex_cs
 
                 if (lastcall == "UpdatePrdNo")
                 {
-                    p.LoadConfig(p.curr_cfg.product_no);
-                    UpdateUI("sys_config");
+                    p.LoadPackConfig(p.curr_cfg.product_no,false);
+                    UpdateSysConfigUI();
                     Thread.Sleep(2000);
                     lastcall = "";
                 }
@@ -256,104 +428,8 @@ namespace ioex_cs
             }
             tmlock = false;
         }
-        public void RefreshRunNodeUI() //node ui update at run time
-        {
-            lbl_status.Content = "";
-            foreach (UIPacker pk in currentApp().packers)
-            {
-                foreach (byte naddr in pk.weight_nodes)
-                {
-                    string param = "wei_node" + naddr.ToString();
-                    Label lb = this.FindName(param) as Label;
-                    Button btn = this.FindName(param.Replace("wei_node", "bucket")) as Button;
-                    byte n = (byte)(RunMode.StringToId(param));
-                    NodeAgent agent = pk.agent;
-
-                    double wt = agent.weight(n);
-                    if (wt > -1000 && wt < 65521)
-                        lb.Content = agent.weight(n).ToString("F1");
-
-                    if (agent.GetStatus(n) == NodeStatus.ST_LOST || agent.GetStatus(n) == NodeStatus.ST_DISABLED)
-                    {
-                        btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
-                        btn.ApplyTemplate();
-                    }
-                    string err = agent.GetErrors(n);
-                    if(err != "" && AlertWnd.b_turnon_alert && AlertWnd.b_show_alert)
-                        lbl_status.Content = n.ToString() + ":" + StringResource.str(err.Substring(0, err.IndexOf(';'))) + "\n";
-                }
-                if (pk.status == PackerStatus.RUNNING)
-                {
-                    lbl_speed.Content = pk.speed.ToString();
-                    lbl_lastweight.Content = pk.last_pack_weight.ToString("F1");
-                    lbl_totalpack.Content = pk.total_packs.ToString();
-
-                    RefreshVibUI();
-                }
-            }
-            if (lbl_status.Content.ToString() == "")
-            {
-                lbl_status.Content = StringResource.str("normal");
-                lbl_status.Foreground = Brushes.Green;
-            }
-            else
-            {
-                lbl_status.Foreground = Brushes.Red;
-                if (AlertWnd.b_turnon_alert && AlertWnd.b_stop_onalert && (curr_packer.status == PackerStatus.RUNNING))
-                    btn_start_click(null, null);
-            }
-
-        }
-        public void CombineNodeUI(CombineEventArgs ce)
-        {
-            foreach (byte naddr in currentApp().packers[ce.packer_id].weight_nodes)
-            {
-                string param = "wei_node" + naddr.ToString();
-                Label lb = this.FindName(param) as Label;
-                Button btn = this.FindName(param.Replace("wei_node", "bucket")) as Button;
-                byte n = (byte)(RunMode.StringToId(param));
-                NodeAgent agent = currentApp().packers[ce.packer_id].agent;
-
-                double wt = -100000;
-                for(int i=0;i<ce.release_addrs.Length;i++)
-                {
-                    if (ce.release_addrs[i] == n)
-                    {
-                        wt = ce.release_wts[i];
-                        break;
-                    }
-                }
-                
-                
-                if (wt > -1000 && wt < 65521)
-                    lb.Content = wt.ToString("F1");
-
-                if (agent.GetStatus(n) == NodeStatus.ST_LOST || agent.GetStatus(n) == NodeStatus.ST_DISABLED)
-                {
-                    btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
-                }else if (n != curr_packer.vib_addr)
-                {
-                    if (ce.release_addrs.Contains(n))
-                        btn.Template = this.FindResource("WeightBarRelease") as ControlTemplate;
-                    else
-                    {
-                        btn.Template = this.FindResource("WeightBar") as ControlTemplate;
-                    }
-                }
-                btn.ApplyTemplate();
-            }
-            UIPacker p = currentApp().packers[ce.packer_id];
-            if (p.status == PackerStatus.RUNNING)
-            {
-                lbl_speed.Content = p.speed.ToString();
-                lbl_lastweight.Content = p.last_pack_weight.ToString("F1");
-                lbl_totalpack.Content = p.total_packs.ToString();
-                RefreshVibUI();
-            }
-        }
-        void  RunMode_Loaded(object sender, RoutedEventArgs e)
-        {
-        }
+        
+        //send group command
         private void group_action(string action)
         {
             App p = currentApp();
@@ -464,79 +540,6 @@ namespace ioex_cs
                 return -1;
         }
         
-        public void UpdateUI(string param)
-        {
-            App p = currentApp();
-            UIPacker pack = curr_packer;
-            
-            //display the variable based on current setting
-            if(param == "sys_config")
-            {
-                this.input_uvar.Content = pack.curr_cfg.upper_var.ToString() + StringResource.str("gram");
-
-                this.input_dvar.Content = pack.curr_cfg.lower_var.ToString() + StringResource.str("gram");
-
-                this.lbl_weight.Content = pack.curr_cfg.target.ToString() + StringResource.str("gram");
-
-                this.prd_no.Content = pack.curr_cfg.product_no.ToString();
-
-                this.operator_no.Content = p.oper;
-
-                this.prd_desc.Content = pack.curr_cfg.product_desc.ToString();
-                Rectangle rect = this.FindName("ellipseWithImageBrush") as Rectangle;
-                //load the corresponding picture.
-                if (File.Exists(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"))
-                    (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pack.curr_cfg.product_desc.ToString() + ".jpg"));
-                else
-                    (rect.Fill as ImageBrush).ImageSource = new BitmapImage(new Uri(ProdNum.baseDir + "\\prodpic\\default.jpg"));
-
-            }
-            if (param.IndexOf("wei_node") == 0)
-            {
-                Label lb = NameToControl(param) as Label;
-                Button btn = NameToControl(param.Replace("wei_node", "bucket")) as Button;
-                Button pbtn = NameToControl(param.Replace("wei_node", "pass")) as Button;
-                byte n = (byte)(StringToId(param) );
-                
-                string ct = pack.agent.weight(n).ToString("F1");
-                string err = pack.agent.GetErrors(n);
-                double wt = pack.agent.weight(n);
-                
-                if (err == "" || !AlertWnd.b_show_alert || !AlertWnd.b_show_alert)
-                {
-                    pbtn.Template = this.FindResource("PassBar") as ControlTemplate;
-                    pbtn.ToolTip = "";
-                }
-                else
-                {
-                    pbtn.Template = this.FindResource("PassBarError") as ControlTemplate;
-                    pbtn.ToolTip = StringResource.str(err.Substring(0, err.IndexOf(';')));
-                    lbl_status.Content = StringResource.str(err.Substring(0, err.IndexOf(';'))) + "\n";
-                    lb.Content = StringResource.str(err.Substring(0, err.IndexOf(';')));//"ERR";
-
-                }
-                pbtn.ApplyTemplate();
-
-
-                if (pack.agent.GetStatus(n) == NodeStatus.ST_LOST || pack.agent.GetStatus(n) == NodeStatus.ST_DISABLED)
-                {
-                    btn.Template = this.FindResource("WeightBarError") as ControlTemplate;
-                }
-                if (pack.agent.GetStatus(n) == NodeStatus.ST_IDLE)
-                {
-                    btn.Template = this.FindResource("WeightBar") as ControlTemplate;
-                }
-                btn.ApplyTemplate();
-
-                if (wt > -1000 && wt < 65521)
-                    lb.Content = pack.agent.weight(n).ToString("F1");
-                else
-                {
-                    if (wt < -1000)
-                        lb.Content = "";
-                }
-            }
-        }
         private object NameToControl(string name)
         {
             return this.FindName(name);
@@ -581,19 +584,9 @@ namespace ioex_cs
                 }
                 if (param == "run_target")
                 {
-                    double oldtarget = curr_packer.curr_cfg.target;
+                    
                     pack.curr_cfg.target = Double.Parse(data);
-                    foreach (byte naddr in pack.weight_nodes)
-                    {
-                        if ((pack.agent.GetStatus(naddr) == NodeStatus.ST_IDLE))
-                        {
-                            double per = Double.Parse(pack.agent.GetNodeReg(naddr, "target_weight")); ;
-                            if (per > 0.0001)
-                            {
-                                pack.agent.SetNodeReg(naddr, "target_weight", Convert.ToUInt32(pack.curr_cfg.target * per / oldtarget));
-                            }
-                        }
-                    }
+                    pack.UpdateEachNodeTarget();
                     pack.SaveCurrentConfig(1+4);
                 }
                 if (param == "run_operator")
@@ -613,7 +606,7 @@ namespace ioex_cs
                     else
                         MessageBox.Show(StringResource.str("invalid_pwd"));
                 }
-                UpdateUI("sys_config");
+                UpdateSysConfigUI();
             }
             catch (System.Exception e)
             {
@@ -765,11 +758,6 @@ namespace ioex_cs
             }
         }
 
-        private void title_speed_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (ts_pwd == null)
-                ts_pwd = new TimeSpan(DateTime.Now.Ticks);
-        }
         private int title_cnt = 0;
         private void title_speed_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {

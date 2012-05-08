@@ -46,9 +46,9 @@ namespace ioex_cs
             this.phandler = h;
             this.wrapPanel1.Children.Clear();
             PackerConfig pcfg = new PackerConfig();
-            foreach (string id in curr_packer.all_conf.Keys)
+            foreach (string id in curr_packer.pkg_confs.Keys)
             {
-                pcfg.FromElement(curr_packer.all_conf[id]);
+                pcfg.FromElement(curr_packer.pkg_confs[id]);
                 FileInfo fi;
                 if (File.Exists(ProdNum.baseDir + "\\prodpic\\" + StringResource.language + "\\" + pcfg.product_desc + ".jpg"))
                 {
@@ -108,15 +108,15 @@ namespace ioex_cs
         {
             string id = (sender as Button).Name.Remove(0, 2);
             
-            string lastcfg = curr_packer.all_conf.cfg_name;
-            if (id == curr_packer.all_conf.cfg_name)
+            string lastcfg = curr_packer.pkg_confs.cfg_name;
+            if (id == curr_packer.pkg_confs.cfg_name)
             {
                 MessageBox.Show(StringResource.str("cfg_inuse"));
                 return;
             }
-            curr_packer.all_conf.RemoveConfig(id);
-            curr_packer.all_conf.LoadConfig(lastcfg);
-            curr_packer.all_conf.SaveConfigToFile();
+            curr_packer.pkg_confs.RemoveConfig(id);
+            curr_packer.pkg_confs.LoadConfig(lastcfg);
+            curr_packer.pkg_confs.SaveConfigToFile();
             Init(phandler,true);
         }
 

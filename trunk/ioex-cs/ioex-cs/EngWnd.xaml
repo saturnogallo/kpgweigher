@@ -225,52 +225,65 @@
 
     </Window.Resources>
     <Canvas>
-        <Rectangle Canvas.Left="458" Canvas.Top="190" Height="470" Name="rectangle1" RadiusX="10" RadiusY="10" Stroke="Black" Width="508" />
-        <Rectangle Canvas.Left="16.873" Canvas.Top="190" Height="470" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" Width="364" />
+        <Rectangle Canvas.Left="382.972" Canvas.Top="190" Height="470" Name="rectangle1" RadiusX="10" RadiusY="10" Stroke="Black" Width="583.032" />
+        <Rectangle Canvas.Left="5.716" Canvas.Top="190" Height="470" Name="rectangle2" RadiusX="10" RadiusY="10" Stroke="Black" Width="350.105" />
         <Label Name="lbl_title" Content="{DynamicResource engineerpage}" Foreground="ForestGreen" FontFamily="华文楷体" FontSize="70" FontWeight="Black" HorizontalContentAlignment="Center" Margin="41,12,63,0" Height="101.459" VerticalAlignment="Top" Canvas.Left="-3" Canvas.Top="-12" Width="936.578"></Label>
         
             <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource entersystem}" Click="btn_entersys_Click" Style="{StaticResource ButtonStyleOn}" Margin="102.888,104.317,0,0" Name="btn_entersys" Foreground="Black" FontSize="40" Canvas.Left="280.084" Canvas.Top="-5.716" BorderThickness="0" VerticalAlignment="Top" HorizontalAlignment="Left" Width="277.226" Height="61.447" />
             <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource locksystem}" Click="btn_locksys_Click" Style="{StaticResource ButtonStyleOn}" Margin="0,104.317,241.501,0" Name="btn_locksys" Foreground="Black" FontSize="40" Canvas.Left="52.873" Canvas.Top="-5.716" BorderThickness="0" VerticalAlignment="Top" Height="61.447" HorizontalAlignment="Right" Width="258.649" />
             <Button FocusVisualStyle="{x:Null}" Content="{DynamicResource language}" Click="btn_language_Click" Style="{StaticResource ButtonStyleOn}" Margin="102.888,221.495,0,0" Name="btn_language" Foreground="Black" FontSize="40" Canvas.Left="611.612" Canvas.Top="-122.894" BorderThickness="0" VerticalAlignment="Top" Height="61.447" HorizontalAlignment="Left" Width="260.078" />
 
-        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="38" Canvas.Top="274" Content="1" Height="72" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="nd_1" Template="{StaticResource roundButton2}" VerticalAlignment="Bottom" Width="78" Click="nd_1_Click" FontSize="16" FontWeight="Black" Foreground="White" />
-        <Button Canvas.Left="112.873" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_2" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">2</Button>
-        <Button Canvas.Left="194.873" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_3" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">3</Button>
-        <Button Canvas.Left="38" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_13" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">13</Button>
-        <Button Canvas.Left="268.873" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_4" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">4</Button>
-        <Button Canvas.Left="38" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_5" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">5</Button>
-        <Button Canvas.Left="112.873" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_6" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">6</Button>
-        <Button Canvas.Left="112.873" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_14" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">14</Button>
-        <Button Canvas.Left="194.873" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_7" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">7</Button>
-        <Button Canvas.Left="268.873" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_8" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">8</Button>
-        <Button Canvas.Left="38" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_9" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">9</Button>
-        <Button Canvas.Left="194.873" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_15" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">15</Button>
-        <Button Canvas.Left="112.873" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_10" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">10</Button>
-        <Button Canvas.Left="194.873" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_11" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">11</Button>
-        <Button Canvas.Left="268.873" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_12" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">12</Button>
-        <Button Canvas.Left="38" Canvas.Top="526" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_36" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">?</Button>
-        <Button Canvas.Left="91.746" Canvas.Top="612" Content="{DynamicResource cmd_selectall}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_selectall" Click="btn_selectall_Click" Style="{StaticResource ButtonStyle}" Width="100" />
-        <Button Canvas.Left="52.873" Canvas.Top="220" Content="{DynamicResource changeaddr}" FocusVisualStyle="{x:Null}" Height="44" Name="btn_changeaddr" Click="btn_changeaddr_Click" Style="{StaticResource ButtonStyle2}" Width="138" />
-        <Button Canvas.Left="206.395" Canvas.Top="224" Content="{DynamicResource updatefw}" FocusVisualStyle="{x:Null}" Height="40" Name="btn_updatefw" Click="btn_updatefw_Click" Style="{StaticResource ButtonStyle2}" Width="148" />
-        <Button Canvas.Left="268.873" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_16" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78">16</Button>
+        <Button FocusVisualStyle="{x:Null}"  Canvas.Left="27.151" Canvas.Top="274" Content="1" Height="72" HorizontalAlignment="Right" Margin="0,0,228.159,25.452" Name="nd_1" Template="{StaticResource roundButton2}" VerticalAlignment="Bottom" Width="78.595" Click="nd_1_Click" FontSize="16" FontWeight="Black" Foreground="White" />
+        <Button Canvas.Left="101.459" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_2" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">2</Button>
+        <Button Canvas.Left="182.912" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_3" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">3</Button>
+        <Button Canvas.Left="27.151" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_13" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">13</Button>
+        <Button Canvas.Left="257.22" Canvas.Top="274" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_4" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">4</Button>
+        <Button Canvas.Left="27.151" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_5" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">5</Button>
+        <Button Canvas.Left="101.459" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_6" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">6</Button>
+        <Button Canvas.Left="101.459" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_14" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">14</Button>
+        <Button Canvas.Left="182.912" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_7" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">7</Button>
+        <Button Canvas.Left="257.22" Canvas.Top="330" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_8" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">8</Button>
+        <Button Canvas.Left="27.151" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_9" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">9</Button>
+        <Button Canvas.Left="182.912" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_15" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">15</Button>
+        <Button Canvas.Left="101.459" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_10" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">10</Button>
+        <Button Canvas.Left="182.912" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_11" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">11</Button>
+        <Button Canvas.Left="257.22" Canvas.Top="396" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_12" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">12</Button>
+        <Button Canvas.Left="27.151" Canvas.Top="526" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_36" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">?</Button>
+        <Button Canvas.Left="68.592" Canvas.Top="612" Content="{DynamicResource cmd_selectall}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_selectall" Click="btn_selectall_Click" Style="{StaticResource ButtonStyle}" Width="100.03" />
+        <Button Canvas.Left="27.151" Canvas.Top="222" Content="{DynamicResource changeaddr}" FocusVisualStyle="{x:Null}" Height="44" Name="btn_changeaddr" Click="btn_changeaddr_Click" Style="{StaticResource ButtonStyle2}" Width="138.613" />
+        <Button Canvas.Left="187.199" Canvas.Top="224" Content="{DynamicResource updatefw}" FocusVisualStyle="{x:Null}" Height="40" Name="btn_updatefw" Click="btn_updatefw_Click" Style="{StaticResource ButtonStyle2}" Width="148.616" />
+        <Button Canvas.Left="257.22" Canvas.Top="454" FocusVisualStyle="{x:Null}" FontSize="16" FontWeight="Black" Foreground="White" Height="72" Name="nd_16" Template="{StaticResource roundButton2}" Click="nd_1_Click" Width="78.595">16</Button>
         <Button Canvas.Left="211.522" Canvas.Top="612" Content="{DynamicResource refresh}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_refreshaddr" Click="btn_refreshaddr_Click" Style="{StaticResource ButtonStyle}" Width="100" />
-        <Label Background="#FFEEF2FB" Canvas.Left="127.332" Canvas.Top="172" Content="{DynamicResource seladdr}" FontSize="24" Height="38" HorizontalContentAlignment="Center" Name="label2" Width="145.541" />
-        <ListBox Canvas.Left="488" Canvas.Top="220" Height="378" Name="listBox1" Width="452" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" >
+        <Label Background="#FFEEF2FB" Canvas.Left="115.966" Canvas.Top="170.051" Content="{DynamicResource seladdr}" FontSize="24" Height="38.583" HorizontalContentAlignment="Center" Name="label2" Width="145.541" />
+        <ListBox Canvas.Left="397.262" Canvas.Top="312.951" Height="285.8" Name="listBox1" Width="555.881" MouseLeftButtonUp="TextBlock_MouseLeftButtonUp" >
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding name}" Width="200" /> 
-                        <TextBlock Text="{Binding address}" Width="80" /> 
-                        <TextBlock Text="{Binding value}" Width="80" /> 
-                        <TextBlock Text="{Binding vhex}"  /> 
+                        <TextBlock Text="{Binding name}" FontSize="14" Width="150" /> 
+                        <TextBlock Text="{Binding address}" FontSize="14" Width="80" /> 
+                        <TextBlock Text="{Binding value}" FontSize="14" Width="80" /> 
+                        <TextBlock Text="{Binding vhex}" FontSize="14" /> 
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Label Background="#FFEEF2FB" Canvas.Left="648" Canvas.Top="172" Content="{DynamicResource setregs}" FontSize="24" Height="38" HorizontalContentAlignment="Center" Name="label1" Width="146" />
-        <Button Canvas.Left="661.627" Canvas.Top="612" Content="{DynamicResource refresh}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_refreshreg" Style="{StaticResource ButtonStyle}" Width="100.03" Click="btn_refreshreg_Click" />
+        <Label Background="#FFEEF2FB" Canvas.Left="484.431" Canvas.Top="170.051" Content="{DynamicResource setregs}" FontSize="24" Height="38.583" HorizontalContentAlignment="Center" Name="label1" Width="380.114" />
+        <Button Canvas.Left="668.772" Canvas.Top="612" Content="{DynamicResource refresh}" FocusVisualStyle="{x:Null}" Height="38" Name="btn_refreshreg" Style="{StaticResource ButtonStyle}" Width="100.03" Click="btn_refreshreg_Click" />
         <Button Canvas.Left="540.162" Canvas.Top="682.154" Template="{StaticResource RetBtn2}" FocusVisualStyle="{x:Null}" Height="42" Name="btn_ret_run" Click="btn_ret_run_Click" Width="148">回到运行</Button>
         <Button FocusVisualStyle="{x:Null}" Template="{StaticResource RetBtn1}" Canvas.Left="330.099" Canvas.Top="679.936" Height="42" Name="btn_ret_config" Width="148" Click="btn_ret_config_Click">回到设置</Button>
-        <ProgressBar Canvas.Left="45.728" Canvas.Top="281.513" Height="57.16" Name="fwprgs_bar" Visibility="Hidden" Width="308.664" />
+        <ProgressBar Canvas.Left="27.151" Canvas.Top="274" Height="64.673" Name="fwprgs_bar" Visibility="Hidden" Width="308.664" />
+        <Button Canvas.Left="397.262" Canvas.Top="204.276" Content="{DynamicResource cmd_cali0}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali0" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="508.724" Canvas.Top="204.276" Content="{DynamicResource cmd_cali1}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali1" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="624.473" Canvas.Top="202.918" Content="{DynamicResource cmd_cali2}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali2" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="737.364" Canvas.Top="201.276" Content="{DynamicResource cmd_cali3}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali3" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="851.684" Canvas.Top="201.986" Content="{DynamicResource cmd_cali4}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali4" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="508.724" Canvas.Top="238.278" Content="{DynamicResource cmd_cali5}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali5" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="397.262" Canvas.Top="617.195" Content="{DynamicResource cmd_empty}" FocusVisualStyle="{x:Null}" Height="28.58" Name="btn_empty" Click="btn_cali_Click" Width="80.837" />
+        <Label Canvas.Left="484.431" Canvas.Top="619.642" Height="32.867" Name="label3" Width="107.175" MouseLeftButtonUp="label3_MouseLeftButtonUp">0.0g</Label>
+        <Button Canvas.Left="624.473" Canvas.Top="238.849" Content="{DynamicResource cmd_cali6}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali6" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="737.364" Canvas.Top="240.278" Content="{DynamicResource cmd_cali7}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali7" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="851.684" Canvas.Top="238.849" Content="{DynamicResource cmd_cali8}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali8" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="508.724" Canvas.Top="274" Content="{DynamicResource cmd_cali9}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali9" Click="btn_cali_Click" Width="101.459" />
+        <Button Canvas.Left="624.473" Canvas.Top="274" Content="{DynamicResource cmd_cali10}" FocusVisualStyle="{x:Null}" Height="27" Name="btn_cali10" Click="btn_cali_Click" Width="101.459" />
     </Canvas>
 </Window>

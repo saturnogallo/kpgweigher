@@ -171,7 +171,7 @@ namespace ioex_cs
                 runwnd.Show();
                 if (runwnd.btn_allstart.Visibility == Visibility.Hidden)
                     MessageBox.Show(StringResource.str("license"));
-                runwnd.UpdateUI("sys_config");
+                runwnd.UpdateSysConfigUI();
                 runwnd.BringIntoView();
                 return;
             }

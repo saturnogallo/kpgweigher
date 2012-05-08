@@ -65,6 +65,10 @@ namespace ioex_cs
                 p.SwitchTo("runmode");
                 this.Visibility = Visibility.Hidden;
 
+                
+                p.agent.Action((byte)(0x80 + p.packers[0]._pack_id), "stop");
+                p.agent.Action(p.packers[0].vib_addr, "stop");
+
             }
         }
         public void PackerBoot()
@@ -132,7 +136,7 @@ namespace ioex_cs
                         pk.nc.Start();
                         //load config for node
                         UpdateMessage("\r\n" + StringResource.str("init_nodereg"));
-                        pk.LoadConfig(pk.all_conf.cfg_name);
+                        pk.LoadPackConfig(pk.pkg_confs.cfg_name,true);
                         pk.agent.SetVibIntf(pk.vib_addr, pk.getInterface());
 
                         NodeAgent.bBootDone = true;
