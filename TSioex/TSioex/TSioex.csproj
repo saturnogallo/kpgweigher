@@ -1,0 +1,293 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DBB7CE0A-C807-4174-93E3-264CA66743FF}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TSioex</RootNamespace>
+    <AssemblyName>TSioex</AssemblyName>
+    <ProjectTypeGuids>{4D628B5B-2FBC-4AA6-8C16-197242AEB884};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <PlatformFamilyName>WindowsCE</PlatformFamilyName>
+    <PlatformID>E2BECB1F-8C8C-41ba-B736-9BE7D946A398</PlatformID>
+    <OSVersion>5.00</OSVersion>
+    <DeployDirSuffix>TSioex</DeployDirSuffix>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <NativePlatformName>Windows CE</NativePlatformName>
+    <FormFactorID>
+    </FormFactorID>
+    <DeployDirPrefix>\</DeployDirPrefix>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;$(PlatformFamilyName)</DefineConstants>
+    <NoStdLib>true</NoStdLib>
+    <NoConfig>true</NoConfig>
+    <ErrorReport>prompt</ErrorReport>
+    <FileAlignment>512</FileAlignment>
+    <WarningLevel>4</WarningLevel>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.WindowsCE.Forms" />
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite, Version=1.0.79.0, Culture=neutral, PublicKeyToken=1fdb50b1b62b4c84, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\System.Data.SQLite.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AlertWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AlertWnd.Designer.cs">
+      <DependentUpon>AlertWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="bootloader.cs" />
+    <Compile Include="BottomWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="BottomWnd.Designer.cs">
+      <DependentUpon>BottomWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConfigMenuWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfigMenuWnd.Designer.cs">
+      <DependentUpon>ConfigMenuWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="EngWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="EngWnd.Designer.cs">
+      <DependentUpon>EngWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="kbdWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="kbdWnd.Designer.cs">
+      <DependentUpon>kbdWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LogonWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LogonWindow.Designer.cs">
+      <DependentUpon>LogonWindow.cs</DependentUpon>
+    </Compile>
+    <Compile Include="NodeCombination.cs" />
+    <Compile Include="NodeMaster.cs" />
+    <Compile Include="ProdHistory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProdHistory.designer.cs">
+      <DependentUpon>ProdHistory.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProdNum.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProdNum.Designer.cs">
+      <DependentUpon>ProdNum.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ProdWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProdWnd.Designer.cs">
+      <DependentUpon>ProdWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="LogonWindow.resx">
+      <DependentUpon>LogonWindow.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProdHistory.resx">
+      <DependentUpon>ProdHistory.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="PwdWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PwdWnd.Designer.cs">
+      <DependentUpon>PwdWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RectButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RectButton.Designer.cs">
+      <DependentUpon>RectButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RunModeWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RunModeWnd.Designer.cs">
+      <DependentUpon>RunModeWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RunPan.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RunPan.Designer.cs">
+      <DependentUpon>RunPan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SchemeItem.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SchemeItem.Designer.cs">
+      <DependentUpon>SchemeItem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SchemeItem2.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="SchemeItem2.Designer.cs">
+      <DependentUpon>SchemeItem2.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SingleModeWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SingleModeWnd.Designer.cs">
+      <DependentUpon>SingleModeWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SPort.cs" />
+    <Compile Include="SubNode.cs" />
+    <Compile Include="UIPacker.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\MAIN.BIN" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\node_define.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\lang\en-US.xml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>
+      </SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="AlertWnd.resx">
+      <DependentUpon>AlertWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BottomWnd.resx">
+      <DependentUpon>BottomWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConfigMenuWnd.resx">
+      <DependentUpon>ConfigMenuWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="EngWnd.resx">
+      <DependentUpon>EngWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="kbdWnd.resx">
+      <DependentUpon>kbdWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProdNum.resx">
+      <DependentUpon>ProdNum.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ProdWnd.resx">
+      <DependentUpon>ProdWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PwdWnd.resx">
+      <DependentUpon>PwdWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RectButton.resx">
+      <DependentUpon>RectButton.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\lang\zh-CN.xml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>
+      </SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RunModeWnd.resx">
+      <DependentUpon>RunModeWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SchemeItem.resx">
+      <DependentUpon>SchemeItem.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SchemeItem2.resx">
+      <DependentUpon>SchemeItem2.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SingleModeWnd.resx">
+      <DependentUpon>SingleModeWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image\back.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image\en-US.JPG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image\next.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image\ret1.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image\ret2.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Image\zh-CN.JPG" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}">
+        <HostingProcess disable="1" />
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
