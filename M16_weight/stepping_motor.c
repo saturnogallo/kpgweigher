@@ -19,7 +19,7 @@ bit extra_pulse_sent;
 /* Used by motor driver */
 #define SHIFT_PULSE_INCNUM                0
 #define SHIFT_PULSE_DECNUM                0
-#define NUM_OF_STARTUP_PULSE             25
+#define NUM_OF_STARTUP_PULSE             15
 #define NUM_OF_EXTRA_PULSES             100
 
 /* Used by Magnet Driver */
@@ -78,7 +78,7 @@ void Motor_One_Step()
 *      |------------>|   |        
 *      | Timer Delay |   |
 *      |             |   |
-*      |  Triac ON-->|   |<-- Triac ON
+*      |  Triac ON-->|   |<-- Triac OFF
 *      |             |
 *                    |<---- Trigger Triac on   
 *
@@ -124,6 +124,7 @@ interrupt [ANA_COMP] void ana_comp_isr(void)
           }
           TCNT1 = temp;
           START_TIMER1_CNT();
+          CLR_TIMER1_INT_FLG();
           ENABLE_TIMER1_INT();           
           // flag to indicate timer is set by Analog comparator interruption.
           Timer1_flag = SET_BY_ACINT;  
@@ -133,7 +134,7 @@ interrupt [ANA_COMP] void ana_comp_isr(void)
   {  
      if(!TIMER_AC_FREQ_ONGOING)                   // Timer task 7 (measure power AC frequency) ongoing, 
         ACSR &= 0xF7;                             // disable AC interrupt                
-     DISABLE_TIMER1_INT();                     // disable timer1 OV interrupt.
+     DISABLE_TIMER1_INT();                        // disable timer1 OV interrupt.
      STOP_TIMER1_CNT(); 
      Timer1_flag = ONE_PLS_CMPLT;  
      SHUTDOWN_TRIAC();                            //  shut down triac.
@@ -363,15 +364,19 @@ void Motor_Driver(u8 MotorMode,u8 pulsenum,u8 powerdown)
    // during first several driving pulses. 
    // bit 5~0 of phase indicates how many pulses are given at low frequency.
    RS485._motor.phase = NUM_OF_STARTUP_PULSE; 
+
+   MOTOR_ROTATE_CLKWISE;        /* motor rotates clockwise */
    // bit 6 of phase is motor power on/off flag after rotation.
    if (powerdown)
-       keep_poweron = TRUE;  // set bit 6, keep motor driver active after rotation.  
+      keep_poweron = TRUE;     /* set bit 6, keep motor driver active after rotation.*/  
    else
-       keep_poweron = FALSE; // clear bit 6, power off motor driver after rotation.
+   {  keep_poweron = FALSE;    /* clear bit 6, power off motor driver after rotation. */
+#ifdef _MOTOR_2WAY_
+      MOTOR_ROTATE_ANTICLKWISE;
+#endif  
+   }  
+      
    RS485._motor.mode = MotorMode;  
-   
-   // Activate Motor back from Reset mode
-   MOTOR_ROTATE_CLKWISE;        /* motor rotates clockwise */
    MT_MODE_BIT0 = 1;            /* motor mode is 00 (4 phases) */
    MT_MODE_BIT1 = 1; 
 
@@ -437,7 +442,7 @@ u16 Magnet_Is_Running()
 #if 0
   /* if pulse_num goes to zero, magnet stops running */
   if(RS485._magnet.pulse_num == 0)
-  {  timer_set_already = 0;           /* clear flag anyway*/
+  {  timer_set_already = 0;            /* clear flag anyway*/
      last_pulse_num = 0;
      return 0; 
   } 
@@ -458,10 +463,10 @@ u16 Magnet_Is_Running()
     {  
        RS485._magnet.pulse_num = 0;    /* error happened, stop magnet pulses */ 
        SET_MAGNET_ERROR_BIT;
-       return 0xffff;                  /* pulse num didn't decrease within 40ms, error*/
+       return 0xffff;                  /* pulse num didn't decrease within 40ms, error */
     }
     else
-       return RS485._magnet.pulse_num; /* looks normal*/
+       return RS485._magnet.pulse_num; /* looks normal */
   }
   
   /* magnet is running, and timer haven't expired yet, too early to make a conclusion */  

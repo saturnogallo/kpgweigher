@@ -14,11 +14,6 @@ bit flag_to_print_ad_readings;
 
 /* Calibration point */
 flash u16 cal_gram[] = {20,50,100,200,300,400,500,700,900,1000};
-#if 0
-#define BASE_INDEX 2
-#define CAL_BASE 200
-#define CAL_BASE_X_64 (CAL_BASE*64)
-#endif
 
 bit flushDataBuffer;
 void flush_data_buffer()
@@ -240,8 +235,7 @@ u16 read_ad_data()
        temp = ConvTempbuf[0];                      // don't merge these 2 lines.                   
        raw_data = temp << 8; 
        
-       raw_data += ConvTempbuf[1]; 
-
+       raw_data += ConvTempbuf[1];       
 #ifdef _DEBUG_WEIGHT_        
        if(flag_to_print_ad_readings)
        {
@@ -259,7 +253,7 @@ u16 read_ad_data()
 // software filter on material weight  
 /********************************************************************************/    
 #define MAX_BUF_SIZE 8 //average buffer size, must be times of 8.  xianghua 64
-#define SAMPLE_SIZE 4  
+#define SAMPLE_SIZE 2  
 #define MAX_TOLERANCE 32  
 #define MIN_TOLERANCE 4
 #define FILTER_PHASE1 0
@@ -280,12 +274,12 @@ u8 CS5532_PoiseWeight()
    // Test if we need to flush raw data buffer
    // send from 
    /*************************************************************/
-  if(flushDataBuffer)
+   if(flushDataBuffer)
    {
       cur_data_index = 0;
       data_counts = 0;
-      filter_phase = 0;
-      flushDataBuffer = FALSE;
+      filter_phase = FILTER_PHASE1;
+      flushDataBuffer = FALSE; 
    }
             
    /*************************************************************/
@@ -299,7 +293,7 @@ u8 CS5532_PoiseWeight()
       RS485._global.cs_mtrl = temp;  // Invalidate "cs_mtrl" and return      
       return ERR_AD_OVER_FLOW;
    }
-           
+
    /*************************************************************/
    // Queue data. Report FILTER_ONGOING if queue is not full yet. 
    /*************************************************************/  
