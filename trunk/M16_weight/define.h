@@ -25,7 +25,7 @@
 * 0x22: 1) remove "target-weight-per-group" logic. This is implemented in software 
 * 0X24: 1) Add more calibration data point. 
 *************************************************************************************/
-#define FIRMWARE_REV 0x24 
+#define FIRMWARE_REV 0x03  //0x25 
 
 /*************************************************************************************
 *                               Compile Switches
@@ -33,6 +33,8 @@
 #define _DISABLE_WATCHDOG_                     //uncommented to disable watchdog
 //#define _BOARD_TYPE_IS_VIBRATE_15            
 //#define _BOARD_TYPE_IS_VIBRATE_11
+//#define _MOTOR_2WAY_
+
 
 #define NUM_OF_CAL_POINT 10
 
@@ -78,8 +80,13 @@
 
 /*------------------------------define motor pulse numbers---------------------------*/
 #define MOTOR_ONE_CYCLE_WITH_SENSOR    230 
-#define MOTOR_SHIFT_CYCLE_OPEN         100
 #define HALF_CYCLE_CLOSE_WITH_SENSOR   130
+
+#ifdef _MOTOR_2WAY_
+#define MOTOR_SHIFT_CYCLE_OPEN         80
+#else
+#define MOTOR_SHIFT_CYCLE_OPEN        100
+#endif
 
 /*-----------------------------------Board Property----------------------------------*/
 #define BOARD_TYPE_MASK               0xf0                          
@@ -341,6 +348,8 @@ typedef struct {
    volatile u8  status;          /* boolean type variable, 1: in progress, 0: task completed */
 } OS_SCHEDULER;  
 
+#define MAX_NUM_OF_TIMERS               0x08
+#define MAX_TMR_ID     (MAX_NUM_OF_TIMERS-1)
 #define AC_FREQ_TIMER                   0x07          
 #define PACKER_RESP_TIMER               0x06
 #define ERROR_SIGNAL_TIMER              0x05  
@@ -356,9 +365,9 @@ typedef struct {
 #define TIMER_AC_FREQ_ONGOING          (os_sched.status & MASK_MEAS_AC_FREQ)
 #define TIMER_PACKER_RESP_ONGIONG      (os_sched.status & MSAK_PACKER_TIMER)
 
-#define DELAY1_END !(os_sched.status & 0x1)   // used in release_material()
-#define DELAY2_END !(os_sched.status & 0x2)   // used in magnet_add_material()
-                                              // and motor_magnet_action()
+#define RSM_TMR_DLY_END !(os_sched.status & 0x1)   // used in release_material()
+#define WSM_TMR_DLY_END !(os_sched.status & 0x2)   // used in magnet_add_material()
+                                                   // and motor_magnet_action()
                                               
 /*************************************************************************************
 *                              Global Variables
@@ -389,5 +398,6 @@ extern u8 debug_mode;
 
 #define CHANGE_RS485_ADDR      (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0xC0
 #define CHANGE_BOARD_TYPE      (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x80
+#define READ_AUTO_AMP_REC      (RS485._global.test_mode_reg2 & TEST_BITS_76) == 0x40 
 
 #endif

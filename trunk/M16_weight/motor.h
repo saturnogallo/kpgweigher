@@ -51,6 +51,7 @@
 #define TRIG_TRIAC()             PORTB.1 = 0 
 #define SHUTDOWN_TRIAC()         PORTB.1 = 1
 #define DISABLE_TIMER1_INT()     TIMSK &= 0xFB
+#define CLR_TIMER1_INT_FLG()     TIFR |= (1<<TOV1)
 #define ENABLE_TIMER1_INT()      TIMSK |= 0x4
 #define STOP_TIMER1_CNT()        TCCR1B = 0x0
 #define START_TIMER1_CNT()       TCCR1B = 0x3
