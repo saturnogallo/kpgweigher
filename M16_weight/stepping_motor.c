@@ -1,5 +1,6 @@
 #include <MEGA16.h>
 #include "motor.h"
+#include "define.h"
 
 
 /*************************************************************************************
@@ -436,8 +437,8 @@ u8 Motor_Is_Running()
 /*******************************************************************************/
 u16 Magnet_Is_Running()
 { 
-  static u8 timer_set_already;
-  static u16 last_pulse_num;  
+  //static u8 timer_set_already;
+  //static u16 last_pulse_num;  
   
 #if 0
   /* if pulse_num goes to zero, magnet stops running */

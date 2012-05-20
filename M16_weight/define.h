@@ -373,9 +373,11 @@ typedef struct {
 *                              Global Variables
 *************************************************************************************/
 extern void kick_off_timer(u8 task_id, u16 timer_len);
+extern void kill_timer(u8 task_id);
+extern void sleepms(u16 ms);
 extern OS_SCHEDULER os_sched; 
 extern NODE_CONFIG RS485;
-extern u8 debug_mode;
+extern u8 hw_id; 
 /*************************************************************************************
 *                                  Test Switches
 *************************************************************************************/

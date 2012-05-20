@@ -34,7 +34,7 @@ void UART_Init(void);
 void putchar(u8);    
 //void d_putchar(u8); //byte to char format;
 void SetBaudrate(void);  
-void mputs(u8 *buf, u8 size, u8 port);  
+//void mputs(u8 *buf, u8 size, u8 port);  
 #ifndef _OLD_FASHION_CMD_PROCESS_
 //u8 read_uart_db();
 //u8 data_available_in_rxbuf();

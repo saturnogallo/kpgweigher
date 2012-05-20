@@ -21,12 +21,11 @@ extern CM_OUTFRAME outfrm[STATE_MACHINE];
 extern u8 RFlag[STATE_MACHINE];
 void cm_pushc(u8 data,u8 port);
 void cm_ack(u8 port);
-void sleepms(u16 ms);
-void cm_send(u8 addr, u8 cmdid, u8 port, u8 wait);  
-void cm_forward(u8 iport,u8 oport);
+//void cm_send(u8 addr, u8 cmdid, u8 port, u8 wait);  
+//void cm_forward(u8 iport,u8 oport);
 void parse_node_frm(u8* base,u8 port);
 void cm_process(u8 port);
-void cm_query(u8 addr, u8 regid, u8 size, u8 port);
+//void cm_query(u8 addr, u8 regid, u8 size, u8 port);
 void cm_write(u8 addr, u8 regid, u8 size, u8 *dat, u8 port);
 
 #endif
