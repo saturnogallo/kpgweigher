@@ -152,7 +152,7 @@ void CS5532_Cont_Conversion(void);
 u8 CS5532_ReadADC(u8 *);
 //u8 CS5532_SysGainCal(void); 
 void CS5532_Manual_Offset_Gain_Cal(u8 *, u8);
-u8 CS5532_SysOffsetCal(void);
+//u8 CS5532_SysOffsetCal(void);
 //extern u8 CS5532_SelfOffsetCal(void);
 //extern void CS5532_ReadCal(unsigned int);
 //void CS5532_Test(void);

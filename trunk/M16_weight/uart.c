@@ -20,8 +20,6 @@ u8 volatile tx_counter;
 u8 volatile rx_wr_index;
 u8 volatile rx_rd_index;
 u8 volatile rx_counter;
-
-extern u8 debug_mode;
      
 /****************************************************************************/
 //               UART Receiver Interrupt service routine    

@@ -3,6 +3,7 @@
 #include "command.h"
 
 extern u8 myaddr;              //RS485 address of this node.
+extern void prints(u8 *buf, u8 size, u8 port);
 /****************************************************************************/
 // Global buffer to save data received or to be sent out.
 // UART Frame Format: 
