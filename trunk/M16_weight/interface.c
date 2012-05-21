@@ -11,11 +11,12 @@
 // Init_interface() should be re-called everytime when interface settings are changed in GUI. 
 
 // *********Shakehands mode:*************
-// step 1: On finding available combinations, master board output OR1 pulse 
+// step 1: On finding available combinations, interface board output OR1 pulse 
 // step 2: Packer request weigher to feed
 // step 3: master board releases material and output OF1 pulse. 
                                                                 
-// IF (combinations available)
+// IF (combinations available)                      
+
 // {    Tell_Packer_Weigher_Rdy();
 //   While(Packer_Is_Busy()); 
 //   Release_Material();
@@ -72,8 +73,6 @@
 
 #include <mega16.h>
 #include "define.h"
-
-#define MAX_SVS_NUM           8 
   
 #define NEED_HANDSHAKE        (packer_config & 0x0080)
 #define ASYN_IF_MASK          0x0002
@@ -103,8 +102,6 @@
 
 #define IF_PIN_HIGH           (PIN_PACKER_REQ)
 #define IF_PIN_LOW            (!PIN_PACKER_REQ)
-
-#define TASK_OF               4
  
 #define PACKER_BUSY           0xFF
 #define PACKER_READY          0x0
@@ -123,6 +120,16 @@
 #define LEVEL_TEST_WAIT_TIME  150   /* 150 ms */
 
 /******************************************************************************************************/
+//                       Available states of packer interface state machine
+/******************************************************************************************************/
+#define PSM_INIT_STATE        0
+#define PSM_MULTI_FEED        1
+#define PSM_FEED_DELAY        2
+#define PSM_WAIT_DLY_END      3
+#define PSM_SEND_SIGNAL       4
+#define PSM_SIGNAL_SENT       5
+
+/******************************************************************************************************/
 //                                  Global variables
 /******************************************************************************************************/
 extern void kick_off_timer(u8 task_id, u16 timer_len);
@@ -136,6 +143,7 @@ typedef struct {
    
 }INTERFACE;
 INTERFACE Intf;                                /* packer interface global variables */
+u8 PSM_Flag;                                   /* current state of packer state machine*/
 u16 packer_config;                             /* configuration of packer interface, passed from PC */ 
 u16 interface_pulse_width;                    
      
@@ -151,12 +159,12 @@ void deassert_of()
           PIN_RFU = HIGH_LEVEL;                  
           break;    
       case OF_CFG_NEG_PULSE:
-          kill_timer(TASK_OF);
+          kill_timer(SIGNAL_PLS_WIDTH_TIMER);
           PIN_FEED_PACKER = HIGH_LEVEL; 
           PIN_RFU = HIGH_LEVEL; 
           break;
       case OF_CFG_POS_PULSE:                                         
-          kill_timer(TASK_OF);
+          kill_timer(SIGNAL_PLS_WIDTH_TIMER);
           PIN_FEED_PACKER = LOW_LEVEL;
           PIN_RFU = LOW_LEVEL;
           break;                      
@@ -209,8 +217,8 @@ interrupt [EXT_INT0] void ext_int0_isr(void)
        else
          Intf.pack_reqs_pending |= INT_FALLING_EDGE; /* Set bit 0 to indicate falling edge */ 
    }
-   /***********************************************************************/   
-   Intf.feed_counter = 0;                         /* reset feed counter */
+   /************************************************************************/   
+   Intf.feed_counter = 0;                            /* reset feed counter */
 }
 
 /******************************************************************************************************/
@@ -227,7 +235,7 @@ void Init_interface()
    packer_config = RS485._flash.target_weight; 
    /* max pulse width 255*10 ms = 2.55s, minimum pulse width 10ms */
    interface_pulse_width = (u16)RS485._flash.cs_Filter_option ;     
-   if(interface_pulse_width < 1)
+   if(!(interface_pulse_width))
       interface_pulse_width = 1;
   
    if(!INTF_MODE_SHAKEHANDS)
@@ -278,10 +286,12 @@ void Init_interface()
    
    Intf.weigher_is_ready = FALSE;              /* initialize weigher status, not ready yet */      
    Intf.multi_feed_inprogress = FALSE;         /* not a multi_feed*/
+   PSM_Flag = PSM_INIT_STATE;
 }
 
 /******************************************************************************************************/
-// return 0x0 if packing machine is ready to receive another feeding. return 0xff if busy    
+// return "PACKER_READY" if packing machine is ready to receive another feeding. return PACKER_BUSY 
+// if no new requests coming from packer.    
 // "new_request"
 //    TRUE:  request from packer is level valid and weigher has not responded yet
 //    FALSE: request from packer is level valid and weigher has responded already
@@ -356,7 +366,6 @@ u8 Packer_Is_Busy()
 // this signal is to connect collector bucket
 /******************************************************************************************************/
 #define PIN_WEIGHER_READY PORTB.4
-#define TASK_OR 3
 #if 0
 void Tell_Packer_Weigher_Rdy()
 {  
@@ -374,7 +383,7 @@ void Tell_Packer_Weigher_Rdy()
           break;         
    }
    Intf.weigher_is_ready = TRUE;                    /* flag to inform interrupt 0 */
-   kick_off_timer(TASK_OR, interface_pulse_width);  /* start timer to generate pulse OR1. */   
+   kick_off_timer(READY_SIGNAL_TIMER, interface_pulse_width);  /* start timer to generate pulse OR1. */   
 }
 #endif
 /******************************************************************************************************/
@@ -382,8 +391,7 @@ void Tell_Packer_Weigher_Rdy()
 // issues command to call this subroutine to send out signal indicating current activity is a force 
 // release. 
 /******************************************************************************************************/
-#define PIN_FORCE_RELEASE PORTB.6
-#define TASK_OE 5     
+#define PIN_FORCE_RELEASE PORTB.6    
 #if 0
 void Tell_Packer_Force_Release()
 {  
@@ -401,7 +409,7 @@ void Tell_Packer_Force_Release()
           break;         
    }
 
-   kick_off_timer(TASK_OE, interface_pulse_width);  /* start timer to generate pulse OR1. */   
+   kick_off_timer(ERROR_SIGNAL_TIMER, interface_pulse_width);  /* start timer to generate pulse OR1. */   
 }
 #endif
 /******************************************************************************************************/
@@ -419,25 +427,21 @@ void send_packer_release_signal()
    {
       case OF_CFG_LOW:                            /* low to enable */      
           PIN_FEED_PACKER = LOW_LEVEL;            /* assert low until packer response */ 
-          PIN_RFU = LOW_LEVEL;             
           break;
       case OF_CFG_NEG_PULSE:                      /* negative pulse to enable */
           PIN_FEED_PACKER = LOW_LEVEL;            /* assert low first */
-          PIN_RFU = LOW_LEVEL;
-          kick_off_timer(TASK_OF, interface_pulse_width);/* back to high when timeout*/
+          kick_off_timer(SIGNAL_PLS_WIDTH_TIMER, interface_pulse_width);/* back to high when timeout*/
           break;
       case OF_CFG_POS_PULSE:                      /* high to enable */
           PIN_FEED_PACKER = HIGH_LEVEL;           /* assert high until packer response */
-          PIN_RFU = HIGH_LEVEL;
-          kick_off_timer(TASK_OF, interface_pulse_width);/* back to low when timeout*/
+          kick_off_timer(SIGNAL_PLS_WIDTH_TIMER, interface_pulse_width);/* back to low when timeout*/
           break;
       case OF_CFG_HIGH:
-          PIN_FEED_PACKER = HIGH_LEVEL;            /* assert high first */
-          //PIN_RFU = LOW_LEVEL; 
+          PIN_FEED_PACKER = HIGH_LEVEL;          /* assert high first */ 
           break;
       default: 
           break;         
-   } 
+   }
 }
 /***************************************************************/
 // Tell packer material is release, packer can start to pack now.
@@ -446,15 +450,16 @@ void send_packer_release_signal()
 // In the case of single-release-single-pack and multi-release-single-pack
 // mode, it is good enough to add the delay after last release and
 // before sending out release_done signal to packer.
-// To avoid waiting in this subroutine,  TMR0_SVS2 status bit is
+// To avoid waiting in this subroutine, A timer status bit is
 // checked to decide whether we should go into this subroutine. 
 // Accordingly main.c periodically call this subroutine
 // and complete remaining actions in it if delay expires.
 /***************************************************************/
-#define TASK_DELAY 2
+
+#ifdef _PACKER_SIGNAL_
+
 #define TASK_NOT_FINISHED 0xff
 #define TASK_DONE 0x0
-
 u8 Tell_Packer_Release_Done()
 {
    u16 signal_delay; 
@@ -463,7 +468,7 @@ u8 Tell_Packer_Release_Done()
       
    /************************************************************************/
    /* Check if delay (releasing material <-> sending signal) is ongoing */   
-   if(os_sched.status & 0x4)                       /* Task 2(feed delay) is ongoing */
+   if(os_sched.status & ((u8)1<<FEED_DELAY_TIMER)) /* Task 2(feed delay) is ongoing */
        return TASK_NOT_FINISHED;                   /* return and check again later*/           
    /************************************************************************/
    /* if OF signal has not been sent yet, send it and wait for it to complete */
@@ -479,7 +484,7 @@ u8 Tell_Packer_Release_Done()
    /* wait for release signal to complete */   
    if (wait_for_signal_complete)                        
    {
-      if (os_sched.status & 0x10)                   /* wait for pulse width to complete */
+      if (os_sched.status & ((u8)1<<SIGNAL_PLS_WIDTH_TIMER)) /* wait for pulse width to complete */
           return TASK_NOT_FINISHED;
       else
       {
@@ -508,14 +513,14 @@ u8 Tell_Packer_Release_Done()
       {   
          signal_delay = (CONFIG_REG & 0xF800)>>11;  /* 5 most significant bits:  get delay time */         
          signal_delay = signal_delay * 20;          /* X 20 */
-         kick_off_timer(TASK_DELAY,signal_delay);   /* kickoff timer service 2 to start a delay, unit: 20*10ms */ 
+         kick_off_timer(FEED_DELAY_TIMER,signal_delay);   /* kickoff timer service 2 to start a delay, unit: 20*10ms */ 
          release_signal_not_sent_yet = TRUE;        /* we haven't sent release_done signal to packer yet */         
          return(TASK_NOT_FINISHED);                 /* return 0xff to tell caller we have something to do in the future.*/
       }
       else                                          /* send out signal immediately */
       {   
-          if(os_sched.status & 0x4)
-              kill_timer(TASK_DELAY);               /* kill timer in case any prior task is in progress */
+          if(os_sched.status & ((u8)1<<FEED_DELAY_TIMER))
+              kill_timer(FEED_DELAY_TIMER);         /* kill timer in case any prior task is in progress */
           send_packer_release_signal();             /* send packer release done signal*/
           wait_for_signal_complete = TRUE; 
           return TASK_NOT_FINISHED;         
@@ -524,4 +529,102 @@ u8 Tell_Packer_Release_Done()
    
    return TASK_DONE;
 }
-                       
+
+#else
+
+u8 Tell_Packer_Release_Done()
+{
+    
+   u16 signal_delay;
+
+   switch(PSM_Flag)
+   {
+    /********************************************************/
+    // Initial state:
+    // IF we haven't given packer enough bags, complete this
+    // cycle and don't send signal to packer.
+    // ELSE move to next state to delay for a brief period.
+    /********************************************************/
+    case PSM_INIT_STATE:
+       Intf.weigher_is_ready = FALSE;                   /* we are responding and completing this cycle, so clear flag for next cycle */      
+       Intf.feed_counter++;                             /* how many bags weigher has feed packer so far */
+       if(Intf.feed_counter < Intf.max_feed_counter)    /* packer needs more before it starts to pack */
+       {  
+          Intf.pack_reqs_pending = PENDING_REQ;         /* We don't have to wait for acknowledge signal from packer to proceed */
+          Intf.multi_feed_inprogress = TRUE;
+          RS485._global.packer_release_cnt++;               
+       }
+       else                                             /* last feed, already gave packer enough material it has asked for */
+       {  
+          Intf.feed_counter = 0;                        /* reset counter */
+          Intf.pack_reqs_pending = NO_PENDING_REQ;      /* Now need to await packer's feedback to continue. */   
+          Intf.multi_feed_inprogress = FALSE;
+          PSM_Flag = PSM_FEED_DELAY;
+       }
+       break;
+    /********************************************************/
+    // Delay before sending signal to start packing.
+    // IF a delay is requried per user configuration, 
+    //    Kick off a timer to delay for a while, then move to
+    //    next state to wait for delay to end.
+    // ELSE directly go to "SEND_SIGNAL" state to send signals.
+    /********************************************************/
+    case PSM_FEED_DELAY:
+       if(CONFIG_REG & 0xF800)                          /* need delay before sending out signal */
+       {   
+          signal_delay = (CONFIG_REG & 0xF800)>>11;     /* 5 most significant bits:  get delay time */         
+          signal_delay = signal_delay * 20;             /* delay unity: 200ms */
+          kick_off_timer(FEED_DELAY_TIMER,signal_delay); 
+          PSM_Flag = PSM_WAIT_DLY_END;
+       }
+       else                                             /* send out signal immediately */
+          PSM_Flag = PSM_SEND_SIGNAL;      
+       break;
+    /********************************************************/
+    // Wait for delay to complete. Move to "SEND_SIGNAL" state 
+    // once delay comes to an end.
+    /********************************************************/
+	case PSM_WAIT_DLY_END:
+       if(PSM_FEED_DLY_END)
+           PSM_Flag = PSM_SEND_SIGNAL;
+       break;
+    /********************************************************/
+    // Send signal to inform packer.
+    // Clean up relevant timers before sending signal.
+    // Send out release signal to packer.
+    // Move to next state to wait for pulse to complete.
+    /********************************************************/
+    case PSM_SEND_SIGNAL:
+       if(TIMER_FEED_DLY_ONGOING)
+           kill_timer(FEED_DELAY_TIMER);
+       if(TIMER_SIGNAL_ONGOING)
+           kill_timer(SIGNAL_PLS_WIDTH_TIMER);
+
+       send_packer_release_signal();
+       PSM_Flag = PSM_SIGNAL_SENT;	   
+       break;
+    /********************************************************/
+    // Wait for pulse to complete. Once complete, move to
+    // back to init state. and augment release counter for 
+    // master monitor purpose.
+    /********************************************************/
+    case PSM_SIGNAL_SENT:
+       if(PSM_SIGNAL_CMPLT)
+       {   
+          if(!Packer_Is_Busy())
+          { RS485._global.packer_release_cnt++;
+            PSM_Flag = PSM_INIT_STATE;
+          } 
+       }   
+       break;
+    /********************************************************/
+    // Wait for signal tasks 
+    /********************************************************/
+	default:
+       PSM_Flag = PSM_INIT_STATE;
+       break;
+   }
+   
+   return PSM_Flag;
+}
+#endif                       
