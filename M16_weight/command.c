@@ -190,14 +190,7 @@ void cm_process(u8 port)
 void parse_node_frm(u8* ptr, u8 port)
 {
         u8 j;                                            
-        /*if(infrm[port].cmd == 'C')
-        {   // configure, save data to EEPROM
-            // I add this command so that I can easily configure my raw boards.
-            // infrm.databuf format: rom_start_addr,byte1, byte2, byte3, byte4.... 
-            // add 0x80 to distiguish from 'F' command
-            RS485._global.NumOfDataToBePgmed = infrm[port].datalen - 1 + 0x80;           
-            port_eeprom = port;
-        }//*/
+
         if(infrm[port].cmd == 'F'){   //write to flash
                 RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
         }        
@@ -209,11 +202,6 @@ void parse_node_frm(u8* ptr, u8 port)
                         /* add a counter to count how many flag_cmd received */
                         if((infrm[port].databuf[j]> 64) && (infrm[port].databuf[j]< 69))
                         {
-                            /* increase the 3rd byte to indicate receive another command */ 
-                            /*if((RS485._global.cs_sys_offset_cal_data & 0x00FF0000) == 0x00FF0000)
-                                RS485._global.cs_sys_offset_cal_data &= 0xFF00FFFF; 
-                            else 
-                                RS485._global.cs_sys_offset_cal_data += 0x10000; */
                             RS485._global.flag_cmd_cnt++;    
                         }
                         

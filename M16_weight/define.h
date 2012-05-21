@@ -25,7 +25,7 @@
 * 0x22: 1) remove "target-weight-per-group" logic. This is implemented in software 
 * 0X24: 1) Add more calibration data point. 
 *************************************************************************************/
-#define FIRMWARE_REV 0x03  //0x25 
+#define FIRMWARE_REV 0x04  //0x25 
 
 /*************************************************************************************
 *                               Compile Switches
@@ -359,16 +359,16 @@ typedef struct {
 #define WSM_TIMER                       0x01
 #define RSM_TIMER                       0x00
 
-#define MASK_MEAS_AC_FREQ               0x80
-#define MSAK_PACKER_TIMER               0x60
+#define TIMER_AC_FREQ_ONGOING          (os_sched.status & ((u8)1<<AC_FREQ_TIMER))
+#define TIMER_PACKER_RESP_ONGIONG      (os_sched.status & ((u8)1<<PACKER_RESP_TIMER))
+#define TIMER_FEED_DLY_ONGOING         (os_sched.status & ((u8)1<<FEED_DELAY_TIMER))
+#define TIMER_SIGNAL_ONGOING           (os_sched.status & ((u8)1<<SIGNAL_PLS_WIDTH_TIMER))
 
-#define TIMER_AC_FREQ_ONGOING          (os_sched.status & MASK_MEAS_AC_FREQ)
-#define TIMER_PACKER_RESP_ONGIONG      (os_sched.status & MSAK_PACKER_TIMER)
-
-#define RSM_TMR_DLY_END !(os_sched.status & 0x1)   // used in release_material()
-#define WSM_TMR_DLY_END !(os_sched.status & 0x2)   // used in magnet_add_material()
-                                                   // and motor_magnet_action()
-                                              
+#define RSM_TMR_DLY_END !(os_sched.status & ((u8)1<<RSM_TIMER))   // used in release_material()
+#define WSM_TMR_DLY_END !(os_sched.status & ((u8)1<<WSM_TIMER))   // used in magnet_add_material()
+#define PSM_FEED_DLY_END !(os_sched.status & ((u8)1<<FEED_DELAY_TIMER))                                                  
+#define PSM_SIGNAL_CMPLT !(os_sched.status & ((u8)1<<SIGNAL_PLS_WIDTH_TIMER))
+                                             
 /*************************************************************************************
 *                              Global Variables
 *************************************************************************************/

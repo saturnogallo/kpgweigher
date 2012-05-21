@@ -577,7 +577,7 @@ void auto_amp_adj(u16 weight_delta)
         local_magnet_amp = max_amp;
 } 
 
-/*******************************************************************************
+/*******************************************************************************/
 //                  Magnet State Machine
 // magnet_add_material()is called during the delay period of motor_magnet_action()
 // or in parallel with release_material() call to save time. 
@@ -609,7 +609,7 @@ u8 magnet_add_material()
     /**************************************************************/
      case MM_ADD_MATERIAL:
         /* log actual amp to hw_status register for monitor */
-        //RS485._global.hw_status = local_magnet_amp; 
+        RS485._global.hw_status = local_magnet_amp; 
                 			              
         if(local_target)
            auto_amp_adj(weight_gap);
