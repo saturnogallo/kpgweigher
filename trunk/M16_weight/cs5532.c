@@ -109,12 +109,13 @@ void CS5532_Cont_Conversion(void)
 //            CS5532 single conversion
 // Initialize CS5532 to single conversion mode. 
 // SDO of CS5532 falls to indicate completion of a conversion cycle.
-/******************************************************************
+/******************************************************************/
+#if 0
 void CS5532_Single_Conversion(void)
 {
   SPI_MasterTransmit_c(CMD_SINGLE_CONV_SETUP1); 
 }        
-
+#endif
 /******************************************************************/
 //            CS5532 conversion result readout
 // ADC conversion result readout
@@ -225,24 +226,19 @@ u16 read_ad_data()
    if(CS5532_ReadADC(ConvTempbuf) != SUCCESSFUL)                      
       return(AD_BUSY);
    // LSB byte of the 32 bits is monitor byte, 
-   if (ConvTempbuf[3] != 0) { 
+   if (ConvTempbuf[3] != 0) 
+   { 
        RS485._global.diag_status1 |= 0x20;         // set bit 5 error flag
        return(AD_OVER_FLOW);                       
    }
-   else{  
+   else
+   {  
        RS485._global.diag_status1 &= 0xDF;         // clear error flag
         
        temp = ConvTempbuf[0];                      // don't merge these 2 lines.                   
        raw_data = temp << 8; 
        
-       raw_data += ConvTempbuf[1];       
-#ifdef _DEBUG_WEIGHT_        
-       if(flag_to_print_ad_readings)
-       {
-          putchar(ConvTempbuf[0]);
-          putchar(ConvTempbuf[1]);
-       }
-#endif                       
+       raw_data += ConvTempbuf[1];                     
 
    }   
    return(raw_data);
