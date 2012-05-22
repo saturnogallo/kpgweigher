@@ -86,7 +86,6 @@ extern void Motor_Driver(u8 Mode,u8 pulsenum, u8 powerflag);
 extern u8 Motor_Is_Running();
 extern u16 Magnet_Is_Running();
 extern u8 read_ana_cmp_isr_counter(); 
-//void init_ana_isr_counter();
 extern void Motor_One_Step();
 
 #endif

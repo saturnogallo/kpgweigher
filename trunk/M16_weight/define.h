@@ -25,7 +25,7 @@
 * 0x22: 1) remove "target-weight-per-group" logic. This is implemented in software 
 * 0X24: 1) Add more calibration data point. 
 *************************************************************************************/
-#define FIRMWARE_REV 0x04  //0x25 
+#define FIRMWARE_REV 0x05  //0x25 
 
 /*************************************************************************************
 *                               Compile Switches
