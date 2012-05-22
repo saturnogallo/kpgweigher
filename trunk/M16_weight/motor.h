@@ -73,7 +73,7 @@
 // arguments: intervals, define how many m-seconds Electical magnet will work
 // arguments: PWM_Freq, define working frequency of electical magnet.
 /*****************************************************************************/
-extern void E_Magnet_Driver(u16 pulse_num, u8 amp); 
+extern void E_Magnet_Driver(u16 pls_num, u8 amp); 
 
 /*****************************************************************************/
 //                    Stepping Motor driver
@@ -81,7 +81,7 @@ extern void E_Magnet_Driver(u16 pulse_num, u8 amp);
 // arguments: PWM_Freq, define working frequency of electical magnet.
 /*****************************************************************************/
 
-extern void Motor_Driver(u8 Mode,u8 pulsenum, u8 powerflag);
+extern void Motor_Driver(u8 MotorMode,u8 pulsenum,u8 powerdown);
 
 extern u8 Motor_Is_Running();
 extern u16 Magnet_Is_Running();
