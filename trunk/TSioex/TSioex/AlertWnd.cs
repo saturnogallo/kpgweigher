@@ -36,12 +36,32 @@ namespace TSioex
         void btn_ret_run_Click(object sender, EventArgs e)
         {
             Program.SwitchTo("runmode");
+            if (bDirty)
+            {
+                btn_ret_config.Visible = false;
+                btn_ret_run.Visible = false;
+                Application.DoEvents();
+                this.Invoke(new Action(Program.SaveAppConfig));
+                bDirty = false;
+                btn_ret_run.Visible = true;
+                btn_ret_config.Visible = true;
+            }
             //this.Hide();
         }
 
         void btn_ret_config_Click(object sender, EventArgs e)
         {
             Program.SwitchTo("configmenu");
+            if (bDirty)
+            {
+                btn_ret_config.Visible = false;
+                btn_ret_run.Visible = false;
+                Application.DoEvents();
+                this.Invoke(new Action(Program.SaveAppConfig));
+                bDirty = false;
+                btn_ret_config.Visible = true;
+                btn_ret_run.Visible = true;
+            }
             //this.Hide();
         }
         public void UpdateUI()
@@ -81,6 +101,7 @@ namespace TSioex
                 btn_stop_onalert.SetStyle(Color.Gray, MyButtonType.round2RectButton);
             this.Invalidate();
         }
+        private bool bDirty = false;
         private void btn_alert_Click(object sender, EventArgs e)
         {
             RectButton btn = sender as RectButton;
@@ -92,7 +113,7 @@ namespace TSioex
                     else
                         cfg.SetElementValue("turnon_alert", "ON");
                     UpdateUI();
-                    this.Invoke(new Action(Program.SaveAppConfig));
+                    bDirty = true;
                 }
                 if (btn.Name == "btn_stop_onalert")
                 {
@@ -101,7 +122,7 @@ namespace TSioex
                     else
                         cfg.SetElementValue("stop_onalert", "ON");
                     UpdateUI();
-                    this.Invoke(new Action(Program.SaveAppConfig));
+                    bDirty = true;
                 }
                 if (btn.Name == "btn_show_alert")
                 {
@@ -110,7 +131,8 @@ namespace TSioex
                     else
                         cfg.SetElementValue("show_alert", "ON");
                     UpdateUI();
-                    this.Invoke(new Action(Program.SaveAppConfig));
+                    bDirty = true;
+                    
                 }
                 if (btn.Name == "btn_manual_reset")
                 {
@@ -119,7 +141,8 @@ namespace TSioex
                     else
                         cfg.SetElementValue("manual_reset", "ON");
                     UpdateUI();
-                    this.Invoke(new Action(Program.SaveAppConfig));
+                    bDirty = true;
+                    
                 }
             
         }

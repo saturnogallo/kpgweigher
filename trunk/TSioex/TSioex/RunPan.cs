@@ -103,7 +103,7 @@ namespace TSioex
         private string[] node_texts;
         private PanStatus[] node_stats;
         private PanStatus pack_stat;
-        public void SetStatus(string item, byte node, PanStatus status)
+        public void SetStatus(string item, byte node, PanStatus status,bool refresh)
         {
             if (item == "weightbar" && node <= pannum)
             {
@@ -117,13 +117,19 @@ namespace TSioex
             {
                 pack_stat = status;
             }
+            if(refresh)
+                this.Invalidate();
+        }
+        public void ReDraw()
+        {
             this.Invalidate();
         }
-        public void SetText(byte node, string text)
+        public void SetText(byte node, string text,bool refresh)
         {
             if (node <= pannum)
                 node_texts[node-1] = text;
-            this.Invalidate();
+            if(refresh)
+                this.Invalidate();
         }
         private SolidBrush myYellow = new SolidBrush(Color.Yellow);
         private SolidBrush myBlack = new SolidBrush(Color.Black);

@@ -110,8 +110,12 @@ namespace TSioex
             //graphics.FillRectangle(new SolidBrush(bgColor), ClientRectangle);
             //base.OnPaintBackground(e);
         }
+        static private bool bLock = false;
         void RectButton_Click(object sender, MouseEventArgs e)
         {
+            if (bLock)
+                return;
+            bLock = true;
             Point p = System.Windows.Forms.Control.MousePosition;
             p = base.PointToClient(p);
             if (CheckMouseHover(p.X, p.Y))
@@ -122,6 +126,7 @@ namespace TSioex
             {
                 base.OnMouseUp(e);
             }
+            bLock = false;
         }
         public void SetStyle(Color tcolor, MyButtonType type)
         {
@@ -183,7 +188,8 @@ namespace TSioex
             }
             areaTop.Inflate(-1, -1);
             areaBottom.Inflate(-1, -1);
-            this.Invalidate();
+            
+                this.Invalidate();
         }
         /// <summary> 
         /// 检测释放发生鼠标悬停状态发生改变,若发生改变则重写绘制控件 

@@ -12,7 +12,8 @@ namespace TSioex
     public partial class ProdNum : Form
     {
         public static bool bReadOnly = true;
-        public static string baseDir = "\\TSioex";
+        public static string baseDir = "\\NANDFlash\\TSioex";
+        //public static string baseDir = "\\Storage Card\\TSioex";
         public ProdNum()
         {
             InitializeComponent();
@@ -96,7 +97,7 @@ namespace TSioex
             string lastcfg = curr_packer.pkg_confs.cfg_name;
             if (id == curr_packer.pkg_confs.cfg_name)
             {
-                MessageBox.Show(StringResource.str("cfg_inuse"));
+                Program.MsgShow(StringResource.str("cfg_inuse"));
                 return;
             }
             curr_packer.pkg_confs.RemoveConfig(id);

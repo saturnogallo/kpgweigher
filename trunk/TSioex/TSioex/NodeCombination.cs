@@ -82,7 +82,7 @@ namespace TSioex
             release_cnt = 0;
             release_timeout = 0;
         }
-        private int phase = 0;        
+        static public int phase = 0;        
         public void Step()
         {
             //phase 0_start, 1_collect weight, 2_comb_release, 3 packer,
@@ -137,7 +137,7 @@ namespace TSioex
             }
             if (phase == 20)
             {
-                if (packer.status == PackerStatus.IDLE)
+                if (packer.status != PackerStatus.RUNNING)
                 {
                     phase = 0;
                     return;
@@ -149,7 +149,23 @@ namespace TSioex
                 while (CheckCombination())
                     ;
                 bSimCombine = false;
-                phase = 30;
+                foreach (byte b in packer.weight_nodes)
+                {
+                    if (!bSimNodeValid[b]) //has a combination
+                    {
+                        phase = 30;
+                    }
+                }
+                if (phase == 30)
+                    ProcessGoonNodes();
+                else  //no combination at all
+                {
+                    while (ProcessGoonNodes())
+                        ;
+                    CheckNodeStatus();
+                    phase = 0;
+                    return;
+                }
             }
             if (phase == 30)
             {
@@ -164,11 +180,11 @@ namespace TSioex
                 
 
                 Intf intf_reg = new Intf(Convert.ToUInt16(NodeMaster.GetNodeReg(packer.vib_addr, "target_weight")));
-                if (pack_cnt % (intf_reg.feed_times + 1) != 0)
-                {
-                    phase = 30;
-                    return;
-                }
+                //if (pack_cnt % (intf_reg.feed_times + 1) != 0)
+                //{
+                //    phase = 30;
+                //    return;
+                //}
                 {
                     pack_cnt = 0;
                     NodeMaster.Action(new byte[] { packer.vib_addr }, "trigger");
@@ -217,12 +233,14 @@ namespace TSioex
         }
         public void Stop(int ms)
         {
-            while(phase != 0)
+            while((phase != 0) && (ms--) > 0)
             {
                 Step();
                 if (phase == 50)
                     phase = 0;
+                Thread.Sleep(1);
             }
+            phase = 0;
         }
         public void CheckNodeStatus() //update node status after combination is completed
         {
@@ -495,7 +513,7 @@ namespace TSioex
                 }
                 catch
                 {
-                    MessageBox.Show(StringResource.str("tryagain"));
+                    Program.MsgShow(StringResource.str("tryagain"));
                 }
                 }
             }
@@ -518,7 +536,7 @@ namespace TSioex
         public bool CheckCombination()  //return whether there is hit or not.
         {
             {
-                if (Caculation1() || Caculation2() || Caculation3() || Caculation4() || Caculation5())
+                if (Caculation1() || Caculation2() || Caculation3() || Caculation4())// || Caculation5())
                 {
                     return true;
 

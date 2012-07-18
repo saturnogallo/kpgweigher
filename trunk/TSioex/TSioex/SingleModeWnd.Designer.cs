@@ -153,7 +153,7 @@
             // 
             this.wei_otime_input.BackColor = System.Drawing.Color.Moccasin;
             this.wei_otime_input.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.wei_otime_input.Location = new System.Drawing.Point(424, 225);
+            this.wei_otime_input.Location = new System.Drawing.Point(431, 225);
             this.wei_otime_input.Name = "wei_otime_input";
             this.wei_otime_input.Size = new System.Drawing.Size(78, 28);
             this.wei_otime_input.TabIndex = 2;
@@ -162,7 +162,7 @@
             // 
             this.openwei_input.BackColor = System.Drawing.Color.Moccasin;
             this.openwei_input.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.openwei_input.Location = new System.Drawing.Point(424, 183);
+            this.openwei_input.Location = new System.Drawing.Point(431, 183);
             this.openwei_input.Name = "openwei_input";
             this.openwei_input.Size = new System.Drawing.Size(78, 28);
             this.openwei_input.TabIndex = 3;
@@ -171,7 +171,7 @@
             // 
             this.col_dtime_input.BackColor = System.Drawing.Color.Moccasin;
             this.col_dtime_input.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.col_dtime_input.Location = new System.Drawing.Point(424, 146);
+            this.col_dtime_input.Location = new System.Drawing.Point(431, 146);
             this.col_dtime_input.Name = "col_dtime_input";
             this.col_dtime_input.Size = new System.Drawing.Size(79, 28);
             this.col_dtime_input.TabIndex = 4;
@@ -180,7 +180,7 @@
             // 
             this.col_otime_input.BackColor = System.Drawing.Color.Moccasin;
             this.col_otime_input.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.col_otime_input.Location = new System.Drawing.Point(424, 109);
+            this.col_otime_input.Location = new System.Drawing.Point(431, 109);
             this.col_otime_input.Name = "col_otime_input";
             this.col_otime_input.Size = new System.Drawing.Size(79, 28);
             this.col_otime_input.TabIndex = 5;
@@ -189,7 +189,7 @@
             // 
             this.wei_dtime_input.BackColor = System.Drawing.Color.Moccasin;
             this.wei_dtime_input.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.wei_dtime_input.Location = new System.Drawing.Point(424, 70);
+            this.wei_dtime_input.Location = new System.Drawing.Point(431, 70);
             this.wei_dtime_input.Name = "wei_dtime_input";
             this.wei_dtime_input.Size = new System.Drawing.Size(78, 28);
             this.wei_dtime_input.TabIndex = 6;
@@ -198,7 +198,7 @@
             // 
             this.run_amp.BackColor = System.Drawing.Color.Moccasin;
             this.run_amp.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.run_amp.Location = new System.Drawing.Point(424, 30);
+            this.run_amp.Location = new System.Drawing.Point(431, 30);
             this.run_amp.Name = "run_amp";
             this.run_amp.Size = new System.Drawing.Size(79, 28);
             this.run_amp.TabIndex = 7;
@@ -208,42 +208,42 @@
             this.wei_otime_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
             this.wei_otime_label.Location = new System.Drawing.Point(260, 225);
             this.wei_otime_label.Name = "wei_otime_label";
-            this.wei_otime_label.Size = new System.Drawing.Size(158, 41);
+            this.wei_otime_label.Size = new System.Drawing.Size(168, 41);
             // 
             // openwei_label
             // 
             this.openwei_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
-            this.openwei_label.Location = new System.Drawing.Point(261, 183);
+            this.openwei_label.Location = new System.Drawing.Point(260, 183);
             this.openwei_label.Name = "openwei_label";
-            this.openwei_label.Size = new System.Drawing.Size(157, 42);
+            this.openwei_label.Size = new System.Drawing.Size(168, 42);
             // 
             // col_dtime_label
             // 
             this.col_dtime_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
             this.col_dtime_label.Location = new System.Drawing.Point(261, 146);
             this.col_dtime_label.Name = "col_dtime_label";
-            this.col_dtime_label.Size = new System.Drawing.Size(157, 37);
+            this.col_dtime_label.Size = new System.Drawing.Size(167, 37);
             // 
             // col_otime_label
             // 
             this.col_otime_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
             this.col_otime_label.Location = new System.Drawing.Point(261, 109);
             this.col_otime_label.Name = "col_otime_label";
-            this.col_otime_label.Size = new System.Drawing.Size(157, 37);
+            this.col_otime_label.Size = new System.Drawing.Size(167, 37);
             // 
             // wei_dtime_label
             // 
             this.wei_dtime_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
             this.wei_dtime_label.Location = new System.Drawing.Point(261, 70);
             this.wei_dtime_label.Name = "wei_dtime_label";
-            this.wei_dtime_label.Size = new System.Drawing.Size(157, 39);
+            this.wei_dtime_label.Size = new System.Drawing.Size(167, 39);
             // 
             // run_amp_label
             // 
             this.run_amp_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
             this.run_amp_label.Location = new System.Drawing.Point(261, 30);
             this.run_amp_label.Name = "run_amp_label";
-            this.run_amp_label.Size = new System.Drawing.Size(157, 40);
+            this.run_amp_label.Size = new System.Drawing.Size(167, 40);
             // 
             // motor_speed_input
             // 
@@ -267,7 +267,7 @@
             // 
             this.sub_time_input.BackColor = System.Drawing.Color.Moccasin;
             this.sub_time_input.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.sub_time_input.Location = new System.Drawing.Point(173, 183);
+            this.sub_time_input.Location = new System.Drawing.Point(172, 146);
             this.sub_time_input.Name = "sub_time_input";
             this.sub_time_input.Size = new System.Drawing.Size(81, 28);
             this.sub_time_input.TabIndex = 16;
@@ -276,7 +276,7 @@
             // 
             this.sub_amp_input.BackColor = System.Drawing.Color.Moccasin;
             this.sub_amp_input.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.sub_amp_input.Location = new System.Drawing.Point(173, 146);
+            this.sub_amp_input.Location = new System.Drawing.Point(172, 109);
             this.sub_amp_input.Name = "sub_amp_input";
             this.sub_amp_input.Size = new System.Drawing.Size(82, 28);
             this.sub_amp_input.TabIndex = 17;
@@ -285,7 +285,7 @@
             // 
             this.sub_freq_input.BackColor = System.Drawing.Color.Moccasin;
             this.sub_freq_input.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.sub_freq_input.Location = new System.Drawing.Point(173, 109);
+            this.sub_freq_input.Location = new System.Drawing.Point(172, 183);
             this.sub_freq_input.Name = "sub_freq_input";
             this.sub_freq_input.Size = new System.Drawing.Size(82, 28);
             this.sub_freq_input.TabIndex = 18;
@@ -327,15 +327,15 @@
             // sub_time_label
             // 
             this.sub_time_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
-            this.sub_time_label.Location = new System.Drawing.Point(16, 183);
+            this.sub_time_label.Location = new System.Drawing.Point(17, 146);
             this.sub_time_label.Name = "sub_time_label";
-            this.sub_time_label.Size = new System.Drawing.Size(151, 42);
+            this.sub_time_label.Size = new System.Drawing.Size(151, 37);
             this.sub_time_label.Text = "label2";
             // 
             // sub_amp_label
             // 
             this.sub_amp_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
-            this.sub_amp_label.Location = new System.Drawing.Point(17, 146);
+            this.sub_amp_label.Location = new System.Drawing.Point(17, 109);
             this.sub_amp_label.Name = "sub_amp_label";
             this.sub_amp_label.Size = new System.Drawing.Size(150, 37);
             this.sub_amp_label.Text = "label2";
@@ -343,7 +343,7 @@
             // sub_freq_label
             // 
             this.sub_freq_label.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular);
-            this.sub_freq_label.Location = new System.Drawing.Point(17, 109);
+            this.sub_freq_label.Location = new System.Drawing.Point(17, 183);
             this.sub_freq_label.Name = "sub_freq_label";
             this.sub_freq_label.Size = new System.Drawing.Size(150, 37);
             this.sub_freq_label.Text = "label2";

@@ -99,6 +99,12 @@
     <Compile Include="LogonWindow.Designer.cs">
       <DependentUpon>LogonWindow.cs</DependentUpon>
     </Compile>
+    <Compile Include="MsgDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MsgDlg.Designer.cs">
+      <DependentUpon>MsgDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="NodeCombination.cs" />
     <Compile Include="NodeMaster.cs" />
     <Compile Include="ProdHistory.cs">
@@ -217,6 +223,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="kbdWnd.resx">
       <DependentUpon>kbdWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MsgDlg.resx">
+      <DependentUpon>MsgDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="ProdNum.resx">

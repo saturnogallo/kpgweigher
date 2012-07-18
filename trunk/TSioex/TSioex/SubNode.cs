@@ -393,7 +393,7 @@ namespace TSioex
             }
             catch (System.Exception e)
             {
-                MessageBox.Show(e.Message);
+                Program.MsgShow(e.Message);
                 return false;
             }
             
@@ -415,7 +415,7 @@ namespace TSioex
             }
             catch (System.Exception e)
             {
-                MessageBox.Show(e.Message);
+                Program.MsgShow(e.Message);
                 return false;
             }
         }
@@ -545,7 +545,7 @@ namespace TSioex
             }
             catch (System.Exception e)
             {
-                MessageBox.Show(e.Message);
+                Program.MsgShow(e.Message);
                 return false;
             }
         }
@@ -573,7 +573,7 @@ namespace TSioex
             }
             catch (System.Exception e)
             {
-                MessageBox.Show(e.Message);
+                Program.MsgShow(e.Message);
                 return false;
             }
             
@@ -1029,7 +1029,7 @@ namespace TSioex
                     }
                     catch (System.Exception e)
                     {
-                        MessageBox.Show(e.Message);                 	
+                        Program.MsgBox(e.Message);                 	
                     }
                 }
             }

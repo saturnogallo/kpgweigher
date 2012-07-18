@@ -53,7 +53,9 @@ namespace TSioex
         static private Thread msg_loop;
         static NodeMaster()
         {
+            Program.line = 9999;
             agent = new NodeAgent();
+            Program.line = 99999;
             WaitEvent = new AutoResetEvent(false);
             OverEvent = new AutoResetEvent(false);
             agent_access = false;
@@ -256,6 +258,7 @@ namespace TSioex
             WaitEvent.Set();
             OverEvent.WaitOne();
             OverEvent.Reset();
+            Thread.Sleep(10 * reg.Length); //for 210 it is 20 * reg.Length
         }
         static public void Action(byte[] addrs, string action)
         {
@@ -266,7 +269,7 @@ namespace TSioex
             OverEvent.Reset();
             if (actmsg.action == "retry")
             {
-                MessageBox.Show(StringResource.str("tryagain"));
+                Program.MsgShow(StringResource.str("tryagain"));
             }
             if (actmsg.action == "fail")
                 throw new Exception("Critical Action failed.");
@@ -277,11 +280,11 @@ namespace TSioex
             {
                 WeighNode n = agent[addr] as WeighNode;
                 n.cnt_match++;
-                if (n.cnt_match > 10)
+                if (n.cnt_match > 50)
                 {
                     if (AlertWnd.b_turnon_alert)
                     {
-                        if (!AlertWnd.b_manual_reset) //auto reset
+                        if (AlertWnd.b_manual_reset) //manual reset
                         {
                             if (n.errlist.IndexOf("err_om;") < 0)   //no matching for serveral times
                                 n.errlist = n.errlist + "err_om;";
@@ -317,13 +320,25 @@ namespace TSioex
             UInt32 flag_cnt;
             bool bDone = true;
             int retry = 0;
+            if (NodeAgent.IsDebug)
+            {
+                foreach (byte addr in addrs)
+                {
+                    if (agent[addr].status == NodeStatus.ST_IDLE)
+                    {
+                        agent[addr].write_vregs(new string[] { reg }, new UInt32[] { val });
+                        Thread.Sleep(2);//for 210 it is 5
+                    }
+                }
+                return true;
+            }
             foreach (byte addr in addrs)
             {
                 if (agent[addr].status == NodeStatus.ST_IDLE)
                 {
-                    retry = 4;
+                    retry = 8;
                     while (!GetRegister(addr, new string[] { "flag_cnt" }) && (retry-- > 0))
-                        Thread.Sleep(100);
+                        Thread.Sleep(15);//for 210 it is 30
                     if (retry < 0)
                     {
                         bDone = false;
@@ -334,7 +349,7 @@ namespace TSioex
                     do
                     {
                         agent[addr].write_vregs(new string[] { reg }, new UInt32[] { val });
-                        Thread.Sleep(5);
+                        Thread.Sleep(2); //for 210 it is 5
                         GetRegister(addr, new string[] { "flag_cnt" });
                     } while ((flag_cnt == agent[addr]["flag_cnt"]) && (retry-- > 0));
                     if (retry < 0)
@@ -372,7 +387,7 @@ namespace TSioex
                 }
                 TimeSpan ts2 = DateTime.Now.Subtract(ts1);
                 
-                if (bHit || (ts2.TotalMilliseconds > 500))
+                if (bHit || (ts2.TotalMilliseconds > 300))
                     break;
             }
             return bHit;
@@ -406,8 +421,8 @@ namespace TSioex
                     }
                     #endregion
                     #region actions
-                    if ((msg.action == "fill") || (msg.action == "zero") || (msg.action == "empty") || (msg.action == "trigger") ||
-                        (msg.action == "pass") || (msg.action == "start") || (msg.action == "stop") || (msg.action == "pass") || (msg.action == "intf"))
+                    if ((msg.action == "fill") || (msg.action == "zero") || (msg.action == "empty") || 
+                        (msg.action == "pass") || (msg.action == "pass") )
                     {
                         foreach (byte addr in msg.addrs)
                         {
@@ -483,7 +498,7 @@ namespace TSioex
                             }
                         }
                         OverEvent.Set();
-                        return;
+                        continue;
                     }
                     #endregion
                     #region start stop trigger
@@ -561,38 +576,67 @@ namespace TSioex
         //create all the subnodes based on ports, type and address
         private void LoadConfiguration()
         {
+            SqlConfig app_cfg;
+            XElement def_cfg;
+            Program.line = 3000;
+            Int32 baudrate;
+            string parity;
+            string[] ser_ports;
+            string[] node_addrs;
+            try
+            {
+                app_cfg = new SqlConfig("app"); Program.line++;
+                app_cfg.LoadConfigFromFile(); Program.line++;
+                def_cfg = app_cfg.Current; Program.line++;
 
-            SqlConfig app_cfg = new SqlConfig("app");
-            app_cfg.LoadConfigFromFile();
+                baudrate = Int32.Parse(def_cfg.Element("baudrate").Value); Program.line++;
+                parity = def_cfg.Element("parity").Value.ToLower(); Program.line++;
+                ser_ports = def_cfg.Element("totalports").Value.ToString().Split(new char[] { ',' }); Program.line++;
+                node_addrs = def_cfg.Element("totalnodes").Value.ToString().Split(new char[] { ',' }); Program.line++;
 
-            XElement def_cfg = app_cfg.Current;
-
-            Int32 baudrate = Int32.Parse(def_cfg.Element("baudrate").Value);
-            string parity = def_cfg.Element("parity").Value.ToLower();
-            string[] ser_ports = def_cfg.Element("totalports").Value.ToString().Split(new char[] { ',' });
-            string[] node_addrs = def_cfg.Element("totalnodes").Value.ToString().Split(new char[] { ',' });
-
-            VAR_RANGE = Double.Parse(def_cfg.Element("var_range").Value);
-            LASTCOMB_NUM = UInt32.Parse(def_cfg.Element("lastcomb_num").Value);
-            MSDELAY = UInt32.Parse(def_cfg.Element("msdelay").Value);
+                VAR_RANGE = Double.Parse(def_cfg.Element("var_range").Value); Program.line++;
+                LASTCOMB_NUM = UInt32.Parse(def_cfg.Element("lastcomb_num").Value); Program.line++;
+                MSDELAY = UInt32.Parse(def_cfg.Element("msdelay").Value); Program.line++;
+            }
+            catch
+            {
+                throw new Exception("Invalid parameter in database");
+            }
 
             //create all serial ports
-            foreach (string port in ser_ports)
+            try
             {
-                if (parity == "even")
-                    allports.Add(new SPort(port, baudrate, Parity.Even, 8, StopBits.One));
-                else if (parity == "odd")
-                    allports.Add(new SPort(port, baudrate, Parity.Odd, 8, StopBits.One));
-                else
-                    allports.Add(new SPort(port, baudrate, Parity.None, 8, StopBits.One));
-            }
-            foreach (SPort sp in allports)
-            {
-                if (!sp.Open())
+                foreach (string port in ser_ports)
                 {
-                    throw new Exception("Failed to open the port");
+                    if (parity == "even")
+                        allports.Add(new SPort(port, baudrate, Parity.Even, 8, StopBits.One));
+                    else if (parity == "odd")
+                        allports.Add(new SPort(port, baudrate, Parity.Odd, 8, StopBits.One));
+                    else
+                        allports.Add(new SPort(port, baudrate, Parity.None, 8, StopBits.One));
+                    Program.line++;
                 }
             }
+            catch
+            {
+                throw new Exception("Failed to open the COM port");
+            }
+            
+            foreach (SPort sp in allports)
+            {
+                try
+                {
+                    if (!sp.Open())
+                    {
+                        throw new Exception("Failed to open the port");
+                    }
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
+            Program.line = 5000;
             //create all nodes
             foreach (string node in node_addrs)
             {
@@ -609,6 +653,7 @@ namespace TSioex
                     nodemap[byte.Parse(node)] = new VibrateNode(allports[byte.Parse(com)], byte.Parse(node));
                 }
             }
+            Program.line = 33333;
             //missingnode = new SubNode(allports[0], byte.Parse(def_cfg.Element("def_addr").Value)); //36 is the default address of unassigned address board
         }
         internal NodeAgent()
@@ -616,7 +661,9 @@ namespace TSioex
             allports = new List<SPort>();
             weight_nodes = new List<WeighNode>();
             nodemap = new Dictionary<byte, SubNode>();
+            Program.line = 7;
             this.LoadConfiguration();
+            Program.line = 77;
             NodeNum = weight_nodes.Count;
         }
 
@@ -631,7 +678,10 @@ namespace TSioex
             {
                 foreach (string reg in wn_regs)
                 {
-                    x.Add(new XElement(reg, nodemap[addr][reg].Value.ToString()));
+                    if(nodemap[addr][reg].HasValue)
+                        x.Add(new XElement(reg, nodemap[addr][reg].Value.ToString()));
+                    else
+                        x.Add(new XElement(reg, "0"));
                 }
             }
         }

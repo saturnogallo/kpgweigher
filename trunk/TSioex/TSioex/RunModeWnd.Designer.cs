@@ -174,11 +174,12 @@
             // lbl_datetime
             // 
             this.lbl_datetime.Font = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Regular);
-            this.lbl_datetime.Location = new System.Drawing.Point(55, 718);
+            this.lbl_datetime.Location = new System.Drawing.Point(13, 718);
             this.lbl_datetime.Name = "lbl_datetime";
             this.lbl_datetime.Size = new System.Drawing.Size(478, 35);
             this.lbl_datetime.Text = "label6";
             this.lbl_datetime.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            this.lbl_datetime.ParentChanged += new System.EventHandler(this.lbl_datetime_ParentChanged);
             // 
             // prd_picture
             // 

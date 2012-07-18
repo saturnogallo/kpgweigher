@@ -206,7 +206,7 @@ namespace TSioex
 
             if (data.ToString() == "")
             {
-                MessageBox.Show(StringResource.str("emptydata"));
+                Program.MsgShow(StringResource.str("emptydata"));
                 return;
             }
             try
@@ -237,7 +237,7 @@ namespace TSioex
             }
             catch (Exception err)
             {
-                MessageBox.Show(err.Message);
+                Program.MsgShow(err.Message);
                 return;
             }
 
