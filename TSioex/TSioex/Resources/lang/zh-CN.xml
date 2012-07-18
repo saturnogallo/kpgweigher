@@ -90,6 +90,7 @@
     <string skey="modifying">正在修改配置</string>
     <string skey="downloading">正在下载配置</string>
     <string skey="clearpack">复位总包数</string>
+  <string skey="emptyhistory">清空记录</string>
     <string skey="done">操作完成</string>
     <string skey="login">登录系统</string>
     <string skey="help">帮助</string>
@@ -170,7 +171,7 @@
     <string skey="operator">操作员</string>
     <string skey="bootfail">启动失败，请检查连接后重试</string>
     <string skey="intf_lb_feed_times">灌装次数</string>
-    <string skey="intf_ckb_delay">灌装延时(*20ms)</string>
+    <string skey="intf_ckb_delay">灌装延时(*200ms)</string>
     <string skey="intf_handshake">从机模式</string>
     <string skey="intf_lb_input_fmt">输入触发方式</string>
     <string skey="intf_ckb_mem">记忆</string>
@@ -181,7 +182,7 @@
 
     <string skey="enter_intf_lb_feed_times">请输入灌装次数</string>
     <string skey="enter_intf_pulse_width">请输入灌装脉冲宽度</string>
-    <string skey="enter_intf_ckb_delay">请输入灌装延时(*20ms)</string>
+    <string skey="enter_intf_ckb_delay">请输入灌装延时(*200ms)</string>
 
     <string skey="grp_name">当前设置名称</string>
     <string skey="grp_amp">主振幅度</string>
@@ -243,8 +244,10 @@
     <string skey="cmd_cali8">700g砝码</string>
     <string skey="cmd_cali9">900g砝码</string>
     <string skey="cmd_cali10">1000g砝码</string>
+  <string skey="enter_newdate">输入新的日期(例如:20120131)</string>
+  <string skey="enter_newtime">输入新的时间(ex:230159)</string>
 
-    <string skey="err_ad">机械故障</string>
+  <string skey="err_ad">机械故障</string>
     <string skey="err_dz">重量校准数据错误</string>
    <string skey="err_ow1">A/D信号超重</string>
     <string skey="err_ow">超重</string>
@@ -269,7 +272,7 @@
     <string skey="run_freq_llimit">0</string>
     <string skey="run_freq_ulimit">255</string>
     <string skey="run_time_llimit">0</string>
-    <string skey="run_time_ulimit">65535</string>
+    <string skey="run_time_ulimit">255</string>
     <string skey="run_amp_llimit">0</string>
     <string skey="run_amp_ulimit">255</string>
     <string skey="sub_freq_input_llimit">0</string>
@@ -280,11 +283,11 @@
     <string skey="sub_filter_input_ulimit">255</string>
     <string skey="sub_time_input_llimit">0</string>
     <string skey="sub_time_input_ulimit">65535</string>
-    <string skey="wei_otime_input_llimit">10</string>
+    <string skey="wei_otime_input_llimit">0</string>
     <string skey="wei_otime_input_ulimit">255</string>
     <string skey="wei_dtime_input_llimit">0</string>
     <string skey="wei_dtime_input_ulimit">255</string>
-    <string skey="col_dtime_input_llimit">10</string>
+    <string skey="col_dtime_input_llimit">0</string>
     <string skey="col_dtime_input_ulimit">255</string>
     <string skey="col_otime_input_llimit">0</string>
     <string skey="col_otime_input_ulimit">255</string>

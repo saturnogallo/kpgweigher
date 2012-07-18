@@ -220,9 +220,27 @@ namespace TSioex
         }
         public SPort(string PortName, int BaudRate, Parity Parity, int DataBits, StopBits StopBit)
         {
-            _serial = new SerialPort(PortName, BaudRate, Parity, DataBits, StopBit);
+            int hit = 20;
+            while (hit-- > 0)
+            {
+                try
+                {
+                    if (SerialPort.GetPortNames().Contains<string>(PortName))
+                    {
+                        _serial = new SerialPort(PortName, BaudRate, Parity, DataBits, StopBit);
+                        _serial.Handshake = Handshake.None;
+                        break;
+                    }
+                }
+                catch
+                {
+                    Thread.Sleep(1000);
+                }
+            }
+            if (hit <= 0)
+                throw new Exception("Failed to open port "+PortName);
             //_serial.DataReceived +=new SerialDataReceivedEventHandler(_serial_DataReceived);
-            _serial.Handshake = Handshake.None;
+            
 
            
 //            _serial.ErrorReceived += new SerialErrorReceivedEventHandler(_serial_ErrorReceived);
@@ -248,12 +266,12 @@ namespace TSioex
                 return false;
             while (_serial.BytesToWrite > 0)
             {
-                Thread.Sleep(1);//115200 baud = 11520 byte = 1152 /percommand
+                ;// 115200 baud = 11520 byte = 1152 /percommand
             }
             _serial.Write(cmd, 1, cmd[0]);
             while (_serial.BytesToWrite > 0)
             {
-                Thread.Sleep(1);//115200 baud = 11520 byte = 1152 /percommand
+                ;// 115200 baud = 11520 byte = 1152 /percommand
             }
 
             return true;
@@ -271,7 +289,6 @@ namespace TSioex
             }
             catch (System.Exception e)
             {
-                MessageBox.Show(e.Message);
                 Status = PortStatus.ERROR;
             }
             if (_serial.IsOpen)

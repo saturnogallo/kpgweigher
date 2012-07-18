@@ -30,6 +30,17 @@ namespace TSioex
         private void InitializeComponent()
         {
             this.dataGridView1 = new System.Windows.Forms.DataGrid();
+            this.dataGridTableStyle1 = new System.Windows.Forms.DataGridTableStyle();
+            this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn3 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn4 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn5 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn6 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn7 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn8 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn9 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.dataGridTextBoxColumn10 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.mc_starttime = new System.Windows.Forms.MonthCalendar();
             this.mc_endtime = new System.Windows.Forms.MonthCalendar();
             this.lb_oper = new System.Windows.Forms.ListBox();
@@ -44,17 +55,7 @@ namespace TSioex
             this.btnClr = new System.Windows.Forms.Button();
             this.btn_ret_cfg = new System.Windows.Forms.PictureBox();
             this.btn_ret_run = new System.Windows.Forms.PictureBox();
-            this.dataGridTableStyle1 = new System.Windows.Forms.DataGridTableStyle();
-            this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn3 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn4 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn5 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn6 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn7 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn8 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn9 = new System.Windows.Forms.DataGridTextBoxColumn();
-            this.dataGridTextBoxColumn10 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.btnClrAll = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // dataGridView1
@@ -65,6 +66,90 @@ namespace TSioex
             this.dataGridView1.Size = new System.Drawing.Size(1002, 400);
             this.dataGridView1.TabIndex = 2;
             this.dataGridView1.TableStyles.Add(this.dataGridTableStyle1);
+            // 
+            // dataGridTableStyle1
+            // 
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn1);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn2);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn3);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn4);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn5);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn6);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn7);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn8);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn9);
+            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn10);
+            this.dataGridTableStyle1.MappingName = "BOX";
+            // 
+            // dataGridTextBoxColumn1
+            // 
+            this.dataGridTextBoxColumn1.Format = "";
+            this.dataGridTextBoxColumn1.FormatInfo = null;
+            this.dataGridTextBoxColumn1.HeaderText = "start_date";
+            this.dataGridTextBoxColumn1.Width = 100;
+            // 
+            // dataGridTextBoxColumn2
+            // 
+            this.dataGridTextBoxColumn2.Format = "";
+            this.dataGridTextBoxColumn2.FormatInfo = null;
+            this.dataGridTextBoxColumn2.HeaderText = "end_date";
+            this.dataGridTextBoxColumn2.Width = 100;
+            // 
+            // dataGridTextBoxColumn3
+            // 
+            this.dataGridTextBoxColumn3.Format = "";
+            this.dataGridTextBoxColumn3.FormatInfo = null;
+            this.dataGridTextBoxColumn3.HeaderText = "operator";
+            this.dataGridTextBoxColumn3.Width = 100;
+            // 
+            // dataGridTextBoxColumn4
+            // 
+            this.dataGridTextBoxColumn4.Format = "";
+            this.dataGridTextBoxColumn4.FormatInfo = null;
+            this.dataGridTextBoxColumn4.HeaderText = "product_no";
+            this.dataGridTextBoxColumn4.Width = 100;
+            // 
+            // dataGridTextBoxColumn5
+            // 
+            this.dataGridTextBoxColumn5.Format = "";
+            this.dataGridTextBoxColumn5.FormatInfo = null;
+            this.dataGridTextBoxColumn5.HeaderText = "description";
+            this.dataGridTextBoxColumn5.Width = 160;
+            // 
+            // dataGridTextBoxColumn6
+            // 
+            this.dataGridTextBoxColumn6.Format = "";
+            this.dataGridTextBoxColumn6.FormatInfo = null;
+            this.dataGridTextBoxColumn6.HeaderText = "target";
+            this.dataGridTextBoxColumn6.Width = 80;
+            // 
+            // dataGridTextBoxColumn7
+            // 
+            this.dataGridTextBoxColumn7.Format = "";
+            this.dataGridTextBoxColumn7.FormatInfo = null;
+            this.dataGridTextBoxColumn7.HeaderText = "upper_var";
+            this.dataGridTextBoxColumn7.Width = 80;
+            // 
+            // dataGridTextBoxColumn8
+            // 
+            this.dataGridTextBoxColumn8.Format = "";
+            this.dataGridTextBoxColumn8.FormatInfo = null;
+            this.dataGridTextBoxColumn8.HeaderText = "lower_var";
+            this.dataGridTextBoxColumn8.Width = 80;
+            // 
+            // dataGridTextBoxColumn9
+            // 
+            this.dataGridTextBoxColumn9.Format = "";
+            this.dataGridTextBoxColumn9.FormatInfo = null;
+            this.dataGridTextBoxColumn9.HeaderText = "weight";
+            this.dataGridTextBoxColumn9.Width = 80;
+            // 
+            // dataGridTextBoxColumn10
+            // 
+            this.dataGridTextBoxColumn10.Format = "";
+            this.dataGridTextBoxColumn10.FormatInfo = null;
+            this.dataGridTextBoxColumn10.HeaderText = "pack_num";
+            this.dataGridTextBoxColumn10.Width = 100;
             // 
             // mc_starttime
             // 
@@ -156,7 +241,7 @@ namespace TSioex
             // btnClr
             // 
             this.btnClr.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
-            this.btnClr.Location = new System.Drawing.Point(9, 682);
+            this.btnClr.Location = new System.Drawing.Point(9, 637);
             this.btnClr.Name = "btnClr";
             this.btnClr.Size = new System.Drawing.Size(157, 52);
             this.btnClr.TabIndex = 13;
@@ -179,96 +264,23 @@ namespace TSioex
             this.btn_ret_run.Size = new System.Drawing.Size(148, 56);
             this.btn_ret_run.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             // 
-            // dataGridTableStyle1
+            // btnClrAll
             // 
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn1);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn2);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn3);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn4);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn5);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn6);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn7);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn8);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn9);
-            this.dataGridTableStyle1.GridColumnStyles.Add(this.dataGridTextBoxColumn10);
-            this.dataGridTableStyle1.MappingName = "BOX";
-            // 
-            // dataGridTextBoxColumn1
-            // 
-            this.dataGridTextBoxColumn1.Format = "";
-            this.dataGridTextBoxColumn1.FormatInfo = null;
-            this.dataGridTextBoxColumn1.HeaderText = "start_date";
-            this.dataGridTextBoxColumn1.Width = 100;
-            // 
-            // dataGridTextBoxColumn2
-            // 
-            this.dataGridTextBoxColumn2.Format = "";
-            this.dataGridTextBoxColumn2.FormatInfo = null;
-            this.dataGridTextBoxColumn2.HeaderText = "end_date";
-            this.dataGridTextBoxColumn2.Width = 100;
-            // 
-            // dataGridTextBoxColumn3
-            // 
-            this.dataGridTextBoxColumn3.Format = "";
-            this.dataGridTextBoxColumn3.FormatInfo = null;
-            this.dataGridTextBoxColumn3.HeaderText = "operator";
-            this.dataGridTextBoxColumn3.Width = 100;
-            // 
-            // dataGridTextBoxColumn4
-            // 
-            this.dataGridTextBoxColumn4.Format = "";
-            this.dataGridTextBoxColumn4.FormatInfo = null;
-            this.dataGridTextBoxColumn4.HeaderText = "product_no";
-            this.dataGridTextBoxColumn4.Width = 100;
-            // 
-            // dataGridTextBoxColumn5
-            // 
-            this.dataGridTextBoxColumn5.Format = "";
-            this.dataGridTextBoxColumn5.FormatInfo = null;
-            this.dataGridTextBoxColumn5.HeaderText = "description";
-            this.dataGridTextBoxColumn5.Width = 160;
-            // 
-            // dataGridTextBoxColumn6
-            // 
-            this.dataGridTextBoxColumn6.Format = "";
-            this.dataGridTextBoxColumn6.FormatInfo = null;
-            this.dataGridTextBoxColumn6.HeaderText = "target";
-            this.dataGridTextBoxColumn6.Width = 80;
-            // 
-            // dataGridTextBoxColumn7
-            // 
-            this.dataGridTextBoxColumn7.Format = "";
-            this.dataGridTextBoxColumn7.FormatInfo = null;
-            this.dataGridTextBoxColumn7.HeaderText = "upper_var";
-            this.dataGridTextBoxColumn7.Width = 80;
-            // 
-            // dataGridTextBoxColumn8
-            // 
-            this.dataGridTextBoxColumn8.Format = "";
-            this.dataGridTextBoxColumn8.FormatInfo = null;
-            this.dataGridTextBoxColumn8.HeaderText = "lower_var";
-            this.dataGridTextBoxColumn8.Width = 80;
-            // 
-            // dataGridTextBoxColumn9
-            // 
-            this.dataGridTextBoxColumn9.Format = "";
-            this.dataGridTextBoxColumn9.FormatInfo = null;
-            this.dataGridTextBoxColumn9.HeaderText = "weight";
-            this.dataGridTextBoxColumn9.Width = 80;
-            // 
-            // dataGridTextBoxColumn10
-            // 
-            this.dataGridTextBoxColumn10.Format = "";
-            this.dataGridTextBoxColumn10.FormatInfo = null;
-            this.dataGridTextBoxColumn10.HeaderText = "pack_num";
-            this.dataGridTextBoxColumn10.Width = 100;
+            this.btnClrAll.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
+            this.btnClrAll.Location = new System.Drawing.Point(9, 703);
+            this.btnClrAll.Name = "btnClrAll";
+            this.btnClrAll.Size = new System.Drawing.Size(157, 52);
+            this.btnClrAll.TabIndex = 20;
+            this.btnClrAll.Text = "button1";
+            this.btnClrAll.Click += new System.EventHandler(this.btnClrAll_Click);
             // 
             // ProdHistory
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(242)))), ((int)(((byte)(251)))));
-            this.ClientSize = new System.Drawing.Size(640, 480);
+            this.ClientSize = new System.Drawing.Size(1024, 768);
             this.ControlBox = false;
+            this.Controls.Add(this.btnClrAll);
             this.Controls.Add(this.btn_ret_run);
             this.Controls.Add(this.btn_ret_cfg);
             this.Controls.Add(this.btnClr);
@@ -320,5 +332,6 @@ namespace TSioex
         private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn8;
         private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn9;
         private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn10;
+        private System.Windows.Forms.Button btnClrAll;
     }
 }

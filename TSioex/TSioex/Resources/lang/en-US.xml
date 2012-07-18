@@ -87,6 +87,7 @@
     <string skey="modifying">Modifying setting</string>
     <string skey="downloading">Downloading</string>
     <string skey="clearpack">Reset pack number</string>
+    <string skey="emptyhistory">Clear history</string>
     <string skey="done">Operation done</string>
     <string skey="login">Log in</string>
     <string skey="help">Help</string>
@@ -175,7 +176,7 @@
     <string skey="operator">Operator</string>
     <string skey="bootfail">Connection failed. Please check it before continue.</string>
     <string skey="intf_lb_feed_times">Feed times</string>
-    <string skey="intf_ckb_delay">Feed delay(*20ms)</string>
+    <string skey="intf_ckb_delay">Feed delay(*200ms)</string>
     <string skey="intf_handshake">Slave mode</string>
     <string skey="intf_lb_input_fmt">Input trigger</string>
     <string skey="intf_ckb_mem">Memorize</string>
@@ -186,8 +187,11 @@
 
     <string skey="enter_intf_lb_feed_times">Please enter feed times</string>
     <string skey="enter_intf_pulse_width">Please enter pulse width</string>
-    <string skey="enter_intf_ckb_delay">Please enter feed delay(*20ms)</string>
+    <string skey="enter_intf_ckb_delay">Please enter feed delay(*200ms)</string>
 
+    <string skey="enter_newdate">New date in YYYYMMDD(ex:20120131)</string>
+    <string skey="enter_newtime">New time in HHMMSS(ex:230159)</string>
+  
     <string skey="grp_name">Name</string>
     <string skey="grp_amp">Main Amplitude</string>
     <string skey="grp_freq">Main Freq.</string>
@@ -201,8 +205,8 @@
     <string skey="openwei">Release delay(*10ms)</string>
     <string skey="gain">AD speed</string>
     <string skey="cs_filter">AD filter</string>
-    <string skey="col_otime">Pass bucket delay(*10ms)</string>
-    <string skey="col_dtime">Pre weight Delay(*10ms)</string>
+    <string skey="col_otime">Pass delay(*10ms)</string>
+    <string skey="col_dtime">Weight Delay(*10ms)</string>
     <string skey="sub_amp">Sub Amplitude</string>
     <string skey="sub_freq">Zero cycle</string>
 
@@ -212,7 +216,7 @@
     <string skey="sub_time">Sub VIB(*10ms)</string>
     <string skey="sub_filter">Filter</string>
     <string skey="wei_otime">Post release delay(*10ms)</string>
-    <string skey="wei_dtime">Post vibrate delay(*10ms)</string>
+    <string skey="wei_dtime">Post vib delay(*10ms)</string>
     <string skey="motor_speed">Motor speed</string>
 
     <string skey="address">Address</string>
@@ -266,7 +270,7 @@
     <string skey="run_freq_llimit">0</string>
     <string skey="run_freq_ulimit">255</string>
     <string skey="run_time_llimit">0</string>
-    <string skey="run_time_ulimit">65535</string>
+    <string skey="run_time_ulimit">255</string>
     <string skey="run_amp_llimit">0</string>
     <string skey="run_amp_ulimit">255</string>
     <string skey="sub_freq_input_llimit">0</string>
@@ -277,11 +281,11 @@
     <string skey="sub_filter_input_ulimit">255</string>
     <string skey="sub_time_input_llimit">0</string>
     <string skey="sub_time_input_ulimit">65535</string>
-    <string skey="wei_otime_input_llimit">10</string>
+    <string skey="wei_otime_input_llimit">0</string>
     <string skey="wei_otime_input_ulimit">255</string>
     <string skey="wei_dtime_input_llimit">0</string>
     <string skey="wei_dtime_input_ulimit">255</string>
-    <string skey="col_dtime_input_llimit">10</string>
+    <string skey="col_dtime_input_llimit">0</string>
     <string skey="col_dtime_input_ulimit">255</string>
     <string skey="col_otime_input_llimit">0</string>
     <string skey="col_otime_input_ulimit">255</string>
@@ -289,7 +293,7 @@
     <string skey="openwei_input_ulimit">255</string>
     <string skey="motor_speed_input_llimit">0</string>
     <string skey="motor_speed_input_ulimit">255</string>
-
+    
     <string skey="intf_pulse_width_llimit">0</string>
     <string skey="intf_pulse_width_ulimit">200</string>
 

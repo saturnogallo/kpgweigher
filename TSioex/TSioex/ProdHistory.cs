@@ -44,7 +44,7 @@ namespace TSioex
             mc_starttime.DateChanged += new DateRangeEventHandler(UpdateDataGrid);
             mc_endtime.DateChanged += new DateRangeEventHandler(UpdateDataGrid);
             btn_ret_cfg.Click +=new EventHandler(btnRet_Click);
-            btn_ret_cfg.Click += new EventHandler(btnRetRun_Click);
+            btn_ret_run.Click += new EventHandler(btnRetRun_Click);
             //start_date, end_date, operator, product_no, product_desc, target, upper_var, lower_var, weight, pack_num
             UpdateDisplay();
             UpdateList();
@@ -65,6 +65,7 @@ namespace TSioex
         public void UpdateDisplay()
         {
             btnClr.Text = StringResource.str("clearpack");
+            btnClrAll.Text = StringResource.str("emptyhistory");
             lbl_starttime.Text = StringResource.str("start_date");
             lbl_endtime.Text = StringResource.str("end_date");
             lbl_oper.Text = StringResource.str("operator");
@@ -182,9 +183,8 @@ namespace TSioex
 
         private void btnClr_Click(object sender, EventArgs e)
         {
-            
             curr_packer.total_packs = 0;
-            MessageBox.Show(StringResource.str("done"));
+            Program.MsgShow(StringResource.str("done"));
         }
         private UIPacker curr_packer
         {
@@ -204,6 +204,13 @@ namespace TSioex
         {
             Hide();
             Program.SwitchTo("runmode");
+        }
+
+        private void btnClrAll_Click(object sender, EventArgs e)
+        {
+            string txtUpdate = "delete from mains";
+            ExecuteQuery(txtUpdate);
+            Program.MsgShow(StringResource.str("done"));
         }
     }
 }

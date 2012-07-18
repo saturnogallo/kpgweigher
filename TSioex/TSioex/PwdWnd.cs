@@ -117,18 +117,18 @@ namespace TSioex
                     if (new_pwd_input1_pwd == new_pwd_input2_pwd)
                     {
                         Password.set_pwd(user, new_pwd_input1_pwd);
-                        MessageBox.Show(StringResource.str("pwd_done"));
+                        Program.MsgShow(StringResource.str("pwd_done"));
                         
                         btn_return_Click(sender, e);
                     }
                     else
                     {
-                        MessageBox.Show(StringResource.str("notsame_pwd"));
+                        Program.MsgShow(StringResource.str("notsame_pwd"));
                     }
                 }
                 else
                 {
-                    MessageBox.Show(StringResource.str("invalid_pwd"));
+                    Program.MsgShow(StringResource.str("invalid_pwd"));
                 }
             
         }
@@ -147,7 +147,7 @@ namespace TSioex
         private void btn_restore_Click(object sender, EventArgs e)
         {
             RunModeWnd.Reset();
-            MessageBox.Show(StringResource.str("pwd_restore_done"));
+            Program.MsgShow(StringResource.str("pwd_restore_done"));
             btn_return_Click(sender, e);
         }
         private void pwd_GotFocus(object sender, EventArgs e)

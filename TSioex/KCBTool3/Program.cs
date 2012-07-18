@@ -14,6 +14,11 @@ namespace KCBTool3
         static void Main()
         {
             Application.Run(new Form1());
+
+        }
+        public static void MsgShow(string line)
+        {
+            MessageBox.Show(line);
         }
     }
 }

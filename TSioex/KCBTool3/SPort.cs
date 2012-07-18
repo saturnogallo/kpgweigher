@@ -123,7 +123,7 @@ namespace KCBTool3
                 }
                 catch
                 {
-                    MessageBox.Show("so weird " + bufcnt.ToString() + ">" + data.Length);
+                    Program.MsgShow("so weird " + bufcnt.ToString() + ">" + data.Length);
                 }
                 bufcnt++;
                 if (datalen <= bufcnt)
@@ -291,12 +291,12 @@ namespace KCBTool3
             try
             {
                 _serial.Open();
-                _serial.DiscardInBuffer();
             }
             catch (System.Exception e)
             {
-                MessageBox.Show(e.Message);
+                Program.MsgShow(e.Message);
                 Status = PortStatus.ERROR;
+                return false ;
             }
             if (_serial.IsOpen)
             {

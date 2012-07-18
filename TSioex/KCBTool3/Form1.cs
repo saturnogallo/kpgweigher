@@ -144,12 +144,12 @@ namespace KCBTool3
         {
             if(lb_addrfrom.SelectedIndex <= 0)
             {
-                MessageBox.Show(GetText("select_addrfrom"));
+                Program.MsgShow(GetText("select_addrfrom"));
                 return;
             }
             if(lb_addrto.SelectedIndex < 0)
             {
-                MessageBox.Show(GetText("select_addrto"));
+                Program.MsgShow(GetText("select_addrto"));
                 return;
             }
             btn_changeaddr.Visible = false;
@@ -164,12 +164,12 @@ namespace KCBTool3
             
             if (lb_addrfrom.SelectedIndex <= 0)
             {
-                MessageBox.Show(GetText("select_addrfrom"));
+                Program.MsgShow(GetText("select_addrfrom"));
                 return;
             }
             if (lb_typeto.SelectedIndex < 0)
             {
-                MessageBox.Show(GetText("select_addrto"));
+                Program.MsgShow(GetText("select_addrto"));
                 return;
             }
             this.Invoke(new VoidHandler(this.hidetypebtn));
@@ -190,7 +190,7 @@ namespace KCBTool3
                 nodemap[id]["NumOfDataToBePgmed"] = 45;
                 Thread.Sleep(1000);
                 UpdateAllNodeStatus();
-                MessageBox.Show(GetText("success"));
+                Program.MsgShow(GetText("success"));
                 btn_changetype.Visible = true;
             }
              */
@@ -202,17 +202,19 @@ namespace KCBTool3
                 {
                     nodemap[id]["NumOfDataToBePgmed"] = 45;
                     Thread.Sleep(1000);
-                    MessageBox.Show(GetText("success"));
+                    Program.MsgShow(GetText("success"));
                 }
                 else
                 {
-                    MessageBox.Show(GetText("fail"));
+                    Program.MsgShow(GetText("fail"));
                 }
                 btn_changeaddr.Visible = true;
             }
         }
         private void btn_choosefw_Click(object sender, EventArgs e)
         {
+            openFileDialog1.Filter = "BIN File(*.bin)|*.bin";
+            openFileDialog1.InitialDirectory = "\\Storage Card";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 if (File.Exists(openFileDialog1.FileName))
@@ -274,7 +276,7 @@ namespace KCBTool3
         {
             if(lb_addrfrom.SelectedIndex < 0)
             {
-                MessageBox.Show(GetText("select_addrfrom"));
+                Program.MsgShow(GetText("select_addrfrom"));
                 return;
             }
 
@@ -299,9 +301,9 @@ namespace KCBTool3
             Thread.Sleep(1000);
             UpdateAllNodeStatus();
             if (ret == "")
-                MessageBox.Show(GetText("success"));
+                Program.MsgShow(GetText("success"));
             else
-                MessageBox.Show(GetText("fail"));
+                Program.MsgShow(GetText("fail"));
             
         }
         private void btn_refresh_Click(object sender, EventArgs e)
@@ -310,50 +312,94 @@ namespace KCBTool3
             UpdateAllNodeStatus();
             btn_refresh.Visible = true;
         }
+        private void copyonefile(string src, string dst)
+        {
+            if(File.Exists(dst))
+            {
+                FileInfo fa = new FileInfo(dst);
+                if ((fa.Attributes & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                {
+                    fa.Attributes = fa.Attributes & (~FileAttributes.ReadOnly);
+                }
+            }
+            File.Copy(src, dst, true);
 
-        private void btn_updateprg_Click(object sender, EventArgs e)
+        }
+        private const string basedir = "\\NANDFlash\\TSioex";
+
+        //private const string basedir = "\\Storage Card\\TSioex";
+        private void btn_updatepic_Click(object sender, EventArgs e)
         {
             bool done = false;
+            openFileDialog1.Filter = "File(*.exe)|*.exe";
+            openFileDialog1.InitialDirectory = "\\Storage Card";
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 FileInfo fi2 = new FileInfo(openFileDialog1.FileName);
                 string SelectedPath = fi2.Directory.FullName;
                 try
                 {
-                    foreach (string file in Directory.GetFiles(SelectedPath + "\\prodpic\\zh-CN", "*.jpg"))
+                    if (Directory.Exists(SelectedPath + "\\prodpic\\zh-CN"))
                     {
-                        FileInfo fi = new FileInfo(file);
-                        File.Copy(file, "\\TSioex\\prodpic\\zh-CN\\" + fi.Name, true);
+                        foreach (string file in Directory.GetFiles(SelectedPath + "\\prodpic\\zh-CN", "*.jpg"))
+                        {
+                            FileInfo fi = new FileInfo(file);
+                            copyonefile(fi.FullName, basedir + "\\prodpic\\zh-CN\\" + fi.Name);
+                        }
                     }
-                    foreach (string file in Directory.GetFiles(SelectedPath + "\\prodpic\\en-US", "*.jpg"))
+                    if (Directory.Exists(SelectedPath + "\\prodpic\\en-US"))
                     {
-                        FileInfo fi = new FileInfo(file);
-                        File.Copy(file, "\\TSioex\\prodpic\\en-US\\" + fi.Name, true);
+                        foreach (string file in Directory.GetFiles(SelectedPath + "\\prodpic\\en-US", "*.jpg"))
+                        {
+                            FileInfo fi = new FileInfo(file);
+                            copyonefile(fi.FullName, basedir + "\\prodpic\\en-US\\" + fi.Name);
+                        }
+                    }
+                    done = true;
+                }
+                catch (Exception ex)
+                {
+                    done = false;
+                }
+                if (done)
+                    Program.MsgShow(GetText("success"));
+                else
+                    Program.MsgShow(GetText("fail"));
+
+            }
+        }
+        private void btn_updateprg_Click(object sender, EventArgs e)
+        {
+            bool done = false;
+            openFileDialog1.InitialDirectory = "\\Storage Card";
+            openFileDialog1.Filter = "File(*.exe)|*.exe";
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                FileInfo fi2 = new FileInfo(openFileDialog1.FileName);
+                string SelectedPath = fi2.Directory.FullName;
+                try
+                {
+                    if (File.Exists(SelectedPath + "\\TSioex.exe"))
+                    {
+                        copyonefile(SelectedPath + "\\TSioex.exe", basedir+"\\Tsioex.exe");
                     }
                     foreach (string file in Directory.GetFiles(SelectedPath, "*.dll"))
                     {
                         FileInfo fi = new FileInfo(file);
-                        File.Copy(file, "\\TSioex\\" + fi.Name, true);
+                        copyonefile(file, basedir + "\\" + fi.Name);
                     }
-
-                    if (File.Exists(SelectedPath + "\\TSioex.exe"))
-                    {
-                        File.Copy(SelectedPath + "\\TSioex.exe", "\\TSioex\\Tsioex.exe", true);
-                        {
-                            done = true;
-                        }
-                    }
+                    done = true;
                 }
-                catch
+                catch(Exception ex)
                 {
                     done = false;
                 }
 
             }
             if (done)
-                MessageBox.Show(GetText("success"));
+                Program.MsgShow(GetText("success"));
             else
-                MessageBox.Show(GetText("fail"));
+                Program.MsgShow(GetText("fail"));
 
         }
         public static string GetRegistData(string name)

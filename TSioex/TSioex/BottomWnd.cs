@@ -31,10 +31,11 @@ namespace TSioex
             intf_ckb_delay.GotFocus += new EventHandler(TextBox_GotFocus);
             intf_pulse_width.GotFocus += new EventHandler(TextBox_GotFocus);
             intf_lb_feed_times.GotFocus += new EventHandler(TextBox_GotFocus);
-            intf_input_trigger.GotFocus += new EventHandler(intf_input_trigger_GotFocus);
-            intf_output_trigger.GotFocus += new EventHandler(intf_input_trigger_GotFocus);
+            intf_input_trigger.SelectedIndexChanged += new EventHandler(intf_input_trigger_GotFocus);
+            intf_output_trigger.SelectedIndexChanged += new EventHandler(intf_input_trigger_GotFocus);
             intf_handshake.Click +=new EventHandler(intf_handshake_Click);
             intf_ckb_mem.Click += new EventHandler(intf_handshake_Click);
+            btn_run.Click += new EventHandler(btn_run_Click);
             this.panel1.BackColor = SingleModeWnd.bgWindow;
         }
 
@@ -81,7 +82,8 @@ namespace TSioex
         private void ApplySetting()
         {
             UInt16 delay = UInt16.Parse(intf_ckb_delay.Text.ToString());
-
+            if (intf_input_trigger.SelectedIndex < 0 || intf_output_trigger.SelectedIndex < 0)
+                return;
             vib_intf.b_Hasdelay = (delay > 0);
             vib_intf.b_Hasmem = intf_ckb_mem.Checked;
             vib_intf.b_Handshake = intf_handshake.Checked;
@@ -90,6 +92,8 @@ namespace TSioex
             vib_intf.fmt_input = Convert.ToUInt16(intf_input_trigger.SelectedIndex);
             vib_intf.fmt_output = Convert.ToUInt16(intf_output_trigger.SelectedIndex);
             NodeMaster.SetNodeReg(this.curr_packer.bot_addr, new string[] { "target_weight", "cs_filter" }, new UInt32[] { vib_intf.buf, Convert.ToUInt16(intf_pulse_width.Text) });
+            NodeMaster.Action(new byte[]{this.curr_packer.bot_addr}, "intf");
+
             UpdateData();
         }
         private void btn_return_Click(object sender, EventArgs e)

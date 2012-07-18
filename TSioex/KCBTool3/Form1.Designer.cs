@@ -50,6 +50,7 @@
             this.lbl_fwstatus = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.btn_updatepic = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -107,11 +108,12 @@
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.btn_updatepic);
             this.panel1.Controls.Add(this.btn_updateprg);
             this.panel1.Controls.Add(this.label2);
             this.panel1.Location = new System.Drawing.Point(389, 26);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(407, 102);
+            this.panel1.Size = new System.Drawing.Size(572, 102);
             // 
             // btn_updateprg
             // 
@@ -262,6 +264,16 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // btn_updatepic
+            // 
+            this.btn_updatepic.Font = new System.Drawing.Font("Tahoma", 18F, System.Drawing.FontStyle.Regular);
+            this.btn_updatepic.Location = new System.Drawing.Point(314, 24);
+            this.btn_updatepic.Name = "btn_updatepic";
+            this.btn_updatepic.Size = new System.Drawing.Size(227, 63);
+            this.btn_updatepic.TabIndex = 1;
+            this.btn_updatepic.Text = "Update Pictures";
+            this.btn_updatepic.Click += new System.EventHandler(this.btn_updatepic_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -313,6 +325,7 @@
         private System.Windows.Forms.Label lbl_fwstatus;
         private System.Windows.Forms.Label lbl_fw;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.Button btn_updatepic;
     }
 }
 

@@ -44,20 +44,25 @@ namespace TSioex
             btn_selectall.SetStyle(Color.Orange, MyButtonType.roundRectButton);
             ellipseWithImageBrush.MouseUp +=new MouseEventHandler(this.ellipseWithImageBrush_MouseLeftButtonUp);
 
-            sub_freq_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            sub_amp_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            sub_time_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            sub_filter_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            wei_otime_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            wei_dtime_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            col_dtime_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            col_otime_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            openwei_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            motor_speed_input.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            run_freq.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            run_amp.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
-            run_time.SetStyle(Color.Bisque, MyButtonType.round2RectButton);
+            
+            sub_amp_input.SetStyle(Color.Yellow, MyButtonType.round2RectButton);
+            sub_time_input.SetStyle(Color.Yellow, MyButtonType.round2RectButton);
 
+            sub_freq_input.SetStyle(Color.MediumBlue, MyButtonType.round2RectButton); //zero cycle
+            sub_filter_input.SetStyle(Color.MediumBlue, MyButtonType.round2RectButton);
+            wei_otime_input.SetStyle(Color.MediumBlue, MyButtonType.round2RectButton);
+            
+            openwei_input.SetStyle(Color.MediumBlue, MyButtonType.round2RectButton);
+            motor_speed_input.SetStyle(Color.MediumBlue, MyButtonType.round2RectButton);
+            col_dtime_input.SetStyle(Color.MediumBlue, MyButtonType.round2RectButton); //delay before weight
+
+            col_otime_input.SetStyle(Color.Green, MyButtonType.round2RectButton);
+            wei_dtime_input.SetStyle(Color.Green, MyButtonType.round2RectButton); //delay after vibrate
+
+            run_freq.SetStyle(Color.MediumPurple, MyButtonType.round2RectButton);
+            run_amp.SetStyle(Color.MediumPurple, MyButtonType.round2RectButton);
+            run_time.SetStyle(Color.MediumPurple, MyButtonType.round2RectButton);
+            
 
             sub_freq_input.ValidClick +=new EventHandler(this.input_GotFocus);
             sub_amp_input.ValidClick += new EventHandler(this.input_GotFocus);
@@ -101,7 +106,7 @@ namespace TSioex
             lbl_speed.Text = "";
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
-            uiTimer.Interval = 250;
+            uiTimer.Interval = 100;
             uiTimer.Enabled = true;
             this.panel1.BackColor = SingleModeWnd.bgWindow;
             this.panel2.BackColor = SingleModeWnd.bgWindow;
@@ -179,7 +184,7 @@ namespace TSioex
             {
                 curr_packer.SaveCurrentConfig(1 + 2 + 4);
                 lastcall = "";
-                //MessageBox.Show(StringResource.str("store_done"));
+                //Program.MsgShow(StringResource.str("store_done"));
             }
             if (lastcall == "")
             {
@@ -235,11 +240,12 @@ namespace TSioex
         private Button last_btn;
         private object tlock = new object();
         private static bool tmlock = false;
+        private int idlehit = 0;
         void uiTimer_Tick(object sender, EventArgs e)
         {
-            if (Program.topwnd != "singlemode")
+            if(Program.topwnd != "singlemode")
                 return;
-            if (tmlock)
+            if(tmlock)
                 return;
             tmlock = true;
             
@@ -254,15 +260,36 @@ namespace TSioex
                         HandleLongCommand();
                     else
                     {
-                        RefreshNodeUI();
                         curr_packer.nc.Step();
+                        if (curr_packer.status != PackerStatus.RUNNING)
+                        {
+                            RefreshNodeUI();
+                            runPan1.ReDraw();
+                        }
+                        else
+                        {
+                            
+                            if ((NodeCombination.phase == 40) || (NodeCombination.phase == 30))
+                                idlehit++;
+                            else
+                                idlehit = 0;
+                        }
                     }
                 }
-                if (NodeCombination.q_hits.Count > 0)
+                if ((curr_packer.status == PackerStatus.RUNNING) || (NodeCombination.q_hits.Count > 0))
                 {
-                    HitCombineNodeUI(NodeCombination.q_hits.Dequeue());
+                    
+                    while ((NodeCombination.q_hits.Count > 0))
+                        HitCombineNodeUI(NodeCombination.q_hits.Dequeue());
                     tmlock = false;
-                    return;
+
+                    if ((NodeCombination.phase == 50) || idlehit > 10)
+                    {
+                        if(idlehit > 10)
+                            RefreshNodeUI();
+                        runPan1.ReDraw();
+                        idlehit = 0;
+                    }
                 }
             }
             tmlock = false;
@@ -276,22 +303,22 @@ namespace TSioex
                     byte n = naddr;
                     double wt = NodeMaster.GetWeight(n);
                     if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
-                        runPan1.SetText(n, wt.ToString("F1"));
+                        runPan1.SetText(n, wt.ToString("F1"),false);
                     else
                     {
                         if (wt > WeighNode.MAX_VALID_WEIGHT && wt < 65537)
                         {
-                            runPan1.SetText(n, "ERR");
-                            runPan1.SetStatus("weightnode", n, PanStatus.ERROR);
+                            runPan1.SetText(n, "ERR",false);
+                            runPan1.SetStatus("weightnode", n, PanStatus.ERROR,false);
                         }
                     }
                     if (NodeMaster.GetStatus(n) == NodeStatus.ST_LOST || NodeMaster.GetStatus(n) == NodeStatus.ST_DISABLED)
                     {
-                        runPan1.SetStatus("weightbar", n, PanStatus.DISBALED);
+                        runPan1.SetStatus("weightbar", n, PanStatus.DISBALED,false);
                     }
                     if (NodeMaster.GetStatus(n) == NodeStatus.ST_IDLE)
                     {
-                        runPan1.SetStatus("weightbar", n , PanStatus.IDLE);
+                        runPan1.SetStatus("weightbar", n , PanStatus.IDLE,false);
                     }
                 }
             }
@@ -303,6 +330,7 @@ namespace TSioex
                 lbl_totalpack.Text = p.total_sim_packs.ToString();
                 lbl_totalweights.Text = p.total_sim_weights.ToString("F1");
             }
+            
         }
         public void Disable(bool state)
         {
@@ -314,28 +342,57 @@ namespace TSioex
             {
                 byte n = naddr;
 
-                if (!ce.release_addrs.Contains(n))
-                    continue;
                 double wt = NodeMaster.GetWeight(n);
                 if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
-                    runPan1.SetText(n, NodeMaster.GetWeight(n).ToString("F1"));
+                    runPan1.SetText(n, NodeMaster.GetWeight(n).ToString("F1"), false);
+                else
+                {
+                    if (wt > WeighNode.MAX_VALID_WEIGHT && wt < 65537)
+                    {
+                        runPan1.SetText(n, "ERR", false);
+                        runPan1.SetStatus("weightnode", n, PanStatus.ERROR, false);
+                    }
+                }
+                if (!ce.release_addrs.Contains(n))
+                {
+                    if (NodeMaster.GetStatus(n) == NodeStatus.ST_LOST || NodeMaster.GetStatus(n) == NodeStatus.ST_DISABLED)
+                    {
+                        runPan1.SetStatus("weightbar", n, PanStatus.DISBALED, false);
+                    }
+                    else
+                    {
+                        if (n != curr_packer.vib_addr)
+                        {
+                            runPan1.SetStatus("weightbar", n, PanStatus.IDLE, false);
+                        }
+                    }
+                    continue;
+                }
 
                 if (NodeMaster.GetStatus(n) == NodeStatus.ST_LOST || NodeMaster.GetStatus(n) == NodeStatus.ST_DISABLED)
                 {
-                    runPan1.SetStatus("weightbar", n, PanStatus.DISBALED);
+                    runPan1.SetStatus("weightbar", n, PanStatus.DISBALED,false);
                 }else{
                     if (n != curr_packer.vib_addr)
                     {
                         if (ce.release_addrs.Contains(n))
                         {
-                            runPan1.SetStatus("weightbar", n, PanStatus.RELEASE);
+                            runPan1.SetStatus("weightbar", n, PanStatus.RELEASE,false);
                         }
                         else
                         {
-                            runPan1.SetStatus("weightbar", n, PanStatus.IDLE);
+                            runPan1.SetStatus("weightbar", n, PanStatus.IDLE,false);
                         }
                      }
                 }
+            }
+            UIPacker p = curr_packer;
+            if (p.status == PackerStatus.RUNNING)
+            {
+                lbl_speed.Text = p.speed.ToString();
+                lbl_lastweight.Text = p.last_pack_weight.ToString("F1");
+                lbl_totalpack.Text = p.total_sim_packs.ToString();
+                lbl_totalweights.Text = p.total_sim_weights.ToString("F1");
             }
         }
         
@@ -507,7 +564,7 @@ namespace TSioex
             }
             catch (System.Exception e)
             {
-                //MessageBox.Show("Invalid Parameter");
+                //Program.MsgShow("Invalid Parameter");
                 return;
             }
         }
@@ -515,7 +572,7 @@ namespace TSioex
         {
             if (curr_packer.status == PackerStatus.RUNNING)
             {
-                //MessageBox.Show("is_running");
+                //Program.MsgShow("is_running");
                 return;
             }
             string regname = (sender as RectButton).Name;
@@ -524,8 +581,15 @@ namespace TSioex
 
         private void btn_action_Click(object sender, EventArgs e)
         {
+
             byte n = (byte)curr_node_index;
             string name = (sender as RectButton).Name;
+            if (curr_packer.status == PackerStatus.RUNNING)
+            {
+                //Program.MsgShow("is_running");
+                return;
+            }
+
             if (name == "btn_mainvib")
             {
                 NodeMaster.Action(new byte[] { curr_packer.bot_addr }, "fill");
@@ -576,22 +640,31 @@ namespace TSioex
             if (curr_packer.status == PackerStatus.RUNNING)
             {
                 curr_packer.StopRun();
-                this.btn_trial.Text = StringResource.str("sall_start");
+                this.btn_trial.Text = StringResource.str("cmd_run");
+                uiTimer.Enabled = false;
+                uiTimer.Interval = 100;
+                uiTimer.Enabled = true;
+
             }
             else
             {
                 curr_packer.bSimulate = true;
+                uiTimer.Enabled = false;
+                uiTimer.Interval = 10;
+                uiTimer.Enabled = true;
+
                 curr_packer.StartRun();
                 this.btn_trial.Text = StringResource.str("sall_stop");
+
             }
         }
         private void btn_trial_Click(object sender, EventArgs e)
         {
             lastcall = "StartStop";
             if(curr_packer.status == PackerStatus.RUNNING)
-                ShowStatus(StringResource.str("stopping"));
+                ShowStatus("stopping");
             else
-                ShowStatus(StringResource.str("starting"));
+                ShowStatus("starting");
         }
         private void btn_save_Click(object sender, EventArgs e)
         {
@@ -668,7 +741,7 @@ namespace TSioex
         {
             if (curr_packer.pkg_confs.Keys.Contains<string>(data))
             {
-                MessageBox.Show(StringResource.str("used_prdno"));
+                Program.MsgShow(StringResource.str("used_prdno"));
                 lastcall = "select_prdno";
             }
             else
@@ -709,7 +782,7 @@ namespace TSioex
         {
             if (curr_packer.status == PackerStatus.RUNNING)
             {
-                //MessageBox.Show("is_running");
+                //Program.MsgShow("is_running");
                 return;
             }
             string regname = (sender as Label).Name;

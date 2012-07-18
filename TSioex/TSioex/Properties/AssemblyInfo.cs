@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("TSioex")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Agilent Technologies")]
-[assembly: AssemblyProduct("TSioex")]
-[assembly: AssemblyCopyright("Copyright © Agilent Technologies 2012")]
+[assembly: AssemblyCompany("KingPak")]
+[assembly: AssemblyProduct("KingPak Multi-head Weigher")]
+[assembly: AssemblyCopyright("Copyright © KingPak 2012")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -29,7 +29,7 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-[assembly: AssemblyVersion("1.0.0.1")]
+[assembly: AssemblyVersion("1.0.0.14")]
 
 // Below attribute is to suppress FxCop warning "CA2232 : Microsoft.Usage : Add STAThreadAttribute to assembly"
 // as Device app does not support STA thread.

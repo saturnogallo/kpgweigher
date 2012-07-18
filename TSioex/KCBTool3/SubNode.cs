@@ -654,7 +654,7 @@ namespace KCBTool3
                     }
                     catch (System.Exception e)
                     {
-                       MessageBox.Show(e.Message);                 	
+                        Program.MsgShow(e.Message);                 	
                     }
                 }
                 status = NodeStatus.ST_IDLE;
@@ -672,7 +672,7 @@ namespace KCBTool3
                     }
                     catch (System.Exception e)
                     {
-                        MessageBox.Show(e.Message);                 	
+                        Program.MsgBox(e.Message);                 	
                     }
                 }
             }
@@ -683,7 +683,7 @@ namespace KCBTool3
         /*
          * The function wait until the regname data equal to value.
          * It is only used for long time operation such as EEPROM programming
-         */
+      
         protected void WaitUntilGetValue(string regname, UInt32 value)
         {
             do 
@@ -696,6 +696,7 @@ namespace KCBTool3
                 this[regname] = null;
             } while (true);
         }
+            */
         /*
          * Load all the reg value from the board
          */

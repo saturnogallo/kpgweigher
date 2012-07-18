@@ -84,7 +84,7 @@ namespace TSioex
 #endregion
         
 #region summarydata
-        private Queue<onepack> packhist;
+        private List<onepack> packhist;
         public double total_weights;
         public UInt32 total_packs;
         public UInt32 speed;
@@ -132,7 +132,7 @@ namespace TSioex
             pkg_confs.LoadConfigFromFile();
 
             _curr_cfg = new PackerConfig();
-            packhist = new Queue<onepack>();
+            packhist = new List<onepack>();
             
         }
         private void ResetHistory()
@@ -142,7 +142,11 @@ namespace TSioex
             last_one_pack.bucket = null;
             last_one_pack.weight = 0.0;
         }
-
+        public bool screen(onepack po)
+        {
+            return (po.time < lastmin);
+        }
+        private DateTime lastmin = DateTime.Now;
         public void AddNewPack(onepack o)
         {
             if (!bSimulate)
@@ -157,28 +161,10 @@ namespace TSioex
             }
             last_one_pack = o;
 
-            packhist.Enqueue(o);
-            if (packhist.Count > 500)
-            {
-                packhist.Dequeue();
-            }
-            //update the speed
-            long count = 0;
-            DateTime lastmin = DateTime.Now;
-            lastmin = lastmin.Subtract(new TimeSpan(0, 1, 0));
-            foreach (onepack op in packhist)
-            {
-                if (op.time < lastmin)
-                {
-                    count = count + 1;
-                }
-                else
-                {
-                    count = packhist.Count - count;
-                    break;
-                }
-            }
-            speed = (UInt32)count;
+            packhist.Add(o);
+            lastmin = DateTime.Now.AddMinutes(-1);
+            packhist.RemoveAll(new Predicate<onepack>(screen));
+            speed = (UInt32)packhist.Count;
             if (bSimulate)
                 return;
             if (total_packs % 100 == 1) //update record for every 100 packs
@@ -352,6 +338,7 @@ namespace TSioex
         {
             rStart = DateTime.Now;
             ProdHistory.InitNewRun(this);
+            nc.Start();
             NodeMaster.Action(this.wn_addrs, "start");
             NodeMaster.Action(new byte[]{this.bot_addr}, "start");
             status = PackerStatus.RUNNING;
@@ -361,6 +348,7 @@ namespace TSioex
             NodeMaster.Action(new byte[]{ this.bot_addr }, "stop");
             NodeMaster.Action(this.wn_addrs, "stop");
             Thread.Sleep(300);
+            nc.Stop(100);
             status = PackerStatus.IDLE;
             
             if (!bSimulate)
@@ -373,7 +361,6 @@ namespace TSioex
                 total_sim_packs = 0;
                 total_sim_weights = 0;
             }
-
         }
         //update weight of each node based on current setting
         public void UpdateEachNodeTarget()

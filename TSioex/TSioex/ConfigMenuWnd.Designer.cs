@@ -51,9 +51,9 @@
             // 
             this.lbl_title.Font = new System.Drawing.Font("Arial", 36F, System.Drawing.FontStyle.Regular);
             this.lbl_title.ForeColor = System.Drawing.Color.Green;
-            this.lbl_title.Location = new System.Drawing.Point(365, 36);
+            this.lbl_title.Location = new System.Drawing.Point(46, 36);
             this.lbl_title.Name = "lbl_title";
-            this.lbl_title.Size = new System.Drawing.Size(287, 64);
+            this.lbl_title.Size = new System.Drawing.Size(907, 81);
             this.lbl_title.Text = "label11";
             this.lbl_title.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 

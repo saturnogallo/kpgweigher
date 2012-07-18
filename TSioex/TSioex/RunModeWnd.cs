@@ -10,14 +10,37 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 namespace TSioex
 {
     public partial class RunModeWnd : Form
     {
+[StructLayout(LayoutKind.Sequential)]
+public struct SystemTime
+{
+public ushort wYear;
+public ushort wMonth;
+public ushort wDayOfWeek;
+public ushort wDay;
+public ushort wHour;
+public ushort wMinute;
+public ushort wSecond;
+public ushort wMiliseconds;
+}
+[DllImport("coredll")]
+public static extern bool SetLocalTime(ref SystemTime sysTime); //设置本地时间
+//public static extern bool SetSystemTime(ref SystemTime sysTime); //设置系统时间
+
+
+
         //[DllImport("user32.dll", EntryPoint = "ShowCursor", CharSet = CharSet.Auto)]
         //public static extern int ShowCursor(int bShow);
         public static int ShowCursor(int bShow)
         {
+            if (bShow == 0)
+                Cursor.Hide();
+            else
+                Cursor.Hide();//Cursor.Show();
             return 0;
         }
         private System.Windows.Forms.Timer tm_cursor; //timer for cursor hiding
@@ -69,15 +92,14 @@ namespace TSioex
             lastcalls = new Queue<string>();
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
-            uiTimer.Interval = 250; //250ms for UI update
+            uiTimer.Interval = 100; //250ms for UI update
             uiTimer.Enabled = true; ;
 
             tm_cursor = new System.Windows.Forms.Timer();
             tm_cursor.Tick += new EventHandler(tm_cursor_Tick);
             tm_cursor.Interval = 5000;
             this.MouseUp += new MouseEventHandler(RunMode_MouseMove);
-            this.MouseDown += new MouseEventHandler(RunModeWnd_MouseDown);
-
+            this.Click += new EventHandler(RunModeWnd_Click);
             btn_allempty.SetStyle(Color.Orange, MyButtonType.roundRectButton);
             btn_allzero.SetStyle(Color.Orange, MyButtonType.roundRectButton);
             runPan1.Init(NodeAgent.NodeNum,false);
@@ -99,6 +121,8 @@ namespace TSioex
             lbl_alert2.Click += new EventHandler(this.lbl_alert_MouseLeftButtonUp);
             lbl_alert3.Click += new EventHandler(this.lbl_alert_MouseLeftButtonUp);
             lbl_alert4.Click += new EventHandler(this.lbl_alert_MouseLeftButtonUp);
+
+            
             UpdateSysConfigUI();
             UpdateAlertWindow(false);
             txt_oper.Visible = false;
@@ -106,22 +130,25 @@ namespace TSioex
             lbl_speed.Text = "";
             lbl_lastweight.Text = "";
             lbl_totalpack.Text = "";
+            ShowCursor(0);
         }
 
-        void RunModeWnd_MouseDown(object sender, MouseEventArgs e)
+        void RunModeWnd_Click(object sender, EventArgs e)
         {
-            Region r = new Region(this.title_speed.ClientRectangle);
-            Point p = new Point(e.X, e.Y);
-            if (r.IsVisible(p))
-                this.title_speed_MouseDown(sender, e);
+            if(lbl_datetime.Bounds.Contains(MousePosition.X,MousePosition.Y))
+            {
+                  lbl_datetime_ParentChanged(sender, e);
+            }
+            if (title_speed.Bounds.Contains(MousePosition.X, MousePosition.Y))
+            {
+                this.title_speed_MouseLeftButtonUp(sender, e);
+            }
+
         }
+
         #region mouse hide after 5 seconds in running mode
         void RunMode_MouseMove(object sender, MouseEventArgs e)
         {
-            Region r = new Region(this.title_speed.ClientRectangle);
-            Point p = new Point(e.X, e.Y);
-            if (r.IsVisible(p))
-                this.title_speed_MouseLeftButtonUp(sender, e);
             if (!bShowCursor)
             {
                 ShowCursor(1);
@@ -140,11 +167,6 @@ namespace TSioex
             tm_cursor.Enabled = false;
         }
         #endregion
-        private void title_speed_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (ts_pwd == null)
-                ts_pwd = new TimeSpan(DateTime.Now.Ticks);
-        }
 
         //hide start button for nonvalid license
         public void Disable(bool state)
@@ -177,6 +199,7 @@ namespace TSioex
             {
                 UpdateNodeUI(n);
             }
+            runPan1.ReDraw();
             if (lbl_status.Text.ToString() != "")
             {
                 lbl_status.ForeColor = Color.Red;
@@ -234,27 +257,27 @@ namespace TSioex
             {
                 wt = NodeMaster.GetWeight(n);
                 ct = wt.ToString("F1");
-                runPan1.SetStatus("passbar",n,PanStatus.IDLE);
+                runPan1.SetStatus("passbar",n,PanStatus.IDLE,false);
             }
             else
             {
                 if (AlertWnd.b_show_alert && AlertWnd.b_turnon_alert)
                 {
-                    runPan1.SetStatus("passbar", n, PanStatus.ERROR);
+                    runPan1.SetStatus("passbar", n, PanStatus.ERROR,false);
                     lbl_status.Text = StringResource.str(err.Substring(0, err.IndexOf(';'))) + "\n";
-                    runPan1.SetText(n, StringResource.str(err.Substring(0, err.IndexOf(';'))));
+                    runPan1.SetText(n, StringResource.str(err.Substring(0, err.IndexOf(';'))),false);
                 }
             }
             if (NodeMaster.GetStatus(n) == NodeStatus.ST_LOST || NodeMaster.GetStatus(n) == NodeStatus.ST_DISABLED)
             {
-                runPan1.SetStatus("weightbar",n, PanStatus.DISBALED);
+                runPan1.SetStatus("weightbar",n, PanStatus.DISBALED,false);
             }
             if (NodeMaster.GetStatus(n) == NodeStatus.ST_IDLE)
             {
-                runPan1.SetStatus("weightbar", n, PanStatus.IDLE);
+                runPan1.SetStatus("weightbar", n, PanStatus.IDLE,false);
             }
             if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
-                runPan1.SetText(n,ct);
+                runPan1.SetText(n,ct,false);
         }
         public void RefreshRunNodeUI() //node ui update at run time
         {
@@ -269,11 +292,11 @@ namespace TSioex
 
                     double wt = NodeMaster.GetWeight(n);
                     if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
-                        runPan1.SetText(n,wt.ToString("F1"));
+                        runPan1.SetText(n,wt.ToString("F1"),false);
 
                     if (NodeMaster.GetStatus(n) == NodeStatus.ST_LOST || NodeMaster.GetStatus(n) == NodeStatus.ST_DISABLED)
                     {
-                        runPan1.SetStatus("weightbar", n, PanStatus.ERROR);
+                        runPan1.SetStatus("weightbar", n, PanStatus.ERROR,false);
                     }
                     string err = NodeMaster.GetErrors(n);
                     if (err != "" && AlertWnd.b_turnon_alert && AlertWnd.b_show_alert)
@@ -299,7 +322,7 @@ namespace TSioex
                 if (AlertWnd.b_turnon_alert && AlertWnd.b_stop_onalert && (curr_packer.status == PackerStatus.RUNNING))
                     btn_start_click(null, null);
             }
-
+            runPan1.ReDraw();
         }
         //update UI when a packer is hitted
         public void CombineNodeUI(CombineEventArgs ce)
@@ -320,19 +343,19 @@ namespace TSioex
                 }
 
                 if (wt > -1000 && wt <= WeighNode.MAX_VALID_WEIGHT)
-                    runPan1.SetText(naddr,wt.ToString("F1"));
+                    runPan1.SetText(naddr,wt.ToString("F1"),false);
 
                 //update status display
                 if (NodeMaster.GetStatus(naddr) == NodeStatus.ST_LOST || NodeMaster.GetStatus(naddr) == NodeStatus.ST_DISABLED)
                 {
-                    runPan1.SetStatus("weightbar",naddr,PanStatus.DISBALED);
+                    runPan1.SetStatus("weightbar",naddr,PanStatus.DISBALED,false);
                 }
                 else if (naddr != curr_packer.vib_addr)
                 {
                     if (ce.release_addrs.Contains(naddr))
-                        runPan1.SetStatus("weightbar",naddr,PanStatus.RELEASE);
+                        runPan1.SetStatus("weightbar",naddr,PanStatus.RELEASE,false);
                     else
-                        runPan1.SetStatus("weightbar", naddr,PanStatus.IDLE);
+                        runPan1.SetStatus("weightbar", naddr,PanStatus.IDLE,false);
                 }
             }
             //Update speed information
@@ -344,9 +367,9 @@ namespace TSioex
                 lbl_totalpack.Text = p.total_packs.ToString();
                 RefreshVibUI();
             }
-            
         }
         #endregion
+        private int idlehit = 0;
         private static bool tmlock = false; //lock for timer handler
         void uiTimer_Tick(object sender, EventArgs e)
         {
@@ -362,6 +385,11 @@ namespace TSioex
 
             if (lastcall != "")
             {
+                if (lastcall == "newtime")
+                {
+                    lastcall = "";
+                    Program.kbdwnd.Init(StringResource.str("enter_newtime"), "newtime", false, KbdData);
+                }
                 if (lastcall == "StartStop")
                 {
                     ToggleStartStop();
@@ -382,17 +410,28 @@ namespace TSioex
             else
             {
                 curr_packer.nc.Step();
+                if ((NodeCombination.phase == 40) || (NodeCombination.phase == 30))
+                    idlehit++;
+                else
+                    idlehit = 0;
             }
-            if (NodeCombination.q_hits.Count > 0)
+            if(NodeCombination.q_hits.Count > 0)
             {
-                CombineNodeUI(NodeCombination.q_hits.Dequeue());
+                while((NodeCombination.q_hits.Count > 0))
+                    CombineNodeUI(NodeCombination.q_hits.Dequeue());
                 tmlock = false;
                 return;
             }
             if (p.status != PackerStatus.RUNNING)
                 RefreshNodeUI();
             else
-                RefreshRunNodeUI();
+            {
+                if ((NodeCombination.phase == 50) || (idlehit > 10))
+                {
+                    idlehit = 0;
+                    RefreshRunNodeUI();
+                }
+            }
             tmlock = false;
         }
 
@@ -430,6 +469,9 @@ namespace TSioex
                 this.btn_allstart.Text = StringResource.str("all_start");
                 btn_allstart.SetStyle(Color.Green, MyButtonType.round2RectButton);
                 //show cursor;
+                uiTimer.Enabled = false;
+                uiTimer.Interval = 100;
+                uiTimer.Enabled = true;
                 tm_cursor.Enabled = false;
                 ShowCursor(1);
                 bShowCursor = true;
@@ -437,9 +479,14 @@ namespace TSioex
             else
             {
                 curr_packer.bSimulate = false;
+                uiTimer.Enabled = false;
+                uiTimer.Interval = 10;
+                uiTimer.Enabled = true;
                 curr_packer.StartRun();
                 this.btn_allstart.Text = StringResource.str("all_stop");
                 btn_allstart.SetStyle(Color.BlueViolet,MyButtonType.round2RectButton);
+ 
+
             }
         }
         private void btn_start_click(object sender, EventArgs e)
@@ -509,11 +556,37 @@ namespace TSioex
                 grp_reg("run_dvar");
         }
 
+        private string newdate = "";
         public void KbdData(string param, string data)
         {
             try
             {
+                
                 UIPacker pack = curr_packer;
+                if (param == "newtime")
+                {
+                    if (!Regex.IsMatch(newdate, "^\\d\\d\\d\\d\\d\\d\\d\\d$"))
+                        return;
+
+                    if (!Regex.IsMatch(data, "^\\d\\d\\d\\d\\d\\d$"))
+                        return;
+                    SystemTime time = new SystemTime();
+                    time.wYear = Convert.ToUInt16(newdate.Substring(0, 4));
+                    time.wMonth = Convert.ToUInt16(newdate.Substring(4, 2));
+                    time.wDay = Convert.ToUInt16(newdate.Substring(6, 2));
+                    time.wHour = Convert.ToUInt16(data.Substring(0, 2));
+                    time.wMinute = Convert.ToUInt16(data.Substring(2, 2));
+                    time.wSecond = Convert.ToUInt16(data.Substring(4, 2)) ;
+                    time.wMiliseconds = 0;
+                    SetLocalTime(ref time);
+                }
+
+                if (param == "newdate")
+                {
+                    newdate = data;                    
+                    lastcall = "newtime";
+                    return;
+                }
                 if (param == "run_uvar")
                 {
                     pack.curr_cfg.upper_var = double.Parse(data);
@@ -545,13 +618,13 @@ namespace TSioex
                         return;
                     }
                     else
-                        MessageBox.Show(StringResource.str("invalid_pwd"));
+                        Program.MsgShow(StringResource.str("invalid_pwd"));
                 }
                 UpdateSysConfigUI();
             }
             catch (System.Exception e)
             {
-                MessageBox.Show("Invalid Parameter");
+                Program.MsgShow("Invalid Parameter");
                 return;
             }
         }
@@ -669,7 +742,7 @@ namespace TSioex
             {
                 return;
             }
-            if (!AlertWnd.b_manual_reset || !AlertWnd.b_turnon_alert)
+            if (!AlertWnd.b_manual_reset || !AlertWnd.b_turnon_alert) //auto reset or alert off
                 return;
             
                     byte id  = (byte)sid;
@@ -707,20 +780,23 @@ namespace TSioex
         }
 
         private int title_cnt = 0;
-        private void title_speed_MouseLeftButtonUp(object sender, MouseEventArgs e)
+        private void title_speed_MouseLeftButtonUp(object sender, EventArgs e)
         {
             if (ts_pwd == null)
+            {
+                ts_pwd = new TimeSpan(DateTime.Now.Ticks);
                 return;
+            }
             title_cnt++;
             if (title_cnt < 5)
                 return;
 
             TimeSpan ts2 = new TimeSpan(DateTime.Now.Ticks);
             TimeSpan ts = ts2.Subtract((TimeSpan)ts_pwd).Duration();
-            if (ts.Seconds < 6)
+            if (ts.TotalSeconds < 6)
             {
                 Reset();
-                MessageBox.Show(StringResource.str("pwd_restore_done"));
+                Program.MsgShow(StringResource.str("pwd_restore_done"));
             }
             title_cnt = 0;
             ts_pwd = null;
@@ -731,5 +807,26 @@ namespace TSioex
             Password.set_pwd("user", "111111");
         }
 
+        private void lbl_datetime_ParentChanged(object sender, EventArgs e)
+        {
+            if (Program.topwnd != "runmode")
+                return;
+            trypanel2(13);
+        }
+        private void trypanel2(int i)
+        {
+            Program.kbdwnd.Init(StringResource.str("enter_newdate"), "newdate", false, KbdData);
+            return;
+            /*
+            Process app = new Process();
+            app.StartInfo.FileName = "ctlpnl.exe";
+            app.StartInfo.Arguments = "\\Windows\\cplmain.cpl," + i.ToString();
+            app.StartInfo.UseShellExecute = true;
+            //app.StartInfo.FileName = "rundll32.exe";
+            //app.StartInfo.Arguments = "shell32.dll,Control_RunDLL timedate.cpl,,1";
+            app.Start();
+            Thread.Sleep(2000);
+             */
+        }
     }
 }

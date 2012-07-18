@@ -129,6 +129,7 @@ namespace TSioex
             btn_cali7.Click += new EventHandler(this.btn_cali_Click);
             btn_cali8.Click += new EventHandler(this.btn_cali_Click);
             btn_cali9.Click += new EventHandler(this.btn_cali_Click);
+            btn_cali10.Click += new EventHandler(this.btn_cali_Click);
             btn_ret_config.Click +=new EventHandler(btn_ret_config_Click);
             btn_ret_run.Click +=new EventHandler(btn_ret_run_Click);
             this.panel1.BackColor = SingleModeWnd.bgWindow;
@@ -171,9 +172,14 @@ namespace TSioex
                 }
 
                 if ((NodeMaster.GetErrors(i) != "") || (NodeMaster.GetStatus(i) == NodeStatus.ST_LOST))
+				{
                     btn.SetStyle(Color.Gray,MyButtonType.roundButton);
-                else
-                    btn.SetStyle(Color.DarkGreen, MyButtonType.roundButton);
+				}else{
+					if(i == curr_sel || all_sel)
+                    	btn.SetStyle(Color.DarkGreen, MyButtonType.round2Button);
+					else
+	                    btn.SetStyle(Color.DarkGreen, MyButtonType.roundButton);
+				}
                 btn.Visible = true;
                 continue;
             }
@@ -189,6 +195,7 @@ namespace TSioex
             btn_cali8.Text = StringResource.str("cmd_cali8");
             btn_cali9.Text = StringResource.str("cmd_cali9");
             btn_cali10.Text = StringResource.str("cmd_cali10");
+            btnSave.Text = StringResource.str("cmd_save");
             btn_empty.Text = StringResource.str("cmd_empty");
             btn_refreshaddr.Text = StringResource.str("refresh");
             btn_selectall.Text = StringResource.str("cmd_selectall");
@@ -345,9 +352,7 @@ namespace TSioex
 
                 string msg = StringResource.str("put_poise") + "(" + data + StringResource.str("gram") + ")";
 
-                if (MessageBox.Show(msg, "", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk,MessageBoxDefaultButton.Button1) == DialogResult.Cancel)
-                    return;
-                
+                Program.MsgShow(msg);
                 int i = RunModeWnd.StringToId(param) - 1;
                 if (curr_sel >= 0)
                 {
@@ -360,11 +365,11 @@ namespace TSioex
                             else
                                 NodeMaster.SetNodeReg((byte)curr_sel, new string[]{"cs_poise" + (i-5).ToString()}, new UInt32[]{cs_mtrl_val});
                             NodeMaster.Action(new byte[]{(byte)curr_sel}, "flash");
-                            MessageBox.Show(StringResource.str("calidone"));
+                            Program.MsgShow(StringResource.str("calidone"));
                             label3_MouseLeftButtonUp(null, null);
                             return;
                     }
-                    MessageBox.Show(StringResource.str("tryagain"));
+                    Program.MsgShow(StringResource.str("tryagain"));
                     
                 }
                 return;
@@ -373,28 +378,27 @@ namespace TSioex
 
         private void calibrate(string calreg)
         {
-            Byte i = Convert.ToByte(curr_sel);
             if (curr_sel == -1)
                 return;
+            Byte i = Convert.ToByte(curr_sel);
             if (calreg == "cali0")
             {
-                if (curr_sel >= 0)
+                if (curr_sel >= 0 && NodeMaster.GetStatus(i) != NodeStatus.ST_LOST)
                 {
-                    if (MessageBox.Show(StringResource.str("put_empty"), "", MessageBoxButtons.OKCancel, MessageBoxIcon.Asterisk, MessageBoxDefaultButton.Button1) == DialogResult.Cancel)
-                        return;
+                    Program.MsgShow(StringResource.str("put_empty"));
 
                     NodeMaster.RefreshNodeReg(i, new string[]{"cs_mtrl"});
                     UInt32 val = NodeMaster.GetNodeReg(i, "cs_mtrl");
-                    if (val <= WeighNode.MAX_VALID_WEIGHT)
+                    if ((val <= WeighNode.MAX_VALID_WEIGHT) && (val > 0))
                     {
                         NodeMaster.SetNodeReg(i,new string[]{"cs_zero"}, new UInt32[]{val});
                         NodeMaster.Action(new byte[]{i}, "flash");
-                        MessageBox.Show(StringResource.str("calidone"));
+                        Program.MsgShow(StringResource.str("calidone"));
                         label3_MouseLeftButtonUp(null, null);
                     }
                     else
                     {
-                        MessageBox.Show(StringResource.str("tryagain"));
+                        Program.MsgShow(StringResource.str("tryagain"));
                     }
 
                 }
@@ -496,7 +500,7 @@ namespace TSioex
         public void btn_updatefw_Click(object sender, EventArgs e)
         {
             Process app = new Process();
-            app.StartInfo.FileName = "\\TSioex\\KCBTool3.exe";
+            app.StartInfo.FileName = ProdNum.baseDir+"\\KCBTool3.exe";
             app.StartInfo.Arguments = "";
             app.Start();
             Thread.Sleep(2000);
@@ -585,11 +589,15 @@ namespace TSioex
             if (curr_sel == -1)
                 return;
             Byte i = Convert.ToByte(curr_sel);
-
+            NodeMaster.RefreshNodeReg(i, new string[] { "mtrl_weight_gram", "mtrl_weight_decimal" });
             lbl_weight.Text = NodeMaster.GetWeight(i).ToString("F2");
         }
 
-
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            NodeMaster.SetNodeReg((byte)curr_sel, new string[] { "flag_enable" }, new UInt32[] { 14 });
+            Program.MsgShow(StringResource.str("done"));
+        }
     }
     internal class PerReg
     {

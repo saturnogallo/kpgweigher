@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using System.Threading;
 namespace TSioex
 {
     static class Program
@@ -26,7 +27,7 @@ namespace TSioex
         static public ProdWnd prodwnd;
         static public ProdNum prodnum;
         static public kbdWnd kbdwnd;
-
+        static public MsgDlg msgwnd;
         static public NodeMaster nm;
         static public string topwnd = "logon";
         static public string oper
@@ -48,6 +49,7 @@ namespace TSioex
                 SaveAppConfig();
             }
         }
+        static public int line = 0;
         static public void Initialize()
         {
 /*
@@ -57,38 +59,55 @@ namespace TSioex
                 System.Diagnostics.Process.GetCurrentProcess().Kill();
               return;
             }
- */ 
-            
-            StringResource.SetLanguage();
-            app_cfg = new SqlConfig("app");
-            app_cfg.LoadConfigFromFile();
-
-            curr_cfg = app_cfg.Current;
-
-            packers = new List<UIPacker>();
-            for (int i = 0; i < Int32.Parse(curr_cfg.Element("machine_number").Value); i++)
+ */
+            Thread.Sleep(3000);
+            try
             {
-                UIPacker p = new UIPacker(i);
-                p.InitConfig();
-                packers.Add(p);
-            }
-            NodeMaster.Dummy();
-            singlewnd = new SingleModeWnd();
-            runwnd = new RunModeWnd();
-            
-            
-            histwnd = new ProdHistory();
-            
-            kbdwnd = new kbdWnd();
-            bottomwnd = new BottomWnd();
-            alertwnd = new AlertWnd();
-            alertwnd.UpdateUI(); //load alert configuration which is in app_config.xml too
+                StringResource.SetLanguage();
+                msgwnd = new MsgDlg();
+                app_cfg = new SqlConfig("app");
+                app_cfg.LoadConfigFromFile(); 
 
-            pwdwnd = new PwdWnd();
-            engwnd = new EngWnd();
-            configwnd = new ConfigMenuWnd();
-            prodwnd = new ProdWnd();
-            prodnum = new ProdNum();
+                curr_cfg = app_cfg.Current;
+
+                packers = new List<UIPacker>();
+                for (int i = 0; i < Int32.Parse(curr_cfg.Element("machine_number").Value); i++)
+                {
+                    UIPacker p = new UIPacker(i); line++;
+                    p.InitConfig();
+                    packers.Add(p);
+                }
+                line = 999;
+                NodeMaster.Dummy(); line++;
+
+                singlewnd = new SingleModeWnd(); line++;
+                runwnd = new RunModeWnd(); line++;
+
+
+                histwnd = new ProdHistory(); line++;
+
+                kbdwnd = new kbdWnd(); line++;
+                bottomwnd = new BottomWnd(); line++;
+                alertwnd = new AlertWnd(); line++;
+                alertwnd.UpdateUI(); //load alert configuration which is in app_config.xml too
+
+                pwdwnd = new PwdWnd(); line++;
+                engwnd = new EngWnd(); line++;
+                configwnd = new ConfigMenuWnd(); line++;
+                prodwnd = new ProdWnd(); line++;
+                prodnum = new ProdNum(); line++;
+                
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message);
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+            }
+        }
+        static public void MsgShow(string line)
+        {
+            msgwnd.Message = line;
+            msgwnd.ShowDialog();
         }
         static public void SaveAppConfig()
         {
@@ -119,8 +138,8 @@ namespace TSioex
             {
                 topwnd = mode;
                 bottomwnd.BringToFront();
-                bottomwnd.Show();
                 bottomwnd.UpdateDisplay();
+                bottomwnd.Show();
                 return;
             }
             if (mode == "password")
@@ -168,7 +187,7 @@ namespace TSioex
                 runwnd.BringToFront();
                 runwnd.Show();
                 if (runwnd.btn_allstart.Visible == false)
-                      MessageBox.Show(StringResource.str("license"));
+                    Program.MsgShow(StringResource.str("license"));
                 runwnd.UpdateSysConfigUI();
 
                 return;
@@ -191,7 +210,7 @@ namespace TSioex
         {
 //            if((argv.Length > 1) && (argv[1].IndexOf("/debug") > 0))
             //NodeAgent.IsDebug = true;
-
+            Thread.Sleep(2000);
             Program.Initialize();
             Application.Run(new LogonWindow());
         }

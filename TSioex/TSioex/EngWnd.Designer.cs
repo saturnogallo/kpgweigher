@@ -33,29 +33,6 @@
             this.btn_ret_config = new System.Windows.Forms.PictureBox();
             this.lbl_title = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.btn_refreshaddr = new System.Windows.Forms.Button();
-            this.btn_selectall = new System.Windows.Forms.Button();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.lbl_weight = new System.Windows.Forms.Button();
-            this.btn_cali10 = new System.Windows.Forms.Button();
-            this.btn_cali9 = new System.Windows.Forms.Button();
-            this.btn_cali8 = new System.Windows.Forms.Button();
-            this.btn_cali7 = new System.Windows.Forms.Button();
-            this.btn_cali6 = new System.Windows.Forms.Button();
-            this.btn_cali5 = new System.Windows.Forms.Button();
-            this.btn_cali4 = new System.Windows.Forms.Button();
-            this.btn_cali3 = new System.Windows.Forms.Button();
-            this.btn_cali2 = new System.Windows.Forms.Button();
-            this.btn_cali1 = new System.Windows.Forms.Button();
-            this.btn_cali0 = new System.Windows.Forms.Button();
-            this.dataGrid1 = new System.Windows.Forms.DataGrid();
-            this.btn_refreshreg = new System.Windows.Forms.Button();
-            this.btn_empty = new System.Windows.Forms.Button();
-            this.lbl_reg = new System.Windows.Forms.Label();
-            this.lbl_seladdr = new System.Windows.Forms.Label();
-            this.btn_language = new TSioex.RectButton();
-            this.btn_entersys = new TSioex.RectButton();
-            this.btn_locksys = new TSioex.RectButton();
             this.nd_36 = new TSioex.RectButton();
             this.nd_16 = new TSioex.RectButton();
             this.nd_15 = new TSioex.RectButton();
@@ -72,14 +49,38 @@
             this.nd_4 = new TSioex.RectButton();
             this.nd_3 = new TSioex.RectButton();
             this.nd_2 = new TSioex.RectButton();
+            this.btn_refreshaddr = new System.Windows.Forms.Button();
+            this.btn_selectall = new System.Windows.Forms.Button();
             this.nd_1 = new TSioex.RectButton();
             this.btn_updatefw = new TSioex.RectButton();
             this.btn_changeaddr = new TSioex.RectButton();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.lbl_weight = new System.Windows.Forms.Button();
+            this.btn_cali10 = new System.Windows.Forms.Button();
+            this.btn_cali9 = new System.Windows.Forms.Button();
+            this.btn_cali8 = new System.Windows.Forms.Button();
+            this.btn_cali7 = new System.Windows.Forms.Button();
+            this.btn_cali6 = new System.Windows.Forms.Button();
+            this.btn_cali5 = new System.Windows.Forms.Button();
+            this.btn_cali4 = new System.Windows.Forms.Button();
+            this.btn_cali3 = new System.Windows.Forms.Button();
+            this.btn_cali2 = new System.Windows.Forms.Button();
+            this.btn_cali1 = new System.Windows.Forms.Button();
+            this.btn_cali0 = new System.Windows.Forms.Button();
+            this.dataGrid1 = new System.Windows.Forms.DataGrid();
             this.dataGridTableStyle1 = new System.Windows.Forms.DataGridTableStyle();
             this.dataGridTextBoxColumn1 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn2 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn3 = new System.Windows.Forms.DataGridTextBoxColumn();
             this.dataGridTextBoxColumn4 = new System.Windows.Forms.DataGridTextBoxColumn();
+            this.btn_refreshreg = new System.Windows.Forms.Button();
+            this.btn_empty = new System.Windows.Forms.Button();
+            this.lbl_reg = new System.Windows.Forms.Label();
+            this.lbl_seladdr = new System.Windows.Forms.Label();
+            this.btn_language = new TSioex.RectButton();
+            this.btn_entersys = new TSioex.RectButton();
+            this.btn_locksys = new TSioex.RectButton();
+            this.btnSave = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -136,223 +137,6 @@
             this.panel1.Location = new System.Drawing.Point(50, 195);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(337, 463);
-            // 
-            // btn_refreshaddr
-            // 
-            this.btn_refreshaddr.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
-            this.btn_refreshaddr.Location = new System.Drawing.Point(215, 410);
-            this.btn_refreshaddr.Name = "btn_refreshaddr";
-            this.btn_refreshaddr.Size = new System.Drawing.Size(82, 32);
-            this.btn_refreshaddr.TabIndex = 4;
-            this.btn_refreshaddr.Text = "button2";
-            // 
-            // btn_selectall
-            // 
-            this.btn_selectall.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
-            this.btn_selectall.Location = new System.Drawing.Point(27, 410);
-            this.btn_selectall.Name = "btn_selectall";
-            this.btn_selectall.Size = new System.Drawing.Size(82, 32);
-            this.btn_selectall.TabIndex = 3;
-            this.btn_selectall.Text = "button1";
-            this.btn_selectall.Visible = false;
-            // 
-            // panel2
-            // 
-            this.panel2.Controls.Add(this.lbl_weight);
-            this.panel2.Controls.Add(this.btn_cali10);
-            this.panel2.Controls.Add(this.btn_cali9);
-            this.panel2.Controls.Add(this.btn_cali8);
-            this.panel2.Controls.Add(this.btn_cali7);
-            this.panel2.Controls.Add(this.btn_cali6);
-            this.panel2.Controls.Add(this.btn_cali5);
-            this.panel2.Controls.Add(this.btn_cali4);
-            this.panel2.Controls.Add(this.btn_cali3);
-            this.panel2.Controls.Add(this.btn_cali2);
-            this.panel2.Controls.Add(this.btn_cali1);
-            this.panel2.Controls.Add(this.btn_cali0);
-            this.panel2.Controls.Add(this.dataGrid1);
-            this.panel2.Controls.Add(this.btn_refreshreg);
-            this.panel2.Controls.Add(this.btn_empty);
-            this.panel2.Location = new System.Drawing.Point(412, 195);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(579, 463);
-            // 
-            // lbl_weight
-            // 
-            this.lbl_weight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(242)))), ((int)(((byte)(251)))));
-            this.lbl_weight.Location = new System.Drawing.Point(132, 410);
-            this.lbl_weight.Name = "lbl_weight";
-            this.lbl_weight.Size = new System.Drawing.Size(99, 32);
-            this.lbl_weight.TabIndex = 39;
-            this.lbl_weight.Text = "0.0";
-            // 
-            // btn_cali10
-            // 
-            this.btn_cali10.Location = new System.Drawing.Point(243, 96);
-            this.btn_cali10.Name = "btn_cali10";
-            this.btn_cali10.Size = new System.Drawing.Size(94, 30);
-            this.btn_cali10.TabIndex = 35;
-            this.btn_cali10.Text = "button16";
-            // 
-            // btn_cali9
-            // 
-            this.btn_cali9.Location = new System.Drawing.Point(132, 96);
-            this.btn_cali9.Name = "btn_cali9";
-            this.btn_cali9.Size = new System.Drawing.Size(96, 30);
-            this.btn_cali9.TabIndex = 34;
-            this.btn_cali9.Text = "button17";
-            // 
-            // btn_cali8
-            // 
-            this.btn_cali8.Location = new System.Drawing.Point(466, 59);
-            this.btn_cali8.Name = "btn_cali8";
-            this.btn_cali8.Size = new System.Drawing.Size(97, 31);
-            this.btn_cali8.TabIndex = 33;
-            this.btn_cali8.Text = "button10";
-            // 
-            // btn_cali7
-            // 
-            this.btn_cali7.Location = new System.Drawing.Point(353, 59);
-            this.btn_cali7.Name = "btn_cali7";
-            this.btn_cali7.Size = new System.Drawing.Size(94, 31);
-            this.btn_cali7.TabIndex = 32;
-            this.btn_cali7.Text = "button11";
-            // 
-            // btn_cali6
-            // 
-            this.btn_cali6.Location = new System.Drawing.Point(243, 59);
-            this.btn_cali6.Name = "btn_cali6";
-            this.btn_cali6.Size = new System.Drawing.Size(94, 31);
-            this.btn_cali6.TabIndex = 31;
-            this.btn_cali6.Text = "button12";
-            // 
-            // btn_cali5
-            // 
-            this.btn_cali5.Location = new System.Drawing.Point(132, 59);
-            this.btn_cali5.Name = "btn_cali5";
-            this.btn_cali5.Size = new System.Drawing.Size(96, 31);
-            this.btn_cali5.TabIndex = 30;
-            this.btn_cali5.Text = "button13";
-            // 
-            // btn_cali4
-            // 
-            this.btn_cali4.Location = new System.Drawing.Point(466, 22);
-            this.btn_cali4.Name = "btn_cali4";
-            this.btn_cali4.Size = new System.Drawing.Size(97, 31);
-            this.btn_cali4.TabIndex = 29;
-            this.btn_cali4.Text = "button9";
-            // 
-            // btn_cali3
-            // 
-            this.btn_cali3.Location = new System.Drawing.Point(353, 22);
-            this.btn_cali3.Name = "btn_cali3";
-            this.btn_cali3.Size = new System.Drawing.Size(94, 31);
-            this.btn_cali3.TabIndex = 28;
-            this.btn_cali3.Text = "button8";
-            // 
-            // btn_cali2
-            // 
-            this.btn_cali2.Location = new System.Drawing.Point(243, 22);
-            this.btn_cali2.Name = "btn_cali2";
-            this.btn_cali2.Size = new System.Drawing.Size(94, 31);
-            this.btn_cali2.TabIndex = 27;
-            this.btn_cali2.Text = "button7";
-            // 
-            // btn_cali1
-            // 
-            this.btn_cali1.Location = new System.Drawing.Point(132, 22);
-            this.btn_cali1.Name = "btn_cali1";
-            this.btn_cali1.Size = new System.Drawing.Size(96, 31);
-            this.btn_cali1.TabIndex = 26;
-            this.btn_cali1.Text = "button6";
-            // 
-            // btn_cali0
-            // 
-            this.btn_cali0.Location = new System.Drawing.Point(20, 22);
-            this.btn_cali0.Name = "btn_cali0";
-            this.btn_cali0.Size = new System.Drawing.Size(98, 31);
-            this.btn_cali0.TabIndex = 25;
-            this.btn_cali0.Text = "button5";
-            // 
-            // dataGrid1
-            // 
-            this.dataGrid1.BackColor = System.Drawing.Color.Gainsboro;
-            this.dataGrid1.BackgroundColor = System.Drawing.Color.DarkGray;
-            this.dataGrid1.Font = new System.Drawing.Font("Times New Roman", 9F, System.Drawing.FontStyle.Regular);
-            this.dataGrid1.ForeColor = System.Drawing.Color.Black;
-            this.dataGrid1.GridLineColor = System.Drawing.Color.Silver;
-            this.dataGrid1.HeaderBackColor = System.Drawing.Color.Black;
-            this.dataGrid1.HeaderForeColor = System.Drawing.Color.White;
-            this.dataGrid1.Location = new System.Drawing.Point(20, 132);
-            this.dataGrid1.Name = "dataGrid1";
-            this.dataGrid1.SelectionBackColor = System.Drawing.Color.Firebrick;
-            this.dataGrid1.SelectionForeColor = System.Drawing.Color.White;
-            this.dataGrid1.Size = new System.Drawing.Size(543, 255);
-            this.dataGrid1.TabIndex = 24;
-            this.dataGrid1.TableStyles.Add(this.dataGridTableStyle1);
-            // 
-            // btn_refreshreg
-            // 
-            this.btn_refreshreg.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
-            this.btn_refreshreg.Location = new System.Drawing.Point(284, 410);
-            this.btn_refreshreg.Name = "btn_refreshreg";
-            this.btn_refreshreg.Size = new System.Drawing.Size(106, 32);
-            this.btn_refreshreg.TabIndex = 37;
-            this.btn_refreshreg.Text = "button4";
-            // 
-            // btn_empty
-            // 
-            this.btn_empty.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
-            this.btn_empty.Location = new System.Drawing.Point(36, 410);
-            this.btn_empty.Name = "btn_empty";
-            this.btn_empty.Size = new System.Drawing.Size(82, 32);
-            this.btn_empty.TabIndex = 38;
-            this.btn_empty.Text = "button3";
-            // 
-            // lbl_reg
-            // 
-            this.lbl_reg.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Regular);
-            this.lbl_reg.Location = new System.Drawing.Point(550, 180);
-            this.lbl_reg.Name = "lbl_reg";
-            this.lbl_reg.Size = new System.Drawing.Size(309, 30);
-            this.lbl_reg.Text = "label2";
-            this.lbl_reg.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // lbl_seladdr
-            // 
-            this.lbl_seladdr.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Regular);
-            this.lbl_seladdr.Location = new System.Drawing.Point(107, 180);
-            this.lbl_seladdr.Name = "lbl_seladdr";
-            this.lbl_seladdr.Size = new System.Drawing.Size(219, 30);
-            this.lbl_seladdr.Text = "label3";
-            this.lbl_seladdr.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // btn_language
-            // 
-            this.btn_language.bEnabled = false;
-            this.btn_language.Font = new System.Drawing.Font("Arial", 26.25F, System.Drawing.FontStyle.Regular);
-            this.btn_language.Location = new System.Drawing.Point(717, 95);
-            this.btn_language.Name = "btn_language";
-            this.btn_language.Size = new System.Drawing.Size(241, 76);
-            this.btn_language.TabIndex = 2;
-            // 
-            // btn_entersys
-            // 
-            this.btn_entersys.bEnabled = false;
-            this.btn_entersys.Font = new System.Drawing.Font("Arial", 26.25F, System.Drawing.FontStyle.Regular);
-            this.btn_entersys.Location = new System.Drawing.Point(385, 95);
-            this.btn_entersys.Name = "btn_entersys";
-            this.btn_entersys.Size = new System.Drawing.Size(241, 76);
-            this.btn_entersys.TabIndex = 3;
-            // 
-            // btn_locksys
-            // 
-            this.btn_locksys.bEnabled = false;
-            this.btn_locksys.Font = new System.Drawing.Font("Arial", 26.25F, System.Drawing.FontStyle.Regular);
-            this.btn_locksys.Location = new System.Drawing.Point(50, 95);
-            this.btn_locksys.Name = "btn_locksys";
-            this.btn_locksys.Size = new System.Drawing.Size(241, 76);
-            this.btn_locksys.TabIndex = 4;
             // 
             // nd_36
             // 
@@ -498,6 +282,25 @@
             this.nd_2.Size = new System.Drawing.Size(51, 51);
             this.nd_2.TabIndex = 5;
             // 
+            // btn_refreshaddr
+            // 
+            this.btn_refreshaddr.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
+            this.btn_refreshaddr.Location = new System.Drawing.Point(215, 410);
+            this.btn_refreshaddr.Name = "btn_refreshaddr";
+            this.btn_refreshaddr.Size = new System.Drawing.Size(82, 32);
+            this.btn_refreshaddr.TabIndex = 4;
+            this.btn_refreshaddr.Text = "button2";
+            // 
+            // btn_selectall
+            // 
+            this.btn_selectall.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
+            this.btn_selectall.Location = new System.Drawing.Point(27, 410);
+            this.btn_selectall.Name = "btn_selectall";
+            this.btn_selectall.Size = new System.Drawing.Size(82, 32);
+            this.btn_selectall.TabIndex = 3;
+            this.btn_selectall.Text = "button1";
+            this.btn_selectall.Visible = false;
+            // 
             // nd_1
             // 
             this.nd_1.bEnabled = false;
@@ -511,9 +314,9 @@
             // 
             this.btn_updatefw.bEnabled = false;
             this.btn_updatefw.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular);
-            this.btn_updatefw.Location = new System.Drawing.Point(183, 34);
+            this.btn_updatefw.Location = new System.Drawing.Point(173, 34);
             this.btn_updatefw.Name = "btn_updatefw";
-            this.btn_updatefw.Size = new System.Drawing.Size(150, 52);
+            this.btn_updatefw.Size = new System.Drawing.Size(161, 52);
             this.btn_updatefw.TabIndex = 1;
             // 
             // btn_changeaddr
@@ -522,8 +325,144 @@
             this.btn_changeaddr.Font = new System.Drawing.Font("Microsoft Sans Serif", 18F, System.Drawing.FontStyle.Regular);
             this.btn_changeaddr.Location = new System.Drawing.Point(2, 34);
             this.btn_changeaddr.Name = "btn_changeaddr";
-            this.btn_changeaddr.Size = new System.Drawing.Size(150, 52);
+            this.btn_changeaddr.Size = new System.Drawing.Size(163, 52);
             this.btn_changeaddr.TabIndex = 0;
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.btnSave);
+            this.panel2.Controls.Add(this.lbl_weight);
+            this.panel2.Controls.Add(this.btn_cali10);
+            this.panel2.Controls.Add(this.btn_cali9);
+            this.panel2.Controls.Add(this.btn_cali8);
+            this.panel2.Controls.Add(this.btn_cali7);
+            this.panel2.Controls.Add(this.btn_cali6);
+            this.panel2.Controls.Add(this.btn_cali5);
+            this.panel2.Controls.Add(this.btn_cali4);
+            this.panel2.Controls.Add(this.btn_cali3);
+            this.panel2.Controls.Add(this.btn_cali2);
+            this.panel2.Controls.Add(this.btn_cali1);
+            this.panel2.Controls.Add(this.btn_cali0);
+            this.panel2.Controls.Add(this.dataGrid1);
+            this.panel2.Controls.Add(this.btn_refreshreg);
+            this.panel2.Controls.Add(this.btn_empty);
+            this.panel2.Location = new System.Drawing.Point(412, 195);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(579, 463);
+            // 
+            // lbl_weight
+            // 
+            this.lbl_weight.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(242)))), ((int)(((byte)(251)))));
+            this.lbl_weight.Location = new System.Drawing.Point(132, 410);
+            this.lbl_weight.Name = "lbl_weight";
+            this.lbl_weight.Size = new System.Drawing.Size(99, 32);
+            this.lbl_weight.TabIndex = 39;
+            this.lbl_weight.Text = "0.0";
+            // 
+            // btn_cali10
+            // 
+            this.btn_cali10.Location = new System.Drawing.Point(243, 96);
+            this.btn_cali10.Name = "btn_cali10";
+            this.btn_cali10.Size = new System.Drawing.Size(94, 30);
+            this.btn_cali10.TabIndex = 35;
+            this.btn_cali10.Text = "button16";
+            // 
+            // btn_cali9
+            // 
+            this.btn_cali9.Location = new System.Drawing.Point(132, 96);
+            this.btn_cali9.Name = "btn_cali9";
+            this.btn_cali9.Size = new System.Drawing.Size(96, 30);
+            this.btn_cali9.TabIndex = 34;
+            this.btn_cali9.Text = "button17";
+            // 
+            // btn_cali8
+            // 
+            this.btn_cali8.Location = new System.Drawing.Point(466, 59);
+            this.btn_cali8.Name = "btn_cali8";
+            this.btn_cali8.Size = new System.Drawing.Size(97, 31);
+            this.btn_cali8.TabIndex = 33;
+            this.btn_cali8.Text = "button10";
+            // 
+            // btn_cali7
+            // 
+            this.btn_cali7.Location = new System.Drawing.Point(353, 59);
+            this.btn_cali7.Name = "btn_cali7";
+            this.btn_cali7.Size = new System.Drawing.Size(94, 31);
+            this.btn_cali7.TabIndex = 32;
+            this.btn_cali7.Text = "button11";
+            // 
+            // btn_cali6
+            // 
+            this.btn_cali6.Location = new System.Drawing.Point(243, 59);
+            this.btn_cali6.Name = "btn_cali6";
+            this.btn_cali6.Size = new System.Drawing.Size(94, 31);
+            this.btn_cali6.TabIndex = 31;
+            this.btn_cali6.Text = "button12";
+            // 
+            // btn_cali5
+            // 
+            this.btn_cali5.Location = new System.Drawing.Point(132, 59);
+            this.btn_cali5.Name = "btn_cali5";
+            this.btn_cali5.Size = new System.Drawing.Size(96, 31);
+            this.btn_cali5.TabIndex = 30;
+            this.btn_cali5.Text = "button13";
+            // 
+            // btn_cali4
+            // 
+            this.btn_cali4.Location = new System.Drawing.Point(466, 22);
+            this.btn_cali4.Name = "btn_cali4";
+            this.btn_cali4.Size = new System.Drawing.Size(97, 31);
+            this.btn_cali4.TabIndex = 29;
+            this.btn_cali4.Text = "button9";
+            // 
+            // btn_cali3
+            // 
+            this.btn_cali3.Location = new System.Drawing.Point(353, 22);
+            this.btn_cali3.Name = "btn_cali3";
+            this.btn_cali3.Size = new System.Drawing.Size(94, 31);
+            this.btn_cali3.TabIndex = 28;
+            this.btn_cali3.Text = "button8";
+            // 
+            // btn_cali2
+            // 
+            this.btn_cali2.Location = new System.Drawing.Point(243, 22);
+            this.btn_cali2.Name = "btn_cali2";
+            this.btn_cali2.Size = new System.Drawing.Size(94, 31);
+            this.btn_cali2.TabIndex = 27;
+            this.btn_cali2.Text = "button7";
+            // 
+            // btn_cali1
+            // 
+            this.btn_cali1.Location = new System.Drawing.Point(132, 22);
+            this.btn_cali1.Name = "btn_cali1";
+            this.btn_cali1.Size = new System.Drawing.Size(96, 31);
+            this.btn_cali1.TabIndex = 26;
+            this.btn_cali1.Text = "button6";
+            // 
+            // btn_cali0
+            // 
+            this.btn_cali0.Location = new System.Drawing.Point(20, 22);
+            this.btn_cali0.Name = "btn_cali0";
+            this.btn_cali0.Size = new System.Drawing.Size(98, 31);
+            this.btn_cali0.TabIndex = 25;
+            this.btn_cali0.Text = "button5";
+            // 
+            // dataGrid1
+            // 
+            this.dataGrid1.BackColor = System.Drawing.Color.Gainsboro;
+            this.dataGrid1.BackgroundColor = System.Drawing.Color.DarkGray;
+            this.dataGrid1.Font = new System.Drawing.Font("Times New Roman", 9F, System.Drawing.FontStyle.Regular);
+            this.dataGrid1.ForeColor = System.Drawing.Color.Black;
+            this.dataGrid1.GridLineColor = System.Drawing.Color.Silver;
+            this.dataGrid1.HeaderBackColor = System.Drawing.Color.Black;
+            this.dataGrid1.HeaderForeColor = System.Drawing.Color.White;
+            this.dataGrid1.Location = new System.Drawing.Point(20, 132);
+            this.dataGrid1.Name = "dataGrid1";
+            this.dataGrid1.SelectionBackColor = System.Drawing.Color.Firebrick;
+            this.dataGrid1.SelectionForeColor = System.Drawing.Color.White;
+            this.dataGrid1.Size = new System.Drawing.Size(543, 255);
+            this.dataGrid1.TabIndex = 24;
+            this.dataGrid1.TableStyles.Add(this.dataGridTableStyle1);
             // 
             // dataGridTableStyle1
             // 
@@ -556,6 +495,78 @@
             this.dataGridTextBoxColumn4.Format = "";
             this.dataGridTextBoxColumn4.HeaderText = "HexValue";
             this.dataGridTextBoxColumn4.Width = 100;
+            // 
+            // btn_refreshreg
+            // 
+            this.btn_refreshreg.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
+            this.btn_refreshreg.Location = new System.Drawing.Point(284, 410);
+            this.btn_refreshreg.Name = "btn_refreshreg";
+            this.btn_refreshreg.Size = new System.Drawing.Size(106, 32);
+            this.btn_refreshreg.TabIndex = 37;
+            this.btn_refreshreg.Text = "button4";
+            // 
+            // btn_empty
+            // 
+            this.btn_empty.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular);
+            this.btn_empty.Location = new System.Drawing.Point(36, 410);
+            this.btn_empty.Name = "btn_empty";
+            this.btn_empty.Size = new System.Drawing.Size(82, 32);
+            this.btn_empty.TabIndex = 38;
+            this.btn_empty.Text = "button3";
+            // 
+            // lbl_reg
+            // 
+            this.lbl_reg.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Regular);
+            this.lbl_reg.Location = new System.Drawing.Point(550, 180);
+            this.lbl_reg.Name = "lbl_reg";
+            this.lbl_reg.Size = new System.Drawing.Size(309, 30);
+            this.lbl_reg.Text = "label2";
+            this.lbl_reg.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // lbl_seladdr
+            // 
+            this.lbl_seladdr.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Regular);
+            this.lbl_seladdr.Location = new System.Drawing.Point(107, 180);
+            this.lbl_seladdr.Name = "lbl_seladdr";
+            this.lbl_seladdr.Size = new System.Drawing.Size(219, 30);
+            this.lbl_seladdr.Text = "label3";
+            this.lbl_seladdr.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // btn_language
+            // 
+            this.btn_language.bEnabled = false;
+            this.btn_language.Font = new System.Drawing.Font("Arial", 26.25F, System.Drawing.FontStyle.Regular);
+            this.btn_language.Location = new System.Drawing.Point(717, 95);
+            this.btn_language.Name = "btn_language";
+            this.btn_language.Size = new System.Drawing.Size(241, 76);
+            this.btn_language.TabIndex = 2;
+            // 
+            // btn_entersys
+            // 
+            this.btn_entersys.bEnabled = false;
+            this.btn_entersys.Font = new System.Drawing.Font("Arial", 26.25F, System.Drawing.FontStyle.Regular);
+            this.btn_entersys.Location = new System.Drawing.Point(385, 95);
+            this.btn_entersys.Name = "btn_entersys";
+            this.btn_entersys.Size = new System.Drawing.Size(241, 76);
+            this.btn_entersys.TabIndex = 3;
+            // 
+            // btn_locksys
+            // 
+            this.btn_locksys.bEnabled = false;
+            this.btn_locksys.Font = new System.Drawing.Font("Arial", 26.25F, System.Drawing.FontStyle.Regular);
+            this.btn_locksys.Location = new System.Drawing.Point(50, 95);
+            this.btn_locksys.Name = "btn_locksys";
+            this.btn_locksys.Size = new System.Drawing.Size(241, 76);
+            this.btn_locksys.TabIndex = 4;
+            // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(466, 96);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(97, 30);
+            this.btnSave.TabIndex = 40;
+            this.btnSave.Text = "Save";
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // EngWnd
             // 
@@ -636,5 +647,6 @@
         private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn2;
         private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn3;
         private System.Windows.Forms.DataGridTextBoxColumn dataGridTextBoxColumn4;
+        private System.Windows.Forms.Button btnSave;
     }
 }

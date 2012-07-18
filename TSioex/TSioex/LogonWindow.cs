@@ -39,7 +39,7 @@ namespace TSioex
             uiTimer.Enabled = false;
             if (boot_ok == 0)
             {
-                MessageBox.Show(StringResource.str("bootfail"));
+                Program.MsgShow(StringResource.str("bootfail"));
                 bootmsg.Text = "";
                 bootup = new Thread(PackerBoot);
 
@@ -243,36 +243,36 @@ namespace TSioex
 
         public static void CheckLicense(string lic)
         {
-/*
-            string cpuInfo = "";
+            /*
+                        string cpuInfo = "";
 
-            ManagementClass cimobject = new ManagementClass("Win32_Processor");
-            ManagementObjectCollection moc = cimobject.GetInstances();
-            foreach (ManagementObject mo in moc)
-            {
-                cpuInfo = mo.Properties["ProcessorId"].Value.ToString();
-                cpuInfo = cpuInfo.Substring(cpuInfo.Length - 6);
-                break;
-            }
+                        ManagementClass cimobject = new ManagementClass("Win32_Processor");
+                        ManagementObjectCollection moc = cimobject.GetInstances();
+                        foreach (ManagementObject mo in moc)
+                        {
+                            cpuInfo = mo.Properties["ProcessorId"].Value.ToString();
+                            cpuInfo = cpuInfo.Substring(cpuInfo.Length - 6);
+                            break;
+                        }
 
-            string HDid = "";
-            ManagementClass cimobject1 = new ManagementClass("Win32_DiskDrive");
-            ManagementObjectCollection moc1 = cimobject1.GetInstances();
-            foreach (ManagementObject mo in moc1)
-            {
-                HDid = (string)mo.Properties["Model"].Value;
-                HDid = HDid.Substring(HDid.Length - 6);
-                break;
-            }
+                        string HDid = "";
+                        ManagementClass cimobject1 = new ManagementClass("Win32_DiskDrive");
+                        ManagementObjectCollection moc1 = cimobject1.GetInstances();
+                        foreach (ManagementObject mo in moc1)
+                        {
+                            HDid = (string)mo.Properties["Model"].Value;
+                            HDid = HDid.Substring(HDid.Length - 6);
+                            break;
+                        }
 
 
-            if (lic != MD5Value(cpuInfo + "255" + HDid, true))
-            {
-                //StringResource.dolog(MD5Value(cpuInfo + "255" + HDid, true));
-                MessageBox.Show("Please provide following string to vendor for a valid license : " + cpuInfo + HDid);
-                System.Diagnostics.Process.GetCurrentProcess().Kill();
-            }
- */
+                        if (lic != MD5Value(cpuInfo + "255" + HDid, true))
+                        {
+                            //StringResource.dolog(MD5Value(cpuInfo + "255" + HDid, true));
+                            Program.MsgShow("Please provide following string to vendor for a valid license : " + cpuInfo + HDid);
+                            System.Diagnostics.Process.GetCurrentProcess().Kill();
+                        }
+             */
         }
         static Password()
         {
