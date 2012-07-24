@@ -34,6 +34,7 @@ bit extra_pulse_sent;
 /* Timing parameters used by TIMER1 ISR */
 #define DELAY_13MS_MAX                64042
 #define DELAY_11P9MS_MAX              64166
+#define DELAY_12MS_MAX                64150
 #define DELAY_11P7MS_MAX              64186
 #define RESPONSE_DELAYED_BY_0P4MS        48
 #define TRIG_PULSE_WIDTH_0P31MS       65500
@@ -106,20 +107,20 @@ interrupt [ANA_COMP] void ana_comp_isr(void)
           {   
               if(freq_is_50HZ)
               {   if(RS485._flash.addr == 11)
-                      temp =  (u16)magnet_amp * 16 + DELAY_11P9MS_MAX;      /*orginally 6 */
+                      temp =  (u16)magnet_amp * 8 + DELAY_12MS_MAX;      /*orginally 6 */
                   else if (RS485._flash.addr == 15)
                       temp =  (u16)magnet_amp * 2 + 64000;
               }
               else /* 60HZ */
               {   if(RS485._flash.addr == 11)
-                      temp =  (u16)magnet_amp * 16 + 64186; 
+                      temp =  (u16)magnet_amp * 8 + 64186; 
                   else if (RS485._flash.addr == 15)
                       temp =  (u16)magnet_amp * 2 + 64186;        
               }     
           }
           else /* weight board */
           {   if(freq_is_50HZ)
-                  temp =  (u16)magnet_amp * 3 + DELAY_11P9MS_MAX;      
+                  temp =  (u16)magnet_amp * 3 + DELAY_12MS_MAX;      
               else /* 60HZ */
                   temp =  (u16)magnet_amp * 3 + 64186;                
           }
@@ -383,18 +384,18 @@ void Motor_Driver(u8 MotorMode,u8 pulsenum,u8 powerdown)
 
    switch(RS485._motor.mode)
    {
-       case 'W':             	 
+   case 'W':             	 
 	 DISABLE_MOTOR_S; 
 	 ENABLE_MOTOR_W;
-         break;    
-       case 'S':
+     break;    
+   case 'S':
 	 DISABLE_MOTOR_W;	
 	 ENABLE_MOTOR_S; 
 	 break;      
-       default:
-         DISABLE_MOTOR_W; 
-         DISABLE_MOTOR_S;
-         break;
+   default:
+     DISABLE_MOTOR_W; 
+     DISABLE_MOTOR_S;
+     break;
    }   
    // Stepping motor driver needs 40us max to wake up from power saving mode.
    for(i=128;i>0;i--);

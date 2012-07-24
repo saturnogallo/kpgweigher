@@ -1,1 +1,1 @@
-hexbin main.hex main.bin I 2
+hexbin M16_weight M16_weight.bin I 2
