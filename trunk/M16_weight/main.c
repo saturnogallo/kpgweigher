@@ -22,7 +22,7 @@ Data Stack size     : 256
 *****************************************************/
 
 /*************************************************************************************************************/
-
+// include header files
 /*************************************************************************************************************/
 #include <mega16.h>
 #include "spi.h"
@@ -39,14 +39,14 @@ Data Stack size     : 256
 NODE_CONFIG RS485;                                /* structure of node */
 OS_SCHEDULER os_sched;                            /* timer service */
 u8 myaddr;                                        /* rs485 addr of current node */
-u8 hw_id;                                         /* hard-wired board type (PORTC[7:6]) */
+u8 hw_id;                                         /* hard-wired board type (PORTC[7:6]), weight or interface */
 bit freq_is_50HZ;                                 /* freq of AC power supply */
-u16 release_times;                                /* how many times node has been released */
+u16 release_times;                                /* How many times node has been released */
 u8 flag_turn_off_watchdog;
 u8 numOfMfgDataToBePgm;
 
 /* dynamic magnet amplitude adjustment */
-#define MAX_AMP_WEIGHT_RECORDS        25          /* don't exceed 32, 32*4 */
+#define MAX_AMP_WEIGHT_RECORDS        50          
 #define NOT_AVAILABLE             0xFFFF
 bit run_time_adj_done;
 bit record_weight_flag;  
@@ -178,7 +178,7 @@ void kick_off_timer(u8 task_id, u16 timer_len)
 void kill_timer(u8 task_id)
 {
    if(task_id > MAX_TMR_ID)
-     return;
+      return;
    #asm("cli"); 
    os_sched.status &= ~((u8)1<<task_id); 
    os_sched.timerlen[task_id] = 0;
@@ -523,15 +523,7 @@ void clear_weight_record()
 /*******************************************************************************/
 void auto_amp_adj(u16 weight_delta)
 {
-    static u8 cnt; 
     u8 new_amp, i, max_amp;
- 
-    cnt++; 
-    if(cnt > 250)
-    {
-        cnt = 0;
-        clear_weight_record(); 
-    }  
     /*********************************************************
      * Search through all amp_weight records. 
      * IF current "amp" has no weight value attached, 
@@ -545,6 +537,8 @@ void auto_amp_adj(u16 weight_delta)
             continue;
         else if(amp_weight[i] < weight_delta + (local_target>>3))     
             new_amp = i;                      
+        else if(!record_weight_flag)
+            break;                     
     }
     
     /***********************************************************
@@ -566,7 +560,7 @@ void auto_amp_adj(u16 weight_delta)
     * To be safe, we set a max limit for internal amplitude adjustment
     * based on user setting. 
     ******************************************************************/
-    local_magnet_amp = new_amp<<2;
+    local_magnet_amp = new_amp<<1;
     max_amp = RS485._flash.magnet_amp + 20;
     if(local_magnet_amp> max_amp)
         local_magnet_amp = max_amp;
@@ -603,6 +597,8 @@ u8 magnet_add_material()
     // auto_amp_adj() to adjust amp.
     /**************************************************************/
      case MM_ADD_MATERIAL:
+        if(Magnet_Is_Running())
+           break;
         /* log actual amp to hw_status register for monitor */
         RS485._global.hw_status = local_magnet_amp; 
                 			              
@@ -627,7 +623,7 @@ u8 magnet_add_material()
      case MM_WAIT_ADDEND:  
         // delay before motor action if magnet stops
         if((!Magnet_Is_Running()) || (Magnet_Is_Running()== 0xffff)){
-           if(RS485._flash.delay_f > 0){
+           if(RS485._flash.delay_f){
               kick_off_timer(WSM_TIMER, RS485._flash.delay_f);   
            }                           
            // move to next state.
@@ -693,7 +689,8 @@ void motor_magnet_action()
     // otherwise, rotate motor for half cycle to open upper bucket.      
     /**************************************************************/ 
      case MM_PASS_MATERIAL:       
-        if(!Motor_Is_Running()){                                   
+        if(!Motor_Is_Running())
+        {                                   
            RS485._global.Mtrl_Weight_gram = INVALID_DATA ; 
            flush_data_buffer(); 
            Motor_Driver('S',MOTOR_SHIFT_CYCLE_OPEN, KEEP_POWER_ON);          
@@ -708,7 +705,8 @@ void motor_magnet_action()
     // from getting stuck in bucket. 
     /**************************************************************/     
      case MM_WAIT_OPEN:   
-        if(!Motor_Is_Running()){        
+        if(!Motor_Is_Running())
+        {        
            if(RS485._flash.open_s)
               kick_off_timer(WSM_TIMER, RS485._flash.open_s);                            
            WSM_Flag = MM_WAIT_OPEN_S;             
@@ -720,7 +718,8 @@ void motor_magnet_action()
     // upper bucket.
     /**************************************************************/     
      case MM_WAIT_OPEN_S:   
-        if(WSM_TMR_DLY_END){
+        if(WSM_TMR_DLY_END)
+        {
            Motor_Driver('S',HALF_CYCLE_CLOSE_WITH_SENSOR, POWER_OFF_AFTER_ROTATION); 
            WSM_Flag = MM_WAIT_PASSEND;
         }
@@ -732,8 +731,10 @@ void motor_magnet_action()
     // weight of material in lower bucket to stablize.
     /**************************************************************/          
      case MM_WAIT_PASSEND:  
-        if(!Motor_Is_Running()){
-           if(RS485._flash.delay_s){
+        if(!Motor_Is_Running())
+        {
+           if(RS485._flash.delay_s)
+           {
               if(RS485._flash.delay_s < 8)
                  RS485._flash.delay_s = 8;   
               kick_off_timer(WSM_TIMER, RS485._flash.delay_s);
@@ -776,7 +777,7 @@ void motor_magnet_action()
            **********************************************************/
            if(READ_AUTO_AMP_REC)
            {
-              i = RS485._global.test_mode_reg2 & 0xF;
+              i = RS485._global.test_mode_reg2 & 0x1F;
               RS485._global.new_cs_zero = amp_weight[i];
            }      
            /***********************************************************
@@ -803,7 +804,7 @@ void motor_magnet_action()
                  /* Valid weight, log last "weight_vs_amp" record */
                  last_weight = current_weight;
                  current_weight = RS485._global.Mtrl_Weight_gram;
-                 index = local_magnet_amp>>2; 
+                 index = local_magnet_amp>>1; 
                  
                  /* If we were asked not to record weight (material 
                   * is re-added), skip amp_weight update.*/
@@ -813,29 +814,34 @@ void motor_magnet_action()
                        amp_weight[index] = current_weight - last_weight; 
                     else
                        amp_weight[index] = 0;
-                 }
-                 else
-                    record_weight_flag = TRUE; 
                  
                  /* If we set a record greater than target, its corresponding
                   * amplitude will never be eligible again. So we set it to  
                   * NOT_AVAILABLE, giving it chances to be selected again.*/   
                  if((amp_weight[index] > (local_target-(local_target>>3))) &&
-                    (amp_weight[index] < (local_target+(local_target>>4)))) 
+                    (amp_weight[index] < (local_target+(local_target>>2)))) 
                        amp_weight[index] = NOT_AVAILABLE; 
+                     /* Last amptidue selected is not strong enough. We didn't
+                      * go to a higher amplitude probably because its weight is 
+                      * too high to be selected. We need to adjust it. */    
+                     if((local_target+(local_target>>3)) > current_weight)
+                     {  
+                        index++;
+                        if(amp_weight[index] != NOT_AVAILABLE)
+                        {    
+                           if(amp_weight[index] > amp_weight[index-1])
+                               amp_weight[index] -= 2;
+                        }
+                        else
+                           amp_weight[index] = amp_weight[index-1];
+                     }
+                 }
+                 else
+                    record_weight_flag = TRUE; 
                  /* calculate gap between current weight and target weight */    
                  if(local_target > current_weight)
                  {     
                      weight_gap = local_target - current_weight;                     
-                     /* Last amptidue selected is not strong enough. We didn't
-                      * go to a higher amplitude probably because its weight is 
-                      * too high to be selected. We need to adjust it.  */
-                     index++;
-                     if(amp_weight[index] != NOT_AVAILABLE)
-                     {    
-                         if(amp_weight[index] > 2)
-                            amp_weight[index] -= 2;
-                     }                    
                  }
                  else
                      weight_gap = 0;                    
@@ -848,11 +854,9 @@ void motor_magnet_action()
             * add material to upper bucket. Add material only when 
             * flag_enable is ENABLE_ON (bug fix). 
             ***********************************************************/
-           if((run_time_adj_done) || (!local_target))
-           {   
-               if(RS485._global.flag_enable == ENABLE_ON)
-                   magnet_add_material(); 
-           }                   
+           else if(RS485._global.flag_enable == ENABLE_ON)
+               magnet_add_material(); 
+                                  
            /************************************************************** 
            * Conditions of breaking out of this "while" loop: 
            * 1. flag_goon = 1:  
@@ -865,7 +869,7 @@ void motor_magnet_action()
            else if((RS485._global.flag_release))
            {   
                if(RS485._global.cs_mtrl < MAX_VALID_DATA)
-                   weight_gap = RS485._global.Mtrl_Weight_gram;
+                   weight_gap = RS485._global.Mtrl_Weight_gram;    
                else
                    weight_gap = local_target>>2;   
                // re-add material. last amp forecast is out-of-date
@@ -1011,9 +1015,7 @@ void Validate_EEPROM_Data()
    {   RS485._flash.board_copy1 = RS485._flash.board_copy2;  invalid_flag = 0xff;}
                 
     if(invalid_flag) 
-    {  RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH);
-       //RS485._global.test_mode_reg1 |= EN_EEPROM_PROG_BIT;
-    } 
+       RS485._global.NumOfDataToBePgmed = sizeof(S_FLASH); 
 
 }
 /*******************************************************************************/
@@ -1321,8 +1323,8 @@ void main(void)
           if(release_signal_not_sent)
           {   release_signal_not_sent = Tell_Packer_Release_Done(); 
              /* if signal has been sent, tell "flag enable" not to do again */
-             if(!release_signal_not_sent)
-                RS485._global.flag_enable = ENABLE_OFF;                      
+             //if(!release_signal_not_sent)
+             //   RS485._global.flag_enable = ENABLE_OFF;                      
 		  }                                        
        }
        /************************************************************/
@@ -1560,8 +1562,8 @@ void main(void)
                    if(!Packer_Is_Busy())
                    {   
                        release_signal_not_sent = Tell_Packer_Release_Done(); 
-                       if(!release_signal_not_sent)
-                           RS485._global.flag_enable = ENABLE_OFF;
+                       //if(!release_signal_not_sent)
+                       RS485._global.flag_enable = ENABLE_OFF;
                    }
                 }
                 else  

@@ -198,13 +198,17 @@ interrupt [EXT_INT0] void ext_int0_isr(void)
       acknowledged by packer, then we should deassert OF signal. */
    if(IF_PIN_HIGH)                                 /* risking edge interrupt */
    {   if((IF_CFG == IF_CFG_LOW) || 
-          (IF_CFG == IF_CFG_RISING_EDGE))
+          (IF_CFG == IF_CFG_FALLING_EDGE))
            deassert_of();
+       else
+           RS485._global.hw_status = PACKER_READY;
    }
    else                                            /* falling edge interrupt */
    {   if((IF_CFG == IF_CFG_HIGH) || 
-          (IF_CFG == IF_CFG_FALLING_EDGE) )
+          (IF_CFG == IF_CFG_RISING_EDGE) )
            deassert_of();
+       else
+           RS485._global.hw_status = PACKER_READY; 
    }
    /***********************************************************************/
    /* If weigher is configured to memorized any packer requests when not 
@@ -557,7 +561,7 @@ u8 Tell_Packer_Release_Done()
        else                                             /* last feed, already gave packer enough material it has asked for */
        {  
           Intf.feed_counter = 0;                        /* reset counter */
-          Intf.pack_reqs_pending = NO_PENDING_REQ;      /* Now need to await packer's feedback to continue. */   
+          //Intf.pack_reqs_pending = NO_PENDING_REQ;      /* Now need to await packer's feedback to continue. */   
           Intf.multi_feed_inprogress = FALSE;
           PSM_Flag = PSM_FEED_DELAY;
        }
@@ -570,7 +574,7 @@ u8 Tell_Packer_Release_Done()
     // ELSE directly go to "SEND_SIGNAL" state to send signals.
     /********************************************************/
     case PSM_FEED_DELAY:
-       if(CONFIG_REG & 0xF800)                          /* need delay before sending out signal */
+       if((CONFIG_REG & 0xF800)&&(NEED_HANDSHAKE))      /* need delay before sending out signal */
        {   
           signal_delay = (CONFIG_REG & 0xF800)>>11;     /* 5 most significant bits:  get delay time */         
           signal_delay = signal_delay * 20;             /* delay unity: 200ms */
@@ -600,18 +604,19 @@ u8 Tell_Packer_Release_Done()
        if(TIMER_SIGNAL_ONGOING)
            kill_timer(SIGNAL_PLS_WIDTH_TIMER);
 
-       send_packer_release_signal();
+       Intf.pack_reqs_pending = NO_PENDING_REQ;      /* Now need to await packer's feedback to continue. */ 
+       send_packer_release_signal();        
        PSM_Flag = PSM_SIGNAL_SENT;	   
        break;
     /********************************************************/
-    // Wait for pulse to complete. Once complete, move to
+    // Wait for pulse to complete. Once complete, move
     // back to init state. and augment release counter for 
     // master monitor purpose.
     /********************************************************/
     case PSM_SIGNAL_SENT:
-       if(PSM_SIGNAL_CMPLT)
+       if(PSM_SIGNAL_CMPLT)  /* wait till signal is formed and sent */
        {   
-          if(!Packer_Is_Busy())
+          if(!Packer_Is_Busy()) /* wait until we get reply from packing machine */
           { RS485._global.packer_release_cnt++;
             PSM_Flag = PSM_INIT_STATE;
           } 
