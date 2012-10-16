@@ -369,7 +369,7 @@ void uart_232(void)
 {
 	SCON = 0x50; //串口方式1,允许接收
 	TMOD = 0x21; //定时器1定时方式2
-	TH1 = 0xfa;TL1 = 0xfa;	  //1200比特
+	TH1 = 0xfa;TL1 = 0xfa;	  //9600比特
 	PCON = 0x80; //波特率加倍控制,SMOD位
 	//  TI = 1;		 //开启定时器1
 	ET1 =0;
