@@ -1,0 +1,17 @@
+1.Hide mouse //text
+2.menu text //done
+3.thread for task machine //partially done
+4.PC command //done
+5.export data
+6.status bar //done
+7.data filter //done
+8.graph display
+9. table display //done
+10. const voltage mode big r
+11. KTT //done
+12. +/- 1K //done, +0.5
+
+change button size, //done
+color //done
+http://wenku.baidu.com/view/efe0bd6f1eb91a37f1115ca0.html
+http://www.cnblogs.com/wantfei/archive/2010/04/23/1718236.html
