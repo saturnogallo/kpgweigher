@@ -5,18 +5,21 @@
         Scanner interface
 ****************************/
 u8 scancmd[5];
-u8 eeprom scanner_type = 1; //1: MI, 2: GUIDLINE
+u8 eeprom scanner_type = 1; //1: MI, 2: GUIDLINE, 3: RAYSTING
 void scanner_set_mode()
-{                            
-        scancmd[0] = '#';
-        //scancmd[0]= '!';
-        scancmd[1] = 0x0D;
-        scancmd[2] = 0x0A;
-        prints(scancmd,3,PORT_SCANNER);    
+{      
+        if(scanner_type == 3)                      
+        {
+                scancmd[0] = '#';
+                //scancmd[0]= '!';
+                scancmd[1] = 0x0D;
+                scancmd[2] = 0x0A;
+                prints(scancmd,3,PORT_SCANNER);    
+        }
 }
 void scanner_set_channel(uchar ch)
 {       
-        if(scanner_type == 1) //MI
+        if((scanner_type == 1)||(scanner_type == 3)) //MI OR RAYSTING
         {        
                 if(ch < 10)
                 {
@@ -207,32 +210,13 @@ void turn_relay(uchar reg)
 /**********************************
         Relay control logic
 **********************************/
-//the high 5 bits of mode is for relay, the low 3 bit is for current, 0 means no change
-//there are 4 relay, K1/K2/K3/KTT 
-#define RELAYSTATE_K1   0x10
-#define RELAYSTATE_K2   0x20
-#define RELAYSTATE_K3   0x40
-#define RELAYSTATE_KTT  0x80
-#define RELAYSTATE_SQR  0x08
-#define RELAYCURR_P01   0x01
-#define RELAYCURR_P1    0x02
-#define RELAYCURR_1     0x03
-#define RELAYCURR_10    0x04
-#define RELAYCURR_100   0x05
-#define RELAYCURR_1K    0x06
-#define RELAYCURR_10K   0x07
-
-#define RLYMODE_VRS     (RELAYSTATE_K1 | RELAYSTATE_KTT)
-#define RLYMODE_VRX     (RELAYSTATE_K2 | RELAYSTATE_KTT)
-#define RLYMODE_TRACKP  (RELAYSTATE_K3 | RELAYSTATE_KTT)
-#define RLYMODE_TRACKN  (RELAYSTATE_K3 )
 
 static uchar rlystate = 0x00; //current relay state
 void relaystate(uchar mode)
 {                                                            
         uchar  s = 0x00;               
         SEND_RLYHEAD;
-//        if((mode & 0xE0) != (rlystate & 0xE0))
+//      if((mode & 0xE0) != (rlystate & 0xE0))
         {
                 //turn off relay first
                 turn_relay(0xf1);turn_relay(0xf2);turn_relay(0xf3);
@@ -240,36 +224,36 @@ void relaystate(uchar mode)
                 if(mode & RELAYSTATE_K2)         turn_relay(0x02);
                 if(mode & RELAYSTATE_K3)         turn_relay(0x03);                
         }
-//        if((mode & RELAYSTATE_KTT) != (rlystate & RELAYSTATE_KTT))                
+//      if((mode & RELAYSTATE_KTT) != (rlystate & RELAYSTATE_KTT))                
         {
-                s = (mode & RELAYSTATE_KTT)? 0x00: 0xff;        
+                s = (mode & RELAYSTATE_KTT)? 0x25: 0x2C;        
                 turn_relay(s);
         }
         if((mode & 0x07)) //new current setting        
         {               
-//                if(((mode & 0x07) != (rlystate & 0x07)))
-                {
+//              if(((mode & 0x07) != (rlystate & 0x07)))
+                {                               
                         s = mode & 0x07;        
                         //turn on the new current relay;
-                        if(s == RELAYCURR_P01)      turn_relay(0x01);
-                        if(s == RELAYCURR_P1)       turn_relay(0x01);                
-                        if(s == RELAYCURR_1)        turn_relay(0x01);                
-                        if(s == RELAYCURR_10)       turn_relay(0x01);                
-                        if(s == RELAYCURR_100)      turn_relay(0x01);                
-                        if(s == RELAYCURR_1K)       turn_relay(0x01);                
-                        if(s == RELAYCURR_10K)      turn_relay(0x01);
+                        if(s == RELAYCURR_P01)     turn_relay(0x42);
+                        if(s == RELAYCURR_P02)     turn_relay(0x13);                
+                        if(s == RELAYCURR_P05)     turn_relay(0x40);                
+                        if(s == RELAYCURR_P1)      turn_relay(0x22);                
+                        if(s == RELAYCURR_1)       turn_relay(0x30);                
+                        if(s == RELAYCURR_3)       turn_relay(0x11);                
+                        if(s == RELAYCURR_10)      turn_relay(0x31);
                         //turn off the old current relay;
-                        if(s != RELAYCURR_P01)      turn_relay(0xff);
-                        if(s != RELAYCURR_P1)       turn_relay(0xff);                
-                        if(s != RELAYCURR_1)        turn_relay(0xff);                
-                        if(s != RELAYCURR_10)       turn_relay(0xff);                
-                        if(s != RELAYCURR_100)      turn_relay(0xff);                
-                        if(s != RELAYCURR_1K)       turn_relay(0xff);                
-                        if(s != RELAYCURR_10K)      turn_relay(0xff);                
+                        if(s != RELAYCURR_P01)     turn_relay(0x43);
+                        if(s != RELAYCURR_P02)     turn_relay(0x1A);                
+                        if(s != RELAYCURR_P05)     turn_relay(0x41);                
+                        if(s != RELAYCURR_P1)      turn_relay(0x2B);                
+                        if(s != RELAYCURR_1)       turn_relay(0x39);                
+                        if(s != RELAYCURR_3)       turn_relay(0x18);                
+                        if(s != RELAYCURR_10)      turn_relay(0x38);                
                 }
 //                if(((mode & RELAYSTATE_SQR) != (rlystate & RELAYSTATE_SQR))
                 {
-                        s = (mode & RELAYSTATE_SQR)? 0x00: 0xff;        
+                        s = (mode & RELAYSTATE_SQR)? 0x1E: 0x17;        
                         turn_relay(s);
                 }        
                 rlystate = mode;        
@@ -280,18 +264,20 @@ void relaystate(uchar mode)
 }
 
 //get the correct k based on vrs and vrx input           
-static double vrs,vrx,vcross_p,vcross_n;
-static double isrc = 0.001; //current of i src based on initial vrs reading
-static double rs = 100;     //rs value
-static double rx = 100;           //calculated rx value
-static uchar irx=1; //index of irx
-static unsigned int k_pos = 800;
+extern double vrs,vrx,vcross_p,vcross_n;
+extern double isrc;             //current of i src based on initial vrs reading
+extern double rs;                 //rs value
+extern double rx;                 //calculated rx value
+extern uchar irx;                     //index of irx
+extern unsigned int k_pos;        //default k value
 /**********************************
         Capture and Track mode update
 **********************************/   
 static int track_weight[5]; //weights in tracking mode
-static uchar ptr_tw = 0;   
-
+static uchar ptr_tw = 0;    //pointer in track weight
+                                                     
+//Get a new K value in non tracking mode
+//return the difference between new K and current k value
 unsigned int calc_capture_nextk()
 {               
         unsigned int N;    
@@ -304,7 +290,11 @@ unsigned int calc_capture_nextk()
                 if(N > 8191)  N = 8191;                              
                 return N-k_pos;
         }                 
-}  
+}                                       
+//Get a new K value in tracking mode                     
+//return the difference between new k and old k based on weight algorithm
+//if delta > 4, no weight algorithm
+//else use the weight algorithm
 unsigned int calc_track_nextk()
 {               
         unsigned int N;    
@@ -323,7 +313,7 @@ unsigned int calc_track_nextk()
                 
         if(++ptr_tw >= sizeof(track_weight)/sizeof(int))
                ptr_tw = 0;
-        //todo calculate the weight
+        //calculate the weight
         sum = 0;
         for(ptr_tw = 0; ptr_tw < sizeof(track_weight)/sizeof(int);ptr_tw++)                
                sum = sum + track_weight[ptr_tw]; 
@@ -351,7 +341,7 @@ void turn_k(unsigned int k)
         s = (k & 0x1000)? 0x00: 0xff; turn_relay(s);                        
         SEND_RLYTAIL;        
 }
-
+//turn into capture mode.
 void capture_prepare()
 {
        navto1v();                                     
@@ -359,7 +349,10 @@ void capture_prepare()
        relaystate(RLYMODE_VRS);       
        sleepms(10000); //sleep 1s       
 }
-//update reading based on capture mode
+//update reading in capture mode
+//return 1: invalid vrs
+//       2: invalid vrx
+//       0: valid reading
 uchar capture_once()
 {
         //update vrs
@@ -377,14 +370,21 @@ uchar capture_once()
         //update k
         turn_k(k_pos + calc_capture_nextk());
         return 0;
-}                               
+}                
+//turn into track mode               
 void track_prepare()  
 {
        navto120mv();                                     
        turn_k(800); //1:1 mode                       
        relaystate(RLYMODE_TRACKP + irx);       
        sleepms(10000); //sleep 1s       
-}
+}                        
+//update k in track mode
+//return 1: invalid vcross_p 
+//return 2: invalid vcross_n
+//return 3: delta k >64 
+//return 4: delta k > 0
+//return 0: delta k = 0
 uchar track_once()
 {       
         unsigned int newN;                                       
@@ -403,7 +403,7 @@ uchar track_once()
         if(newN > 0)                 
         {
                 if(newN >= 64)   //too big changes
-                        return 3;
+                      return 3;
                 turn_k(k_pos + newN);                                
                 return 4;
         }        
@@ -413,8 +413,17 @@ uchar track_once()
         Debug interface
 **********************************/
 //incoming data hander of PC
-//four char or 1 char command
-//example : 'x' or 'x' '1''2''3'4'
+//four char or 1 char command     end with 0x0D or 0x0A
+//example : 'x' or 'x' '1''2''3'4'                     
+//R xx: turn relay to xx (ex: R 3E)
+//M [RX,RS,KP,KN][1-7][Q] ( Q means sqr of current, RX is VRX, RS is VRS, KP is TRACKP, KN is TRACKN , [1-7] is current index)
+//K nnnn : switch the relay to K nnnn is number
+//N : reading navmeter
+//t: Track prepare
+//r: track once
+//c: Capture prepare
+//a: capture once
+//0-9.UDCOT simulate keyboards
 static uchar pccmd[7];
 static uchar ptr_pccmd = 0;
 void pc_uart_push(uchar data)
@@ -463,27 +472,42 @@ void pc_uart_push(uchar data)
                         dbgout(k_pos);
                         return;
                 }                
-                if(pccmd[0] == 'T')     //track prepare
+                if(pccmd[0] == 't')     //track prepare
                 {
                         track_prepare();
                         return;
                 }                
-                if(pccmd[0] == 't')     //track once
+                if(pccmd[0] == 'r')     //track once
                 {
                         dbgout(track_once());
                         return;
                 }                
 
-                if(pccmd[0] == 'C')     //capture prepare
+                if(pccmd[0] == 'c')     //capture prepare
                 {
                         capture_prepare();
                         return;
                 }                
-                if(pccmd[0] == 'c')     //capture once
+                if(pccmd[0] == 'a')     //capture once
                 {
                         dbgout(capture_once());
                         return;
-                }                               
+                }                
+                if((pccmd[0] >= '') && (pccmd[0] <= '9'))
+                {              
+                        key = pccmd[0];                          
+                        return;
+                }
+                if((pccmd[0] == '.') ||
+                   (pccmd[0] == 'U') ||
+                   (pccmd[0] == 'D') ||
+                   (pccmd[0] == 'C') ||
+                   (pccmd[0] == 'O') ||
+                   (pccmd[0] == 'T') )
+                {              
+                        key = pccmd[0];                          
+                        return;
+                }
                 
         }
 }                

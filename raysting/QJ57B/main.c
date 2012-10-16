@@ -22,7 +22,7 @@ External SRAM size  : 0
 Data Stack size     : 1024
 *****************************************************/
 
-#include <mega64.h>
+#include <mega128.h>
 #include "uart.h"
 #include "init.h"
 #include "16c554.h"
@@ -45,45 +45,40 @@ extern void pg_boot_handler(uchar);
 extern void com1_putstr(char *s);
 extern unsigned int strlen(char *s);
 RUNDATA rundata;
-SYSDATA eeprom sysdata;
-PRBDATA eeprom prbdata;
-/*
 SYSDATA eeprom sysdata = {
-	0,0,100,3,
+	0,0,100,0,0,25,3,
 	{0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-	{0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-	1,1};
+	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},//24IDs
+	1,1,3};
 PRBDATA	eeprom prbdata = {
        {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
-	{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, //24paramA
+       {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
-	{0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, //24paramB
+       {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
 	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0},
-	{25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
+	0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0}, //24paramC
+       {25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
 	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0,
-	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0},	
-	{"11","","","","","","","",
+	25.0,25.0,25.0,25.0,25.0,25.0,25.0,25.0}, //24rtp
+       {"1","","","","","","","",
 	"","","","","","","","",
-	"","","","","","","",""},
+	"","","","","","","",""},//24name
+       {4,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0 }, //24 current
        {0x03,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
 	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff}
+	0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff} //24type
 };
-*/
+
 char  strbuf[50];        //buffer for menu display
 uchar key;
 
 LABEL flash bootup = {LBL_HZ16,0,10,7,"正在启动..."};
-LABEL flash bootup1 = {LBL_HZ16,0,40,7,"更新数据..."};
-LABEL flash modify = {LBL_HZ16,30,30,8,"正在更新数据..."};
 
 LABEL flash lbldbg = {LBL_HZ6X8,10,30,8,strbuf};
 
@@ -158,13 +153,20 @@ void init_var()
 LABEL flash statelbl = {LBL_HZ6X8,100,55,16,strbuf};
 int ch_to_search=1; //1 based index
 int last_ch_to_search = 0;
-int nextwin=0;
+int nextwin=0; //ID to next window
 uint dlg_cnt,onesec_cnt;
 
-uchar phase = 0;
+uchar phase = 0;                
+double vrs,vrx,vcross_p,vcross_n;
+double isrc = 0.001;             //current of i src based on initial vrs reading
+double rs = 100;                 //rs value
+double rx = 100;                 //calculated rx value
+uchar irx=1;                     //index of irx
+unsigned int k_pos = 800;        //default k value
+
 //several phase define
-//0: switch to new channel and capture prepare if required
-//10: get vrs, 
+//0: switch to new channel 
+//10: capture prepare , and get vrs
 //20: get vrx,
 //30: prepare track
 //40: TRACK P irx
@@ -172,73 +174,76 @@ uchar phase = 0;
 //60: update reading
 uchar track_state()
 {
-/*                  
+                  
     uchar i;
-	
+    unsigned int newN; 
+return;	
 	i = sysdata.id[ch_to_search-1];   
+	
 	if(i == INVALID_PROBE)
 	{
         	rundata.temperature[ch_to_search-1] = -9999;
         	rundata.reading[ch_to_search-1] = -9999;
         	phase = 60;
 	}
+	
 	if(phase == 0)
 	{
+	        irx = prbdata.current[ch_to_search-1];
 		if(ch_to_search == last_ch_to_search) //not new channel
 		{
 			phase = 40;
 			return 0;
 		}
 		scanner_set_channel(ch_to_search);
- 	    navto1v();                                     
-        turn_k(800); //1:1 mode                       
-        relaystate(RLYMODE_VRS);  
-		dlg_cnt = 1;
 		phase = 10;
+		dlg_cnt = 0;
 		return 0;
 	}
 	if(phase == 10)
 	{
-	   //update vrs
-        relaystate(RLYMODE_VRS + irx);
+                navto1v();                                     
+                turn_k(800); //1:1 mode                       
+                relaystate(RLYMODE_VRS + irx);  
 		dlg_cnt = 1;
 		phase = 20;
 		return 0;
+	
 	}
 	if(phase == 20)
 	{
-        vrs = nav_read_stable();
-        if((vrs > 10.0)||(vrs < -10.0))
+                vrs = nav_read_stable();
+                if((vrs > 10.0)||(vrs < -10.0))
 		{
 			phase = 59;
-            return 0;
+                        return 0;
 		}
-        //update vrx
-        relaystate(RLYMODE_VRX + irx);  		
+                //update vrx
+                relaystate(RLYMODE_VRX + irx);  		
 		dlg_cnt = 1;
 		phase = 30;
 		return 0;
 	}
 	if(phase == 30)
 	{
-	   vrx = nav_read_stable();
-        if((vrx > 10.0)||(vrx < -10.0))
+                vrx = nav_read_stable();
+                if((vrx > 10.0)||(vrx < -10.0))
 		{
-			phase = 59;
-            return 0;
+	                phase = 59;
+                        return 0;
 		}
-        //update k
-        turn_k(k_pos + calc_capture_nextk());		
-        navto120mv();                                     
+                //update k
+                turn_k(k_pos + calc_capture_nextk());		
+                navto120mv();                                     
 		dlg_cnt = 0;
 		phase = 40;
 		return 0;
 	}
 	if(phase == 40)
 	{
-        relaystate(RLYMODE_TRACKP + irx);       
+                relaystate(RLYMODE_TRACKP + irx);       
 		dlg_cnt = 5;
-		if(rundata.kttmode)
+		if(sysdata.kttmode)
 			phase = 50;
 		else
 			phase = 55;
@@ -247,12 +252,12 @@ uchar track_state()
 	if(phase == 50)
 	{
 		vcross_p = nav_read_stable();
-        if((vcross_p > 10.0)||(vcross_p < -10.0))
-		{
-			phase = 59;
-            return 0;
-		}
-        relaystate(RLYMODE_TRACKN + irx); 
+                if((vcross_p > 10.0)||(vcross_p < -10.0))
+        	{
+	        	phase = 59;
+                        return 0;
+        	}
+                relaystate(RLYMODE_TRACKN + irx); 
 		dlg_cnt = 5;
 		phase = 55;
 		return 0;
@@ -260,31 +265,31 @@ uchar track_state()
 	if(phase == 55)
 	{
 		vcross_n = nav_read_stable();
-        if((vcross_n > 10.0)||(vcross_n < -10.0))
+                if((vcross_n > 10.0)||(vcross_n < -10.0))
 		{
 			phase = 59;
 			return 0;
 		}
-		if(!rundata.kttmode)
+		if(!sysdata.kttmode)
 		{
 			vcross_p = vcross_n;
 			vcross_n = -vcross_n;
 		}
-		newN = calc_track_nextk();
-        if(newN > 0)                 
-        {
-                if(newN >= 64)   //too big changes
-				{
-					phase = 40;
-                    return 0;
-				}
-                turn_k(k_pos + newN);  
-				phase = 40;
-				return 0;
-        }        
+		newN = calc_track_nextk();   //rx is updated here
+                if(newN > 0)                 
+                {
+                        if(newN >= 64)   //too big changes
+			{
+				phase = 10; //capture again
+                                return 0;
+			}
+                        turn_k(k_pos + newN);  
+			phase = 40;
+			return 0;
+                }        
 		rundata.reading[ch_to_search-1] = rx;
 		rundata.temperature[ch_to_search-1] = RValueToTValue(rx,sysdata.id[ch_to_search-1]);
-        phase = 60;
+                phase = 60;
 		return 0;
 	}
 	if(phase == 59)
@@ -298,7 +303,6 @@ uchar track_state()
 		pg_main_handler(MSG_REFRESH);
 		phase = 0;
 	}
-*/	
 	return 1;
 }
 
@@ -306,7 +310,6 @@ void updatestate()
 {
         char star[6];
         sprintf(star,"    ");
-                
         sprintf(strbuf,"(ch%2i,%2d,%2i)",ch_to_search+1,dlg_cnt/ONESEC,phase);                        
         draw_label(&statelbl,SW_NORMAL);
 }
@@ -316,6 +319,7 @@ void updatestate()
 /**************************************************************************************/
 extern u8 databuf[12];
 extern u8 pos_databuf; //position in data buffer
+extern void update_shortcuts();
 void main(void)
 {
     u16 i;     
@@ -336,8 +340,11 @@ void main(void)
     /*********************************************************************/
     // System hardware detection
     /*********************************************************************/
+    rundata.runstop &= 0xFE; //set to stop state 
+    ch_to_search = 1;        
+    update_shortcuts();
     nextwin = PG_BOOT;
-	scanner_set_mode();
+	 scanner_set_mode();
 	 while(1)
 	 {
  	 	if(nextwin != 0)
@@ -352,37 +359,37 @@ void main(void)
 			key = KEY_INVALID;
 			continue;
 		}		
-		if(curr_window != pg_main_handler)
+		if(curr_window != pg_main_handler) //update data only in main screen
 			continue;   		
-		if(dlg_cnt > 1)
+		if(dlg_cnt > 1) //still in delay part
 		{         
 		        onesec_cnt++;
 		        if(onesec_cnt == (ONESEC-10))
-		        {       
-       			        updatestate();
-       			}
+       			        updatestate(); //display status string every 1 second
+
        			if(onesec_cnt == ONESEC)
        			        onesec_cnt = 0 ;
 			dlg_cnt--;
 			continue;
 		}    
-		updatestate();
-		if(track_state() == 0)
-			continue;
-        //shift to next channel
-        while(true)
-        {
-            ch_to_search += 1;
-        	if(ch_to_search > MAX_CH_NUM)
-        	{
+		updatestate();          //display status string
+		if(track_state() == 0)  //update the tracking state
+			continue;            
+		last_ch_to_search = ch_to_search;
+                //shift to next valid channel
+                while(true)
+                {
+                    ch_to_search += 1;
+                    if(ch_to_search > MAX_CH_NUM)
+                    {
 	        	ch_to_search = 1;
 	        	break;
-	        }           
-	        i = sysdata.id[ch_to_search-1];
-       		if(i == INVALID_PROBE)
+                    }           
+	            i = sysdata.id[ch_to_search-1];
+       		    if(i == INVALID_PROBE)
    		        continue;
-       		if((prbdata.type[i] == PRBTYPE_PT25) || (prbdata.type[i] == PRBTYPE_PT100))
-       		    break;
+       		    if((prbdata.type[i] == PRBTYPE_PT25) || (prbdata.type[i] == PRBTYPE_PT100))
+       		        break;
 		}	
 	 }
 }      

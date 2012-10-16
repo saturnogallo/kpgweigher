@@ -1,6 +1,6 @@
 // System Initialization file
 
-#include <mega64.h>
+#include <mega128.h>
 #include "global.h"
 /**************************************************************************************/
 //                              Initialize Port A-G
@@ -64,10 +64,10 @@ void Init_Port()
  // Port G initialization
  // Input        
  // PORTG0-1: IOR/W
- // PORTG3-4: NO USE
+ // PORTG3-4: FOR LCD WR AND RD //NO USE
  // PORTG2  : ALE
-    PORTG=0x00;
-    DDRG=0x00;
+    PORTG=0x18;
+    DDRG=0x18;
 }
 
 /**************************************************************************************/

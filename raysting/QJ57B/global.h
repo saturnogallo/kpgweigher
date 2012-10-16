@@ -1,7 +1,7 @@
 // global.h    
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_             
-#include <mega64.h>
+#include <mega128.h>
 #include "typedef.h"
 
 #define LED_ON(addr)       addr=0;

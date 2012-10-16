@@ -21,7 +21,7 @@
 
 // Coded by: fd_lxh@yahoo.com.cn
 /********************************************************************************/
-#include "mega64.h"
+#include "mega128.h"
 #include "global.h"
 #include "16c554.h"
 #include "uart.h" 
@@ -54,7 +54,6 @@ interrupt [EXT_INT4] void ext_int4_isr(void)
       default:
           break;
    }           
-   
    rundata = UC_554A_LSR;        // read LSR to clear interrupt. dummy read     
 }
 /********************************************************************************/

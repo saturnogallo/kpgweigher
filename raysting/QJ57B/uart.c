@@ -1,7 +1,7 @@
 /*********************************************************************************/
 //                         UART0 and UART1 Subroutines
 /*********************************************************************************/
-#include <mega64.h>
+#include <mega128.h>
 #include "uart.h" 
 #include "16c554.h" 
 #include "global.h"                 
@@ -121,7 +121,6 @@ else
 #asm("sei")
 }
 
-/*
 void com0_puthex(u8 a)
 {
 	unsigned char h,l;
@@ -136,7 +135,14 @@ void com0_puthex(u8 a)
 	else
 		com0_putc(l+'A'-0x0a);
 } 
-*/              
+              
+
+void com0_mputs(u8 *buf, u8 size){
+        while(size-- > 0){
+                com0_puthex(*buf++);
+        }
+} 
+
 
 void com0_putstr(u8 *ptr){
         while(*ptr != 0x00){
@@ -163,13 +169,6 @@ void com1_putstr(u8 *ptr){
                 com1_putc(*ptr++);
         } 
 }                             
-/*
-void com0_mputs(u8 *buf, u8 size){
-        while(size-- > 0){
-                com0_puthex(*buf++);
-        }
-} 
-*/
 void com1_mputs(u8 *buf, u8 size){
         while(size-- > 0){
                 com1_puthex(*buf++);
