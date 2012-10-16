@@ -8,6 +8,10 @@ double CeliusToF(double c)
 {                         
         return c*1.8+32.0;
 	//convert C temp to F temp
+}             
+double FToCelius(double f)
+{
+        return (f-32)/1.8;
 }
 double PT100RToTValue(double r,double r0)
 {

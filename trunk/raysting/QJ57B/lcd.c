@@ -1,6 +1,6 @@
 #include <string.h>
 
-#include <mega64.h>
+#include <mega128.h>
 #include "lcd.h"
 #include "font.h"
 #include "global.h"
@@ -10,8 +10,13 @@
 #define LCD_DATA_SET_IN         DDRB=0x00;
 #define LCD_DATA_SET_OUT        DDRB=0xff;
 #define LCD_DATA_BUS_IN         PINB
-#define LCD_WR			PORTD.0
-#define LCD_RD			PORTD.1
+#define CLR_WR                  PORTG = (PORTG & 0xF7)
+#define SET_WR                  PORTG = (PORTG | 0x08)
+#define CLR_RD                  PORTG = (PORTG & 0xEF)
+#define SET_RD                  PORTG = (PORTG | 0x10)
+
+#define LCD_WR			MPORTG.3//PORTD.0
+#define LCD_RD			MPORTG.4//PORTD.1
 #define LCD_CE			PORTD.4
 #define LCD_CD			PORTD.5
 #define LCD_RESET		PORTD.6
@@ -25,14 +30,14 @@ uchar LCD_BusyStatus (uchar mask)    //测状态
 	LCD_DATA_SET_OUT;
 	LCD_CE = 0;
 	LCD_CD = 1;
-	LCD_RD = 1;
-	LCD_WR = 1;
+	SET_RD;//LCD_RD = 1;
+	SET_WR;//LCD_WR = 1;
         LCD_DATA_BUS_OUT = 0xff;	
        	LCD_DATA_SET_IN;
- 	LCD_RD = 0;
+ 	CLR_RD;//LCD_RD = 0;
         sleepms(LCD_DELAY);
        	dat=LCD_DATA_BUS_IN;
-       	LCD_RD = 1;
+       	SET_RD;//LCD_RD = 1;
   	return dat;
 }
 
@@ -74,11 +79,11 @@ void LCD_AutoWrite (uchar dat)               //自动写数据
   	LCD_CheckBusy3();
   	LCD_DATA_SET_OUT;
   	LCD_CD = 0;
-  	LCD_RD = 1;
+  	SET_RD;//LCD_RD = 1;
        	LCD_DATA_BUS_OUT=dat;  	
-  	LCD_WR = 0;
+  	CLR_WR;//LCD_WR = 0;
 	sleepms(LCD_DELAY);
-	LCD_WR = 1;
+	SET_WR;//LCD_WR = 1;
 
 }
 /*	读数据	*/
@@ -88,12 +93,12 @@ uchar LCD_Read(void)
 	LCD_CheckBusy1();
 	LCD_DATA_SET_IN;
 	LCD_CE = 0;
-	LCD_WR = 1;
-	LCD_RD = 0;
+	SET_WR;//LCD_WR = 1;
+	CLR_RD;//LCD_RD = 0;
 	LCD_CD = 0;
 	sleepms(LCD_DELAY);
 	dat = LCD_DATA_BUS_IN;
-	LCD_RD = 1;
+	SET_RD;//LCD_RD = 1;
 	LCD_CD = 1;
 	return dat;
 }
@@ -119,12 +124,12 @@ void LCD_Comm (uchar comm)       //写命令
   	LCD_CheckBusy1();
   	LCD_DATA_SET_OUT;                        
   	LCD_CD = 1;
-        LCD_RD = 1;
+        SET_RD;//LCD_RD = 1;
         
        	LCD_DATA_BUS_OUT=comm;                       
-       	LCD_WR = 0;
+       	CLR_WR;//LCD_WR = 0;
 	sleepms(LCD_DELAY);
-	LCD_WR = 1;
+	SET_WR;//LCD_WR = 1;
 }
 void LCD_Data (uchar dat)       //写数据
 {
@@ -133,11 +138,11 @@ void LCD_Data (uchar dat)       //写数据
   	LCD_DATA_SET_OUT;  
 
   	LCD_CD = 0;
-        LCD_RD = 1;
+        SET_RD;//LCD_RD = 1;
        	LCD_DATA_BUS_OUT=dat;  	
-       	LCD_WR = 0;
+       	CLR_WR;//LCD_WR = 0;
 	sleepms(LCD_DELAY);
-	LCD_WR = 1;
+	SET_WR;//LCD_WR = 1;
   	
 }
 
@@ -146,8 +151,8 @@ void LCD_Init (void)
 {
 	LCD_DATA_SET_OUT;
 	LCD_CE = 1;
-	LCD_WR = 1;
-	LCD_RD = 1;
+	SET_WR;//LCD_WR = 1;
+	SET_RD;//LCD_RD = 1;
 	//LCD_RESET = 0;
 	//sleepms(2000);
         //LCD_RESET = 1;        
@@ -173,8 +178,8 @@ void LCD_Cls(void)
 {      
 
 	u16  i;
-	//LCD_Write2(0x00,0x00,LC_ADD_POS);// 置地址指针为从零开始
-  	LCD_WriteInt(LCD_TEXT_HOME_ADDR,LC_ADD_POS);
+	//LCD_Write2(0x00,0x00,LC_ADD_POS);
+  	LCD_WriteInt(LCD_TEXT_HOME_ADDR,LC_ADD_POS); // 置地址指针为从零开始
 	LCD_Comm(LC_AUT_WR);		// 自动写
 //	LCD_CheckBusy1();
 	for(i=0;i< (LCD_HEIGHT+8)*LCD_WIDTH;i++)	// 清一屏
@@ -237,7 +242,6 @@ void LCD_TextSetAddr(uchar x,uchar y)
 }
 */
 /*	清除一点*/
-/*
 void LCD_ClrPixel(uchar x,uchar y) 
 {
 	uchar b;
@@ -245,12 +249,10 @@ void LCD_ClrPixel(uchar x,uchar y)
 
 	b = 7 - (x % 8);
 	
-	LCD_WriteInt(addr,0x24);
+	LCD_WriteInt(addr,LC_ADD_POS);
 	LCD_Comm(0xf0|b);
 }
-*/
 /*	点亮一点	*/
-
 void LCD_Putpixel(uchar x,uchar y) 
 {
 	uchar b;
@@ -272,7 +274,6 @@ void LCD_ShowCursor(uchar x,uchar y)
 }
 
 /*	取消光标	*/
-
 void LCD_HideCursor(void)  
 {	
   	//LCD_CE = 0;
@@ -311,9 +312,7 @@ void LCD_PrintNumStr(uchar x,uchar y,uchar *s)
 	while(*s)
 	{
 		LCD_PutImg(x,y,1,11,Num_Tab + (*s - '0') * 11);
-		
-		x = x + 8;
-		
+                x = x + 8;
 		s++;
 	}
 }
@@ -472,7 +471,6 @@ void LCD_TextPrintHex(uchar x,uchar y,uchar hex)
 /************************************************/
 /*画线。任意方向的斜线,直线数学方程 aX+bY=1	*/
 /************************************************/
-/*
 void LCD_Linexy(uchar x0,uchar y0,uchar xt,uchar yt) 
 {
 	register uchar t;
@@ -513,7 +511,7 @@ void LCD_Linexy(uchar x0,uchar y0,uchar xt,uchar yt)
 		}
 	}
 }
-*/
+
 
 void LCD_LineH(uchar y) 
 {
@@ -554,8 +552,6 @@ void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2)
 	LCD_LineV(x1,y1,y2);
 	LCD_LineV(x2,y1,y2);
 }
-
-
 
 FNT_GB12 flash *GetHzk12(uchar c1,uchar c2)
 {

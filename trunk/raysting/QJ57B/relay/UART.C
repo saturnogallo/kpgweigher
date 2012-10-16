@@ -203,7 +203,7 @@ char iogetchar( void )
 			qout = 0;
 		}
 	}
-	while ( ch==0x0A || ch==0xC2 );
+	while (ch==0xC2);
 	return( ch );
 }
 

@@ -1,4 +1,4 @@
-#include <mega64.h>
+#include <mega128.h>
 #include "lcd.h"
 #include "key.h"
 #include "utili.h"
@@ -7,9 +7,9 @@
 #include "utili.h"
 #include "scanner.h"
 
-extern uchar nextwin;
-extern MSG_HANDLER      lp_listvalue;
-extern MSG_HANDLER      lp_listclear;
+extern uchar nextwin;  //next window ID
+extern MSG_HANDLER      lp_listvalue;  //prepare the string value of Ith item
+extern MSG_HANDLER      lp_listclear;  //handler for item remove action
 LABEL flash main_mark = {LBL_HZ12, 1, 20, 1, ">"};
 LABEL flash main_options[] = {
 	{LBL_HZ16, 10,3,  8, strbuf	},
@@ -17,24 +17,26 @@ LABEL flash main_options[] = {
 	{LBL_HZ12, 10,36, 8, strbuf	},
 	{LBL_HZ12, 10,48, 8, strbuf	}
 };
-void display_buttons(uchar pos,uchar state)
+void display_buttons(uchar pos,uchar state) //update the LED status
 {
 }
-extern uchar ch_to_search;
+extern uchar ch_to_search;  //current channel selected start from 1
+//display the result of channel
 void result_of_channel(uchar ch)
 {
 	char i,j;
-	while(ch > MAX_CH_NUM)
+	while(ch > MAX_CH_NUM)  //for rollback display id25 = id1
 		ch = ch - MAX_CH_NUM;
-	sprintf(strbuf,"        ");
+	sprintf(strbuf,"        "); //8 space
 	if(ch == 0)
 		return;
 
 	ch = ch - 1; //0 based
-	
-	if((sysdata.id[ch] == INVALID_PROBE) || (prbdata.type[sysdata.id[ch]] == PRBTYPE_INVALID))
+	        
+	sprintf(strbuf,"CH%2i:      ",ch+1);
+	if((sysdata.id[ch] == INVALID_PROBE) || 
+           (prbdata.type[sysdata.id[ch]] == PRBTYPE_INVALID)) //no display for invalid channel
 	{
-		sprintf(strbuf,"CH%2i:      ",ch+1);
 		return;
 	}
 	j = sysdata.id[ch];
@@ -57,25 +59,23 @@ void result_of_channel(uchar ch)
 		}
 	}
 }                                 
-void display_button(uchar bt, uchar state)
-{
-}
+//update LED display
 void update_shortcuts()
 {
 		if(sysdata.dispmode & DISP_FMODE)
-			display_button(KEY_BTN1, 1);
+			display_buttons(KEY_BTN1, 1);
 		else
-			display_button(KEY_BTN1, 0);
+			display_buttons(KEY_BTN1, 0);
 
 		if(sysdata.kttmode & 0x01)
-			display_button(KEY_BTN2, 1);
+			display_buttons(KEY_BTN2, 1);
 		else
-			display_button(KEY_BTN2, 0);
+			display_buttons(KEY_BTN2, 0);
 
 		if(rundata.runstop & 0x01)
-			display_button(KEY_BTN4, 1);
+			display_buttons(KEY_BTN4, 1);
 		else
-			display_button(KEY_BTN4, 0);
+			display_buttons(KEY_BTN4, 0);
 
 }
 void pg_main_handler(uchar msg)
@@ -92,7 +92,7 @@ void pg_main_handler(uchar msg)
 	{
 		sysdata.kttmode = 1 ^ sysdata.kttmode ; 
 		update_shortcuts();
-		msg = MSG_INIT;
+                return; //no need to update display
 	}
 	if(msg == KEY_BTN3) //??
 	{
@@ -103,10 +103,10 @@ void pg_main_handler(uchar msg)
 	{
 		rundata.runstop = 1 ^ rundata.runstop;
 		update_shortcuts();
-		return;
+		return; //no need to update display
 	}
 
-    if(msg == MSG_INIT)
+        if(msg == MSG_INIT)
 	{
 		LCD_Cls();
 		result_of_channel(ch_to_search);
@@ -124,14 +124,14 @@ void pg_main_handler(uchar msg)
 		nextwin = PG_MAIN;
 		return;
 	}
-	if(msg == KEY_DN) //page up
+	if(msg == KEY_DN) //page down
 	{
 		curr_sel = curr_sel + 3;
 		if(curr_sel > MAX_CH_NUM)
-			curr_sel = curr_sel = MAX_CH_NUM;
+			curr_sel = curr_sel - MAX_CH_NUM;
 		msg = MSG_REFRESH;
 	}
-	if(msg == KEY_UP) //page down
+	if(msg == KEY_UP) //page up
 	{
 		if(curr_sel > 3)
 			curr_sel = curr_sel - 3;
@@ -158,9 +158,10 @@ void pg_main_handler(uchar msg)
 	{
 		result_of_channel(ch_to_search);
 		draw_label(&main_options[0],SW_NORMAL);
+		draw_label(&main_mark,SW_NORMAL);		
 		for(i = 0; i<3 ; i++)
 		{
-			if(((curr_sel+i) == ch_to_search) || ((curr_sel+i) == (ch_to_search+MAX_CH_NUM)))
+			if(((curr_sel+i) == ch_to_search) || ((curr_sel+i) == (ch_to_search+MAX_CH_NUM))) //no need to update old values here
 			{
 				result_of_channel(curr_sel+i);
 				draw_label(&main_options[i+1],SW_NORMAL);
@@ -170,9 +171,9 @@ void pg_main_handler(uchar msg)
 }
 LABEL flash boot_banner = {LBL_HZ12,3,3,8,"  "};	
 LABEL flash boot_options[] = {
- 	{LBL_HZ16, 10,23,7,"1.开始测量"},
+ 	{LBL_HZ16, 10, 23,7,"1.开始测量"},
  	{LBL_HZ16, 130,23,7,"2.通道配置"},
- 	{LBL_HZ16, 10,45,7,"3.探头参数"},
+ 	{LBL_HZ16, 10, 45,7,"3.探头参数"},
  	{LBL_HZ16, 130,45,7,"4.系统设置"}
 };       
 void pg_boot_handler(uchar i)
@@ -190,7 +191,7 @@ void pg_boot_handler(uchar i)
 		}
 	}
 }
-void buf2name(uchar i, uchar *buf)
+void buf2name(uchar i, uchar *buf) //copy name from buffer to eeprom
 {
 	u8 j=0;
     for(j=0;j<8;j++)
@@ -201,11 +202,11 @@ void buf2name(uchar i, uchar *buf)
 
         if((buf[j] >= '0' && buf[j] <= '9') || (buf[j] >= 'A' && buf[j] <= 'Z'))
             continue;
-        prbdata.name[i][j] = '\0';
+        prbdata.name[i][j] = '\0'; //avoid no alphabit values
         break;
     }
 }
-void name2buf(uchar i, uchar *buf)
+void name2buf(uchar i, uchar *buf) //copy name from eeprom to buffer
 {
     u8 j=0;
     for(j=0;j<8;j++)
@@ -216,7 +217,7 @@ void name2buf(uchar i, uchar *buf)
 
         if((buf[j] >= '0' && buf[j] <= '9') || (buf[j] >= 'A' && buf[j] <= 'Z'))
             continue;
-        buf[0] = '\0';
+        buf[0] = '\0'; //avoid no alphabit values
         break;
     }
 }
@@ -268,17 +269,17 @@ void pg_ch_sel_handler(uchar kmsg)
 	{
 		lp_listvalue = prb_name_on_channel;
 		lp_listclear = clear_channel;
-		msg = wnd_listbox(&chsel_banner,MAX_CH_NUM,6,msg);
+		msg = wnd_listbox(&chsel_banner,MAX_CH_NUM,msg);
 		if(msg >= 1 && msg <= MAX_CH_NUM)
 		{
 			ch = msg;
 			sprintf(strbuf,"选择通道%i使用的探头",ch);
 			lp_listvalue = prb_name_on_probe;
 			lp_listclear = 0;
-			pmsg = wnd_listbox(&chprb_banner,MAX_PRB_NUM,6,pmsg);
-			if(pmsg >= 1 && pmsg <= MAX_CH_NUM)
+			pmsg = wnd_listbox(&chprb_banner,MAX_PRB_NUM,pmsg);
+			if(pmsg >= 1 && pmsg <= MAX_PRB_NUM)
 			{
-				sysdata.id[ch-1] = pmsg; //set probe id to channel
+				sysdata.id[ch-1] = pmsg-1; //set probe id to channel
 			}
 		}else{
 			nextwin = PG_BOOT;
@@ -287,7 +288,7 @@ void pg_ch_sel_handler(uchar kmsg)
 	}
 }                  
 
-static u8 curr_prb_sel = 1; //current probe param index
+static u8 curr_prb_sel = 1; //current probe param index, 1 based
 LABEL flash prbparam_banner = {LBL_HZ12,3,3,8,strbuf};	
 LABEL flash prbparam_options[] = {
 	{ LBVAR_SN   + LBL_HZ12,10,17,6,strbuf}, //"1.序列号"
@@ -331,6 +332,18 @@ void pg_prb_param_handler(uchar kmsg)
 			PRBTYPE_INC(curr_prb_sel);// switch the probe type
 			continue;
 		}
+		if(msg == 3) {
+			msg = wnd_menu(&prbcurr_banner,prbcurr_options,7,7);
+			if((msg >= 1) && (msg <= (PRBCURR_10+1)))//save the current
+				prbdata.current[curr_prb_sel-1] = (prbdata.current[curr_prb_sel-1] & PRBCURR_SQR) + (msg - 1);
+			msg = 3;
+			continue;
+		}
+		if(msg == 4) {
+			prbdata.current[curr_prb_sel-1] = (prbdata.current[curr_prb_sel-1] ^ PRBCURR_SQR) ; //switch the sqr
+			continue;
+		}
+		
 		if(msg == 5) {
 			f = prbdata.rtp[curr_prb_sel-1]; //load the current rtp
 			sprintf(strbuf,"请输入探头RTP:");
@@ -343,14 +356,14 @@ void pg_prb_param_handler(uchar kmsg)
 			sprintf(strbuf,"请输入探头系数A:");
 			f = wnd_floatinput(f);
 			prbdata.paramA[curr_prb_sel-1] = f;//save the new A
-			return;
+			continue;
 		}
 		if(msg == 7) {
 			f = prbdata.paramB[curr_prb_sel-1];//load the current B
 			sprintf(strbuf,"请输入探头系数B:");
 			f = wnd_floatinput(f);
 			prbdata.paramB[curr_prb_sel-1] = f;//save the new B
-			return;
+			continue;
 		}
 		if(msg == 8) {
 			f = prbdata.paramC[curr_prb_sel-1];//load the current C
@@ -358,17 +371,6 @@ void pg_prb_param_handler(uchar kmsg)
 			f = wnd_floatinput(f);
 			prbdata.paramC[curr_prb_sel-1] = f;//save the new C
 			return;
-		}
-		if(msg == 3) {
-			msg = wnd_menu(&prbcurr_banner,prbcurr_options,7,7);
-			if((msg >= 1) && (msg <= (PRBCURR_10+1)))//save the current
-				prbdata.current[curr_prb_sel-1] = (prbdata.current[curr_prb_sel-1] & PRBCURR_SQR) + (msg - 1);
-			msg = 3;
-			continue;
-		}
-		if(msg == 4) {
-			prbdata.current[curr_prb_sel-1] = (prbdata.current[curr_prb_sel-1] ^ PRBCURR_SQR) ; //switch the sqr
-			continue;
 		}
 		nextwin = PG_PRB_SEL;
 		return;
@@ -380,7 +382,7 @@ void pg_prb_sel_handler(uchar kmsg)
 	uchar msg=1;
 	lp_listvalue = prb_name_on_probe;
 	lp_listclear = clear_probe;
-	msg = wnd_listbox(&prbsel_banner,MAX_CH_NUM,6,curr_prb_sel);
+	msg = wnd_listbox(&prbsel_banner,MAX_CH_NUM,curr_prb_sel);
 	if(msg >= 1 && msg <= MAX_PRB_NUM)
 	{
 		curr_prb_sel = msg;
@@ -418,9 +420,15 @@ void pg_system_handler(uchar kmsg)
 			sysdata.ktime = wnd_uintinput(sysdata.ktime);
 			continue;
 		}
-		if(msg == 3) {
-			sprintf(strbuf,"输入环境温度:");
-			sysdata.RoomT = wnd_floatinput(sysdata.RoomT);
+		if(msg == 3) {                        
+		        if(sysdata.dispmode ^ DISP_FMODE)
+		        {
+			        sprintf(strbuf,"输入环境温度: F");
+        			sysdata.RoomT = FToCelius(wnd_floatinput(CeliusToF(sysdata.RoomT)));
+        		}else{
+			        sprintf(strbuf,"输入环境温度: C");
+        			sysdata.RoomT = wnd_floatinput(sysdata.RoomT);
+        		}
 			continue;
 		}
 		if(msg == 4) {
@@ -428,9 +436,9 @@ void pg_system_handler(uchar kmsg)
 			continue;
 		}
 		if(msg == 5) {
-			sprintf(strbuf,"选择扫描器协议:1.MI,2.GUIDL");
+			sprintf(strbuf,"选择扫描器:1.MI,2.GUIDL,3.RAYSTING");
 			msg = wnd_uintinput(sysdata.scanner);
-			if((msg != 1) && (msg != 2))
+			if((msg < 1) || (msg >3) )
 				msg = 1;
 			continue;
 		}
@@ -445,7 +453,7 @@ void display_var(uchar type)
 	switch(type)
 	{
 		case LBVAR_SN	 	:
-			name2buf(curr_prb_sel,databuf);
+			name2buf(curr_prb_sel-1,databuf);
 			sprintf(strbuf,"1.序列号%s",databuf);
 			return;
 		case LBVAR_TYPE	 	:
@@ -459,17 +467,17 @@ void display_var(uchar type)
 			sprintf(strbuf,"3.电流");
 			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT01)
 				sprintf(strbuf,"3.电流0.01mA");
-			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT01)
+			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT02)
 				sprintf(strbuf,"3.电流0.02mA");
-			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT01)
+			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT05)
 				sprintf(strbuf,"3.电流0.05mA");
-			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT01)
+			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT1)
 				sprintf(strbuf,"3.电流0.1mA");
-			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT01)
+			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_1)
 				sprintf(strbuf,"3.电流1mA");
-			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT01)
+			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_3)
 				sprintf(strbuf,"3.电流3mA");
-			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_PT01)
+			if((prbdata.type[curr_prb_sel-1] & 0x7f) == PRBCURR_10)
 				sprintf(strbuf,"3.电流10mA");
 			return;
 		case LBVAR_SQR		: 
@@ -482,19 +490,22 @@ void display_var(uchar type)
 			sprintf(strbuf,"5.Rtp:%7f",prbdata.rtp[curr_prb_sel-1]);
 			return;
 		case LBVAR_COEFA	:	 
-			sprintf(strbuf,"6.系数A:%7f",prbdata.rtp[curr_prb_sel-1]);
+			sprintf(strbuf,"6.系数A:%7f",prbdata.paramA[curr_prb_sel-1]);
 			return;
 		case LBVAR_COEFB	:	 
-			sprintf(strbuf,"7.系数B:%7f",prbdata.rtp[curr_prb_sel-1]);
+			sprintf(strbuf,"7.系数B:%7f",prbdata.paramB[curr_prb_sel-1]);
 			return;
 		case LBVAR_COEFC	:	 
-			sprintf(strbuf,"8.系数C:%7f",prbdata.rtp[curr_prb_sel-1]);
+			sprintf(strbuf,"8.系数C:%7f",prbdata.paramC[curr_prb_sel-1]);
 			return;
 		case LBVAR_KTIME	:	 
 			sprintf(strbuf,"2.换向时间:%i",sysdata.ktime);
 			return;
-		case LBVAR_SYSTEMP	:
-			sprintf(strbuf,"3.环境温度:%.1f",sysdata.RoomT);
+		case LBVAR_SYSTEMP	:                
+			if(sysdata.dispmode & DISP_FMODE)
+                		sprintf(strbuf,"3.环境温度:%.1f F",CeliusToF(sysdata.RoomT));
+			else
+                		sprintf(strbuf,"3.环境温度:%.1f C",sysdata.RoomT);
 			return;
 		case LBVAR_FCMODE	:
 			if(sysdata.dispmode & DISP_FMODE)
@@ -504,9 +515,12 @@ void display_var(uchar type)
 			return;
 		case LBVAR_SCANNER	:
 			if(sysdata.scanner == 1)
-				sprintf(strbuf,"5.扫描器协议:MI");
-			else
-				sprintf(strbuf,"5.扫描器协议:GUIDLINE");
+				sprintf(strbuf,"5.扫描器:MI");
+			if(sysdata.scanner == 2)
+				sprintf(strbuf,"5.扫描器:GUIDLINE");
+			if(sysdata.scanner == 3)
+				sprintf(strbuf,"5.扫描器:RAYSTING");
+				
 	}
 }
 void State_Init() {

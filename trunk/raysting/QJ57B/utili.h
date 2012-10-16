@@ -28,7 +28,7 @@ char highc(uchar x);
 #define KEY_TAB		'T'
 //shortcut key
 #define KEY_BTN1	'a' //F C mode switch
-#define KEY_BTN2	'b'	//for KTT indicator
+#define KEY_BTN2	'b' //for KTT indicator
 #define KEY_BTN3	'c'
 #define KEY_BTN4  	'd' //run stop
 //key for relay
@@ -51,14 +51,14 @@ char highc(uchar x);
 #define MAX_PRB_NUM		24
 #define MAX_CH_NUM		24
 
-#define PRBTYPE_PT100	0xf1
-#define PRBTYPE_PT25	0xf2
+#define PRBTYPE_PT100	        0xf1
+#define PRBTYPE_PT25	        0xf2
 #define PRBTYPE_INC(id)		prbdata.type[id-1] += 1; if(prbdata.type[id-1] > PRBTYPE_PT25) {prbdata.type[id-1] = PRBTYPE_PT100;}
-#define PRBTYPE_INVALID	0x80
+#define PRBTYPE_INVALID	        0x80
 
-#define PRBCURR_PT01	0
-#define PRBCURR_PT02	1
-#define PRBCURR_PT05	2
+#define PRBCURR_PT01	        0
+#define PRBCURR_PT02	        1
+#define PRBCURR_PT05	        2
 #define PRBCURR_PT1		3
 #define PRBCURR_1		4
 #define PRBCURR_3		5

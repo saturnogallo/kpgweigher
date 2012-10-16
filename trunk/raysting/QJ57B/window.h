@@ -29,7 +29,7 @@ typedef flash struct typWINDOW
 
 typedef flash struct  typLABEL
 {
-	u8 id_type;	//id of the label (high byte) and type of the label, font type (low byte)
+	u8    id_type;	//id of the label (high byte) and type of the label, font type (low byte)
 	int   x;
 	int   y; 
 	int   width;    //width in characters
@@ -40,13 +40,13 @@ void draw_label(flash LABEL *lbl, uchar reverse);
 void draw_inputbox(flash LABEL *lbl);
 void wnd_msgbox(flash LABEL *lbl); //display a message box
 double wnd_floatinput(double oldval); //input a float
-u8 wnd_listbox(flash LABEL *title, uchar max_index,uchar max_option,uchar curr_pos);//two column list box type
+u8 wnd_listbox(flash LABEL *title, uchar max_index,uchar curr_pos);//two column list box type
 u8 wnd_uintinput(u8 oldval); //input a unsigned int
 u8* wnd_strinput(); //input a string
 uchar wnd_menu(flash LABEL *title,flash LABEL *labels,uchar max_option,uchar page_option); //select value from a menu
 extern MSG_HANDLER curr_window;
-extern MSG_HANDLER lp_ownerdraw;    
-extern MSG_HANDLER lp_listvalue;
+extern MSG_HANDLER lp_ownerdraw;    //handler for owner draw label
+extern MSG_HANDLER lp_listvalue;    //calculate the label the value
 extern uchar max_databuf;
 #define window_setup(A)	max_databuf = A
 #endif

@@ -314,8 +314,9 @@ LABEL flash listitems[] = {
 	{LBL_HZ6X8, 130,50, 10, strbuf}
 };
 
-//list box type : two column, six item one page 
-uchar wnd_listbox(flash LABEL *title, uchar max_index,uchar max_option,uchar curr_pos)
+//list box type : two column, six item one page             
+#define MAX_LISTBOX_OPT         6
+uchar wnd_listbox(flash LABEL *title, uchar max_index,uchar curr_pos)
 {
         uchar i,j;
 	uchar last_pos = curr_pos;
@@ -337,7 +338,7 @@ uchar wnd_listbox(flash LABEL *title, uchar max_index,uchar max_option,uchar cur
         	        msg = MSG_INIT;
         	if(msg == KEY_DOT)
         	{                    
-        	        curr_pos = curr_pos+max_option;
+        	        curr_pos = curr_pos+MAX_LISTBOX_OPT;
         	        if(curr_pos > max_index)
         	                curr_pos = curr_pos - max_index;
         	        new_page = 1;                           
@@ -350,7 +351,7 @@ uchar wnd_listbox(flash LABEL *title, uchar max_index,uchar max_option,uchar cur
 			        curr_pos = max_index;
 			if(last_pos == curr_pos)  
 			        continue;
-			if((curr_pos % max_option) == 0)  
+			if((curr_pos % MAX_LISTBOX_OPT) == 0)  
 			        new_page = 1;
 			else
 			        new_page = 0;
@@ -364,7 +365,7 @@ uchar wnd_listbox(flash LABEL *title, uchar max_index,uchar max_option,uchar cur
 			        curr_pos = 1;
 			if(last_pos == curr_pos)	
 			        return;
-			if((curr_pos % max_option) == 1)  
+			if((curr_pos % MAX_LISTBOX_OPT) == 1)  
 			        new_page = 1;
 			else
 			        new_page = 0;        	
@@ -398,25 +399,25 @@ uchar wnd_listbox(flash LABEL *title, uchar max_index,uchar max_option,uchar cur
         	if(msg == MSG_REFRESH)
         	{
                		if(new_page == 1){
-		               for(i = 1; i <= max_option; i++){
-			             j = ((curr_pos-1)/max_option)*max_option + i;
+		               for(i = 1; i <= MAX_LISTBOX_OPT; i++){
+			             j = ((curr_pos-1)/MAX_LISTBOX_OPT)*MAX_LISTBOX_OPT + i;
 			             lp_listvalue(curr_pos);
 			             draw_label(&listitems[i-1],SW_NORMAL);
-        	                     if((curr_pos-1) % max_option == (i-1))
+        	                     if((curr_pos-1) % MAX_LISTBOX_OPT == (i-1))
 					        draw_label(&(listitems[i-1]),SW_REVERSE);
         	                }
                          }else{
-	                	for(i = 1; i <= max_option; i++) {
-        		              if((last_pos-1) % max_option == (i-1)) 	
+	                	for(i = 1; i <= MAX_LISTBOX_OPT; i++) {
+        		              if((last_pos-1) % MAX_LISTBOX_OPT == (i-1)) 	
         		                        draw_label(&(listitems[i-1]),SW_REVERSE);
-			              if((curr_pos-1) % max_option == (i-1))	
+			              if((curr_pos-1) % MAX_LISTBOX_OPT == (i-1))	
 				                draw_label(&listitems[i-1],SW_REVERSE);
 			        }
 		         }         
 		         //add page index display .2..
 		        sprintf(strbuf,"********");
-		        strbuf[(u8)((max_index-1)/max_option)+1] = '\0';
-		        strbuf[(u8)((curr_pos-1)/max_option)] = '0' + (u8)((curr_pos-1)/max_option);
+		        strbuf[(u8)((max_index-1)/MAX_LISTBOX_OPT)+1] = '\0';
+		        strbuf[(u8)((curr_pos-1)/MAX_LISTBOX_OPT)] = '0' + (u8)((curr_pos-1)/MAX_LISTBOX_OPT);
 		        draw_label(&listpage,SW_NORMAL);
         	}                         
 	}
