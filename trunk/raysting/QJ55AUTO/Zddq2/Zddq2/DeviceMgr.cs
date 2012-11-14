@@ -142,6 +142,7 @@ namespace Zddq2
         private List<double> valfilter;
         private bool ValidNewValue(ref double val)
         {
+            return true;
             valfilter.Add(val);
             if(valfilter.Count < RunWnd.syscfg.iFilter)
                 return false;
@@ -260,9 +261,13 @@ namespace Zddq2
                     }
                     else
                     {
-                        dataCount = 0; //do collection again
-                        datafilter.Clear();
-                        return false;
+                        if (RunWnd.syscfg.sFilterType != "filtertype4")
+                        {
+                            dataCount = 0; //do collection again
+                            datafilter.Clear();
+                            return false;
+                        }
+                       
                     }
                     
                     //full data acquired
@@ -271,7 +276,14 @@ namespace Zddq2
                     int avg_cnt = datafilter.Count / 4;
                     if (avg_cnt < 3)
                         avg_cnt = 3;
-                    if (RunWnd.syscfg.sFilterType == "filtertype1") //中位数平均值
+                    string type = RunWnd.syscfg.sFilterType;
+                    if ( type == "filtertype4") //always 10 group
+                    {
+                        datafilter.RemoveRange(0, datafilter.Count - 40);
+                        type = "filtertype1";
+                    }
+
+                    if (type == "filtertype1") //中位数平均值
                     {
                         datafilter.Sort();
                         win_start = (datafilter.Count - avg_cnt) / 2;
@@ -284,12 +296,12 @@ namespace Zddq2
                         dStableReading = dStableReading / (win_end - win_start + 1);
                         bInReading = false;
                     }
-                    if (RunWnd.syscfg.sFilterType == "filtertype2") //average of final data
+                    if (type == "filtertype2") //average of final data
                     {
                         win_start = (datafilter.Count - avg_cnt);
                         win_end = datafilter.Count - 1;
                     }
-                    if (RunWnd.syscfg.sFilterType == "filtertype3") //
+                    if (type == "filtertype3") //average after filter
                     {
                         for (int i = 1; i < (datafilter.Count-1); i++)
                         {
@@ -577,14 +589,6 @@ namespace Zddq2
 
                 DeviceMgr.Action("MEAS_DELTA|KTTP|" + ComposeAction(), 0);
                 delay = 2*sec_cnt; //1s
-                stm = 46;
-                return;
-            }
-            if (stm == 46) //determince next range
-            {
-                currRx.i_State = RUN_STATE.READING;
-                StatusChanged(this, "reading");
-                StartCollectReading(false);
                 stm = 50;
                 return;
             }
@@ -598,17 +602,8 @@ namespace Zddq2
                 }
                 else
                 {
+                    DeviceMgr.Action("navto120mv", 0);
                     is1V = false;
-                    if(Math.Abs(dStableReading) < 0.01)
-                        DeviceMgr.Action("navto10mv", 0);
-                    else if (Math.Abs(dStableReading) < 0.1)
-                        DeviceMgr.Action("navto120mv", 0);
-                    else
-                    {
-                        DeviceMgr.Action("navto1v", 0);
-                        is1V = true;
-                    }
-                    
                     delay = 2 * sec_cnt;
                     stm = 60;
                     return;
@@ -646,7 +641,7 @@ namespace Zddq2
                 currRx.i_State = RUN_STATE.TRACKING;
                 StatusChanged(this, "tracking");
 
-                if (!is1V)
+                if (!is1V && (RunWnd.syscfg.sNavmeter == "PZ2182" || RunWnd.syscfg.sNavmeter == "PZ158"))
                     currRx.var.vCrossP = dStableReading / 1000;  //convert to V
                 else
                     currRx.var.vCrossP = dStableReading;
@@ -675,7 +670,7 @@ namespace Zddq2
             {
                 currRx.i_State = RUN_STATE.TRACKING;
                 StatusChanged(this, "tracking");
-                if(!is1V)
+                if (!is1V && (RunWnd.syscfg.sNavmeter == "PZ2182" || RunWnd.syscfg.sNavmeter == "PZ158"))
                     currRx.var.vCrossN = dStableReading / 1000;
                 else
                     currRx.var.vCrossN = dStableReading;
@@ -719,7 +714,7 @@ namespace Zddq2
                         stm = 5; //redo capture
                         return;
                     }
-                    if (Math.Abs(newN) > 0)
+                    if (Math.Abs(newN) > 2)
                     {
                         if(newN > 0)
                             currRx.var.iK = currRx.var.iK + (newN+1)/2;
@@ -728,9 +723,9 @@ namespace Zddq2
                         delay = 1 * sec_cnt;
                     }
                     stm = 60;
-                    if (newN != 0)
+                    if (newN > 2)
                         DeviceMgr.Action("turnk", Convert.ToUInt32(currRx.var.iK));
-                if (newN == 0)
+                if (newN <= 2)
                     {
                         if (ValidNewValue(ref currRx.var.rRx))
                             StatusChanged(this, "newvalue");
@@ -853,6 +848,7 @@ curr2, ktt, rs/rx, dvm  --  4
         static private StringBuilder cmdbuffer;
         static DeviceMgr()
         {
+            bool bDebugGPIB = false;
             Thread.Sleep(3000);
             WaitEvent = new AutoResetEvent(false);
             OverEvent = new AutoResetEvent(false);
@@ -862,21 +858,36 @@ curr2, ktt, rs/rx, dvm  --  4
             
             #region init port
             port.BaudRate = 9600;
-            port.PortName = "COM10";
+            if (!bDebugGPIB)
+                port.PortName = "COM10";
+            else
+                port.PortName = "COM11";
             port.Parity = Parity.None;
             port.DataBits = 8;
             port.StopBits = StopBits.One;
             port.NewLine = "\r";
-            port.Open();
-            if (!port.IsOpen)
+            int i;
+            for (i = 0; i < 10; i++)
+            {
+            if (bDebugGPIB)
+	break;
+                port.Open();
+                if (port.IsOpen)
+                    break;
+                Thread.Sleep(3000);
+            }
+            if(i >= 10)
                 throw new Exception("Failed to open port A");
             #endregion 
              
-            
+            /*
             #region init cmdport
             cmdport = new SerialPort();
             cmdport.BaudRate = 9600;
-            cmdport.PortName = "COM11";
+            if(!bDebugGPIB)
+                cmdport.PortName = "COM11";
+            else
+                cmdport.PortName = "COM10";
             cmdport.Parity = Parity.None;
             cmdport.DataBits = 8;
             cmdport.StopBits = StopBits.One;
@@ -890,11 +901,14 @@ curr2, ktt, rs/rx, dvm  --  4
             }
             cmdport.DiscardInBuffer();
             cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
+            */
              
             agent_access = false;
             actmsg = new ActMessage();
             msg_loop = new Thread(new ThreadStart(MessageHandler));
             msg_loop.IsBackground = false;
+            if(bDebugGPIB)
+                return;
             msg_loop.Start();
         }
 
@@ -935,12 +949,12 @@ curr2, ktt, rs/rx, dvm  --  4
         static public void ReportHeader(int total)
         {
             string reply;
-            cmdport.Write("\r");
-            cmdport.Write("\r");
-            cmdport.Write("\r");
+            cmdport.Write(cmdport.NewLine);
+            cmdport.Write(cmdport.NewLine);
+            cmdport.Write(cmdport.NewLine);
             reply = String.Format("D{0} Measurements:", total);
             cmdport.Write(reply);
-            cmdport.Write("\r");
+            cmdport.Write(cmdport.NewLine);
             //cmdport.WriteLine(reply);
             reply = String.Format("R{0}", Program.lst_rxinfo[0].dRxInput.ToString("E13"));
             cmdport.WriteLine(reply);
@@ -950,13 +964,13 @@ curr2, ktt, rs/rx, dvm  --  4
         }
         static public void ReportData(int index, double value)
         {
-
+            /*
             string reply;
             reply = String.Format("#{0}",index.ToString());
             cmdport.WriteLine(reply);
             reply = String.Format("&{0}",value.ToString("E13"));
             cmdport.WriteLine(reply);
-            
+             */
         }
         static void cmdport_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -1038,7 +1052,6 @@ curr2, ktt, rs/rx, dvm  --  4
             WaitEvent.Set();
 //            OverEvent.WaitOne();
         }
-        
         //k1 = RS/RX, DVM
         //ktt = ON/OFF
         //curr = CURR_P001|CURR_P01/P1/P3/1/5 ; 1mA/10mA,0.1A,0.3A,1A,5A

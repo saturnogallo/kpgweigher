@@ -150,8 +150,11 @@ namespace Zddq2
             p = base.PointToClient(p);
             if (CheckMouseHover(p.X, p.Y))
             {
+                if (ValidClick != null)
+                {
                 if(ValidClick.Target != null)
                     ValidClick(this, e);
+                }
             }
             else
             {

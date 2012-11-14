@@ -118,6 +118,8 @@ namespace Zddq2
                     syscfg.sFilterType = "filtertype3";
                 else if (m.Groups[1].Value == "1")
                     syscfg.sFilterType = "filtertype2";
+                else if (m.Groups[1].Value == "3")
+                    syscfg.sFilterType = "filtertype4";
                 else 
                     syscfg.sFilterType = "filtertype1";
                 return;
@@ -223,12 +225,11 @@ namespace Zddq2
                     if (!task.bRunning)
                     {
                         statusBar1.status = RUN_STATE.IDLE;
-                        DeviceMgr.Log("====Measurement Stopped========");
+                        DeviceMgr.Log("Measurement Stopped...");
                     }
                 }
             }
             tmlock = false;
-            
         }
         public RunWnd()
         {
@@ -311,11 +312,31 @@ namespace Zddq2
             }
             else
             {
-
+                RsInfo rs = Program.lst_rsinfo[Program.mainwnd.selectedRs];
+                RxInfo rx = Program.lst_rxinfo[Program.mainwnd.selectedRx];
                 statusBar1.total = syscfg.iMeasTimes;
                 statusBar1.count = 1;
                 statusBar1.status = RUN_STATE.INITIALIZING;
-                DeviceMgr.Log(String.Format("====New Measurement Started {0}========", syscfg.iMeasTimes.ToString()));
+                DeviceMgr.Log(String.Format(@"==== New Measurement Paramter========
+    Measure times = {0}
+    Rs ID = {1}
+    Rs Value = {2}
+    Rs Temp. Alpha = {3}
+    Rs Temp. Beta = {4}
+    Temperature = {5}
+    Rx ID = {6}
+    Sample times = {7}
+    Switch delay = {8}
+    Filter = {9}
+    Filter Length = {10}
+    Measure delay = {11}
+    AutoFilter = {12}
+    Rx curr. = {13}
+    New Measurement Started...", syscfg.iMeasTimes.ToString(), rs.sSerial, rs.dValue.ToString("F8"),rs.dAlpha.ToString("F3"),
+                                                                       rs.dBeta.ToString("F3"),
+                                                                       syscfg.dTemp.ToString("F3"),rx.sSerial,syscfg.iSampleTimes, syscfg.iKTT, 
+                                                                       syscfg.sFilterType, syscfg.iFilter, syscfg.iMeasDelay, syscfg.bThrow, rx.iIx                                       
+                                            ));
                 task.Start();
                 rxDisplay1.ClearAll();
                 rxDisplay2.ClearAll();

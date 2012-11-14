@@ -24,6 +24,7 @@ namespace Zddq2
 
             btn_vmode.Visible = false;
             lbl_vmode.Visible = false;
+
             lbl_range.Text = StringResource.str("rrange");
             btn_rangeP001.Text = "0.001";
             btn_rangeP01.Text = "0.01";
@@ -79,7 +80,7 @@ namespace Zddq2
             btn_next.Visible = false;
             btn_stdchan.Visible = false;
             lbl_stdchan.Visible = false;
-            btn_enable.Visible = false;
+            btn_enable.Visible = true;
 
             btn_chan.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_chan.ValidClick += new EventHandler(btn_dummy);
