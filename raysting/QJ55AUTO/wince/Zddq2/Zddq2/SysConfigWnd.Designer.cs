@@ -53,6 +53,8 @@ namespace Zddq2
             this.btn_display = new Zddq2.RectButton();
             this.lbl_throw = new System.Windows.Forms.Label();
             this.btn_throw = new Zddq2.RectButton();
+            this.lbl_navmeter = new System.Windows.Forms.Label();
+            this.btn_navmeter = new Zddq2.RectButton();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -99,6 +101,8 @@ namespace Zddq2
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.White;
+            this.panel1.Controls.Add(this.lbl_navmeter);
+            this.panel1.Controls.Add(this.btn_navmeter);
             this.panel1.Controls.Add(this.btn_ktt);
             this.panel1.Controls.Add(this.lbl_ktt);
             this.panel1.Controls.Add(this.lbl_date);
@@ -305,6 +309,25 @@ namespace Zddq2
             this.btn_throw.Size = new System.Drawing.Size(162, 46);
             this.btn_throw.TabIndex = 5;
             // 
+            // lbl_navmeter
+            // 
+            this.lbl_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
+            this.lbl_navmeter.Location = new System.Drawing.Point(14, 203);
+            this.lbl_navmeter.Name = "lbl_navmeter";
+            this.lbl_navmeter.Size = new System.Drawing.Size(135, 25);
+            this.lbl_navmeter.Text = "lbl_navmeter";
+            // 
+            // btn_navmeter
+            // 
+            this.btn_navmeter.BackColor = System.Drawing.Color.Red;
+            this.btn_navmeter.bEnabled = true;
+            this.btn_navmeter.bOn = true;
+            this.btn_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_navmeter.Location = new System.Drawing.Point(186, 193);
+            this.btn_navmeter.Name = "btn_navmeter";
+            this.btn_navmeter.Size = new System.Drawing.Size(162, 46);
+            this.btn_navmeter.TabIndex = 11;
+            // 
             // SysConfigWnd
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -355,5 +378,7 @@ namespace Zddq2
         private RectButton btn_export;
         private System.Windows.Forms.Label lbl_throw;
         private RectButton btn_throw;
+        private System.Windows.Forms.Label lbl_navmeter;
+        private RectButton btn_navmeter;
     }
 }

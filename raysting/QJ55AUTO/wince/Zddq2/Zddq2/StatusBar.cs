@@ -118,7 +118,6 @@ namespace Zddq2
             if (_status == RUN_STATE.IDLE)
             {
                 bt_run.Text = StringResource.str("start");
-                
                 bt_menu.Text = StringResource.str("menu");
                 bt_run.BackColor = Color.White;
                 bt_run.Width = progress_width;

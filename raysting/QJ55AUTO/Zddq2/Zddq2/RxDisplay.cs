@@ -170,20 +170,17 @@ namespace Zddq2
         }
         public void LogData(int index, double value)
         {
-            DeviceMgr.Log(String.Format("R\t{0}\tS\t{1}\t#{2}\t{3}", Util.FormatData(Program.lst_rxinfo[0].dRxInput, 8),
-                Util.FormatData(Program.lst_rsinfo[0].dValue, 7),
-                index.ToString(),
-                Util.FormatData(value, 8)));
+            DeviceMgr.Log(String.Format("Reading {0} = {1}", index.ToString(),Util.FormatData(value, 8)));
         }
         public void LogComplete()
         {
-            DeviceMgr.Log("=========Summarize Data===========");
-            DeviceMgr.Log(String.Format("Rx:{0}\nMax:{1}\nMin:{2}\nRx/Rs:{3}\nStdev:{4}", GetData(RXDATA_MODE.AVERAGE),
+            DeviceMgr.Log("...... Summary Begin ......");
+            DeviceMgr.Log(String.Format("Rx(mean):{0}\nMax:{1}\nMin:{2}\nRx/Rs:{3}\nStdev:{4}", GetData(RXDATA_MODE.AVERAGE),
                 GetData(RXDATA_MODE.MAX),
                 GetData(RXDATA_MODE.MIN),
                 GetData(RXDATA_MODE.RATIO),
                 GetData(RXDATA_MODE.VARIANCE)));
-            DeviceMgr.Log("=========Completed Data===========");
+            DeviceMgr.Log("...... Summary End ...... ");
         }
 
         //throw top 30% data and bottom 30% data;

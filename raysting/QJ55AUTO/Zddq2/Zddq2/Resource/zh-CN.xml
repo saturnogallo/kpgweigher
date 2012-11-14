@@ -73,9 +73,10 @@
   <string skey="sysconfig">系统设置</string>
   <string skey="rxconfig">被测电阻</string>
   <string skey="rsconfig">标准电阻</string>
-  <string skey="filtertype1">滤波算法1</string>
-  <string skey="filtertype2">滤波算法2</string>
-  <string skey="filtertype3">滤波算法3</string>
+  <string skey="filtertype1">去两头平均</string>
+  <string skey="filtertype2">所有数平均</string>
+  <string skey="filtertype3">平滑平均</string>
+  <string skey="filtertype4">固定时间</string>
   <string skey="serial">序列号</string>
   <string skey="mychannel">被测通道</string>
   <string skey="current">电流</string>

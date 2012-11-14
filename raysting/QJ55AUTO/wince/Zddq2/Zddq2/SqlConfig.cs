@@ -129,7 +129,7 @@ namespace Zddq2
         {
             get
             {
-                return (int)this["iStdChan"];
+                return 1;//int)this["iStdChan"];
             }
             set
             {
@@ -540,6 +540,20 @@ namespace Zddq2
                 this["dTemp"] = value;
             }
         }
+        public string sNavmeter
+        {
+            get
+            {
+                string nav = (string)this["sNavmeter"];
+                if (nav == "")
+                    nav = "PZ158";
+                return nav;
+            }
+            set
+            {
+                this["sNavmeter"] = value;
+            }
+        }
         public string sFilterType
         {
             get
@@ -629,7 +643,7 @@ namespace Zddq2
         private string sql_grp;
         static void SetConnection()
         {
-            sql_con = new SQLiteConnection("Data Source="+"\\NANDFlash\\TSioex\\Config.db;Version=3;New=False;Compress=True;");
+            sql_con = new SQLiteConnection("Data Source="+StringResource.baseDir+"Config.db;Version=3;New=False;Compress=True;");
         }
         private Dictionary<string, string> curr_conf; //store all the configuration string
         public SqlConfig(string sql_tbl,string group)
@@ -757,7 +771,7 @@ namespace Zddq2
             XDocument xml_doc = XDocument.Load(sr);
 
             IEnumerable<XElement> regs = xml_doc.Descendants("string");
-            str_tbl.Clear();
+            //str_tbl.Clear();
             foreach (XElement reg in regs)
             {
                 str_tbl[reg.Attribute("skey").Value] = reg.Value;
@@ -771,6 +785,37 @@ namespace Zddq2
             FileStream fsLog = new FileStream(baseDir + "\\history.log", FileMode.Truncate, FileAccess.Write, FileShare.Read);
             fsLog.Close();
             SetLanguage("zh-CN");
+
+
+            str_tbl["NAV_INIT_PZ158"] = "Un%%01;00\r";
+            str_tbl["NAV_10MV_PZ158"] = "Un%%01;12;00\r";
+            str_tbl["NAV_120MV_PZ158"] = "Un%%01;12;00\r";
+            str_tbl["NAV_1V_PZ158"] = "Un%%01;12;01\r";
+            str_tbl["NAV_30V_PZ158"] = "Un%%01;12;02\r";
+            str_tbl["NAV_AFLTOFF_PZ158"] = "Un%%01;26\r";
+            str_tbl["NAV_AFLTON_PZ158"] = "Un%%01;27\r";
+            str_tbl["NAV_ZEROON_PZ158"] = "Un%%01;06\r";
+            str_tbl["NAV_READ_PZ158"] = "Un%%01;01\r";
+
+            str_tbl["NAV_INIT_PZ2182"] = "Un%%01;00\r";
+            str_tbl["NAV_10MV_PZ2182"] = "Un%%01;12;00\r";
+            str_tbl["NAV_120MV_PZ2182"] = "Un%%01;12;01\r";
+            str_tbl["NAV_1V_PZ2182"] = "Un%%01;12;02\r";
+            str_tbl["NAV_30V_PZ2182"] = "Un%%01;12;02\r";
+            str_tbl["NAV_AFLTOFF_PZ2182"] = "Un%%01;26\r";
+            str_tbl["NAV_AFLTON_PZ2182"] = "Un%%01;27\r";
+            str_tbl["NAV_ZEROON_PZ2182"] = "Un%%01;06\r";
+            str_tbl["NAV_READ_PZ2182"] = "Un%%01;01\r";
+
+            str_tbl["NAV_INIT_2182"] = "Un*RST\n*CLS\n:init:cont on;:ABORT\n:sens:func 'volt:dc'\n:sense:chan 1\n:sens:volt:rang:auto on\n:sens:volt:chan1:lpas off\n:SENS:VOLT:DC:NPLC 1\nVOLT:DIG 8\n:syst:azer on\n";
+            str_tbl["NAV_10MV_2182"] = "Un:sens:volt:chan1:rang 0.01\n";
+            str_tbl["NAV_120MV_2182"] = "Un:sens:volt:chan1:rang 0.1\n";
+            str_tbl["NAV_1V_2182"] = "Un:sens:volt:chan1:rang 1\n";
+            str_tbl["NAV_30V_2182"] = "Un:sens:volt:chan1:rang 10\n";
+            str_tbl["NAV_AFLTOFF_2182"] = "Un:sens:volt:chan1:dfil:stat off\n";
+            str_tbl["NAV_AFLTON_2182"] = "Un:sens:volt:chan1:dfil:wind 5\n:sens:volt:chan1:dfil:coun 10\n:sens:volt:chan1:dfil:tcon mov\n:sens:volt:chan1:dfil:stat on\n";
+            str_tbl["NAV_ZEROON_2182"] = "Un:sens:volt:ref:acq\n:sens:volt:ref:stat on\n";
+            str_tbl["NAV_READ_2182"] = "Un:fetc?\n";
         }
         static public void dolog(string log)
         {

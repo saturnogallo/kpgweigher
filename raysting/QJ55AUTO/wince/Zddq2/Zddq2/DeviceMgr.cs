@@ -142,6 +142,7 @@ namespace Zddq2
         private List<double> valfilter;
         private bool ValidNewValue(ref double val)
         {
+            return true;
             valfilter.Add(val);
             if(valfilter.Count < RunWnd.syscfg.iFilter)
                 return false;
@@ -260,9 +261,13 @@ namespace Zddq2
                     }
                     else
                     {
+                        if (RunWnd.syscfg.sFilterType != "filtertype4")
+                        {
                         dataCount = 0; //do collection again
                         datafilter.Clear();
                         return false;
+                        }
+                       
                     }
                     
                     //full data acquired
@@ -271,7 +276,14 @@ namespace Zddq2
                     int avg_cnt = datafilter.Count / 4;
                     if (avg_cnt < 3)
                         avg_cnt = 3;
-                    if (RunWnd.syscfg.sFilterType == "filtertype1") //中位数平均值
+                    string type = RunWnd.syscfg.sFilterType;
+                    if ( type == "filtertype4") //always 10 group
+                    {
+                        datafilter.RemoveRange(0, datafilter.Count - 40);
+                        type = "filtertype1";
+                    }
+
+                    if (type == "filtertype1") //中位数平均值
                     {
                         datafilter.Sort();
                         win_start = (datafilter.Count - avg_cnt) / 2;
@@ -284,12 +296,12 @@ namespace Zddq2
                         dStableReading = dStableReading / (win_end - win_start + 1);
                         bInReading = false;
                     }
-                    if (RunWnd.syscfg.sFilterType == "filtertype2") //average of final data
+                    if (type == "filtertype2") //average of final data
                     {
                         win_start = (datafilter.Count - avg_cnt);
                         win_end = datafilter.Count - 1;
                     }
-                    if (RunWnd.syscfg.sFilterType == "filtertype3") //
+                    if (type == "filtertype3") //average after filter
                     {
                         for (int i = 1; i < (datafilter.Count-1); i++)
                         {
@@ -629,7 +641,7 @@ namespace Zddq2
                 currRx.i_State = RUN_STATE.TRACKING;
                 StatusChanged(this, "tracking");
 
-                if(!is1V)
+                if (!is1V && (RunWnd.syscfg.sNavmeter == "PZ2182" || RunWnd.syscfg.sNavmeter == "PZ158"))
                     currRx.var.vCrossP = dStableReading / 1000;  //convert to V
                 else
                     currRx.var.vCrossP = dStableReading;
@@ -658,7 +670,7 @@ namespace Zddq2
             {
                 currRx.i_State = RUN_STATE.TRACKING;
                 StatusChanged(this, "tracking");
-                if(!is1V)
+                if (!is1V && (RunWnd.syscfg.sNavmeter == "PZ2182" || RunWnd.syscfg.sNavmeter == "PZ158"))
                     currRx.var.vCrossN = dStableReading / 1000;
                 else
                     currRx.var.vCrossN = dStableReading;
@@ -702,7 +714,7 @@ namespace Zddq2
                     stm = 5; //redo capture
                     return;
                 }
-                if (Math.Abs(newN) > 0)
+                    if (Math.Abs(newN) > 2)
                 {
                         if(newN > 0)
                             currRx.var.iK = currRx.var.iK + (newN+1)/2;
@@ -711,9 +723,9 @@ namespace Zddq2
                     delay = 1*sec_cnt;
                 }
                 stm = 60;
-                if (newN != 0)
+                    if (newN > 2)
                     DeviceMgr.Action("turnk", Convert.ToUInt32(currRx.var.iK));
-                if (newN == 0)
+                if (newN <= 2)
                 {
                         if (ValidNewValue(ref currRx.var.rRx))
                             StatusChanged(this, "newvalue");
@@ -836,6 +848,7 @@ curr2, ktt, rs/rx, dvm  --  4
         static private StringBuilder cmdbuffer;
         static DeviceMgr()
         {
+            bool bDebugGPIB = false;
             Thread.Sleep(3000);
             WaitEvent = new AutoResetEvent(false);
             OverEvent = new AutoResetEvent(false);
@@ -845,7 +858,10 @@ curr2, ktt, rs/rx, dvm  --  4
             
             #region init port
             port.BaudRate = 9600;
+            if (!bDebugGPIB)
             port.PortName = "COM1";
+            else
+                port.PortName = "COM1";
             port.Parity = Parity.None;
             port.DataBits = 8;
             port.StopBits = StopBits.One;
@@ -853,6 +869,8 @@ curr2, ktt, rs/rx, dvm  --  4
             int i;
             for (i = 0; i < 10; i++)
             {
+            if (bDebugGPIB)
+	break;
                 port.Open();
                 if (port.IsOpen)
                     break;
@@ -866,7 +884,10 @@ curr2, ktt, rs/rx, dvm  --  4
             #region init cmdport
             cmdport = new SerialPort();
             cmdport.BaudRate = 9600;
+            if(!bDebugGPIB)
             cmdport.PortName = "COM2";
+            else
+                cmdport.PortName = "COM2";
             cmdport.Parity = Parity.None;
             cmdport.DataBits = 8;
             cmdport.StopBits = StopBits.One;
@@ -880,17 +901,20 @@ curr2, ktt, rs/rx, dvm  --  4
             }
             cmdport.DiscardInBuffer();
             cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
+            
              
             agent_access = false;
             actmsg = new ActMessage();
             msg_loop = new Thread(new ThreadStart(MessageHandler));
             msg_loop.IsBackground = false;
+            if(bDebugGPIB)
+                return;
             msg_loop.Start();
         }
 
         static public string GetLogFileName()
         {
-            string file = "\\NandFlash\\TSioex\\"+DateTime.Now.ToString("yyyy_MM_dd")+".txt";
+            string file = StringResource.baseDir+DateTime.Now.ToString("yyyy_MM_dd")+".txt";
             if (!File.Exists(file))
             {
                 try
@@ -925,12 +949,12 @@ curr2, ktt, rs/rx, dvm  --  4
         static public void ReportHeader(int total)
         {
             string reply;
-            cmdport.Write("\r");
-            cmdport.Write("\r");
-            cmdport.Write("\r");
+            cmdport.Write(cmdport.NewLine);
+            cmdport.Write(cmdport.NewLine);
+            cmdport.Write(cmdport.NewLine);
             reply = String.Format("D{0} Measurements:", total);
             cmdport.Write(reply);
-            cmdport.Write("\r");
+            cmdport.Write(cmdport.NewLine);
             //cmdport.WriteLine(reply);
             reply = String.Format("R{0}", Program.lst_rxinfo[0].dRxInput.ToString("E13"));
             cmdport.WriteLine(reply);
@@ -1028,14 +1052,6 @@ curr2, ktt, rs/rx, dvm  --  4
             WaitEvent.Set();
 //            OverEvent.WaitOne();
         }
-        private const string NAV_INIT = "Un%%01;00\r";
-        private const string NAV_120MV = "Un%%01;12;00\r";
-        private const string NAV_1V = "Un%%01;12;01\r";
-        private const string NAV_30V = "Un%%01;12;02\r";
-        private const string NAV_AFLTOFF = "Un%%01;26\r";
-        private const string NAV_AFLTON = "Un%%01;27\r";
-        private const string NAV_ZEROON = "Un%%01;06\r";
-        private const string NAV_READ = "Un%%01;01\r";
         //k1 = RS/RX, DVM
         //ktt = ON/OFF
         //curr = CURR_P001|CURR_P01/P1/P3/1/5 ; 1mA/10mA,0.1A,0.3A,1A,5A
@@ -1249,18 +1265,23 @@ curr2, ktt, rs/rx, dvm  --  4
                 {
                     #region navmeter action
                     ActMessage msg = DeviceMgr.actmsg;
-                    if (msg.action == "navto1v" || msg.action == "navto120mv")
+                    if (msg.action == "navto1v" || msg.action == "navto120mv" || msg.action == "navto10mv")
                     {
                         if (msg.action == "navto1v")
                         {
 //                            port.Write(NAV_INIT); //init
-                            port.Write(NAV_1V); //1v
-//                            port.Write(NAV_AFLTON); //slowmode and aflton
+                            port.Write(StringResource.str("NAV_1V_"+RunWnd.syscfg.sNavmeter)); //1v
+//                            DelayWrite(NAV_AFLTON); //slowmode and aflton
                         }
                         if (msg.action == "navto120mv")
                         {
-                            port.Write(NAV_120MV); //120mv
+                            port.Write(StringResource.str("NAV_120MV_" + RunWnd.syscfg.sNavmeter)); //120mv
                         }
+                        if (msg.action == "navto10mv")
+                        {
+                            port.Write(StringResource.str("NAV_10MV_" + RunWnd.syscfg.sNavmeter)); //10mv
+                        }
+
                         Thread.Sleep(3000);
                         actmsg.action = "done";
                         OverEvent.Set();
@@ -1270,7 +1291,7 @@ curr2, ktt, rs/rx, dvm  --  4
                     {
                         reading = -9999;
                         port.DiscardInBuffer();
-                        port.Write(NAV_READ);
+                        port.Write(StringResource.str("NAV_READ_" + RunWnd.syscfg.sNavmeter)); //1v
                         Thread.Sleep(5);
                         int timeout = 400;
                         while ((timeout-- > 0) && (reading < -9000))

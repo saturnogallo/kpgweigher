@@ -80,12 +80,11 @@ namespace Zddq2
             graphPane2.YAxisMin = -5;
             graphPane2.YAxisTitle = "PPM";
             graphPane2.XAxisTicCount = 10;
-/*
-            AddValue(1, 0.010015234);
-            AddValue(2, 0.010015354);
-            AddValue(3, 0.010015434);
-            AddValue(4, 0.010015244);
- */
+            /*
+            for (int j = 0; j < 25;j++ )
+                AddValue(j+1, 100152.34-j);
+            ThrowData();
+             */
             graphPane2.Invalidate();
         }
 
@@ -107,6 +106,7 @@ namespace Zddq2
             }
             ReDraw(false);
         }
+
         void dataGrid2_Click(object sender, EventArgs e)
         {
             if (dataGrid2.CurrentCell.ColumnNumber == 4)
@@ -170,20 +170,17 @@ namespace Zddq2
         }
         public void LogData(int index, double value)
         {
-            DeviceMgr.Log(String.Format("R\t{0}\tS\t{1}\t#{2}\t{3}", Util.FormatData(Program.lst_rxinfo[0].dRxInput, 8),
-                Util.FormatData(Program.lst_rsinfo[0].dValue, 7),
-                index.ToString(),
-                Util.FormatData(value, 8)));
+            DeviceMgr.Log(String.Format("Reading {0} = {1}", index.ToString(),Util.FormatData(value, 8)));
         }
         public void LogComplete()
         {
-            DeviceMgr.Log("=========Summarize Data===========");
-            DeviceMgr.Log(String.Format("Rx:{0}\nMax:{1}\nMin:{2}\nRx/Rs:{3}\nStdev:{4}", GetData(RXDATA_MODE.AVERAGE),
+            DeviceMgr.Log("...... Summary Begin ......");
+            DeviceMgr.Log(String.Format("Rx(mean):{0}\nMax:{1}\nMin:{2}\nRx/Rs:{3}\nStdev:{4}", GetData(RXDATA_MODE.AVERAGE),
                 GetData(RXDATA_MODE.MAX),
                 GetData(RXDATA_MODE.MIN),
                 GetData(RXDATA_MODE.RATIO),
                 GetData(RXDATA_MODE.VARIANCE)));
-            DeviceMgr.Log("=========Completed Data===========");
+            DeviceMgr.Log("...... Summary End ...... ");
         }
 
         //throw top 30% data and bottom 30% data;

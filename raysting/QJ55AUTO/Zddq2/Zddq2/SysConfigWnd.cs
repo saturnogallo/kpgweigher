@@ -106,6 +106,7 @@ namespace Zddq2
                 RunWnd.syscfg.sNavmeter = "2182";
             else
                 RunWnd.syscfg.sNavmeter = "PZ158";
+            InitDisplay();
         }
 
         void btn_throw_ValidClick(object sender, EventArgs e)
@@ -123,11 +124,11 @@ namespace Zddq2
             }
             try
             {
-                string basedir = "\\NandFlash\\TSioex";
+                string basedir = StringResource.baseDir;
                 foreach (string fname in Directory.GetFiles(basedir, "20*.txt"))
                 {
                     FileInfo fi = new FileInfo(fname);
-                    File.Copy(basedir + "\\" + fi.Name, "\\Hard Disk\\" + fi.Name);
+                    File.Copy(basedir + fi.Name, "\\Hard Disk\\" + fi.Name);
                 }
                 MessageBox.Show(StringResource.str("export_done"));
             }
@@ -273,21 +274,13 @@ namespace Zddq2
         void btn_flttype_ValidClick(object sender, EventArgs e)
         {
             if (RunWnd.syscfg.sFilterType == "filtertype1")
-            {
                 RunWnd.syscfg.sFilterType = "filtertype2";
-            }
-            else
-            {
-                if (RunWnd.syscfg.sFilterType == "filtertype2")
-                {
+            else if (RunWnd.syscfg.sFilterType == "filtertype2")
                     RunWnd.syscfg.sFilterType = "filtertype3";
-                }
-                else
-                {
+            else if (RunWnd.syscfg.sFilterType == "filtertype3")
+                    RunWnd.syscfg.sFilterType = "filtertype4";
+            else
                     RunWnd.syscfg.sFilterType = "filtertype1";
-                }
-                
-            }
             InitDisplay();
         }
 

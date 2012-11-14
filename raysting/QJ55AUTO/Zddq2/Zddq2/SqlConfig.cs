@@ -129,7 +129,7 @@ namespace Zddq2
         {
             get
             {
-                return (int)this["iStdChan"];
+                return 1;//int)this["iStdChan"];
             }
             set
             {
@@ -643,7 +643,7 @@ namespace Zddq2
         private string sql_grp;
         static void SetConnection()
         {
-            sql_con = new SQLiteConnection("Data Source="+"\\Config.db;Version=3;New=False;Compress=True;"); ;
+            sql_con = new SQLiteConnection("Data Source="+StringResource.baseDir+"Config.db2;Version=3;New=False;Compress=True;");
         }
         private Dictionary<string, string> curr_conf; //store all the configuration string
         public SqlConfig(string sql_tbl,string group)
@@ -762,7 +762,13 @@ namespace Zddq2
     {
         private static Dictionary<string, string> str_tbl;
         static public string language;
-        public static string baseDir = "c:\\Code\\GoogleCode\\g_lxhbucket\\Raysting\\Zddq2\\Zddq2\\bin\\Debug\\";
+        public static string baseDir
+        {
+            get
+            {
+                return System.Threading.Thread.GetDomain().BaseDirectory;
+            }
+        }
         static public void SetLanguage(string lang)
         {
             language = lang;
@@ -810,8 +816,8 @@ namespace Zddq2
             str_tbl["NAV_INIT_2182"] = "Un*RST\n*CLS\n:init:cont on;:ABORT\n:sens:func 'volt:dc'\n:sense:chan 1\n:sens:volt:rang:auto on\n:sens:volt:chan1:lpas off\n:SENS:VOLT:DC:NPLC 1\nVOLT:DIG 8\n:syst:azer on\n";
             str_tbl["NAV_10MV_2182"] = "Un:sens:volt:chan1:rang 0.01\n";
             str_tbl["NAV_120MV_2182"] = "Un:sens:volt:chan1:rang 0.1\n";
-            str_tbl["NAV_1V_2182"] = "Un:sens:volt:chan1:auto on\n";
-            str_tbl["NAV_30V_2182"] = "Un:sens:volt:chan1:auto on\n";
+            str_tbl["NAV_1V_2182"] = "Un:sens:volt:chan1:rang 1\n";
+            str_tbl["NAV_30V_2182"] = "Un:sens:volt:chan1:rang 10\n";
             str_tbl["NAV_AFLTOFF_2182"] = "Un:sens:volt:chan1:dfil:stat off\n";
             str_tbl["NAV_AFLTON_2182"] = "Un:sens:volt:chan1:dfil:wind 5\n:sens:volt:chan1:dfil:coun 10\n:sens:volt:chan1:dfil:tcon mov\n:sens:volt:chan1:dfil:stat on\n";
             str_tbl["NAV_ZEROON_2182"] = "Un:sens:volt:ref:acq\n:sens:volt:ref:stat on\n";

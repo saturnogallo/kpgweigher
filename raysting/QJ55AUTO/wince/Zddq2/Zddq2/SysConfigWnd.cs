@@ -41,6 +41,7 @@ namespace Zddq2
             lbl_throw.Text = StringResource.str("autothrow");
             lbl_date.Text = StringResource.str("date");
             lbl_ktt.Text = StringResource.str("ktt");
+            lbl_navmeter.Text = StringResource.str("navmeter");
 
             btn_quit.SetStyle(Color.Beige, MyButtonType.round2Button);
             btn_quit.Text = StringResource.str("quit");
@@ -59,6 +60,10 @@ namespace Zddq2
 
             btn_throw.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_throw.ValidClick += new EventHandler(btn_throw_ValidClick);
+
+
+            btn_navmeter.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+            btn_navmeter.ValidClick += new EventHandler(btn_navmeter_ValidClick);
 
             btn_measdelay.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_measdelay.ValidClick += new EventHandler(input_GotFocus);
@@ -93,6 +98,17 @@ namespace Zddq2
             InitDisplay();
         }
 
+        void btn_navmeter_ValidClick(object sender, EventArgs e)
+        {
+            if (RunWnd.syscfg.sNavmeter == "PZ158")
+                RunWnd.syscfg.sNavmeter = "PZ2182";
+            else if (RunWnd.syscfg.sNavmeter == "PZ2182")
+                RunWnd.syscfg.sNavmeter = "2182";
+            else
+                RunWnd.syscfg.sNavmeter = "PZ158";
+            InitDisplay();
+        }
+
         void btn_throw_ValidClick(object sender, EventArgs e)
         {
             RunWnd.syscfg.bThrow = !RunWnd.syscfg.bThrow;
@@ -108,11 +124,11 @@ namespace Zddq2
             }
             try
             {
-                string basedir = "\\NandFlash\\TSioex";
+                string basedir = StringResource.baseDir;
                 foreach (string fname in Directory.GetFiles(basedir, "20*.txt"))
                 {
                     FileInfo fi = new FileInfo(fname);
-                    File.Copy(basedir + "\\" + fi.Name, "\\Hard Disk\\" + fi.Name);
+                    File.Copy(basedir + fi.Name, "\\Hard Disk\\" + fi.Name);
                 }
                 MessageBox.Show(StringResource.str("export_done"));
             }
@@ -258,21 +274,13 @@ namespace Zddq2
         void btn_flttype_ValidClick(object sender, EventArgs e)
         {
             if (RunWnd.syscfg.sFilterType == "filtertype1")
-            {
                 RunWnd.syscfg.sFilterType = "filtertype2";
-            }
-            else
-            {
-                if (RunWnd.syscfg.sFilterType == "filtertype2")
-                {
+            else if (RunWnd.syscfg.sFilterType == "filtertype2")
                     RunWnd.syscfg.sFilterType = "filtertype3";
-                }
-                else
-                {
+            else if (RunWnd.syscfg.sFilterType == "filtertype3")
+                    RunWnd.syscfg.sFilterType = "filtertype4";
+            else
                     RunWnd.syscfg.sFilterType = "filtertype1";
-                }
-                
-            }
             InitDisplay();
         }
 
@@ -303,6 +311,7 @@ namespace Zddq2
             btn_meastimes.Text = RunWnd.syscfg.iMeasTimes.ToString();
             btn_date.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             btn_ktt.Text = RunWnd.syscfg.iKTT.ToString();
+            btn_navmeter.Text = RunWnd.syscfg.sNavmeter;
             if (RunWnd.syscfg.iKTT <= 0)
                 btn_ktt.Text = StringResource.str("off");
             if (RunWnd.syscfg.bThrow)
@@ -312,6 +321,16 @@ namespace Zddq2
         }
 
         private void btn_display_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void rectButton1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
         {
 
         }

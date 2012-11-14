@@ -24,6 +24,7 @@ namespace Zddq2
 
             btn_vmode.Visible = false;
             lbl_vmode.Visible = false;
+
             lbl_range.Text = StringResource.str("rrange");
             btn_rangeP001.Text = "0.001";
             btn_rangeP01.Text = "0.01";
