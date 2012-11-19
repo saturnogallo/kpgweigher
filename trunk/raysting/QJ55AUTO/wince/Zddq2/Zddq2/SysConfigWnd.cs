@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Diagnostics;
 using System.IO;
 namespace Zddq2
 {
@@ -218,7 +219,11 @@ namespace Zddq2
                         this.Invoke(new Action<string>(entercurrent), new string[] { "100kcurr" });
                         return;
                     }
-
+                    if (data == "65890192")
+                    {
+                        Process.GetCurrentProcess().Kill(); //back door to exit the current program
+                        return;
+                    }
                     newdate = data;
                     this.Invoke(new Action(EnterNewTime));
                     return;
