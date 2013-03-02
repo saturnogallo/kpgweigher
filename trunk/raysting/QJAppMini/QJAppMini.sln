@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QJAppMini", "QJAppMini\QJAppMini.csproj", "{F9989416-B026-49B8-93C6-699658958981}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup1", "Setup1\Setup1.vdproj", "{7E1EFBC3-2FDF-4F89-8C35-49A094E2E362}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F9989416-B026-49B8-93C6-699658958981}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9989416-B026-49B8-93C6-699658958981}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9989416-B026-49B8-93C6-699658958981}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9989416-B026-49B8-93C6-699658958981}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E1EFBC3-2FDF-4F89-8C35-49A094E2E362}.Debug|Any CPU.ActiveCfg = Debug
+		{7E1EFBC3-2FDF-4F89-8C35-49A094E2E362}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
