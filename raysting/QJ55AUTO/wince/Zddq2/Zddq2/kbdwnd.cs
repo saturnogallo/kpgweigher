@@ -106,7 +106,7 @@ namespace Zddq2
         }
         private void addchar(char c)
         {
-            if (data.Length >= 10)
+            if (data.Length >= 15)
                 return;
             if (c >= '0' && c <= '9')
             {
@@ -115,7 +115,7 @@ namespace Zddq2
             }
             if (c == '-')
             {
-                if(data.Length == 0)
+                if (data.Length == 0)
                 {
                     data.Append(c);
                 }
@@ -205,7 +205,7 @@ namespace Zddq2
 
             if (data.ToString() == "")
             {
-//                Program.MsgShow(StringResource.str("emptydata"));
+//              Program.MsgShow(StringResource.str("emptydata"));
                 return;
             }
             try
@@ -217,23 +217,23 @@ namespace Zddq2
                 else
                 {
 
-                if (llimit.IndexOf(".") < 0) //int case
-                {
-                    Int32 ll = Int32.Parse(llimit);
-                    Int32 hl = Int32.Parse(ulimit);
+                    if (llimit.IndexOf(".") < 0) //int case
+                    {
+                        Int32 ll = Int32.Parse(llimit);
+                        Int32 hl = Int32.Parse(ulimit);
 
-                    if (Int32.Parse(data.ToString()) < ll || Int32.Parse(data.ToString()) > hl)
-                        throw new Exception(StringResource.str("out_of_range"));
+                        if (Int32.Parse(data.ToString()) < ll || Int32.Parse(data.ToString()) > hl)
+                            throw new Exception(StringResource.str("out_of_range"));
+                    }
+                    else
+                    {
+                        double ll = double.Parse(llimit);
+                        double hl = double.Parse(ulimit);
+                        if (double.Parse(data.ToString()) < ll || double.Parse(data.ToString()) > hl)
+                            throw new Exception(StringResource.str("out_of_range"));
+                    }
+                    kbdhandler(param, data.ToString());
                 }
-                else
-                {
-                    double ll = double.Parse(llimit);
-                    double hl = double.Parse(ulimit);
-                    if (double.Parse(data.ToString()) < ll || double.Parse(data.ToString()) > hl)
-                        throw new Exception(StringResource.str("out_of_range"));
-                }
-                kbdhandler(param, data.ToString());
-            }
             }
             catch (Exception err)
             {

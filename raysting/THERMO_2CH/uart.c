@@ -25,7 +25,6 @@ u8 volatile rx_counter;
 // This flag is set on USART Receiver buffer overflow
 bit rx_buffer_overflow; 
 
-extern u8 debug_mode;
      
 /****************************************************************************/
 //               UART Receiver Interrupt service routine    
@@ -47,17 +46,9 @@ interrupt [USART_RXC] void usart_rx_isr(void)
    // check if error happened.
    if((status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN))==0)
    {   
-//#ifdef _OLD_FASHION_CMD_PROCESS_
-       //hw_status &=0xEF;
-//#else       
-      // rx_buffer[rx_wr_index++]= data;
-      // if(rx_wr_index >= RX_BUFFER_SIZE)
-      //    rx_wr_index=0;
-      // rx_counter++;
-//#endif    
+        //todo process bytes
+        nav_uart_push(data);
    }      
-   //else
-      //hw_status |= HW_STATUS_UART_ERROR;      
 }
 
 /****************************************************************************/
@@ -67,14 +58,14 @@ interrupt [USART_TXC] void usart_tx_isr(void)
 {
 if (tx_counter)
    {
-      PORTB.0 = 1;         // set RS485 node to transmiter mode
+//      PORTB.0 = 1;         // set RS485 node to transmiter mode
       --tx_counter;
       UDR=tx_buffer[tx_rd_index];
       if (++tx_rd_index == TX_BUFFER_SIZE) 
          tx_rd_index=0;
    }
-else 
-   PORTB.0 = 0;         // set RS485 node to receiver mode.
+//else 
+//   PORTB.0 = 0;         // set RS485 node to receiver mode.
 }
 
 /****************************************************************************/
@@ -84,7 +75,12 @@ else
 /****************************************************************************/
 void SetBaudrate()
 {
-u8 baud = 0x0;
+u8 baud = 0x01;
+        UBRRH=0x00;
+        //UBRRL= 0x2F; //9600
+        UBRRL=191; //2400
+        /*
+
    switch(baud)   
    {  case 0x0:                 // 115200bps
         UBRRH=0x00;
@@ -110,7 +106,8 @@ u8 baud = 0x0;
         UBRRH=0x00;
         UBRRL=0x03;                         
         break;                          
-   }     
+   }      
+   */
 }
 /****************************************************************************/
 //                     UART Initialization   
@@ -146,8 +143,8 @@ void UART_Init(void)
  
  // UCSRC share IO address with reg UBRR, MSB bit for UCSRC must be 1.
  // 8 data, 1 stop, even parity
-    UCSRC=0xA6;    // EVEN parity bit
- // UCSRC=0x86;    // No parity bit
+ // UCSRC=0xA6;    // EVEN parity bit
+    UCSRC=0x86;    // No parity bit
  
  // Set Baud rate based on System setting
  // RS485.BaudRate_Index can be read out from EEPROM
@@ -177,7 +174,7 @@ void putchar(char c)
    while (tx_counter >= TX_BUFFER_SIZE);
 
    // set RS85-node to transmiter mode
-   PORTB.0 = 1;
+   //PORTB.0 = 1;
    
    #asm("cli")
    // if there is data in TX buffer or data being transmitted. 
@@ -203,68 +200,7 @@ void mputs(u8 *buf, u8 size, u8 port)
       putchar(*buf++);    
 } 
 
-/****************************************************************************/
-// Read a byte from UART buffer
-/****************************************************************************/
-/*#ifndef _OLD_FASHION_CMD_PROCESS_
-u8 read_uart_db()
-{
-  u8 uart_rdata;
-  uart_rdata = rx_buffer[rx_rd_index++];
-  rx_rd_index %= RX_BUFFER_SIZE;
-  rx_counter--;
-  return uart_rdata;
-}
-u8 data_available_in_rxbuf()
-{
-  if (rx_counter > RX_BUFFER_SIZE)
-  {  
-     rx_rd_index = 0;
-     #asm("cli")
-     rx_wr_index = 0;
-     rx_counter = 0;
-     #asm("sei")
-  }
-  return rx_counter;
-}        
-#endif//*/
 
-/****************************************************************************/
-// d_putchar(): output a character in ASCII code mode.
-// For example: 0x9b is converted to 2 characters '9'/'B' before output
-/****************************************************************************/
-/*void d_putchar(u8 a)
-{
-    unsigned char h,l;
-    h = (a & 0xf0) >> 4;
-    l = (a & 0x0f);
-    if(h <= 9)		
-       putchar(h+'0');
-    else
-        putchar(h+'A'-0x0a);
-
-    if(l <= 9)
-	putchar(l+'0');
-    else
-	putchar(l+'A'-0x0a);
-} //*/ 
-
-/****************************************************************************/
-// d_mputs() convert an ASCII code array to HEX and print them via UART
-/****************************************************************************/
-/*void d_mputs(u8 *buf, u8 size, u8 port)
-{   while(size-- > 0)
-      d_putchar(*buf++);        
-} //*/
-
-/****************************************************************************/
-// UART print a string
-/****************************************************************************/ 
-/*void putstr(flash u8 *ptr)
-{
-   while(*ptr != 0x00)
-      putchar(*ptr++);   
-} //*/
 
 #pragma used-
 #endif

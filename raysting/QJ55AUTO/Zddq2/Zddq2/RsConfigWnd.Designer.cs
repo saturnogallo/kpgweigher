@@ -30,13 +30,23 @@
         {
             this.panel1 = new System.Windows.Forms.Panel();
             this.lbl_serial = new System.Windows.Forms.Label();
-            this.btn_serial = new Zddq2.RectButton();
-            this.btn_next = new Zddq2.RectButton();
-            this.btn_last = new Zddq2.RectButton();
             this.lbl_beta = new System.Windows.Forms.Label();
             this.lbl_rvalue = new System.Windows.Forms.Label();
             this.lbl_temp = new System.Windows.Forms.Label();
             this.lbl_alpha = new System.Windows.Forms.Label();
+            this.lbl_error = new System.Windows.Forms.Label();
+            this.btn_rsp001 = new Zddq2.RectButton();
+            this.btn_rsp01 = new Zddq2.RectButton();
+            this.btn_rsp1 = new Zddq2.RectButton();
+            this.btn_rs1 = new Zddq2.RectButton();
+            this.btn_rs10 = new Zddq2.RectButton();
+            this.btn_rs100 = new Zddq2.RectButton();
+            this.btn_rs1k = new Zddq2.RectButton();
+            this.btn_rs10k = new Zddq2.RectButton();
+            this.btn_rs100k = new Zddq2.RectButton();
+            this.btn_serial = new Zddq2.RectButton();
+            this.btn_next = new Zddq2.RectButton();
+            this.btn_last = new Zddq2.RectButton();
             this.btn_chan = new Zddq2.RectButton();
             this.btn_rbeta = new Zddq2.RectButton();
             this.btn_rvalue = new Zddq2.RectButton();
@@ -52,6 +62,15 @@
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.btn_rsp001);
+            this.panel1.Controls.Add(this.btn_rsp01);
+            this.panel1.Controls.Add(this.btn_rsp1);
+            this.panel1.Controls.Add(this.btn_rs1);
+            this.panel1.Controls.Add(this.btn_rs10);
+            this.panel1.Controls.Add(this.btn_rs100);
+            this.panel1.Controls.Add(this.btn_rs1k);
+            this.panel1.Controls.Add(this.btn_rs10k);
+            this.panel1.Controls.Add(this.btn_rs100k);
             this.panel1.Controls.Add(this.lbl_serial);
             this.panel1.Controls.Add(this.btn_serial);
             this.panel1.Controls.Add(this.btn_next);
@@ -79,42 +98,6 @@
             this.lbl_serial.Size = new System.Drawing.Size(98, 25);
             this.lbl_serial.TabIndex = 6;
             this.lbl_serial.Text = "lbl_serial";
-            // 
-            // btn_serial
-            // 
-            this.btn_serial.BackColor = System.Drawing.Color.Red;
-            this.btn_serial.bEnabled = true;
-            this.btn_serial.bOn = true;
-            this.btn_serial.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_serial.Location = new System.Drawing.Point(190, 93);
-            this.btn_serial.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_serial.Name = "btn_serial";
-            this.btn_serial.Size = new System.Drawing.Size(162, 46);
-            this.btn_serial.TabIndex = 5;
-            // 
-            // btn_next
-            // 
-            this.btn_next.BackColor = System.Drawing.Color.Red;
-            this.btn_next.bEnabled = true;
-            this.btn_next.bOn = true;
-            this.btn_next.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_next.Location = new System.Drawing.Point(199, 20);
-            this.btn_next.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_next.Name = "btn_next";
-            this.btn_next.Size = new System.Drawing.Size(35, 46);
-            this.btn_next.TabIndex = 4;
-            // 
-            // btn_last
-            // 
-            this.btn_last.BackColor = System.Drawing.Color.Red;
-            this.btn_last.bEnabled = true;
-            this.btn_last.bOn = true;
-            this.btn_last.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_last.Location = new System.Drawing.Point(30, 20);
-            this.btn_last.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_last.Name = "btn_last";
-            this.btn_last.Size = new System.Drawing.Size(37, 46);
-            this.btn_last.TabIndex = 4;
             // 
             // lbl_beta
             // 
@@ -155,6 +138,143 @@
             this.lbl_alpha.Size = new System.Drawing.Size(99, 25);
             this.lbl_alpha.TabIndex = 1;
             this.lbl_alpha.Text = "lbl_alpha";
+            // 
+            // lbl_error
+            // 
+            this.lbl_error.AutoSize = true;
+            this.lbl_error.BackColor = System.Drawing.Color.White;
+            this.lbl_error.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_error.ForeColor = System.Drawing.Color.Red;
+            this.lbl_error.Location = new System.Drawing.Point(12, 52);
+            this.lbl_error.Name = "lbl_error";
+            this.lbl_error.Size = new System.Drawing.Size(0, 24);
+            this.lbl_error.TabIndex = 8;
+            // 
+            // btn_rsp001
+            // 
+            this.btn_rsp001.BackColor = System.Drawing.Color.Blue;
+            this.btn_rsp001.bEnabled = true;
+            this.btn_rsp001.bOn = true;
+            this.btn_rsp001.Location = new System.Drawing.Point(589, 258);
+            this.btn_rsp001.Name = "btn_rsp001";
+            this.btn_rsp001.Size = new System.Drawing.Size(56, 50);
+            this.btn_rsp001.TabIndex = 17;
+            // 
+            // btn_rsp01
+            // 
+            this.btn_rsp01.BackColor = System.Drawing.Color.Blue;
+            this.btn_rsp01.bEnabled = true;
+            this.btn_rsp01.bOn = true;
+            this.btn_rsp01.Location = new System.Drawing.Point(516, 258);
+            this.btn_rsp01.Name = "btn_rsp01";
+            this.btn_rsp01.Size = new System.Drawing.Size(67, 50);
+            this.btn_rsp01.TabIndex = 16;
+            // 
+            // btn_rsp1
+            // 
+            this.btn_rsp1.BackColor = System.Drawing.Color.Blue;
+            this.btn_rsp1.bEnabled = true;
+            this.btn_rsp1.bOn = true;
+            this.btn_rsp1.Location = new System.Drawing.Point(647, 20);
+            this.btn_rsp1.Name = "btn_rsp1";
+            this.btn_rsp1.Size = new System.Drawing.Size(58, 46);
+            this.btn_rsp1.TabIndex = 15;
+            // 
+            // btn_rs1
+            // 
+            this.btn_rs1.BackColor = System.Drawing.Color.Blue;
+            this.btn_rs1.bEnabled = true;
+            this.btn_rs1.bOn = true;
+            this.btn_rs1.Location = new System.Drawing.Point(589, 20);
+            this.btn_rs1.Name = "btn_rs1";
+            this.btn_rs1.Size = new System.Drawing.Size(56, 46);
+            this.btn_rs1.TabIndex = 14;
+            // 
+            // btn_rs10
+            // 
+            this.btn_rs10.BackColor = System.Drawing.Color.Blue;
+            this.btn_rs10.bEnabled = true;
+            this.btn_rs10.bOn = true;
+            this.btn_rs10.Location = new System.Drawing.Point(529, 20);
+            this.btn_rs10.Name = "btn_rs10";
+            this.btn_rs10.Size = new System.Drawing.Size(54, 46);
+            this.btn_rs10.TabIndex = 13;
+            // 
+            // btn_rs100
+            // 
+            this.btn_rs100.BackColor = System.Drawing.Color.Blue;
+            this.btn_rs100.bEnabled = true;
+            this.btn_rs100.bOn = true;
+            this.btn_rs100.Location = new System.Drawing.Point(454, 20);
+            this.btn_rs100.Name = "btn_rs100";
+            this.btn_rs100.Size = new System.Drawing.Size(57, 46);
+            this.btn_rs100.TabIndex = 12;
+            // 
+            // btn_rs1k
+            // 
+            this.btn_rs1k.BackColor = System.Drawing.Color.Blue;
+            this.btn_rs1k.bEnabled = true;
+            this.btn_rs1k.bOn = true;
+            this.btn_rs1k.Location = new System.Drawing.Point(386, 20);
+            this.btn_rs1k.Name = "btn_rs1k";
+            this.btn_rs1k.Size = new System.Drawing.Size(51, 46);
+            this.btn_rs1k.TabIndex = 11;
+            // 
+            // btn_rs10k
+            // 
+            this.btn_rs10k.BackColor = System.Drawing.Color.Blue;
+            this.btn_rs10k.bEnabled = true;
+            this.btn_rs10k.bOn = true;
+            this.btn_rs10k.Location = new System.Drawing.Point(321, 20);
+            this.btn_rs10k.Name = "btn_rs10k";
+            this.btn_rs10k.Size = new System.Drawing.Size(49, 46);
+            this.btn_rs10k.TabIndex = 10;
+            // 
+            // btn_rs100k
+            // 
+            this.btn_rs100k.BackColor = System.Drawing.Color.Blue;
+            this.btn_rs100k.bEnabled = true;
+            this.btn_rs100k.bOn = true;
+            this.btn_rs100k.Location = new System.Drawing.Point(257, 20);
+            this.btn_rs100k.Name = "btn_rs100k";
+            this.btn_rs100k.Size = new System.Drawing.Size(47, 46);
+            this.btn_rs100k.TabIndex = 9;
+            // 
+            // btn_serial
+            // 
+            this.btn_serial.BackColor = System.Drawing.Color.Red;
+            this.btn_serial.bEnabled = true;
+            this.btn_serial.bOn = true;
+            this.btn_serial.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_serial.Location = new System.Drawing.Point(190, 93);
+            this.btn_serial.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btn_serial.Name = "btn_serial";
+            this.btn_serial.Size = new System.Drawing.Size(162, 46);
+            this.btn_serial.TabIndex = 5;
+            // 
+            // btn_next
+            // 
+            this.btn_next.BackColor = System.Drawing.Color.Red;
+            this.btn_next.bEnabled = true;
+            this.btn_next.bOn = true;
+            this.btn_next.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_next.Location = new System.Drawing.Point(199, 20);
+            this.btn_next.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btn_next.Name = "btn_next";
+            this.btn_next.Size = new System.Drawing.Size(35, 46);
+            this.btn_next.TabIndex = 4;
+            // 
+            // btn_last
+            // 
+            this.btn_last.BackColor = System.Drawing.Color.Red;
+            this.btn_last.bEnabled = true;
+            this.btn_last.bOn = true;
+            this.btn_last.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_last.Location = new System.Drawing.Point(30, 20);
+            this.btn_last.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btn_last.Name = "btn_last";
+            this.btn_last.Size = new System.Drawing.Size(37, 46);
+            this.btn_last.TabIndex = 4;
             // 
             // btn_chan
             // 
@@ -269,6 +389,7 @@
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(800, 550);
             this.ControlBox = false;
+            this.Controls.Add(this.lbl_error);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.btn_quit);
             this.Controls.Add(this.btn_SysConfig);
@@ -283,6 +404,7 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
         #endregion
@@ -305,5 +427,15 @@
         private RectButton btn_ralpha;
         private System.Windows.Forms.Label lbl_temp;
         private RectButton btn_temp;
+        private System.Windows.Forms.Label lbl_error;
+        private RectButton btn_rsp001;
+        private RectButton btn_rsp01;
+        private RectButton btn_rsp1;
+        private RectButton btn_rs1;
+        private RectButton btn_rs10;
+        private RectButton btn_rs100;
+        private RectButton btn_rs1k;
+        private RectButton btn_rs10k;
+        private RectButton btn_rs100k;
     }
 }

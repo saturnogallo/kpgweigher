@@ -26,69 +26,124 @@ Data Stack size     : 256
 /*************************************************************************************************************/
 #include <mega16.h>
 #include "define.h"
-#include "spi.h"
+//#include "spi.h"
 #include "drveeprom.h"
 #include "uart.h"
 #include "utili.h"
-
-
+#include "scanner.h"
+#include "wendu.h"
+//#include "stdlib.h"
 /*********************************************************************************************************************/
 // Boot vetctors: This structure is used to share boot configuration info between primary firmware and boot firmware.
 /*********************************************************************************************************************/
 #define BOOT_VECT_ADDR 0x60
 //BOOT_CONFIG boot_vector @ BOOT_VECT_ADDR;  /* store boot vector at a specified address in SRAM for sharing with primary */
                                            /* firmware. The first 96 (0x0~0x5F) addresses are reserved for I/O and registers */
+/*
+	double          R0;  	 //zero offset
+	double          V0;  	 //zero offset
+	double          Rs1; 	 //jiao-zheng zhi for PT100
+	double          Rs2; 	 //for PT1000
+	u8             	ktime;	 //time for switch
+	u8		type_bore;  //probe type of channel 1 and channel 2 for bore case
+	u8              type_therm; //probe type of channel 1 and channel 2 for therm case
+	u8		mode;	 //mode
+	u8		kttmode; //ktt mode
+	u8		fcmode;	 //F or C
+	u8		chan;	 //channel mode
+*/
+SYSDATA eeprom sysdata = { 0,0,100,1000,4,1,1,1,1,0,0};
 
-SYSDATA eeprom sysdata = {
-   0,0,100,3,
-   {0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-   0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-   0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-   {0x00,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-   0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff,
-   0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff},
-   1,1,1000};
+RUNDATA rundata;
+int ch_to_search = 0;
+extern u8 databuf[12];
 
+extern double GetThmoVolt(double t,char type);
+extern void HandleKey(u8);
+extern void CH453_I2C_Init();
+extern void init_digi_Led();
+extern void digi_cprint(u8 flash *str,u8 startpos, u8 size);
+extern void timer_tick();
+extern u8 CH453_ReadKey();
+
+/*
+typedef eeprom struct _PRBDATA
+{
+	char param1[8]; //+0.000E+0
+	char param2[8]; //+0.000E+0
+	char param3[8]; //+0.000E+0
+	char rtp[8];	//0000.0000
+}PRBDATA;
+*/
 PRBDATA   eeprom rprbdata = {
-   {0.0,0.0},
-   {0.0,0.0},
-   {0.0,0.0},
-   {0.0,0.0},
-   {3,3}
+        {"", ""},
+        {"", ""},
+        {"", ""},
+        {"", ""}
  };
 
-/*****************************************************************************/
-//                     Timer 2 interrupt service routine
-// Timer 2 overflow interrupt service routine.
-// Generate 10ms interrupt.
-// Support up to 3 timer services. timerlen[3] store counters for different
-// timers.
-/*****************************************************************************/
-//bit timeoutflag;
-#define DELAY1_END timerlen[0]==0
-#define DELAY2_END timerlen[1]==0
-#define DELAY3_END timerlen[2]==0
-u16 timerlen[4] = {0,0,0,0};
-
-interrupt [TIM2_OVF] void timer2_ovf_isr(void)
+u8 start_of_buf()
 {
-  TCNT2=0xB8;            // 7.2KHZ input,interrupt frequency is set to 100HZ (10ms timer)
-  // if timerlen != 0, at least 1 timer service is ongoing.
-  if(timerlen[0] || timerlen[1] || timerlen[2] || timerlen[3]){
-    if(timerlen[0]>0)   timerlen[0]--;
-    if(timerlen[1]>0)   timerlen[1]--;
-    if(timerlen[2]>0)   timerlen[2]--;
-    if(timerlen[3]>0)   timerlen[3]--;
-  }else{
-    TIMSK &= 0xbf;       // mask Timer2 overflow interrupt
-  }
+        u8 i = 0;
+        while(i< 16)
+        {
+                if(databuf[i] == 0x00)
+                        return i;
+                i++;
+        }
+        return i;
 }
+void myftoa(double v)
+{
+        u8 pos;
+        int dat;
+        sprintf(databuf,"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+        dat = (int)v;
+        sprintf(databuf,"%d",dat);
+        pos = start_of_buf();
+        databuf[pos] = '.';
+        v = v - dat;
+        if(v < 0)
+                v = -v;
+        pos = pos+1;
+        while(1)
+        {
+                v = v * 10000;
+                dat = (int)v;
+                sprintf(databuf+pos,"%d",dat);
+                v = v - dat;
+                pos = start_of_buf();
+                if(pos > 11)
+                        return;
+        }
+}
+void sleepms(unsigned int i)
+{
+   while(i-- > 0)
+      ;
+}
+u8 keycode = KEY_INVALID;
+u8 refresh_cnt = 0;
+u8 busy = 0;
+extern u8 flash_cnt;
+interrupt [TIM0_OVF] void timer0_ovf_isr(void)
+{
+        if(busy == 1)
+                return;
+        busy = 1;
+	flash_cnt++;
+	if(flash_cnt > 10)
+	        flash_cnt = 0;
 
+        if(keycode == KEY_INVALID)
+        {
+                keycode = CH453_ReadKey();
+        }
+        busy = 0;
+}
 /*****************************************************************************/
 //                      Initialize Timers
 // Timer 0 is used to generate pulses to drive electrical magnet
-// Timer 1 is used to generate pulses to drive motors
-// Timer 2 is used to measure RS485 frame intervals.
 //
 /*****************************************************************************/
 void Init_Timers()
@@ -101,7 +156,7 @@ void Init_Timers()
    // define Timer0 interrupt frequency: 7.2K/(FF-TCNT) = 514HZ
    // 200 pulses to run one cycle (1.8/step)
    // Motor Speed: 514/200 ~= 2.5 cycles/sec
-   TCNT0=0xF2;
+   TCNT0=0x92;            //60hz
 
    // Timer/Counter 1 initialization
    // Used for delay from 220V AC cross zero point to Triac ON.
@@ -117,7 +172,7 @@ void Init_Timers()
    // Compare A Match Interrupt: Off
    // Compare B Match Interrupt: Off
    TCCR1A=0x00;
-   TCCR1B=0x03;
+   TCCR1B=0x00;
    TCNT1H=0x00;
    TCNT1L=0x00;
    ICR1H=0x00;
@@ -134,13 +189,13 @@ void Init_Timers()
    // Mode: Normal top=FFh
    // OC2 output: Disconnected
    ASSR=0x00;
-   TCCR2=0x07;
+   TCCR2=0x00;
    TCNT2=0x00;
    OCR2=0x00;
 
    // Timer(s)/Counter(s) Interrupt(s) initialization
    // disable Timer 0, 1 and 2 interrupt
-   TIMSK=0x00;
+   TIMSK=0x01;
 }
 
 /*******************************************************************************/
@@ -148,33 +203,32 @@ void Init_Timers()
 /*******************************************************************************/
 void Init_PORT(void)
 {
-
+   //PORT,DDR: 0,0, Hi-Z, 		1,0, Hi-Z pullup
+   //          0,1, output low, 1,1, output high
    // Input/Output Ports initialization
    // Port A initialization
-   // Func7=In Func6=In Func5=Out Func4=Out Func3=Out Func2=Out Func1=Out Func0=Out
-   // State7=T State6=T State5=1 State4=1 State3=1 State2=1 State1=1 State0=1
-   // PA0: MT1_PS, PA1: MT2_PS, PA2: MT_MD0, PA3: MT_MD1, PA4: MT_CLK, PA5: MT_DIR
-   // PA6: PWM_FB, PA7: Test1
-   PORTA=0x3F;
-   DDRA=0x3F;
+   // bit6,bit5,bit4: OUTPUT, others are No use , all set to Hi-Z
+   PORTA=0x70;
+   DDRA=0x70;
 
    // Port B initialization
-   // Func7=Out Func6=In Func5=Out Func4=Out Func3=In Func2=In Func1=Out Func0=Out
-   // State7=0 State6=T State5=0 State4=1 State3=T State2=T State1=1 State0=0
-   PORTB=0x12;
-   DDRB=0xB3;
+   // bit7: OUT, bit6: OUT, bit 5: OUT bit4-bit1 no use bit0 : 485DIR, bit1
+   // 11100000
+   // 11100001
+   PORTB=0xE0;
+   DDRB=0xE1;
 
    // Port C initialization
-   // Func7=In Func6=In Func5=In Func4=In Func3=In Func2=In Func1=In Func0=In
-   // State7=T State6=T State5=T State4=T State3=T State2=T State1=T State0=T
-   PORTC=0x00;
-   DDRC=0x00;
+   // bit7-bit2 no use bit1 = SDA, bit0,SCL
+   PORTC=0x03;
+   DDRC=0x03;
 
    // Port D initialization
+   // bit7-bit2 out, bit1 :txd, bit0:rxd
    // Func7=Out Func6=Out Func5=Out Func4=Out Func3=In Func2=In Func1=Out Func0=In
    // State7=1 State6=1 State5=1 State4=1 State3=T State2=T State1=1 State0=T
-   PORTD=0xF2;
-   DDRD=0xF2;
+   PORTD=0xFE;
+   DDRD=0xFE;
 
    // External Interrupt(s) initialization
    // INT0: Off
@@ -230,20 +284,305 @@ void Turn_Off_Watchdog()
 //                    Initialize System Global Variable
 // Read data from EEPROM and set vaule for system global variables
 /*******************************************************************************/
+extern void ValidatePrbType();
 void Init_Vars(void)
 {
+        if((sysdata.Rs1 > 101) || (sysdata.Rs1 < 99))
+                sysdata.Rs1 = 100;
+        if((sysdata.Rs2 > 1010) || (sysdata.Rs2 < 990))
+                sysdata.Rs2 = 1000;
+    if(IS_BORE_MODE)
+    {
+        if(IS_THERM_MODE)
+                sysdata.mode = MODE_TEMP | MODE_BORE;
+    }
+    ValidatePrbType();
+
 }
 
-void Init_EEPROM_Para()
- {
- }
-/*******************************************************************************/
-//
-/*******************************************************************************/
-void Validate_EEPROM_Data()
+uchar nav1v = 1;
+void navto120mv()
 {
+   nav1v = 0;
+   nav_command(NAV_120MV);
+   sleepms(200*ONEMS);
 }
 
+void navto1v()
+{
+    nav1v = 1;
+    nav_command(NAV_1V);
+    sleepms(200*ONEMS);
+}
+double mabs(double val)
+{
+        if(val < 0)
+                return -val;
+        else
+                return val;
+}
+u8 ToByte(char l, char h)
+{
+	h = (h > 'A')?(h-'A'+0x0A):(h-'0');
+	l = (l > 'A')?(l-'A'+0x0A):(l-'0');
+	return (h<<4)|l;
+}
+void update_display()
+{
+        double v;
+        if(sysdata.mode & MODE_TEMP)
+        {
+                v = rundata.temperature[ch_to_search];
+                if((sysdata.chan == CHAN_MINUS))
+                {
+                        if(ch_to_search==0)
+                                return;
+                        v = v - rundata.temperature[0];
+                }
+                if(sysdata.fcmode == 0) //F case
+                        v = (v*9.0+32*5.0)/5.0;
+                myftoa(v);
+                digi_print(databuf,0,11);
+                return;
+        }else
+        {
+                v = rundata.reading[ch_to_search];
+                if((sysdata.chan == CHAN_MINUS))
+                {
+                        if(ch_to_search==0)
+                            return;
+
+                        v = v - rundata.reading[0];
+                }
+                myftoa(v);
+                digi_print(databuf,0,11);
+                return;
+        }
+}
+
+
+double pickfrom5()
+{
+        double v,sum,max,min; //use the average of middle 3
+        uchar i;
+        max = -9999999;
+        min  = 9999999;
+        sum = 0;
+        for(i = 0; i < 5; i++)
+        {
+                v = nav_read();
+                if(max < v)
+                        max = v;
+                if(min > v)
+                        min = v;
+                sum = sum + v;
+        }
+        sum = sum - max - min;
+        return sum/3.0;
+
+}
+u8 phase=0;
+u16 dlg_cnt = 0;
+u16 onesec_cnt = 0;
+//state machine of therm type
+//phase 0 : search the current channel and switch to it if apply, add delay, to phase 1, otherwise to phase 2
+//phase 1:get the reading and update the display
+//phase 2: move to next channel
+uchar therm_state()
+{
+        uchar i;
+	if(phase > 2)
+	        phase = 0;
+
+	if(phase == 0)
+	{
+	        update_led(1);
+		if( (sysdata.type_therm >= PRBTYPE_K) && (sysdata.type_therm <= PRBTYPE_R))
+		{
+			scanner_set_channel(ch_to_search+1);
+			dlg_cnt = 6*ONESEC;
+			onesec_cnt = 0;
+			phase = 1;
+			return 0;
+		}else{
+			rundata.temperature[ch_to_search] = -9999; //invalid data
+			phase = 2;
+		}
+	}
+	if(phase == 1)
+	{
+		rundata.reading[ch_to_search] = pickfrom5();//nav_read();//-sysdata.V0;
+                //sprintf(strbuf,"%2d;%f;",ch_to_search+1,rundata.reading[ch_to_search]); //no work
+                //prints(strbuf,strlen(strbuf),PORT_PC);
+
+		rundata.temperature[ch_to_search] = MValueToTValue(rundata.reading[ch_to_search], sysdata.type_therm);
+
+                //sprintf(strbuf,"%f;\r\n",rundata.temperature[ch_to_search]);
+                //prints(strbuf,strlen(strbuf),PORT_PC);
+		phase = 2;
+	}
+	if(phase == 2)
+	{
+		update_display();
+		phase = 0;
+	}
+	return 1;       //one reading is updated
+}
+//state machine of bore measure
+//phase0 the search the current channel and switch to it if apply, switch to rs, pktt, add delay, if not ktt to phase 2 else to phase 1, otherwise to phase n
+//phase1 get reading of rs+, set to nktt, add delay
+//phase2 get reading of rs-, switch to rx, add delay, if  ktt to phase 3 else to phase 4
+//phase3 get reading of rx-, set to pktt, add delay
+//phase4 get reading of rx+, switch to rx, caculate
+//phase5 update display and move to next channel
+void safesys()
+{
+SET_PKTT;
+SET_TORX;
+SET_TO1MA;
+SET_TOCH1;
+}
+double valuep;
+u8 databuf[12];
+uchar bore_state()
+{
+        uchar i;
+	if(phase > 5)
+	        phase = 0;
+        i = sysdata.type_bore;
+	if(phase == 0)
+	{
+	        update_led(1);
+		if((i <= PRBTYPE_PT1000) && (i >= PRBTYPE_PT100))
+		{
+			scanner_set_channel(ch_to_search+1);
+			SET_PKTT;
+			SET_TORS;
+
+			if(i == PRBTYPE_PT100)
+			{
+			        SET_TOPT100;
+			        SET_TO1MA;
+			}
+			if(i == PRBTYPE_PT25)
+			{
+			        SET_TOPT100;
+			        SET_TO1MA;
+			}
+			if(i == PRBTYPE_PT1000)
+			{
+			        SET_TOP1MA;
+       			        SET_TOPT1000;
+			}
+			dlg_cnt =  ONESEC * sysdata.ktime;
+			onesec_cnt = 0;
+			if(IS_MODE_KTT)
+				phase = 1;
+			else
+				phase = 2;
+       			return 0;
+		}else{
+			rundata.temperature[ch_to_search] = -9999;
+			phase = 5;
+		}
+
+	}
+	if(phase == 1)  //-stdV in ktt mode
+	{
+		rundata.stdV = mabs(pickfrom5());
+		SET_NKTT;
+		dlg_cnt =  ONESEC * sysdata.ktime;
+		onesec_cnt = 0;
+		phase = 2;
+		return 0;
+	}
+	if(phase == 2) //final stdV
+	{
+		if(IS_MODE_KTT)
+		{
+			rundata.stdV = (rundata.stdV + mabs(pickfrom5()));
+			phase = 3;
+		}else{
+			rundata.stdV = mabs(pickfrom5());
+			phase = 4;
+		}
+		SET_TORX;
+
+		dlg_cnt = ONESEC * sysdata.ktime;
+		onesec_cnt = 0;
+		return 0;
+	}
+	if(phase == 3)  //-V on rx in ktt mode
+	{
+		valuep = mabs(pickfrom5());
+		SET_PKTT;
+		dlg_cnt = ONESEC * sysdata.ktime;
+		onesec_cnt = 0;
+		phase = 4;
+		return 0;
+	}
+	if(phase == 4) // final V on rx
+	{
+		if(IS_MODE_KTT){
+			valuep = (valuep + mabs(pickfrom5()));
+/* auto switch voltage range
+			if((valuep > 0.21) && (valuep < 2) && (nav1v == 0))
+			{
+        		        navto1v();
+			}
+			if((valuep < 0.21) && (valuep > 0.0002) && (nav1v == 1))
+			{
+			        navto120mv();
+			}
+*/
+		}else{
+			valuep = mabs(nav_read());
+/* auto switch voltage range
+			if((valuep > 0.105) && (valuep < 1) && (nav1v == 0))
+			{
+        		        navto1v();
+			}
+			if((valuep < 0.105) && (valuep > 0.0001) && (nav1v == 1))
+			{
+			        navto120mv();
+			}
+*/
+		}
+		if(rundata.stdV != 0)
+		{
+                        if(i == PRBTYPE_PT1000)
+              			rundata.reading[ch_to_search] = valuep*sysdata.Rs2/rundata.stdV - sysdata.R0;
+                        else
+        			rundata.reading[ch_to_search] = valuep*sysdata.Rs1/rundata.stdV - sysdata.R0;
+			if(rundata.reading[ch_to_search] > 0)
+			{
+                                //sprintf(strbuf,"%2d;%f;",ch_to_search+1,rundata.Rx);
+                                //prints(strbuf,strlen(strbuf),PORT_PC);
+
+			        rundata.temperature[ch_to_search] = RValueToTValue(rundata.reading[ch_to_search],i,sysdata.type_bore);
+                                rundata.Rx = rundata.reading[ch_to_search];
+                                //sprintf(strbuf,"%f;\r\n",rundata.temperature[ch_to_search]);
+                                //prints(strbuf,strlen(strbuf),PORT_PC);
+			}
+		}else{
+		        rundata.temperature[ch_to_search] = -9999;
+		}
+		phase = 5;
+	}
+	if(phase == 5) //got one reading
+	{
+		update_display();//pgmain_handler(MSG_REFRESH);
+		phase = 0;
+	}
+	return 1;
+}
+
+void reset_counter()
+{
+	dlg_cnt = 0;
+       	onesec_cnt = 0;
+        phase = 0;      //reset the state machine
+}
 /*****************************************************************************/
 //                      Main function entry here
 /*****************************************************************************/
@@ -254,155 +593,73 @@ void main(void)
    /********************************************************************/
    // Initialize MEGA8 PORT
    Init_PORT();
-   // Timer (Interrupt) initialization
-   Init_Timers();
-   // Initialize EEPROM
-   vInitEeprom();
+      // Initialize SPI to communicate with CH453
+   CH453_I2C_Init();
 
    // Initialize Global Variable:
    // "Init_Vars()" has to be placed after "bReadDataFromEeprom()" because
-   // RS485._flash.cs_zero is involved.
    Init_Vars();
 
-   // Initialize UART, 8 data, 1 stop, even parity. Boardrate is set based on
-   // EEPROM parameters.
+   // Initialize UART, 8 data, 1 stop, no parity. Boardrate is 2400.
    UART_Init();
-   // Initialize SPI to communicate with CS5532/CS5530
-   SPI_MasterInit();
+      // Timer (Interrupt) initialization
+   safesys();
+   digi_cprint("88888888",0,8);
 
+
+   init_digi_Led();
+   Init_Timers();
    // initialize golbal interrupt.
    #asm("sei")
 
+    //init the DMM
+    nav_command(NAV_INIT);
+    sleepms(200*ONEMS);
+    navto1v();
+    nav_command(NAV_SLOWMODE);
+    sleepms(200*ONEMS);
+    nav_command(NAV_AFLTON);
+    sleepms(200*ONEMS);
+
+    update_led(0);
 
 
-}
-/*********************************************************************************
-This file is MEGA16 SPI driver
+    sysdata.R0 = 0;
+	 while(1)
+	 {
+	        if(keycode != KEY_INVALID)
+	        {
+                        HandleKey(keycode);
+                        keycode = KEY_INVALID;
+                        continue;
+                }
 
-Chip type           : ATmega16
-Program type        : Application
-Clock frequency     : 7.372800 MHz
-Memory model        : Small
-External SRAM size  : 0
-Data Stack size     : 256
+		if(dlg_cnt > 1)
+		{
+       			dlg_cnt--;
+			continue;
+		}
+                timer_tick();
+		if(IS_THERM_MODE)
+		{
+        	        if(therm_state() == 0)
+		                continue;
+                }
+		if(IS_BORE_MODE)
+		{
+	        	if(bore_state() == 0)
+		                continue;
+		}
 
-Code by             : fd_lxh@yahoo.com.cn
-*********************************************************************************/
+                //shift to next channel
 
-#include <mega16.h>
-#include "define.h"
-
-/********************************************************************************/
-//   PCB Board configuration:
-/********************************************************************************/
-sfrb DDR_SPI=0x17;                   /* SPI pins shared with PORT B[7:4] */
-                                     /* 0x17 is the addr of DDRB */
-
-/********************************************************************************/
-//            MEAG16 SPI Master Initialization
-// This subroutine initialize MEGA8 SPI as master.
-// SPI interrupt disabled. MSB sent first.
-/********************************************************************************/
-
-
-void SPI_MasterInit(void)
-{
-
-/* Set MOSI SCK and SS to outputm Set MISO to input mode */
-DDR_SPI.P_MOSI = 1;
-DDR_SPI.P_SCK  = 1;
-DDR_SPI.P_SS   = 1;
-DDR_SPI.P_MISO = 0;
-
-//SS# high to disable slave
-//PORTB = PORTB | (1<<P_SS);
-SPI_SS = 1;
-
-//clear SPIF flag by reading SPSR first and followed by SPDR later.
-#asm
-    in   r30,spsr
-    in   r30,spdr
-#endasm
-
-//Set SPI to master mode, clock rate to fck/8
-//SPCR: SPI Control Register
-//Bit 7 - SPIE : "1" to enable SPI interrupt.
-//Bit 6 - SPE  : "1" to enable.
-//Bit 5 - DORD : "1" stands for LSB first to send
-//Bit 4 - MSTR : "1" to set SPI as master
-//Bit 3 - CPOL : When set to "1", SCK keep high in idle state
-//Bit 2 - CPHA : when set to "1", setting data at the rising edge of clock, while sample data at clock falling edge.
-//Bit 1,0 - SPR1,SPR0 :  SRR1, SPR0 and SPI2X together define clock freq of SPI master.
-//SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
-SPSR = 0x1;
-SPCR = 0b01010001;
-}
-
-/********************************************************************************/
-//             MEAG8 SPI Write/Read subroutine
-// Function: char SPI_MasterTransmit(char cData)
-// when used as writing fuction, cData is the data to be write to
-// SPI slave. When used as read function, set cData equal to 0x0,
-// this subroutine returns data sent from SPI slave.
-/********************************************************************************/
-void SPI_MasterTransmit_c(u8 cData)
-{
-        u8 dat;
-        /* Set SS# pin to low */
-        SPI_SS = 0;
-        /* start data transition*/
-        SPDR = cData;
-        /* waiting for data transition end */
-        while(!(SPSR & (1<<SPIF)));
-        /* return data and clear SPIF */
-        dat = (SPDR); //just discard it
-}
-
-/* send a word data MSB first*/
-void SPI_MasterTransmit_w(u16 cData)
-{
-	SPI_MasterTransmit_c((cData>>8) & 0xFF);
-	SPI_MasterTransmit_c(cData & 0xFF);
-}
-
-/* send a long data MSB first*/
-void SPI_MasterTransmit_l(u32 cData)
-{
-	SPI_MasterTransmit_c((cData>>24) & 0xFF);
-	SPI_MasterTransmit_c((cData>>16) & 0xFF);
-	SPI_MasterTransmit_c((cData>>8) & 0xFF);
-	SPI_MasterTransmit_c(cData & 0xFF);
-}
-
-/********************************************************************************/
-//             MEAG8 SPI Write/Read subroutine
-// Function: char SPI_MasterTransmit(char cData)
-// when used as writing fuction, cData is the data to be write to
-// SPI slave. When used as read function, set cData equal to 0x0,
-// this subroutine returns data sent from SPI slave.
-/********************************************************************************/
-/* receive a char data */
-u8 SPI_MasterReceive_c()
-{
-        /* Set SS# pin to low */
-        SPI_SS = 0;
-        /* start data transition*/
-        SPDR = 0;
-        /* waiting for data transition end */
-        while(!(SPSR & (1<<SPIF)));
-        /* return data and clear SPIF */
-        return(SPDR);
-}
-
-/* recieve a long data MSR first*/
-u32 SPI_MasterReceive_l()
-{
-        u32 ret;
-	ret = SPI_MasterReceive_c();
-	ret = (ret<<8) + SPI_MasterReceive_c();
-	ret = (ret<<8) + SPI_MasterReceive_c();
-	ret = (ret<<8) + SPI_MasterReceive_c();
-	return ret;
+                if(sysdata.chan == CHAN_1)
+                       ch_to_search = 0;
+                else if(sysdata.chan == CHAN_2)
+                       ch_to_search = 1;
+                else
+                     ch_to_search = 1 - ch_to_search&0x01;
+        }
 }
 #include <mega16.h>
 #include "uart.h"
@@ -420,18 +677,17 @@ u8 volatile tx_wr_index;
 u8 volatile tx_rd_index;
 u8 volatile tx_counter;
 
-//#ifndef _OLD_FASHION_CMD_PROCESS_
-//u8 volatile rx_buffer[RX_BUFFER_SIZE];
+// #ifndef _OLD_FASHION_CMD_PROCESS_
+// u8 volatile rx_buffer[RX_BUFFER_SIZE];
 // define index for Receiver
 u8 volatile rx_wr_index;
 u8 volatile rx_rd_index;
 u8 volatile rx_counter;
-//#endif
+// #endif
 
 // This flag is set on USART Receiver buffer overflow
 bit rx_buffer_overflow;
 
-extern u8 debug_mode;
 
 /****************************************************************************/
 //               UART Receiver Interrupt service routine
@@ -453,17 +709,9 @@ interrupt [USART_RXC] void usart_rx_isr(void)
    // check if error happened.
    if((status & (FRAMING_ERROR | PARITY_ERROR | DATA_OVERRUN))==0)
    {
-//#ifdef _OLD_FASHION_CMD_PROCESS_
-       //hw_status &=0xEF;
-//#else
-      // rx_buffer[rx_wr_index++]= data;
-      // if(rx_wr_index >= RX_BUFFER_SIZE)
-      //    rx_wr_index=0;
-      // rx_counter++;
-//#endif
+        //todo process bytes
+        nav_uart_push(data);
    }
-   //else
-      //hw_status |= HW_STATUS_UART_ERROR;
 }
 
 /****************************************************************************/
@@ -473,14 +721,14 @@ interrupt [USART_TXC] void usart_tx_isr(void)
 {
 if (tx_counter)
    {
-      PORTB.0 = 1;         // set RS485 node to transmiter mode
+//      PORTB.0 = 1;         // set RS485 node to transmiter mode
       --tx_counter;
       UDR=tx_buffer[tx_rd_index];
       if (++tx_rd_index == TX_BUFFER_SIZE)
          tx_rd_index=0;
    }
-else
-   PORTB.0 = 0;         // set RS485 node to receiver mode.
+//else
+//   PORTB.0 = 0;         // set RS485 node to receiver mode.
 }
 
 /****************************************************************************/
@@ -490,7 +738,12 @@ else
 /****************************************************************************/
 void SetBaudrate()
 {
-u8 baud = 0x0;
+u8 baud = 0x01;
+        UBRRH=0x00;
+        //UBRRL= 0x2F; //9600
+        UBRRL=191; //2400
+        /*
+
    switch(baud)
    {  case 0x0:                 // 115200bps
         UBRRH=0x00;
@@ -517,6 +770,7 @@ u8 baud = 0x0;
         UBRRL=0x03;
         break;
    }
+   */
 }
 /****************************************************************************/
 //                     UART Initialization
@@ -552,8 +806,8 @@ void UART_Init(void)
 
  // UCSRC share IO address with reg UBRR, MSB bit for UCSRC must be 1.
  // 8 data, 1 stop, even parity
-    UCSRC=0xA6;    // EVEN parity bit
- // UCSRC=0x86;    // No parity bit
+ // UCSRC=0xA6;    // EVEN parity bit
+    UCSRC=0x86;    // No parity bit
 
  // Set Baud rate based on System setting
  // RS485.BaudRate_Index can be read out from EEPROM
@@ -583,7 +837,7 @@ void putchar(char c)
    while (tx_counter >= TX_BUFFER_SIZE);
 
    // set RS85-node to transmiter mode
-   PORTB.0 = 1;
+   //PORTB.0 = 1;
 
    #asm("cli")
    // if there is data in TX buffer or data being transmitted.
@@ -609,68 +863,7 @@ void mputs(u8 *buf, u8 size, u8 port)
       putchar(*buf++);
 }
 
-/****************************************************************************/
-// Read a byte from UART buffer
-/****************************************************************************/
-/*#ifndef _OLD_FASHION_CMD_PROCESS_
-u8 read_uart_db()
-{
-  u8 uart_rdata;
-  uart_rdata = rx_buffer[rx_rd_index++];
-  rx_rd_index %= RX_BUFFER_SIZE;
-  rx_counter--;
-  return uart_rdata;
-}
-u8 data_available_in_rxbuf()
-{
-  if (rx_counter > RX_BUFFER_SIZE)
-  {
-     rx_rd_index = 0;
-     #asm("cli")
-     rx_wr_index = 0;
-     rx_counter = 0;
-     #asm("sei")
-  }
-  return rx_counter;
-}
-#endif//*/
 
-/****************************************************************************/
-// d_putchar(): output a character in ASCII code mode.
-// For example: 0x9b is converted to 2 characters '9'/'B' before output
-/****************************************************************************/
-/*void d_putchar(u8 a)
-{
-    unsigned char h,l;
-    h = (a & 0xf0) >> 4;
-    l = (a & 0x0f);
-    if(h <= 9)
-       putchar(h+'0');
-    else
-        putchar(h+'A'-0x0a);
-
-    if(l <= 9)
-	putchar(l+'0');
-    else
-	putchar(l+'A'-0x0a);
-} //*/
-
-/****************************************************************************/
-// d_mputs() convert an ASCII code array to HEX and print them via UART
-/****************************************************************************/
-/*void d_mputs(u8 *buf, u8 size, u8 port)
-{   while(size-- > 0)
-      d_putchar(*buf++);
-} //*/
-
-/****************************************************************************/
-// UART print a string
-/****************************************************************************/
-/*void putstr(flash u8 *ptr)
-{
-   while(*ptr != 0x00)
-      putchar(*ptr++);
-} //*/
 
 #pragma used-
 #endif
@@ -714,10 +907,11 @@ static u8 volatile _bEepromBufNs;
 /************************************************************************/
 
 //#pragma interrupt_handler vIvEeReady:iv_EE_READY
+/*
 interrupt [EE_RDY] void vIvEeReady(void)
 {
     if(!fgEepromBufEmpty()){
-        while(EECR & (1<<EEWE));  /* wait for last write to complete */
+        while(EECR & (1<<EEWE));  // wait for last write to complete
         EEAR = _sEepromBuf[_bEepromBufRdPtr].wAddress;
         EEDR = _sEepromBuf[_bEepromBufRdPtr].bVal;
         EECR |= (1<<EEMWE);
@@ -731,13 +925,13 @@ interrupt [EE_RDY] void vIvEeReady(void)
         EECR &= ~(1<<EERIE);
     }
 }
-
+*/
 /************************************************************************/
 //                     Write data into EEPROM buffer
 // If buffer is not full, write data into buffer, return RET_SUCCESS(0x0)
 // flag. If buffer is full, return RET_BUSY(0xff) flag
 /************************************************************************/
-
+/*
 u8 bWriteData2Eeprom_c(u16 wAddress, u8 bVal)
 {
     if(fgEepromBufFull())
@@ -779,7 +973,7 @@ u8 bWriteData2Eeprom(u16 wAddress, u8 *bVal, u8 totalsize){
   return totalsize;
 }
 
-
+*/
 /************************************************************************/
 //                         Read data from EEPROM
 // The programer must ensure EEPROM is NOT in writing state before reading
@@ -787,6 +981,7 @@ u8 bWriteData2Eeprom(u16 wAddress, u8 *bVal, u8 totalsize){
 // writting state. Return RET_SUCCESS(0x0) flag if reading successfully
 // Data readout is saved into read buffer.
 /************************************************************************/
+/*
 u8 bReadDataFromEeprom(u16 wAddress, u8 *pbVal,u8 size)
 {
 	while(size-- > 0){
@@ -805,12 +1000,13 @@ u8 bReadDataFromEeprom_c(u16 wAddress, u8 *pbVal)
     *pbVal = EEDR;
     return RET_SUCCESS;
 }
-
+*/
 /************************************************************************/
 //                        Initialize EEPROM
 // Intialize buffer variables. Diable EEPROM interruption
 // EEPROM interrupt is enabled after writing data to EEPROM buffer.
 /************************************************************************/
+/*
 void vInitEeprom(void)
 {
     EECR = 0x00;
@@ -818,6 +1014,7 @@ void vInitEeprom(void)
     _bEepromBufRdPtr = 0;
     _bEepromBufNs    = 0;
 }
+*/
 
 #include "define.h"
 #include "wendu.h"
@@ -849,25 +1046,28 @@ double PT100RToTValue(double r,double r0)
 			tlow = tnew;
 	}
 	return floor((tlow*10000.0+tup*10000)/2.0+0.5)/10000.0;
-
 }
-double RValueToTValue(double r, u8 prbid)
+double myatoi(eeprom u8* str)
+{
+        return 0.0;
+}
+double RValueToTValue(double r, u8 prbid,u8 type)
 {
 	double ac,bc,cc,tlow,tup,rnew,tnew;
 	int count;
 
-	ac = rprbdata.param1[prbid];
-	bc = rprbdata.param2[prbid];
-	cc = rprbdata.param3[prbid];
+	ac = myatoi(rprbdata.param1[prbid]);
+	bc = myatoi(rprbdata.param2[prbid]);
+	cc = myatoi(rprbdata.param3[prbid]);
 
-	if(rprbdata.type[prbid] == PRBTYPE_PT100)
+	if(type == PRBTYPE_PT100)
 		return PT100RToTValue(r, cc);
-	if(rprbdata.type[prbid] == PRBTYPE_PT1000)
+	if(type == PRBTYPE_PT1000)
 		return PT100RToTValue(r, cc);
-	if(rprbdata.type[prbid] != PRBTYPE_PT25)
+	if(type != PRBTYPE_PT25)
 		return -9999.999;
-        if(rprbdata.rtp[prbid] > 0.1)
-                r = r/rprbdata.rtp[prbid];
+        if(myatoi(rprbdata.rtp[prbid]) > 0.1)
+                r = r/myatoi(rprbdata.rtp[prbid]);
         else
 		r = r/25.0;
 
@@ -1136,7 +1336,7 @@ double MValueToTValue(double r,char type)
 }
 
 #include "utili.h"
-#include "stdlib.h"
+//#include "stdlib.h"
 /*---------------延时子程序----------------*/
 /*
 void delay1 (uint ms)
@@ -1167,3 +1367,1188 @@ char highc(uchar x)
 		return '0'+x;
 }
 */
+#include "define.h"
+#include "utili.h"
+
+#define DIGI_NUMBER     8
+
+/*
+*       Every digital structure looks like this
+*       has_point(1bit) flash(1bit) reserver(1bit)   data(5 bits)
+*
+*/
+#define CHAR_CODE_MASK  0x1F//0x70
+#define FUNC_CODE_MASK  0x40
+#define POINT_ON        0x80
+#define POINT_OFF       0x7F
+#define FLASH_ON        0x40
+#define FLASH_OFF       0xBF
+#define CHAR_0          0x00     //char 0 to char 9 is 0-9
+#define CHAR_A          0x0a     //A
+#define CHAR_b          0x0b     //b
+#define CHAR_c          0x0c     //c
+
+#define CHAR_d          0x0d     //d
+#define CHAR_E          0x0e     //E
+#define CHAR_F          0x0f     //F
+#define CHAR_r          0x10     //r
+#define CHAR_o          0x11     //o
+#define CHAR_t          0x12     //t
+#define CHAR_n          0x13     //n
+#define CHAR_L		0x14	 //L
+#define CHAR_Y		0x15	 //Y
+#define CHAR_h		0x16	 //h
+#define CHAR_U		0x17	 //U
+#define CHAR_N		0x18	 //N
+#define CHAR_SPACE      0x19     //
+#define CHAR_MINUS      0x1A     //-
+#define CHAR_BC         0x1B     //C
+#define CHAR_MAX_NUM	0x1C
+
+// *******************
+// CH453的定义
+// *******************
+#define CH453_DIG0      0x6000                      //数码管位0显示
+#define CH453_DIG1      0x6200		            //数码管位1显示
+#define CH453_DIG2      0x6400		            //数码管位2显示
+#define CH453_DIG3      0x6600		            //数码管位3显示
+#define CH453_DIG4      0x6800		            //数码管位4显示
+#define CH453_DIG5      0x6A00	                    //数码管位5显示
+#define CH453_DIG6      0x6C00	                    //数码管位6显示
+#define CH453_DIG7      0x6E00		            //数码管位7显示
+
+#define CH453_LEDA		0x7800		    //数码管位12 for led
+#define CH453_LEDB		0x7A00		    //数码管位13 for led
+
+
+static u8 digi_data[DIGI_NUMBER] = {0,0,0,0,0,0,0,0}; //8 digital LEDs
+
+static flash u8 digi_code[CHAR_MAX_NUM] = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,\
+                                                0x77,0x7C,0x58,0x5E,0x79,0x71,0x50,\
+                                                0x5C,0x78,0x54,0x38,0x6E,0x74,0x3E,0x37,0x00,0x40,0x39};
+u16 reg_led;             //16 leds on off status
+static u16 reg_led_flash;       //16 leds flash status
+u8 flash_cnt = 0;        //counter of timer for flash
+
+extern void Led_Output(u16);
+extern void Digi_Output(u8,u8);
+extern void CH453_Write( u16 );
+void digi_print(u8 *str,uchar startpos, uchar size);
+extern u8 busy;
+u8 needrefresh=0;
+void add_refresh()
+{
+   needrefresh = 2;
+   timer_tick();
+}
+
+u8 fl_onoff = 0; //current on off status;
+void timer_tick()
+{
+	u8 i,j,fl_cnt;
+	i = 0;
+	fl_cnt = flash_cnt;
+
+	if(needrefresh == 0)
+        	return;
+
+        if(needrefresh == 2)     //direct output
+                fl_cnt = 1;
+        else{
+                if((fl_onoff == 0) && (fl_cnt <=5)) //need on
+                {
+                        fl_cnt = 1;
+                        fl_onoff = 1;
+                }else{
+                        if((fl_onoff == 1) && (fl_cnt >5)) //need off
+                        {
+                                fl_cnt = 6;
+                                fl_onoff = 0;
+                        }else{
+                                return; //no action required
+                        }
+                }
+        }
+
+        if(fl_cnt != 1 && fl_cnt != 6) //1: on 6: off
+                return;
+
+        needrefresh = 0;
+        //only 1 and 6 can come here
+	if(fl_cnt == 1)
+	{
+		Led_Output(reg_led | reg_led_flash);
+	}else{
+		Led_Output(reg_led ^ reg_led_flash);
+	}
+        if(reg_led_flash != 0)
+                needrefresh = 1;
+
+	for(i=0;i<DIGI_NUMBER;i++)
+	{
+	        j = digi_data[i];
+		if(digi_data[i] & FLASH_ON)
+		{
+		        needrefresh = 1;
+			if(fl_cnt == 1)
+			{
+				Digi_Output(i,digi_code[CHAR_CODE_MASK & digi_data[i]] | (digi_data[i] & POINT_ON));
+			}else{
+				Digi_Output(i,digi_code[CHAR_SPACE] | (digi_data[i] & POINT_ON));
+			}
+		}else{
+		        j = digi_code[CHAR_CODE_MASK & digi_data[i]];
+		        j = j | (digi_data[i] & POINT_ON);
+		        Digi_Output(i,j);
+		}
+	}
+}
+void Digi_Output(u8 pos, u8 val)
+{
+        while(busy == 1)
+                ;
+        busy = 1;
+        switch(pos)
+        {
+                case 4: CH453_Write(CH453_DIG0 | val); break;
+                case 5: CH453_Write(CH453_DIG1 | val); break;
+                case 6: CH453_Write(CH453_DIG2 | val); break;
+                case 7: CH453_Write(CH453_DIG3 | val); break;
+                case 0: CH453_Write(CH453_DIG4 | val); break;
+                case 1: CH453_Write(CH453_DIG5 | val); break;
+                case 2: CH453_Write(CH453_DIG6 | val); break;
+                case 3: CH453_Write(CH453_DIG7 | val); break;
+                default: break;
+        }
+        busy = 0;
+}
+void init_digi_Led()
+{
+    reg_led = 0;
+    reg_led_flash = 0;
+}
+void led_on(u16 key, bool on)
+{
+
+	if(on){
+		reg_led |= key;
+	}else{
+		reg_led = reg_led & (key ^ 0xffff);
+	}
+	add_refresh();
+}
+void led_flash(u16 key, bool on)
+{
+
+	if(on){
+		reg_led_flash |= key;
+	}else{
+		reg_led_flash = reg_led_flash & (key ^ 0xffff);
+	}
+	add_refresh();
+}
+void digi_flash(uchar startpos, uchar endpos, bool on)
+{
+        u8 i;
+        for(i=0;i<DIGI_NUMBER;i++)
+        {
+                digi_data[i] = digi_data[i] & FLASH_OFF;
+        }
+	while(startpos <= endpos)
+	{
+		if(on)
+			digi_data[startpos] |= FLASH_ON;
+		else
+			digi_data[startpos] = digi_data[startpos] & FLASH_OFF;
+		startpos++;
+	}
+	add_refresh();
+}
+void digi_print(u8 *str,uchar startpos, uchar size)
+{
+   u8 i;
+   u8 endpos;
+   endpos = startpos + size;
+   if(endpos > DIGI_NUMBER)
+        endpos = DIGI_NUMBER;
+
+   for(i=startpos; i < endpos; i++){
+      switch(*str){
+         case '0':
+         case '1':
+         case '2':
+         case '3':
+         case '4':
+         case '5':
+         case '6':
+         case '7':
+         case '8':
+         case '9': digi_data[i] = (digi_data[i] & (FUNC_CODE_MASK)) | (*str -'0'); break;
+         case 'A': digi_data[i] = CHAR_A; break;
+         case 'b': digi_data[i] = CHAR_b; break;
+         case 'c': digi_data[i] = CHAR_c; break;
+         case 'd': digi_data[i] = CHAR_d; break;
+         case 'E': digi_data[i] = CHAR_E; break;
+         case 'F': digi_data[i] = CHAR_F; break;
+         case 'r': digi_data[i] = CHAR_r; break;
+         case 'o': digi_data[i] = CHAR_o; break;
+         case 't': digi_data[i] = CHAR_t; break;
+         case 'n': digi_data[i] = CHAR_n; break;
+         case 'L': digi_data[i] = CHAR_L; break;
+         case 'Y': digi_data[i] = CHAR_Y; break;
+         case 'U': digi_data[i] = CHAR_U; break;
+         case 'h': digi_data[i] = CHAR_h; break;
+         case 'N': digi_data[i] = CHAR_N; break;
+         case 'C': digi_data[i] = CHAR_BC; break;
+         case '-': digi_data[i] = CHAR_MINUS; break;
+         case '.':  digi_data[i-1] |= POINT_ON;
+               i--;
+               break;
+         default: digi_data[i] = CHAR_SPACE; //no show
+               break;
+         }
+      str++;
+   }
+   add_refresh();
+}
+//const string print
+void digi_cprint(u8 flash *str,uchar startpos, uchar size)
+{
+   u8 i;
+   u8 endpos;
+   endpos = startpos + size;
+   if(endpos > DIGI_NUMBER)
+        endpos = DIGI_NUMBER;
+   for(i=startpos; i < endpos; i++){
+      switch(*str){
+         case '0':
+         case '1':
+         case '2':
+         case '3':
+         case '4':
+         case '5':
+         case '6':
+         case '7':
+         case '8':
+         case '9': digi_data[i] = (digi_data[i] & (FUNC_CODE_MASK)) | (*str -'0'); break;
+         case 'A': digi_data[i] = CHAR_A; break;
+         case 'b': digi_data[i] = CHAR_b; break;
+         case 'c': digi_data[i] = CHAR_c; break;
+         case 'd': digi_data[i] = CHAR_d; break;
+         case 'E': digi_data[i] = CHAR_E; break;
+         case 'F': digi_data[i] = CHAR_F; break;
+         case 'r': digi_data[i] = CHAR_r; break;
+         case 'o': digi_data[i] = CHAR_o; break;
+         case 't': digi_data[i] = CHAR_t; break;
+         case 'n': digi_data[i] = CHAR_n; break;
+         case 'L': digi_data[i] = CHAR_L; break;
+         case 'Y': digi_data[i] = CHAR_Y; break;
+         case 'U': digi_data[i] = CHAR_U; break;
+         case 'h': digi_data[i] = CHAR_h; break;
+         case 'N': digi_data[i] = CHAR_N; break;
+         case 'C': digi_data[i] = CHAR_BC; break;
+         case '-': digi_data[i] = CHAR_MINUS; break;
+         case '.':  digi_data[i-1] |= POINT_ON;
+               i--;
+               break;
+         default: digi_data[i] = CHAR_SPACE; //no show
+               break;
+         }
+      str++;
+   }
+   add_refresh();
+}
+
+
+void update_led(u8 mode)
+{
+        //mode 0 is for fix   sysdata.chan
+        //mode 1 is for flash ch_to_search
+        //D1,D2 bore, therm, D3, temp/raw
+        /*D4 -- D13 PRBTYPE_PT100	        0x00
+                    PRBTYPE_PT25	0x01
+                    PRBTYPE_PT1000  0x02
+                PRBTYPE_K 	   	0x03
+                PRBTYPE_N		0x04
+                PRBTYPE_E		0x05
+                PRBTYPE_B		0x06
+                PRBTYPE_J		0x07
+                PRBTYPE_S		0x08
+                PRBTYPE_T		0x09
+                PRBTYPE_R		0x0A
+        */
+        //D14,D15, ch1, ch2, minus
+        u16 dat = 0;
+        u8 ch = 0;
+        ch = ch_to_search;
+        if(sysdata.mode & MODE_TEMP)
+                dat = dat + LED_TEMP;
+        if(IS_BORE_MODE)
+        {
+                dat = dat + LED_BORE;
+                if(sysdata.type_bore == PRBTYPE_PT100)
+                        dat = dat + LED_PT100;
+                if(sysdata.type_bore == PRBTYPE_PT1000)
+                        dat = dat + LED_PT1000;
+        }
+        if(IS_THERM_MODE)
+        {
+                dat = dat + LED_THERM;
+                if(sysdata.type_therm == PRBTYPE_K)
+                        dat = dat + LED_K;
+                if(sysdata.type_therm == PRBTYPE_N)
+                        dat = dat + LED_N;
+                if(sysdata.type_therm == PRBTYPE_E)
+                        dat = dat + LED_E;
+                if(sysdata.type_therm == PRBTYPE_B)
+                        dat = dat + LED_B;
+                if(sysdata.type_therm == PRBTYPE_J)
+                        dat = dat + LED_J;
+                if(sysdata.type_therm == PRBTYPE_S)
+                        dat = dat + LED_S;
+                if(sysdata.type_therm == PRBTYPE_T)
+                        dat = dat + LED_T;
+                if(sysdata.type_therm == PRBTYPE_R)
+                        dat = dat + LED_R;
+        }
+
+        if(sysdata.chan == CHAN_1 || sysdata.chan == CHAN_ALL)
+        {
+                dat = dat + LED_CH1;
+        }
+        if(sysdata.chan == CHAN_2 || sysdata.chan == CHAN_ALL)
+                dat = dat + LED_CH2;
+        if(mode == 0)  //fix channel led
+        {
+                reg_led = dat;
+                add_refresh();
+                return;
+        }
+        //flash mode
+        if(ch == 0)
+        {
+                dat = dat | LED_CH1;
+        }
+        if(ch == 1)
+        {
+                dat = dat | LED_CH2;
+        }
+        reg_led = dat;
+        add_refresh();
+
+}
+void Led_Output(u16 data)
+{
+        u8 key;
+        while(busy == 1)
+                ;
+        busy = 1;
+
+        key = (u8)(data & 0x00ff);
+        CH453_Write(CH453_LEDA | key);
+        key = (u8)(data >> 8);
+        CH453_Write(CH453_LEDB | key);
+        busy = 0;
+}
+#include "define.h"
+#include "mega16.h"
+//ATMEGA16 PC0   -------    CH452 SCL
+//ATMEGA16 PC1   -------    CH452 SDA
+
+#define TWINT	7
+#define TWEA	6
+#define TWSTA 	5
+#define TWSTO	4
+#define TWWC	3
+#define TWEN	2
+#define TWIE	0
+
+#define TWPS0	0
+#define TWPS1	1
+
+#define PC0     0
+#define PC1     1
+
+#define  SLA_W    			0x32
+#define  SLA_R    			0x33
+#define  SLAVER_ADDRESS     0x32
+#define  START              0x08
+#define  RE_START           0x10
+#define  MT_SLA_WRITE_ACK   0x18
+#define  MT_SLA_READ_ACK    0x40
+#define  MT_DATA_ACK        0x28
+#define  MT_READ_ACK        0x58
+
+
+
+#define CMD_CFG_SYSTEM		0x4843					//0x4800| 01000011[SLEEP][INTENS]0[X_INT]0[KEYB][DISP]B
+#define CMD_READ_KEY		0x4F00
+
+#define CH453_START()  			TWCR = ( 1<<TWEN )|(1<<TWSTA )|(1<<TWINT); while( !(TWCR & (1<<TWINT)) )//发 START
+#define CH453_WAIT()	 		while( !(TWCR & (1<<TWINT)) )
+#define CH453_STOP()			TWCR = ( 1<<TWEN )|(1<<TWSTO)|(1<<TWINT)
+#define CH453_Wr_Byte(twi_d)	{TWDR=(twi_d);TWCR=(1<<TWINT)|(1<<TWEN); while( !(TWCR & (1<<TWINT)) );}
+#define CH453_Rd_Byte(twi_d)	{TWCR=(1<<TWINT)|(1<<TWEN); while( !(TWCR & (1<<TWINT)) ); twi_d = TWDR;}
+#define TestACK()		 		(TWSR&0xF8)    		//取出状态码
+#define SetACK() 				(TWCR|=(1<<TWEA))   //产生ACK
+// **************************************
+// 延时毫秒,不准
+// **************************************
+void mDelaymS( unsigned char ms )
+{
+    unsigned short i;
+    while ( ms -- )
+    {
+        for( i = 0; i != 1000; i++ );
+    }
+}
+
+
+// **************************************
+// I2C写CH452命令
+// **************************************
+void CH453_Write( u16 cmd )
+{
+     u8 try;//重试次数
+
+	 try = 50;
+	 do
+	 {
+		 CH453_START();
+
+   	     CH453_Wr_Byte((u8)(cmd>>8));    //command
+
+	 	 if( TestACK() == MT_SLA_WRITE_ACK )//收到ACK
+	 	 {
+	  	  	 CH453_Wr_Byte( (u8)cmd );
+			 CH453_STOP();
+			 break;
+	 	 }
+
+		 CH453_STOP();
+
+		 if( try ) try--;
+	 } while( try );
+
+}
+
+// **************************************
+// I2C读CH452命令
+// **************************************
+u8 CH453_Read( u16 read_cmd )
+{
+    u8 try;//重试次数
+	u8 val;
+
+	try = 5;
+	do
+	{
+	  	val = 0xFF;
+
+   	  	CH453_START();
+
+   	    CH453_Wr_Byte((u8)(read_cmd>>8));
+
+//                sleepms(10);
+		if( TestACK() == MT_SLA_READ_ACK )//收到ACK
+   		{
+			CH453_Rd_Byte(val);
+
+			CH453_STOP();
+			break;
+    	        }
+
+		CH453_STOP();
+
+		if( try ) try--;
+ 	}while( try );
+	return val;
+}
+// **************************************
+// CH453初始化
+// **************************************
+void CH453_I2C_Init( void )
+{
+ 	 PORTC |= (1<<PC1)|(1<<PC0);
+	 DDRC |= (1<<PC1)|(1<<PC0);
+   	 TWBR = 0x64;
+	 TWSR = (1<<TWPS1)|(1<<TWPS0);
+   	 TWCR = ( 1<<TWEN ); //使能TWI
+	 mDelaymS(100);
+	 CH453_Write(CMD_CFG_SYSTEM);
+}
+
+static u8 lastkey = 0xff;
+u8 CH453_ReadKey()
+{
+	u8 key;
+	key = CH453_Read(CMD_READ_KEY);
+	if(key == 0xff)
+		return 0xff;
+	if((key & 0x40)) //key down
+	{
+		lastkey = key & 0x0f;
+		return 0xff;
+	}else{
+	        if(lastkey != 0xff)
+        	{	//key up
+	        	key = lastkey;
+        		lastkey = 0xff;
+		        return key;
+	        }
+	}
+	return 0xff;
+}
+#include "define.h"
+#include "scanner.h"
+#include "utili.h"
+#include "stdlib.h"
+extern PRBDATA eeprom  rprbdata;
+void memcpy1(eeprom u8 *src, u8 *dst, u8 size)
+{
+        while(size-- > 0)
+        {
+                *dst++ = *src++;
+        }
+}
+void memcpy2( u8 *src, eeprom u8 *dst, u8 size)
+{
+        while(size-- > 0)
+        {
+                *dst++ = *src++;
+        }
+}
+double buf2double(u8 *buf)
+{
+        return 0.1;
+}
+void ValidatePrbType()
+{
+	if((sysdata.type_bore > PRBTYPE_PT1000))
+		sysdata.type_bore = PRBTYPE_PT100;
+        if((sysdata.type_therm < PRBTYPE_K) || (sysdata.type_therm > PRBTYPE_R))
+		sysdata.type_therm = PRBTYPE_K;
+
+
+}
+u8 menu_index = 0xff; //not in menu mode
+extern void reset_counter();
+extern void EnterMenu();
+
+void HandleKey(u8 key)
+{
+	if(key == 0xff)
+		return;
+	if(key == KEY_MODE) //display temperature of direct reading
+	{
+	        if(IS_BORE_MODE)
+	        {
+        	        sysdata.mode = (sysdata.mode & MODE_TEMP) | MODE_THERM;
+	        }else{
+               	        sysdata.mode = (sysdata.mode & MODE_TEMP) | MODE_BORE;
+	        }
+	        digi_cprint("   . . . . ",0,8);
+	        update_led(0);
+	        phase = 0;
+                safesys();
+		return;
+	}
+	if(key == KEY_PROBE) //change to next probe type
+	{
+	        if(IS_BORE_MODE)
+	        {
+	                sysdata.type_bore += 1;
+	        }
+	        if(IS_THERM_MODE)
+	        {
+	                sysdata.type_therm += 1;
+	        }
+	        digi_cprint("   . . . . ",0,8);
+	        ValidatePrbType();
+	        update_led(0);
+	        return;
+	}
+
+	if(key == KEY_ZERO)
+	{
+		if(IS_BORE_MODE){
+		        sysdata.R0 = 0;// rundata.Rx;
+		}else{
+			sysdata.V0 = nav_read();
+		        nav_command(NAV_ZEROON);
+		        sleepms(1000*ONEMS);
+		}
+		digi_cprint("  doNE   ",0,8);
+		update_display();
+		return;
+	}
+	if(key == KEY_DIGI) //show temp or not
+	{
+	        sysdata.mode = sysdata.mode ^ MODE_TEMP;
+		ValidatePrbType();
+		update_led(0);
+		update_display();
+		return;
+	}
+	if(key == KEY_CHAN)
+	{
+		sysdata.chan++;
+		if(sysdata.chan > CHAN_MINUS)
+			sysdata.chan = CHAN_1;
+		if(sysdata.chan == CHAN_1)
+		        digi_cprint("  chAn 1",0,8);
+		else if(sysdata.chan == CHAN_2)
+		        digi_cprint("  chAn 2",0,8);
+		else if(sysdata.chan == CHAN_MINUS)
+		        digi_cprint("  chAn -",0,8);
+		else
+       		        digi_cprint(" chAn 1.2",0,8);
+		update_led(0);
+		return;
+	}
+	if(key == KEY_KTT)
+	{
+		if(IS_BORE_MODE)
+		{
+			sysdata.kttmode = sysdata.kttmode ^ 0x01;
+                        SET_TOP1MA;
+	                SET_TOPT1000;
+			SET_PKTT;
+			if(sysdata.kttmode & 0x01)
+				digi_cprint("dUAL  0N",0,8);
+			else
+				digi_cprint("dUAL oFF",0,8);
+                        reset_counter();
+		}
+		return;
+	}
+	if(key == KEY_OK)
+	{
+		EnterMenu();
+		digi_flash(0,7,0);
+	}
+}
+void ValidateDataBuf()
+{//need format 1234.5678
+        u8 j=0;
+        for(j=0;j<9;j++)
+        {
+                if(j == 4)
+                        continue;
+                if(databuf[j] <= '9' && databuf[j] >= '0')
+                        continue;
+                databuf[j] = '0';
+        }
+	databuf[4] = '.';
+	databuf[9] = 0x00;
+
+}
+void ValidateDataBuf2()
+{//need format +1.234E-3
+        u8 j=0;
+        for(j=0;j<9;j++)
+        {
+                if((j==0) || (j==7))
+                {
+                     if((databuf[j] != '-') && (databuf[j] != ' '))
+                        databuf[j] = ' ';
+                     continue;
+                }
+                if(databuf[j] > '9' || databuf[j] < '0')
+                        databuf[j] = '0';
+        }
+     databuf[2] = '.';
+     databuf[6] = 'E';
+     databuf[9] = 0x00;
+}
+#define MAX_MENU_INDEX	10	//total menu rows index     0:dual, 1:unit, 2:dly, 3,4,5,6:r1,a1,b1,c1, 7,8,9,10:r2,a2,b2,c2
+extern u8 databuf[12];
+extern u8 keycode;
+void EnterMenu()
+{	//mode, probe, zero(left), digi(right), chan(up), ktt(down), key_ok
+	//up, 	 down is shift the menu index, and modify the digital
+	//right, left is change the position
+	//ok :	enter the menu, exit the menu, and start to modify
+	u8 key;
+	u8 inflash = 0xff; //flash position
+	double v;
+	if(keycode != KEY_OK)
+		return;
+	menu_index = 1;
+	key = KEY_INVALID;
+	keycode = KEY_INVALID;
+	while(1)
+	{
+/*
+		if(menu_index == 0)	//dUAL	ON|OFF
+		{
+		        if(key == KEY_OK)
+		        {
+		                if(inflash == 0xff)
+		                        inflash = 1;
+		                else
+		                        inflash = 0xff;
+			}
+			if((inflash == 1) && ((key == KEY_UP) || (key == KEY_DN)))
+					sysdata.kttmode	= 1 - sysdata.kttmode & 0x01;
+
+
+			if(inflash == 1)
+				digi_flash(5,7,1);
+			else
+				digi_flash(0,7,0);
+			key = 0xff;
+		}
+*/
+		if(menu_index == 1) //UN1t   F|C
+		{
+		        if(key == KEY_OK)
+		        {
+		                if(inflash == 0xff)
+		                        inflash = 1;
+		                else
+		                        inflash = 0xff;
+			}
+
+			if((inflash == 1) && ((key == KEY_UP) || (key == KEY_DN)))
+					sysdata.fcmode	= 1 - sysdata.fcmode&0x01;
+
+			if(sysdata.fcmode == 0)
+				digi_cprint("UN1t   F",0,8);
+			else
+				digi_cprint("UN1t   C",0,8);
+			if(inflash == 1)
+				digi_flash(7,7,1);
+			else
+				digi_flash(7,7,0);
+			key = 0xff;
+		}
+		if(menu_index == 2) //dLY   00
+		{
+			if(key == KEY_OK)
+			{
+				if(inflash == 0xff)
+					inflash = 6;
+				else
+					inflash = 0xff;
+			}
+			if((inflash == 6) && (key == KEY_RIGHT))
+				inflash = 7;
+			if((inflash == 7) && (key == KEY_LEFT))
+				inflash = 6;
+			if((inflash == 6) && (key == KEY_DN))
+			{
+				if(sysdata.ktime >= 10)
+					sysdata.ktime -= 10;
+				else
+					sysdata.ktime += 90;
+			}
+			if((inflash == 6) && (key == KEY_UP))
+			{
+				if(sysdata.ktime < 90)
+					sysdata.ktime += 10;
+				else
+					sysdata.ktime -= 90;
+			}
+			if((inflash == 7) && (key == KEY_DN))
+			{
+				if((sysdata.ktime % 10) != 9)
+					sysdata.ktime += 1;
+				else
+					sysdata.ktime -= 9;
+			}
+			if((inflash == 7) && (key == KEY_UP))
+			{
+				if((sysdata.ktime % 10) != 0)
+					sysdata.ktime -= 1;
+				else
+					sysdata.ktime += 9;
+			}
+			if(sysdata.ktime >= 100)
+			        sysdata.ktime = 0;
+			sprintf(databuf,"dLY   %d%d", (sysdata.ktime/10),(sysdata.ktime%10));
+			digi_print(databuf,0,8);
+
+			if(inflash != 0xff)
+				digi_flash(inflash,inflash,1);
+			else
+			        digi_flash(0,7,0);
+			key = 0xff;
+		}
+		if((menu_index == 3) || (menu_index == 7))//1r, 2r  ....   rvalue for channel 1 and channel 2
+		{       //1234.5678
+			if(key == KEY_OK)
+			{
+				if(inflash == 0xff)
+				{
+					inflash = (menu_index-3)/4;
+					memcpy1(rprbdata.rtp[inflash],databuf,4);
+					memcpy1(4+rprbdata.rtp[inflash],databuf+5,4);
+					ValidateDataBuf();
+					inflash = 0;
+				}else{
+					ValidateDataBuf();
+					inflash = (menu_index-3)/4;
+					memcpy2(databuf,rprbdata.rtp[inflash],4);
+					memcpy2(databuf+5,rprbdata.rtp[inflash]+4,4);
+					rundata.rtp[inflash] = atof(databuf);//buf2double(databuf); //
+					inflash = 0xff;
+				}
+			}
+			if((key == KEY_DN) && (inflash != 0xff))
+			{
+			        if(inflash >= 4)
+			                inflash += 1;
+				if(databuf[inflash] == '0')
+					databuf[inflash] = '9';
+				else
+					databuf[inflash] = databuf[inflash]-1;
+		                if(inflash >= 4)
+			                inflash -= 1;
+
+			}
+			if((key == KEY_UP) && (inflash != 0xff))
+			{
+			        if(inflash >= 4)
+			                inflash += 1;
+				if(databuf[inflash] == '9')
+					databuf[inflash] = '0';
+				else
+					databuf[inflash] = databuf[inflash]+1;
+		                if(inflash >= 4)
+			                inflash -= 1;
+			}
+			if((key == KEY_LEFT) && (inflash != 0xff))
+			{
+				if(inflash <= 0)
+					inflash = 7;
+				else
+					inflash--;
+				if(inflash == 4)
+					inflash = 3;
+			}
+			if((key == KEY_RIGHT) && (inflash != 0xff))
+			{
+				if(inflash >= 7)
+					inflash = 0;
+				else
+					inflash++;
+			}
+
+			if(inflash != 0xff)
+			{
+				digi_print(databuf,0,8);
+				digi_flash(inflash,inflash,1);
+			}else{
+				sprintf(databuf, "%cr    . . .",'1' + (menu_index-3)/4);
+				digi_print(databuf,0,8);
+				digi_flash(0,7,0);
+			}
+			key = 0xff;
+			timer_tick();
+		}
+		if((menu_index >= 4) && (menu_index  != 7) && (menu_index  < 11))//1AbC  ....     coeffient a,b,c for channel 1 and channel 2, row 4,5,6, 8, 9, 10
+		{ //+1.234E-3
+			if(key == KEY_OK)
+			{
+				if(inflash == 0xff)
+				{
+					inflash = (menu_index-3)/4;
+					memcpy1(rprbdata.rtp[inflash],databuf,2);
+					memcpy1(2+rprbdata.rtp[inflash],databuf+3,6);
+					ValidateDataBuf2();
+					inflash = 0;
+				}else{
+					inflash = (menu_index-3)/4;
+					ValidateDataBuf2();
+					memcpy2(databuf,rprbdata.rtp[inflash],2);
+					memcpy2(databuf+3,rprbdata.rtp[inflash]+2,6);
+					v = atof(databuf);//buf2double(databuf); //
+					if((menu_index % 4) == 0)
+						rundata.param1[inflash] = v;
+					if((menu_index % 4) == 1)
+						rundata.param2[inflash] = v;
+					if((menu_index % 4) == 2)
+						rundata.param3[inflash] = v;
+					inflash = 0xff;
+				}
+			}
+			if((key == KEY_DN) && (inflash != 0xff))
+			{
+			        if(inflash >= 2)
+			                inflash += 1;
+				if(databuf[inflash] == '0')
+					databuf[inflash] = '9';
+				else if(databuf[inflash] == '-')
+					databuf[inflash] = ' ';
+				else if(databuf[inflash] == ' ')
+					databuf[inflash] = '-';
+				else if((databuf[inflash] >='1') && (databuf[inflash] <='9'))
+					databuf[inflash] = databuf[inflash]-1;
+			        if(inflash >= 2)
+			                inflash -= 1;
+
+			}
+			if((key == KEY_UP) && (inflash != 0xff))
+			{
+			        if(inflash >= 2)
+			                inflash += 1;
+
+				if(databuf[inflash] == '9')
+					databuf[inflash] = '0';
+				else if(databuf[inflash] == '-')
+					databuf[inflash] = ' ';
+				else if(databuf[inflash] == ' ')
+					databuf[inflash] = '-';
+				else if((databuf[inflash] >='0') && (databuf[inflash] <='8'))
+					databuf[inflash] = databuf[inflash]+1;
+			        if(inflash >= 2)
+			                inflash -= 1;
+
+			}
+			if((key == KEY_LEFT) && (inflash != 0xff))
+			{
+				if(inflash == 0)
+					inflash = 7;
+				else
+					inflash--;
+				if(inflash == 5)
+					inflash = 4;
+			}
+			if((key == KEY_RIGHT) && (inflash != 0xff))
+			{       inflash++;
+				if(inflash == 8)
+					inflash = 0;
+
+				if(inflash == 5)
+					inflash = 6;
+			}
+
+			if(inflash != 0xff)
+			{
+				digi_print(databuf,0,8);
+				digi_flash(inflash,inflash,1);
+			}else{
+			        key = '1' + (menu_index-3)/4;
+				if((menu_index % 4) == 0)
+					sprintf(databuf, "%cA    . . .",key);
+				if((menu_index % 4) == 1)
+					sprintf(databuf, "%cb    . . .",key);
+				if((menu_index % 4) == 2)
+					sprintf(databuf, "%cc    . . .",key);
+				digi_print(databuf,0,8);
+				digi_flash(0,7,0);
+			}
+			key = 0xff;
+		}
+		while(keycode == 0xff)
+		{
+		        timer_tick();
+			sleepms(1);
+		}
+	        key = keycode;
+	        keycode = KEY_INVALID;
+		if((key == KEY_MODE) || (key == KEY_PROBE))
+			break;
+		if(key == KEY_OK || key == KEY_LEFT || key == KEY_RIGHT)
+			continue; //let sub handle it
+		if((key == KEY_UP))
+		{
+        		if(inflash == 0xff)
+        		{
+		        	if(menu_index == 1)
+	        			menu_index = MAX_MENU_INDEX;
+        			else
+			        	menu_index--;
+        		}else{
+        		        continue; //let sub handle it
+        		}
+		}
+		if((key == KEY_DN) )
+		{
+        		if(inflash == 0xff)
+                	{
+		        	if(menu_index == MAX_MENU_INDEX)
+		        	{
+		        	        digi_cprint("  doNE  ",0,8);
+			        	break;//menu_index = 0;
+        			}
+        			menu_index++;
+	        	}else{
+        		        continue; //let sub handle it
+        		}
+		}
+		key = 0xff;
+		continue;
+	}
+	menu_index = 0xff;
+}
+#include "utili.h"
+#include "scanner.h"
+#include "stdlib.h"
+#include "string.h"
+static uchar navlen = 0;
+static double reading = -1000;
+static char navread[20];
+static char navread2[20];
+u8 scancmd[5];
+u8 eeprom scanner_type = 1; //1: MI, 2: GUIDLINE
+extern void prints(u8 *str, u8 length, char uart_port);
+void scanner_set_mode()
+{
+/* select channel
+        if (IS_BORE_MODE)
+        {
+            scancmd[0] = '#';
+        }else{
+            scancmd[0]= '!';
+        }
+        scancmd[1] = 0x0D;
+        scancmd[2] = 0x0A;
+        prints(scancmd,3,PORT_SCANNER);
+*/
+}
+void scanner_set_channel(uchar ch)
+{
+        if(ch == 1)
+        {
+                SET_TOCH1;
+        }
+        if(ch == 2)
+        {
+                SET_TOCH2;
+                return;
+        }
+/*external switch
+        if(scanner_type == 1) //MI
+        {
+                if(ch < 10)
+                {
+                        scancmd[0] = (ch + '0');
+                        scancmd[1] = 'A';
+                        scancmd[2] = 0x0D;
+                        scancmd[3] = 0x0A;
+                        prints(scancmd,4,PORT_SCANNER);
+                        return;
+                }else{
+                        scancmd[0] = (u8)(ch / 10) + '0';
+                        ch = ch % 10;
+                        scancmd[1] = ch + '0';
+                        scancmd[2] = 'A'; scancmd[3] = 0x0D; scancmd[4] = 0x0A;
+                        prints(scancmd,5,PORT_SCANNER);
+                }
+        }
+        if(scanner_type == 2) //guidline
+        {
+                        scancmd[0] = 'A';
+                        scancmd[1] = (u8)(ch / 10) + '0';
+                        ch = ch % 10;
+                        scancmd[2] = ch + '0';
+                        scancmd[3] = 0x0D; scancmd[4] = 0x0A;
+                        prints(scancmd,5,PORT_SCANNER);
+        }
+        */
+}
+
+
+//incoming data handler of scanner
+void scanner_uart_push(uchar data)
+{
+}
+//incoming data hander of PC
+void pc_uart_push(uchar data)
+{
+}
+static uchar navcmd[12];
+#define NAV_INVALID     -1000
+#define NAV_VALID       -2000
+#define RESETNAV       navlen = 0;   reading = NAV_INVALID;
+
+void nav_command(uchar cmd)
+{
+        if(cmd == NAV_30V)
+               sprintf(navcmd,"%%01;12;02\r");
+        if(cmd == NAV_1V)
+               sprintf(navcmd,"%%01;12;01\r");
+        if(cmd == NAV_120MV)
+               sprintf(navcmd,"%%01;12;00\r");
+        if(cmd == NAV_AFLTOFF)
+               sprintf(navcmd,"%%01;26\r");
+        if(cmd == NAV_AFLTON)
+               sprintf(navcmd,"%%01;27\r");
+        if(cmd == NAV_SLOWMODE)
+               sprintf(navcmd,"%%01;27\r");
+        if(cmd == NAV_ZEROON)
+        {
+               sprintf(navcmd,"%%01;06\r");
+        }
+        if(cmd == NAV_INIT)
+        {
+                RESETNAV;
+                sprintf(navcmd,"%%01;00\r");
+        }
+        if(cmd == NAV_READ)
+        {
+                RESETNAV;
+                sprintf(navcmd,"%%01;01\r");
+        }
+//                com1_putc('?');
+        mputs(navcmd,strlen(navcmd),PORT_NAV);
+}
+
+
+unsigned long navtime;
+double nav_read()
+{
+//        sleepms(10);
+//                return 1.0;
+        nav_command(NAV_READ);
+        navtime = 0;
+        while(1)
+        {
+                if(reading < NAV_INVALID) //make sure it is a valid reading
+                {
+                     reading = atof(navread2);//buf2double(navread2);//
+                     return reading;
+                }
+                if(navtime++ > 655350)
+                {
+                     nav_command(NAV_READ);
+                     navtime = 0;
+                }
+                sleepms(1);
+        }
+        return 1.0;
+}
+//incoming data hander of navameter
+void nav_uart_push(uchar data)
+{
+        if(navlen >= 19)
+        {
+                RESETNAV;
+        }
+        if(((data >= '0') && (data <= '9')) ||
+                (data == '.') ||
+                (data == '-') ||
+                (data == '+') ||
+                (data == 'e') ||
+                (data == 'E') )
+        {
+                navread[navlen++] = data;
+                reading = NAV_INVALID;
+                return;
+        }
+
+        if(navlen < 4) //not enough digits
+        {
+                RESETNAV;
+                return;
+        }
+        navread[navlen] = '\0';
+        do
+        {
+                navread2[navlen] = navread[navlen];
+        }while(navlen-- > 0);
+        navlen = 0;
+        reading =  NAV_VALID; //valid data
+}

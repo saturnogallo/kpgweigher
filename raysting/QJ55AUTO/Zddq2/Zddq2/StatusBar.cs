@@ -27,7 +27,7 @@ namespace Zddq2
         }
         [DllImport("coredll")]
         public static extern bool SetLocalTime(ref SystemTime sysTime); //设置本地时
-        
+
         public event EventHandler MenuClick;
         public event EventHandler PauseResumeClick;
         public event EventHandler StartStopClick;
@@ -210,7 +210,7 @@ namespace Zddq2
         }
         void uiTimer_Tick(object sender, EventArgs e)
         {
-            lbl_datetime.Text = DateTime.Now.ToShortTimeString();
+            lbl_datetime.Text = DateTime.Now.ToString("HH:mm");
         }
     }
 }

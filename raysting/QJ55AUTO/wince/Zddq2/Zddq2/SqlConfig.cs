@@ -41,17 +41,25 @@ namespace Zddq2
             N = Convert.ToInt32(Math.Floor(0.5+ rRx * INIT_LOOP / rRs));
             if (N < 1)    N = 1;
             if (N > MAX_LOOP) N = MAX_LOOP;
-            return N - iK;
+            return N;
         }
         //Get a new K value in tracking mode                     
         //else use the weight algorithm
-        public int calc_track_nextk()
+        public int calc_track_nextk(int iRange)
         {
-            int N;
-            int sum;
             double dK = (double)iK / (double)INIT_LOOP;
-            rRx = (dK * (rRs + ((vCrossP - vCrossN) / (2.0 * Math.Abs(iSrc)))));
+            rRx = dK * (rRs * RunWnd.syscfg.GetScaleAdjust(iRange)*(1e-6) + rRs + ((vCrossP - vCrossN) / (2.0 * (double)dK * Math.Abs(iSrc))));// todo add the variance
+
             return calc_capture_nextk();
+        }
+        public void log_start(int iRange)
+        {
+            DeviceMgr.SysLog(String.Format("iK={0},Scale={1},vP={2},vN={3},Curr={4},Rx={5}", iK.ToString(),
+                Util.FormatData(RunWnd.syscfg.GetScaleAdjust(iRange), 8),
+                Util.FormatData(vCrossP, 8),
+                Util.FormatData(vCrossN, 8),
+                Util.FormatData(iSrc, 8),
+                Util.FormatData(rRx, 8)));
         }
     }
     public class RxInfo : IComparable
@@ -93,8 +101,21 @@ namespace Zddq2
         }
         public double dRxInput  //target rx value
         {
-            get;
-            set;
+            get
+            {
+                try
+                {
+                    return (double)this["dRxInput"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dRxInput"] = value;
+            }
         }
         public RxInfo(int id)
         {
@@ -256,6 +277,17 @@ namespace Zddq2
         {
             config = new SqlConfig("RsInfo", id.ToString());
         }
+        public int iRRange
+        {
+            get
+            {
+                return (int)this["iRRange"];
+            }
+            set
+            {
+                this["iRRange"] = value;
+            }
+        }
         public double dTValue
         {
             get
@@ -267,44 +299,44 @@ namespace Zddq2
         {
             get
             {
-                return (double)this["dValue"];
+                return (double)this["dValue"+iRRange.ToString()];
             }
             set
             {
-                this["dValue"] = value;
+                this["dValue" + iRRange.ToString()] = value;
             }
         }
         public double dAlpha
         {
             get
             {
-                return (double)this["dAlpha"];
+                return (double)this["dAlpha" + iRRange.ToString()];
             }
             set
             {
-                this["dAlpha"] = value;
+                this["dAlpha" + iRRange.ToString()] = value;
             }
         }
         public double dBeta
         {
             get
             {
-                return (double)this["dBeta"];
+                return (double)this["dBeta" + iRRange.ToString()];
             }
             set
             {
-                this["dBeta"] = value;
+                this["dBeta" + iRRange.ToString()] = value;
             }
         }
         public string sSerial
         {
             get
             {
-                return (string)this["sSerial"];
+                return (string)this["sSerial" + iRRange.ToString()];
             }
             set
             {
-                this["sSerial"] = value;
+                this["sSerial" + iRRange.ToString()] = value;
             }
         }
 
@@ -444,80 +476,189 @@ namespace Zddq2
             }
             set
             {
-                this["iFilter"] = value;
+                if(value >= 1)
+                    this["iFilter"] = value;
             }
         }
-        public double d1Kcurr
+        public double GetCurrent(int iIx, bool bsqrt)
         {
-            get
+            double val= 0;
+            if (iIx == 5)
             {
-                double val = 0;
-                try
-                {
-
-                    val = double.Parse(this["d1Kcurr"].ToString());
-                }
-                catch
-                {
-
-                }
-                if (val < 1e-6)
-                    val = 1e-5;
-
+                if(!bsqrt)
+                    val = (double)this["d5A"];
+                else
+                    val = (double)this["d10A"];
+            }
+            if (iIx == 4)
+            {
+                if (!bsqrt)
+                    val = (double)this["d1A"];
+                else
+                    val = (double)this["d2A"];
+            }
+            if (iIx == 3)
+            {
+                if (!bsqrt)
+                    val = (double)this["d300mA"];
+                else
+                    val = (double)this["d600mA"];
+            }
+            if (iIx == 2)
+            {
+                if (!bsqrt)
+                    val = (double)this["d100mA"];
+                else
+                    val = (double)this["d200mA"];
+            }
+            if (iIx == 1)
+            {
+                if (!bsqrt)
+                    val = (double)this["d10mA"];
+                else
+                    val = (double)this["d20mA"];
+            }
+            if (iIx == 0)
+            {
+                if (!bsqrt)
+                    val = (double)this["d1mA"];
+                else
+                    val = (double)this["d2mA"];
+            }
+            if (iIx == -1)
+            {
+                if (!bsqrt)
+                    val = (double)this["dP1mA"];
+                else
+                    val = (double)this["dP2mA"];
+            }
+            double stdcurr = GetStdCurrent(iIx, bsqrt);
+            if (Math.Abs(stdcurr - val) > stdcurr * 0.1) //too big variance
+                return stdcurr;
+            else
                 return val;
-            }
-            set
+        }
+        public double GetStdCurrent(int iIx, bool bsqrt)
+        {
+            if (iIx == 5)
             {
-                this["d1Kcurr"] = value;
+                if (!bsqrt)
+                    return 5;
+                else
+                    return 10;
             }
+            if (iIx == 4)
+            {
+                if (!bsqrt)
+                    return 1;
+                else
+                    return 2;
+            }
+            if (iIx == 3)
+            {
+                if (!bsqrt)
+                    return 0.3;
+                else
+                    return 0.6;
+            }
+            if (iIx == 2)
+            {
+                if (!bsqrt)
+                    return 0.1;
+                else
+                    return 0.2;
+            }
+            if (iIx == 1)
+            {
+                if (!bsqrt)
+                    return 0.01;
+                else
+                    return 0.02;
+            }
+            if (iIx == 0)
+            {
+                if (!bsqrt)
+                    return 0.001;
+                else
+                    return 0.002;
+            }
+            if (iIx == -1)
+            {
+                if (!bsqrt)
+                    return 0.0001;
+                else
+                    return 0.0002;
+            }
+            return 100;
         }
 
-        public double d10Kcurr
+        public void SetCurrent(int iIx, bool bsqrt, double val)
         {
-            get
+            if (iIx == 5)
             {
-                double val = 0;
-                try
-                {
-
-                    val = double.Parse(this["d10Kcurr"].ToString());
-                }
-                catch
-                {
-
-                }
-                if (val < 1e-6)
-                    val = 1e-5;
-                return val;
+                if (!bsqrt)
+                    this["d5A"] = Math.Abs(val);
+                else
+                    this["d10A"] = Math.Abs(val);
             }
-            set
+            if (iIx == 4)
             {
-                this["d10Kcurr"] = value;
+                if (!bsqrt)
+                    this["d1A"] = Math.Abs(val);
+                else
+                    this["d2A"] = Math.Abs(val);
+            }
+            if (iIx == 3)
+            {
+                if (!bsqrt)
+                    this["d300mA"] = Math.Abs(val);
+                else
+                    this["d600mA"] = Math.Abs(val);
+            } 
+            if (iIx == 2)
+            {
+                if (!bsqrt)
+                    this["d100mA"] = Math.Abs(val);
+                else
+                    this["d200mA"] = Math.Abs(val);
+            }
+            if (iIx == 1)
+            {
+                if (!bsqrt)
+                    this["d10mA"] = Math.Abs(val);
+                else
+                    this["d20mA"] = Math.Abs(val);
+            }
+            if (iIx == 0)
+            {
+                if (!bsqrt)
+                    this["d1mA"] = Math.Abs(val);
+                else
+                    this["d2mA"] = Math.Abs(val);
+            }
+            if (iIx == -1)
+            {
+                if (!bsqrt)
+                    this["dP1mA"] = Math.Abs(val);
+                else
+                    this["dP2mA"] = Math.Abs(val);
             }
         }
-        public double d100Kcurr
+       
+        public double GetScaleAdjust(int iRRange)
         {
-            get
+            try
             {
-                double val = 0;
-                try
-                {
-
-                    val = double.Parse(this["d100Kcurr"].ToString());
-                }
-                catch
-                {
-
-                }
-                if (val < 1e-6)
-                    val = 1e-5;
-
-                return val;
+                return (double)this["dAdjust" + iRRange.ToString()];
             }
-            set
+            catch
             {
-                this["d100Kcurr"] = value;
+                return 0;
             }
+        }
+        public void SetScaleAdjust(int iRRange, double val)
+        {
+            this["dAdjust" + iRRange.ToString()] = val;
         }
         public double dTemp
         {
@@ -643,7 +784,7 @@ namespace Zddq2
         private string sql_grp;
         static void SetConnection()
         {
-            sql_con = new SQLiteConnection("Data Source="+StringResource.baseDir+"Config.db;Version=3;New=False;Compress=True;");
+            sql_con = new SQLiteConnection("Data Source=" + StringResource.basedir + "\\Config.db;Version=3;New=False;Compress=True;");
         }
         private Dictionary<string, string> curr_conf; //store all the configuration string
         public SqlConfig(string sql_tbl,string group)
@@ -736,7 +877,7 @@ namespace Zddq2
                 if (id.StartsWith("d")) //double
                 {
                     if (val == "")
-                        return 0;
+                        return 0.0;
                     else
                         return Convert.ToDouble(val);
                 }
@@ -760,9 +901,11 @@ namespace Zddq2
 
     internal class StringResource
     {
+        public static string udiskdir = "\\Hard Disk";
+        public static string basedir = "\\NandFlash\\TSioex";
         private static Dictionary<string, string> str_tbl;
         static public string language;
-        public static string baseDir = "\\NANDFlash\\TSioex\\";
+
         static public void SetLanguage(string lang)
         {
             language = lang;
@@ -780,9 +923,9 @@ namespace Zddq2
         static StringResource()
         {
             str_tbl = new Dictionary<string, string>();
-            if (!File.Exists(baseDir + "\\history.log"))
-                File.Create(baseDir + "\\history.log").Close();
-            FileStream fsLog = new FileStream(baseDir + "\\history.log", FileMode.Truncate, FileAccess.Write, FileShare.Read);
+            if (!File.Exists(StringResource.basedir + "\\history.log"))
+                File.Create(StringResource.basedir + "\\history.log").Close();
+            FileStream fsLog = new FileStream(StringResource.basedir + "\\history.log", FileMode.Truncate, FileAccess.Write, FileShare.Read);
             fsLog.Close();
             SetLanguage("zh-CN");
 

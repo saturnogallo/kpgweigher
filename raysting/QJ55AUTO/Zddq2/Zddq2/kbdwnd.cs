@@ -106,7 +106,7 @@ namespace Zddq2
         }
         private void addchar(char c)
         {
-            if (data.Length >= 10)
+            if (data.Length >= 15)
                 return;
             if (c >= '0' && c <= '9')
             {

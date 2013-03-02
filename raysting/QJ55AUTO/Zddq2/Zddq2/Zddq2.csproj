@@ -52,12 +52,25 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionMgr.cs" />
+    <Compile Include="ChoiceWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChoiceWnd.Designer.cs">
+      <DependentUpon>ChoiceWnd.cs</DependentUpon>
+    </Compile>
     <Compile Include="DeviceMgr.cs" />
     <Compile Include="GraphPane.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="GraphPane.Designer.cs">
       <DependentUpon>GraphPane.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MsgDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MsgDlg.designer.cs">
+      <DependentUpon>MsgDlg.cs</DependentUpon>
     </Compile>
     <Compile Include="RunWnd.cs">
       <SubType>Form</SubType>
@@ -166,12 +179,20 @@
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ChoiceWnd.resx">
+      <DependentUpon>ChoiceWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <EmbeddedResource Include="GraphPane.resx">
       <DependentUpon>GraphPane.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="kbdWnd.resx">
       <DependentUpon>kbdwnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MsgDlg.resx">
+      <DependentUpon>MsgDlg.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Resource\zh-CN.xml" />

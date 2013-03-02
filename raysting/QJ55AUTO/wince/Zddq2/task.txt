@@ -1,3 +1,6 @@
++Î¢Á¿²ÎÊý
++log data using folder,
++automatic upgrade
 1.Hide mouse //text
 2.menu text //done
 3.thread for task machine //partially done

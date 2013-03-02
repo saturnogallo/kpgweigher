@@ -33,7 +33,7 @@
 #ifndef NULL
 #define NULL      0
 #endif
-
+#define DEBUG     0
 /*****************************************************************************************/
 //  Define MCU register bits
 /*****************************************************************************************/
@@ -75,7 +75,7 @@ void sleeps(u16);
 #define LED_OFF(x)        x = 1
 #define LED_FLASH(x)      x = ~x
                                     
-
+void digi_print(u8 *str,uchar startpos, uchar size);
 
 
 

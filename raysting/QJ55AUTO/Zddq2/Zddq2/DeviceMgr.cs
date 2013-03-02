@@ -69,268 +69,92 @@ namespace Zddq2
         }
 
     }
+
+    public enum ACTION_STATE
+    {
+        IDLE,
+        INIT_FOR_START,
+        INIT_FOR_SEARCH,
+        INIT_FOR_RS_KTTP,
+        INIT_FOR_RS_KTTN,
+        COMPLETE_ISRC,
+        INIT_FOR_TRACKP,
+        INIT_FOR_TRACKN,
+        UPDATE_K_TRACK,
+        SHOW_NEW_VALUE,
+        COMPLETE,
+        INIT_FOR_SAFE
+    }
+    public enum ACTION_REQUEST
+    {
+        INIT_NAV_RANGE, //set initial navmeter range\
+        INITKI_FOR_SEARCH, //set up current and K status for search
+        SET_FOR_RS_KTTP,
+        SET_FOR_RS_KTTN,
+        SET_FOR_RX_KTTP,
+        SET_FOR_RX_KTTN,
+        SET_FOR_TRACKP,
+        SET_FOR_TRACKN,
+        SET_NEXT_K,
+        SET_SAFE_STATE,
+    }
     public class TaskMachine
     {
-        
-        //public RUN_STATE state = RUN_STATE.IDLE;
         public RxInfo currRx;
-        //private List<RxInfo> rx_Lists no use now , can use 1..24 for compare
-        public bool bRunning = false;
         public bool bPaused = false;
+        public ActionMgr act_mgr;
+        private DataMgr data_mgr;
         public TaskMachine()
         {
-            datafilter = new List<double>();
-            valfilter = new List<double>();
+            act_mgr = new ActionMgr();
+            data_mgr = new DataMgr();
         }
-        private int curr_ch = 0;
-        public int stm = 0;
-        private int delay = 0;
-        public StrEventHandler StatusChanged;
-        private const int sec_cnt = 4;
+        public int iMeasCnt
+        {
+            get
+            {
+                return data_mgr.iMeasCnt;
+            }
+        }
         public int waiting
         {
             get
             {
-                return (delay+1) / sec_cnt;
+                return act_mgr.waiting;
             }
         }
-        //compose string of curr, sqr std, constv
+        private int curr_ch = 0;
+        public ACTION_STATE stm = ACTION_STATE.IDLE;
 
-        private string ComposeAction()
-        {
-            string ret = "";
-            switch(currRx.iIx)
-            {
-                case -1: ret = ret + "CURR_P0001"; break; //0.1mA
-                case 0: ret = ret + "CURR_P001"; break; //1mA
-                case 1: ret = ret + "CURR_P01"; break; //10mA
-                case 2: ret = ret + "CURR_P1"; break; //0.1A
-                case 3: ret = ret + "CURR_P3"; break; //0.3A
-                case 4: ret = ret + "CURR_1"; break; //1A
-                case 5: ret = ret + "CURR_5"; break; //5A
-                
+        public StrEventHandler StatusChanged;
+
+        public bool bRunning {
+            get {
+                return stm != ACTION_STATE.IDLE;
             }
-            ret = ret + "|";
-            if(currRx.bSqrt)
-                ret = ret + "X2|";
-            else
-                ret = ret + "X1|";
-                
-                if (currRx.iIx == 3) //0.3A
-                    ret = ret + "STD_P1|VMODE_3V";
-                else if (currRx.iIx == 4) //1A
-                    ret = ret + "STD_P01|VMODE_3V";
-                else if (currRx.iIx == 5) //5A
-                    ret = ret + "STD_P001|VMODE_3V";
-                else
-                    ret = ret + "STD_1|VMODE_3V";
-
-            return ret;
-        }
-        private bool bInReading = false;
-        private double dStableReading = -9999;
-        private List<double> datafilter;
-        private int dataCount;
-        private bool broughk; //variance  < 1/1k will be ok
-        private void StartCollectReading(bool roughk)
-        {
-            broughk = roughk;
-            bInReading = true;
-            dataCount = 0;
-            datafilter.Clear();
-        }
-        private List<double> valfilter;
-        private bool ValidNewValue(ref double val)
-        {
-            return true;
-            valfilter.Add(val);
-            if(valfilter.Count < RunWnd.syscfg.iFilter)
-                return false;
-            double avg = valfilter.Average();
-            double sqr = 0;
-            foreach (double v in valfilter)
+            set
             {
-                sqr = sqr + v * (v - avg);
-            }
-            double sqr3 = 2*Math.Sqrt(sqr / (valfilter.Count - 1));
-            if (sqr3 < 1e-7)
-                sqr3 = 1e-7;
-            int i = 0;
-            double ret = 0;
-            foreach(double v in valfilter)
-            {
-                if ((val > (avg - sqr3)) && (val < (avg + sqr3)))
-                {
-                    ret = ret + val;
-                    i = i+1;
-                    continue;
-                }
-            }
-            if (i <= 1)
-                return false;
-            val = ret / i;
-            return true;
-        }
-
-        private bool FoundWildData()
-        {
-            double avg = datafilter.Average();
-            double sqr = 0;
-            foreach (double v in datafilter)
-            {
-                 sqr = sqr + v * (v - avg);
-            }
-            double sqr3 = 2*Math.Sqrt(sqr / (datafilter.Count - 1));
-            if(sqr3 < 1e-8)
-                sqr3 = 1e-8;
-            int i = 0;
-            bool ret = false;
-            while(i < datafilter.Count)
-            {
-                if ((datafilter[i] < (avg - sqr3)) || (datafilter[i] > (avg + sqr3)))
-                {
-                    datafilter.RemoveAt(i);
-                    dataCount--;
-                    ret = true;
-                    continue;
-                }
-                i++;
-            }
-            return ret;
-        }
-        private bool IsReadingStable()
-        {
-            if (DeviceMgr.IsInAction())
-                return false;
-            if (dataCount <= 0)
-            {
-                DeviceMgr.Action("navread", 0);
-                dataCount = 1;
-                delay = sec_cnt / 4;
-                return false;
-            }
-            else
-            {
-                datafilter.Add(DeviceMgr.reading);
-                if (dataCount < RunWnd.syscfg.iSampleTimes)
-                {
-                    DeviceMgr.Action("navread", 0);
-                    delay = sec_cnt / 4;
-                    dataCount++;
-                    return false;
-                }
-                else
-                {
-
-                    if (broughk)
-                    {
-                        dStableReading = datafilter[datafilter.Count - 1];
-                        datafilter.Sort();
-                        if (Math.Abs(datafilter[datafilter.Count - 1] - datafilter[0]) < Math.Abs(datafilter.Average()) * 0.001)
-                            return true;
-
-                        dataCount = 0;
-                        datafilter.Clear();
-                        return false;
-                    }
-                    if (FoundWildData())
-                        return false;
-
-                    int cnt0 = 0;  //count for no change
-                    int cnt1 = 0;  //count for going up
-                    int cnt_1 = 0; //count for going down
-                    for (int i = 1; i < datafilter.Count; i++)
-                    {
-                        if (Math.Abs(datafilter[i] - datafilter[i - 1]) < 1e-12)
-                        {
-                            cnt0++;
-                        }
-                        else
-                        {
-                            if (datafilter[i] > datafilter[i - 1])
-                                cnt1++;
-                            else
-                                cnt_1++;
-                        }
-                    }
-                    if ((cnt0 > datafilter.Count * 0.6) || 
-                        ((Math.Abs(cnt1 - cnt_1) < datafilter.Count * 0.6) && (cnt_1>= 1) && (cnt1>= 1)) ||
-                        ((cnt0 > datafilter.Count * 0.3) && (cnt_1 >= 1) && (cnt1 >= 1)))
-                    {
-                        //60% no change or cnt1 and cnt_1 are almost equal
-                    }
-                    else
-                    {
-                        if (RunWnd.syscfg.sFilterType != "filtertype4")
-                        {
-                            dataCount = 0; //do collection again
-                            datafilter.Clear();
-                            return false;
-                        }
-                       
-                    }
-                    
-                    //full data acquired
-                    int win_start = 0;
-                    int win_end = datafilter.Count - 1;
-                    int avg_cnt = datafilter.Count / 4;
-                    if (avg_cnt < 3)
-                        avg_cnt = 3;
-                    string type = RunWnd.syscfg.sFilterType;
-                    if ( type == "filtertype4") //always 10 group
-                    {
-                        datafilter.RemoveRange(0, datafilter.Count - 40);
-                        type = "filtertype1";
-                    }
-
-                    if (type == "filtertype1") //中位数平均值
-                    {
-                        datafilter.Sort();
-                        win_start = (datafilter.Count - avg_cnt) / 2;
-                        win_end = (datafilter.Count + avg_cnt) / 2;
-                        dStableReading = 0;
-                        for (int i = win_start; i <= win_end; i++)
-                        {
-                            dStableReading += datafilter[i];
-                        }
-                        dStableReading = dStableReading / (win_end - win_start + 1);
-                        bInReading = false;
-                    }
-                    if (type == "filtertype2") //average of final data
-                    {
-                        win_start = (datafilter.Count - avg_cnt);
-                        win_end = datafilter.Count - 1;
-                    }
-                    if (type == "filtertype3") //average after filter
-                    {
-                        for (int i = 1; i < (datafilter.Count-1); i++)
-                        {
-                            datafilter[i] = (2 * datafilter[i] + datafilter[i - 1] + datafilter[i + 1]) / 4;
-                        }
-                        win_start = 0;
-                        win_end = datafilter.Count - 1;
-                    }
-                    dStableReading = 0;
-                    for (int i = win_start; i <= win_end; i++)
-                    {
-                        dStableReading += datafilter[i];
-                    }
-                    dStableReading = dStableReading / (win_end - win_start + 1);
-                    datafilter.Clear();
-                    dataCount = 0;
-                    bInReading = false;
-                    return true;
-                }
+                if (stm == ACTION_STATE.IDLE && value)
+                    stm = ACTION_STATE.INIT_FOR_START;
+                if (!value)
+                    stm = ACTION_STATE.IDLE;
             }
         }
-        public int iMeasCnt;
         public void Start()
         {
             if (!bRunning)
             {
-                stm = 0;
-                iMeasCnt = 1;
-                InitStep();
+                curr_ch = 0;
+                currRx = Program.lst_rxinfo[curr_ch];
+                currRx.var.rRs = Program.lst_rsinfo[0].dTValue;
+
+                act_mgr.Reset();
+                act_mgr.rx = currRx;
+                act_mgr.rs = Program.lst_rsinfo[0];
+                data_mgr.Reset();
+                data_mgr.rx = currRx;
+                data_mgr.rs = Program.lst_rsinfo[0];
+                DeviceMgr.ReportHeader(RunWnd.syscfg.iMeasTimes);
                 bRunning = true;
             }
         }
@@ -341,434 +165,196 @@ namespace Zddq2
                 bPaused = !bPaused;
             }
         }
-        public void InitStep()
-        {
-            curr_ch = 0;
-            currRx = Program.lst_rxinfo[curr_ch];
-            valfilter.Clear();
-            datafilter.Clear();
-            currRx.var.rRs = Program.lst_rsinfo[currRx.iStdChan - 1].dTValue;
-        }
-        bool is1V = true;
+        public bool is1V = true;
         public void Step()
         {
+            if (DeviceMgr.IsInAction()) //communication action is going on
+                return;
 
-            if (DeviceMgr.IsInAction())
-                return;
-            if(delay > 0)
-            {
-                delay--;
-                return;
-            }
-            if (currRx.i_State == RUN_STATE.STOPPING)
+            if (currRx.i_State == RUN_STATE.STOPPING)   //user choose to stop
             {
                 DeviceMgr.Reset();
+                act_mgr.Reset();
                 bPaused = false;
-                bInReading = false;
-                currRx.i_State = RUN_STATE.IDLE;
                 bRunning = false;
+                currRx.i_State = RUN_STATE.IDLE;
             }
-            if (bPaused)
-            {
+            if (bPaused || !bRunning || act_mgr.IsBusy)
                 return;
-            }
-            if (bInReading)
-            {
-                if (!IsReadingStable())
-                    return;
-            }
-            if (!bRunning)
-                return;
-            
-            if (stm == 0)//search the next valid channel
-            {
-                curr_ch = 0;
-                currRx = Program.lst_rxinfo[curr_ch];
-                
-                currRx.var.rRs = Program.lst_rsinfo[currRx.iStdChan - 1].dTValue;
-                stm = 5;
-            }
 
 
-            if (stm == 5) //set nav range to 1v
+            if (stm == ACTION_STATE.INIT_FOR_START)//search the next valid channel
             {
                 currRx.i_State = RUN_STATE.SEARCHING;
                 StatusChanged(this, "search");
-                DeviceMgr.Action("navto1v", 0);
-                is1V = true;
-                stm = 10;
+                stm = act_mgr.Do(ACTION_REQUEST.INIT_NAV_RANGE,stm);
                 return;
             }
-            if (stm == 10)//prepare the capture with 1:1 mode
+            if (stm == ACTION_STATE.INIT_FOR_SEARCH) //prepare the capture with 1:1 mode
+            {
+                currRx.i_State = RUN_STATE.SEARCHING;
+                StatusChanged(this, "search");
+                stm = act_mgr.Do(ACTION_REQUEST.INITKI_FOR_SEARCH,stm);
+                return;
+            }
+            if (stm == ACTION_STATE.INIT_FOR_RS_KTTP) //capture once //set to KTTP mode and delay 1s
+            {
+                currRx.i_State = RUN_STATE.SEARCHING;
+                StatusChanged(this, "search");
+                stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_RS_KTTP, stm);
+                return;
+            }
+            if (stm == ACTION_STATE.INIT_FOR_RS_KTTN) 
             {
                 currRx.i_State = RUN_STATE.SEARCHING;
                 StatusChanged(this, "search");
 
-                if(currRx.iVMode == 0)
+                double val = act_mgr.dStableReading;
+                if (val < -999)
                 {
-                    if (currRx.iIx == 3) //0.3A
-                    {
-                        currRx.var.iK = 100;
-                    }
-                    if (currRx.iIx == 4) //1A
-                    {
-                        currRx.var.iK = 10;
-                    }
-                    if (currRx.iIx == 5) //5A
-                    {
-                        currRx.var.iK = 1;
-                    }
-                    delay = 0;
-                    stm = 20;
+                    currRx.i_State = RUN_STATE.STOPPING;
+                    StatusChanged(this, "stopping");
+                    return;
+                } 
+                currRx.var.vRs = val;
+                stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_RS_KTTN, stm);
+                return;
+            }
+            if (stm == ACTION_STATE.COMPLETE_ISRC) //capture once //set to KTTP mode 
+            {
+                currRx.i_State = RUN_STATE.SEARCHING;
+                StatusChanged(this, "search");
+                double val = act_mgr.dStableReading;
+                if (val < -999)
+                {
+                    currRx.i_State = RUN_STATE.STOPPING;
+                    StatusChanged(this, "stopping");
                     return;
                 }
-                else if (currRx.iVMode == 1)
+                currRx.var.vRs = Math.Abs(currRx.var.vRs - val) / 2.0;
+                currRx.var.iSrc = currRx.var.vRs / currRx.var.rRs;
+                currRx.var.iSrc = currRx.var.iSrc * RX_VAR.INIT_LOOP / (double)currRx.var.iK;
+                stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_TRACKP, stm);
+                return;
+            }
+            #region  no use 
+            /*
+            if (stm == ACTION_STATE.INIT_FOR_RX_KTTP) //capture once //set to KTTP mode 
+            {
+                currRx.i_State = RUN_STATE.SEARCHING;
+                StatusChanged(this, "search");
+                double val = act_mgr.dStableReading;
+                if (val < -999)
                 {
-                    DeviceMgr.Action("turnk", Convert.ToUInt32(RX_VAR.INIT_LOOP)); //1:1 mode
-                    currRx.var.iK = RX_VAR.INIT_LOOP;
-                    delay = 0;
-                    stm = 20;
-                    return;
-                }else if((currRx.iRRange == 6) && (!currRx.bSqrt)) //1K ohm, no x2 current
-                {
-                    DeviceMgr.Action("turnk", Convert.ToUInt32(RX_VAR.INIT_LOOP)); //1:1 mode
-                    currRx.var.iK = RX_VAR.INIT_LOOP;
-                    delay = 0;
-                    stm = 20;
-                    return;
-                }
-                else if (currRx.iVMode == 2 || currRx.iVMode == 3) //10k high mode
-                {
-                    DeviceMgr.Action("turnk", Convert.ToUInt32(RX_VAR.INIT_LOOP)); //1:1 mode
-                    currRx.var.iK = RX_VAR.INIT_LOOP;
-                    currRx.var.rRx = currRx.var.rRs;
-                    if(currRx.iRRange == 6)
-                        currRx.var.iSrc = RunWnd.syscfg.d1Kcurr; //10mA
-                    else if (currRx.iRRange == 7)
-                        currRx.var.iSrc = RunWnd.syscfg.d10Kcurr; //1mA
-                    else
-                        currRx.var.iSrc = RunWnd.syscfg.d100Kcurr; //0.1mA
-                    if (currRx.bSqrt)
-                        currRx.var.iSrc = currRx.var.iSrc * 2;
-                    stm = 45; //prepare tracking
+                    currRx.i_State = RUN_STATE.STOPPING;
+                    StatusChanged(this, "stopping");
                     return;
                 }
 
-                currRx.i_State = RUN_STATE.STOPPING;
-                stm = 0;
+                currRx.var.vRs = Math.Abs(currRx.var.vRs - val) / 2.0;
+                currRx.var.iSrc = currRx.var.vRs / currRx.var.rRs;
+                stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_RX_KTTP, stm);
                 return;
             }
-            if (stm == 20) //capture once //set to KTTP mode and delay 1s
+            if (stm == ACTION_STATE.INIT_FOR_RX_KTTN)
             {
                 currRx.i_State = RUN_STATE.SEARCHING;
                 StatusChanged(this, "search");
-
-                DeviceMgr.Action("MEAS_RS|KTTP|" + ComposeAction(),0);
-                delay = 5*sec_cnt; //1s delay
-                stm = 25;
-                return;
-            }
-            if (stm == 25) //get vrs reading
-            {
-                currRx.i_State = RUN_STATE.READING;
-                StatusChanged(this, "search");
-
-                StartCollectReading(true);
-                stm = 27;
-                return;
-            }
-            if (stm == 27) 
-            {
-                currRx.i_State = RUN_STATE.SEARCHING;
-                StatusChanged(this, "search");
-                currRx.var.vRs = dStableReading;
-                DeviceMgr.Action("MEAS_RS|KTTN|" + ComposeAction(), 0);
-                delay = 5 * sec_cnt; //1s delay
-                stm = 28;
-                return;
-            }
-            if (stm == 28) //get vrs reading
-            {
-                currRx.i_State = RUN_STATE.READING;
-                StatusChanged(this, "reading");
-
-                StartCollectReading(true);
-                stm = 30;
-                return;
-            }
-            if (stm == 30)
-            {
-                currRx.i_State = RUN_STATE.SEARCHING;
-                StatusChanged(this, "search");
-
-                if(currRx.var.vRs < 0)
-                    currRx.var.vRs = (currRx.var.vRs - dStableReading) / 2;
-                else
-                    currRx.var.vRs = (currRx.var.vRs - dStableReading) / 2;
-                if (Math.Abs(currRx.var.vRs) > 2)
+                double val = act_mgr.dStableReading;
+                if (val < -999)
                 {
-                    currRx.var.rRx = -9999;
-                    currRx.var.errMsg = StringResource.str("big_rs_volt");
-                    stm = 1000;
+                    currRx.i_State = RUN_STATE.STOPPING;
+                    StatusChanged(this, "stopping");
                     return;
                 }
-                if (currRx.var.rRs < 1e-6)
-                    currRx.var.rRs = 1;
-                currRx.var.iSrc = Math.Abs(currRx.var.vRs / currRx.var.rRs);
-                if (currRx.var.iSrc < 1e-4) //too small current
-                    currRx.var.iSrc = 1e-3; //1mA
-                
-                if (currRx.iVMode == 0)
+                currRx.var.vRx = val;
+                stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_RX_KTTN, stm);
+                return;
+            }
+            if (stm == ACTION_STATE.INIT_K_ADJUST) //adjust K
+            {
+                double val = act_mgr.dStableReading;
+                if (val < -999)
                 {
-                    currRx.var.rRx = currRx.var.rRs;
-                    stm = 45;
-                        return;
-                }
-                DeviceMgr.Action("MEAS_RX|KTTP|" + ComposeAction(), 0);
-                delay = 5*sec_cnt; //1s delay
-                stm = 35;
-                return;
-            }
-
-            if (stm == 35) //get -rx reading
-            {
-                currRx.i_State = RUN_STATE.READING;
-                StatusChanged(this, "reading");
-
-                StartCollectReading(true);
-                stm = 37;
-                return;
-            }
-
-            if (stm == 37) 
-            {
-                currRx.i_State = RUN_STATE.SEARCHING;
-                StatusChanged(this, "search");
-                currRx.var.vRx = Math.Abs(dStableReading);
-                DeviceMgr.Action("MEAS_RX|KTTN|" + ComposeAction(), 0);
-                delay = 5 * sec_cnt; //1s delay
-                stm = 38;
-                return;
-            }
-            if (stm == 38) ////get -vrx reading
-            {
-                currRx.i_State = RUN_STATE.READING;
-                StatusChanged(this, "reading");
-                StartCollectReading(true);
-                stm = 40;
-                return;
-            }
-
-            if (stm == 40) //update k
-            {
-                currRx.i_State = RUN_STATE.SEARCHING;
-                StatusChanged(this, "search");
-
-                currRx.var.vRx = (currRx.var.vRx+Math.Abs(dStableReading))/2;
-
-                if (Math.Abs(currRx.var.vRx) > 2)
-                {
-                    currRx.var.rRx = -9999;
-                    currRx.var.errMsg = StringResource.str("big_rx_volt");
-                    stm = 1000;
+                    currRx.i_State = RUN_STATE.STOPPING;
+                    StatusChanged(this, "stopping");
                     return;
                 }
+
+                currRx.var.vRx = Math.Abs(currRx.var.vRx - val)/ 2;
                 currRx.var.rRx = currRx.var.vRx / currRx.var.iSrc;
-                if (currRx.iVMode == 1) //10V mode
-                {
-                    currRx.var.iK = currRx.var.iK + currRx.var.calc_capture_nextk();
-                    DeviceMgr.Action("turnk", Convert.ToUInt32(currRx.var.iK));
-                }
-                stm = 45;
+
+                currRx.var.iK = currRx.var.calc_capture_nextk();
+                DeviceMgr.Action("turnk", Convert.ToUInt32(currRx.var.iK));
+                stm = ACTION_STATE.INIT_FOR_TRACKP;
+            }
+*/
+            #endregion
+            if (stm == ACTION_STATE.INIT_FOR_TRACKP) //capture once //set to KTTP mode 
+            {
+                currRx.i_State = RUN_STATE.TRACKING;
+                StatusChanged(this, "tracking");
+                
+                stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_TRACKP, stm);
                 return;
             }
-            if (stm == 45) //prepare track
+            if (stm == ACTION_STATE.INIT_FOR_TRACKN)
+            {
+                currRx.i_State = RUN_STATE.TRACKING;
+                StatusChanged(this, "tracking");
+                double val = act_mgr.dStableReading;
+                if (val < -999)
+                {
+                    currRx.i_State = RUN_STATE.STOPPING;
+                    StatusChanged(this, "stopping");
+                    return;
+                }
+                currRx.var.vCrossP = val;
+                stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_TRACKN, stm);
+                return;
+            }
+            if (stm == ACTION_STATE.UPDATE_K_TRACK)
             {
                 currRx.i_State = RUN_STATE.TRACKING;
                 StatusChanged(this, "tracking");
 
-                DeviceMgr.Action("MEAS_DELTA|KTTP|" + ComposeAction(), 0);
-                delay = 2*sec_cnt; //1s
-                stm = 50;
+                double val = act_mgr.dStableReading;
+                if (val < -999)
+                {
+                    currRx.i_State = RUN_STATE.STOPPING;
+                    StatusChanged(this, "stopping");
+                    return;
+                }
+                currRx.var.vCrossN = val;
+                               
+                stm = act_mgr.Do(ACTION_REQUEST.SET_NEXT_K,stm);
+                if (stm == ACTION_STATE.SHOW_NEW_VALUE)
+                    currRx.var.log_start(currRx.iRRange);
                 return;
             }
-            if (stm == 50) //switch nav to 120mV
+            if (stm == ACTION_STATE.SHOW_NEW_VALUE)
             {
-                currRx.i_State = RUN_STATE.TRACKING;
-                StatusChanged(this, "tracking");
-                if (currRx.iRRange == 8) //100K
+                if (data_mgr.AddNewValue(ref currRx.var.rRx))
                 {
-                    stm = 60;
+                     StatusChanged(this, "newvalue");
                 }
+                if (data_mgr.iMeasCnt == RunWnd.syscfg.iMeasTimes)
+                    stm = ACTION_STATE.COMPLETE;
                 else
-                {
-                    DeviceMgr.Action("navto120mv", 0);
-                    is1V = false;
-                    delay = 2 * sec_cnt;
-                    stm = 60;
-                    return;
-                }
-            }
-            if (stm == 60)  //track once
-            {
-                currRx.i_State = RUN_STATE.TRACKING;
-                StatusChanged(this, "tracking");
-
-                DeviceMgr.Action("MEAS_DELTA|KTTP|" + ComposeAction(), 0);
-
-                if (RunWnd.syscfg.iKTT > 0)
-                {
-                    delay = RunWnd.syscfg.iKTT * sec_cnt; //0.5s
-                    stm = 65;
-                }
-                else
-                {
-                    stm = 75;
-                }
+                    stm = ACTION_STATE.INIT_FOR_TRACKP;
                 return;
             }
-            if (stm == 65) //get vcrossp reading
-            {
-                currRx.i_State = RUN_STATE.READING;
-                StatusChanged(this, "tracking");
-
-                StartCollectReading(false);
-                stm = 70;
-                return;
-            }
-            if (stm == 70) //get vcrossp and turn kttn
-            {
-                currRx.i_State = RUN_STATE.TRACKING;
-                StatusChanged(this, "tracking");
-
-                if (!is1V && (RunWnd.syscfg.sNavmeter == "PZ2182" || RunWnd.syscfg.sNavmeter == "PZ158"))
-                    currRx.var.vCrossP = dStableReading / 1000;  //convert to V
-                else
-                    currRx.var.vCrossP = dStableReading;
-                if ((!is1V && Math.Abs(currRx.var.vCrossP) > 0.076) || Math.Abs(currRx.var.vCrossP) > 2) //76mV for maximum
-                {
-                    currRx.var.rRx = -9999;
-                    currRx.var.errMsg = StringResource.str("big_vcrossp_volt");
-                    stm = 1000;
-                    return;
-                }
-                DeviceMgr.Action("MEAS_DELTA|KTTN|" + ComposeAction(), 0);
-                delay = RunWnd.syscfg.iKTT * sec_cnt; 
-                stm = 75;
-                return;
-            }
-            if (stm == 75) //get vcrossn reading
-            {
-                currRx.i_State = RUN_STATE.READING;
-                StatusChanged(this, "tracking");
-
-                StartCollectReading(false);
-                stm = 80;
-                return;
-            }
-            if (stm == 80)
-            {
-                currRx.i_State = RUN_STATE.TRACKING;
-                StatusChanged(this, "tracking");
-                if (!is1V && (RunWnd.syscfg.sNavmeter == "PZ2182" || RunWnd.syscfg.sNavmeter == "PZ158"))
-                    currRx.var.vCrossN = dStableReading / 1000;
-                else
-                    currRx.var.vCrossN = dStableReading;
-                if ((!is1V && Math.Abs(currRx.var.vCrossN) > 0.076) || Math.Abs(currRx.var.vCrossN) > 2) //76mV for maximum
-                {
-                    currRx.var.rRx = -9999;
-                    currRx.var.errMsg = StringResource.str("big_vcrossn_volt");
-                    stm = 1000;
-                    return;
-                }
-                if (RunWnd.syscfg.iKTT <= 0)
-                {
-                    currRx.var.vCrossP = currRx.var.vCrossN;
-                    currRx.var.vCrossN = -currRx.var.vCrossN;
-                }
-                int newN;
-                if (currRx.iVMode == 0) //fix loop mode
-                {
-                    newN = currRx.var.calc_track_nextk();
-                    if (ValidNewValue(ref currRx.var.rRx))
-                        StatusChanged(this, "newvalue");
-                    else
-                        iMeasCnt--;
-                    delay = RunWnd.syscfg.iMeasDelay * sec_cnt;
-                    if (iMeasCnt == RunWnd.syscfg.iMeasTimes)
-                    {
-                        stm = 90;
-                    }
-                    else
-                    {
-                        stm = 60;
-                    }
-                    iMeasCnt++;
-                    return;
-                }
-                if (currRx.iVMode == 1 || currRx.iVMode == 2 || currRx.iVMode == 3) //Hi mode
-                {
-                    newN = currRx.var.calc_track_nextk();
-                    if (Math.Abs(newN) > 64) //too big changes
-                    {
-                        stm = 5; //redo capture
-                        return;
-                    }
-                    if (Math.Abs(newN) > 2)
-                    {
-                        if(newN > 0)
-                            currRx.var.iK = currRx.var.iK + (newN+1)/2;
-                        else
-                            currRx.var.iK = currRx.var.iK - (newN+1)/2;
-                        delay = 1 * sec_cnt;
-                    }
-                    stm = 60;
-                    if (newN > 2)
-                        DeviceMgr.Action("turnk", Convert.ToUInt32(currRx.var.iK));
-                if (newN <= 2)
-                    {
-                        if (ValidNewValue(ref currRx.var.rRx))
-                            StatusChanged(this, "newvalue");
-                        else
-                            iMeasCnt--;
-                        delay = RunWnd.syscfg.iMeasDelay * sec_cnt;
-                        if (iMeasCnt == RunWnd.syscfg.iMeasTimes)
-                        {
-                            stm = 90;
-                        }
-                        iMeasCnt++;
-                    }
-                    return;
-                }
-            }
-            if (stm == 90) //update the display and try the next channel
+          
+            if (stm == ACTION_STATE.COMPLETE) //update the display and try the next channel
             {
                 currRx.i_State = RUN_STATE.IDLE;
                 bRunning = false;
                 StatusChanged(this, "complete");
-                stm = 1100; //reset to status
-//                stm = 0; return;
-                
-            }
-            if (stm == 1000)
-            {
-                currRx.i_State = RUN_STATE.ERROR;
-                StatusChanged(this, "stopping");
-                stm = 1100;
-                return;
-            }
-            if (stm == 1100)
-            {
-                DeviceMgr.Action("navto1v",0);
-                is1V = true;
-                while (DeviceMgr.IsInAction())
-                    ;
-                currRx.var.iK = RX_VAR.INIT_LOOP;
+                act_mgr.Do(ACTION_REQUEST.INIT_NAV_RANGE,stm);
                 DeviceMgr.Reset();
                 while (DeviceMgr.IsInAction())
                     ;
-                stm = 0;
-                return;
+                stm = ACTION_STATE.IDLE;
             }
         }
         
@@ -849,6 +435,8 @@ curr2, ktt, rs/rx, dvm  --  4
         static DeviceMgr()
         {
             bool bDebugGPIB = false;
+            SysLog("");
+            SysLog(DateTime.Now.ToLongTimeString());
             Thread.Sleep(3000);
             WaitEvent = new AutoResetEvent(false);
             OverEvent = new AutoResetEvent(false);
@@ -880,7 +468,7 @@ curr2, ktt, rs/rx, dvm  --  4
                 throw new Exception("Failed to open port A");
             #endregion 
              
-            /*
+            
             #region init cmdport
             cmdport = new SerialPort();
             cmdport.BaudRate = 9600;
@@ -901,7 +489,7 @@ curr2, ktt, rs/rx, dvm  --  4
             }
             cmdport.DiscardInBuffer();
             cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
-            */
+            
              
             agent_access = false;
             actmsg = new ActMessage();
@@ -909,13 +497,16 @@ curr2, ktt, rs/rx, dvm  --  4
             msg_loop.IsBackground = false;
             if(bDebugGPIB)
                 return;
+            
             msg_loop.Start();
         }
-
-        static public string GetLogFileName()
+        static public string GetSysLogFileName()
         {
-            string file = @"C:\\"+DateTime.Now.ToString("yyyy_MM_dd")+".txt";
-            if (!File.Exists(file))
+            return StringResource.basedir + "\\run.txt";
+        }
+        static public void TouchFile(string file)
+        {
+                        if (!File.Exists(file))
             {
                 try
                 {
@@ -928,7 +519,39 @@ curr2, ktt, rs/rx, dvm  --  4
                 {
                 }
             }
+        }
+        static public string GetLogFileName()
+        {
+            DateTime dt = DateTime.Now;
+            string folder = StringResource.basedir + "\\" + dt.ToString("yyyy_MM");
+            string file = folder + "\\"+DateTime.Now.ToString("yyyy_MM_dd")+".txt";
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+            TouchFile(file);
             return file;
+        }
+        static public void SysLog(string line)
+        {
+            string fn = GetSysLogFileName();
+            try
+            {
+                if (line == "")
+                {
+                    if(File.Exists(fn))
+                        File.Delete(fn);
+                    TouchFile(fn);
+                    return;
+                }
+                FileStream fsLog = new FileStream(fn, FileMode.Append, FileAccess.Write, FileShare.Read);
+                using (StreamWriter sw = new StreamWriter(fsLog))
+                {
+                    sw.WriteLine(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff") + "\t" + line);
+                }
+                fsLog.Close();
+            }
+            catch (System.Exception ex)
+            {
+            }
         }
         static public void Log(string line)
         {
@@ -950,30 +573,31 @@ curr2, ktt, rs/rx, dvm  --  4
         {
             string reply;
             cmdport.Write(cmdport.NewLine);
-            cmdport.Write(cmdport.NewLine);
-            cmdport.Write(cmdport.NewLine);
             reply = String.Format("D{0} Measurements:", total);
             cmdport.Write(reply);
             cmdport.Write(cmdport.NewLine);
             //cmdport.WriteLine(reply);
             reply = String.Format("R{0}", Program.lst_rxinfo[0].dRxInput.ToString("E13"));
             cmdport.WriteLine(reply);
+            cmdport.Write(cmdport.NewLine);
             reply = String.Format("S{0}", Program.lst_rsinfo[0].dTValue.ToString("E13"));
             cmdport.WriteLine(reply);
+            cmdport.Write(cmdport.NewLine);
 
         }
         static public void ReportData(int index, double value)
         {
-            /*
-            string reply;
-            reply = String.Format("#{0}",index.ToString());
+            string reply = String.Format("#{0}", index.ToString());
             cmdport.WriteLine(reply);
-            reply = String.Format("&{0}",value.ToString("E13"));
+            cmdport.Write(cmdport.NewLine);
+            reply = String.Format("&{0}", value.ToString("E11"));
             cmdport.WriteLine(reply);
-             */
+            cmdport.Write(cmdport.NewLine);
         }
         static void cmdport_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
+            if (!cmdport.IsOpen)
+                return;
             while (cmdport.BytesToRead > 0)
             {
                 char data = Convert.ToChar(cmdport.ReadChar());
@@ -1017,7 +641,7 @@ curr2, ktt, rs/rx, dvm  --  4
                         }
                     }
                     if(inbuffer.Length > 0)
-                    inbuffer.Remove(0, inbuffer.Length);
+                        inbuffer.Remove(0, inbuffer.Length);
                 }
             }
         }
@@ -1043,9 +667,17 @@ curr2, ktt, rs/rx, dvm  --  4
             }
             return false;
         }
+        static public void Action(string cmd, Int32 param)
+        {
+            if (param < 0)
+                Action(cmd, 0);
+            else
+                Action(cmd, Convert.ToUInt32(param));
+        }
         static public void Action(string cmd, UInt32 param)
         {
-            
+            if (cmd == "")
+                throw new Exception("Unexpected command");
             actmsg.action = cmd;
             actmsg.addr = 0;
             actmsg.value = param;
@@ -1076,6 +708,38 @@ curr2, ktt, rs/rx, dvm  --  4
                 port.Write(buf,i,1);
                 Thread.Sleep(30 * len);
             }
+        }
+        //compose string of curr, sqr std, constv
+        public static string ComposeAction(RxInfo myRx)
+        {
+            string ret = "";
+            switch (myRx.iIx)
+            {
+                case -1: ret = ret + "CURR_P0001"; break; //0.1mA
+                case 0: ret = ret + "CURR_P001"; break; //1mA
+                case 1: ret = ret + "CURR_P01"; break; //10mA
+                case 2: ret = ret + "CURR_P1"; break; //0.1A
+                case 3: ret = ret + "CURR_P3"; break; //0.3A
+                case 4: ret = ret + "CURR_1"; break; //1A
+                case 5: ret = ret + "CURR_5"; break; //5A
+
+            }
+            ret = ret + "|";
+            if (myRx.bSqrt)
+                ret = ret + "X2|";
+            else
+                ret = ret + "X1|";
+
+            if (myRx.iIx == 3) //0.3A
+                ret = ret + "STD_P1|VMODE_3V";
+            else if (myRx.iIx == 4) //1A
+                ret = ret + "STD_P01|VMODE_3V";
+            else if (myRx.iIx == 5) //5A
+                ret = ret + "STD_P001|VMODE_3V";
+            else
+                ret = ret + "STD_1|VMODE_3V";
+
+            return ret;
         }
         static public void KState(UInt32 k)
         {
@@ -1153,6 +817,7 @@ curr2, ktt, rs/rx, dvm  --  4
         {
             KState(Convert.ToUInt32(65536)); //clear all
             RelayState("MEAS_RS", "KTTP", "CURR_OFF", "X1", "STD_1", "VMODE_3V");
+            Action("navto1v", 0);
         }
         static public void RelayState(string swi, string ktt, string curr, string sqr, string std, string constv)
         {
@@ -1265,7 +930,7 @@ curr2, ktt, rs/rx, dvm  --  4
                 {
                     #region navmeter action
                     ActMessage msg = DeviceMgr.actmsg;
-                    if (msg.action == "navto1v" || msg.action == "navto120mv" || msg.action == "navto10mv")
+                    if (msg.action == "navto30v" || msg.action == "navto1v" || msg.action == "navto120mv" || msg.action == "navto10mv")
                     {
                         if (msg.action == "navto1v")
                         {
@@ -1280,6 +945,10 @@ curr2, ktt, rs/rx, dvm  --  4
                         if (msg.action == "navto10mv")
                         {
                             port.Write(StringResource.str("NAV_10MV_" + RunWnd.syscfg.sNavmeter)); //10mv
+                        }
+                        if (msg.action == "navto30v")
+                        {
+                            port.Write(StringResource.str("NAV_30V_" + RunWnd.syscfg.sNavmeter)); //10mv
                         }
 
                         Thread.Sleep(3000);
@@ -1322,10 +991,12 @@ curr2, ktt, rs/rx, dvm  --  4
                         continue;
                     }
                     #endregion
-                    throw new Exception("Invalide command " + actmsg.action);
+                    if(actmsg.action != "")
+                    throw new Exception("Invalid command " + actmsg.action);
                 }
                 catch (Exception ex)
                 {
+                    SysLog(ex.Message);
                     Debug.WriteLine(ex.Message);
                     actmsg.action = "fail";
                     OverEvent.Set();

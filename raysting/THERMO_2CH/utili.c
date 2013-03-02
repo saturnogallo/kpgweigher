@@ -1,5 +1,5 @@
 #include "utili.h"
-#include "stdlib.h"
+//#include "stdlib.h"
 /*---------------ÑÓÊ±×Ó³ÌÐò----------------*/
 /*
 void delay1 (uint ms) 

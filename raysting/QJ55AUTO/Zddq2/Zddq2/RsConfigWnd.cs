@@ -62,6 +62,43 @@ namespace Zddq2
             selectedRs = 0;
             btn_last.Visible = false;
             btn_next.Visible = false;
+
+            btn_rs100k.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rs100k.Text = "100k";
+            btn_rs100k.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_100K); });
+
+            btn_rs10k.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rs10k.Text = "10k";
+            btn_rs10k.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_10K); });
+
+            btn_rs1k.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rs1k.Text = "1k";
+            btn_rs1k.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_1K); });
+
+            btn_rs100.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rs100.Text = "100";
+            btn_rs100.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_100); });
+
+            btn_rs10.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rs10.Text = "10";
+            btn_rs10.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_10); });
+
+            btn_rs1.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rs1.Text = "1";
+            btn_rs1.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_1); });
+
+            btn_rsp1.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rsp1.Text = "0.1";
+            btn_rsp1.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_P1); });
+
+            btn_rsp01.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rsp01.Text = "0.01";
+            btn_rsp01.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_P01); });
+
+            btn_rsp001.SetStyle(Color.Beige, MyButtonType.round2Button);
+            btn_rsp001.Text = "0.001";
+            btn_rsp001.ValidClick += new EventHandler((o, e) => { SelectRange(ActionMgr.RNG_P001); });
+
             /*
             rs_dt = new DataTable("RsInfo");
             rs_dt.Columns.Add(StringResource.str("serial"));
@@ -95,6 +132,12 @@ namespace Zddq2
         }
         void btn_dummy(object sender, EventArgs e)
         {
+        }
+        public void SelectRange(int range)
+        {
+            RsInfo rs = Program.lst_rsinfo[selectedRs];
+            rs.iRRange = range;
+            InitDisplay(selectedRs);
         }
         void btn_next_ValidClick(object sender, EventArgs e)
         {
@@ -135,6 +178,7 @@ namespace Zddq2
                 if (param == "rvalue")
                 {
                     Program.lst_rsinfo[selectedRs].dValue = Convert.ToDouble(data) ;
+                    CheckError();
                 }
                 if (param == "ralpha")
                 {
@@ -164,6 +208,10 @@ namespace Zddq2
 
         void btn_quit_ValidClick(object sender, EventArgs e)
         {
+            if (CheckError())
+            {
+                return;
+            }
             Program.SwitchWindow("mainwnd");
             Program.mainwnd.Invoke(new Action<bool>(Program.mainwnd.ReDraw), new object[] { false });
         }
@@ -182,12 +230,47 @@ namespace Zddq2
             selectedRs = iRs;
             RsInfo rs = Program.lst_rsinfo[iRs];
             btn_chan.Text = "CH " + (iRs + 1).ToString();
-            btn_rvalue.Text = Util.FormatData(rs.dValue,7); 
+            btn_rvalue.Text = Util.FormatData(rs.dValue,8); 
             btn_ralpha.Text = rs.dAlpha.ToString("F2");
             btn_rbeta.Text = rs.dBeta.ToString("F2");
             btn_temp.Text = RunWnd.syscfg.dTemp.ToString("F3");
             btn_serial.Text = rs.sSerial;
             
+            btn_rs100k.bOn = (rs.iRRange == ActionMgr.RNG_100K);
+            btn_rs10k.bOn = (rs.iRRange == ActionMgr.RNG_10K);
+            btn_rs1k.bOn = (rs.iRRange == ActionMgr.RNG_1K);
+            btn_rs100.bOn = (rs.iRRange == ActionMgr.RNG_100);
+            btn_rs10.bOn = (rs.iRRange == ActionMgr.RNG_10);
+            btn_rs1.bOn = (rs.iRRange == ActionMgr.RNG_1);
+            btn_rsp1.bOn = (rs.iRRange == ActionMgr.RNG_P1);
+            btn_rsp01.bOn = (rs.iRRange == ActionMgr.RNG_P01);
+            btn_rsp001.bOn = (rs.iRRange == ActionMgr.RNG_P001);
+        }
+        public bool CheckError()
+        {
+            lbl_error.Text = "";
+            lbl_error.Visible = false;
+            RxInfo rx = Program.lst_rxinfo[Program.mainwnd.selectedRx];
+            RsInfo rs = Program.lst_rsinfo[Program.mainwnd.selectedRs];
+            if ((rs.dValue / rx.dRxInput) > 1023.1)
+            {
+                lbl_error.Text = StringResource.str("rs_2big") + "," + StringResource.str(String.Format("help_std{0}", rx.iRRange));
+                lbl_error.Visible = true;
+                return true;
+            }
+            if ((rs.dValue / rx.dRxInput) < 0.000977) //=1/1023.1
+            {
+                lbl_error.Text = StringResource.str("rs_2small") + "," + StringResource.str(String.Format("help_std{0}", rx.iRRange));
+                lbl_error.Visible = true;
+                return true;
+            }
+            if ((rx.iRRange == ActionMgr.RNG_10K && rx.bSqrt) || (rx.iRRange == ActionMgr.RNG_100K && rx.bSqrt))
+            {
+                lbl_error.Text = StringResource.str("nox2_4big");
+                lbl_error.Visible = true;
+                return true;
+            }
+            return false;
         }
     }
 }
