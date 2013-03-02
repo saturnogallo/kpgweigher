@@ -304,7 +304,7 @@ namespace Zddq2
                     length = ticLength * 2;
                 }
 
-                if ((i % scale) == 0)
+                if (((i % scale) == 0) || ticCount < 21)
                 {
                     double tic;
                     if (this is YAxis)

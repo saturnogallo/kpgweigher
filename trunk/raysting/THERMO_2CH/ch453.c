@@ -30,7 +30,7 @@
 
 
 #define CMD_CFG_SYSTEM		0x4843					//0x4800| 01000011[SLEEP][INTENS]0[X_INT]0[KEYB][DISP]B
-#define CMD_READ_KEY		0x4F
+#define CMD_READ_KEY		0x4F00
 
 #define CH453_START()  			TWCR = ( 1<<TWEN )|(1<<TWSTA )|(1<<TWINT); while( !(TWCR & (1<<TWINT)) )//发 START
 #define CH453_WAIT()	 		while( !(TWCR & (1<<TWINT)) )
@@ -88,7 +88,7 @@ u8 CH453_Read( u16 read_cmd )
     u8 try;//重试次数
 	u8 val;
 	
-	try = 50;
+	try = 5;
 	do
 	{
 	  	val = 0xFF;
@@ -96,13 +96,15 @@ u8 CH453_Read( u16 read_cmd )
    	  	CH453_START();
 
    	    CH453_Wr_Byte((u8)(read_cmd>>8));    
-		
+   	    
+//                sleepms(10);
 		if( TestACK() == MT_SLA_READ_ACK )//收到ACK
    		{
 			CH453_Rd_Byte(val);
+
 			CH453_STOP();
 			break;
-    	}
+    	        }
 		
 		CH453_STOP();
 		
@@ -131,13 +133,17 @@ u8 CH453_ReadKey()
 	key = CH453_Read(CMD_READ_KEY);
 	if(key == 0xff)
 		return 0xff;
-	if(key & 0x40) //key down
+	if((key & 0x40)) //key down
 	{
-		lastkey = key;
+		lastkey = key & 0x0f;
 		return 0xff;
-	}else{	//key up
-		key = lastkey;
-		lastkey = 0xff;
-		return key;
-	}
+	}else{
+	        if(lastkey != 0xff)
+        	{	//key up
+	        	key = lastkey;
+        		lastkey = 0xff;
+		        return key;
+	        }     
+	}                  
+	return 0xff;
 }

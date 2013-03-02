@@ -5,12 +5,13 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Diagnostics;
 using System.IO;
+using System.Diagnostics;
+using System.Reflection;
 namespace Zddq2
 {
     public partial class SysConfigWnd : Form
@@ -58,7 +59,8 @@ namespace Zddq2
 
             btn_ktt.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_ktt.ValidClick += new EventHandler(btn_ktt_ValidClick);
-
+            
+            
             btn_throw.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_throw.ValidClick += new EventHandler(btn_throw_ValidClick);
 
@@ -96,6 +98,16 @@ namespace Zddq2
             btn_export.SetStyle(Color.LightSeaGreen, MyButtonType.round2RectButton);
             btn_export.Text = StringResource.str("export");
             btn_export.ValidClick += new EventHandler(btn_export_ValidClick);
+
+            btn_throw.Visible = false;
+            lbl_throw.Visible = false;
+            btn_navmeter.Visible = false;
+            lbl_navmeter.Visible = false;
+            btn_flttype.Visible = false;
+            lbl_flttype.Visible = false;
+
+            FileInfo fi = new FileInfo(StringResource.basedir + "\\Tsioex.exe");
+            lbl_version.Text = "版本: " + fi.LastWriteTime.ToString("yyyyMMdd");
             InitDisplay();
         }
 
@@ -120,29 +132,20 @@ namespace Zddq2
         {
             if (!Directory.Exists("\\Hard Disk"))
             {
-                MessageBox.Show(StringResource.str("noharddisk"));
+                Program.msg.Init(StringResource.str("noharddisk"));
                 return;
             }
-            try
-            {
-                string basedir = StringResource.baseDir;
-                foreach (string fname in Directory.GetFiles(basedir, "20*.txt"))
-                {
-                    FileInfo fi = new FileInfo(fname);
-                    File.Copy(basedir + fi.Name, "\\Hard Disk\\" + fi.Name);
-                }
-                MessageBox.Show(StringResource.str("export_done"));
-            }
-            catch
-            {
-                MessageBox.Show(StringResource.str("export_fail"));
-                return;
-            }
+
+            Program.kbd.Init(StringResource.str("enter_exportdate"), "exportdate", false, KbdData);
+        }
+        public void enterscale(string type)
+        {
+            Program.kbd.Init(StringResource.str("enter_" + type + "B") + "," + RunWnd.syscfg.GetScaleAdjust(ActionMgr.ConvertToRange(type)).ToString("F3"), "scale" + type, false, KbdData);
         }
 
         public void entercurrent(string type)
         {
-            Program.kbd.Init(StringResource.str("enter_"+type), type, false, KbdData);
+            Program.kbd.Init(StringResource.str("enter_"+type+"A"), type, false, KbdData);
         }
         public void EnterNewTime()
         {
@@ -165,26 +168,112 @@ namespace Zddq2
         {
             //same page no action at all
         }
+        private string export_start = "";
         public void KbdData(string param, string data)
         {
             try
             {
-                if (param == "1kcurr")
+                if (param.StartsWith("scale"))
                 {
-                    RunWnd.syscfg.d1Kcurr = Convert.ToDouble(data);
+                    param = param.Remove(0, "scale".Length);
+                    if(ActionMgr.ConvertToRange(param)!= ActionMgr.RNG_INVALID)
+                        RunWnd.syscfg.SetScaleAdjust(ActionMgr.ConvertToRange(param), Convert.ToDouble(data));
                     return;
                 }
-                if (param == "10kcurr")
+                if (param == "5" || param == "10")
+                    RunWnd.syscfg.SetCurrent(5, (param.IndexOfAny("5".ToCharArray()) < 0), Convert.ToDouble(data));
+                if (param == "1" || param == "2" )
+                    RunWnd.syscfg.SetCurrent(4, (param.IndexOfAny("1".ToCharArray()) < 0), Convert.ToDouble(data));
+                if (param == "0.3" || param == "0.6")
+                    RunWnd.syscfg.SetCurrent(3, (param.IndexOfAny("3".ToCharArray()) < 0), Convert.ToDouble(data));
+                  if(  param == "0.1" || param == "0.2" )
+                      RunWnd.syscfg.SetCurrent(2, (param.IndexOfAny("1".ToCharArray()) < 0), Convert.ToDouble(data));
+                  if(  param == "0.01" || param == "0.02" )
+                      RunWnd.syscfg.SetCurrent(1, (param.IndexOfAny("1".ToCharArray()) < 0), Convert.ToDouble(data));
+                  if(  param == "0.001" || param == "0.002" )
+                      RunWnd.syscfg.SetCurrent(0, (param.IndexOfAny("1".ToCharArray()) < 0), Convert.ToDouble(data));
+                  if(  param == "0.0001" || param == "0.0002")
+                      RunWnd.syscfg.SetCurrent(-1, (param.IndexOfAny("1".ToCharArray()) < 0), Convert.ToDouble(data));
+                if (param == "exportdate")
                 {
-                    RunWnd.syscfg.d10Kcurr = Convert.ToDouble(data);
-                    return;
-                }
-                if (param == "100kcurr")
-                {
-                    RunWnd.syscfg.d100Kcurr = Convert.ToDouble(data);
-                    return;
-                }
+                    #region remove date log
+                    if (Regex.IsMatch(data, "^820\\d\\d\\d\\d\\d\\d$"))
+                    {
+                        data = data.Remove(0, 1);
+                        try
+                        {
+                            foreach (string dname in Directory.GetDirectories(StringResource.basedir, "20*"))
+                            {
+                                string[] todel = Directory.GetFiles(dname, "20*.txt");
+                                foreach (string fname in todel)
+                                {
+                                    FileInfo fi = new FileInfo(fname);
+                                    Match m = Regex.Match(fi.Name, @"(\d\d\d\d)_(\d\d)_(\d\d).*");
+                                    if (m.Success)
+                                    {
+                                        if ((Convert.ToUInt16(data.Substring(0, 4)) <= Convert.ToUInt16(m.Groups[1].Value)) &&
+                                            (Convert.ToUInt16(data.Substring(4, 2)) <= Convert.ToUInt16(m.Groups[2].Value)) &&
+                                            (Convert.ToUInt16(data.Substring(6, 2)) <= Convert.ToUInt16(m.Groups[3].Value)))
+                                        {
+                                            //do nothing
+                                        }
+                                        else
+                                        {
+                                            File.Delete(fname);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        return;
+                    }
+                    #endregion
 
+                    if (Regex.IsMatch(data, "^20\\d\\d\\d\\d\\d\\d$"))
+                    {
+                        export_start = data;
+                        Program.kbd.Init(StringResource.str("enter_endexport"), "endexport", false, KbdData);
+                    }
+                    return;
+                }
+                if(param == "endexport")
+                {
+                    if (!Regex.IsMatch(data, "^20\\d\\d\\d\\d\\d\\d$"))
+                        return;
+
+                    try
+                    {
+                        foreach (string dname in Directory.GetDirectories(StringResource.basedir, "20*"))
+                        {
+                            foreach (string fname in Directory.GetFiles(dname, "20*.txt"))
+                            {
+                                FileInfo fi = new FileInfo(fname);
+                                Match m = Regex.Match(fi.Name, @"(\d\d\d\d)_(\d\d)_(\d\d).*");
+                                if (m.Success)
+                                {
+                                    if ((Convert.ToUInt16(data.Substring(0, 4)) >= Convert.ToUInt16(m.Groups[1].Value)) &&
+                                        (Convert.ToUInt16(data.Substring(4, 2)) >= Convert.ToUInt16(m.Groups[2].Value)) &&
+                                        (Convert.ToUInt16(data.Substring(6, 2)) >= Convert.ToUInt16(m.Groups[3].Value)) &&
+                                        (Convert.ToUInt16(export_start.Substring(0, 4)) <= Convert.ToUInt16(m.Groups[1].Value)) &&
+                                        (Convert.ToUInt16(export_start.Substring(4, 2)) <= Convert.ToUInt16(m.Groups[2].Value)) &&
+                                        (Convert.ToUInt16(export_start.Substring(6, 2)) <= Convert.ToUInt16(m.Groups[3].Value)))
+                                    {
+                                        File.Copy(fname, StringResource.udiskdir + "\\" + fi.Name, true);
+                                    }
+                                }
+                            }
+                        }
+                        Program.msg.Init(StringResource.str("export_done"));
+                    }
+                    catch
+                    {
+                        Program.msg.Init(StringResource.str("export_fail"));
+                        return;
+                    }
+                }
                 if (param == "newtime")
                 {
                     if (!Regex.IsMatch(newdate, "^\\d\\d\\d\\d\\d\\d\\d\\d$"))
@@ -204,19 +293,51 @@ namespace Zddq2
                 }
                 if (param == "newdate")
                 {
-                    if (data == "1000")
+                    if(data.StartsWith("8")) //input of scale offset
                     {
-                        this.Invoke(new Action<string>(entercurrent), new string[] { "1kcurr" });
+                        string sparam = data.Remove(0, 1);
+                        if (ActionMgr.ConvertToRange(sparam) != ActionMgr.RNG_INVALID)
+                        {
+                            this.Invoke(new Action<string>(enterscale), new string[] { sparam });
+                        }
                         return;
                     }
-                    if (data == "10000")
+                    if (data=="00000") //current calibration
                     {
-                        this.Invoke(new Action<string>(entercurrent), new string[] { "10kcurr" });
+                        Program.Upgrade();
                         return;
                     }
-                    if (data == "100000")
+                    if(data == "99999") //current calibration
                     {
-                        this.Invoke(new Action<string>(entercurrent), new string[] { "100kcurr" });
+                        string sparam = data.Remove(0, 1);
+                        RxInfo myrx = Program.lst_rxinfo[Program.mainwnd.selectedRx];
+                        myrx.var.rRs = Program.lst_rsinfo[0].dTValue;
+                        if (myrx.iRRange == ActionMgr.RNG_P001)
+                            myrx.var.iK = 1; //1000:1
+                        else if (myrx.iRRange == ActionMgr.RNG_P01)
+                            myrx.var.iK = 10; //100:1
+                        else if (myrx.iRRange == ActionMgr.RNG_P1)
+                            myrx.var.iK = 100; //10:1
+                        else
+                            myrx.var.iK = (int)Math.Floor(1000.0 / (myrx.var.rRs*RunWnd.syscfg.GetStdCurrent(myrx.iIx,myrx.bSqrt)));
+                        
+                        if(myrx.var.iK > 1020)
+                        {
+                            Program.msg.Init("标准电阻阻值过小,无法校准。标准电阻上电压应不小于1V");
+                            return;
+                        }
+                        Program.msg.Init(String.Format(@"电流校准完成,电流值为{0}", Util.FormatData(Program.mainwnd.task.act_mgr.CalibrateCurr(myrx), 8)));
+                        return;
+                    }
+                    if (data == "1" || data == "2" ||
+                        data == "5" || data == "10" ||
+                        data == "0.3" || data == "0.6" ||
+                        data == "0.1" || data == "0.2" ||
+                        data == "0.01" || data == "0.02" ||
+                        data == "0.001" || data == "0.002" ||
+                        data == "0.0001" || data == "0.0002")
+                    {
+                        this.Invoke(new Action<string>(entercurrent), new string[] { data });
                         return;
                     }
                     if (data == "65890192")
@@ -224,10 +345,27 @@ namespace Zddq2
                         Process.GetCurrentProcess().Kill(); //back door to exit the current program
                         return;
                     }
+                    if (data == "658901920")
+                    {
+                        Program.OpenLog(0);
+                        return;
+                    }
+
+                    if (data == "12345678")
+                    {
+                        Process app = new Process();
+                        app.StartInfo.WorkingDirectory = @"\Windows";
+                        app.StartInfo.FileName = @"\Windows\TouchKit.exe";
+                        app.StartInfo.Arguments = "";
+                        app.Start();
+                        btn_quit_ValidClick(null, null);
+                        return;
+                    }
                     newdate = data;
                     this.Invoke(new Action(EnterNewTime));
                     return;
                 }
+
                 if (param == "ktt")
                 {
                     RunWnd.syscfg.iKTT = Convert.ToInt32(data);
@@ -291,6 +429,11 @@ namespace Zddq2
 
         void btn_quit_ValidClick(object sender, EventArgs e)
         {
+            if (Program.rswnd.CheckError())
+            {
+                this.Invoke(new Action<object,EventArgs>(btn_RsConfig_ValidClick), new object[]{null,null});
+                return;
+            }
             Program.SwitchWindow("mainwnd");
             Program.mainwnd.Invoke(new Action<bool>(Program.mainwnd.ReDraw), new object[] { false });                
         }

@@ -32,7 +32,7 @@ namespace Zddq2
         public const int win_width = 800;
         public const int win_height = 600;
         public const int bar_height = 70;
-        private TaskMachine task;
+        public TaskMachine task;
 
         private int total_validRx = 0;  //total number of valid Rx Number
         private int page_currRx = 0;    //current page index
@@ -79,6 +79,12 @@ namespace Zddq2
         private Regex reg_filter = new Regex("F([0-9]+)");
         private Regex reg_ix = new Regex("I([0-9.]+)"); //mA
         private Regex reg_delay = new Regex("T([0-9]+)");
+        private Regex reg_switch = new Regex("W([0-9]+)");
+        private Regex reg_alpha = new Regex("ALPHA([0-9]+)");
+        private Regex reg_beta = new Regex("BETA([0-9]+)");
+        private Regex reg_rxid = new Regex("RX_(.*)");
+        private Regex reg_rsid = new Regex("RS_(.*)");
+        private Regex reg_temp = new Regex("TEMP([0-9]+)");
         private Regex reg_meastimes = new Regex("M([0-9]+)");
         private Regex reg_sampletimes = new Regex("D([0-9]+)"); //sample times for single measurements
         private Regex reg_measure = new Regex("D([0-9]+)Measurements:");
@@ -88,14 +94,27 @@ namespace Zddq2
         private string oper_mode = "";
         public void pc_cmd(string cmd)
         {
-            if (cmd == "S")
+            DeviceMgr.SysLog(cmd);
+            if (cmd == "ECHO")
             {
-                task.Stop();//STOP
+                DeviceMgr.Resend();
                 return;
             }
+            if (cmd == "S")
+            {
+                if (task.bRunning)
+                {
+                    statusBar1_StartStopClick(null, null); //click stop
+                }
+                return;
+            }
+
             if (cmd == "H")
             {
-                DeviceMgr.Reset();//reset 
+                if((!task.bRunning) && (!DeviceMgr.IsInAction()))
+                {
+                    DeviceMgr.Reset();//reset 
+                }
                 return;
             }
             Match m;
@@ -126,31 +145,95 @@ namespace Zddq2
             }
             m = reg_ix.Match(cmd);
             if (m.Success)
-            {/*
-                //todo
-                if (currRx.iIx == 0) //1mA
-                if (currRx.iIx == 1) //10mA
-                if (currRx.iIx == 2) //0.1A
-                if (currRx.iIx == 3) //0.3A
-                if (currRx.iIx == 4) //1A
-                if (currRx.iIx == 5) //5A
-                    */
+            {
+                #region current convert
                 double myIx = double.Parse(m.Groups[1].Value)/1000;
-                if(myIx >= 3)
-                    Program.lst_rxinfo[0].iIx = 5;
-                else if (myIx >= 0.65)
-                    Program.lst_rxinfo[0].iIx = 4;
-                else if (myIx >= 0.2)
-                    Program.lst_rxinfo[0].iIx = 3;
-                else if (myIx >= 0.05)
-                    Program.lst_rxinfo[0].iIx = 2;
-                else if (myIx >= 0.005)
-                    Program.lst_rxinfo[0].iIx = 1;
-                else if (myIx >= 0.0005)
-                    Program.lst_rxinfo[0].iIx = 0;
-                else
-                    Program.lst_rxinfo[0].iIx = -1;
-                return;
+                if (myIx >= 5.5)
+                {
+                    Program.lst_rxinfo[0].iIx = 5; //5A x 2
+                    Program.lst_rxinfo[0].bSqrt = true;
+                    return;
+                }
+                if (myIx >= 2.2)
+                {
+                    Program.lst_rxinfo[0].iIx = 5; //5A
+                    Program.lst_rxinfo[0].bSqrt = false;
+                    return;
+                }
+                if (myIx >= 1.1)
+                {
+                    Program.lst_rxinfo[0].iIx = 4; //1A x 2
+                    Program.lst_rxinfo[0].bSqrt = true;
+                    return;
+                }
+                if (myIx >= 0.66)
+                {
+                    Program.lst_rxinfo[0].iIx = 4; //1A x 2
+                    Program.lst_rxinfo[0].bSqrt = false;
+                    return;
+                }
+                if (myIx >= 0.33)
+                {
+                    Program.lst_rxinfo[0].iIx = 3; //0.3A x 2
+                    Program.lst_rxinfo[0].bSqrt = true;
+                    return;
+                }
+                if (myIx >= 0.22)
+                {
+                    Program.lst_rxinfo[0].iIx = 3; //0.3A
+                    Program.lst_rxinfo[0].bSqrt = false;
+                    return;
+                }
+                if (myIx >= 0.11)
+                {
+                    Program.lst_rxinfo[0].iIx = 2; //0.1A x 2
+                    Program.lst_rxinfo[0].bSqrt = true;
+                    return;
+                }
+                if (myIx >= 0.022)
+                {
+                    Program.lst_rxinfo[0].iIx = 2; //0.1A
+                    Program.lst_rxinfo[0].bSqrt = false;
+                    return;
+                }
+                if (myIx >= 0.011)
+                {
+                    Program.lst_rxinfo[0].iIx = 1; //10mA x 2
+                    Program.lst_rxinfo[0].bSqrt = true;
+                    return;
+                }
+                if (myIx >= 0.0022)
+                {
+                    Program.lst_rxinfo[0].iIx = 1; //10mA
+                    Program.lst_rxinfo[0].bSqrt = false;
+                    return;
+                }
+
+                if (myIx >= 0.0011)
+                {
+                    Program.lst_rxinfo[0].iIx = 0; //1mA x 2
+                    Program.lst_rxinfo[0].bSqrt = true;
+                    return;
+                }
+                if (myIx >= 0.00022)
+                {
+                    Program.lst_rxinfo[0].iIx = 0; //1mA
+                    Program.lst_rxinfo[0].bSqrt = false;
+                    return;
+                }
+                if (myIx >= 0.00011)
+                {
+                    Program.lst_rxinfo[0].iIx = -1; //0.1mA x 2
+                    Program.lst_rxinfo[0].bSqrt = true;
+                    return;
+                }
+                {
+                    Program.lst_rxinfo[0].iIx = -1; //0.1mA
+                    Program.lst_rxinfo[0].bSqrt = false;
+                    return;
+                }
+#endregion
+                
             }
             m = reg_delay.Match(cmd);
             if (m.Success)
@@ -164,30 +247,78 @@ namespace Zddq2
                 syscfg.iMeasTimes = Convert.ToInt32(m.Groups[1].Value);
                 return;
             }
-            m = reg_sampletimes.Match(cmd);
+            m = reg_switch.Match(cmd);
             if (m.Success)
             {
-                syscfg.iSampleTimes = Convert.ToInt32(m.Groups[1].Value);
+                syscfg.iKTT = Convert.ToInt32(m.Groups[1].Value);
                 return;
             }
             m = reg_measure.Match(cmd);
             if (m.Success)
             {
                 syscfg.iMeasTimes = Convert.ToInt32(m.Groups[1].Value);
-                task.Start();
+                RsInfo rs = Program.lst_rsinfo[Program.mainwnd.selectedRs];
+                RxInfo rx = Program.lst_rxinfo[Program.mainwnd.selectedRx];
+                if (!task.bRunning)
+                {
+                    statusBar1_StartStopClick(null, null); //click start
+                }
                 return;
             }
+            m = reg_sampletimes.Match(cmd);
+            if (m.Success)
+            {
+                syscfg.iSampleTimes = Convert.ToInt32(m.Groups[1].Value);
+                return;
+            }
+             m = reg_alpha.Match(cmd);
+             if (m.Success)
+             {
+                 Program.lst_rsinfo[0].iRRange = ActionMgr.RNG_INVALID;
+                 Program.lst_rsinfo[0].dAlpha = Convert.ToDouble(m.Groups[1].Value);
+                 return;
+             }
+             m = reg_beta.Match(cmd);
+             if (m.Success)
+             {
+                 Program.lst_rsinfo[0].iRRange = ActionMgr.RNG_INVALID;
+                 Program.lst_rsinfo[0].dBeta = Convert.ToDouble(m.Groups[1].Value);
+
+                 return;
+             }
+             m = reg_temp.Match(cmd);
+             if (m.Success)
+             {
+                 syscfg.dTemp = Convert.ToDouble(m.Groups[1].Value);
+                 return;
+             }
             m = reg_rsa.Match(cmd);
             if (m.Success)
             {
+                Program.lst_rsinfo[0].iRRange = ActionMgr.RNG_INVALID;
                 Program.lst_rsinfo[0].dValue = Convert.ToDouble(m.Groups[1].Value);
                 Program.lst_rxinfo[0].cStdChan = 'A';
                 return;
             }
+            m = reg_rsid.Match(cmd);
+            if (m.Success)
+            {
+                Program.lst_rsinfo[0].iRRange = ActionMgr.RNG_INVALID;
+                Program.lst_rsinfo[0].sSerial = m.Groups[1].Value;
+                return;
+            }
+            m = reg_rxid.Match(cmd);
+            if (m.Success)
+            {
+                Program.lst_rxinfo[0].sSerial = m.Groups[1].Value;
+                return;
+            }
+
             m = reg_rsb.Match(cmd);
             if (m.Success)
             {
-                Program.lst_rsinfo[0].dValue = Convert.ToDouble(m.Groups[1].Value);
+                Program.lst_rxinfo[0].dRxInput = Convert.ToDouble(m.Groups[1].Value);
+                ActionMgr.SetIxRange(0, Program.lst_rxinfo[0].dRxInput,false);
                 Program.lst_rxinfo[0].cStdChan = 'B';
                 return;
             }
@@ -199,7 +330,6 @@ namespace Zddq2
         private static bool tmlock = false; //lock for timer handler
         void uiTimer_Tick(object sender, EventArgs e)
         {
-            
             if (tmlock)
                 return;
             tmlock = true;
@@ -225,7 +355,7 @@ namespace Zddq2
                     if (!task.bRunning)
                     {
                         statusBar1.status = RUN_STATE.IDLE;
-                        DeviceMgr.Log("Measurement Stopped...");
+                        DeviceMgr.Log("测量结束...");
                     }
                 }
             }
@@ -233,14 +363,13 @@ namespace Zddq2
         }
         public RunWnd()
         {
-            
             InitializeComponent();
             task = new TaskMachine();
             task.StatusChanged += new StrEventHandler(UpdateStatusBar);
             lastcalls = new Queue<string>();
             uiTimer = new System.Windows.Forms.Timer();
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
-            uiTimer.Interval = 250; //250ms for UI update
+            uiTimer.Interval = 300; //250ms for UI update
             uiTimer.Enabled = true; ;
 
             rxDisplay1.Click += new EventHandler(rx_display_Click);
@@ -308,7 +437,13 @@ namespace Zddq2
                 statusBar1.pause = false;
                 statusBar1.status = RUN_STATE.STOPPING;                
                 task.Stop();
-                
+                try
+                {
+                    rxDisplay1.LogComplete();
+                }
+                catch
+                {
+                }
             }
             else
             {
@@ -317,26 +452,7 @@ namespace Zddq2
                 statusBar1.total = syscfg.iMeasTimes;
                 statusBar1.count = 1;
                 statusBar1.status = RUN_STATE.INITIALIZING;
-                DeviceMgr.Log(String.Format(@"==== New Measurement Paramter========
-    Measure times = {0}
-    Rs ID = {1}
-    Rs Value = {2}
-    Rs Temp. Alpha = {3}
-    Rs Temp. Beta = {4}
-    Temperature = {5}
-    Rx ID = {6}
-    Sample times = {7}
-    Switch delay = {8}
-    Filter = {9}
-    Filter Length = {10}
-    Measure delay = {11}
-    AutoFilter = {12}
-    Rx curr. = {13}
-    New Measurement Started...", syscfg.iMeasTimes.ToString(), rs.sSerial, rs.dValue.ToString("F8"),rs.dAlpha.ToString("F3"),
-                                                                       rs.dBeta.ToString("F3"),
-                                                                       syscfg.dTemp.ToString("F3"),rx.sSerial,syscfg.iSampleTimes, syscfg.iKTT, 
-                                                                       syscfg.sFilterType, syscfg.iFilter, syscfg.iMeasDelay, syscfg.bThrow, rx.iIx                                       
-                                            ));
+                
                 task.Start();
                 rxDisplay1.ClearAll();
                 rxDisplay2.ClearAll();

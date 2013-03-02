@@ -32,11 +32,13 @@
             this.lbl_current = new System.Windows.Forms.Label();
             this.lbl_serial = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lbl_vname = new System.Windows.Forms.Label();
+            this.lbl_vmode = new System.Windows.Forms.Label();
             this.btn_next = new Zddq2.RectButton();
             this.btn_last = new Zddq2.RectButton();
             this.btn_enable = new Zddq2.RectButton();
-            this.lbl_vmode = new System.Windows.Forms.Label();
             this.btn_chan = new Zddq2.RectButton();
+            this.btn_vname = new Zddq2.RectButton();
             this.btn_vmode = new Zddq2.RectButton();
             this.btn_sqrt = new Zddq2.RectButton();
             this.btn_current = new Zddq2.RectButton();
@@ -46,16 +48,6 @@
             this.btn_RxConfig = new Zddq2.RectButton();
             this.btn_RsConfig = new Zddq2.RectButton();
             this.btn_quit = new Zddq2.RectButton();
-            this.lbl_range = new System.Windows.Forms.Label();
-            this.btn_rangeP001 = new Zddq2.RectButton();
-            this.btn_rangeP01 = new Zddq2.RectButton();
-            this.btn_rangeP1 = new Zddq2.RectButton();
-            this.btn_range1 = new Zddq2.RectButton();
-            this.btn_range10 = new Zddq2.RectButton();
-            this.btn_range100 = new Zddq2.RectButton();
-            this.btn_range1k = new Zddq2.RectButton();
-            this.btn_range10k = new Zddq2.RectButton();
-            this.btn_range100k = new Zddq2.RectButton();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,7 +65,7 @@
             // 
             this.lbl_current.AutoSize = true;
             this.lbl_current.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_current.Location = new System.Drawing.Point(22, 114);
+            this.lbl_current.Location = new System.Drawing.Point(25, 195);
             this.lbl_current.Name = "lbl_current";
             this.lbl_current.Size = new System.Drawing.Size(113, 25);
             this.lbl_current.TabIndex = 1;
@@ -95,21 +87,13 @@
             this.panel1.Controls.Add(this.btn_next);
             this.panel1.Controls.Add(this.btn_last);
             this.panel1.Controls.Add(this.btn_enable);
-            this.panel1.Controls.Add(this.lbl_range);
+            this.panel1.Controls.Add(this.lbl_vname);
             this.panel1.Controls.Add(this.lbl_vmode);
             this.panel1.Controls.Add(this.lbl_current);
             this.panel1.Controls.Add(this.lbl_serial);
             this.panel1.Controls.Add(this.lbl_stdchan);
             this.panel1.Controls.Add(this.btn_chan);
-            this.panel1.Controls.Add(this.btn_range100k);
-            this.panel1.Controls.Add(this.btn_range10k);
-            this.panel1.Controls.Add(this.btn_range1k);
-            this.panel1.Controls.Add(this.btn_range100);
-            this.panel1.Controls.Add(this.btn_range10);
-            this.panel1.Controls.Add(this.btn_range1);
-            this.panel1.Controls.Add(this.btn_rangeP1);
-            this.panel1.Controls.Add(this.btn_rangeP01);
-            this.panel1.Controls.Add(this.btn_rangeP001);
+            this.panel1.Controls.Add(this.btn_vname);
             this.panel1.Controls.Add(this.btn_vmode);
             this.panel1.Controls.Add(this.btn_sqrt);
             this.panel1.Controls.Add(this.btn_current);
@@ -119,6 +103,25 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(722, 402);
             this.panel1.TabIndex = 6;
+            // 
+            // lbl_vname
+            // 
+            this.lbl_vname.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F);
+            this.lbl_vname.Location = new System.Drawing.Point(28, 114);
+            this.lbl_vname.Name = "lbl_vname";
+            this.lbl_vname.Size = new System.Drawing.Size(110, 25);
+            this.lbl_vname.TabIndex = 2;
+            this.lbl_vname.Text = "lbl_vname";
+            // 
+            // lbl_vmode
+            // 
+            this.lbl_vmode.AutoSize = true;
+            this.lbl_vmode.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_vmode.Location = new System.Drawing.Point(25, 352);
+            this.lbl_vmode.Name = "lbl_vmode";
+            this.lbl_vmode.Size = new System.Drawing.Size(110, 25);
+            this.lbl_vmode.TabIndex = 2;
+            this.lbl_vmode.Text = "lbl_vmode";
             // 
             // btn_next
             // 
@@ -156,16 +159,6 @@
             this.btn_enable.Size = new System.Drawing.Size(162, 46);
             this.btn_enable.TabIndex = 3;
             // 
-            // lbl_vmode
-            // 
-            this.lbl_vmode.AutoSize = true;
-            this.lbl_vmode.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_vmode.Location = new System.Drawing.Point(25, 195);
-            this.lbl_vmode.Name = "lbl_vmode";
-            this.lbl_vmode.Size = new System.Drawing.Size(110, 25);
-            this.lbl_vmode.TabIndex = 2;
-            this.lbl_vmode.Text = "lbl_vmode";
-            // 
             // btn_chan
             // 
             this.btn_chan.BackColor = System.Drawing.Color.Red;
@@ -178,13 +171,25 @@
             this.btn_chan.Size = new System.Drawing.Size(91, 46);
             this.btn_chan.TabIndex = 0;
             // 
+            // btn_vname
+            // 
+            this.btn_vname.BackColor = System.Drawing.Color.Red;
+            this.btn_vname.bEnabled = true;
+            this.btn_vname.bOn = true;
+            this.btn_vname.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_vname.Location = new System.Drawing.Point(167, 103);
+            this.btn_vname.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btn_vname.Name = "btn_vname";
+            this.btn_vname.Size = new System.Drawing.Size(162, 46);
+            this.btn_vname.TabIndex = 0;
+            // 
             // btn_vmode
             // 
             this.btn_vmode.BackColor = System.Drawing.Color.Red;
             this.btn_vmode.bEnabled = true;
             this.btn_vmode.bOn = true;
             this.btn_vmode.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_vmode.Location = new System.Drawing.Point(167, 186);
+            this.btn_vmode.Location = new System.Drawing.Point(167, 331);
             this.btn_vmode.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.btn_vmode.Name = "btn_vmode";
             this.btn_vmode.Size = new System.Drawing.Size(162, 46);
@@ -196,7 +201,7 @@
             this.btn_sqrt.bEnabled = true;
             this.btn_sqrt.bOn = true;
             this.btn_sqrt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_sqrt.Location = new System.Drawing.Point(277, 103);
+            this.btn_sqrt.Location = new System.Drawing.Point(275, 186);
             this.btn_sqrt.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.btn_sqrt.Name = "btn_sqrt";
             this.btn_sqrt.Size = new System.Drawing.Size(52, 46);
@@ -208,7 +213,7 @@
             this.btn_current.bEnabled = true;
             this.btn_current.bOn = true;
             this.btn_current.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_current.Location = new System.Drawing.Point(167, 103);
+            this.btn_current.Location = new System.Drawing.Point(167, 186);
             this.btn_current.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.btn_current.Name = "btn_current";
             this.btn_current.Size = new System.Drawing.Size(98, 46);
@@ -279,128 +284,12 @@
             this.btn_quit.BackColor = System.Drawing.Color.Red;
             this.btn_quit.bEnabled = true;
             this.btn_quit.bOn = true;
+            this.btn_quit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_quit.Location = new System.Drawing.Point(674, 1);
+            this.btn_quit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btn_quit.Name = "btn_quit";
             this.btn_quit.Size = new System.Drawing.Size(71, 71);
             this.btn_quit.TabIndex = 0;
-            // 
-            // lbl_range
-            // 
-            this.lbl_range.AutoSize = true;
-            this.lbl_range.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_range.Location = new System.Drawing.Point(25, 272);
-            this.lbl_range.Name = "lbl_range";
-            this.lbl_range.Size = new System.Drawing.Size(101, 25);
-            this.lbl_range.TabIndex = 2;
-            this.lbl_range.Text = "lbl_range";
-            // 
-            // btn_rangeP001
-            // 
-            this.btn_rangeP001.BackColor = System.Drawing.Color.Red;
-            this.btn_rangeP001.bEnabled = true;
-            this.btn_rangeP001.bOn = true;
-            this.btn_rangeP001.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_rangeP001.Location = new System.Drawing.Point(167, 262);
-            this.btn_rangeP001.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_rangeP001.Name = "btn_rangeP001";
-            this.btn_rangeP001.Size = new System.Drawing.Size(71, 46);
-            this.btn_rangeP001.TabIndex = 0;
-            // 
-            // btn_rangeP01
-            // 
-            this.btn_rangeP01.BackColor = System.Drawing.Color.Red;
-            this.btn_rangeP01.bEnabled = true;
-            this.btn_rangeP01.bOn = true;
-            this.btn_rangeP01.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_rangeP01.Location = new System.Drawing.Point(258, 262);
-            this.btn_rangeP01.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_rangeP01.Name = "btn_rangeP01";
-            this.btn_rangeP01.Size = new System.Drawing.Size(71, 46);
-            this.btn_rangeP01.TabIndex = 0;
-            // 
-            // btn_rangeP1
-            // 
-            this.btn_rangeP1.BackColor = System.Drawing.Color.Red;
-            this.btn_rangeP1.bEnabled = true;
-            this.btn_rangeP1.bOn = true;
-            this.btn_rangeP1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_rangeP1.Location = new System.Drawing.Point(339, 262);
-            this.btn_rangeP1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_rangeP1.Name = "btn_rangeP1";
-            this.btn_rangeP1.Size = new System.Drawing.Size(71, 46);
-            this.btn_rangeP1.TabIndex = 0;
-            // 
-            // btn_range1
-            // 
-            this.btn_range1.BackColor = System.Drawing.Color.Red;
-            this.btn_range1.bEnabled = true;
-            this.btn_range1.bOn = true;
-            this.btn_range1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range1.Location = new System.Drawing.Point(423, 262);
-            this.btn_range1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range1.Name = "btn_range1";
-            this.btn_range1.Size = new System.Drawing.Size(71, 46);
-            this.btn_range1.TabIndex = 0;
-            // 
-            // btn_range10
-            // 
-            this.btn_range10.BackColor = System.Drawing.Color.Red;
-            this.btn_range10.bEnabled = true;
-            this.btn_range10.bOn = true;
-            this.btn_range10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range10.Location = new System.Drawing.Point(513, 262);
-            this.btn_range10.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range10.Name = "btn_range10";
-            this.btn_range10.Size = new System.Drawing.Size(71, 46);
-            this.btn_range10.TabIndex = 0;
-            // 
-            // btn_range100
-            // 
-            this.btn_range100.BackColor = System.Drawing.Color.Red;
-            this.btn_range100.bEnabled = true;
-            this.btn_range100.bOn = true;
-            this.btn_range100.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range100.Location = new System.Drawing.Point(167, 318);
-            this.btn_range100.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range100.Name = "btn_range100";
-            this.btn_range100.Size = new System.Drawing.Size(71, 46);
-            this.btn_range100.TabIndex = 0;
-            // 
-            // btn_range1k
-            // 
-            this.btn_range1k.BackColor = System.Drawing.Color.Red;
-            this.btn_range1k.bEnabled = true;
-            this.btn_range1k.bOn = true;
-            this.btn_range1k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range1k.Location = new System.Drawing.Point(258, 318);
-            this.btn_range1k.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range1k.Name = "btn_range1k";
-            this.btn_range1k.Size = new System.Drawing.Size(71, 46);
-            this.btn_range1k.TabIndex = 0;
-            // 
-            // btn_range10k
-            // 
-            this.btn_range10k.BackColor = System.Drawing.Color.Red;
-            this.btn_range10k.bEnabled = true;
-            this.btn_range10k.bOn = true;
-            this.btn_range10k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range10k.Location = new System.Drawing.Point(339, 318);
-            this.btn_range10k.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range10k.Name = "btn_range10k";
-            this.btn_range10k.Size = new System.Drawing.Size(71, 46);
-            this.btn_range10k.TabIndex = 0;
-            // 
-            // btn_range100k
-            // 
-            this.btn_range100k.BackColor = System.Drawing.Color.Red;
-            this.btn_range100k.bEnabled = true;
-            this.btn_range100k.bOn = true;
-            this.btn_range100k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range100k.Location = new System.Drawing.Point(423, 318);
-            this.btn_range100k.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range100k.Name = "btn_range100k";
-            this.btn_range100k.Size = new System.Drawing.Size(71, 46);
-            this.btn_range100k.TabIndex = 0;
             // 
             // RxConfigWnd
             // 
@@ -446,15 +335,7 @@
         private RectButton btn_vmode;
         private RectButton btn_next;
         private RectButton btn_last;
-        private System.Windows.Forms.Label lbl_range;
-        private RectButton btn_range100k;
-        private RectButton btn_range10k;
-        private RectButton btn_range1k;
-        private RectButton btn_range100;
-        private RectButton btn_range10;
-        private RectButton btn_range1;
-        private RectButton btn_rangeP1;
-        private RectButton btn_rangeP01;
-        private RectButton btn_rangeP001;
+        private System.Windows.Forms.Label lbl_vname;
+        private RectButton btn_vname;
     }
 }

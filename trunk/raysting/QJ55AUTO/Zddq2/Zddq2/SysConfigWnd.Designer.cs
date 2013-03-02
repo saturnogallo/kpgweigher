@@ -34,6 +34,8 @@
             this.lbl_fltlength = new System.Windows.Forms.Label();
             this.lbl_display = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lbl_navmeter = new System.Windows.Forms.Label();
+            this.btn_navmeter = new Zddq2.RectButton();
             this.btn_export = new Zddq2.RectButton();
             this.lbl_date = new System.Windows.Forms.Label();
             this.btn_date = new Zddq2.RectButton();
@@ -52,8 +54,7 @@
             this.btn_RsConfig = new Zddq2.RectButton();
             this.btn_quit = new Zddq2.RectButton();
             this.btn_display = new Zddq2.RectButton();
-            this.lbl_navmeter = new System.Windows.Forms.Label();
-            this.btn_navmeter = new Zddq2.RectButton();
+            this.lbl_version = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -113,6 +114,7 @@
             this.panel1.Controls.Add(this.lbl_navmeter);
             this.panel1.Controls.Add(this.btn_navmeter);
             this.panel1.Controls.Add(this.btn_export);
+            this.panel1.Controls.Add(this.lbl_version);
             this.panel1.Controls.Add(this.lbl_date);
             this.panel1.Controls.Add(this.btn_date);
             this.panel1.Controls.Add(this.btn_ktt);
@@ -133,6 +135,28 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(722, 343);
             this.panel1.TabIndex = 7;
+            // 
+            // lbl_navmeter
+            // 
+            this.lbl_navmeter.AutoSize = true;
+            this.lbl_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_navmeter.Location = new System.Drawing.Point(14, 203);
+            this.lbl_navmeter.Name = "lbl_navmeter";
+            this.lbl_navmeter.Size = new System.Drawing.Size(135, 25);
+            this.lbl_navmeter.TabIndex = 12;
+            this.lbl_navmeter.Text = "lbl_navmeter";
+            // 
+            // btn_navmeter
+            // 
+            this.btn_navmeter.BackColor = System.Drawing.Color.Red;
+            this.btn_navmeter.bEnabled = true;
+            this.btn_navmeter.bOn = true;
+            this.btn_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_navmeter.Location = new System.Drawing.Point(186, 193);
+            this.btn_navmeter.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btn_navmeter.Name = "btn_navmeter";
+            this.btn_navmeter.Size = new System.Drawing.Size(162, 46);
+            this.btn_navmeter.TabIndex = 11;
             // 
             // btn_export
             // 
@@ -343,27 +367,15 @@
             this.btn_display.TabIndex = 5;
             this.btn_display.Load += new System.EventHandler(this.btn_display_Load);
             // 
-            // lbl_navmeter
+            // lbl_version
             // 
-            this.lbl_navmeter.AutoSize = true;
-            this.lbl_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_navmeter.Location = new System.Drawing.Point(14, 203);
-            this.lbl_navmeter.Name = "lbl_navmeter";
-            this.lbl_navmeter.Size = new System.Drawing.Size(135, 25);
-            this.lbl_navmeter.TabIndex = 12;
-            this.lbl_navmeter.Text = "lbl_navmeter";
-            // 
-            // btn_navmeter
-            // 
-            this.btn_navmeter.BackColor = System.Drawing.Color.Red;
-            this.btn_navmeter.bEnabled = true;
-            this.btn_navmeter.bOn = true;
-            this.btn_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_navmeter.Location = new System.Drawing.Point(186, 193);
-            this.btn_navmeter.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.btn_navmeter.Name = "btn_navmeter";
-            this.btn_navmeter.Size = new System.Drawing.Size(162, 46);
-            this.btn_navmeter.TabIndex = 11;
+            this.lbl_version.AutoSize = true;
+            this.lbl_version.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_version.Location = new System.Drawing.Point(181, 278);
+            this.lbl_version.Name = "lbl_version";
+            this.lbl_version.Size = new System.Drawing.Size(116, 25);
+            this.lbl_version.TabIndex = 10;
+            this.lbl_version.Text = "lbl_version";
             // 
             // SysConfigWnd
             // 
@@ -417,5 +429,6 @@
         private RectButton btn_throw;
         private System.Windows.Forms.Label lbl_navmeter;
         private RectButton btn_navmeter;
+        private System.Windows.Forms.Label lbl_version;
     }
 }

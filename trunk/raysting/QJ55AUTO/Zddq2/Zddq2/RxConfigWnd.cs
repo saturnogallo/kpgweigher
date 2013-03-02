@@ -21,46 +21,19 @@ namespace Zddq2
             btn_vmode.SetStyle(Color.White, MyButtonType.round2RectButton);
             btn_last.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_next.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+            btn_vname.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+
+            btn_vname.ValidClick += new EventHandler(input_GotFocus);
 
             btn_vmode.Visible = false;
             lbl_vmode.Visible = false;
 
-            lbl_range.Text = StringResource.str("rrange");
-            btn_rangeP001.Text = "0.001";
-            btn_rangeP01.Text = "0.01";
-            btn_rangeP1.Text = "0.1";
-            btn_range1.Text = "1";
-            btn_range10.Text = "10";
-            btn_range100.Text = "100";
-            btn_range1k.Text = "1k";
-            btn_range10k.Text = "10k";
-            btn_range100k.Text = "100k";
+            lbl_vname.Text = StringResource.str("vname");
 
-            btn_rangeP001.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_rangeP01.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_rangeP1.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_range1.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_range10.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_range100.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_range1k.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_range10k.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_range100k.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-
-            btn_rangeP001.ValidClick += new EventHandler(btn_rangeP001_ValidClick);
-            btn_rangeP01.ValidClick += new EventHandler(btn_rangeP01_ValidClick);
-            btn_rangeP1.ValidClick += new EventHandler(btn_rangeP1_ValidClick);
-            btn_range1.ValidClick += new EventHandler(btn_range1_ValidClick);
-            btn_range10.ValidClick += new EventHandler(btn_range10_ValidClick);
-            btn_range100.ValidClick += new EventHandler(btn_range100_ValidClick);
-            btn_range1k.ValidClick += new EventHandler(btn_range1k_ValidClick);
-            btn_range10k.ValidClick += new EventHandler(btn_range10k_ValidClick);
-            btn_range100k.ValidClick += new EventHandler(btn_range100k_ValidClick);
-
-
-//            btn_current.ValidClick += new EventHandler(input_GotFocus);
+//          btn_current.ValidClick += new EventHandler(input_GotFocus);
             btn_serial.ValidClick += new EventHandler(input_GotFocus);
             btn_stdchan.ValidClick += new EventHandler(input_GotFocus);
-//            btn_vmode.ValidClick += new EventHandler(btn_vmode_ValidClick);
+//          btn_vmode.ValidClick += new EventHandler(btn_vmode_ValidClick);
             btn_sqrt.ValidClick +=new EventHandler(btn_sqrt_ValidClick);
 
             btn_last.ValidClick += new EventHandler(btn_last_ValidClick);
@@ -80,7 +53,7 @@ namespace Zddq2
             btn_next.Visible = false;
             btn_stdchan.Visible = false;
             lbl_stdchan.Visible = false;
-            btn_enable.Visible = true;
+            btn_enable.Visible = false;
 
             btn_chan.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_chan.ValidClick += new EventHandler(btn_dummy);
@@ -106,80 +79,7 @@ namespace Zddq2
             
         }
 
-        void btn_rangeP001_ValidClick(object sender, EventArgs e)
-        {
-            //5A, 3V mode
-            Program.lst_rxinfo[selectedRx].iVMode = 0;
-            Program.lst_rxinfo[selectedRx].iIx = 5; 
-            Program.lst_rxinfo[selectedRx].iRRange = 0;
-            InitDisplay(selectedRx);
-        }
-        void btn_rangeP01_ValidClick(object sender, EventArgs e)
-        {
-            //1A, 3V mode
-            Program.lst_rxinfo[selectedRx].iVMode = 0;
-            Program.lst_rxinfo[selectedRx].iIx = 4;
-            Program.lst_rxinfo[selectedRx].iRRange = 1;
-
-            InitDisplay(selectedRx);
-        }
-        void btn_rangeP1_ValidClick(object sender, EventArgs e)
-        {
-            //0.3A, 3V mode
-            Program.lst_rxinfo[selectedRx].iVMode = 0;
-            Program.lst_rxinfo[selectedRx].iIx = 3;
-            Program.lst_rxinfo[selectedRx].iRRange = 2;
-            InitDisplay(selectedRx);
-        }
-        void btn_range1_ValidClick(object sender, EventArgs e)
-        {
-            //0.1A, 10V mode
-            Program.lst_rxinfo[selectedRx].iVMode = 1;
-            Program.lst_rxinfo[selectedRx].iIx = 2;
-            Program.lst_rxinfo[selectedRx].iRRange = 3;
-            InitDisplay(selectedRx);
-        }
-        void btn_range10_ValidClick(object sender, EventArgs e)
-        {
-            //0.01A, 10V mode
-            Program.lst_rxinfo[selectedRx].iVMode = 1;
-            Program.lst_rxinfo[selectedRx].iIx = 1;
-            Program.lst_rxinfo[selectedRx].iRRange = 4;
-            InitDisplay(selectedRx);
-        }
-        void btn_range100_ValidClick(object sender, EventArgs e)
-        {
-            //0.01A, 10V mode
-            Program.lst_rxinfo[selectedRx].iVMode = 1;
-            Program.lst_rxinfo[selectedRx].iIx = 1;
-            Program.lst_rxinfo[selectedRx].iRRange = 5;
-            InitDisplay(selectedRx);
-        }
-        void btn_range1k_ValidClick(object sender, EventArgs e)
-        {
-            //0.001, 10V mode
-            Program.lst_rxinfo[selectedRx].iVMode = 2;
-            Program.lst_rxinfo[selectedRx].iIx = 0;
-            Program.lst_rxinfo[selectedRx].iRRange = 6;
-
-            InitDisplay(selectedRx);
-        }
-        void btn_range10k_ValidClick(object sender, EventArgs e)
-        {
-            //1mA fix, 10V high mode
-            Program.lst_rxinfo[selectedRx].iVMode = 2;
-            Program.lst_rxinfo[selectedRx].iIx = 0;
-            Program.lst_rxinfo[selectedRx].iRRange = 7;
-            InitDisplay(selectedRx);
-        }
-        void btn_range100k_ValidClick(object sender, EventArgs e)
-        {
-            //0.3mA fix, 30V high mode
-            Program.lst_rxinfo[selectedRx].iVMode = 3;
-            Program.lst_rxinfo[selectedRx].iIx = -1;
-            Program.lst_rxinfo[selectedRx].iRRange = 8;
-            InitDisplay(selectedRx);
-        }
+        
         void btn_dummy(object sender, EventArgs e)
         {
         }
@@ -223,6 +123,11 @@ namespace Zddq2
 
         void btn_quit_ValidClick(object sender, EventArgs e)
         {
+            if (Program.rswnd.CheckError())
+            {
+                this.Invoke(new Action<object, EventArgs>(btn_RsConfig_ValidClick), new object[] { null, null });
+                return;
+            }
             Program.SwitchWindow("mainwnd");
             Program.mainwnd.Invoke(new Action<bool>(Program.mainwnd.ReDraw), new object[] { false });                
         }
@@ -280,6 +185,12 @@ namespace Zddq2
                 {
                     Program.lst_rxinfo[selectedRx].sSerial = data;
                 }
+                if (param == "vname")
+                {
+                    double rname = Math.Abs(Convert.ToDouble(data));
+                    Program.lst_rxinfo[selectedRx].dRxInput = rname;
+                    ActionMgr.SetIxRange(selectedRx, rname);
+                }
                 InitDisplay(selectedRx);
             }
             catch
@@ -310,10 +221,14 @@ namespace Zddq2
                     btn_current.Text = "1A";
                 if (rx.iIx == 5)
                     btn_current.Text = "5A";
-
+                btn_vname.Text = Util.FormatData(rx.dRxInput, 8);
                 btn_serial.Text = rx.sSerial;
                 btn_stdchan.Text = rx.iStdChan.ToString();
                 
+                if ((rx.iRRange == ActionMgr.RNG_10K && rx.bSqrt) || (rx.iRRange == ActionMgr.RNG_100K && rx.bSqrt))
+                {
+                    rx.bSqrt = false;
+                }
                 if (rx.bSqrt)
                 {
                     btn_sqrt.Text = "x2";
@@ -334,17 +249,7 @@ namespace Zddq2
             btn_stdchan.bOn = rx.bEnabled;
             //btn_sqrt.bOn = rx.bEnabled && (rx.iVMode == 0);
             //btn_vmode.bOn = rx.bEnabled;
-
-            btn_rangeP001.bOn = (rx.iRRange == 0);
-            btn_rangeP01.bOn = (rx.iRRange == 1);
-            btn_rangeP1.bOn = (rx.iRRange == 2);
-            btn_range1.bOn = (rx.iRRange == 3);
-            btn_range10.bOn = (rx.iRRange == 4);
-            btn_range100.bOn = (rx.iRRange == 5);
-            btn_range1k.bOn = (rx.iRRange == 6);
-            btn_range10k.bOn = (rx.iRRange == 7);
-            btn_range100k.bOn = (rx.iRRange == 8);
-
         }
+
     }
 }

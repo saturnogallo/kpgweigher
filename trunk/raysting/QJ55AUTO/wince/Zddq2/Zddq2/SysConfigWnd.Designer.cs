@@ -35,24 +35,25 @@ namespace Zddq2
             this.lbl_fltlength = new System.Windows.Forms.Label();
             this.lbl_display = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lbl_ktt = new System.Windows.Forms.Label();
+            this.lbl_meastimes = new System.Windows.Forms.Label();
+            this.lbl_date = new System.Windows.Forms.Label();
             this.lbl_navmeter = new System.Windows.Forms.Label();
+            this.lbl_throw = new System.Windows.Forms.Label();
+            this.lbl_version = new System.Windows.Forms.Label();
             this.btn_navmeter = new Zddq2.RectButton();
             this.btn_ktt = new Zddq2.RectButton();
-            this.lbl_ktt = new System.Windows.Forms.Label();
-            this.lbl_date = new System.Windows.Forms.Label();
-            this.lbl_meastimes = new System.Windows.Forms.Label();
-            this.lbl_throw = new System.Windows.Forms.Label();
-            this.btn_date = new Zddq2.RectButton();
-            this.btn_meastimes = new Zddq2.RectButton();
-            this.btn_throw = new Zddq2.RectButton();
-            this.btn_measdelay = new Zddq2.RectButton();
-            this.btn_fltlength = new Zddq2.RectButton();
-            this.btn_flttype = new Zddq2.RectButton();
-            this.btn_sampletimes = new Zddq2.RectButton();
             this.btn_export = new Zddq2.RectButton();
+            this.btn_meastimes = new Zddq2.RectButton();
+            this.btn_measdelay = new Zddq2.RectButton();
+            this.btn_date = new Zddq2.RectButton();
+            this.btn_sampletimes = new Zddq2.RectButton();
+            this.btn_throw = new Zddq2.RectButton();
             this.btn_SysConfig = new Zddq2.RectButton();
             this.btn_RxConfig = new Zddq2.RectButton();
+            this.btn_fltlength = new Zddq2.RectButton();
             this.btn_RsConfig = new Zddq2.RectButton();
+            this.btn_flttype = new Zddq2.RectButton();
             this.btn_quit = new Zddq2.RectButton();
             this.btn_display = new Zddq2.RectButton();
             this.panel1.SuspendLayout();
@@ -69,7 +70,7 @@ namespace Zddq2
             // lbl_measdelay
             // 
             this.lbl_measdelay.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_measdelay.Location = new System.Drawing.Point(432, 173);
+            this.lbl_measdelay.Location = new System.Drawing.Point(432, 102);
             this.lbl_measdelay.Name = "lbl_measdelay";
             this.lbl_measdelay.Size = new System.Drawing.Size(150, 25);
             this.lbl_measdelay.Text = "lbl_measdelay";
@@ -77,7 +78,7 @@ namespace Zddq2
             // lbl_flttype
             // 
             this.lbl_flttype.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_flttype.Location = new System.Drawing.Point(14, 102);
+            this.lbl_flttype.Location = new System.Drawing.Point(502, 451);
             this.lbl_flttype.Name = "lbl_flttype";
             this.lbl_flttype.Size = new System.Drawing.Size(166, 25);
             this.lbl_flttype.Text = "lbl_flttype";
@@ -85,9 +86,9 @@ namespace Zddq2
             // lbl_fltlength
             // 
             this.lbl_fltlength.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_fltlength.Location = new System.Drawing.Point(432, 102);
+            this.lbl_fltlength.Location = new System.Drawing.Point(432, 175);
             this.lbl_fltlength.Name = "lbl_fltlength";
-            this.lbl_fltlength.Size = new System.Drawing.Size(150, 25);
+            this.lbl_fltlength.Size = new System.Drawing.Size(119, 25);
             this.lbl_fltlength.Text = "lbl_fltlength";
             // 
             // lbl_display
@@ -101,55 +102,22 @@ namespace Zddq2
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.White;
-            this.panel1.Controls.Add(this.lbl_navmeter);
-            this.panel1.Controls.Add(this.btn_navmeter);
             this.panel1.Controls.Add(this.btn_ktt);
+            this.panel1.Controls.Add(this.btn_export);
             this.panel1.Controls.Add(this.lbl_ktt);
             this.panel1.Controls.Add(this.lbl_meastimes);
-            this.panel1.Controls.Add(this.lbl_throw);
             this.panel1.Controls.Add(this.lbl_measdelay);
             this.panel1.Controls.Add(this.btn_meastimes);
-            this.panel1.Controls.Add(this.btn_throw);
             this.panel1.Controls.Add(this.btn_measdelay);
+            this.panel1.Controls.Add(this.lbl_date);
             this.panel1.Controls.Add(this.lbl_fltlength);
-            this.panel1.Controls.Add(this.lbl_flttype);
-            this.panel1.Controls.Add(this.lbl_sampletimes);
             this.panel1.Controls.Add(this.btn_fltlength);
-            this.panel1.Controls.Add(this.btn_flttype);
+            this.panel1.Controls.Add(this.lbl_sampletimes);
+            this.panel1.Controls.Add(this.btn_date);
             this.panel1.Controls.Add(this.btn_sampletimes);
             this.panel1.Location = new System.Drawing.Point(12, 88);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(767, 319);
-            // 
-            // lbl_navmeter
-            // 
-            this.lbl_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_navmeter.Location = new System.Drawing.Point(14, 247);
-            this.lbl_navmeter.Name = "lbl_navmeter";
-            this.lbl_navmeter.Size = new System.Drawing.Size(135, 25);
-            this.lbl_navmeter.Text = "lbl_navmeter";
-            // 
-            // btn_navmeter
-            // 
-            this.btn_navmeter.BackColor = System.Drawing.Color.Red;
-            this.btn_navmeter.bEnabled = true;
-            this.btn_navmeter.bOn = true;
-            this.btn_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_navmeter.Location = new System.Drawing.Point(186, 235);
-            this.btn_navmeter.Name = "btn_navmeter";
-            this.btn_navmeter.Size = new System.Drawing.Size(162, 46);
-            this.btn_navmeter.TabIndex = 11;
-            // 
-            // btn_ktt
-            // 
-            this.btn_ktt.BackColor = System.Drawing.Color.Red;
-            this.btn_ktt.bEnabled = true;
-            this.btn_ktt.bOn = true;
-            this.btn_ktt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_ktt.Location = new System.Drawing.Point(591, 24);
-            this.btn_ktt.Name = "btn_ktt";
-            this.btn_ktt.Size = new System.Drawing.Size(162, 46);
-            this.btn_ktt.TabIndex = 0;
             // 
             // lbl_ktt
             // 
@@ -159,40 +127,78 @@ namespace Zddq2
             this.lbl_ktt.Size = new System.Drawing.Size(153, 25);
             this.lbl_ktt.Text = "lbl_ktt";
             // 
-            // lbl_date
-            // 
-            this.lbl_date.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_date.Location = new System.Drawing.Point(377, 441);
-            this.lbl_date.Name = "lbl_date";
-            this.lbl_date.Size = new System.Drawing.Size(166, 25);
-            this.lbl_date.Text = "lbl_date";
-            // 
             // lbl_meastimes
             // 
             this.lbl_meastimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_meastimes.Location = new System.Drawing.Point(14, 173);
+            this.lbl_meastimes.Location = new System.Drawing.Point(14, 102);
             this.lbl_meastimes.Name = "lbl_meastimes";
             this.lbl_meastimes.Size = new System.Drawing.Size(166, 25);
             this.lbl_meastimes.Text = "lbl_meastimes";
             // 
+            // lbl_date
+            // 
+            this.lbl_date.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
+            this.lbl_date.Location = new System.Drawing.Point(14, 175);
+            this.lbl_date.Name = "lbl_date";
+            this.lbl_date.Size = new System.Drawing.Size(166, 25);
+            this.lbl_date.Text = "lbl_date";
+            // 
+            // lbl_navmeter
+            // 
+            this.lbl_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
+            this.lbl_navmeter.Location = new System.Drawing.Point(209, 436);
+            this.lbl_navmeter.Name = "lbl_navmeter";
+            this.lbl_navmeter.Size = new System.Drawing.Size(35, 25);
+            this.lbl_navmeter.Text = "lbl_navmeter";
+            // 
             // lbl_throw
             // 
             this.lbl_throw.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_throw.Location = new System.Drawing.Point(435, 247);
+            this.lbl_throw.Location = new System.Drawing.Point(209, 410);
             this.lbl_throw.Name = "lbl_throw";
-            this.lbl_throw.Size = new System.Drawing.Size(150, 25);
+            this.lbl_throw.Size = new System.Drawing.Size(35, 25);
             this.lbl_throw.Text = "lbl_throw";
             // 
-            // btn_date
+            // lbl_version
             // 
-            this.btn_date.BackColor = System.Drawing.Color.Red;
-            this.btn_date.bEnabled = true;
-            this.btn_date.bOn = true;
-            this.btn_date.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_date.Location = new System.Drawing.Point(549, 430);
-            this.btn_date.Name = "btn_date";
-            this.btn_date.Size = new System.Drawing.Size(230, 46);
-            this.btn_date.TabIndex = 4;
+            this.lbl_version.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
+            this.lbl_version.Location = new System.Drawing.Point(29, 461);
+            this.lbl_version.Name = "lbl_version";
+            this.lbl_version.Size = new System.Drawing.Size(312, 25);
+            this.lbl_version.Text = "lbl_version";
+            // 
+            // btn_navmeter
+            // 
+            this.btn_navmeter.BackColor = System.Drawing.Color.Red;
+            this.btn_navmeter.bEnabled = true;
+            this.btn_navmeter.bOn = true;
+            this.btn_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_navmeter.Location = new System.Drawing.Point(250, 441);
+            this.btn_navmeter.Name = "btn_navmeter";
+            this.btn_navmeter.Size = new System.Drawing.Size(91, 20);
+            this.btn_navmeter.TabIndex = 11;
+            // 
+            // btn_ktt
+            // 
+            this.btn_ktt.BackColor = System.Drawing.Color.Red;
+            this.btn_ktt.bEnabled = true;
+            this.btn_ktt.bOn = true;
+            this.btn_ktt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_ktt.Location = new System.Drawing.Point(588, 24);
+            this.btn_ktt.Name = "btn_ktt";
+            this.btn_ktt.Size = new System.Drawing.Size(162, 46);
+            this.btn_ktt.TabIndex = 0;
+            // 
+            // btn_export
+            // 
+            this.btn_export.BackColor = System.Drawing.Color.Blue;
+            this.btn_export.bEnabled = true;
+            this.btn_export.bOn = true;
+            this.btn_export.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btn_export.Location = new System.Drawing.Point(18, 255);
+            this.btn_export.Name = "btn_export";
+            this.btn_export.Size = new System.Drawing.Size(162, 46);
+            this.btn_export.TabIndex = 13;
             // 
             // btn_meastimes
             // 
@@ -200,21 +206,10 @@ namespace Zddq2
             this.btn_meastimes.bEnabled = true;
             this.btn_meastimes.bOn = true;
             this.btn_meastimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_meastimes.Location = new System.Drawing.Point(186, 164);
+            this.btn_meastimes.Location = new System.Drawing.Point(186, 93);
             this.btn_meastimes.Name = "btn_meastimes";
             this.btn_meastimes.Size = new System.Drawing.Size(162, 46);
             this.btn_meastimes.TabIndex = 4;
-            // 
-            // btn_throw
-            // 
-            this.btn_throw.BackColor = System.Drawing.Color.Red;
-            this.btn_throw.bEnabled = true;
-            this.btn_throw.bOn = true;
-            this.btn_throw.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_throw.Location = new System.Drawing.Point(591, 235);
-            this.btn_throw.Name = "btn_throw";
-            this.btn_throw.Size = new System.Drawing.Size(162, 46);
-            this.btn_throw.TabIndex = 5;
             // 
             // btn_measdelay
             // 
@@ -222,32 +217,21 @@ namespace Zddq2
             this.btn_measdelay.bEnabled = true;
             this.btn_measdelay.bOn = true;
             this.btn_measdelay.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_measdelay.Location = new System.Drawing.Point(591, 164);
+            this.btn_measdelay.Location = new System.Drawing.Point(588, 93);
             this.btn_measdelay.Name = "btn_measdelay";
             this.btn_measdelay.Size = new System.Drawing.Size(162, 46);
             this.btn_measdelay.TabIndex = 5;
             // 
-            // btn_fltlength
+            // btn_date
             // 
-            this.btn_fltlength.BackColor = System.Drawing.Color.Red;
-            this.btn_fltlength.bEnabled = true;
-            this.btn_fltlength.bOn = true;
-            this.btn_fltlength.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_fltlength.Location = new System.Drawing.Point(591, 93);
-            this.btn_fltlength.Name = "btn_fltlength";
-            this.btn_fltlength.Size = new System.Drawing.Size(162, 46);
-            this.btn_fltlength.TabIndex = 10;
-            // 
-            // btn_flttype
-            // 
-            this.btn_flttype.BackColor = System.Drawing.Color.Red;
-            this.btn_flttype.bEnabled = true;
-            this.btn_flttype.bOn = true;
-            this.btn_flttype.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_flttype.Location = new System.Drawing.Point(186, 93);
-            this.btn_flttype.Name = "btn_flttype";
-            this.btn_flttype.Size = new System.Drawing.Size(162, 46);
-            this.btn_flttype.TabIndex = 12;
+            this.btn_date.BackColor = System.Drawing.Color.Red;
+            this.btn_date.bEnabled = true;
+            this.btn_date.bOn = true;
+            this.btn_date.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_date.Location = new System.Drawing.Point(186, 165);
+            this.btn_date.Name = "btn_date";
+            this.btn_date.Size = new System.Drawing.Size(230, 46);
+            this.btn_date.TabIndex = 4;
             // 
             // btn_sampletimes
             // 
@@ -260,16 +244,16 @@ namespace Zddq2
             this.btn_sampletimes.Size = new System.Drawing.Size(162, 46);
             this.btn_sampletimes.TabIndex = 13;
             // 
-            // btn_export
+            // btn_throw
             // 
-            this.btn_export.BackColor = System.Drawing.Color.Blue;
-            this.btn_export.bEnabled = true;
-            this.btn_export.bOn = true;
-            this.btn_export.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_export.Location = new System.Drawing.Point(12, 430);
-            this.btn_export.Name = "btn_export";
-            this.btn_export.Size = new System.Drawing.Size(136, 46);
-            this.btn_export.TabIndex = 13;
+            this.btn_throw.BackColor = System.Drawing.Color.Red;
+            this.btn_throw.bEnabled = true;
+            this.btn_throw.bOn = true;
+            this.btn_throw.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_throw.Location = new System.Drawing.Point(250, 413);
+            this.btn_throw.Name = "btn_throw";
+            this.btn_throw.Size = new System.Drawing.Size(91, 25);
+            this.btn_throw.TabIndex = 5;
             // 
             // btn_SysConfig
             // 
@@ -293,6 +277,17 @@ namespace Zddq2
             this.btn_RxConfig.Size = new System.Drawing.Size(136, 46);
             this.btn_RxConfig.TabIndex = 2;
             // 
+            // btn_fltlength
+            // 
+            this.btn_fltlength.BackColor = System.Drawing.Color.Red;
+            this.btn_fltlength.bEnabled = true;
+            this.btn_fltlength.bOn = true;
+            this.btn_fltlength.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_fltlength.Location = new System.Drawing.Point(588, 165);
+            this.btn_fltlength.Name = "btn_fltlength";
+            this.btn_fltlength.Size = new System.Drawing.Size(162, 46);
+            this.btn_fltlength.TabIndex = 10;
+            // 
             // btn_RsConfig
             // 
             this.btn_RsConfig.BackColor = System.Drawing.Color.Blue;
@@ -303,6 +298,17 @@ namespace Zddq2
             this.btn_RsConfig.Name = "btn_RsConfig";
             this.btn_RsConfig.Size = new System.Drawing.Size(136, 46);
             this.btn_RsConfig.TabIndex = 3;
+            // 
+            // btn_flttype
+            // 
+            this.btn_flttype.BackColor = System.Drawing.Color.Red;
+            this.btn_flttype.bEnabled = true;
+            this.btn_flttype.bOn = true;
+            this.btn_flttype.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_flttype.Location = new System.Drawing.Point(664, 461);
+            this.btn_flttype.Name = "btn_flttype";
+            this.btn_flttype.Size = new System.Drawing.Size(125, 15);
+            this.btn_flttype.TabIndex = 12;
             // 
             // btn_quit
             // 
@@ -331,18 +337,22 @@ namespace Zddq2
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(800, 490);
+            this.ClientSize = new System.Drawing.Size(800, 506);
             this.ControlBox = false;
-            this.Controls.Add(this.btn_export);
+            this.Controls.Add(this.lbl_navmeter);
+            this.Controls.Add(this.btn_navmeter);
+            this.Controls.Add(this.lbl_throw);
             this.Controls.Add(this.panel1);
+            this.Controls.Add(this.btn_throw);
             this.Controls.Add(this.btn_SysConfig);
+            this.Controls.Add(this.lbl_flttype);
+            this.Controls.Add(this.lbl_version);
             this.Controls.Add(this.btn_RxConfig);
-            this.Controls.Add(this.lbl_date);
             this.Controls.Add(this.btn_RsConfig);
+            this.Controls.Add(this.btn_flttype);
             this.Controls.Add(this.btn_quit);
             this.Controls.Add(this.btn_display);
             this.Controls.Add(this.lbl_display);
-            this.Controls.Add(this.btn_date);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "SysConfigWnd";
             this.Text = "SysConfig";
@@ -380,5 +390,6 @@ namespace Zddq2
         private RectButton btn_throw;
         private System.Windows.Forms.Label lbl_navmeter;
         private RectButton btn_navmeter;
+        private System.Windows.Forms.Label lbl_version;
     }
 }

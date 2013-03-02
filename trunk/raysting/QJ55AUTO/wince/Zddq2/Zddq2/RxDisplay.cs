@@ -71,6 +71,7 @@ namespace Zddq2
             dt.Columns.Add("time");
             dt.Columns.Add("excluded");
             SetGridStyle();
+            dataGrid2.BackColor = Color.White;
             dataGrid2.DataSource = dt;
             dataGrid2.Click += new EventHandler(dataGrid2_Click);
             AdjustPanel();
@@ -78,13 +79,8 @@ namespace Zddq2
             graphPane2.YAxisTicCount = 4;
             graphPane2.YAxisMax = 5;
             graphPane2.YAxisMin = -5;
-            graphPane2.YAxisTitle = "PPM";
+            graphPane2.YAxisTitle = "ppm";
             graphPane2.XAxisTicCount = 10;
-            /*
-            for (int j = 0; j < 25;j++ )
-                AddValue(j+1, 100152.34-j);
-            ThrowData();
-             */
             graphPane2.Invalidate();
         }
 
@@ -109,6 +105,8 @@ namespace Zddq2
 
         void dataGrid2_Click(object sender, EventArgs e)
         {
+            if (dataGrid2.CurrentCell is DataGridCell)
+            {
             if (dataGrid2.CurrentCell.ColumnNumber == 4)
             {
                 if (dataGrid2.CurrentCell.RowNumber >= 0)
@@ -124,6 +122,7 @@ namespace Zddq2
                     btn_aux1.Focus();
                     graphPane2.PointList[dataGrid2.CurrentCell.RowNumber] = pp;
                     ReDraw(true);
+                    }
                 }
             }
         }
@@ -170,17 +169,22 @@ namespace Zddq2
         }
         public void LogData(int index, double value)
         {
-            DeviceMgr.Log(String.Format("Reading {0} = {1}", index.ToString(),Util.FormatData(value, 8)));
+            DeviceMgr.Log(String.Format("读数 {0} = {1}", index.ToString(),Util.FormatData(value, 8)));
         }
         public void LogComplete()
         {
-            DeviceMgr.Log("...... Summary Begin ......");
-            DeviceMgr.Log(String.Format("Rx(mean):{0}\nMax:{1}\nMin:{2}\nRx/Rs:{3}\nStdev:{4}", GetData(RXDATA_MODE.AVERAGE),
+            DeviceMgr.Log(String.Format(@"...... 数据汇总 开始 ......
+            Rx(平均值):{0}
+            最大值:    {1}
+            最小值:    {2}
+            Rx/Rs:     {3}
+            标准差:    {4}
+            不确定度:  {4}", GetData(RXDATA_MODE.AVERAGE),
                 GetData(RXDATA_MODE.MAX),
                 GetData(RXDATA_MODE.MIN),
                 GetData(RXDATA_MODE.RATIO),
                 GetData(RXDATA_MODE.VARIANCE)));
-            DeviceMgr.Log("...... Summary End ...... ");
+            DeviceMgr.Log("...... 数据汇总 结束 ...... ");
         }
 
         //throw top 30% data and bottom 30% data;
@@ -357,11 +361,11 @@ namespace Zddq2
             get
             {
                 if(my_sum < 1e-10)
-                    return 0;
+                    return 1e-11;
                 
                 int rows = valid_rows;
                 if (rows < 2)
-                    return 0;
+                    return 1e-11;
                 double sqr = 0;
                 double avg = my_sum / rows;
                 foreach (PointPair v in graphPane2.PointList)
@@ -369,7 +373,9 @@ namespace Zddq2
                     if(!v.excluded)
                         sqr = sqr + v.value * (v.value - avg); 
                 }
-                return Math.Sqrt(sqr/ (rows-1))/avg;
+
+                sqr = Math.Sqrt(sqr/ (rows-1))/avg;
+                return sqr;
             }
         }
         public void AddValue(int index, double val)
@@ -401,7 +407,7 @@ namespace Zddq2
                 }
                 else
                 {
-                    graphPane2.YAxisMax = 1;
+                    graphPane2.YAxisMax = 3;
                 }
                 graphPane2.YAxisMin = -graphPane2.YAxisMax;
                 graphPane2.Refresh();
@@ -458,7 +464,10 @@ namespace Zddq2
 
             if (mode == RXDATA_MODE.VARIANCE)
             {
-                return (my_sqrtsum * 1e6).ToString("F2") + " PPM";
+                if (my_sqrtsum < 1e-8)
+                    return "0.00 ppm";
+                else
+                    return (my_sqrtsum * 1e6).ToString("F2") + " ppm";
             }
             return "0";
         }
@@ -511,9 +520,9 @@ namespace Zddq2
             }
             lbl_reading.Text = GetData(config.iMainData);
             lbl_aux1.Text = GetData(config.iAux1Data);
-            lbl_aux2.Text = GetData(config.iAux2Data);
+            lbl_aux2.Text = GetData(RXDATA_MODE.VARIANCE);//GetData(config.iAux2Data);
             btn_aux1.Text = StringResource.str("val_" + config.iAux1Data.ToString().ToLower());
-            btn_aux2.Text = StringResource.str("val_" + config.iAux2Data.ToString().ToLower());
+            btn_aux2.Text = "不确定度";// StringResource.str("val_" + config.iAux2Data.ToString().ToLower());
             btn_bigdisp.Text = StringResource.str("val_" + config.iMainData.ToString().ToLower());
             btn_dispmode.Text = StringResource.str("disp_" + config.iDataMode.ToString().ToLower());
         }

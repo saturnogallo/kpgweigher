@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V5.01                                                        04/05/2011  10:56:37  PAGE 1
+BL51 BANKED LINKER/LOCATER V5.01                                                        04/14/2012  11:02:44  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V5.01, INVOKED BY:
@@ -59,7 +59,7 @@ LINK MAP OF MODULE:  btnencoder (MAIN)
             CODE    0631H     0007H     UNIT         ?PR?PAUSE?MAIN
             CODE    0638H     0004H     UNIT         ?C_INITSEG
 
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 2
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 2
 
 
 
@@ -119,7 +119,7 @@ SEGMENT                                   DATA_GROUP
 ?PR?LED_SHOW?MAIN                       -----    -----
   +--> ?PR?_D164?MAIN
   +--> ?CO?MAIN
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 3
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 3
 
 
 
@@ -179,7 +179,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   C:053DH         PUBLIC        _d164
   D:00C8H         PUBLIC        T2CON
   C:0441H         PUBLIC        disptbls
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 4
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 4
 
 
   B:00A0H.2       PUBLIC        dat1
@@ -239,7 +239,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   -------         PROC          SJSERIALWAITFORONEBYTE
   -------         DO            
   D:0007H         SYMBOL        udata
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 5
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 5
 
 
   -------         ENDDO         
@@ -299,7 +299,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   -------         PROC          PAUSE
   C:0631H         LINE#         156
   C:0631H         LINE#         157
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 6
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 6
 
 
   C:0631H         LINE#         158
@@ -359,7 +359,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   C:031BH         LINE#         256
   C:031DH         LINE#         257
   C:031DH         LINE#         258
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 7
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 7
 
 
   C:031DH         LINE#         259
@@ -419,7 +419,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   C:05F2H         LINE#         302
   C:05F6H         LINE#         303
   -------         ENDPROC       CLEAR_10KNOB
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 8
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 8
 
 
   -------         PROC          UPDATE_10KNOB
@@ -479,7 +479,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   C:059BH         LINE#         352
   C:059DH         LINE#         353
   C:059DH         LINE#         354
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 9
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 9
 
 
   C:05A6H         LINE#         355
@@ -539,7 +539,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   C:0086H         LINE#         411
   C:0086H         LINE#         413
   C:008BH         LINE#         414
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 10
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 10
 
 
   C:008BH         LINE#         415
@@ -599,7 +599,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   C:016BH         LINE#         477
   C:016BH         LINE#         478
   C:016EH         LINE#         479
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 11
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 11
 
 
   C:0170H         LINE#         480
@@ -659,7 +659,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   C:051BH         LINE#         530
   C:051BH         LINE#         531
   C:0528H         LINE#         532
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 12
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 12
 
 
   C:052CH         LINE#         533
@@ -719,7 +719,7 @@ SYMBOL TABLE OF MODULE:  btnencoder (MAIN)
   C:01F4H         LINE#         615
   C:01F9H         LINE#         616
   C:01F9H         LINE#         617
-BL51 BANKED LINKER/LOCATER V5.01                                                      04/05/2011  10:56:37  PAGE 13
+BL51 BANKED LINKER/LOCATER V5.01                                                      04/14/2012  11:02:44  PAGE 13
 
 
   C:01FCH         LINE#         618

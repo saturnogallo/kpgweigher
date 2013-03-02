@@ -37,10 +37,11 @@ static u8 volatile _bEepromBufNs;
 /************************************************************************/
 
 //#pragma interrupt_handler vIvEeReady:iv_EE_READY 
+/*
 interrupt [EE_RDY] void vIvEeReady(void) 
 { 
     if(!fgEepromBufEmpty()){ 
-        while(EECR & (1<<EEWE));  /* wait for last write to complete */
+        while(EECR & (1<<EEWE));  // wait for last write to complete 
         EEAR = _sEepromBuf[_bEepromBufRdPtr].wAddress; 
         EEDR = _sEepromBuf[_bEepromBufRdPtr].bVal; 
         EECR |= (1<<EEMWE); 
@@ -54,13 +55,13 @@ interrupt [EE_RDY] void vIvEeReady(void)
         EECR &= ~(1<<EERIE); 
     } 
 }    
-
+*/
 /************************************************************************/
 //                     Write data into EEPROM buffer
 // If buffer is not full, write data into buffer, return RET_SUCCESS(0x0)
 // flag. If buffer is full, return RET_BUSY(0xff) flag
 /************************************************************************/ 
-
+/*
 u8 bWriteData2Eeprom_c(u16 wAddress, u8 bVal) 
 { 
     if(fgEepromBufFull()) 
@@ -102,7 +103,7 @@ u8 bWriteData2Eeprom(u16 wAddress, u8 *bVal, u8 totalsize){
   return totalsize;  
 }
 
-
+*/
 /************************************************************************/
 //                         Read data from EEPROM 
 // The programer must ensure EEPROM is NOT in writing state before reading
@@ -110,6 +111,7 @@ u8 bWriteData2Eeprom(u16 wAddress, u8 *bVal, u8 totalsize){
 // writting state. Return RET_SUCCESS(0x0) flag if reading successfully
 // Data readout is saved into read buffer.
 /************************************************************************/ 
+/*
 u8 bReadDataFromEeprom(u16 wAddress, u8 *pbVal,u8 size)
 {
 	while(size-- > 0){
@@ -128,12 +130,13 @@ u8 bReadDataFromEeprom_c(u16 wAddress, u8 *pbVal)
     *pbVal = EEDR; 
     return RET_SUCCESS; 
 } 
-
+*/
 /************************************************************************/
 //                        Initialize EEPROM
 // Intialize buffer variables. Diable EEPROM interruption
 // EEPROM interrupt is enabled after writing data to EEPROM buffer.
 /************************************************************************/ 
+/*
 void vInitEeprom(void) 
 { 
     EECR = 0x00; 
@@ -141,4 +144,5 @@ void vInitEeprom(void)
     _bEepromBufRdPtr = 0; 
     _bEepromBufNs    = 0; 
 } 
+*/
 

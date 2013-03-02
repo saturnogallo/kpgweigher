@@ -210,7 +210,7 @@ namespace Zddq2
         }
         void uiTimer_Tick(object sender, EventArgs e)
         {
-            lbl_datetime.Text = DateTime.Now.ToShortTimeString();
+            lbl_datetime.Text = DateTime.Now.ToString("HH:mm");
         }
     }
 }

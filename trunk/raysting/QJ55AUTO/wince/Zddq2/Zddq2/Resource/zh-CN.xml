@@ -29,16 +29,18 @@
   <string skey="emptydata">数据为空</string>
   <string skey="enter_current">请输入电流值(A)</string>
   <string skey="enter_newtime">请输入新的时间</string>
-  <string skey="fltlength">滤波器长度</string>
-  <string skey="enter_fltlength">请输入滤波器长度</string>
+  <string skey="fltlength">滤波器</string>
+  <string skey="enter_fltlength">请输入滤波器值</string>
   <string skey="filtertype">滤波器类型</string>
   <string skey="sampletimes">单次采样次数</string>
   <string skey="enter_sampletimes">请输入单次采样次数</string>
-  <string skey="measdelay">测量间隔</string>
+  <string skey="measdelay">测量间隔(秒)</string>
   <string skey="enter_measdelay">请输入测量间隔时间(秒)</string>
   <string skey="meastimes">测量次数</string>
   <string skey="enter_meastimes">请输入测量次数</string>
   <string skey="enter_newdate">按格式输入新的日期(例:20120131)</string>
+  <string skey="enter_exportdate">按格式输入开始日期(例:20120131)</string>
+  <string skey="enter_endexport">按格式输入结束日期(例:20120131)</string>
   <string skey="enter_newtime">按格式输入新的时间(例:235959)</string>
 
   <string skey="noharddisk">未发现U盘，请重新插入U盘。</string>
@@ -58,7 +60,43 @@
   <string skey="val_ratio">Rx/Rs</string>
   <string skey="val_rs">Rs</string>
 
-  <string skey="enter_1kcurr">请输入1k ohm电流</string>
+  <string skey="enter_100000B">请输入100k ohm量程比例误差</string>
+  <string skey="enter_10000B">请输入10k ohm量程比例误差</string>
+  <string skey="enter_1000B">请输入1k ohm量程比例误差</string>
+  <string skey="enter_100B">请输入100 ohm量程比例误差</string>
+  <string skey="enter_10B">请输入10 ohm量程比例误差</string>
+  <string skey="enter_1B">请输入1 ohm量程比例误差</string>
+  <string skey="enter_0.1B">请输入0.1 ohm量程比例误差</string>
+  <string skey="enter_0.01B">请输入0.01 ohm量程比例误差</string>
+  <string skey="enter_0.001B">请输入0.001 ohm量程比例误差</string>
+  
+  <string skey="enter_1A">请输入1A电流实际值</string>
+  <string skey="enter_2A">请输入2A电流实际值</string>
+  <string skey="enter_5A">请输入5A电流实际值</string>
+  <string skey="enter_10A">请输入10A电流实际值</string>
+  <string skey="enter_0.3A">请输入300mA电流实际值</string>
+  <string skey="enter_0.6A">请输入600mA电流实际值</string>
+  <string skey="enter_0.1A">请输入100mA电流实际值</string>
+  <string skey="enter_0.2A">请输入200mA电流实际值</string>
+  <string skey="enter_0.01A">请输入10mA电流实际值</string>
+  <string skey="enter_0.02A">请输入20mA电流实际值</string>
+  <string skey="enter_0.001A">请输入1mA电流实际值</string>
+  <string skey="enter_0.002A">请输入2mA电流实际值</string>
+  <string skey="enter_0.0001A">请输入0.1mA电流实际值</string>
+  <string skey="enter_0.0002A">请输入0.2mA电流实际值</string>
+  <string skey="nox2_4big">10K,100K欧姆不能使用x2电流</string>
+  <string skey="rs_2small">标准电阻过小</string>
+  <string skey="rs_2big">标准电阻过大</string>
+  <string skey="help_std0">请使用 1欧姆电阻做标准</string>
+  <string skey="help_std1">请使用1 欧姆电阻做标准</string>
+  <string skey="help_std2">请使用1 欧姆电阻做标准</string>
+  <string skey="help_std3">请使用1 欧姆电阻做标准</string>
+  <string skey="help_std4">请使用10 欧姆电阻做标准</string>
+  <string skey="help_std5">请使用100 欧姆电阻做标准</string>
+  <string skey="help_std6">请使用1k 欧姆电阻做标准</string>
+  <string skey="help_std7">请使用10k 欧姆电阻做标准</string>
+  <string skey="help_std8">请使用100k 欧姆电阻做标准</string>
+
   <string skey="enter_10kcurr">请输入10k ohm电流</string>
   <string skey="enter_100kcurr">请输入100k ohm电流</string>
   <string skey="enter_chan">请选择通道(1-24)</string>
@@ -73,11 +111,11 @@
   <string skey="sysconfig">系统设置</string>
   <string skey="rxconfig">被测电阻</string>
   <string skey="rsconfig">标准电阻</string>
-  <string skey="filtertype1">去两头平均</string>
-  <string skey="filtertype2">所有数平均</string>
-  <string skey="filtertype3">平滑平均</string>
-  <string skey="filtertype4">固定时间</string>
-  <string skey="serial">序列号</string>
+  <string skey="filtertype1">中位数平均</string>
+  <string skey="filtertype2">最后值平均</string>
+  <string skey="filtertype3">平滑滤波平均</string>
+  <string skey="filtertype4">按分布平均</string>
+  <string skey="serial">编号</string>
   <string skey="mychannel">被测通道</string>
   <string skey="current">电流</string>
   <string skey="stdchan">标准通道</string>
@@ -88,14 +126,16 @@
   <string skey="rvalue">电阻值</string>
   <string skey="date">日期</string>
   <string skey="enter_rvalue">输入电阻值(Ω)</string>
-  <string skey="temp">温度</string>
-  <string skey="enter_temp">请输入温度</string>
+  <string skey="temp">温度(℃)</string>
+  <string skey="enter_temp">请输入温度(℃)</string>
 
   <string skey="ralpha">温度系数α</string>
   <string skey="enter_ralpha">输入温度系数α(x1e-6/℃)</string>
   <string skey="rbeta">温度系数β</string>
   <string skey="enter_rbeta">输入温度系数β(x1e-6/℃)</string>
 
+  <string skey="vname">名义值</string>
+  <string skey="enter_vname">请输入被测电阻名义值</string>
   <string skey="col_id">序号</string>
   <string skey="col_data">Rx电阻值</string>
   <string skey="col_ratio">Rx/Rs比例值</string>
