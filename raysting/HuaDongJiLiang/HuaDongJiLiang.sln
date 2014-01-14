@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "kongwy", "kongwy\kongwy.csproj", "{E13951D7-2FEF-41C8-8B17-7A44598565D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "erdengbo", "erdengbo\erdengbo.csproj", "{EA887504-E3E4-4824-B530-B8DDD8F7F670}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E13951D7-2FEF-41C8-8B17-7A44598565D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E13951D7-2FEF-41C8-8B17-7A44598565D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E13951D7-2FEF-41C8-8B17-7A44598565D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E13951D7-2FEF-41C8-8B17-7A44598565D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA887504-E3E4-4824-B530-B8DDD8F7F670}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA887504-E3E4-4824-B530-B8DDD8F7F670}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA887504-E3E4-4824-B530-B8DDD8F7F670}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA887504-E3E4-4824-B530-B8DDD8F7F670}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
