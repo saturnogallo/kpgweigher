@@ -486,7 +486,8 @@ namespace ioex_cs
             XElement xe = new XElement("Item");
             foreach (string reg in regs)
             {
-                xe.Add(reg, "0");
+                if(reg != null)
+                    xe.Add(new XElement(reg, "0")); //sojodebug
             }
             foreach (DataRow dr in DS2.Tables[0].Rows)
             {
