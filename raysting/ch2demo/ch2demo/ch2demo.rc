@@ -1,0 +1,269 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#ifndef APSTUDIO_INVOKED
+#include "targetver.h"
+#endif
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#ifndef APSTUDIO_INVOKED\r\n"
+    "#include ""targetver.h""\r\n"
+    "#endif\r\n"
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#include ""res\\ch2demo.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\ch2demo.ico"
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_CH2DEMO_DIALOG DIALOGEX 0, 0, 574, 233
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_VISIBLE | WS_CAPTION
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "ch2demo"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,209,212,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,524,212,50,14
+    PUSHBUTTON      "Button1",IDC_BUTTON11,26,16,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON12,26,38,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON13,26,60,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON14,19,20,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON15,19,43,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON16,47,44,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON17,47,21,6,19
+    PUSHBUTTON      "Button2",IDC_BUTTON18,57,60,6,8
+    PUSHBUTTON      "Button1",IDC_BUTTON19,83,16,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON20,83,38,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON21,83,61,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON22,76,21,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON23,76,43,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON24,104,45,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON25,104,21,6,19
+    PUSHBUTTON      "Button2",IDC_BUTTON26,114,61,6,8
+    PUSHBUTTON      "Button1",IDC_BUTTON27,143,17,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON28,143,39,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON29,143,62,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON30,135,22,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON31,135,44,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON32,163,46,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON33,163,22,6,19
+    PUSHBUTTON      "Button2",IDC_BUTTON34,173,62,6,8
+    PUSHBUTTON      "Button1",IDC_BUTTON35,197,17,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON36,197,39,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON37,197,62,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON38,189,22,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON39,189,44,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON40,217,46,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON41,217,22,6,19
+    PUSHBUTTON      "Button2",IDC_BUTTON42,227,62,6,8
+    PUSHBUTTON      "Button1",IDC_BUTTON43,253,17,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON44,253,39,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON45,253,62,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON46,245,22,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON47,245,44,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON48,273,46,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON49,273,22,6,19
+    PUSHBUTTON      "Button2",IDC_BUTTON50,283,62,6,8
+    PUSHBUTTON      "Button1",IDC_BUTTON51,307,18,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON52,307,40,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON53,307,63,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON54,299,23,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON55,299,45,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON56,327,47,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON57,327,23,6,19
+    PUSHBUTTON      "Button2",IDC_BUTTON58,337,63,6,8
+    PUSHBUTTON      "Button1",IDC_BUTTON59,363,18,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON60,363,40,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON61,363,63,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON62,355,23,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON63,355,45,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON64,383,47,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON65,383,23,6,19
+    PUSHBUTTON      "Button2",IDC_BUTTON66,393,63,6,8
+    PUSHBUTTON      "Button1",IDC_BUTTON67,419,18,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON68,419,40,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON69,419,63,21,6
+    PUSHBUTTON      "Button1",IDC_BUTTON70,411,23,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON71,411,45,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON72,439,47,6,19
+    PUSHBUTTON      "Button1",IDC_BUTTON73,439,23,6,19
+    PUSHBUTTON      "Button2",IDC_BUTTON74,449,63,6,8
+    PUSHBUTTON      "C,ohm,mV",IDC_BUTTON3,9,95,48,31
+    PUSHBUTTON      "type",IDC_BUTTON4,69,94,48,31
+    PUSHBUTTON      "zero",IDC_BUTTON5,133,95,48,31
+    PUSHBUTTON      "channel/LEFT",IDC_BUTTON6,197,94,48,31
+    PUSHBUTTON      "RIGHT",IDC_BUTTON7,256,94,48,31
+    PUSHBUTTON      "OK",IDC_BUTTON8,439,95,48,31
+    PUSHBUTTON      "DN",IDC_BUTTON9,378,95,48,31
+    PUSHBUTTON      "UP",IDC_BUTTON10,317,95,48,31
+    CONTROL         "PT1000",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,517,21,43,8
+    CONTROL         "PT100",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,516,39,43,8
+    CONTROL         "E",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,515,55,43,8
+    CONTROL         "K",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,515,68,43,8
+    CONTROL         "R",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,516,85,43,8
+    CONTROL         "S",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,517,100,43,8
+    CONTROL         "B",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,517,114,43,8
+    CONTROL         "J",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,519,128,43,8
+    CONTROL         "T",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,519,142,43,8
+    CONTROL         "T",IDC_CHECK10,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,464,20,43,8
+    CONTROL         "ohm",IDC_CHECK11,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,463,33,43,8
+    CONTROL         "mV",IDC_CHECK12,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,463,48,43,8
+    CONTROL         "ch1",IDC_CHECK13,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,151,43,8
+    CONTROL         "ch2",IDC_CHECK14,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,168,43,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "TODO: <Company name>"
+            VALUE "FileDescription", "TODO: <File description>"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "ch2demo.exe"
+            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "OriginalFilename", "ch2demo.exe"
+            VALUE "ProductName", "TODO: <Product name>"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_CH2DEMO_DIALOG, DIALOG
+    BEGIN
+        RIGHTMARGIN, 545
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 226
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#include "res\ch2demo.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
