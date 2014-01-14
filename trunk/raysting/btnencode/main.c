@@ -558,6 +558,17 @@ void main()
 	}
 	clearrows();	
 	bUpdate = 1;
+
+	/*for debug
+	for(cnt = 0; cnt < 17; cnt++)
+	{
+		leds[cnt] = led_code[1];
+	}
+	led_show();
+	while(1)
+	{
+	}
+	*/
 	while(1)
 	{
 		scanrows();
