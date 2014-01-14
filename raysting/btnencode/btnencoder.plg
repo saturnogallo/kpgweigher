@@ -4,17 +4,9 @@
 <h1>µVision2 Build Log</h1>
 <h2>Project:</h2>
 C:\Code\GoogleCode\g_lxhbucket\raysting\btnencode\btnencoder.uv2
-Project File Date:  03/12/2011
+Project File Date:  04/07/2013
 
 <h2>Output:</h2>
-Build target 'Target 1'
-compiling main.c...
-linking...
-*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
-    SEGMENT: ?PR?PAUSE?MAIN
-Program Size: data=113.0 xdata=0 code=1593
-creating hex file from "btnencoder"...
-"btnencoder" - 0 Error(s), 1 Warning(s).
 </pre>
 </body>
 </html>
