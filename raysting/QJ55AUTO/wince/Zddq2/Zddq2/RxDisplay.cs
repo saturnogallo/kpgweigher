@@ -133,31 +133,31 @@ namespace Zddq2
             DataGridColumnStyle col1 = new DataGridTextBoxColumn();
             col1.MappingName = "id";
             col1.HeaderText = StringResource.str("col_id");
-            col1.Width = 50;
+            col1.Width = 70;
             col1.NullText = string.Empty;
 
             DataGridColumnStyle col2 = new DataGridTextBoxColumn();
             col2.MappingName = "data";
             col2.HeaderText = StringResource.str("col_data");
-            col2.Width = 150;
+            col2.Width = 190;
             col2.NullText = string.Empty;
 
             DataGridColumnStyle col3 = new DataGridTextBoxColumn();
             col3.MappingName = "ratio";
             col3.HeaderText = StringResource.str("col_ratio");
-            col3.Width = 150;
+            col3.Width = 190;
             col3.NullText = string.Empty;
 
             DataGridColumnStyle col4 = new DataGridTextBoxColumn();
             col4.MappingName = "time";
             col4.HeaderText = StringResource.str("col_time");
-            col4.Width = 150;
+            col4.Width = 190;
             col4.NullText = string.Empty;
 
             DataGridColumnStyle col5 = new DataGridTextBoxColumn();
             col5.MappingName = "excluded";
             col5.HeaderText = StringResource.str("col_excluded");
-            col5.Width = 150;
+            col5.Width = 190;
             col5.NullText = string.Empty;
 
             tblStyle.GridColumnStyles.Add(col1);
@@ -495,7 +495,7 @@ namespace Zddq2
                 {
                     dataGrid2.Visible = false;
                     graphPane2.Top = dataGrid2.Top;
-                    graphPane2.Height = 340;
+                    graphPane2.Height = 550;
                     graphPane2.Visible = true;
                     RefreshData(dt.Rows.Count);
                     graphPane2.Refresh();
@@ -503,15 +503,15 @@ namespace Zddq2
                 if (config.iDataMode == RXDISP_MODE.GRID)
                 {
                     graphPane2.Visible = false;
-                    dataGrid2.Height = 340;
+                    dataGrid2.Height = 550;
                     dataGrid2.Visible = true;
                 }
                 if (config.iDataMode == RXDISP_MODE.MIXED)
                 {
-                    dataGrid2.Height = 170;
+                    dataGrid2.Height = 250;
                     dataGrid2.Visible = true;
                     graphPane2.Top = dataGrid2.Top +dataGrid2.Height + 5;
-                    graphPane2.Height = 170;
+                    graphPane2.Height = 300;
                     graphPane2.Visible = true;
                     RefreshData(dt.Rows.Count);
                     graphPane2.Refresh();
@@ -599,6 +599,16 @@ namespace Zddq2
         }
 
         private void RxDisplay_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RxDisplay_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lbl_aux1_ParentChanged(object sender, EventArgs e)
         {
 
         }

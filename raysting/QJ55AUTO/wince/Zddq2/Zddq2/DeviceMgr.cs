@@ -469,9 +469,9 @@ curr2, ktt, rs/rx, dvm  --  4
             #region init port
             port.BaudRate = 9600;
             if (!bDebugGPIB)
-            port.PortName = "COM1";
+                port.PortName = "COM1"; //for old , it is COM3, for new it is COM1
             else
-                port.PortName = "COM1";
+                port.PortName = "COM1";//for old , it is COM3, for new it is COM1
             port.Parity = Parity.None;
             port.DataBits = 8;
             port.StopBits = StopBits.One;
@@ -495,9 +495,9 @@ curr2, ktt, rs/rx, dvm  --  4
             cmdport = new SerialPort();
             cmdport.BaudRate = 9600;
             if(!bDebugGPIB)
-            cmdport.PortName = "COM4";
+                cmdport.PortName = "COM4"; //for old is COM2, for new is COM4
             else
-                cmdport.PortName = "COM4";
+                cmdport.PortName = "COM4"; //for old is COM2, for new is COM4
             cmdport.Parity = Parity.None;
             cmdport.DataBits = 8;
             cmdport.StopBits = StopBits.One;

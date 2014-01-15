@@ -272,5 +272,10 @@ namespace Zddq2
             }
             return false;
         }
+
+        private void lbl_rvalue_ParentChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
