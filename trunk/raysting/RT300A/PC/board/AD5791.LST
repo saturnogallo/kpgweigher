@@ -1,0 +1,191 @@
+C51 COMPILER V7.01  AD5791                                                                 05/26/2013 15:32:04 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE AD5791
+OBJECT MODULE PLACED IN AD5791.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE AD5791.c OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          /********************************************************************************
+   2           Author : CAC (China Applications Support Team) 
+   3          
+   4           Date :   January, 2012
+   5          
+   6           File name :   AD5791.c
+   7          
+   8           Description :   Use the GPIO to simulate the SPI communication of AD5791
+   9          
+  10           Hardware plateform :   ADuC7026 and AD5791
+  11          ********************************************************************************/
+  12          
+  13          //#include "ADuC7026.h"
+  14          //#include "ADuC7026Driver.h"
+  15          #include "AD5791.h"
+  16          #include "stdio.h"
+  17          extern void swiDelay(unsigned char dl1,unsigned char dl2);
+  18          
+  19          xdata unsigned long int AD5791Registers[5]={0,0,0,0,0};         // only low 24 bits are used for each register
+  20          
+  21          unsigned char ch_dummy;
+  22          
+  23          #define ADuC7026OutputBit(A,B)  A=B;
+  24          
+  25          #define ADuC7026DelayUs(i)      swiDelay(1,i);
+  26          
+  27          #define ADuC7026InputBit(A)  (A) 
+  28          
+  29          
+  30          
+  31          unsigned char ADuC7026SpiRead(unsigned char WriteData)
+  32          {
+  33   1               unsigned   char   ReadData;
+  34   1           unsigned   char  j;
+  35   1      
+  36   1        
+  37   1      
+  38   1            ReadData = 0;
+  39   1      
+  40   1            for(j=0; j<8; j++)
+  41   1            {
+  42   2               ADuC7026OutputBit(SCLK,1);
+  43   2      
+  44   2               if(0x80 == (WriteData & 0x80))
+  45   2               {
+  46   3                  ADuC7026OutputBit(SDI,1);     //Send one to SDI pin
+  47   3               }
+  48   2               else
+  49   2               {
+  50   3                  ADuC7026OutputBit(SDI,0);     //Send zero to SDI pin
+  51   3               }
+  52   2               WriteData = WriteData << 1;
+  53   2               ReadData = (ReadData<<1) | ADuC7026InputBit(SDO); 
+  54   2      
+  55   2               ADuC7026OutputBit(SCLK,0);   /////
+C51 COMPILER V7.01  AD5791                                                                 05/26/2013 15:32:04 PAGE 2   
+
+  56   2      
+  57   2            }
+  58   1            return ReadData;
+  59   1      }
+  60          void ADuC7026SpiWrite(unsigned char WriteData)
+  61          {
+  62   1           unsigned   char   j;
+  63   1      
+  64   1      
+  65   1            for(j=0; j<8; j++)
+  66   1            {
+  67   2               ADuC7026OutputBit(SCLK,1);
+  68   2      
+  69   2               if(0x80 == (WriteData & 0x80))
+  70   2               {
+  71   3                  ADuC7026OutputBit(SDI,1);     //Send one to SDI pin
+  72   3               }
+  73   2               else
+  74   2               {
+  75   3                  ADuC7026OutputBit(SDI,0);     //Send zero to SDI pin
+  76   3               }
+  77   2               WriteData = WriteData << 1;
+  78   2      
+  79   2               ADuC7026OutputBit(SCLK,0);   /////
+  80   2            }
+  81   1      }
+  82          
+  83          void ADuC7026Init()
+  84          {
+  85   1         /* initialize the GPIOs for controlling the AD5791*/
+  86   1         ADuC7026OutputBit(LDAC, 1);
+  87   1         ADuC7026OutputBit(SYNC, 1);
+  88   1         ADuC7026OutputBit(CLR, 1);
+  89   1         ADuC7026OutputBit(SCLK, 1);
+  90   1         ADuC7026OutputBit(SDI, 1);
+  91   1         ch_dummy = ADuC7026InputBit(SDO);
+  92   1      }
+  93          
+  94          void AD5791HardwareReset()
+  95          {
+  96   1              ADuC7026OutputBit(RESET,0);
+  97   1              ADuC7026OutputBit(RESET,1);
+  98   1              ADuC7026DelayUs(10);
+  99   1      }
+ 100          
+ 101          void AD5791HardwareClear()
+ 102          {
+ 103   1              ADuC7026OutputBit(CLR,0);
+ 104   1              ADuC7026OutputBit(CLR,1);
+ 105   1      }
+ 106          
+ 107          void AD5791HardwareLoad()
+ 108          {
+ 109   1              ADuC7026OutputBit(LDAC,0);
+ 110   1              ADuC7026OutputBit(LDAC,1);
+ 111   1      }
+ 112          
+ 113          void AD5791Initialization()
+ 114          {
+ 115   1              AD5791HardwareReset();
+ 116   1              AD5791HardwareClear();
+ 117   1      }
+C51 COMPILER V7.01  AD5791                                                                 05/26/2013 15:32:04 PAGE 3   
+
+ 118          
+ 119          void WriteToAD5791ViaSPI(unsigned char RegisterStartAddress, unsigned long int *DataBuffer)
+ 120          {
+ 121   1              unsigned char  WriteData;
+ 122   1              
+ 123   1      
+ 124   1         ADuC7026OutputBit(SYNC,0);
+ 125   1         ADuC7026OutputBit(SCLK,1); 
+ 126   1      
+ 127   1                      WriteData = ((RegisterStartAddress)<<4) | (DataBuffer[RegisterStartAddress]>>16);
+ 128   1                      ADuC7026SpiWrite(WriteData);
+ 129   1                      WriteData = DataBuffer[RegisterStartAddress]>>8;
+ 130   1                      ADuC7026SpiWrite(WriteData);
+ 131   1                      WriteData = DataBuffer[RegisterStartAddress];
+ 132   1                      ADuC7026SpiWrite(WriteData);
+ 133   1      
+ 134   1         ADuC7026OutputBit(SCLK,1);
+ 135   1         ADuC7026OutputBit(SYNC,1);
+ 136   1      }
+ 137          
+ 138          void ReadFromAD5791ViaSPI(const unsigned char RegisterStartAddress,unsigned char *DataBuffer)
+ 139          {
+ 140   1              unsigned char  WriteData;
+ 141   1      
+ 142   1              ADuC7026OutputBit(SYNC,0);
+ 143   1              ADuC7026OutputBit(SCLK,1); 
+ 144   1      
+ 145   1              WriteData = 0x80 | ((RegisterStartAddress)<<4) ;        
+ 146   1              ADuC7026SpiWrite(WriteData);
+ 147   1              ADuC7026SpiWrite(NOP);
+ 148   1              ADuC7026SpiWrite(NOP);
+ 149   1              ADuC7026OutputBit(SCLK,1);
+ 150   1              ADuC7026OutputBit(SYNC,1);
+ 151   1      
+ 152   1              ADuC7026OutputBit(SCLK,0);
+ 153   1              ADuC7026OutputBit(SYNC,0);
+ 154   1      
+ 155   1              DataBuffer[0] = 0x00;
+ 156   1              DataBuffer[1] = 0x0f & ADuC7026SpiRead(NOP);
+ 157   1              DataBuffer[2] = ADuC7026SpiRead(NOP);
+ 158   1              DataBuffer[3] = ADuC7026SpiRead(NOP);
+ 159   1      
+ 160   1              ADuC7026OutputBit(SYNC,1);
+ 161   1              ADuC7026OutputBit(SCLK,1);
+ 162   1      
+ 163   1      }
+ 164          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    300    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     20    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
