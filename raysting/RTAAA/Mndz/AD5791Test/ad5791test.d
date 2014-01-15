@@ -1,0 +1,14 @@
+ad5791test.o: AD5791Test.c
+ad5791test.o: C:\Keil\ARM\INC\ADI\ADuC7026.h
+ad5791test.o: C:\Keil\ARM\INC\ADI\irq.h
+ad5791test.o: C:\Keil\ARM\INC\ADI\timer.h
+ad5791test.o: C:\Keil\ARM\INC\ADI\dac.h
+ad5791test.o: C:\Keil\ARM\INC\ADI\uart.h
+ad5791test.o: C:\Keil\ARM\INC\ADI\I2C.h
+ad5791test.o: C:\Keil\ARM\INC\ADI\PLA.H
+ad5791test.o: C:\Keil\ARM\INC\ADI\GPIO.h
+ad5791test.o: C:\Keil\ARM\INC\ADI\flash.h
+ad5791test.o: C:\Keil\ARM\INC\ADI\pwm.h
+ad5791test.o: ADuC7026Driver.h
+ad5791test.o: AD5791.h
+ad5791test.o: C:\Keil\ARM\RV31\INC\stdio.h

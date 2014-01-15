@@ -1,0 +1,3 @@
+--cpu ARM7TDMI "aduc702x.o" "aduc7026driver.o" "ad5791test.o" "ad5791.o" --ro-base 0x00080000 --entry 0x00080000 --rw-base 0x00010000 --strict --autoat --summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list ".\AD5791Test.map" -o "AD5791Test.axf"
