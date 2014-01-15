@@ -1,0 +1,21 @@
+﻿<Window x:Class="QJApp.Window1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Window1" Height="768" Width="1024" Loaded="Window_Loaded" ResizeMode="CanResizeWithGrip" SizeToContent="WidthAndHeight" Topmost="False" WindowStartupLocation="CenterScreen" MinWidth="800" MinHeight="600">
+    <Window.Resources>
+        
+    </Window.Resources>
+    <Grid Name="grid1">
+        <Grid.ColumnDefinitions >
+            <ColumnDefinition Width="*"  />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="5*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions />
+        <StackPanel Grid.Column="0"  Background="DarkBlue">
+            <Button Height="22.864" Name="button1">Button</Button>
+        </StackPanel>
+        <GridSplitter Grid.Column="1"  Width="3" Background="Red" ResizeBehavior="PreviousAndNext" />
+        <StackPanel Grid.Column="2"  Background="#FFAEA130" />
+    </Grid>
+</Window>
