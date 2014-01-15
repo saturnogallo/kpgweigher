@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PCRT-SDL", "PCMndz\PCRT-SDL.csproj", "{B22C12EA-96FE-4F5C-B780-4B237BCB29BE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RT-SDL", "Mndz\RT-SDL.csproj", "{759FF971-9C39-4969-AF96-8E0847C0F74A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B22C12EA-96FE-4F5C-B780-4B237BCB29BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B22C12EA-96FE-4F5C-B780-4B237BCB29BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B22C12EA-96FE-4F5C-B780-4B237BCB29BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B22C12EA-96FE-4F5C-B780-4B237BCB29BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{759FF971-9C39-4969-AF96-8E0847C0F74A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{759FF971-9C39-4969-AF96-8E0847C0F74A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{759FF971-9C39-4969-AF96-8E0847C0F74A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{759FF971-9C39-4969-AF96-8E0847C0F74A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

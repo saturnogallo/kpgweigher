@@ -1,0 +1,702 @@
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE STATE
+OBJECT MODULE PLACED IN state.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE state.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "lcd.h"
+   2          #include "key.h"
+   3          #include "utili.h"
+   4          #include "eeprom.h"
+   5          #include "window.h"
+   6          #include "utili.h"
+   7          #include "scanner.h"
+   8          
+   9          extern uchar prb_type[];
+  10          extern double prb_param1[];
+  11          extern double prb_param2[];
+  12          extern double prb_param3[];
+  13          extern char   prb_name[];
+  14          extern uchar  prb_type[];
+  15          
+  16          double valuep;
+  17          #define REFRESH_TABLES1 sprintf(strbuf,"%i",curr_pos);draw_label(&chvalue,SW_NORMAL);\
+  18                          if(new_page == 1){\
+  19                                  for(i = min_option; i <= max_option; i++){\
+  20                                          j = ((curr_pos-1)/max_option)*max_option + i;
+  21          #define REFRESH_TABLES2 draw_label(&(items[i-1]),SW_NORMAL);\
+  22                                          if((curr_pos-1) % max_option == (i-1))\
+  23                                                  draw_label(&(items[i-1]),SW_REVERSE);\
+  24                                  }\
+  25                          }else{\
+  26                                  for(i = min_option; i <= max_option; i++) {\
+  27                                          if((last_pos-1) % max_option == (i-1))\
+  28                                                  draw_label(&(items[i-1]),SW_REVERSE);\
+  29                                          if((curr_pos-1) % max_option == (i-1))\
+  30                                                  draw_label(&(items[i-1]),SW_REVERSE);\
+  31                                  }\
+  32                          }       
+  33          
+  34          #define INC_TABLE       last_pos = curr_pos;    curr_pos++;\
+  35                                  if(curr_pos > max_index) curr_pos = min_index;\
+  36                                  if(last_pos == curr_pos)        return;\
+  37                                  if(curr_pos % max_option == 1)  {new_page = 1;}else{new_page = 0;}
+  38          
+  39          #define DEC_TABLE       last_pos = curr_pos;   curr_pos--;\
+  40                                  if(curr_pos < min_index) curr_pos = max_index;\
+  41                                  if(last_pos == curr_pos)  return;\
+  42                                  if(curr_pos % max_option == 0)  {new_page = 1;}else{new_page = 0;}
+  43          
+  44          #define KEY_TABLE       if((msg > KEY_NUM0) && (msg-KEY_NUM0)*max_option <= max_index)\
+  45                                                  {new_page = 1; curr_pos = (msg-KEY_NUM1)*max_option+1;}
+  46          
+  47          #define INIT_OPTIONS    for(i = min_option;i <= max_option; i++) {\
+  48                                          draw_label(&options[i-1], SW_NORMAL);\
+  49                                  }       
+  50          #define REFRESH_OPTIONS if(last_sel == curr_sel)\
+  51                                          return;\
+  52                                  for(i = min_option;i <= max_option; i++){\
+  53                                          if(last_sel == i)\
+  54                                                  draw_label(&options[i-1], SW_REVERSE);\
+  55                                          if(curr_sel == i)\
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 2   
+
+  56                                                  draw_label(&options[i-1], SW_REVERSE);\
+  57                                  }
+  58          
+  59          #define INC_OPTION      last_sel = curr_sel;\
+  60                                  curr_sel++;\
+  61                                  if(curr_sel > max_option)\
+  62                                          curr_sel = min_option;
+  63          #define DEC_OPTION      last_sel = curr_sel;\
+  64                                  curr_sel--;\
+  65                                  if(curr_sel < min_option)\
+  66                                          curr_sel = max_option;
+  67          
+  68          extern int   curr_ch;           //index of current channel in menu
+  69          extern int   curr_prb;  //index of current probe selection in menu
+  70          
+  71          char* getprbtype(uchar);
+  72          void pgmain_handler(uchar msg) {
+  73   1              int i,old_ch;
+  74   1              char *cptr;
+  75   1              LABEL code chs[] = {
+  76   1                      {LBL_HZ12, 4, 3,3,strbuf}, {LBL_HZ6X8,2,30,3,strbuf}, {LBL_HZ6X8,2,40,3,strbuf}, {LBL_HZ6X8,2,50,3,strbu
+             -f}
+  77   1              };
+  78   1              LABEL code values[] = {
+  79   1                      {LBL_HZ12, 40,3, 7,strbuf}, {LBL_HZ6X8,40,30,10,strbuf}, {LBL_HZ6X8,40,40,10,strbuf}, {LBL_HZ6X8,40,50,1
+             -0,strbuf}
+  80   1              };
+  81   1              LABEL code temps[] = {
+  82   1                      {LBL_HZ12, 140,3, 7,strbuf}, {LBL_HZ6X8,140,30,10,strbuf}, {LBL_HZ6X8,140,40,10,strbuf}, {LBL_HZ6X8,140,
+             -50,10,strbuf}
+  83   1              };
+  84   1              
+  85   1              
+  86   1              if(msg == KEY_TAB) {
+  87   2                      if(IS_THERM_MODE)
+  88   2                      {
+  89   3                              irun[IRUN_NEW_PG] = PG_TCONFIG;
+  90   3                      }else{
+  91   3                              irun[IRUN_NEW_PG] = PG_RCONFIG;
+  92   3                      }
+  93   2                      return;
+  94   2              }
+  95   1              if(msg == MSG_INIT) {
+  96   2                      LCD_Cls();
+  97   2                      old_ch = curr_ch;
+  98   2                      for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
+  99   2                      {
+ 100   3                              sprintf(strbuf,"CH%02i:",curr_ch);
+ 101   3                              draw_label(&chs[i],SW_NORMAL);
+ 102   3                              INC_CH;
+ 103   3                      }
+ 104   2                      curr_ch = old_ch;
+ 105   2                      msg = MSG_REFRESH;
+ 106   2              }
+ 107   1              if(msg == KEY_UP) {
+ 108   2                      DEC_CH; 
+ 109   2                      old_ch = curr_ch;
+ 110   2                      for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
+ 111   2                      {
+ 112   3                              sprintf(strbuf,"CH%02i:",curr_ch);
+ 113   3                              draw_label(&chs[i],SW_NORMAL);
+ 114   3                              INC_CH;
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 3   
+
+ 115   3                      }
+ 116   2                      curr_ch = old_ch;
+ 117   2                      msg = MSG_REFRESH;
+ 118   2              }
+ 119   1              if(msg == KEY_DN) {
+ 120   2      
+ 121   2                      INC_CH;
+ 122   2                      old_ch = curr_ch;
+ 123   2                      for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
+ 124   2                      {
+ 125   3                              sprintf(strbuf,"CH%02i:",curr_ch);
+ 126   3                              draw_label(&chs[i],SW_NORMAL);
+ 127   3                              INC_CH;
+ 128   3                      }
+ 129   2                      curr_ch = old_ch;
+ 130   2                      msg = MSG_REFRESH;
+ 131   2              }
+ 132   1              if(msg == MSG_REFRESH) {
+ 133   2                      old_ch = curr_ch;
+ 134   2                      for(i=0;i<sizeof(chs)/sizeof(LABEL);i++)//
+ 135   2                      {
+ 136   3                              cptr = getprbtype(prb_type[ch_prbid[curr_ch-1]]);
+ 137   3                              if((ch_prbid[curr_ch - 1] == INVALID_PROBE) ||\
+ 138   4                                      (vreading[curr_ch - 1] < -90000) ||\
+ 139   4                                      ((IS_THERM_MODE) && (cptr[0] == 'P'))||\ 
+ 140   4                                      ((IS_BORE_MODE) && (cptr[0] != 'P'))){
+ 141   4                                      sprintf(strbuf," -------");
+ 142   4                                      draw_label(&values[i],SW_NORMAL|SW_OVERLAP);
+ 143   4                                      draw_label(&temps[i],SW_NORMAL|SW_OVERLAP);
+ 144   4                              }else{
+ 145   4                                      if(IS_THERM_MODE)
+ 146   4                                      {
+ 147   5                                              sprintf(strbuf,"%8f",vreading[curr_ch - 1]);
+ 148   5                                              sprintf(strbuf+8," mV");
+ 149   5                                      }else{
+ 150   5                                              sprintf(strbuf,"%8f",vreading[curr_ch - 1]);
+ 151   5                                              sprintf(strbuf+8," ohm");
+ 152   5                                      }
+ 153   4                                      draw_label(&values[i],SW_NORMAL|SW_OVERLAP);
+ 154   4                                      sprintf(strbuf," %8f", reading[curr_ch - 1]);
+ 155   4                                      sprintf(strbuf+8," C,%c",cptr[0]);
+ 156   4                                      draw_label(&temps[i],SW_NORMAL|SW_OVERLAP);
+ 157   4                              }
+ 158   3                              INC_CH;
+ 159   3                      }
+ 160   2                      curr_ch = old_ch;
+ 161   2              }
+ 162   1      }
+ 163          
+ 164          //main configuration window of R
+ 165          extern uint dlg_cnt;
+ 166          extern double valuep;
+ 167          void pgrconfig_handler(uchar msg) {
+ 168   1              uchar i;
+ 169   1              LABEL code banner = {LBL_HZ16,3,3,1,"铂电阻参数配置"};
+ 170   1              LABEL code calibrate = {LBL_HZ16,30,30,8,"内标准校准中..."};
+ 171   1              LABEL code klbl = {LBL_HZ6X8, 88,28, 9,strbuf}; //label for ktt display
+ 172   1              LABEL code options[] = {
+ 173   1                      {LBL_HZ16, 10,23,1,"1.电流换向"},
+ 174   1                      {LBL_HZ16,130,23,8,"2.内标准校准"},
+ 175   1                      {LBL_HZ16, 10,45,8,"3.通道探头选择"},
+ 176   1                      {LBL_HZ16,130,45,8,"4.设置探头参数"}
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 4   
+
+ 177   1              };
+ 178   1      
+ 179   1              static uchar curr_sel = 1;
+ 180   1              static uchar last_sel = 1;
+ 181   1              const uchar min_option = 1;
+ 182   1              const uchar max_option = sizeof(options)/sizeof(LABEL);
+ 183   1      
+ 184   1              if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
+ 185   2                      irun[IRUN_NEW_PG] = PG_MAIN;
+ 186   2                      return;
+ 187   2              }
+ 188   1              if(msg == MSG_INIT) {
+ 189   2                      LCD_Cls();
+ 190   2                      draw_label(&banner, SW_NORMAL);
+ 191   2                      sprintf(strbuf,"(%i)",irun[IRUN_KTIME]);
+ 192   2                      draw_label(&klbl, SW_NORMAL);
+ 193   2                      INIT_OPTIONS;
+ 194   2                      msg = MSG_REFRESH;
+ 195   2              }
+ 196   1              if(msg == KEY_NUM1) {
+ 197   2                      window_setup(4); //max data length
+ 198   2                      sprintf(strbuf,"电流换向时间设置");
+ 199   2                      if(1 == wnd_intinput())
+ 200   2                              send_byte(SRUN_NEWKTT,buf2byte());
+ 201   2                      else
+ 202   2                              irun[IRUN_NEW_PG] = PG_RCONFIG;
+ 203   2                      return;
+ 204   2              }
+ 205   1              if(msg == KEY_NUM2)
+ 206   1              {
+ 207   2                      valuep = 0;
+ 208   2                      sprintf(strbuf,"请输入外标准(CH1)阻值");
+ 209   2                      if(1 == wnd_floatinput(valuep))
+ 210   2                      {
+ 211   3                              valuep = buf2double();
+ 212   3                              send_double(SRUN_CALIB,(uchar*)&valuep,4);
+ 213   3                              wnd_msgbox(&calibrate);
+ 214   3                      }else{
+ 215   3                              irun[IRUN_NEW_PG] = PG_RCONFIG;
+ 216   3                      }
+ 217   2                      return;
+ 218   2              }
+ 219   1              if(msg == KEY_NUM3) {
+ 220   2                      irun[IRUN_NEW_PG] = PG_CHSET;
+ 221   2                      return;
+ 222   2              }
+ 223   1              if(msg == KEY_NUM4) {
+ 224   2                      irun[IRUN_NEW_PG] = PG_PRBSET;
+ 225   2                      return;
+ 226   2              }
+ 227   1              if(msg == MSG_REFRESH) {
+ 228   2                      REFRESH_OPTIONS;
+ 229   2              }
+ 230   1      }
+ 231          //main configuration window of T
+ 232          void pgtconfig_handler(uchar msg) {
+ 233   1              uchar i;
+ 234   1              LABEL code banner = {LBL_HZ16,3,3,7,"热电偶参数配置"};
+ 235   1              LABEL code options[] = {
+ 236   1                      {LBL_HZ16,40,25,8,"1.选择各通道探头"}, {LBL_HZ16,40,45,8,"2.设置各探头参数"}
+ 237   1              };
+ 238   1              static uchar curr_sel = 1;
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 5   
+
+ 239   1              static uchar last_sel = 1;
+ 240   1              const uchar min_option = 1;
+ 241   1              const uchar max_option = sizeof(options)/sizeof(LABEL);
+ 242   1              if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
+ 243   2                      irun[IRUN_NEW_PG] = PG_MAIN;
+ 244   2                      return;
+ 245   2              }
+ 246   1              if(msg == MSG_INIT) {
+ 247   2                      LCD_Cls();
+ 248   2                      draw_label(&banner, SW_NORMAL);
+ 249   2                      INIT_OPTIONS;
+ 250   2                      msg = MSG_REFRESH;
+ 251   2              }
+ 252   1              if(msg == KEY_NUM1) {
+ 253   2                      irun[IRUN_NEW_PG] = PG_CHSET;
+ 254   2                      return;
+ 255   2              }
+ 256   1              if(msg == KEY_NUM2) {
+ 257   2                      irun[IRUN_NEW_PG] = PG_PRBSET;
+ 258   2                      return;
+ 259   2              }
+ 260   1              if(msg == MSG_REFRESH) {
+ 261   2                      REFRESH_OPTIONS;
+ 262   2              }
+ 263   1              return;
+ 264   1      }
+ 265          //channel probe setup
+ 266          void pgchset_handler(uchar msg) {
+ 267   1              LABEL code banner =    {LBL_HZ16,3,3,4,"通道设置"};
+ 268   1              LABEL code chvalue = {LBL_HZ6X8,130,3,2,strbuf};
+ 269   1              LABEL code items[] = {
+ 270   1                      {LBL_HZ6X8, 10, 30, 10, strbuf},
+ 271   1                      {LBL_HZ6X8, 130,30, 10, strbuf},
+ 272   1                      {LBL_HZ6X8, 10, 40, 10, strbuf},
+ 273   1                      {LBL_HZ6X8, 130,40, 10, strbuf},
+ 274   1                      {LBL_HZ6X8, 10, 50, 10, strbuf},
+ 275   1                      {LBL_HZ6X8, 130,50, 10, strbuf}
+ 276   1              };
+ 277   1      
+ 278   1              static uint curr_pos = 0;
+ 279   1              static uint last_pos = 0;
+ 280   1              const uchar code min_option = 1;
+ 281   1              const uchar code max_option = sizeof(items)/sizeof(LABEL);
+ 282   1              const uchar code min_index = 1;
+ 283   1              uchar max_index = MAX_CH_NUM;
+ 284   1              uchar new_page = 0;
+ 285   1              int i,j;
+ 286   1              if(msg == KEY_TAB || msg == KEY_CE) {
+ 287   2                      if(irun[IRUN_MODE] == THERM_MODE)
+ 288   2                              irun[IRUN_NEW_PG] = PG_TCONFIG;
+ 289   2                      else
+ 290   2                              irun[IRUN_NEW_PG] = PG_RCONFIG;
+ 291   2                      return;
+ 292   2              }
+ 293   1      
+ 294   1              if(msg == KEY_UP) {
+ 295   2                      DEC_TABLE;
+ 296   2                      msg = MSG_REFRESH;
+ 297   2              }
+ 298   1              if(msg == KEY_DN) {
+ 299   2                      INC_TABLE;
+ 300   2                      msg = MSG_REFRESH;
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 6   
+
+ 301   2              }
+ 302   1              if(msg == KEY_OK) {     //show window to select the probe
+ 303   2                      curr_ch = curr_pos;
+ 304   2                      irun[IRUN_NEW_PG] = PG_PRBLIST;
+ 305   2                      return;
+ 306   2              }
+ 307   1              if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
+ 308   2                      KEY_TABLE;
+ 309   2                      msg = MSG_REFRESH;
+ 310   2              }
+ 311   1              if(msg == KEY_DOT)
+ 312   1              {
+ 313   2                      msg = INVALID_PROBE;
+ 314   2                      send_double(SRUN_CHPRB_BASE + curr_pos,&msg,1);
+ 315   2                      return;
+ 316   2              }
+ 317   1              if(msg == MSG_INIT) {
+ 318   2                      LCD_Cls();
+ 319   2                      draw_label(&banner, SW_NORMAL);
+ 320   2                      curr_pos = 1;
+ 321   2                      new_page = 1;
+ 322   2                      msg = MSG_REFRESH;
+ 323   2              }
+ 324   1              if(msg == MSG_REFRESH) {
+ 325   2                      REFRESH_TABLES1;
+ 326   4                                      if(ch_prbid[j-1] == INVALID_PROBE){
+ 327   5                                              sprintf(strbuf,"CH%i:*",j);
+ 328   5                                      }else{ //draw line item j
+ 329   5                                              sprintf(strbuf,"CH%i:%s",j,prb_name[(ch_prbid[j-1])]);
+ 330   5                                      }
+ 331   4                      REFRESH_TABLES2;
+ 332   2              }
+ 333   1              return;
+ 334   1      }
+ 335          //select probe to edit.
+ 336          void pgprbset_handler(uchar msg) {
+ 337   1              LABEL code banner = {LBL_HZ16,3,3,8,"请选择要配置的探头"};
+ 338   1              LABEL code chvalue = {LBL_HZ6X8,180,3,2,strbuf};
+ 339   1              LABEL code items[] = {
+ 340   1                      {LBL_HZ6X8, 10, 30, 10, strbuf},
+ 341   1                      {LBL_HZ6X8, 130,30, 10, strbuf},
+ 342   1                      {LBL_HZ6X8, 10, 40, 10, strbuf},
+ 343   1                      {LBL_HZ6X8, 130,40, 10, strbuf},
+ 344   1                      {LBL_HZ6X8, 10, 50, 10, strbuf},
+ 345   1                      {LBL_HZ6X8, 130,50, 10, strbuf}
+ 346   1              };
+ 347   1              static uint curr_pos = 1;
+ 348   1              static uint last_pos = 1;
+ 349   1              const uchar min_option = 1;
+ 350   1              const uchar max_option = sizeof(items)/sizeof(LABEL);
+ 351   1              const uchar min_index = 1;
+ 352   1              const uchar max_index = MAX_PROBE_NUM;
+ 353   1              int i,j;
+ 354   1              uchar new_page = 1;
+ 355   1              if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
+ 356   2                      KEY_TABLE;
+ 357   2                      msg = MSG_REFRESH;
+ 358   2              }
+ 359   1              if(msg == KEY_CE || msg == KEY_TAB)
+ 360   1              {
+ 361   2                      if(irun[IRUN_MODE] == THERM_MODE) //thermal mode
+ 362   2                              irun[IRUN_NEW_PG] = PG_TCONFIG;
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 7   
+
+ 363   2                      else
+ 364   2                              irun[IRUN_NEW_PG] = PG_RCONFIG;
+ 365   2                      return;
+ 366   2              }
+ 367   1              if(msg == KEY_OK)
+ 368   1              {
+ 369   2                      curr_prb = curr_pos;
+ 370   2                      irun[IRUN_NEW_PG] = PG_PRBCONFIG;
+ 371   2                      return;
+ 372   2              }
+ 373   1              if(msg == MSG_INIT)
+ 374   1              {
+ 375   2                      LCD_Cls();
+ 376   2                      draw_label(&banner, SW_NORMAL);
+ 377   2                      curr_pos = 1;
+ 378   2                      new_page = 1;
+ 379   2                      msg = MSG_REFRESH;
+ 380   2              }
+ 381   1              if(msg == KEY_UP) {
+ 382   2                      DEC_TABLE;
+ 383   2                      msg = MSG_REFRESH;
+ 384   2              }
+ 385   1              if(msg == KEY_DN) {
+ 386   2                      INC_TABLE;
+ 387   2                      msg = MSG_REFRESH;
+ 388   2              }
+ 389   1              if(msg == MSG_REFRESH) {
+ 390   2                      REFRESH_TABLES1;        
+ 391   4                              sprintf(strbuf,"%s",prb_name[j-1]);
+ 392   4                              draw_label(&(items[i-1]),SW_NORMAL);
+ 393   4                      REFRESH_TABLES2;
+ 394   2              }
+ 395   1              return;
+ 396   1      }
+ 397          //select probe for channel setup
+ 398          void pgprblist_handler(uchar msg) {
+ 399   1              LABEL code banner = {LBL_HZ16,3,3,8,strbuf};
+ 400   1              LABEL code chvalue = {LBL_HZ6X8,180,3,2,strbuf};
+ 401   1              LABEL code items[] = {
+ 402   1                      {LBL_HZ6X8, 10, 30, 10, strbuf},
+ 403   1                      {LBL_HZ6X8, 130,30, 10, strbuf},
+ 404   1                      {LBL_HZ6X8, 10, 40, 10, strbuf},
+ 405   1                      {LBL_HZ6X8, 130,40, 10, strbuf},
+ 406   1                      {LBL_HZ6X8, 10, 50, 10, strbuf},
+ 407   1                      {LBL_HZ6X8, 130,50, 10, strbuf}
+ 408   1              };
+ 409   1              static uint curr_pos = 1;
+ 410   1              static uint last_pos = 1;
+ 411   1              const uchar min_option = 1;
+ 412   1              const uchar max_option = sizeof(items)/sizeof(LABEL);
+ 413   1              const uchar min_index = 1;
+ 414   1              const uchar max_index = MAX_PROBE_NUM;
+ 415   1              uchar i,j;
+ 416   1              uchar new_page = 1;
+ 417   1              if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
+ 418   2                      KEY_TABLE;
+ 419   2                      msg = MSG_REFRESH;
+ 420   2              }
+ 421   1              if(msg == KEY_CE)
+ 422   1              {
+ 423   2                      irun[IRUN_NEW_PG] = PG_CHSET;
+ 424   2                      return;
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 8   
+
+ 425   2              }
+ 426   1              if(msg == KEY_TAB || msg == KEY_OK)
+ 427   1              {
+ 428   2                      send_byte(SRUN_CHPRB_BASE+curr_ch, curr_pos);
+ 429   2                      return;
+ 430   2              }
+ 431   1              if(msg == MSG_INIT)
+ 432   1              {
+ 433   2                      LCD_Cls();
+ 434   2                      sprintf(strbuf,"请选择通道%i使用的探头",curr_ch);
+ 435   2                      draw_label(&banner, SW_NORMAL);
+ 436   2                      curr_pos = 1;
+ 437   2                      new_page = 1;
+ 438   2                      msg = MSG_REFRESH;
+ 439   2              }
+ 440   1              if(msg == KEY_UP) {
+ 441   2                      DEC_TABLE;
+ 442   2                      msg = MSG_REFRESH;
+ 443   2              }
+ 444   1              if(msg == KEY_DN) {
+ 445   2                      INC_TABLE;
+ 446   2                      msg = MSG_REFRESH;
+ 447   2              }
+ 448   1              if(msg == MSG_REFRESH) {
+ 449   2                      REFRESH_TABLES1;        
+ 450   4                              sprintf(strbuf,"%s",prb_name[j-1]);
+ 451   4                              draw_label(&(items[i-1]),SW_NORMAL);
+ 452   4                      REFRESH_TABLES2;
+ 453   2              }
+ 454   1              return;
+ 455   1      }
+ 456          //select probe type list
+ 457          void pgprbtypelist_handler(uchar msg) {
+ 458   1              LABEL code banner = {LBL_HZ16,3,3,8,strbuf};
+ 459   1              LABEL code options[] = {
+ 460   1                      {LBL_HZ6X8,10,20,8,"1.PT100"},
+ 461   1                      {LBL_HZ6X8,80,20,8,"2.PT25"},
+ 462   1                      {LBL_HZ6X8,10,30,8,"3.K-TYPE"},
+ 463   1                      {LBL_HZ6X8,80,30,8,"4.N-TYPE"},
+ 464   1                      {LBL_HZ6X8,150,30,8,"5.E-TYPE"},
+ 465   1                      {LBL_HZ6X8,10,40,8,"6.B-TYPE"},
+ 466   1                      {LBL_HZ6X8,80,40,8,"7.J-TYPE"},
+ 467   1                      {LBL_HZ6X8,150,40,8,"8.S-TYPE"},
+ 468   1                      {LBL_HZ6X8,10,50,8,"9.R-TYPE"},
+ 469   1              };
+ 470   1              static int curr_sel = 1;
+ 471   1              static int last_sel = 1;
+ 472   1              const uchar min_option = 1;
+ 473   1              const uchar max_option = sizeof(options)/sizeof(LABEL);
+ 474   1              uchar i;
+ 475   1              if(msg >= KEY_NUM1 && msg <= KEY_NUM9) {
+ 476   2                      if(msg == KEY_NUM1)
+ 477   2                      {
+ 478   3                          send_byte(SRUN_SET_PRBT,PRBTYPE_PT100);
+ 479   3                      }
+ 480   2                      else if(msg == KEY_NUM2)
+ 481   2                      {
+ 482   3                          send_byte(SRUN_SET_PRBT,PRBTYPE_PT25);
+ 483   3                      }else{
+ 484   3                              send_byte(SRUN_SET_PRBT,msg-KEY_NUM3+PRBTYPE_K); 
+ 485   3                      }
+ 486   2                      return;
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 9   
+
+ 487   2              }
+ 488   1      
+ 489   1              if(msg == KEY_TAB || msg == KEY_CE || msg == KEY_OK) {
+ 490   2                      irun[IRUN_NEW_PG] = PG_PRBCONFIG;
+ 491   2                      return;
+ 492   2              }
+ 493   1              if(msg == MSG_INIT)
+ 494   1              {
+ 495   2                      LCD_Cls();
+ 496   2                      sprintf(strbuf,"探头%i类型设置为:",curr_prb);
+ 497   2                      draw_label(&banner, SW_NORMAL);
+ 498   2                      INIT_OPTIONS;
+ 499   2                      msg = MSG_REFRESH;
+ 500   2              }
+ 501   1              if(msg == KEY_UP) {
+ 502   2                      DEC_OPTION;
+ 503   2                      msg = MSG_REFRESH;
+ 504   2              }
+ 505   1              if(msg == KEY_DN) {
+ 506   2                      INC_OPTION;
+ 507   2                      msg = MSG_REFRESH;
+ 508   2              }
+ 509   1              if(msg == MSG_REFRESH) {
+ 510   2                      REFRESH_OPTIONS;
+ 511   2              }
+ 512   1              return;
+ 513   1      }
+ 514          char* getprbtype(uchar prbtype)
+ 515          {
+ 516   1              switch(prbtype)
+ 517   1              {
+ 518   2                      case PRBTYPE_PT25:      return "PT  25";
+ 519   2                      case PRBTYPE_PT100:     return "PT 100";
+ 520   2                      case PRBTYPE_K:         return "K TYPE";
+ 521   2                      case PRBTYPE_N:         return "N TYPE";
+ 522   2                      case PRBTYPE_E:         return "E TYPE";
+ 523   2                      case PRBTYPE_B:         return "B TYPE";
+ 524   2                      case PRBTYPE_J:         return "J TYPE";
+ 525   2                      case PRBTYPE_S:         return "S TYPE";
+ 526   2                      case PRBTYPE_R:         return "R TYPE";
+ 527   2              }
+ 528   1              return "? TYPE";
+ 529   1      }
+ 530          //config r probe parameter
+ 531          void pgprbconfig_handler(uchar msg) {
+ 532   1              LABEL code banner = {LBL_HZ12,3,3,8,strbuf};
+ 533   1              LABEL code snlbl = {LBL_HZ12,10,17,4,"1.序列号"};
+ 534   1              LABEL code snval = {LBL_HZ6X8,75,22,10,strbuf};
+ 535   1              LABEL code typelbl = {LBL_HZ12,10,31,3,"2.类型"};
+ 536   1              LABEL code typeval = {LBL_HZ6X8,59,36,10,strbuf};
+ 537   1              LABEL code paramlbl1 = {LBL_HZ12,130,31,3,"3.a"};
+ 538   1              LABEL code paramval1 = {LBL_HZ6X8,165,36,10,strbuf};
+ 539   1              LABEL code paramlbl2 = {LBL_HZ12,10,45,3,"4.b"};
+ 540   1              LABEL code paramval2 = {LBL_HZ6X8,45,50,10,strbuf};
+ 541   1              LABEL code paramlbl3 = {LBL_HZ12,130,45,3,"5.c"};
+ 542   1              LABEL code paramval3 = {LBL_HZ6X8,165,50,10,strbuf};
+ 543   1              
+ 544   1              
+ 545   1              if(msg == KEY_TAB || msg == KEY_OK) {
+ 546   2                      irun[IRUN_NEW_PG] = PG_PRBSET;
+ 547   2                      return;
+ 548   2              }
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 10  
+
+ 549   1              if(msg == KEY_CE) {
+ 550   2                      irun[IRUN_NEW_PG] = PG_PRBSET;
+ 551   2                      return;
+ 552   2              }
+ 553   1              if(msg == MSG_INIT)
+ 554   1              {
+ 555   2                      LCD_Cls();
+ 556   2                      sprintf(strbuf,"探头%i参数设置",curr_prb);
+ 557   2                      draw_label(&banner,SW_NORMAL);
+ 558   2                      sprintf(strbuf,":%s",prb_name[curr_prb-1]);
+ 559   2                      draw_label(&snlbl,SW_NORMAL);
+ 560   2                      draw_label(&snval,SW_NORMAL);
+ 561   2                      sprintf(strbuf,":%s",getprbtype(prb_type[curr_prb-1]));
+ 562   2                      draw_label(&typelbl,SW_NORMAL);
+ 563   2                      draw_label(&typeval,SW_NORMAL);
+ 564   2                      sprintf(strbuf,":%7f",prb_param1[curr_prb-1]);
+ 565   2                      draw_label(&paramlbl1,SW_NORMAL);
+ 566   2                      draw_label(&paramval1,SW_NORMAL);
+ 567   2                      _printf(strbuf,":%7f",prb_param2[curr_prb-1]);
+ 568   2                      draw_label(&paramlbl2,SW_NORMAL);
+ 569   2                      draw_label(&paramval2,SW_NORMAL);
+ 570   2                      sprintf(strbuf,":%7f",prb_param3[curr_prb-1]);
+ 571   2                      draw_label(&paramlbl3,SW_NORMAL);
+ 572   2                      draw_label(&paramval3,SW_NORMAL);
+ 573   2                      return;
+ 574   2              }
+ 575   1              if(msg == KEY_NUM1) {
+ 576   2                      window_setup(7);
+ 577   2                      sprintf(strbuf,"请输入探头序列号");
+ 578   2                      if(1 == wnd_sninput(&(prb_name[(curr_prb-1)<<3])))
+ 579   2                              send_double(SRUN_PRBNM_BASE+curr_prb,&prb_name[(curr_prb-1)<<3],8);
+ 580   2                      return;
+ 581   2              }
+ 582   1              if(msg == KEY_NUM2){
+ 583   2                      irun[IRUN_NEW_PG] = PG_PRBTYPELIST;
+ 584   2                      return;
+ 585   2              }
+ 586   1              if(msg == KEY_NUM3 ){
+ 587   2                      window_setup(8);
+ 588   2                      sprintf(strbuf,"输入系数a");
+ 589   2                      valuep = prb_param1[curr_prb-1];
+ 590   2                      if(wnd_floatinput(valuep) == 1)
+ 591   2                              send_double(SRUN_PRBP1_BASE + curr_prb,(uchar*)&valuep,4);
+ 592   2                      return;
+ 593   2              }
+ 594   1              if(msg == KEY_NUM4) {
+ 595   2                      window_setup(8);
+ 596   2                      sprintf(strbuf,"输入系数b");
+ 597   2                      valuep = prb_param2[curr_prb-1];
+ 598   2                      if(wnd_floatinput(valuep))
+ 599   2                              send_double(SRUN_PRBP2_BASE + curr_prb,(uchar*)&valuep,4);
+ 600   2                      return;
+ 601   2              }
+ 602   1              if(msg == KEY_NUM5) {
+ 603   2                      window_setup(8);
+ 604   2                      sprintf(strbuf,"输入系数c");
+ 605   2                      valuep = prb_param3[curr_prb-1];
+ 606   2                      if(wnd_floatinput(valuep))
+ 607   2                              send_double(SRUN_PRBP3_BASE + curr_prb,(uchar*)&valuep,4);
+ 608   2                      return;
+ 609   2              }
+ 610   1              return;
+C51 COMPILER V7.01  STATE                                                                  01/27/2011 21:46:12 PAGE 11  
+
+ 611   1      }
+ 612          
+ 613          
+ 614          void pgboottype_handler(uchar msg) {
+ 615   1              uchar i;
+ 616   1              LABEL code banner = {LBL_HZ16,3,3,1,"请选择工作模式"};
+ 617   1              LABEL code options[] = {
+ 618   1                      {LBL_HZ16, 10,23,1,"1.铂电阻测量"},
+ 619   1                      {LBL_HZ16, 130,23,1,"2.铂电阻配置"},
+ 620   1                      {LBL_HZ16, 10,45,1,"3.热电偶测量"},
+ 621   1                      {LBL_HZ16, 130,45,8,"4.热电偶配置"},
+ 622   1              };
+ 623   1              
+ 624   1              static uchar curr_sel = 1;
+ 625   1              static uchar last_sel = 1;
+ 626   1              const uchar min_option = 1;
+ 627   1              const uchar max_option = sizeof(options)/sizeof(LABEL);
+ 628   1      
+ 629   1              if(msg == MSG_INIT) {
+ 630   2                      LCD_Cls();
+ 631   2                      draw_label(&banner, SW_NORMAL);
+ 632   2                      INIT_OPTIONS;
+ 633   2                      msg = MSG_REFRESH;
+ 634   2              }
+ 635   1              if(msg == KEY_NUM1) {
+ 636   2                      send_byte(SRUN_SET_MODE,BORE_MODE);
+ 637   2                      return;
+ 638   2              }
+ 639   1              if(msg == KEY_NUM2) {
+ 640   2                      irun[IRUN_NEW_PG] = PG_TCONFIG;
+ 641   2                      return;
+ 642   2              }
+ 643   1              if(msg == KEY_NUM3) {
+ 644   2                      send_byte(SRUN_SET_MODE,THERM_MODE);
+ 645   2                      return;
+ 646   2              }
+ 647   1              if(msg == KEY_NUM4) {
+ 648   2                      irun[IRUN_NEW_PG] = PG_TCONFIG;
+ 649   2                      return;
+ 650   2              }
+ 651   1              if(msg == MSG_REFRESH) {
+ 652   2                      REFRESH_OPTIONS;
+ 653   2              }
+ 654   1      }
+ 655          
+ 656          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   6488    ----
+   CONSTANT SIZE    =   1418    ----
+   XDATA SIZE       =     26      45
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

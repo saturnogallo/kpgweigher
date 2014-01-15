@@ -1,0 +1,69 @@
+CodeVisionAVR C Compiler V1.25.3 Standard
+(C) Copyright 1998-2007 Pavel Haiduc, HP InfoTech s.r.l.
+http://www.hpinfotech.com
+
+File: c:\code\googlecode\g_lxhbucket\raysting\rt2010\main.c
+Global variables memory map:
+
+Variable                          Address   Size
+rundata.reading                                                       500h     96
+rundata.temperature                                                   560h     96
+rundata.Rx                                                            5C0h      4
+rundata.stdV                                                          5C4h      4
+strbuf                                                                5C8h     50
+key                                                                     R5      1
+nextwin                                                                 R4      1
+curr_ch                                                              R6,R7      2
+curr_prb                                                             R8,R9      2
+curr_dispch                                                        R10,R11      2
+ch_to_search                                                       R12,R13      2
+dlg_cnt                                                               5FAh      4
+onesec_cnt                                                            5FEh      4
+phase                                                                 602h      1
+valuep                                                                603h      4
+nav1v                                                                 607h      1
+namebuf                                                               608h      8
+tA_G1                                                                 610h      1
+tB_G1                                                                 611h      1
+tx_buffer0                                                            612h    128
+tx_wr_index0                                                          692h      1
+tx_rd_index0                                                          693h      1
+tx_counter0                                                           694h      1
+tx_buffer1                                                            695h    128
+tx_wr_index1                                                          715h      1
+tx_rd_index1                                                          716h      1
+tx_counter1                                                           717h      1
+*coef                                                                 718h      2
+kbd_state_G8                                                          71Ah      1
+lcdcmd_G8                                                             71Bh     40
+head_G8                                                               743h      3
+tail_G8                                                               746h      3
+hex2ch_G8                                                             749h      2
+idle_G8                                                               74Bh     10
+navlen_G9                                                             755h      1
+reading_G9                                                            756h      4
+navread_G9                                                            75Ah     20
+navread2_G9                                                           76Eh     20
+scancmd                                                               782h      5
+navcmd_G9                                                             787h     12
+navtime                                                               793h      4
+curr_sel_S4C                                                          797h      1
+last_sel_S4C                                                          798h      1
+curr_sel_S4D                                                          799h      1
+last_sel_S4D                                                          79Ah      1
+curr_pos_S4E                                                          79Bh      2
+last_pos_S4E                                                          79Dh      2
+curr_pos_S4F                                                          79Fh      2
+last_pos_S4F                                                          7A1h      2
+curr_pos_S50                                                          7A3h      2
+last_pos_S50                                                          7A5h      2
+curr_sel_S51                                                          7A7h      2
+last_sel_S51                                                          7A9h      2
+PRBSTR                                                                7ABh      7
+curr_sel_S54                                                          7B2h      1
+last_sel_S54                                                          7B3h      1
+*curr_window                                                          7B4h      2
+databuf                                                               7B6h     12
+pos_databuf                                                           7C2h      1
+max_databuf                                                           7C3h      1
+data_sign                                                             7C4h      1
