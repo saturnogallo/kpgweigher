@@ -1,0 +1,6 @@
+"sjSerial.obj",
+"UART.obj",
+"sjMain.obj",
+"AD5791.obj" 
+TO "rtest1p2" 
+RAMSIZE(256) 
