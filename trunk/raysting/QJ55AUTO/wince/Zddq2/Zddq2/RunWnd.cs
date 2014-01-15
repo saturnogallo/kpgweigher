@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 namespace Zddq2
 {
-
     public partial class RunWnd : Form
     {
         [StructLayout(LayoutKind.Sequential)]
@@ -29,8 +28,8 @@ namespace Zddq2
         [DllImport("coredll")]
         public static extern bool SetLocalTime(ref SystemTime sysTime); //设置本地时
 
-        public const int win_width = 800;
-        public const int win_height = 600;
+        public const int win_width = 1024;
+        public const int win_height = 768;
         public const int bar_height = 70;
         public TaskMachine task;
 

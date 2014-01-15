@@ -33,7 +33,7 @@ namespace Zddq2
         public event EventHandler StartStopClick;
         private System.Windows.Forms.Timer uiTimer;
         private RUN_STATE _status;
-        private const int progress_width = 530;
+        private const int progress_width = 650;
 
         private bool _pause;
         public bool pause

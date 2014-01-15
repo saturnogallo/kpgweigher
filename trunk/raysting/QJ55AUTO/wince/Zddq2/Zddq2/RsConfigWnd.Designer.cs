@@ -86,46 +86,47 @@
             this.panel1.Controls.Add(this.btn_ralpha);
             this.panel1.Location = new System.Drawing.Point(12, 88);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(766, 312);
+            this.panel1.Size = new System.Drawing.Size(994, 528);
             // 
             // lbl_serial
             // 
-            this.lbl_serial.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_serial.Location = new System.Drawing.Point(25, 103);
+            this.lbl_serial.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Regular);
+            this.lbl_serial.Location = new System.Drawing.Point(39, 163);
             this.lbl_serial.Name = "lbl_serial";
-            this.lbl_serial.Size = new System.Drawing.Size(154, 25);
+            this.lbl_serial.Size = new System.Drawing.Size(154, 41);
             this.lbl_serial.Text = "lbl_serial";
             // 
             // lbl_beta
             // 
-            this.lbl_beta.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_beta.Location = new System.Drawing.Point(398, 184);
+            this.lbl_beta.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Regular);
+            this.lbl_beta.Location = new System.Drawing.Point(542, 259);
             this.lbl_beta.Name = "lbl_beta";
-            this.lbl_beta.Size = new System.Drawing.Size(167, 25);
+            this.lbl_beta.Size = new System.Drawing.Size(167, 39);
             this.lbl_beta.Text = "lbl_beta";
             // 
             // lbl_rvalue
             // 
-            this.lbl_rvalue.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_rvalue.Location = new System.Drawing.Point(398, 103);
+            this.lbl_rvalue.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Regular);
+            this.lbl_rvalue.Location = new System.Drawing.Point(542, 163);
             this.lbl_rvalue.Name = "lbl_rvalue";
-            this.lbl_rvalue.Size = new System.Drawing.Size(167, 25);
+            this.lbl_rvalue.Size = new System.Drawing.Size(167, 52);
             this.lbl_rvalue.Text = "lbl_rvalue";
+            this.lbl_rvalue.ParentChanged += new System.EventHandler(this.lbl_rvalue_ParentChanged);
             // 
             // lbl_temp
             // 
-            this.lbl_temp.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_temp.Location = new System.Drawing.Point(24, 262);
+            this.lbl_temp.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Regular);
+            this.lbl_temp.Location = new System.Drawing.Point(38, 345);
             this.lbl_temp.Name = "lbl_temp";
-            this.lbl_temp.Size = new System.Drawing.Size(155, 25);
+            this.lbl_temp.Size = new System.Drawing.Size(155, 36);
             this.lbl_temp.Text = "lbl_temp";
             // 
             // lbl_alpha
             // 
-            this.lbl_alpha.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular);
-            this.lbl_alpha.Location = new System.Drawing.Point(24, 184);
+            this.lbl_alpha.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Regular);
+            this.lbl_alpha.Location = new System.Drawing.Point(39, 259);
             this.lbl_alpha.Name = "lbl_alpha";
-            this.lbl_alpha.Size = new System.Drawing.Size(155, 25);
+            this.lbl_alpha.Size = new System.Drawing.Size(155, 37);
             this.lbl_alpha.Text = "lbl_alpha";
             // 
             // lbl_error
@@ -141,8 +142,8 @@
             this.btn_rsp001.BackColor = System.Drawing.Color.Blue;
             this.btn_rsp001.bEnabled = true;
             this.btn_rsp001.bOn = true;
-            this.btn_rsp001.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rsp001.Location = new System.Drawing.Point(704, 18);
+            this.btn_rsp001.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rsp001.Location = new System.Drawing.Point(783, 18);
             this.btn_rsp001.Name = "btn_rsp001";
             this.btn_rsp001.Size = new System.Drawing.Size(59, 55);
             this.btn_rsp001.TabIndex = 13;
@@ -152,8 +153,8 @@
             this.btn_rsp01.BackColor = System.Drawing.Color.Blue;
             this.btn_rsp01.bEnabled = true;
             this.btn_rsp01.bOn = true;
-            this.btn_rsp01.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rsp01.Location = new System.Drawing.Point(644, 18);
+            this.btn_rsp01.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rsp01.Location = new System.Drawing.Point(718, 18);
             this.btn_rsp01.Name = "btn_rsp01";
             this.btn_rsp01.Size = new System.Drawing.Size(59, 55);
             this.btn_rsp01.TabIndex = 12;
@@ -163,8 +164,8 @@
             this.btn_rsp1.BackColor = System.Drawing.Color.Blue;
             this.btn_rsp1.bEnabled = true;
             this.btn_rsp1.bOn = true;
-            this.btn_rsp1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rsp1.Location = new System.Drawing.Point(584, 18);
+            this.btn_rsp1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rsp1.Location = new System.Drawing.Point(653, 18);
             this.btn_rsp1.Name = "btn_rsp1";
             this.btn_rsp1.Size = new System.Drawing.Size(59, 55);
             this.btn_rsp1.TabIndex = 11;
@@ -174,8 +175,8 @@
             this.btn_rs1.BackColor = System.Drawing.Color.Blue;
             this.btn_rs1.bEnabled = true;
             this.btn_rs1.bOn = true;
-            this.btn_rs1.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rs1.Location = new System.Drawing.Point(524, 18);
+            this.btn_rs1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rs1.Location = new System.Drawing.Point(588, 18);
             this.btn_rs1.Name = "btn_rs1";
             this.btn_rs1.Size = new System.Drawing.Size(59, 55);
             this.btn_rs1.TabIndex = 5;
@@ -185,8 +186,8 @@
             this.btn_rs10.BackColor = System.Drawing.Color.Blue;
             this.btn_rs10.bEnabled = true;
             this.btn_rs10.bOn = true;
-            this.btn_rs10.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rs10.Location = new System.Drawing.Point(464, 18);
+            this.btn_rs10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rs10.Location = new System.Drawing.Point(523, 18);
             this.btn_rs10.Name = "btn_rs10";
             this.btn_rs10.Size = new System.Drawing.Size(59, 55);
             this.btn_rs10.TabIndex = 5;
@@ -196,8 +197,8 @@
             this.btn_rs100.BackColor = System.Drawing.Color.Blue;
             this.btn_rs100.bEnabled = true;
             this.btn_rs100.bOn = true;
-            this.btn_rs100.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rs100.Location = new System.Drawing.Point(404, 18);
+            this.btn_rs100.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rs100.Location = new System.Drawing.Point(458, 18);
             this.btn_rs100.Name = "btn_rs100";
             this.btn_rs100.Size = new System.Drawing.Size(59, 55);
             this.btn_rs100.TabIndex = 5;
@@ -207,8 +208,8 @@
             this.btn_rs1k.BackColor = System.Drawing.Color.Blue;
             this.btn_rs1k.bEnabled = true;
             this.btn_rs1k.bOn = true;
-            this.btn_rs1k.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rs1k.Location = new System.Drawing.Point(344, 18);
+            this.btn_rs1k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rs1k.Location = new System.Drawing.Point(393, 18);
             this.btn_rs1k.Name = "btn_rs1k";
             this.btn_rs1k.Size = new System.Drawing.Size(59, 55);
             this.btn_rs1k.TabIndex = 5;
@@ -218,8 +219,8 @@
             this.btn_rs10k.BackColor = System.Drawing.Color.Blue;
             this.btn_rs10k.bEnabled = true;
             this.btn_rs10k.bOn = true;
-            this.btn_rs10k.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rs10k.Location = new System.Drawing.Point(284, 18);
+            this.btn_rs10k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rs10k.Location = new System.Drawing.Point(328, 18);
             this.btn_rs10k.Name = "btn_rs10k";
             this.btn_rs10k.Size = new System.Drawing.Size(59, 55);
             this.btn_rs10k.TabIndex = 5;
@@ -229,8 +230,8 @@
             this.btn_rs100k.BackColor = System.Drawing.Color.Blue;
             this.btn_rs100k.bEnabled = true;
             this.btn_rs100k.bOn = true;
-            this.btn_rs100k.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_rs100k.Location = new System.Drawing.Point(224, 18);
+            this.btn_rs100k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_rs100k.Location = new System.Drawing.Point(263, 18);
             this.btn_rs100k.Name = "btn_rs100k";
             this.btn_rs100k.Size = new System.Drawing.Size(59, 55);
             this.btn_rs100k.TabIndex = 5;
@@ -240,10 +241,10 @@
             this.btn_serial.BackColor = System.Drawing.Color.Red;
             this.btn_serial.bEnabled = true;
             this.btn_serial.bOn = true;
-            this.btn_serial.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_serial.Location = new System.Drawing.Point(190, 93);
+            this.btn_serial.Font = new System.Drawing.Font("Arial", 20F, System.Drawing.FontStyle.Bold);
+            this.btn_serial.Location = new System.Drawing.Point(199, 153);
             this.btn_serial.Name = "btn_serial";
-            this.btn_serial.Size = new System.Drawing.Size(162, 46);
+            this.btn_serial.Size = new System.Drawing.Size(188, 58);
             this.btn_serial.TabIndex = 1;
             // 
             // btn_next
@@ -252,7 +253,7 @@
             this.btn_next.bEnabled = true;
             this.btn_next.bOn = true;
             this.btn_next.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_next.Location = new System.Drawing.Point(199, 20);
+            this.btn_next.Location = new System.Drawing.Point(88, 72);
             this.btn_next.Name = "btn_next";
             this.btn_next.Size = new System.Drawing.Size(35, 46);
             this.btn_next.TabIndex = 2;
@@ -273,8 +274,8 @@
             this.btn_chan.BackColor = System.Drawing.Color.Red;
             this.btn_chan.bEnabled = true;
             this.btn_chan.bOn = true;
-            this.btn_chan.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_chan.Location = new System.Drawing.Point(88, 20);
+            this.btn_chan.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_chan.Location = new System.Drawing.Point(152, 20);
             this.btn_chan.Name = "btn_chan";
             this.btn_chan.Size = new System.Drawing.Size(91, 46);
             this.btn_chan.TabIndex = 7;
@@ -284,10 +285,10 @@
             this.btn_rbeta.BackColor = System.Drawing.Color.Red;
             this.btn_rbeta.bEnabled = true;
             this.btn_rbeta.bOn = true;
-            this.btn_rbeta.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_rbeta.Location = new System.Drawing.Point(571, 174);
+            this.btn_rbeta.Font = new System.Drawing.Font("Arial", 20F, System.Drawing.FontStyle.Bold);
+            this.btn_rbeta.Location = new System.Drawing.Point(715, 245);
             this.btn_rbeta.Name = "btn_rbeta";
-            this.btn_rbeta.Size = new System.Drawing.Size(162, 46);
+            this.btn_rbeta.Size = new System.Drawing.Size(188, 58);
             this.btn_rbeta.TabIndex = 8;
             // 
             // btn_rvalue
@@ -295,10 +296,10 @@
             this.btn_rvalue.BackColor = System.Drawing.Color.Red;
             this.btn_rvalue.bEnabled = true;
             this.btn_rvalue.bOn = true;
-            this.btn_rvalue.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_rvalue.Location = new System.Drawing.Point(571, 93);
+            this.btn_rvalue.Font = new System.Drawing.Font("Arial", 20F, System.Drawing.FontStyle.Bold);
+            this.btn_rvalue.Location = new System.Drawing.Point(715, 153);
             this.btn_rvalue.Name = "btn_rvalue";
-            this.btn_rvalue.Size = new System.Drawing.Size(162, 46);
+            this.btn_rvalue.Size = new System.Drawing.Size(188, 58);
             this.btn_rvalue.TabIndex = 9;
             // 
             // btn_temp
@@ -306,10 +307,10 @@
             this.btn_temp.BackColor = System.Drawing.Color.Red;
             this.btn_temp.bEnabled = true;
             this.btn_temp.bOn = true;
-            this.btn_temp.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_temp.Location = new System.Drawing.Point(190, 251);
+            this.btn_temp.Font = new System.Drawing.Font("Arial", 20F, System.Drawing.FontStyle.Bold);
+            this.btn_temp.Location = new System.Drawing.Point(199, 336);
             this.btn_temp.Name = "btn_temp";
-            this.btn_temp.Size = new System.Drawing.Size(162, 46);
+            this.btn_temp.Size = new System.Drawing.Size(188, 58);
             this.btn_temp.TabIndex = 10;
             // 
             // btn_ralpha
@@ -317,10 +318,10 @@
             this.btn_ralpha.BackColor = System.Drawing.Color.Red;
             this.btn_ralpha.bEnabled = true;
             this.btn_ralpha.bOn = true;
-            this.btn_ralpha.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_ralpha.Location = new System.Drawing.Point(190, 174);
+            this.btn_ralpha.Font = new System.Drawing.Font("Arial", 20F, System.Drawing.FontStyle.Bold);
+            this.btn_ralpha.Location = new System.Drawing.Point(199, 245);
             this.btn_ralpha.Name = "btn_ralpha";
-            this.btn_ralpha.Size = new System.Drawing.Size(162, 46);
+            this.btn_ralpha.Size = new System.Drawing.Size(188, 58);
             this.btn_ralpha.TabIndex = 10;
             // 
             // btn_quit
@@ -328,8 +329,8 @@
             this.btn_quit.BackColor = System.Drawing.Color.Blue;
             this.btn_quit.bEnabled = true;
             this.btn_quit.bOn = true;
-            this.btn_quit.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btn_quit.Location = new System.Drawing.Point(674, 1);
+            this.btn_quit.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
+            this.btn_quit.Location = new System.Drawing.Point(928, 11);
             this.btn_quit.Name = "btn_quit";
             this.btn_quit.Size = new System.Drawing.Size(71, 71);
             this.btn_quit.TabIndex = 1;
@@ -339,7 +340,7 @@
             this.btn_SysConfig.BackColor = System.Drawing.Color.Blue;
             this.btn_SysConfig.bEnabled = true;
             this.btn_SysConfig.bOn = true;
-            this.btn_SysConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btn_SysConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
             this.btn_SysConfig.Location = new System.Drawing.Point(12, 12);
             this.btn_SysConfig.Name = "btn_SysConfig";
             this.btn_SysConfig.Size = new System.Drawing.Size(136, 46);
@@ -350,7 +351,7 @@
             this.btn_RxConfig.BackColor = System.Drawing.Color.Blue;
             this.btn_RxConfig.bEnabled = true;
             this.btn_RxConfig.bOn = true;
-            this.btn_RxConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btn_RxConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
             this.btn_RxConfig.Location = new System.Drawing.Point(316, 12);
             this.btn_RxConfig.Name = "btn_RxConfig";
             this.btn_RxConfig.Size = new System.Drawing.Size(136, 46);
@@ -361,7 +362,7 @@
             this.btn_RsConfig.BackColor = System.Drawing.Color.Blue;
             this.btn_RsConfig.bEnabled = true;
             this.btn_RsConfig.bOn = true;
-            this.btn_RsConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btn_RsConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold);
             this.btn_RsConfig.Location = new System.Drawing.Point(164, 12);
             this.btn_RsConfig.Name = "btn_RsConfig";
             this.btn_RsConfig.Size = new System.Drawing.Size(136, 46);
@@ -372,7 +373,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(800, 506);
+            this.ClientSize = new System.Drawing.Size(1024, 763);
             this.ControlBox = false;
             this.Controls.Add(this.lbl_error);
             this.Controls.Add(this.panel1);

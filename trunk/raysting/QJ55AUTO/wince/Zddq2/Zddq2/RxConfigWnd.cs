@@ -14,14 +14,14 @@ namespace Zddq2
         public RxConfigWnd()
         {
             InitializeComponent();
-            btn_current.SetStyle(Color.White, MyButtonType.round2RectButton);
+            btn_current.SetStyle(Color.White, MyButtonType.roundRectButton);
             btn_serial.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_stdchan.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_sqrt.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_vmode.SetStyle(Color.White, MyButtonType.round2RectButton);
+            btn_vmode.SetStyle(Color.White, MyButtonType.roundRectButton);
             btn_last.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_next.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_vname.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+            btn_vname.SetStyle(Color.Beige, MyButtonType.roundRectButton);
 
             btn_vname.ValidClick += new EventHandler(input_GotFocus);
 
@@ -249,6 +249,11 @@ namespace Zddq2
             btn_stdchan.bOn = rx.bEnabled;
             //btn_sqrt.bOn = rx.bEnabled && (rx.iVMode == 0);
             //btn_vmode.bOn = rx.bEnabled;
+        }
+
+        private void panel1_GotFocus(object sender, EventArgs e)
+        {
+
         }
 
     }

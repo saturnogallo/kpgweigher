@@ -37,16 +37,16 @@
             // 
             // statusBar1
             // 
-            this.statusBar1.Location = new System.Drawing.Point(0, 553);
+            this.statusBar1.Location = new System.Drawing.Point(0, 714);
             this.statusBar1.Name = "statusBar1";
-            this.statusBar1.Size = new System.Drawing.Size(800, 47);
+            this.statusBar1.Size = new System.Drawing.Size(1024, 54);
             this.statusBar1.TabIndex = 0;
             // 
             // rxDisplay1
             // 
             this.rxDisplay1.Location = new System.Drawing.Point(0, 0);
             this.rxDisplay1.Name = "rxDisplay1";
-            this.rxDisplay1.Size = new System.Drawing.Size(800, 554);
+            this.rxDisplay1.Size = new System.Drawing.Size(1024, 715);
             this.rxDisplay1.TabIndex = 1;
             // 
             // rxDisplay2
@@ -75,7 +75,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.BackColor = System.Drawing.Color.Black;
-            this.ClientSize = new System.Drawing.Size(800, 600);
+            this.ClientSize = new System.Drawing.Size(1024, 768);
             this.ControlBox = false;
             this.Controls.Add(this.rxDisplay4);
             this.Controls.Add(this.rxDisplay3);
