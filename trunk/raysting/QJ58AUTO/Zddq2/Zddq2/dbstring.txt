@@ -1,0 +1,385 @@
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','1','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','1','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','1','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','1','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','1','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','1','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','1','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','1','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','1','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','1','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','2','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','2','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','2','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','2','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','2','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','2','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','2','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','2','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','2','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','2','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','3','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','3','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','3','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','3','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','3','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','3','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','3','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','3','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','3','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','3','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','4','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','4','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','4','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','4','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','4','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','4','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','4','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','4','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','4','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','4','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','5','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','5','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','5','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','5','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','5','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','5','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','5','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','5','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','5','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','5','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','6','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','6','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','6','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','6','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','6','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','6','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','6','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','6','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','6','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','6','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','7','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','7','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','7','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','7','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','7','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','7','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','7','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','7','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','7','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','7','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','8','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','8','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','8','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','8','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','8','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','8','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','8','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','8','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','8','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','8','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','9','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','9','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','9','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','9','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','9','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','9','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','9','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','9','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','9','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','9','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','10','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','10','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','10','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','10','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','10','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','10','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','10','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','10','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','10','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','10','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','11','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','11','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','11','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','11','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','11','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','11','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','11','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','11','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','11','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','11','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','12','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','12','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','12','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','12','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','12','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','12','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','12','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','12','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','12','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','12','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','13','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','13','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','13','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','13','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','13','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','13','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','13','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','13','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','13','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','13','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','14','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','14','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','14','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','14','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','14','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','14','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','14','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','14','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','14','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','14','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','15','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','15','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','15','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','15','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','15','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','15','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','15','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','15','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','15','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','15','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','16','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','16','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','16','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','16','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','16','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','16','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','16','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','16','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','16','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','16','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','17','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','17','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','17','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','17','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','17','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','17','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','17','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','17','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','17','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','17','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','18','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','18','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','18','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','18','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','18','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','18','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','18','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','18','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','18','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','18','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','19','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','19','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','19','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','19','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','19','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','19','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','19','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','19','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','19','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','19','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','20','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','20','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','20','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','20','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','20','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','20','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','20','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','20','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','20','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','20','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','21','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','21','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','21','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','21','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','21','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','21','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','21','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','21','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','21','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','21','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','22','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','22','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','22','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','22','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','22','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','22','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','22','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','22','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','22','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','22','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','23','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','23','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','23','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','23','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','23','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','23','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','23','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','23','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','23','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','23','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasDelay','2','24','RxInfo');
+replace into data(id,value,grp,tbl) values('iMeasTimes','2','24','RxInfo');
+replace into data(id,value,grp,tbl) values('iStdChan','2','24','RxInfo');
+replace into data(id,value,grp,tbl) values('iChan','2','24','RxInfo');
+replace into data(id,value,grp,tbl) values('iIx','2','24','RxInfo');
+replace into data(id,value,grp,tbl) values('cStdChan','A','24','RxInfo');
+replace into data(id,value,grp,tbl) values('cChan','A','24','RxInfo');
+replace into data(id,value,grp,tbl) values('bEnabled','true','24','RxInfo');
+replace into data(id,value,grp,tbl) values('bSqrt','true','24','RxInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','24','RxInfo');
+
+
+
+=============================================================================
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','1','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','1','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','1','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','1','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','2','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','2','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','2','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','2','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','3','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','3','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','3','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','3','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','4','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','4','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','4','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','4','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','5','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','5','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','5','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','5','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','6','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','6','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','6','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','6','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','7','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','7','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','7','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','7','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','8','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','8','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','8','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','8','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','9','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','9','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','9','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','9','RsInfo');
+
+
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','10','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','10','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','10','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','10','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','11','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','11','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','11','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','11','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','12','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','12','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','12','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','12','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','13','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','13','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','13','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','13','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','14','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','14','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','14','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','14','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','15','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','15','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','15','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','15','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','16','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','16','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','16','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','16','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','17','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','17','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','17','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','17','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','18','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','18','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','18','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','18','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','19','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','19','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','19','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','19','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','20','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','20','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','20','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','20','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','21','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','21','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','21','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','21','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','22','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','22','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','22','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','22','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','23','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','23','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','23','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','23','RsInfo');
+
+replace into data(id,value,grp,tbl) values('dValue' ,'1.0','24','RsInfo');
+replace into data(id,value,grp,tbl) values('dAlpha' ,'0.0','24','RsInfo');
+replace into data(id,value,grp,tbl) values('dBeta'  ,'0.0','24','RsInfo');
+replace into data(id,value,grp,tbl) values('sSerial','333','24','RsInfo');
+
+
+
+=========================================================================
+replace into data(id,value,grp,tbl) values('iSampleTimes','1','pc','SysInfo');
+replace into data(id,value,grp,tbl) values('iSampleDelay','1','pc','SysInfo');
+replace into data(id,value,grp,tbl) values('iFilter','1','pc','SysInfo');
+replace into data(id,value,grp,tbl) values('sFilterType','1','pc','SysInfo');
+replace into data(id,value,grp,tbl) values('iDispaly','4','pc','SysInfo');
+replace into data(id,value,grp,tbl) values('bKTT','true','pc','SysInfo');
+
+
+
+
+
+
+
+
+
+
