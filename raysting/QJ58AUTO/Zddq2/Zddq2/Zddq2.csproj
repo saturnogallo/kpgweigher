@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{EC31877C-7ECE-4F6D-820D-C75F815FAAA9}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Zddq2</RootNamespace>
+    <AssemblyName>Zddq2</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="SQLite.NET, Version=0.21.1869.3794, Culture=neutral, PublicKeyToken=c273bd375e695f9c">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>.\SQLite.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ChoiceWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChoiceWnd.Designer.cs">
+      <DependentUpon>ChoiceWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DeviceMgr.cs" />
+    <Compile Include="GraphPane.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GraphPane.Designer.cs">
+      <DependentUpon>GraphPane.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RunWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RunWnd.Designer.cs">
+      <DependentUpon>RunWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="kbdwnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="kbdwnd.Designer.cs">
+      <DependentUpon>kbdwnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="RunWnd.resx">
+      <DependentUpon>RunWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RectButton.resx">
+      <DependentUpon>RectButton.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RsConfigWnd.resx">
+      <DependentUpon>RsConfigWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RxConfigWnd.resx">
+      <DependentUpon>RxConfigWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RxDisplay.resx">
+      <DependentUpon>RxDisplay.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="StatusBar.resx">
+      <DependentUpon>StatusBar.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SysConfigWnd.resx">
+      <DependentUpon>SysConfigWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <Compile Include="RectButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RectButton.Designer.cs">
+      <DependentUpon>RectButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RsConfigWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RsConfigWnd.Designer.cs">
+      <DependentUpon>RsConfigWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RxConfigWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RxConfigWnd.Designer.cs">
+      <DependentUpon>RxConfigWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="RxDisplay.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="RxDisplay.Designer.cs">
+      <DependentUpon>RxDisplay.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SqlConfig.cs">
+    </Compile>
+    <Compile Include="StatusBar.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="StatusBar.Designer.cs">
+      <DependentUpon>StatusBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="SysConfigWnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SysConfigWnd.Designer.cs">
+      <DependentUpon>SysConfigWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TouchButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="TouchButton.Designer.cs">
+      <DependentUpon>TouchButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Util.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="ChoiceWnd.resx">
+      <DependentUpon>ChoiceWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GraphPane.resx">
+      <DependentUpon>GraphPane.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="kbdWnd.resx">
+      <DependentUpon>kbdwnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resource\zh-CN.xml" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
