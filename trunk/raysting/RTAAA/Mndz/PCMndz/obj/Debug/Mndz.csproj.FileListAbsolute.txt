@@ -1,0 +1,12 @@
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\ResolveAssemblyReference.cache
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.kbdWnd.resources
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.Properties.Resources.resources
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.csproj.GenerateResource.Cache
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.MsgDlg.resources
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.RectButton.resources
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\bin\Debug\Mndz.exe
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\bin\Debug\Mndz.pdb
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.exe
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.pdb
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.Form1.resources
+c:\Code\GoogleCode\g_lxhbucket\raysting\RTAAA\Mndz\Mndz\obj\Debug\Mndz.ChoiceWnd.resources
