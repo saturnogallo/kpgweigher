@@ -1,0 +1,363 @@
+C51 COMPILER V7.01  WINDOW                                                                 01/27/2011 21:46:12 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE WINDOW
+OBJECT MODULE PLACED IN window.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE window.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "window.h"
+   2          #include "utili.h"
+   3          #include "lcd.h"
+   4          
+   5          MSG_HANDLER curr_window = 0;
+   6          extern uchar key;
+   7          extern uchar pos_databuf;
+   8          
+   9          uchar max_databuf;
+  10          const LABEL code datalbl = {LBL_HZ16,30,10,8,strbuf};
+  11          const LABEL code databox = {LBL_HZ16,30,30,8,databuf};
+  12          
+  13          void mystrcpy(char* dst, char* src, uchar len)
+  14          {
+  15   1              while(len-- != 0)
+  16   1              {
+  17   2                      *dst++ = *src++;
+  18   2              }
+  19   1      
+  20   1      }
+  21          
+  22          uchar wnd_sninput(char* oldbuf)
+  23          {
+  24   1              uchar msg;
+  25   1              key = MSG_INIT;
+  26   1              while(1)
+  27   1              {
+  28   2                      if(key != KEY_INVALID)
+  29   2                      {
+  30   3                              msg = key;
+  31   3                              key = KEY_INVALID;
+  32   3                      }else{
+  33   3                              continue;
+  34   3                      }
+  35   2                      if(msg == MSG_INIT) {
+  36   3                              LCD_Cls();
+  37   3                              databuf[0] = '\0';
+  38   3                              pos_databuf = 0;
+  39   3                              draw_label(&datalbl,SW_NORMAL);
+  40   3                              wnd_inputbox(&databox);
+  41   3      //                      LCD_ShowCursor(databox.x,databox.y);
+  42   3                      }
+  43   2                      if(msg == KEY_TAB)
+  44   2                      {
+  45   3                              databuf[pos_databuf++] = '0';
+  46   3                              databuf[pos_databuf] = '\0';
+  47   3                              msg = MSG_REFRESH;
+  48   3                      }
+  49   2                      if(msg == KEY_CE) {     
+  50   3                              return 0;
+  51   3                      }
+  52   2                      if(pos_databuf >= max_databuf)
+  53   2                              continue;
+  54   2      
+  55   2                      if(msg == KEY_DN) {
+C51 COMPILER V7.01  WINDOW                                                                 01/27/2011 21:46:12 PAGE 2   
+
+  56   3                              if(pos_databuf == 0)
+  57   3                              {
+  58   4                                      databuf[pos_databuf++] = '0';
+  59   4                                      databuf[pos_databuf] = '\0';
+  60   4                              }
+  61   3      
+  62   3                              if(databuf[pos_databuf-1] == '0')
+  63   3                                      databuf[pos_databuf-1] = 'Z';
+  64   3                              else if (databuf[pos_databuf] == 'A')
+  65   3                                      databuf[pos_databuf-1] = '9';
+  66   3                              else
+  67   3                                      databuf[pos_databuf-1] -= 1;
+  68   3                              msg = MSG_REFRESH;
+  69   3                      }
+  70   2                      if(msg == KEY_UP) {
+  71   3                              if(pos_databuf == 0)
+  72   3                              {
+  73   4                                      databuf[pos_databuf++] = '0';
+  74   4                                      databuf[pos_databuf] = '\0';
+  75   4                              }
+  76   3      
+  77   3                              if(databuf[pos_databuf-1] == '9')
+  78   3                                      databuf[pos_databuf-1] = 'A';
+  79   3                              else if (databuf[pos_databuf-1] == 'Z')
+  80   3                                      databuf[pos_databuf-1] = '0';
+  81   3                              else
+  82   3                                      databuf[pos_databuf-1] +=1;
+  83   3                              msg = MSG_REFRESH;
+  84   3                      }
+  85   2                      if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
+  86   3                              databuf[pos_databuf++] = msg;
+  87   3                              databuf[pos_databuf] = '\0';
+  88   3                              msg = MSG_REFRESH;
+  89   3                      }
+  90   2                      if(msg == KEY_OK) {
+  91   3                              mystrcpy(oldbuf,databuf,pos_databuf);
+  92   3                              oldbuf[pos_databuf] = '\0';
+  93   3                              return 1;
+  94   3                      }
+  95   2      
+  96   2                      if(msg == MSG_REFRESH) {
+  97   3                              draw_label(&databox,SW_NORMAL);
+  98   3      //                      LCD_ShowCursor(databox.x+pos_databuf*16,databox.y);
+  99   3                      }
+ 100   2              }
+ 101   1      //      LCD_HideCursor();
+ 102   1      }
+ 103          
+ 104          uchar wnd_intinput()
+ 105          {
+ 106   1              uchar msg;
+ 107   1              
+ 108   1              key = MSG_INIT;
+ 109   1              while(1)
+ 110   1              {
+ 111   2                      if(key != KEY_INVALID)
+ 112   2                      {
+ 113   3                              msg = key;
+ 114   3                              key = KEY_INVALID;
+ 115   3                      }else{
+ 116   3                              continue;
+ 117   3                      }
+C51 COMPILER V7.01  WINDOW                                                                 01/27/2011 21:46:12 PAGE 3   
+
+ 118   2                      if(msg == MSG_INIT)
+ 119   2                      {
+ 120   3                              LCD_Cls();
+ 121   3                              databuf[0] = '0';
+ 122   3                              databuf[1] = '\0';
+ 123   3                              pos_databuf = 0;
+ 124   3                              draw_label(&datalbl,SW_NORMAL);
+ 125   3                              wnd_inputbox(&databox);
+ 126   3      //                      LCD_ShowCursor(databox.x,databox.y);
+ 127   3                      }
+ 128   2      
+ 129   2                      if(msg == KEY_TAB)
+ 130   2                      {
+ 131   3                              databuf[pos_databuf++] = '0';
+ 132   3                              databuf[pos_databuf] = '\0';
+ 133   3                              msg = MSG_REFRESH;
+ 134   3                      }
+ 135   2                      if(pos_databuf >= max_databuf)
+ 136   2                              continue;
+ 137   2                      if(msg == KEY_DN) {
+ 138   3                              if(pos_databuf == 0)
+ 139   3                              {
+ 140   4                                      databuf[pos_databuf++] = '0';
+ 141   4                                      databuf[pos_databuf] = '\0';
+ 142   4                              }
+ 143   3      
+ 144   3                              if(databuf[pos_databuf-1] == '0')
+ 145   3                                      databuf[pos_databuf-1] = '9';
+ 146   3                              else
+ 147   3                                      databuf[pos_databuf-1] -= 1;
+ 148   3                              msg = MSG_REFRESH;
+ 149   3                      }
+ 150   2                      if(msg == KEY_UP) {
+ 151   3                              if(pos_databuf == 0)
+ 152   3                              {
+ 153   4                                      databuf[pos_databuf++] = '0';
+ 154   4                                      databuf[pos_databuf] = '\0';
+ 155   4                              }
+ 156   3      
+ 157   3                              if(databuf[pos_databuf-1] == '9')
+ 158   3                                      databuf[pos_databuf-1] = '0';
+ 159   3                              else
+ 160   3                                      databuf[pos_databuf-1] += 1;
+ 161   3                              msg = MSG_REFRESH;
+ 162   3                      }
+ 163   2                      if(msg >= KEY_NUM0 && msg <= KEY_NUM9) {
+ 164   3                              databuf[pos_databuf++] = msg;
+ 165   3                              databuf[pos_databuf] = '\0';
+ 166   3                              msg = MSG_REFRESH;
+ 167   3                      }
+ 168   2                      if(msg == KEY_CE) {
+ 169   3      //                      LCD_HideCursor();
+ 170   3                              return 0;
+ 171   3                      }
+ 172   2                      if(msg == KEY_OK){
+ 173   3      //                      LCD_HideCursor();
+ 174   3                              return 1;
+ 175   3                      }
+ 176   2                      if(msg == MSG_REFRESH) {
+ 177   3                              draw_label(&databox,SW_NORMAL);
+ 178   3      //                      LCD_ShowCursor(databox.x+pos_databuf*16,databox.y);
+ 179   3                      }
+C51 COMPILER V7.01  WINDOW                                                                 01/27/2011 21:46:12 PAGE 4   
+
+ 180   2              }
+ 181   1      }
+ 182          uchar wnd_floatinput(double oldval)
+ 183          {
+ 184   1              uchar msg;
+ 185   1              
+ 186   1              key = MSG_INIT;
+ 187   1              while(1)
+ 188   1              {
+ 189   2                      if(key != KEY_INVALID)
+ 190   2                      {
+ 191   3                              msg = key;
+ 192   3                              key = KEY_INVALID;
+ 193   3                      }else{
+ 194   3                              continue;
+ 195   3                      }
+ 196   2                      if(msg == MSG_INIT)
+ 197   2                      {
+ 198   3                              LCD_Cls();
+ 199   3                              databuf[0] = '0';
+ 200   3                              databuf[1] = '\0';
+ 201   3                              pos_databuf = 0;
+ 202   3                              draw_label(&datalbl,SW_NORMAL);
+ 203   3                              wnd_inputbox(&databox);
+ 204   3      //                      LCD_ShowCursor(databox.x,databox.y);
+ 205   3                      }
+ 206   2      
+ 207   2                      if(msg == KEY_TAB)
+ 208   2                      {
+ 209   3                              databuf[pos_databuf++] = '0';
+ 210   3                              databuf[pos_databuf] = '\0';
+ 211   3                              msg = MSG_REFRESH;
+ 212   3                      }
+ 213   2                      if(pos_databuf >= max_databuf)
+ 214   2                              continue;
+ 215   2                      if(msg == KEY_DN) {
+ 216   3                                              if(pos_databuf == 0)
+ 217   3                              {
+ 218   4                                      databuf[pos_databuf++] = '0';
+ 219   4                                      databuf[pos_databuf] = '\0';
+ 220   4                              }
+ 221   3      
+ 222   3                              if(databuf[pos_databuf-1] == '0')
+ 223   3                                      databuf[pos_databuf-1] = '9';
+ 224   3                              else
+ 225   3                                      databuf[pos_databuf-1] -= 1;
+ 226   3                              msg = MSG_REFRESH;
+ 227   3                      }
+ 228   2                      if(msg == KEY_UP) {
+ 229   3                              if(databuf[pos_databuf-1] == '9')
+ 230   3                                      databuf[pos_databuf-1] = '0';
+ 231   3                              else
+ 232   3                                      databuf[pos_databuf-1] += 1;
+ 233   3                              msg = MSG_REFRESH;
+ 234   3                      }
+ 235   2                      if((msg >= KEY_NUM0 && msg <= KEY_NUM9) || msg == KEY_DOT) {
+ 236   3                              databuf[pos_databuf++] = msg;
+ 237   3                              databuf[pos_databuf] = '\0';
+ 238   3                              msg = MSG_REFRESH;
+ 239   3                      }
+ 240   2                      if(msg == KEY_CE) {
+ 241   3      //                      LCD_HideCursor();
+C51 COMPILER V7.01  WINDOW                                                                 01/27/2011 21:46:12 PAGE 5   
+
+ 242   3                              return 0;
+ 243   3                      }
+ 244   2                      if(msg == KEY_OK){
+ 245   3      //                      LCD_HideCursor();
+ 246   3                              return 1;
+ 247   3                      }
+ 248   2                      if(msg == MSG_REFRESH) {
+ 249   3                              draw_label(&databox,SW_NORMAL);
+ 250   3      //                      LCD_ShowCursor(databox.x+pos_databuf*16,databox.y);
+ 251   3                      }
+ 252   2              }
+ 253   1      }
+*** WARNING C280 IN LINE 182 OF WINDOW.C: 'oldval': unreferenced local variable
+ 254          //display a message box
+ 255          void wnd_msgbox(LABEL *lbl)
+ 256          {
+ 257   1              LCD_ClsBlock(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 -14 , lbl->y+19);
+ 258   1              draw_label(lbl, SW_NORMAL);     
+ 259   1              LCD_Rectange(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 -14, lbl->y+19);
+ 260   1              LCD_Rectange(lbl->x - 8,lbl->y - 1,lbl->x + lbl->width * 16 - 16 , lbl->y+17);
+ 261   1      
+ 262   1      }
+ 263          
+ 264          void wnd_inputbox(LABEL *lbl)
+ 265          {
+ 266   1              LCD_ClsBlock(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 , lbl->y+19);
+ 267   1              LCD_Rectange(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 , lbl->y+19);
+ 268   1              draw_label(lbl, SW_NORMAL);     
+ 269   1      }
+ 270          
+ 271          void draw_label(LABEL *lbl,uchar reverse) {
+ 272   1              uchar len = lbl->width;
+ 273   1              if(lbl->type == LBL_HZ6X8) {
+ 274   2                      if(reverse & SW_NORMAL) {
+ 275   3                              if((reverse & SW_OVERLAP) == 0)
+ 276   3                                      LCD_ClsBlock( lbl->x, lbl->y, lbl->x + len * 8, lbl->y + 8);
+ 277   3                              LCD_Print6X8( lbl->x, lbl->y, lbl->param);
+ 278   3                              return;                 
+ 279   3                      }
+ 280   2                      if(reverse & SW_REVERSE)
+ 281   2                              LCD_ReverseRect(lbl->x, lbl->y, len , 8);
+ 282   2                      return;
+ 283   2              }
+ 284   1              if(lbl->type == LBL_HZ8X16) {
+ 285   2                      if(reverse & SW_NORMAL) {
+ 286   3                              if((reverse & SW_OVERLAP) == 0)
+ 287   3                                      LCD_ClsBlock( lbl->x, lbl->y, lbl->x + len * 8, lbl->y + 16);
+ 288   3                              LCD_Print8X16( lbl->x, lbl->y, lbl->param);
+ 289   3                              return;
+ 290   3                      }
+ 291   2                      if(reverse & SW_REVERSE)
+ 292   2                              LCD_ReverseRect(lbl->x, lbl->y, len * 1, 16);
+ 293   2                      return;
+ 294   2              }
+ 295   1              /*
+ 296   1              if(lbl->type == LBL_HZ24X32) {
+ 297   1                      if(reverse & SW_NORMAL) {
+ 298   1                              if((reverse & SW_OVERLAP) == 0)
+ 299   1                                      LCD_ClsBlock( lbl->x, lbl->y, lbl->x + len * 24, lbl->y + 32);
+ 300   1                              LCD_Print24X32( lbl->x, lbl->y, lbl->param);
+ 301   1                      }
+ 302   1                      if(reverse & SW_REVERSE)
+C51 COMPILER V7.01  WINDOW                                                                 01/27/2011 21:46:12 PAGE 6   
+
+ 303   1                              LCD_ReverseRect(lbl->x, lbl->y, len * 3, 32);
+ 304   1                      return;
+ 305   1              }
+ 306   1              */
+ 307   1              if(lbl->type == LBL_HZ12) {
+ 308   2                      if(reverse & SW_NORMAL) {
+ 309   3                              if((reverse & SW_OVERLAP) == 0)
+ 310   3                                      LCD_ClsBlock( lbl->x, lbl->y, lbl->x + len * 16, lbl->y + 12);
+ 311   3                              LCD_PrintHz12( lbl->x, lbl->y, lbl->param);
+ 312   3                      }
+ 313   2                      if(reverse & SW_REVERSE)
+ 314   2                              LCD_ReverseRect(lbl->x, lbl->y, len * 2, 12);
+ 315   2                      return;
+ 316   2              }
+ 317   1              if(lbl->type == LBL_HZ16) {
+ 318   2                      if(reverse & SW_NORMAL) {
+ 319   3                              if((reverse & SW_OVERLAP) == 0)
+ 320   3                                      LCD_ClsBlock( lbl->x, lbl->y, lbl->x + len * 16, lbl->y + 16);
+ 321   3                              LCD_PrintHz16( lbl->x, lbl->y, lbl->param);
+ 322   3                      }
+ 323   2                      if(reverse & SW_REVERSE)
+ 324   2                              LCD_ReverseRect(lbl->x, lbl->y, len * 2, 16);
+ 325   2                      return;
+ 326   2              }
+ 327   1      }
+ 328          
+ 329          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2365    ----
+   CONSTANT SIZE    =     22    ----
+   XDATA SIZE       =      4      28
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

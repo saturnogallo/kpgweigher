@@ -1,0 +1,116 @@
+C51 COMPILER V7.01  UTILI                                                                  01/27/2011 21:46:12 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE UTILI
+OBJECT MODULE PLACED IN utili.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE utili.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "utili.h"
+   2          #include "stc51.h"
+   3          #include "window.h"
+   4          
+   5          /*---------------延时子程序----------------*/
+   6          void delay (uint us) 
+   7          {
+   8   1              while(us--);
+   9   1      }
+  10          /*
+  11          void delay1 (uint ms) 
+  12          {
+  13                  int i,j;
+  14                  for(i=0;i<ms;i++)
+  15                  for(j=0;j<1000;j++)
+  16                          ;
+  17                          
+  18          }
+  19          */
+  20          char lowc(uchar x)
+  21          {
+  22   1              x = x&0x0f;
+  23   1              if(x > 0x09)
+  24   1                      return 'A'+x-0x0a;
+  25   1              else
+  26   1                      return '0'+x;
+  27   1      }
+  28          char highc(uchar x)
+  29          {
+  30   1      
+  31   1              x = x>>4;
+  32   1              if(x > 0x09)
+  33   1                      return 'A'+x-0x0a;
+  34   1              else
+  35   1                      return '0'+x;
+  36   1      }
+  37          
+  38          /*计算字符串长度*/
+  39          uchar strlen(uchar *s)
+  40          {
+  41   1              uchar len = 0;
+  42   1              while(*s++) len ++;
+  43   1              
+  44   1              return len;
+  45   1      }
+  46          
+  47          double buf2double()             
+  48          {
+  49   1              double tmp = 0.0;
+  50   1              uchar i = 0;
+  51   1              uchar pos = 0;
+  52   1              for(i=0;i<pos_databuf;i++) {
+  53   2                      if(databuf[i] != KEY_DOT)
+  54   2                              tmp = tmp * 10.0+(databuf[i] - '0');
+  55   2                      else
+C51 COMPILER V7.01  UTILI                                                                  01/27/2011 21:46:12 PAGE 2   
+
+  56   2                              pos = pos_databuf - i - 1;
+  57   2              }
+  58   1              while(pos > 0) {
+  59   2                      tmp = tmp / 10.0;
+  60   2                      pos--;
+  61   2              }
+  62   1              return tmp;
+  63   1      }
+  64          
+  65          int buf2byte()      //convert rdata.tempbuf to byte (00-99)
+  66          {
+  67   1              int tmp = 0;
+  68   1              uchar i;
+  69   1              for(i=0;i<pos_databuf;i++) {
+  70   2                      tmp = tmp * 10+(databuf[i] - '0');
+  71   2              }
+  72   1              return tmp;
+  73   1      }
+  74          
+  75          
+  76          /*********************************************************************/
+  77          /*                                                                   */
+  78          /*   Copyright Agilent Technology  1996-2000                         */
+  79          /*   all rights reserved                                             */
+  80          /*                                                                   */
+  81          /*********************************************************************/
+  82          
+  83          #include        "stdarg.h"
+  84          
+  85          #define   fSP  0x01
+  86          #define   fPL  0x02
+  87          #define   fMI  0x04
+  88          #define   fNO  0x08
+  89          #define   fZE  0x10
+  90          #define   WMAX   99
+  91          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    337    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      11
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

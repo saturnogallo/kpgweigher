@@ -1,0 +1,493 @@
+C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
+OBJECT MODULE PLACED IN sjMain.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE sjMain.c OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjDefine.h"
+   2          #include "sjSerial.h"
+   3          #include "AD5791.h"
+   4          #include <stdio.h>
+   5          
+   6          //the MARK of header ender and error and quest and reset
+   7          #define  HMARK 0x55     //U
+   8          #define  EMARK 0x56 //V
+   9          #define  QMARK 0x57 //W
+  10          #define  RMARK 0x58 //X
+  11            
+  12          //the length of the switch table ,
+  13          //which must lower than 3fh
+  14          #define  LINIT 32 
+  15          
+  16          //for P1 output
+  17          //for P0 output
+  18          const unsigned char code tbl[8]={0x7F,0xBF,0xDF,0xEF,0xF7,0xFB,0xFD,0xFE};
+  19          
+  20          
+  21          
+  22          
+  23          //for Init use(regaddr of pc)
+  24          const unsigned char code inittbl[LINIT]={
+  25                  0x2B, 0x39, 0x38, 0x18, 0x17, 0x1A, 0x43, 0x41, 
+  26                  0x08, 0x1B, 0x09, 0x19, 0x2C, 0x26, 0x27, 0x0F, 
+  27                  0x3E, 0x3F, 0x3C, 0x3D, 0x0C, 0x23, 0x20, 0x14, 
+  28                  0x1F, 0x24, 0x02, 0x33, 0x21, 0x32, 0xff, 0xff
+  29          
+  30          
+  31          /*********** 05-1-25  8:44 ****************/
+  32          
+  33          //  FKI1,FKI2,FKI3,OKI4,PKTT,FHP9,FHP7,FST2,
+  34          //    0x37,0x36,0x35,0x3D,0x33,0x32,0x31,0x30,
+  35          
+  36          //  FHP3,FHN3,FHP4,FHN4,FST1,FHX1,FHX2,FFX1,  
+  37          //      0x26,0x27,0x24,0x25,0x22,0x23,0x20,0x21,
+  38          
+  39          //  FHP10,FHP1,FHN1,FHP2,FHN2,FHN5,FHP8,FHN6,
+  40          //      0x17,0x16,0x15,0x14,0x13,0x12,0x11,0x10,
+  41          
+  42          //  FKN1,FKN2,FKN3,FKN4,FKN5,OKN6,FHP6,FHP5
+  43          //      0x06,0x07,0x04,0x05,0x02,0x0A,0x00,0x01
+  44          /*******************************************
+  45          //  FKI1,FKI2,FKI3,OKI4,PKTT,FHP9,FHP7,FST2,
+  46              0x37,0x36,0x35,0x3D,0x33,0x17,0x11,0x30,
+  47          
+  48          //  FHP3,FHN3,FHP4,FHN4,FST1,FHX1,FHX2,FFX1,  
+  49                  0x24,0x27,0x01,0x25,0x22,0x23,0x20,0x21,
+  50          
+  51          //  FHP10,FHP1,FHN1,FHP2,FHN2,FHN5,FHP8,FHN6,
+  52                  0x32,0x14,0x15,0x26,0x13,0x12,0x32,0x10,
+  53          
+  54          //  FKN1,FKN2,FKN3,FKN4,FKN5,OKN6,FHP6,FHP5
+  55                  0x06,0x07,0x04,0x05,0x02,0x0A,0x31,0x00
+C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 2   
+
+  56          ********************************************/
+  57          };
+  58          
+  59          //when modification is applied,
+  60          //no address should be modified ,just set the mcu addr= 256,
+  61          //and add new item in mcuaddr
+  62          //C? IT IS SO EASY ,
+  63          //BUT ,A NEW REGISTER MODEL WILL BE APPLIED IN THE FUTURE.
+  64          /*          board allocation (F,O)=P0*8+P1
+  65                          48,49   50,51   52,53   54,55   57,56   59,58   61,60   63,62   //HPo,HNo,??,HP0,H8,H7,STo,STi
+  66                          33,32   35,34   37,36   39,38   41,40   43,42   45,44   47,46   //HN4,HP4,HN3,HP3,HN6,HP6,HN5,HP5
+  67                          17,16   19,18   21,20   23,22   25,24   27,26   29,28   31,30   //KN4,KN3,KN2,KN1,H9,FX1,KTT,KN5
+  68                          0,1             2,3             4,5             6,7             9,8             11,10   13,12   15,14   //H2,H1,HX2,HX1,KI4,KI3,KI2,KI1
+  69          const unsigned char pcaddr[] ={
+  70                          0x16,0x14,0x26,0x24,0x01,0x00,0x31,0x11,0x32,0x17,//FHP 0-9 (pc addr)
+  71                          0x1f,0x1d,0x2f,0x2d,0x08,0x09,0x38,0x18,0x3b,0x1e,//OHP 10-19 (pc addr)
+  72                          0x15,0x13,0x27,0x25,0x12,0x10,                                    //FHN 20-25  (pc addr)
+  73                          0x1c,0x1a,0x2e,0x2c,0x1b,0x19,                                    //OHN 26-31  (pc addr)
+  74                          0x06,0x07,0x04,0x05,0x02,0x03,                                    //FKN 32-37  (pc addr)
+  75                          0x0f,0x0e,0x0d,0x0c,0x0b,0x0a,                                    //OKN 38-42  (pc addr)
+  76                          0x37,0x36,0x35,0x34,                                                      //FKI 44-47      (pc addr)
+  77                          0x3e,0x3f,0x3c,0x3d,                                                      //OKI 48-51      (pc addr)
+  78                          0x23,0x20,0x21,0x33,0x22,0x30,                                    //FHX1,FHX2,FFX1,PKTT,FSTI,FSTO 52-57  (pc addr)
+  79                          0x2a,0x29,0x28,0x3a,0x2b,0x39,                                    //OHX1,OHX2,OFX1,NKTT,OSTI,OSTO, 58-63 (pc addr)
+  80                          0x41,0x40,0x43,0x42};                                                     //FHPO,OHP0,FHNO,OHNO  (pc addr)
+  81          const unsigned char mcuaddr[] ={
+  82                       54,  2     ,  0,   39,      35,  47,  43,  59,  57, 25,   //FHP 0-9 (pc addr)
+  83                           55,  3 ,  1,   38,      34,  46,  42,  58,      56, 24,   //OHP 10-19 (pc addr)
+  84                           255, 255,  37,  33,  45,   41,                                    //FHN 20-25  (pc addr)
+  85                           255, 255,  36,  32,  44,   40,                    //OHN 26-31  (pc addr)
+  86                           23,   21,  19,  17,  31,  255,                                    //FKN 32-37  (pc addr) ?(54)
+  87                           22,   20,  18,  16,  30,  255,                    //OKN 38-42  (pc addr) ?(55)
+  88                           15,   13,  11,  9,                                                                //FKI 44-47     (pc addr)
+  89                           14,   12,  10,  8,                                                                //OKI 48-51     (pc addr)
+  90                           6,   4,   27,  29,  63,  61,                                      //FHX1,FHX2,FFX1,PKTT,FSTI,FSTO 52-57  (pc addr)
+  91                           7,   5,   26,  28,  62,  60,                                      //OHX1,OHX2,OFX1,NKTT,OSTI,OSTO, 58-63 (pc addr)
+  92                           48,  49,  50,  51};                                                       //FHPO,OHP0,FHNO,OHNO  (pc addr)
+  93          
+  94                           CHAINED ADDRESS
+  95          
+  96          ON OFF 
+  97          
+  98          40 41  REG21
+  99          42 43  REG22
+ 100          13 1A  REG23
+ 101          1E 17  REG24
+ 102          
+ 103          
+ 104          11 18  REG11
+ 105          31 38  REG12
+ 106          30 39  REG13
+ 107          22 2B  REG14
+ 108          
+ 109          05 0C  REG61
+ 110          04 0D  REG62
+ 111          07 0E  REG63
+ 112          06 0F  REG64
+ 113          
+ 114          32 3B  REG51
+ 115          21 28  REG52
+ 116          33 3A  REG53
+ 117          02 0B  REG54
+C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 3   
+
+ 118          
+ 119          10 19  REG31
+ 120          00 09  REG32
+ 121          12 1B  REG33
+ 122          01 08  REG34
+ 123          
+ 124          25 2C  REG41
+ 125          24 2D  REG42
+ 126          27 2E  REG43
+ 127          26 2F  REG44
+ 128          
+ 129          
+ 130                           
+ 131          */
+ 132          const unsigned char code lut[]={
+ 133          /*****05-1-25 8:44****
+ 134          47,35,31,255,19,17,23,21,  //0-7
+ 135          34,46,255,30,16,18,20,22,  //8-f
+ 136          41,59,45,255,2,255,54,25,  //10-17
+ 137          58,40,255,44,255,3,24,55,  //18-1f
+ 138          4,27,63,6,39,33,0,37,      //20-27
+ 139          26,5,7,62,32,38,36,1,      //28-2f
+ 140          61,43,57,29,9,11,13,15,    //30-37
+ 141          42,60,28,56,10,8,14,12,    //38-3f 
+ 142          49,48,51,50                                //40-43
+ 143          **********************/
+ 144          /*****05-1-25 8:44****/
+ 145          43,47,31,255,19,17,23,21,  //0-7  
+ 146          46,42,255,30,16,18,20,22,  //8-f
+ 147          41,57,45,53,0,255,2,54,  //10-17
+ 148          56,40,52,44,255,1,55,3,  //18-1f
+ 149          4,27,63,6,35,33,39,37,      //20-27
+ 150          26,5,7,62,32,34,36,38,      //28-2f
+ 151          61,59,25,29,9,11,13,15,    //30-37
+ 152          58,60,28,24,10,8,14,12,    //38-3f 
+ 153          49,48,51,50                                //40-43
+ 154          /**********************/
+ 155          };
+ 156          
+ 157          extern void turn_rx_on( void );
+ 158          extern void turn_rx_off( void );
+ 159          extern void flush_input_buffer( void );
+ 160          extern void ioputchar(char ch);
+ 161          extern char iogetchar();
+ 162          extern char kbhit( void );
+ 163          extern void init_uart( void );
+ 164          unsigned char delayc;
+ 165          
+ 166          //delay loop
+ 167          void swiDelay(unsigned char dl1,unsigned char dl2)
+ 168          {
+ 169   1              unsigned char i,j;
+ 170   1              for(i=0;i<dl1;i++)
+ 171   1                      for(j=0;j<dl2;j++)
+ 172   1                              ;
+ 173   1      }
+ 174          
+ 175          
+ 176          void swiAction(unsigned char SwiID)
+ 177          {
+ 178   1              unsigned char exID;
+ 179   1      
+C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 4   
+
+ 180   1              if(SwiID >= sizeof(lut))
+ 181   1                      return;
+ 182   1      
+ 183   1              exID = lut[SwiID];
+ 184   1              if(exID == 255)
+ 185   1                      return;
+ 186   1      
+ 187   1              P1 = tbl[(exID&7)];
+ 188   1              P0 = tbl[(exID>>3)];
+ 189   1              swiDelay(0x1f,0xff);
+ 190   1      
+ 191   1              P1 = 0xff;
+ 192   1              P0 = 0xff;
+ 193   1              swiDelay(0x03,0xff);
+ 194   1      }
+ 195          void swiReset()
+ 196          {
+ 197   1              unsigned char i;
+ 198   1              for(i=0;i<LINIT;i++)
+ 199   1              {
+ 200   2                      swiAction(inittbl[i]);
+ 201   2              }
+ 202   1      }
+ 203          
+ 204          /*****************************************************
+ 205          Interface Routine for I/O analog serial port (UART.C)
+ 206          (added by songj)
+ 207          // 1. get_rx_pin_status()
+ 208          //    Returns 0 or 1 dependent on whether the receive pin is high or low.
+ 209          // 2. set_tx_pin_high()
+ 210          //    Sets the transmit pin to the high state.
+ 211          // 3. set_tx_pin_low()
+ 212          //    Sets the transmit pin to the low state.
+ 213          // 4. idle()
+ 214          //    Background functions to execute while waiting for input.
+ 215          // 5. timer_set( BAUD_RATE )
+ 216          //    Sets the timer to 3 times the baud rate.
+ 217          // 6. set_timer_interrupt( timer_isr )
+ 218          //    Enables the timer interrupt.
+ 219          
+ 220          ******************************************************/
+ 221          unsigned char get_rx_pin_status()
+ 222          {
+ 223   1              return asp_rx;
+ 224   1      }
+ 225          void set_tx_pin_high()
+ 226          {
+ 227   1              asp_tx = 1;
+ 228   1      }
+ 229          void set_tx_pin_low()
+ 230          {
+ 231   1              asp_tx = 0;
+ 232   1      }
+ 233          void idle()
+ 234          {
+ 235   1      
+ 236   1      }
+ 237          /*
+ 238          */
+ 239          // clear code is set to 0x0007ffff; since we enabled buffer function
+ 240          #define MYCLR_CODE      0x0007ffff
+ 241          #define CONFIG_MODE     RBUF_ON|OPGND_DIS|DACTRI_DIS|BIN_2SC_BIN|SDO_EN|LIN_COMP_10
+C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 5   
+
+ 242          //end interface routine
+ 243          void main()
+ 244          {
+ 245   1              unsigned char temp;
+ 246   1              unsigned char *dacbuf;
+ 247   1              unsigned char *clrbuf;
+ 248   1              unsigned char sid;//id of serial to send 
+ 249   1              long i=1000;
+ 250   1              IE = 0;//close int
+ 251   1      
+ 252   1              sjSerialInit();
+ 253   1              ADuC7026Init();
+ 254   1      
+ 255   1              //set serial port parameter (clock 11.0592M)
+ 256   1              //9600 baut rate 8 data non parity and 1 stop.
+ 257   1              SCON = 0x70;
+ 258   1              PCON = 0x00;
+ 259   1              //timer count
+ 260   1              TH1 = 0xfd;
+ 261   1              //use timer 1 to be serial
+ 262   1              //use timer 0 to be analog I/O
+ 263   1              TMOD = 0x22;
+ 264   1              TR1 = 1;
+ 265   1      
+ 266   1              init_uart();
+ 267   1              turn_rx_on();//enable I/O serial
+ 268   1              flush_input_buffer();
+ 269   1              IE = 0x92;//enable serial int and timer0 interrupt//IE=90
+ 270   1              sid = 0;
+ 271   1              
+ 272   1              asp_tx = 1;//set the asp_tx to be output pin
+ 273   1              if(asp_rx);//set the asp_rx to be input pin
+ 274   1      
+ 275   1      //      sjSerialSendByte('?');
+ 276   1              swiReset();
+ 277   1              swiDelay(0x0f,0xff);
+ 278   1      
+ 279   1              /*
+ 280   1              *       Protocal routine: 
+ 281   1              *       1.      HMARK sid(!=HMARK) :set sid
+ 282   1              *   2.  normal HMARK is repeated
+ 283   1              */
+ 284   1              dacbuf = (unsigned char*)(AD5791Registers + DAC_VALUE);
+ 285   1              clrbuf = (unsigned char*)(AD5791Registers + CLEARCODE);
+ 286   1      
+ 287   1              AD5791Initialization();
+ 288   1              swiDelay(0x0f,0xff);
+ 289   1      
+ 290   1              AD5791Registers[CONTROL] = CONFIG_MODE;
+ 291   1              WriteToAD5791ViaSPI(CONTROL, AD5791Registers);
+ 292   1      
+ 293   1              AD5791Registers[CLEARCODE] = MYCLR_CODE;        
+ 294   1              WriteToAD5791ViaSPI(CLEARCODE, AD5791Registers);
+ 295   1      
+ 296   1              AD5791Registers[DAC_VALUE] = MYCLR_CODE;        
+ 297   1              WriteToAD5791ViaSPI(DAC_VALUE, AD5791Registers);
+ 298   1              AD5791HardwareLoad();   
+ 299   1              AD5791Registers[CONTROL] = 0;
+ 300   1              AD5791Registers[CLEARCODE] = MYCLR_CODE;
+ 301   1      
+ 302   1              while(1)
+ 303   1              {
+C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 6   
+
+ 304   2      
+ 305   2                      if(sjSerialIsDataWaiting())
+ 306   2                      {
+ 307   3                              temp = sjSerialWaitForOneByte();
+ 308   3                              if(temp == HMARK)
+ 309   3                              {
+ 310   4                                      temp = sjSerialWaitForOneByte();                
+ 311   4                                      if(temp != HMARK)
+ 312   4                                      {
+ 313   5                                              sid = temp;
+ 314   5                                              continue;
+ 315   5                                      }
+ 316   4                              }
+ 317   3                              if(sid == 'd')//send to DAC //5 byte data , 1st byte is for sum check = 0x00, (2nd-4th byte is data), 5
+             -th byte is function code,
+ 318   3                              {
+ 319   4                                              dacbuf[0] = temp;               
+ 320   4                                              dacbuf[1] = sjSerialWaitForOneByte();           
+ 321   4                                              dacbuf[0] += dacbuf[1];
+ 322   4                                              dacbuf[2] = sjSerialWaitForOneByte();           
+ 323   4                                              dacbuf[0] += dacbuf[2];
+ 324   4                                              dacbuf[3] = sjSerialWaitForOneByte();           
+ 325   4                                              dacbuf[0] += dacbuf[3];
+ 326   4                                              temp = sjSerialWaitForOneByte();
+ 327   4                                              dacbuf[0] +=  temp;
+ 328   4                                              if(dacbuf[0] == 0x00)
+ 329   4                                              {
+ 330   5                                                      if(temp == 0x01)
+ 331   5                                                      {
+ 332   6                                                              WriteToAD5791ViaSPI(DAC_VALUE, AD5791Registers);
+ 333   6                                                              AD5791HardwareLoad();
+ 334   6                                                              
+ 335   6                                                              swiDelay(0x0f,0xff);
+ 336   6                                                              AD5791Registers[CLEARCODE] = 0;
+ 337   6                                                              ReadFromAD5791ViaSPI(DAC_VALUE, clrbuf);
+ 338   6                                                              temp = 0;
+ 339   6                                                              if(AD5791Registers[CLEARCODE] == AD5791Registers[DAC_VALUE])
+ 340   6                                                                      temp = 1;
+ 341   6                                                      }
+ 342   5                                                      else if(temp == 0x02)
+ 343   5                                                      {
+ 344   6                                                              AD5791HardwareClear();
+ 345   6                                                              temp = 1;
+ 346   6                                                      }
+ 347   5                                                      else if(temp == 0x03)
+ 348   5                                                      {
+ 349   6                                                              AD5791HardwareReset();
+ 350   6                                                              temp = 1;
+ 351   6                                                      }
+ 352   5                                                      else if(temp == 0x04)
+ 353   5                                                      {
+ 354   6                                                              AD5791Registers[CONTROL] = CONFIG_MODE;
+ 355   6                                                              WriteToAD5791ViaSPI(CONTROL, AD5791Registers);
+ 356   6      
+ 357   6                                                              AD5791Registers[CLEARCODE] = MYCLR_CODE;        // clear code is set to 0
+ 358   6                                                              WriteToAD5791ViaSPI(CLEARCODE, AD5791Registers);
+ 359   6      
+ 360   6                                                              AD5791Registers[CONTROL] = 0;
+ 361   6                                                              AD5791Registers[CLEARCODE] = MYCLR_CODE;
+ 362   6                                                              temp = 1;
+ 363   6                                                      }
+ 364   5                                                      else if(temp == 0x05)
+C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 7   
+
+ 365   5                                                      {
+ 366   6                                                              AD5791Registers[CLEARCODE] = 0;
+ 367   6                                                              ReadFromAD5791ViaSPI(CONTROL, clrbuf);
+ 368   6                                                              sjSerialSendByte(clrbuf[0]);
+ 369   6                                                              sjSerialSendByte(clrbuf[1]);
+ 370   6                                                              sjSerialSendByte(clrbuf[2]);
+ 371   6                                                              sjSerialSendByte(clrbuf[3]);
+ 372   6      
+ 373   6                                                              AD5791Registers[CLEARCODE] = 0;
+ 374   6                                                              ReadFromAD5791ViaSPI(DAC_VALUE, clrbuf);
+ 375   6                                                              sjSerialSendByte(clrbuf[0]);
+ 376   6                                                              sjSerialSendByte(clrbuf[1]);
+ 377   6                                                              sjSerialSendByte(clrbuf[2]);
+ 378   6                                                              sjSerialSendByte(clrbuf[3]);
+ 379   6      
+ 380   6                                                              temp = 1;
+ 381   6                                                      }
+ 382   5                                                      else{
+ 383   6                                                              temp = 0;
+ 384   6                                                      }
+ 385   5                                              }else{
+ 386   5                                                      temp = 0;
+ 387   5                                              }
+ 388   4                                              sid = "";
+ 389   4                                              sjSerialSendByte(HMARK);
+ 390   4                                              if(temp > 0) //success
+ 391   4                                              {
+ 392   5                                                      sjSerialSendByte(0);
+ 393   5                                                      sjSerialSendByte(0);
+ 394   5                                              }else{
+ 395   5                                                      sjSerialSendByte(1);
+ 396   5                                                      sjSerialSendByte(1);
+ 397   5                                              }
+ 398   4                                              sjSerialSendByte(EMARK);
+ 399   4                              }
+ 400   3                              if(sid == 's')//send to switch
+ 401   3                              {
+ 402   4                                      if(temp == HMARK)
+ 403   4                                      {
+ 404   5                                              while(1)
+ 405   5                                              {
+ 406   6                                                      temp = sjSerialWaitForOneByte();
+ 407   6                                                      if(temp == EMARK)
+ 408   6                                                              break;
+ 409   6                                                      if(temp == RMARK)
+ 410   6                                                      {
+ 411   7                                                              swiReset();
+ 412   7                                                              continue;
+ 413   7                                                      }
+ 414   6                                                      if(temp == QMARK)
+ 415   6                                                              continue;
+ 416   6                                                      swiAction(temp);
+ 417   6                                              }
+ 418   5                                              sid = "";
+ 419   5                                              sjSerialSendByte(HMARK);
+ 420   5                                              temp = 0; //for DAC board should not read P2 here
+ 421   5                                              sjSerialSendByte(temp);
+ 422   5                                              temp = 0; //for DAC board should not read P3 here
+ 423   5      /*
+ 424   5                                              temp = 0;
+ 425   5                                              if(P3^4)
+ 426   5                                                      temp |= (0x10);
+C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 8   
+
+ 427   5                                              if(P3^5)
+ 428   5                                                      temp |= (0x20);
+ 429   5      */
+ 430   5                                              sjSerialSendByte(temp);
+ 431   5                                              sjSerialSendByte(EMARK);
+ 432   5                                      }
+ 433   4                              }
+ 434   3                              if(sid == 'n')//send to navmeter
+ 435   3                              {
+ 436   4                                      ioputchar(temp);
+ 437   4                              }
+ 438   3                              if(sid == 't')
+ 439   3                              {
+ 440   4                                      P0=sjSerialWaitForOneByte();
+ 441   4                                      P1=sjSerialWaitForOneByte();
+ 442   4                                      sid = "";
+ 443   4                                      sjSerialSendByte(EMARK);
+ 444   4                              }
+ 445   3                      }
+ 446   2                      if(kbhit())
+ 447   2                      {
+ 448   3                              temp = iogetchar();
+ 449   3                              sjSerialSendByte(temp);
+ 450   3                      }
+ 451   2              }
+ 452   1      }
+ 453          
+ 454          
+ 455          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    938    ----
+   CONSTANT SIZE    =    109    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      1      12
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

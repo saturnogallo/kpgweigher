@@ -1,0 +1,198 @@
+C51 COMPILER V7.01  KEY                                                                    12/04/2011 13:12:40 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE KEY
+OBJECT MODULE PLACED IN key.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE key.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include <stc51.h>
+   2          #include <intrins.h>
+   3          #include <MATH.H>
+   4          #include "utili.h"
+   5          #include "key.h"
+   6          #define KEYTIMEOUT      1
+   7          
+   8          sbit l9= P3^6;   //定义时钟端164
+   9          
+  10          bit  KEYBJ2     ;       //KEY_DOWN event
+  11          uchar keykeep;
+  12          uint  keycount; //delay counter
+  13          
+  14          sbit kbit = P3^2; //key int
+  15          extern uchar key;
+  16          void decode_key()
+  17          {
+  18   1         uchar k;
+  19   1         P1 = 0x0F;l9=1;//低位置○，准备查询按键
+  20   1         k  = P1;       //取得当前P1口的状态
+  21   1        
+  22   1         if(k != 0x0F)
+  23   1         {//如果有变化则表示有键按下
+  24   2           k = 0xef;
+  25   2         do{//循环扫描每一行
+  26   3           P1 = k;
+  27   3           if(k != P1)
+  28   3           {
+  29   4           switch(P1)
+  30   4             {
+  31   5            //第一行
+  32   5            case 0x77:{keykeep=KEY_OK;break;}
+  33   5            case 0xb7:{keykeep=KEY_CE;break;}
+  34   5            case 0xd7:{keykeep=KEY_NUM0;break;}
+  35   5            case 0xe7:{keykeep=KEY_DOT;break;}
+  36   5            //第二行
+  37   5            case 0x7b:{keykeep=KEY_DN;break;}
+  38   5            case 0xbb:{keykeep=KEY_NUM3;break;}
+  39   5            case 0xdb:{keykeep=KEY_NUM2;break;}
+  40   5            case 0xeb:{keykeep=KEY_NUM1;break;}
+  41   5            //第三行
+  42   5            case 0x7d:{keykeep=KEY_UP;break;}
+  43   5            case 0xbd:{keykeep=KEY_NUM6;break;}
+  44   5            case 0xdd:{keykeep=KEY_NUM5;break;}
+  45   5            case 0xed:{keykeep=KEY_NUM4;break;}
+  46   5            //第四行
+  47   5            case 0x7e:{keykeep=KEY_TAB;break;}
+  48   5            case 0xbe:{keykeep=KEY_NUM9;break;}
+  49   5            case 0xde:{keykeep=KEY_NUM8;break;}
+  50   5            case 0xee:{keykeep=KEY_NUM7;break;}
+  51   5            default:
+  52   5      
+  53   5                 break;
+  54   5             }
+  55   4            } 
+C51 COMPILER V7.01  KEY                                                                    12/04/2011 13:12:40 PAGE 2   
+
+  56   3           k = _crol_(k,1);//移位，进入下一行扫描
+  57   3          }while(k !=0xef);//超过范围退出    
+  58   2        }
+  59   1      
+  60   1       P1 = 0xff;l9=0;  //第五列如下
+  61   1         k = P1;
+  62   1        if(k != 0xff)
+  63   1           {
+  64   2           switch(P1)
+  65   2              {          //第五行
+  66   3              case 0xf7:{keykeep=KEY_BTN4; break;}
+  67   3              case 0xfb:{keykeep=KEY_BTN3;break;}
+  68   3              case 0xfd:{keykeep=KEY_BTN2; break;}
+  69   3              case 0xfe:{keykeep=KEY_BTN1;break;}
+  70   3                  default:
+  71   3                  break;
+  72   3                  }   
+  73   2                }   
+  74   1          P1 = 0x0f;l9=0;      
+  75   1       }  
+  76            
+  77          /**************************主程序********************************/
+  78          void Key_Init()
+  79          {
+  80   1              KEYBJ2 = 0;                       //key down event
+  81   1              keycount = 0;
+  82   1              keykeep = KEY_INVALID;
+  83   1          P1 = 0x0f;l9=0;      
+  84   1      }
+  85          
+  86          void Key_Scan()
+  87          {
+  88   1              uchar k;
+  89   1              if(KEYBJ2 == 0){
+  90   2                      if(kbit == 0)
+  91   2                      {
+  92   3                              KEYBJ2 = 1;
+  93   3                              keycount = 0;
+  94   3                      }
+  95   2                      return;
+  96   2              }
+  97   1      
+  98   1                      k = keykeep;
+  99   1                      keykeep = KEY_INVALID;
+ 100   1                      decode_key(); //decode the key
+ 101   1                      if(keycount == 0) //initial decode
+ 102   1                      {
+ 103   2                              if(keykeep == KEY_INVALID) //invalid key
+ 104   2                              {
+ 105   3                                      KEYBJ2 = 0;
+ 106   3                                      P1 = 0x0f;l9=0;  
+ 107   3                                      return;
+ 108   3                              }
+ 109   2                      }
+ 110   1                      if(keykeep == KEY_INVALID) //key up event found
+ 111   1                      {
+ 112   2                              KEYBJ2 = 0;
+ 113   2                              P1 = 0x0f;l9=0;
+ 114   2      
+ 115   2                              if(keycount >= KEYTIMEOUT)
+ 116   2                                      key = k;
+ 117   2                              return;
+C51 COMPILER V7.01  KEY                                                                    12/04/2011 13:12:40 PAGE 3   
+
+ 118   2                      }
+ 119   1                      keycount++;
+ 120   1                      if(keycount > 128)
+ 121   1                              keycount = 1;
+ 122   1              return;
+ 123   1      
+ 124   1      }
+ 125          sbit sca_clk = P0^7;
+ 126          sbit sca_dat = P0^6;
+ 127          void display_buttons(uchar btn_pos,uchar btn_val)   //74164串行移位一个数
+ 128          {
+ 129   1               uchar i=0;
+ 130   1                       static uchar c= 0;
+ 131   1                       if(btn_val){
+ 132   2                               switch(btn_pos)
+ 133   2                               {
+ 134   3                                      case KEY_BTN1:  c = c | 0x11;break;
+ 135   3                                      case KEY_BTN2:  c = c | 0x22;break;
+ 136   3                                      case KEY_BTN3:  c = c | 0x44;break;
+ 137   3                                      case KEY_BTN4:  c = c | 0x88;break;
+ 138   3                                      default:
+ 139   3                                              return;
+ 140   3                              }
+ 141   2                      }else{
+ 142   2                              switch(btn_pos)
+ 143   2                              {
+ 144   3                                      case KEY_BTN1:  c = c & 0xEE;break;
+ 145   3                                      case KEY_BTN2:  c = c & 0xDD;break;
+ 146   3                                      case KEY_BTN3:  c = c & 0xBB;break;
+ 147   3                                      case KEY_BTN4:  c = c & 0x77;break;
+ 148   3                                      default:
+ 149   3                                              return;
+ 150   3                              }
+ 151   2                      }
+ 152   1      
+ 153   1               do{  
+ 154   2                   if(c&0x01)     
+ 155   2                       sca_dat=1;
+ 156   2                   else
+ 157   2                                       sca_dat=0;
+ 158   2                           c>>=1;        //数组tabel中的第N个数向右移动一位
+ 159   2                               _nop_(); _nop_();
+ 160   2                   sca_clk=0;            //下降沿将数据写入164，拉高时钟端停止，再拉低等待下一次写入
+ 161   2                   _nop_(); _nop_();
+ 162   2                               sca_clk=1;
+ 163   2                                _nop_(); _nop_();
+ 164   2                   sca_clk=0;
+ 165   2                                _nop_(); _nop_();
+ 166   2                   i++;
+ 167   2                  }
+ 168   1              while(i<8);
+ 169   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    599    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =      4       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+C51 COMPILER V7.01  KEY                                                                    12/04/2011 13:12:40 PAGE 4   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
