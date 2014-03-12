@@ -18,8 +18,8 @@ namespace Mndz
         static public SerialPort port;  //relay board and DA will shared port
         static public SerialPort cmdport; //all command from PC will use the port
         //static public SerialPort adport; //AD board (weighing board)
-        static public SerialPort ad2port; //AD board (weighing board)
-
+        static public SerialPort ad2port; //AD board
+        static Dictionary<string, UInt16> reg_map;
         static public double reading;
         static public double ad2reading;
         static private StringBuilder inbuffer;
@@ -32,80 +32,35 @@ namespace Mndz
         }
         static DeviceMgr()
         {
-            #region relay definition
-            /*
-         * ON OFF 
-        40 41  REG21
-        42 43  REG22
-        13 1A  REG23
-        1E 17  REG24
-    
-        11 18  REG11
-        31 38  REG12
-        30 39  REG13
-        22 2B  REG14
-
-        05 0C  REG61
-        04 0D  REG62
-        07 0E  REG63
-        06 0F  REG64
-
-        32 3B  REG51
-        21 28  REG52
-        33 3A  REG53
-        02 0B  REG54
-
-        10 19  REG31
-        00 09  REG32
-        12 1B  REG33
-        01 08  REG34
-
-        25 2C  REG41
-        24 2D  REG42
-        27 2E  REG43
-        26 2F  REG44
-         */
-            regmap = new Dictionary<string, byte>();
-            byte[]  all_relay = new byte[]{
-                0x40,0x41,0x42,0x43,0x13,0x1A,0x1E,0x17,
-                0x11,0x18,0x31,0x38,0x30,0x39,0x22,0x2B,
-                0x05,0x0C,0x04,0x0D,0x07,0x0E,0x06,0x0F,
-                0x32,0x3B,0x21,0x28,0x33,0x3A,0x02,0x0B,
-                0x10,0x19,0x00,0x09,0x12,0x1B,0x01,0x08,
-                0x25,0x2C,0x24,0x2D,0x27,0x2E,0x26,0x2F};
-            string[] abbr_relay = {"REG21",     "REG22:TOREAL", "REG23:OUT",    "REG24", 
-                                   "REG11",     "REG12:10T",    "REG13:100T",   "REG14",
-                                   "REG61:R13", "REG62:R14",    "REG63:R15",    "REG64",
-                                   "REG51:R9",  "REG52:R10",    "REG53:R11",    "REG54:R12",
-                                   "REG31:R1",  "REG32:R2",     "REG33:R3",     "REG34:R4",
-                                   "REG41:R5",  "REG42:R6",     "REG43:R7",     "REG44:R8"
-                                  };
             int i;
-            for (i = 0; i < abbr_relay.Length; i++)
-            {
-                string abbr = abbr_relay[i];
-                
-                string[] abbrs;
-                if (abbr.IndexOf(':') > 0)
-                {
-                    abbrs = abbr.Split(new char[] { ':' });
-                    regmap[abbrs[0] + "_ON"] = all_relay[2 * i];
-                    regmap[abbrs[0] + "_OFF"] = all_relay[2 * i + 1];
-                    regmap[abbrs[1] + "_ON"] = all_relay[2 * i];
-                    regmap[abbrs[1] + "_OFF"] = all_relay[2 * i + 1];
-                }
-                else
-                {
-                    regmap[abbr + "_ON"] = all_relay[2 * i];
-                    regmap[abbr + "_OFF"] = all_relay[2 * i + 1];
-                }
-            }
-            #endregion
+
             Logger.SysLog("");
             Logger.SysLog(DateTime.Now.ToLongTimeString());
             //Thread.Sleep(3000);
 
+            reg_map = new Dictionary<string, ushort>();
+            string[] regs = new string[] { "VOLT_1V", "VOLT_2V", "VOLT_5V", "VOLT_10V", "VOLT_20V" , "VOLT_50V" , "VOLT_OFF","MUL_OFF",
+                                           "MUL_1", "MUL_10", "MUL_100", "MUL_500", "MUL_1000"};
 
+            UInt16 r = 0x0001;
+            #region set regmap
+            {
+                reg_map["VOLT_1V"]  = 0x0004;
+                reg_map["VOLT_2V"]  = 0x0008;
+                reg_map["VOLT_5V"]  = 0x0010;
+                reg_map["VOLT_10V"] = 0x0020;
+                reg_map["VOLT_20V"] = 0x0040;
+                reg_map["VOLT_50V"] = 0x0080;
+                reg_map["VOLT_OFF"] = 0x0004; //=VOLT_1V
+                //0x4000 no use
+                reg_map["MUL_1"]    = 0x2000;
+                reg_map["MUL_10"]   = 0x1000;
+                reg_map["MUL_100"]  = 0x4800;
+                reg_map["MUL_500"]  = 0x8800;
+                reg_map["MUL_1000"] = 0x0900;
+                reg_map["MUL_OFF"]  = 0x2000; //=MUL_1
+            }
+            #endregion
             WaitEvent = new AutoResetEvent(false);
             OverEvent = new AutoResetEvent(false);
             inbuffer = new StringBuilder();
@@ -114,45 +69,55 @@ namespace Mndz
             ad2buffer = new StringBuilder();
             //ad_rdgbuf = new List<double>();
 
-            if(GlobalConfig.ISDEBUG)
+            if (GlobalConfig.ISDEBUG)
                 return;
             #region init switch board port
             port = new SerialPort();
             port.BaudRate = 9600;
-            
+
             port.PortName = GlobalConfig.sSwiPort;
             port.Parity = Parity.None;
             port.DataBits = 8;
             port.StopBits = StopBits.One;
             port.NewLine = "\r";
-            
+
+            string[] ports = SerialPort.GetPortNames();
+            if(! SerialPort.GetPortNames().Contains(port.PortName))
+                throw new Exception(port.PortName + " not exists");
             for (i = 0; i < 10; i++)
             {
-                port.Open();
-                if (port.IsOpen)
-                    break;
-                Thread.Sleep(3000);
+                try
+                {
+                    
+                    port.Open();
+                    if (port.IsOpen)
+                        break;
+                    Thread.Sleep(3000);
+                }
+                catch(Exception ex)
+                {
+                    Logger.Log(ex.Message);
+                }
             }
             if (i >= 10)
-                throw new Exception("Failed to open port A");
+                throw new Exception("Failed to open port " + port.PortName);
             #endregion
-
 
             #region init cmdport
             cmdport = new SerialPort();
             cmdport.BaudRate = 9600;
-            
+
             cmdport.PortName = GlobalConfig.sCmdPort;
             cmdport.Parity = Parity.None;
             cmdport.DataBits = 8;
             cmdport.StopBits = StopBits.One;
             cmdport.NewLine = "\r";
             cmdport.Open();
-            
+
             if (!cmdport.IsOpen)
             {
                 port.Close();
-                throw new Exception("Failed to open port B");
+                throw new Exception("Failed to open port " + cmdport.PortName);
             }
             cmdport.DiscardInBuffer();
             cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
@@ -177,7 +142,7 @@ namespace Mndz
                 throw new Exception("Failed to open AD2 port");
             }
             ad2port.DiscardInBuffer();
-            
+
             #endregion
         }
 
@@ -210,7 +175,7 @@ namespace Mndz
             }
         }
         
-        /*protocal of ad weighing board
+        /*nouse now protocal of ad weighing board
         //02 26 30 20 31 30 30 34 33 35 30 30 30 30 30 30 0D
         static private int adstate = -1;
         static private int adst_a = 0;
@@ -318,6 +283,7 @@ namespace Mndz
             }
         }
         */
+
         static void cmdport_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             if (!cmdport.IsOpen)
@@ -418,7 +384,7 @@ namespace Mndz
                 success = true;
                 return;
             }
-            if (action == "navto1v" || action == "navto120mv")
+            if (action == "navto1v" || action == "navto120mv" || action == "navto30v")
             {
                 if (nav_range2 == action)
                     return;
@@ -433,11 +399,11 @@ namespace Mndz
                 }
                 if (action == "navto10mv")
                 {
-                    //     ad2port.Write(StringResource.str("NAV_10MV_" + GlobalConfig.sNavmeter2)); //10mv
+                    ad2port.Write(StringResource.str("NAV_10MV_" + GlobalConfig.sNavmeter2)); //10mv
                 }
                 if (action == "navto30v")
                 {
-                    //     ad2port.Write(StringResource.str("NAV_30V_" + GlobalConfig.sNavmeter2)); //10mv
+                    ad2port.Write(StringResource.str("NAV_30V_" + GlobalConfig.sNavmeter2)); //10mv
                 }
                 Thread.Sleep(2000);
                 return;
@@ -456,7 +422,7 @@ namespace Mndz
                 ad2port.Write(StringResource.str("NAV_READ_" + GlobalConfig.sNavmeter2)); //1v
                 Thread.Sleep(10);
                 int timeout = 20;
-                while ((timeout-- > 0) && (reading < -9000))
+                while ((timeout-- > 0) && (ad2reading < -9000))
                 {
                     Thread.Sleep(50);
                     ScanPort2();
@@ -464,9 +430,8 @@ namespace Mndz
                 return;
             }
         }
+
         static public string nav_range = "";
-
-
         static public void Action(string action, object param)
         {
             if (GlobalConfig.ISDEBUG)
@@ -474,7 +439,7 @@ namespace Mndz
                 success = true;
                 return;
             }
-            if (action == "navto1v" || action == "navto120mv")
+            if (action == "navto1v" || action == "navto120mv" || action == "navto30v")
             {
                 if (nav_range == action)
                     return;
@@ -489,11 +454,11 @@ namespace Mndz
                 }
                 if (action == "navto10mv")
                 {
-               //     port.Write(StringResource.str("NAV_10MV_" + GlobalConfig.sNavmeter)); //10mv
+                    port.Write(StringResource.str("NAV_10MV_" + GlobalConfig.sNavmeter)); //10mv
                 }
                 if (action == "navto30v")
                 {
-               //     port.Write(StringResource.str("NAV_30V_" + GlobalConfig.sNavmeter)); //10mv
+                    port.Write(StringResource.str("NAV_30V_" + GlobalConfig.sNavmeter)); //10mv
                 }
                 Thread.Sleep(2000);
                 return;
@@ -535,66 +500,75 @@ namespace Mndz
         }
         static public void Reset()
         {
-            RelayState("", "", "OFF");
+            RelayState("VOLT_OFF", "MUL_OFF");
             Action("daoutput", new byte[] { 0x55, 0x64, 0xfc, 0x00, 0x00, 0x00, 0x04 }); //set control
-            Action("navto120mv",0);
-            Action2("navto120mv", 0);
+            Action("navto30v",0); //vg
+            Action2("navto1v", 0); //vx
+            
             Thread.Sleep(3000);
         }
 
-        static private Dictionary<string, byte> regmap;
         static private string oldvolt = ""; //old Es voltage switch satus
-        static private string olddivider = "";  //old resistance divider
-        static private string oldoutput = ""; //old output status
-        static private string[] volttbl = new string[] { "VOLT_1V", "VOLT_5V", "VOLT_10V", "VOLT_20V" };
-        static private string[] divtbl = new string[] { "DIV_100M", "DIV_10M", "DIV_1M", "DIV_100K", "DIV_10K", "DIV_1K", "DIV_100", "DIV_10" };
+        static private string oldmultiply = "";  //old resistance divider
+        static private string[] volttbl = new string[] { "VOLT_1V", "VOLT_2V", "VOLT_5V", "VOLT_10V", "VOLT_20V","VOLT_50V", "VOLT_OFF" };
+        static private string[] multbl = new string[] { "MUL_1", "MUL_10", "MUL_100", "MUL_500", "MUL_1000", "MUL_OFF"};
         static private string[] outputtbl = new string[] { "ON", "OFF" };
         static private byte[] UsHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('s'), Convert.ToByte('U'), Convert.ToByte('U') };
+        static private byte[] UtHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('t')};
         static private byte[] UdHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('d') };
         static private byte[] UsTail = new byte[] { Convert.ToByte('V') };
+        static private byte[] values = new byte[] { 0x00, 0x00, 0xff };
 
         //output: ON/OFF
-        static public void RelayState(string volt, string divider, string output)
+        static public void RelayState(string volt, string multiply)
         {
-            if (((volt == oldvolt) || (volt == "")) &&
-                ((divider == olddivider) || (divider == "")) &&
-                ((output == oldoutput) || (output == "")))
+            if (volt == "")
+                volt = oldvolt;
+            if (multiply == "")
+                multiply = oldmultiply;
+
+            if ((volt == oldvolt)  &&
+                (multiply == oldmultiply))
                 return;
-            DelayWrite(UsHead, 0, 4);
+            UInt16 regout = 0x0000;
+            DelayWrite(UtHead, 0, 2);
 
             if (volttbl.Contains(volt))
             {
-                if (volt == "VOLT_1V")
-                    DelayWrite(new byte[] { regmap["10T_OFF"], regmap["100T_OFF"], regmap["TOREAL_OFF"] }, 0, 3);
-                if (volt == "VOLT_5V")
-                    DelayWrite(new byte[] { regmap["10T_ON"], regmap["100T_OFF"],  regmap["TOREAL_OFF"] }, 0, 3);
-                if (volt == "VOLT_10V")
-                    DelayWrite(new byte[] { regmap["10T_OFF"], regmap["100T_ON"],  regmap["TOREAL_OFF"] }, 0, 3);
-                if (volt == "VOLT_20V")
-                    DelayWrite(new byte[] { regmap["10T_OFF"], regmap["100T_OFF"], regmap["TOREAL_ON"] }, 0, 3);
+                regout = (ushort)(regout | reg_map[volt]);
                 oldvolt = volt;
             }
-            if (divtbl.Contains(divider))
+            if (multbl.Contains(multiply))
             {
-                DelayWrite(new byte[] { regmap["OUT_" + output] }, 0, 1);
-                olddivider = divider;
+                regout = (ushort)(regout | reg_map[multiply]);
+                oldmultiply = multiply;
             }
-            if (outputtbl.Contains(output))
-            {
-                DelayWrite(new byte[] { regmap["OUT_"+output] }, 0, 1);
-                oldoutput = output;
-            }
-            
-            DelayWrite(UsTail, 0, 1);
+            values[0]= Convert.ToByte( regout & 0x00ff);
+            values[1] = Convert.ToByte(regout >> 8);
+            values[2] = Convert.ToByte((0x2ff - values[0] - values[1]) & 0xff);
+            DelayWrite(values, 0, 3);
+
+            return;
+            //send again to avoid missing
+            //DelayWrite(UtHead, 0, 2);
+            //DelayWrite(values, 0, 3);
+            //DelayWrite(UsTail, 0, 1);
         }
     }
     internal class Processor
     {
+        //Es range types
         private int IND_ES_1V = 0;
-        private int IND_ES_5V = 1;
-        private int IND_ES_10V = 2;
-        private int IND_ES_20V = 3;
-        private const int IND_ES_TOTAL = 4;
+        private int IND_ES_2V = 1;
+        private int IND_ES_5V = 2;
+        private int IND_ES_10V = 3;
+        private int IND_ES_20V = 4;
+        private int IND_ES_50V = 5;
+        //store real Es values for each range.
+        private Decimal[] _EsReals = new Decimal[6]; //total 6 types
+        public static string[] _EsTitles = new string[] { "1V", "2V", "5V", "10V", "20V", "50V"};
+
+        //Rs types from 1e^3 to 1e^12
         private int IND_RS_3 = 0;
         private int IND_RS_4 = 1;
         private int IND_RS_5 = 2;
@@ -605,50 +579,44 @@ namespace Mndz
         private int IND_RS_10 = 7;
         private int IND_RS_11 = 8;
         private int IND_RS_12 = 9;
-        private int IND_RS_BASE = 3;
-        private const int IND_RS_TOTAL = 10;
+        internal static int IND_RS_BASE = 3;
+        //store real RsValues for each range
+        private Decimal[] _RsReals = new Decimal[10]; //total 10 types
+        public static string[] _RsTitles = new string[] { "1k  ", "10k ", "100k", "1M  ", "10M ", "100M", "1G  ", "10G ", "100G", "1T  " };
 
-
-        private Decimal[] _RxTables = new Decimal[] { 1e+2M, 1e+3M, 1e+4M, 1e+5M, 1e+6M, 1e+7M, 1e+8M, 1e+9M, 1e+10M, 1e+11M, 1e+12M, 1e+13M, 1e+14M };
+        //Rx range can be 1e+2 to 1e+14
+        public static Decimal[] _RxTables = new Decimal[] { 1e+2M, 1e+3M, 1e+4M, 1e+5M, 1e+6M, 1e+7M, 1e+8M, 1e+9M, 1e+10M, 1e+11M, 1e+12M, 1e+13M, 1e+14M };
         public static string[] _RxTitles = new string[] {"100 ", "1k  ", "10k ", "100k", "1M  ", "10M ", "100M", "1G  ", "10G ", "100G", "1T  ","10T ","100T" };
+        //public static string[] _RxMuls = new string[] { "1", "10", "10", "100", "100", "500", "500", "500", "500", "500", "500", "1000", "1000" };
+
         
-        private Decimal[] _VsTables = new Decimal[] { 1, 10, 10, 100, 100, 200, 500, 500, 500, 500, 500, 1000, 1000 }; //multiply for voltage
-
-        private int[] _EsTables; //index to values
-        private Decimal[] _EsValues = new Decimal[IND_ES_TOTAL];
-        public static string[] _EsTitles = new string[] { "1V", "5V", "10V", "20V" };
-
-        private int[] _RsTables; //index to values
-        private Decimal[] _RsValues = new Decimal[IND_RS_TOTAL];
-        public static string[] _RsTitles = new string[] { "1k  ", "10k ", "100k", "1M  ","10M ","100M","1G  ","10G ","100G","1T  " };
-
-        public Decimal EsValue
+        public Decimal EsValue  //Es value can only be fixed values
         {
             get
             {
-                if (EsIndex >= 0 && EsIndex < IND_ES_TOTAL)
-                    return _EsValues[EsIndex];
+                if (EsIndex >= 0 && EsIndex < _EsReals.Length)
+                    return _EsReals[EsIndex] ;
                 else
                     return -1;
             }
-            set
+            set //modification only allowed for back door
             {
-                if (EsIndex >= 0 && EsIndex < IND_ES_TOTAL)
+                if (EsIndex >= 0 && EsIndex < _EsReals.Length)
                 {
-                    _EsValues[EsIndex] = value;
-                    Util.ConstIni.WriteString("LASTSETTING", "esvalue" + EsIndex.ToString(), _EsValues[EsIndex].ToString());
+                    _EsReals[EsIndex] = value;
+                    Util.ConstIni.WriteString("LASTSETTING", "esreal" + EsIndex.ToString(), _EsReals[EsIndex].ToString());
                 }
             }
         }
-        private int _EsIndex = -1;        //the range setting, Es = 1,2,5,10,20,50 Volt
+        private int _EsIndex = -1;        //Index to EsValues the range setting
         internal int EsIndex{
             get
             {
                 return _EsIndex;
             }
-            private set
+            set
             {
-                if (value > IND_ES_TOTAL)
+                if (value > _EsReals.Length)
                     return;
                 if (_EsIndex == value)
                     return;
@@ -664,66 +632,103 @@ namespace Mndz
                 Util.ConstIni.WriteString("LASTSETTING", "esindex", _EsIndex.ToString());
             }
         }
-
-        private Decimal _Vx;
-        internal Decimal Vx //same da value for output
+        public int Percent
         {
             get
             {
-                return _Vx;
-            }
-            set
-            {
-                Vx = value;
+                int v = Convert.ToInt32(Math.Round(_VxOutput*18));
+                if (v < 0)
+                    return 0;
+                if (v > 180)
+                    return 180;
+                return v;
+
             }
         }
-
-        private Decimal _Rx;
-        internal Decimal Rx
+        internal double VxMeasure = 0;
+        public static string[] _MulTitles = new string[] { "1V - 10V", "10 - 100V", "100 - 1kV", "200 - 2kV", "500 - 5kV", "1k - 10kV" };
+        public static int[] MulValues = new int[] { 10, 100, 1000, 2000, 5000, 10000 };
+        private double _VxOutput = 0; //store the real DA value
+        internal double VxOutput //stored for DA value output * mulitply
         {
             get
             {
-                double Vg;
-                if (!CollectVoltage(out Vg))
-                    return -1;
-                return Convert.ToDecimal((Convert.ToDouble(Vx) + Vg) * Convert.ToDouble(Rs) / (Convert.ToDouble(EsValue) - Vg));
+                return _VxOutput * VxMultiplier;
             }
             set
             {
+                if (value < 0)
+                    return;
+                if (value / VxMultiplier >= 10) //over 10 volt
+                    return;
+                _VxOutput = value / VxMultiplier;
+            }
+        }
+        internal Decimal RxNominal = 0;
+        private int _RxIndex;
+        internal int RxIndex
+        {
+            get
+            {
+                return _RxIndex;
+            }
+            set
+            {
+                int i = value;
+                if (i >= 0 && i < _RxTables.Length)
+                {
+                    RsIndex = _RsTables[i];
+                    EsIndex = _EsTables[i];
+                    RxNominal = _RxTables[i];
+                    VxMultiplier = _MulTables[RxIndex];
+                    //Initial VxOutput and _Rx
+                    VxOutput = 1; //1V at most
+                    _RxIndex = i;
+                    
+                }
+
+            }
+        }
+        private Decimal lastRx = 0;
+        internal Decimal Rx 
+        {
+            get
+            {
+                return lastRx;
+            }
+            set
+            {//target Rx setting
                 if (value <= 0)
                     return;
                 
                 double dRx = Convert.ToDouble(value);
-                for (int i = 0; i < 13; i++)
+                for (int i = 0; i < _RxTables.Length; i++)
                 {
-                    if (Math.Abs(dRx - Math.Pow(10, i + 2)) < 0.5 * Math.Pow(10, i + 2)) //start from 1e+2, 50% variance
+                    if (Math.Abs(dRx - Convert.ToDouble(_RxTables[i])) < 0.5 * Convert.ToDouble(_RxTables[i])) //start from 1e+2, 50% variance
                     {
-                        _Rx = value;
-                        RsIndex = _RsTables[i];
-                        EsIndex = _EsTables[i];
-                        //Initial Vx
-                        Vx = 5;
+                        RxIndex = i;
+                        return;
                     }
                 }
             }
         }
-        internal Decimal Rs
+
+        internal Decimal RsValue //Rs value can only be fixed values
         {
             get
             {
-                if (RsIndex >= 0 && RsIndex < IND_RS_TOTAL)
-                    return _RsValues[RsIndex];
+                if (RsIndex >= 0 && RsIndex < _RsReals.Length)
+                    return _RsReals[RsIndex];
                 else
                     return -1;
             }
+
             set
             {
-                if (RsIndex >= 0 && RsIndex < IND_RS_TOTAL)
+                if (RsIndex >= 0 && RsIndex < _RsReals.Length)
                 {
-                    _RsValues[RsIndex] = value;
-                    if ((Convert.ToDouble(value) - Math.Pow(10, RsIndex + IND_RS_BASE)) > 0.1*Math.Pow(10, RsIndex + IND_RS_BASE)) //too much variance 10%
-                        return;
-                    Util.ConstIni.WriteString("LASTSETTING", "rsvalue" + RsIndex.ToString() , _RsValues[RsIndex].ToString());
+                    _RsReals[RsIndex] = value;
+                    Util.ConstIni.WriteString("LASTSETTING", "rsreal" + RsIndex.ToString() , _RsReals[RsIndex].ToString());
                 }
             }
         }
@@ -734,27 +739,33 @@ namespace Mndz
             {
                 return _RsIndex;
             }
-            private set
+            set
             {
-                if (value > IND_RS_TOTAL)
+                if (value >= _RsReals.Length || value < -1)
                     return;
                 if (_RsIndex == value)
                     return;
+
                 bOn = false;
-                if (value == -1)
-                {
-                    _RsIndex = -1;
-                }
-                else
-                {
-                    _RsIndex = value;
-                }
+                _RsIndex = value;
+
                 Util.ConstIni.WriteString("LASTSETTING", "rsindex", _RsIndex.ToString());
             }
         }
+        private int _vxmultiplier = 1;
+        public int VxMultiplier{
+            get
+            {
+                return _vxmultiplier;
+            }
+            set
+            {
+                Util.ConstIni.WriteString("LASTSETTING", "vxmultiplier", _vxmultiplier.ToString());
+                _vxmultiplier = value;
+            }
+        }
 
-        
-        private void SaveDA() //Rescue DA from something external EMS signal
+        private void RescueDA() //Rescue DA from something external EMS signal
         {
             //sleep 500 ms, then reset configuration
             Thread.Sleep(600);
@@ -770,13 +781,18 @@ namespace Mndz
             }
             set
             {
-                if (value == false) 
+                
+                if ((value == false) ||(EsIndex < 0 || RxIndex < 0))
                 {
-                    DeviceMgr.RelayState("", "", "OFF");
+                    ToDAValue(0);
+                    DeviceMgr.RelayState("VOLT_OFF", "MUL_OFF");
                     _bOn = false;
                     return;
                 }
-                SaveDA();
+                RescueDA();
+                Thread.Sleep(200);
+                DeviceMgr.RelayState("VOLT_" + _EsTitles[EsIndex], "MUL_" + this.VxMultiplier.ToString());
+                ToDAValue(_VxOutput);
                 _bOn = true;
             }
         }
@@ -798,23 +814,32 @@ namespace Mndz
             }
         }
 
+
+
         private Queue<double> datafilter;
         private Queue<double> datafilter2;
+
+        //Es & Rs & VsTables table store the index to EsValue, RsValue and VsMultiply for each Rx selection
+        private int[] _EsTables; //index to values
+        private int[] _RsTables; //index to values
+        private int[] _MulTables;//multiply for Vx Voltage
+
         internal Processor()
         {
-            _EsTables = new int[] { IND_ES_1V, IND_ES_10V, IND_ES_10V, IND_ES_10V, IND_ES_10V, IND_ES_20V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_5V };
-            _RsTables = new int[] { IND_RS_3, IND_RS_3, IND_RS_4, IND_RS_4, IND_RS_5, IND_RS_6, IND_RS_6, IND_RS_7, IND_RS_8, IND_RS_9, IND_RS_10, IND_RS_11, IND_RS_12 };
-
+            _EsTables = new int[]     { IND_ES_1V, IND_ES_10V, IND_ES_10V, IND_ES_10V, IND_ES_10V, IND_ES_20V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_10V, IND_ES_10V };
+            _RsTables = new int[]     { IND_RS_3,  IND_RS_3,   IND_RS_4,   IND_RS_4,   IND_RS_5,   IND_RS_6,  IND_RS_6,  IND_RS_7,  IND_RS_8,  IND_RS_9,  IND_RS_10, IND_RS_11,  IND_RS_12 };
+            _MulTables = new int[]     { 1,         10,         10,         100,        100,        500,       500,       500,       500,       500,       500,       1000,       1000 }; 
             datafilter = new Queue<double>();
             datafilter2 = new Queue<double>();
             
             _RsIndex = Util.ConstIni.IntValue("LASTSETTING", "rsindex");
             _EsIndex = Util.ConstIni.IntValue("LASTSETTING", "esindex");
-            for(int i = 0; i < IND_ES_TOTAL;i++)
-                _EsValues[i] = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "esvalue"+i.ToString()));
+            VxMultiplier = Util.ConstIni.IntValue("LASTSETTING", "vxmultiplier");
+            for(int i = 0; i < _EsReals.Length;i++)
+                _EsReals[i] = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "esreal"+i.ToString()));
 
-            for (int i = 0; i < IND_RS_TOTAL; i++)
-                _RsValues[i] = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "rsvalue" + i.ToString()));
+            for (int i = 0; i < _RsReals.Length; i++)
+                _RsReals[i] = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "rsreal" + i.ToString()));
             
             _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
             if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.0001) //100uV
@@ -822,18 +847,21 @@ namespace Mndz
             
             bOn = false;
         }
-        public void RefreshOutput()
+        public int RefreshOutput()
         {
-            //TODO
             if (!bOn)
             {
-                //UpdateIndicatorOnly();
+                //UpdateIndicatorOnly;
+                //No indicator to update here
+                return 0;
             }
             else
             {
-                //UpdateVx();
+                return this.UpdateVxOutput();
+                //UpdateVxOutput();
             }
         }
+        //Delta voltage measurement
         private bool CollectVoltage(out double reading)
         {
             int badcount = 0; //count of bad communication
@@ -844,7 +872,7 @@ namespace Mndz
                 DeviceMgr.Action("navread", 0);
                 if (DeviceMgr.reading < -999)
                 {
-                    if (DeviceMgr.nav_range != "navto120mv")
+                    if (DeviceMgr.nav_range != "navto30v")
                     {
                         badcount++;
                         if (badcount < 3)
@@ -853,7 +881,7 @@ namespace Mndz
                             continue;
                         }
                         badcount = 0;
-                        DeviceMgr.Action("navto120mv", "");
+                        DeviceMgr.Action("navto30v", "");
                         Thread.Sleep(3000);
                         continue;
                     }
@@ -865,7 +893,7 @@ namespace Mndz
                 else
                 {
                 }
-                //disable range change
+                /*disable range change
                 if (false && (DeviceMgr.nav_range == "navto1v") && (Math.Abs(DeviceMgr.reading) < 0.1) && bOn)
                 {
                     badcount++;
@@ -880,6 +908,21 @@ namespace Mndz
                     Thread.Sleep(3000);
                     continue;
                 }
+                if (false && (DeviceMgr.nav_range == "navto30v") && (Math.Abs(DeviceMgr.reading) < 1) && bOn)
+                {
+                    badcount++;
+                    if (badcount < 3)
+                    {
+                        Thread.Sleep(500);
+                        continue;
+                    }
+
+                    badcount = 0;
+                    DeviceMgr.Action("navto1v", "");
+                    Thread.Sleep(3000);
+                    continue;
+                }
+                 **/
                 if (DeviceMgr.nav_range == "navto120mv")
                     datafilter.Enqueue(DeviceMgr.reading / 1000);
                 else
@@ -899,12 +942,18 @@ namespace Mndz
                     badcount++;
                     continue;
                 }
+                if ((DeviceMgr.nav_range == "navto30v") && (sqr > 0.05)) //30v
+                {
+                    badcount++;
+                    continue;
+                }
                 badcount = 0;
                 reading = datafilter.Skip(2).Take(2).Average();
                 return true;
             }
             return false;
         }
+        //Vx output measurement
         private bool CollectVoltage2(out double reading)
         {
             int badcount = 0; //count of bad communication
@@ -915,7 +964,8 @@ namespace Mndz
                 DeviceMgr.Action2("navread", 0);
                 if (DeviceMgr.ad2reading < -999)
                 {
-                    if (DeviceMgr.nav_range2 != "navto120mv")
+                    /*
+                    if (DeviceMgr.nav_range2 != "navto1v")
                     {
                         badcount++;
                         if (badcount < 3)
@@ -924,19 +974,19 @@ namespace Mndz
                             continue;
                         }
                         badcount = 0;
-                        DeviceMgr.Action2("navto120mv", "");
+                        DeviceMgr.Action2("navto1v", "");
                         Thread.Sleep(3000);
                         continue;
                     }
                     else
                     {
                         return false;
-                    }
+                    }*/
                 }
                 else
                 {
                 }
-                //disable range change
+                /*disable range change
                 if (false && (DeviceMgr.nav_range2 == "navto1v") && (Math.Abs(DeviceMgr.ad2reading) < 0.1) && bOn)
                 {
                     badcount++;
@@ -951,10 +1001,28 @@ namespace Mndz
                     Thread.Sleep(3000);
                     continue;
                 }
+                if (false && (DeviceMgr.nav_range2 == "navto30v") && (Math.Abs(DeviceMgr.ad2reading) < 1) && bOn)
+                {
+                    badcount++;
+                    if (badcount < 3)
+                    {
+                        Thread.Sleep(500);
+                        continue;
+                    }
+
+                    badcount = 0;
+                    DeviceMgr.Action2("navto1v", "");
+                    Thread.Sleep(3000);
+                    continue;
+                }
+                */
                 if (DeviceMgr.nav_range2 == "navto120mv")
                     datafilter2.Enqueue(DeviceMgr.ad2reading / 1000);
-                else
+                if (DeviceMgr.nav_range2 == "navto1v")
                     datafilter2.Enqueue(DeviceMgr.ad2reading);
+                if (DeviceMgr.nav_range2 == "navto30v")
+                    datafilter2.Enqueue(DeviceMgr.ad2reading);
+
                 if (datafilter2.Count < 5)
                     continue;
                 double sqr;
@@ -966,6 +1034,11 @@ namespace Mndz
                     continue;
                 }
                 if ((DeviceMgr.nav_range2 == "navto1v") && (sqr > 0.05)) //10mv
+                {
+                    badcount++;
+                    continue;
+                }
+                if ((DeviceMgr.nav_range2 == "navto30v") && (sqr > 0.05)) //30V
                 {
                     badcount++;
                     continue;
@@ -1004,6 +1077,15 @@ namespace Mndz
                         DeviceMgr.Action("navzero", 0);
                     break;
                 }
+                System.Threading.Thread.Sleep(1000);
+            }
+        }
+        public void ZeroON2()
+        {
+            int i = 0;
+            while (i++ < 5)
+            {
+                double va;
                 if (CollectVoltage2(out va))
                 {
                     if (Math.Abs(va) < 0.00001) // < 10uV
@@ -1013,26 +1095,75 @@ namespace Mndz
                 System.Threading.Thread.Sleep(1000);
             }
         }
-
-        private bool UpdateVx(Decimal resistance)
+        private Queue<double> q_vgs = new Queue<double>(6);
+        public int ADdelay = 3;
+        public bool bStable = false;
+        //return value is the interval for next reading
+        private int UpdateVxOutput()
         {
-            //TODO update Voltage output
-            if (true) //real res case
+            bStable = false;
+            //update Voltage output
+            if (GlobalConfig.ISDEBUG) //debug use
             {
                 ToDAValue(0);
-                //DeviceMgr.Action("daoutput", new Byte[] { 0x55, 0x64, 0xff, 0x00, 0x00, 0x00, 0x01 }); //just set to 0
-                return DeviceMgr.success;
+                return 0;// DeviceMgr.success;
             }
-            double va;
-            if(!CollectVoltage(out va))
-                return false;
-            double volt = Convert.ToDouble(resistance);
-        
-            return ToDAValue(volt);
+            //measurement of Rx 
+            double Vg;
+            if (!CollectVoltage(out Vg))
+            {
+                CollectVoltage2(out Vg);
+                return 0;
+            }
+            Vg = -Vg;
+            //q_vgs.
+            double Vx;
+            if (!CollectVoltage2(out Vx))
+                return 0;
+            
+            VxMeasure = Vx * VxMultiplier*10; 
+            double thisRx;
+            thisRx = ((VxMeasure + Vg) * Convert.ToDouble(RsValue) / (Convert.ToDouble(EsValue) - Vg));
+            //Vg < Vmeasure/1000 and variation < 5/10000
+            if (Math.Abs(Convert.ToDouble(lastRx) - thisRx) < Math.Abs(Convert.ToDouble(lastRx) * 0.0001) && (Math.Abs(Vg) < Math.Abs(VxMeasure) * 0.00005))
+            {
+                lastRx = Convert.ToDecimal(thisRx);
+                bStable = true;
+                return 0; //no delay for next reading
+            }
+            
+            lastRx = Convert.ToDecimal(thisRx);
+            double newVx = thisRx * Convert.ToDouble(EsValue) /  Convert.ToDouble(RsValue);
+
+            double volt = (newVx - VxMeasure) / (1.1);
+            if (q_vgs.Count <= 3 || Math.Abs(volt) > ( VxMultiplier * 1000.00 / 262144)) //bigger than 1000 counts
+            {
+                VxOutput = VxOutput + volt;
+                q_vgs.Clear();
+                if(!ToDAValue(_VxOutput))
+                    return 0;
+                return ADdelay;//5 seconds for stable
+            }
+            q_vgs.Enqueue(volt);
+            if (q_vgs.Count > 5)
+            {
+                q_vgs.Dequeue();
+            }
+            if (q_vgs.Count == 5)
+            {
+                volt = ((q_vgs.Sum() - q_vgs.Max() - q_vgs.Min()) / (q_vgs.Count - 2));
+                VxOutput = VxOutput + volt;
+                if(!ToDAValue(_VxOutput))
+                    return 0;
+                if (Math.Abs(Vg) > Math.Abs(VxMeasure) / 1000)
+                    q_vgs.Clear();
+                return ADdelay;//3 seconds for stable
+            }
+            return 0;
         }
         private byte[] lasttosend = new byte[] { 0x00,0x00,0xff, 0xff, 0xff, 0x00 };
         //0 to 10 V setting
-        private bool ToDAValue(double voltage)
+        public bool ToDAValue(double voltage)
         {
             // Vout = (Vrefp-Vrefn)*D/(2^20-1)+Vrefn =>  D= (Vout-Vrefn)*(2^20-1)/(Vrefp-Vrefn)
             // when BUF is enabled , Vrefp = 10V;  Vrefn = 0V; D = (Vout)*(2^20-1)/(10)

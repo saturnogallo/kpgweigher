@@ -16,6 +16,7 @@ namespace Mndz.MyCtrl
         {
             InitializeComponent();
             PointColor = Color.Yellow;
+            
             this.Paint += new PaintEventHandler(RectMeter_Paint);
             this.Resize += new EventHandler(RectMeter_Load);
         }
@@ -97,13 +98,13 @@ namespace Mndz.MyCtrl
             
             myPen = new SolidBrush(PointColor);
             graphic.FillRectangle(new SolidBrush(this.BackColor), ClientRectangle);
-            if (_bgid != "")
+            if (_bgid != "" && _bgimg != null)
             {
                 graphic.DrawImage(_bgimg, 0,0);
             }
 
             //draw the pointer
-            int ofy = 10;
+            int ofy = 5;
             int Height = ClientRectangle.Height - ofy;
             int Width = ClientRectangle.Width;
             

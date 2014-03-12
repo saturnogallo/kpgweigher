@@ -35,8 +35,10 @@
             this.OpenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.ReportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.生成校准证书ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.生成检定报告ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.结果通知书ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.校准证书ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.检定证书ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.生成分度表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.AboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -68,7 +70,6 @@
             this.OpenToolStripMenuItem,
             this.toolStripMenuItem1,
             this.ReportToolStripMenuItem,
-            this.生成校准证书ToolStripMenuItem,
             this.生成检定报告ToolStripMenuItem,
             this.生成分度表ToolStripMenuItem,
             this.toolStripMenuItem2,
@@ -110,22 +111,39 @@
             // 
             this.ReportToolStripMenuItem.Name = "ReportToolStripMenuItem";
             this.ReportToolStripMenuItem.Size = new System.Drawing.Size(112, 23);
-            this.ReportToolStripMenuItem.Text = "生成结果通知书";
+            this.ReportToolStripMenuItem.Text = "生成原始记录单";
             this.ReportToolStripMenuItem.Click += new System.EventHandler(this.ReportToolStripMenuItem_Click);
-            // 
-            // 生成校准证书ToolStripMenuItem
-            // 
-            this.生成校准证书ToolStripMenuItem.Name = "生成校准证书ToolStripMenuItem";
-            this.生成校准证书ToolStripMenuItem.Size = new System.Drawing.Size(99, 23);
-            this.生成校准证书ToolStripMenuItem.Text = "生成校准证书";
-            this.生成校准证书ToolStripMenuItem.Click += new System.EventHandler(this.生成校准证书ToolStripMenuItem_Click);
             // 
             // 生成检定报告ToolStripMenuItem
             // 
+            this.生成检定报告ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.结果通知书ToolStripMenuItem,
+            this.校准证书ToolStripMenuItem,
+            this.检定证书ToolStripMenuItem});
             this.生成检定报告ToolStripMenuItem.Name = "生成检定报告ToolStripMenuItem";
-            this.生成检定报告ToolStripMenuItem.Size = new System.Drawing.Size(99, 23);
-            this.生成检定报告ToolStripMenuItem.Text = "生成检定证书";
-            this.生成检定报告ToolStripMenuItem.Click += new System.EventHandler(this.生成检定报告ToolStripMenuItem_Click);
+            this.生成检定报告ToolStripMenuItem.Size = new System.Drawing.Size(73, 23);
+            this.生成检定报告ToolStripMenuItem.Text = "生成证书";
+            // 
+            // 结果通知书ToolStripMenuItem
+            // 
+            this.结果通知书ToolStripMenuItem.Name = "结果通知书ToolStripMenuItem";
+            this.结果通知书ToolStripMenuItem.Size = new System.Drawing.Size(152, 24);
+            this.结果通知书ToolStripMenuItem.Text = "结果通知书";
+            this.结果通知书ToolStripMenuItem.Click += new System.EventHandler(this.结果通知书ToolStripMenuItem_Click);
+            // 
+            // 校准证书ToolStripMenuItem
+            // 
+            this.校准证书ToolStripMenuItem.Name = "校准证书ToolStripMenuItem";
+            this.校准证书ToolStripMenuItem.Size = new System.Drawing.Size(152, 24);
+            this.校准证书ToolStripMenuItem.Text = "校准证书";
+            this.校准证书ToolStripMenuItem.Click += new System.EventHandler(this.校准证书ToolStripMenuItem_Click);
+            // 
+            // 检定证书ToolStripMenuItem
+            // 
+            this.检定证书ToolStripMenuItem.Name = "检定证书ToolStripMenuItem";
+            this.检定证书ToolStripMenuItem.Size = new System.Drawing.Size(152, 24);
+            this.检定证书ToolStripMenuItem.Text = "检定证书";
+            this.检定证书ToolStripMenuItem.Click += new System.EventHandler(this.检定证书ToolStripMenuItem_Click);
             // 
             // 生成分度表ToolStripMenuItem
             // 
@@ -320,8 +338,10 @@
         private System.Windows.Forms.ToolStripMenuItem 生成检定报告ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private ZedGraph.ZedGraphControl zedallprobes;
-        private System.Windows.Forms.ToolStripMenuItem 生成校准证书ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 生成分度表ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 结果通知书ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 校准证书ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 检定证书ToolStripMenuItem;
     }
 }
 

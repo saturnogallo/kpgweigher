@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  UART                                                                   05/26/2013 15:32:03 PAGE 1   
+C51 COMPILER V7.01  UART                                                                   03/08/2014 12:42:16 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE UART
@@ -62,7 +62,7 @@ stmt level    source
   53          extern void set_tx_pin_high();
   54          extern void timer_set(int baud_rate);
   55          extern void idle();
-C51 COMPILER V7.01  UART                                                                   05/26/2013 15:32:03 PAGE 2   
+C51 COMPILER V7.01  UART                                                                   03/08/2014 12:42:16 PAGE 2   
 
   56          
   57          #define BAUD_RATE 9600//19200.0
@@ -126,7 +126,7 @@ stmt level    source
  115   3                              if ( --timer_rx_ctr<=0 )
  116   3                              {
  117   4                                      flag_rx_waiting_for_stop_bit = FALSE;
-C51 COMPILER V7.01  UART                                                                   05/26/2013 15:32:03 PAGE 3   
+C51 COMPILER V7.01  UART                                                                   03/08/2014 12:42:16 PAGE 3   
 
  118   4                                      flag_rx_ready = FALSE;
  119   4                                      internal_rx_buffer &= 0xFF;
@@ -190,7 +190,7 @@ stmt level    source
  177   1              set_tx_pin_low();
  178   1      
  179   1      //  Sets the timer 1 to 3 times the baud rate(9600).(clock 11.0592M)
-C51 COMPILER V7.01  UART                                                                   05/26/2013 15:32:03 PAGE 4   
+C51 COMPILER V7.01  UART                                                                   03/08/2014 12:42:16 PAGE 4   
 
  180   1              //TH0 = 0xE0;//9600
  181   1              //TH0 = 0xC0;//4800
@@ -254,7 +254,7 @@ stmt level    source
  239          {
  240                  flag_rx_off = TRUE;
  241          }
-C51 COMPILER V7.01  UART                                                                   05/26/2013 15:32:03 PAGE 5   
+C51 COMPILER V7.01  UART                                                                   03/08/2014 12:42:16 PAGE 5   
 
  242          */
 

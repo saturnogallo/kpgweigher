@@ -360,7 +360,13 @@ namespace Mndz
         {
             if (backBuffer == null)
             {
+                
                 return;
+            }
+            if (backBuffer.Width != this.Width || backBuffer.Height != this.Height)
+            {
+                backBuffer = new Bitmap(this.Width, this.Height);
+                graphic = Graphics.FromImage(backBuffer);
             }
             graphic.FillRectangle(new SolidBrush(this.BackColor), this.ClientRectangle);
             SolidBrush myTopPen;

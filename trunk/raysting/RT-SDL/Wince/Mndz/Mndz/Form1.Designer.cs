@@ -28,503 +28,346 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.lbl_currscale = new System.Windows.Forms.Label();
+            this.lbl_range = new System.Windows.Forms.Label();
             this.lbl_ohm = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.gb_real = new System.Windows.Forms.Panel();
-            this.rbtn_real15 = new Mndz.RectButton();
-            this.rbtn_real14 = new Mndz.RectButton();
-            this.rbtn_real13 = new Mndz.RectButton();
-            this.rbtn_real12 = new Mndz.RectButton();
-            this.rbtn_real11 = new Mndz.RectButton();
-            this.rbtn_real10 = new Mndz.RectButton();
-            this.rbtn_real9 = new Mndz.RectButton();
-            this.rbtn_real8 = new Mndz.RectButton();
-            this.rbtn_real7 = new Mndz.RectButton();
-            this.rbtn_real6 = new Mndz.RectButton();
-            this.rbtn_real5 = new Mndz.RectButton();
-            this.rbtn_real4 = new Mndz.RectButton();
-            this.rbtn_real3 = new Mndz.RectButton();
-            this.rbtn_real2 = new Mndz.RectButton();
-            this.rbtn_real1 = new Mndz.RectButton();
-            this.label4 = new System.Windows.Forms.Label();
-            this.lbl_version = new System.Windows.Forms.Label();
-            this.lbl_datetime = new System.Windows.Forms.Label();
-            this.rbtn_2dn = new Mndz.RectButton();
-            this.rbtn_1dn = new Mndz.RectButton();
-            this.rbtn_3dn = new Mndz.RectButton();
-            this.rbtn_4dn = new Mndz.RectButton();
-            this.rbtn_2up = new Mndz.RectButton();
-            this.rbtn_5dn = new Mndz.RectButton();
-            this.rbtn_1up = new Mndz.RectButton();
-            this.rbtn_6dn = new Mndz.RectButton();
-            this.rbtn_3up = new Mndz.RectButton();
-            this.rbtn_4up = new Mndz.RectButton();
-            this.rbtn_5up = new Mndz.RectButton();
-            this.rbtn_6up = new Mndz.RectButton();
-            this.btn_rangeReal = new Mndz.RectButton();
-            this.btn_zeroon = new Mndz.RectButton();
-            this.btn_range3 = new Mndz.RectButton();
-            this.btn_range2 = new Mndz.RectButton();
-            this.btn_range1 = new Mndz.RectButton();
-            this.led_current = new DmitryBrant.CustomControls.SevenSegmentArray();
-            this.led_ohm = new DmitryBrant.CustomControls.SevenSegmentArray();
-            this.btn_range0 = new Mndz.RectButton();
+            this.led_rx = new Mndz.SevenSegmentArray();
             this.btn_turnon = new Mndz.RectButton();
+            this.lbl_datetime = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
+            this.btn_zeroon = new Mndz.RectButton();
+            this.label2 = new System.Windows.Forms.Label();
+            this.led_rs = new Mndz.SevenSegmentArray();
+            this.lbl_rsscale = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.led_vx = new Mndz.SevenSegmentArray();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.led_es = new Mndz.SevenSegmentArray();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.rectMeter1 = new Mndz.MyCtrl.RectMeter();
+            this.label13 = new System.Windows.Forms.Label();
+            this.btn_zeroon2 = new Mndz.RectButton();
+            this.label3 = new System.Windows.Forms.Label();
             this.btn_capture = new System.Windows.Forms.Button();
-            this.gb_real.SuspendLayout();
             this.SuspendLayout();
             // 
-            // lbl_currscale
+            // lbl_range
             // 
-            this.lbl_currscale.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Regular);
-            this.lbl_currscale.Location = new System.Drawing.Point(985, 182);
-            this.lbl_currscale.Name = "lbl_currscale";
-            this.lbl_currscale.Size = new System.Drawing.Size(36, 28);
-            this.lbl_currscale.Text = "mA";
+            this.lbl_range.Font = new System.Drawing.Font("Microsoft Sans Serif", 36.35643F, System.Drawing.FontStyle.Bold);
+            this.lbl_range.Location = new System.Drawing.Point(21, 119);
+            this.lbl_range.Name = "lbl_range";
+            this.lbl_range.Size = new System.Drawing.Size(154, 59);
+            this.lbl_range.Text = "R   = ";
             // 
             // lbl_ohm
             // 
-            this.lbl_ohm.Font = new System.Drawing.Font("Tahoma", 26F, System.Drawing.FontStyle.Regular);
-            this.lbl_ohm.Location = new System.Drawing.Point(783, 298);
+            this.lbl_ohm.Font = new System.Drawing.Font("Arial Narrow", 48F, System.Drawing.FontStyle.Regular);
+            this.lbl_ohm.Location = new System.Drawing.Point(747, 119);
             this.lbl_ohm.Name = "lbl_ohm";
-            this.lbl_ohm.Size = new System.Drawing.Size(76, 53);
-            this.lbl_ohm.Text = "mΩ";
-            // 
-            // label3
-            // 
-            this.label3.Font = new System.Drawing.Font("KaiTi", 36F, System.Drawing.FontStyle.Regular);
-            this.label3.ForeColor = System.Drawing.Color.MidnightBlue;
-            this.label3.Location = new System.Drawing.Point(136, 10);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(736, 69);
-            this.label3.Text = "智能数字微电阻标准装置";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // gb_real
-            // 
-            this.gb_real.Controls.Add(this.rbtn_real15);
-            this.gb_real.Controls.Add(this.rbtn_real14);
-            this.gb_real.Controls.Add(this.rbtn_real13);
-            this.gb_real.Controls.Add(this.rbtn_real12);
-            this.gb_real.Controls.Add(this.rbtn_real11);
-            this.gb_real.Controls.Add(this.rbtn_real10);
-            this.gb_real.Controls.Add(this.rbtn_real9);
-            this.gb_real.Controls.Add(this.rbtn_real8);
-            this.gb_real.Controls.Add(this.rbtn_real7);
-            this.gb_real.Controls.Add(this.rbtn_real6);
-            this.gb_real.Controls.Add(this.rbtn_real5);
-            this.gb_real.Controls.Add(this.rbtn_real4);
-            this.gb_real.Controls.Add(this.rbtn_real3);
-            this.gb_real.Controls.Add(this.rbtn_real2);
-            this.gb_real.Controls.Add(this.rbtn_real1);
-            this.gb_real.Location = new System.Drawing.Point(159, 404);
-            this.gb_real.Name = "gb_real";
-            this.gb_real.Size = new System.Drawing.Size(713, 187);
-            // 
-            // rbtn_real15
-            // 
-            this.rbtn_real15.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real15.Location = new System.Drawing.Point(531, 104);
-            this.rbtn_real15.Name = "rbtn_real15";
-            this.rbtn_real15.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real15.TabIndex = 16;
-            // 
-            // rbtn_real14
-            // 
-            this.rbtn_real14.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real14.Location = new System.Drawing.Point(443, 104);
-            this.rbtn_real14.Name = "rbtn_real14";
-            this.rbtn_real14.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real14.TabIndex = 15;
-            // 
-            // rbtn_real13
-            // 
-            this.rbtn_real13.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real13.Location = new System.Drawing.Point(355, 104);
-            this.rbtn_real13.Name = "rbtn_real13";
-            this.rbtn_real13.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real13.TabIndex = 14;
-            // 
-            // rbtn_real12
-            // 
-            this.rbtn_real12.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real12.Location = new System.Drawing.Point(267, 104);
-            this.rbtn_real12.Name = "rbtn_real12";
-            this.rbtn_real12.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real12.TabIndex = 13;
-            // 
-            // rbtn_real11
-            // 
-            this.rbtn_real11.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real11.Location = new System.Drawing.Point(179, 104);
-            this.rbtn_real11.Name = "rbtn_real11";
-            this.rbtn_real11.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real11.TabIndex = 12;
-            // 
-            // rbtn_real10
-            // 
-            this.rbtn_real10.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real10.Location = new System.Drawing.Point(91, 104);
-            this.rbtn_real10.Name = "rbtn_real10";
-            this.rbtn_real10.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real10.TabIndex = 11;
-            // 
-            // rbtn_real9
-            // 
-            this.rbtn_real9.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real9.Location = new System.Drawing.Point(3, 104);
-            this.rbtn_real9.Name = "rbtn_real9";
-            this.rbtn_real9.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real9.TabIndex = 10;
-            // 
-            // rbtn_real8
-            // 
-            this.rbtn_real8.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real8.Location = new System.Drawing.Point(619, 11);
-            this.rbtn_real8.Name = "rbtn_real8";
-            this.rbtn_real8.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real8.TabIndex = 9;
-            // 
-            // rbtn_real7
-            // 
-            this.rbtn_real7.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real7.Location = new System.Drawing.Point(531, 11);
-            this.rbtn_real7.Name = "rbtn_real7";
-            this.rbtn_real7.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real7.TabIndex = 8;
-            // 
-            // rbtn_real6
-            // 
-            this.rbtn_real6.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real6.Location = new System.Drawing.Point(443, 11);
-            this.rbtn_real6.Name = "rbtn_real6";
-            this.rbtn_real6.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real6.TabIndex = 7;
-            // 
-            // rbtn_real5
-            // 
-            this.rbtn_real5.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real5.Location = new System.Drawing.Point(355, 11);
-            this.rbtn_real5.Name = "rbtn_real5";
-            this.rbtn_real5.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real5.TabIndex = 6;
-            // 
-            // rbtn_real4
-            // 
-            this.rbtn_real4.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real4.Location = new System.Drawing.Point(267, 11);
-            this.rbtn_real4.Name = "rbtn_real4";
-            this.rbtn_real4.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real4.TabIndex = 5;
-            // 
-            // rbtn_real3
-            // 
-            this.rbtn_real3.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real3.Location = new System.Drawing.Point(179, 11);
-            this.rbtn_real3.Name = "rbtn_real3";
-            this.rbtn_real3.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real3.TabIndex = 4;
-            // 
-            // rbtn_real2
-            // 
-            this.rbtn_real2.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real2.Location = new System.Drawing.Point(91, 11);
-            this.rbtn_real2.Name = "rbtn_real2";
-            this.rbtn_real2.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real2.TabIndex = 3;
-            // 
-            // rbtn_real1
-            // 
-            this.rbtn_real1.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Bold);
-            this.rbtn_real1.Location = new System.Drawing.Point(3, 11);
-            this.rbtn_real1.Name = "rbtn_real1";
-            this.rbtn_real1.Size = new System.Drawing.Size(88, 74);
-            this.rbtn_real1.TabIndex = 2;
-            // 
-            // label4
-            // 
-            this.label4.Font = new System.Drawing.Font("KaiTi", 22F, System.Drawing.FontStyle.Regular);
-            this.label4.Location = new System.Drawing.Point(808, 103);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(107, 32);
-            this.label4.Text = "电流";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.TopCenter;
-            // 
-            // lbl_version
-            // 
-            this.lbl_version.Font = new System.Drawing.Font("Arial", 8F, System.Drawing.FontStyle.Regular);
-            this.lbl_version.Location = new System.Drawing.Point(3, 574);
-            this.lbl_version.Name = "lbl_version";
-            this.lbl_version.Size = new System.Drawing.Size(114, 17);
-            this.lbl_version.Text = "版本:2013-10-05";
-            this.lbl_version.TextAlign = System.Drawing.ContentAlignment.TopRight;
-            // 
-            // lbl_datetime
-            // 
-            this.lbl_datetime.Font = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Regular);
-            this.lbl_datetime.Location = new System.Drawing.Point(878, 10);
-            this.lbl_datetime.Name = "lbl_datetime";
-            this.lbl_datetime.Size = new System.Drawing.Size(146, 18);
-            this.lbl_datetime.Text = "2013-05-01 13:45:45";
-            // 
-            // rbtn_2dn
-            // 
-            this.rbtn_2dn.Location = new System.Drawing.Point(580, 367);
-            this.rbtn_2dn.Name = "rbtn_2dn";
-            this.rbtn_2dn.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_2dn.TabIndex = 19;
-            // 
-            // rbtn_1dn
-            // 
-            this.rbtn_1dn.Location = new System.Drawing.Point(677, 367);
-            this.rbtn_1dn.Name = "rbtn_1dn";
-            this.rbtn_1dn.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_1dn.TabIndex = 21;
-            // 
-            // rbtn_3dn
-            // 
-            this.rbtn_3dn.Location = new System.Drawing.Point(483, 367);
-            this.rbtn_3dn.Name = "rbtn_3dn";
-            this.rbtn_3dn.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_3dn.TabIndex = 22;
-            // 
-            // rbtn_4dn
-            // 
-            this.rbtn_4dn.Location = new System.Drawing.Point(386, 368);
-            this.rbtn_4dn.Name = "rbtn_4dn";
-            this.rbtn_4dn.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_4dn.TabIndex = 20;
-            // 
-            // rbtn_2up
-            // 
-            this.rbtn_2up.Location = new System.Drawing.Point(580, 91);
-            this.rbtn_2up.Name = "rbtn_2up";
-            this.rbtn_2up.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_2up.TabIndex = 16;
-            // 
-            // rbtn_5dn
-            // 
-            this.rbtn_5dn.Location = new System.Drawing.Point(289, 368);
-            this.rbtn_5dn.Name = "rbtn_5dn";
-            this.rbtn_5dn.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_5dn.TabIndex = 18;
-            // 
-            // rbtn_1up
-            // 
-            this.rbtn_1up.Location = new System.Drawing.Point(677, 91);
-            this.rbtn_1up.Name = "rbtn_1up";
-            this.rbtn_1up.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_1up.TabIndex = 16;
-            // 
-            // rbtn_6dn
-            // 
-            this.rbtn_6dn.Location = new System.Drawing.Point(192, 368);
-            this.rbtn_6dn.Name = "rbtn_6dn";
-            this.rbtn_6dn.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_6dn.TabIndex = 17;
-            // 
-            // rbtn_3up
-            // 
-            this.rbtn_3up.Location = new System.Drawing.Point(483, 91);
-            this.rbtn_3up.Name = "rbtn_3up";
-            this.rbtn_3up.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_3up.TabIndex = 16;
-            // 
-            // rbtn_4up
-            // 
-            this.rbtn_4up.Location = new System.Drawing.Point(386, 91);
-            this.rbtn_4up.Name = "rbtn_4up";
-            this.rbtn_4up.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_4up.TabIndex = 16;
-            // 
-            // rbtn_5up
-            // 
-            this.rbtn_5up.Location = new System.Drawing.Point(289, 91);
-            this.rbtn_5up.Name = "rbtn_5up";
-            this.rbtn_5up.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_5up.TabIndex = 15;
-            // 
-            // rbtn_6up
-            // 
-            this.rbtn_6up.Location = new System.Drawing.Point(192, 91);
-            this.rbtn_6up.Name = "rbtn_6up";
-            this.rbtn_6up.Size = new System.Drawing.Size(82, 56);
-            this.rbtn_6up.TabIndex = 14;
-            // 
-            // btn_rangeReal
-            // 
-            this.btn_rangeReal.Font = new System.Drawing.Font("Arial", 16F, System.Drawing.FontStyle.Bold);
-            this.btn_rangeReal.Location = new System.Drawing.Point(14, 470);
-            this.btn_rangeReal.Name = "btn_rangeReal";
-            this.btn_rangeReal.Size = new System.Drawing.Size(127, 48);
-            this.btn_rangeReal.TabIndex = 11;
-            // 
-            // btn_zeroon
-            // 
-            this.btn_zeroon.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
-            this.btn_zeroon.Location = new System.Drawing.Point(931, 103);
-            this.btn_zeroon.Name = "btn_zeroon";
-            this.btn_zeroon.Size = new System.Drawing.Size(90, 44);
-            this.btn_zeroon.TabIndex = 10;
-            // 
-            // btn_range3
-            // 
-            this.btn_range3.Font = new System.Drawing.Font("Tahoma", 16F, System.Drawing.FontStyle.Bold);
-            this.btn_range3.Location = new System.Drawing.Point(14, 314);
-            this.btn_range3.Name = "btn_range3";
-            this.btn_range3.Size = new System.Drawing.Size(145, 48);
-            this.btn_range3.TabIndex = 10;
-            // 
-            // btn_range2
-            // 
-            this.btn_range2.Font = new System.Drawing.Font("Tahoma", 16F, System.Drawing.FontStyle.Bold);
-            this.btn_range2.Location = new System.Drawing.Point(14, 260);
-            this.btn_range2.Name = "btn_range2";
-            this.btn_range2.Size = new System.Drawing.Size(145, 48);
-            this.btn_range2.TabIndex = 9;
-            // 
-            // btn_range1
-            // 
-            this.btn_range1.Font = new System.Drawing.Font("Tahoma", 16F, System.Drawing.FontStyle.Bold);
-            this.btn_range1.Location = new System.Drawing.Point(14, 205);
-            this.btn_range1.Name = "btn_range1";
-            this.btn_range1.Size = new System.Drawing.Size(145, 48);
-            this.btn_range1.TabIndex = 8;
-            // 
-            // led_current
-            // 
-            this.led_current.ArrayCount = 5;
-            this.led_current.Location = new System.Drawing.Point(783, 153);
-            this.led_current.Name = "led_current";
-            this.led_current.Size = new System.Drawing.Size(196, 81);
-            this.led_current.TabIndex = 1;
-            // 
-            // led_ohm
-            // 
-            this.led_ohm.ArrayCount = 6;
-            this.led_ohm.Location = new System.Drawing.Point(196, 153);
-            this.led_ohm.Name = "led_ohm";
-            this.led_ohm.Size = new System.Drawing.Size(581, 209);
-            this.led_ohm.TabIndex = 1;
-            // 
-            // btn_range0
-            // 
-            this.btn_range0.BackColor = System.Drawing.Color.LightGoldenrodYellow;
-            this.btn_range0.Font = new System.Drawing.Font("Tahoma", 16F, System.Drawing.FontStyle.Bold);
-            this.btn_range0.Location = new System.Drawing.Point(14, 151);
-            this.btn_range0.Name = "btn_range0";
-            this.btn_range0.Size = new System.Drawing.Size(145, 48);
-            this.btn_range0.TabIndex = 0;
+            this.lbl_ohm.Size = new System.Drawing.Size(76, 78);
+            this.lbl_ohm.Text = "G";
+            // 
+            // led_rx
+            // 
+            this.led_rx.ArrayCount = 6;
+            this.led_rx.ColorBackground = System.Drawing.Color.White;
+            this.led_rx.ColorDark = System.Drawing.Color.WhiteSmoke;
+            this.led_rx.ColorLight = System.Drawing.Color.Red;
+            this.led_rx.DecimalShow = true;
+            this.led_rx.ElementWidth = 12;
+            this.led_rx.ItalicFactor = -0.05F;
+            this.led_rx.Location = new System.Drawing.Point(179, 91);
+            this.led_rx.Name = "led_rx";
+            this.led_rx.Size = new System.Drawing.Size(562, 115);
+            this.led_rx.TabIndex = 1;
+            this.led_rx.TabStop = false;
             // 
             // btn_turnon
             // 
-            this.btn_turnon.Font = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Bold);
-            this.btn_turnon.Location = new System.Drawing.Point(878, 439);
+            this.btn_turnon.BackColor = System.Drawing.Color.Blue;
+            this.btn_turnon.bgScale = 3;
+            this.btn_turnon.bOn = true;
+            this.btn_turnon.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_turnon.colorTop = System.Drawing.Color.Pink;
+            this.btn_turnon.Font = new System.Drawing.Font("Microsoft Sans Serif", 21.75F, System.Drawing.FontStyle.Regular);
+            this.btn_turnon.Location = new System.Drawing.Point(816, 207);
             this.btn_turnon.Name = "btn_turnon";
-            this.btn_turnon.Size = new System.Drawing.Size(144, 128);
-            this.btn_turnon.TabIndex = 25;
+            this.btn_turnon.Size = new System.Drawing.Size(140, 140);
+            this.btn_turnon.TabIndex = 9;
+            // 
+            // lbl_datetime
+            // 
+            this.lbl_datetime.Location = new System.Drawing.Point(28, 546);
+            this.lbl_datetime.Name = "lbl_datetime";
+            this.lbl_datetime.Size = new System.Drawing.Size(41, 15);
+            this.lbl_datetime.Text = "label2";
+            // 
+            // label1
+            // 
+            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 42F, System.Drawing.FontStyle.Bold);
+            this.label1.ForeColor = System.Drawing.Color.MediumBlue;
+            this.label1.Location = new System.Drawing.Point(192, 9);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(776, 67);
+            this.label1.Text = "双电源高压高电阻电桥";
+            // 
+            // btn_zeroon
+            // 
+            this.btn_zeroon.BackColor = System.Drawing.Color.Blue;
+            this.btn_zeroon.bgScale = 3;
+            this.btn_zeroon.bOn = true;
+            this.btn_zeroon.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_zeroon.colorTop = System.Drawing.Color.Pink;
+            this.btn_zeroon.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25743F, System.Drawing.FontStyle.Regular);
+            this.btn_zeroon.Location = new System.Drawing.Point(636, 219);
+            this.btn_zeroon.Name = "btn_zeroon";
+            this.btn_zeroon.Size = new System.Drawing.Size(139, 47);
+            this.btn_zeroon.TabIndex = 11;
+            // 
+            // label2
+            // 
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Bold);
+            this.label2.Location = new System.Drawing.Point(71, 139);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(35, 39);
+            this.label2.Text = "x";
+            // 
+            // led_rs
+            // 
+            this.led_rs.ArrayCount = 5;
+            this.led_rs.ColorBackground = System.Drawing.Color.White;
+            this.led_rs.ColorDark = System.Drawing.Color.WhiteSmoke;
+            this.led_rs.ColorLight = System.Drawing.Color.Red;
+            this.led_rs.DecimalShow = true;
+            this.led_rs.ElementWidth = 10;
+            this.led_rs.ItalicFactor = -0.05F;
+            this.led_rs.Location = new System.Drawing.Point(179, 339);
+            this.led_rs.Name = "led_rs";
+            this.led_rs.Size = new System.Drawing.Size(350, 106);
+            this.led_rs.TabIndex = 1;
+            this.led_rs.TabStop = false;
+            // 
+            // lbl_rsscale
+            // 
+            this.lbl_rsscale.Font = new System.Drawing.Font("Arial Narrow", 48F, System.Drawing.FontStyle.Regular);
+            this.lbl_rsscale.Location = new System.Drawing.Point(538, 349);
+            this.lbl_rsscale.Name = "lbl_rsscale";
+            this.lbl_rsscale.Size = new System.Drawing.Size(61, 78);
+            this.lbl_rsscale.Text = "k";
+            // 
+            // label4
+            // 
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 36.35643F, System.Drawing.FontStyle.Bold);
+            this.label4.Location = new System.Drawing.Point(21, 363);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(154, 59);
+            this.label4.Text = "R   = ";
+            // 
+            // led_vx
+            // 
+            this.led_vx.ArrayCount = 5;
+            this.led_vx.ColorBackground = System.Drawing.Color.White;
+            this.led_vx.ColorDark = System.Drawing.Color.WhiteSmoke;
+            this.led_vx.ColorLight = System.Drawing.Color.Red;
+            this.led_vx.DecimalShow = true;
+            this.led_vx.ElementWidth = 10;
+            this.led_vx.ItalicFactor = -0.05F;
+            this.led_vx.Location = new System.Drawing.Point(179, 219);
+            this.led_vx.Name = "led_vx";
+            this.led_vx.Size = new System.Drawing.Size(350, 106);
+            this.led_vx.TabIndex = 1;
+            this.led_vx.TabStop = false;
+            // 
+            // label6
+            // 
+            this.label6.Font = new System.Drawing.Font("Arial Narrow", 48F, System.Drawing.FontStyle.Regular);
+            this.label6.Location = new System.Drawing.Point(554, 227);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(70, 78);
+            this.label6.Text = "V";
+            // 
+            // label7
+            // 
+            this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 36.35643F, System.Drawing.FontStyle.Bold);
+            this.label7.Location = new System.Drawing.Point(21, 241);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(151, 59);
+            this.label7.Text = "V   = ";
+            // 
+            // label8
+            // 
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Bold);
+            this.label8.Location = new System.Drawing.Point(71, 261);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(35, 39);
+            this.label8.Text = "x";
+            // 
+            // led_es
+            // 
+            this.led_es.ArrayCount = 5;
+            this.led_es.ColorBackground = System.Drawing.Color.White;
+            this.led_es.ColorDark = System.Drawing.Color.WhiteSmoke;
+            this.led_es.ColorLight = System.Drawing.Color.Red;
+            this.led_es.DecimalShow = true;
+            this.led_es.ElementWidth = 10;
+            this.led_es.ItalicFactor = -0.05F;
+            this.led_es.Location = new System.Drawing.Point(179, 457);
+            this.led_es.Name = "led_es";
+            this.led_es.Size = new System.Drawing.Size(350, 106);
+            this.led_es.TabIndex = 1;
+            this.led_es.TabStop = false;
+            // 
+            // label9
+            // 
+            this.label9.Font = new System.Drawing.Font("Arial Narrow", 48F, System.Drawing.FontStyle.Regular);
+            this.label9.Location = new System.Drawing.Point(554, 474);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(70, 78);
+            this.label9.Text = "V";
+            // 
+            // label10
+            // 
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Bold);
+            this.label10.Location = new System.Drawing.Point(21, 474);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(151, 59);
+            this.label10.Text = "E   = ";
+            // 
+            // label11
+            // 
+            this.label11.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Bold);
+            this.label11.Location = new System.Drawing.Point(71, 494);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(35, 39);
+            this.label11.Text = "s";
+            // 
+            // label12
+            // 
+            this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 24F, System.Drawing.FontStyle.Bold);
+            this.label12.Location = new System.Drawing.Point(71, 383);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(35, 39);
+            this.label12.Text = "s";
+            // 
+            // rectMeter1
+            // 
+            this.rectMeter1.Angle = 0;
+            this.rectMeter1.BgResId = "";
+            this.rectMeter1.Location = new System.Drawing.Point(656, 374);
+            this.rectMeter1.Name = "rectMeter1";
+            this.rectMeter1.PointColor = System.Drawing.Color.Yellow;
+            this.rectMeter1.Size = new System.Drawing.Size(339, 170);
+            this.rectMeter1.TabIndex = 12;
+            // 
+            // label13
+            // 
+            this.label13.Font = new System.Drawing.Font("Arial Narrow", 24.23762F, System.Drawing.FontStyle.Regular);
+            this.label13.Location = new System.Drawing.Point(809, 149);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(38, 40);
+            this.label13.Text = "Ω";
+            // 
+            // btn_zeroon2
+            // 
+            this.btn_zeroon2.BackColor = System.Drawing.Color.Blue;
+            this.btn_zeroon2.bgScale = 3;
+            this.btn_zeroon2.bOn = true;
+            this.btn_zeroon2.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_zeroon2.colorTop = System.Drawing.Color.Pink;
+            this.btn_zeroon2.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25743F, System.Drawing.FontStyle.Regular);
+            this.btn_zeroon2.Location = new System.Drawing.Point(636, 284);
+            this.btn_zeroon2.Name = "btn_zeroon2";
+            this.btn_zeroon2.Size = new System.Drawing.Size(139, 47);
+            this.btn_zeroon2.TabIndex = 11;
+            // 
+            // label3
+            // 
+            this.label3.Font = new System.Drawing.Font("Arial Narrow", 24.23762F, System.Drawing.FontStyle.Regular);
+            this.label3.Location = new System.Drawing.Point(586, 379);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(38, 40);
+            this.label3.Text = "Ω";
             // 
             // btn_capture
             // 
-            this.btn_capture.Location = new System.Drawing.Point(26, 10);
+            this.btn_capture.Location = new System.Drawing.Point(9, 9);
             this.btn_capture.Name = "btn_capture";
-            this.btn_capture.Size = new System.Drawing.Size(111, 26);
-            this.btn_capture.TabIndex = 28;
-            this.btn_capture.Text = "截屏";
+            this.btn_capture.Size = new System.Drawing.Size(166, 44);
+            this.btn_capture.TabIndex = 27;
+            this.btn_capture.Text = "Capture";
             this.btn_capture.Visible = false;
-            this.btn_capture.Click += new System.EventHandler(this.btn_capture_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
+            this.BackColor = System.Drawing.Color.LightSkyBlue;
             this.ClientSize = new System.Drawing.Size(1024, 600);
             this.ControlBox = false;
             this.Controls.Add(this.btn_capture);
-            this.Controls.Add(this.rbtn_2dn);
-            this.Controls.Add(this.lbl_datetime);
-            this.Controls.Add(this.rbtn_1dn);
-            this.Controls.Add(this.lbl_version);
-            this.Controls.Add(this.rbtn_3dn);
-            this.Controls.Add(this.rbtn_4dn);
-            this.Controls.Add(this.rbtn_2up);
-            this.Controls.Add(this.rbtn_5dn);
-            this.Controls.Add(this.rbtn_1up);
-            this.Controls.Add(this.rbtn_6dn);
-            this.Controls.Add(this.rbtn_3up);
-            this.Controls.Add(this.rbtn_4up);
-            this.Controls.Add(this.rbtn_5up);
-            this.Controls.Add(this.rbtn_6up);
-            this.Controls.Add(this.gb_real);
-            this.Controls.Add(this.btn_rangeReal);
-            this.Controls.Add(this.btn_zeroon);
-            this.Controls.Add(this.btn_range3);
-            this.Controls.Add(this.btn_range2);
-            this.Controls.Add(this.btn_range1);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.lbl_ohm);
-            this.Controls.Add(this.lbl_currscale);
-            this.Controls.Add(this.led_current);
-            this.Controls.Add(this.led_ohm);
-            this.Controls.Add(this.btn_range0);
-            this.Controls.Add(this.btn_turnon);
+            this.Controls.Add(this.label13);
+            this.Controls.Add(this.rectMeter1);
+            this.Controls.Add(this.btn_zeroon2);
+            this.Controls.Add(this.btn_zeroon);
+            this.Controls.Add(this.lbl_datetime);
+            this.Controls.Add(this.label12);
+            this.Controls.Add(this.label11);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label2);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.label7);
             this.Controls.Add(this.label4);
+            this.Controls.Add(this.lbl_range);
+            this.Controls.Add(this.label9);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.lbl_rsscale);
+            this.Controls.Add(this.lbl_ohm);
+            this.Controls.Add(this.led_es);
+            this.Controls.Add(this.led_vx);
+            this.Controls.Add(this.led_rs);
+            this.Controls.Add(this.led_rx);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.btn_turnon);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "Form1";
             this.Text = "Form1";
             this.TopMost = true;
-            this.gb_real.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private RectButton btn_range0;
-        private DmitryBrant.CustomControls.SevenSegmentArray led_ohm;
-        private RectButton rbtn_real1;
-        private DmitryBrant.CustomControls.SevenSegmentArray led_current;
-        private System.Windows.Forms.Label lbl_currscale;
+        private Mndz.SevenSegmentArray led_rx;
+        private System.Windows.Forms.Label lbl_range;
         private System.Windows.Forms.Label lbl_ohm;
-        private System.Windows.Forms.Label label3;
-        private RectButton btn_range1;
-        private RectButton btn_range2;
-        private RectButton btn_range3;
-        private RectButton btn_rangeReal;
-        private System.Windows.Forms.Panel gb_real;
-        private RectButton rbtn_real14;
-        private RectButton rbtn_real13;
-        private RectButton rbtn_real12;
-        private RectButton rbtn_real11;
-        private RectButton rbtn_real10;
-        private RectButton rbtn_real9;
-        private RectButton rbtn_real8;
-        private RectButton rbtn_real7;
-        private RectButton rbtn_real6;
-        private RectButton rbtn_real5;
-        private RectButton rbtn_real4;
-        private RectButton rbtn_real3;
-        private RectButton rbtn_real2;
-        private RectButton rbtn_6up;
-        private RectButton rbtn_5up;
-        private RectButton rbtn_4up;
-        private RectButton rbtn_3up;
-        private RectButton rbtn_1up;
-        private RectButton rbtn_2up;
-        private RectButton rbtn_2dn;
-        private RectButton rbtn_1dn;
-        private RectButton rbtn_3dn;
-        private RectButton rbtn_4dn;
-        private RectButton rbtn_5dn;
-        private RectButton rbtn_6dn;
-        private System.Windows.Forms.Label label4;
         private RectButton btn_turnon;
-        private RectButton rbtn_real15;
-        private System.Windows.Forms.Label lbl_version;
         private System.Windows.Forms.Label lbl_datetime;
+        private System.Windows.Forms.Label label1;
         private RectButton btn_zeroon;
+        private System.Windows.Forms.Label label2;
+        private Mndz.SevenSegmentArray led_rs;
+        private System.Windows.Forms.Label lbl_rsscale;
+        private System.Windows.Forms.Label label4;
+        private Mndz.SevenSegmentArray led_vx;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label8;
+        private Mndz.SevenSegmentArray led_es;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label12;
+        private Mndz.MyCtrl.RectMeter rectMeter1;
+        private System.Windows.Forms.Label label13;
+        private RectButton btn_zeroon2;
+        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btn_capture;
     }
 }

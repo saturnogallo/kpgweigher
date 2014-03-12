@@ -385,7 +385,7 @@ namespace Jmbo
 
             if (dev.Open())
             {
-                if (TalkTryThree("*IDN?").Trim() == "HART,1529,A71426,1.40")
+                if (TalkTryThree("*IDN?").Trim().StartsWith("HART,1529"))
                 {
                     
                     bInUse = true;

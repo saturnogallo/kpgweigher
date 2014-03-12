@@ -264,7 +264,25 @@ namespace Jmbo
                 return true;
             }
             return false;
-        } 
+        }
+        internal void FillInHeader(string wfile, IEnumerable<JProperty> props,Microsoft.Office.Interop.Word.WdSeekView view)
+        {
+
+            _WordApplication.ActiveWindow.View.SeekView = view;
+            _WordApplication.Selection.WholeStory();
+            foreach (JProperty jp in props)
+            {
+                if (jp.Name.EndsWith("zsbh"))
+                {
+                    string key = jp.Name;
+                    SearchReplace(String.Format("<<{0}>>", key), _testdoc.StrValue(jp.Name));
+                }
+            }
+            //FillInField(wfile, props);
+            _WordApplication.ActiveWindow.View.SeekView = Microsoft.Office.Interop.Word.WdSeekView.wdSeekMainDocument;
+
+        }
+
         internal void FillInHeader(string wfile, IEnumerable<JProperty> props,string ibcid, Microsoft.Office.Interop.Word.WdSeekView view)
         {
 
@@ -312,6 +330,38 @@ namespace Jmbo
                 _WordApplication.Selection.TypeText(text);
             }
         }
+        internal void FillInField(string wfile, IEnumerable<JProperty> props)
+        {
+
+
+            Word.MailMerge mailMerge;
+            mailMerge = _WordDoc.MailMerge;
+
+
+            // Try to find the field name.
+            foreach (Word.MailMergeField f in mailMerge.Fields)
+            {
+                f.Select();
+                string text = "/";
+                foreach (JProperty jp in props)
+                {
+                    if (jp.Type == JTokenType.Array)
+                        continue;
+                    // Assuming the field code is: MERGEFIELD  "mailMergeFieldName"
+                    string codetxt = f.Code.Text;
+                    while (codetxt.EndsWith("_"))
+                        codetxt=codetxt.Remove(codetxt.Length - 1, 1);
+                    if ((codetxt.IndexOf("MERGEFIELD  " + jp.Name) > -1))//field is found
+                    {
+                        // Replace selected field with supplied value.
+                        text = _testdoc.FormatValue(jp, false);
+                        break;
+                    }
+                }
+                _WordApplication.Selection.TypeText(text);
+            }
+        }
+
     }
     static class JObjTool
     {

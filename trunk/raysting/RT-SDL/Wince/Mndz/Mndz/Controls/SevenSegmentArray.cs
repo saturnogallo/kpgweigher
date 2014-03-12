@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using System.Drawing;
-using Mndz;
+//using Mndz;
 /*
  * Seven-segment LED array control for .NET
  * (uses the original seven-segment LED control)
@@ -23,7 +23,7 @@ using Mndz;
  * 
  */
 
-namespace DmitryBrant.CustomControls
+namespace Mndz
 {
     public class SevenSegmentArray : UserControl
     {
@@ -69,18 +69,6 @@ namespace DmitryBrant.CustomControls
                 segments[i].Height = this.Height;
                 segments[i].Anchor = AnchorStyles.Top | AnchorStyles.Bottom;
                 segments[i].Visible = true;
-                if (this.Name == "led_ohm")
-                {
-                    /*
-                    segments[i].Click += new EventHandler((o, e) =>
-                    {
-                        Mndz.Form1 f1 = Program.mainwnd;
-
-                        f1.Invoke(new Action<object, object>(f1.led_ohm_Click), new object[] { o, e });
-
-                    });
-                     */
-                }
             }
 
             ResizeSegments(true);
@@ -178,6 +166,10 @@ namespace DmitryBrant.CustomControls
         /// </summary>
         public Mndz.Padding ElementPadding { get { return elementPadding; } set { elementPadding = value; UpdateSegments(); } }
 
+        public void DoClick(object sender, EventArgs e)
+        {
+            this.Invoke(new Action<EventArgs>(OnClick), new object[]{e});
+        }
 
         private string theValue = null;
         /// <summary>

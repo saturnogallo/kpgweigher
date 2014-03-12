@@ -57,13 +57,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CaptureScreen.cs" />
-    <Compile Include="ChoiceWnd.cs">
-      <SubType>Form</SubType>
+    <Compile Include="Controls\ColorMng.cs" />
+    <Compile Include="Controls\MathFunc.cs" />
+    <Compile Include="Controls\Renderer.cs" />
+    <Compile Include="Controls\SevenSegment.cs">
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ChoiceWnd.designer.cs">
-      <DependentUpon>ChoiceWnd.cs</DependentUpon>
+    <Compile Include="Controls\SevenSegmentArray.cs">
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="ColorMng.cs" />
     <Compile Include="DeviceMgr.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -71,35 +73,60 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="kbdwnd.cs">
+    <Compile Include="MyCtrl\ChoiceWnd.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="kbdwnd.designer.cs">
+    <Compile Include="MyCtrl\ChoiceWnd.designer.cs">
+      <DependentUpon>ChoiceWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyCtrl\kbdwnd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyCtrl\kbdwnd.designer.cs">
       <DependentUpon>kbdwnd.cs</DependentUpon>
     </Compile>
-    <Compile Include="MathFunc.cs" />
-    <Compile Include="MsgDlg.cs">
+    <Compile Include="MyCtrl\MsgDlg.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MsgDlg.designer.cs">
+    <Compile Include="MyCtrl\MsgDlg.designer.cs">
       <DependentUpon>MsgDlg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyCtrl\RectButton.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MyCtrl\RectButton.designer.cs">
+      <DependentUpon>RectButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MyCtrl\RectMeter.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MyCtrl\RectMeter.designer.cs">
+      <DependentUpon>RectMeter.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="ChoiceWnd.resx">
-      <DependentUpon>ChoiceWnd.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="kbdwnd.resx">
+    <EmbeddedResource Include="MyCtrl\ChoiceWnd.resx">
+      <DependentUpon>ChoiceWnd.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyCtrl\kbdwnd.resx">
       <DependentUpon>kbdwnd.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="MsgDlg.resx">
+    <EmbeddedResource Include="MyCtrl\MsgDlg.resx">
       <DependentUpon>MsgDlg.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyCtrl\RectButton.resx">
+      <DependentUpon>RectButton.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyCtrl\RectMeter.resx">
+      <DependentUpon>RectMeter.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -107,28 +134,15 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="RectButton.resx">
-      <DependentUpon>RectButton.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="RectButton.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="RectButton.designer.cs">
-      <DependentUpon>RectButton.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Renderer.cs" />
-    <Compile Include="SevenSegment.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="SevenSegmentArray.cs">
-      <SubType>UserControl</SubType>
+      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="Util.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\BGMETER.png" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>

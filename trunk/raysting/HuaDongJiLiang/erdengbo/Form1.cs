@@ -91,7 +91,7 @@ namespace Jmbo
                 // flag may not have been set, even though
                 // CancelAsync was called.
                 // todo
-                
+                MessageBox.Show("测试意外终止:"+e.Result.ToString());
             }
             else
             {
@@ -296,7 +296,7 @@ namespace Jmbo
 
                             setvalue(id, process.form_result);
                             test[id] = dat;
-                            test.AutoCaculation();
+                            test.AutoCaculation(false);
                             FillInPage("");
                         }
                     }
@@ -336,7 +336,6 @@ namespace Jmbo
             catch (Exception ex)
             {
             }
-
         }
         public void callfunc(string func, string param)
         {
@@ -473,15 +472,25 @@ namespace Jmbo
             saveFileDialog1.DefaultExt = ".doc";
             saveFileDialog1.Filter = "DOC File(*.doc)|*.doc|All Files(*.*)|*.*";
 
-            saveFileDialog1.FileName = DateTime.Now.ToString("yyyy-MM-dd") + "结果通知书.doc";
+            saveFileDialog1.FileName = DateTime.Now.ToString("yyyy-MM-dd") + "原始记录单.doc";
             if (saveFileDialog1.ShowDialog() != DialogResult.OK)
                 return;
-            test.FillInDocument(REPORT_TYPE.INFO_REPORT, saveFileDialog1.FileName);
+            test.FillInRawData(saveFileDialog1.FileName);
         } 
 
 
 
-        private void 生成检定报告ToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void 生成分度表ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (process.bRunning)
+                return;
+            
+            test.FillInFendu(saveFileDialog1);
+
+        }
+
+        private void 结果通知书ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (process.bRunning)
                 return;
@@ -489,14 +498,13 @@ namespace Jmbo
             saveFileDialog1.DefaultExt = ".doc";
             saveFileDialog1.Filter = "DOC File(*.doc)|*.doc|All Files(*.*)|*.*";
 
-
-            saveFileDialog1.FileName = DateTime.Now.ToString("yyyy-MM-dd") + "检定证书.doc";
+            saveFileDialog1.FileName = DateTime.Now.ToString("yyyy-MM-dd") + "结果通知书.doc";
             if (saveFileDialog1.ShowDialog() != DialogResult.OK)
                 return;
-            test.FillInDocument(REPORT_TYPE.CALI_REPORT, saveFileDialog1.FileName);
+            test.FillInDocument(REPORT_TYPE.INFO_REPORT, saveFileDialog1.FileName);
         }
 
-        private void 生成校准证书ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void 校准证书ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (process.bRunning)
                 return;
@@ -511,12 +519,19 @@ namespace Jmbo
             test.FillInDocument(REPORT_TYPE.JIAOZHUN_REPORT, saveFileDialog1.FileName);
         }
 
-        private void 生成分度表ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void 检定证书ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (process.bRunning)
                 return;
-            
-            test.FillInFendu(saveFileDialog1);
+
+            saveFileDialog1.DefaultExt = ".doc";
+            saveFileDialog1.Filter = "DOC File(*.doc)|*.doc|All Files(*.*)|*.*";
+
+
+            saveFileDialog1.FileName = DateTime.Now.ToString("yyyy-MM-dd") + "检定证书.doc";
+            if (saveFileDialog1.ShowDialog() != DialogResult.OK)
+                return;
+            test.FillInDocument(REPORT_TYPE.CALI_REPORT, saveFileDialog1.FileName);
 
         }
     }

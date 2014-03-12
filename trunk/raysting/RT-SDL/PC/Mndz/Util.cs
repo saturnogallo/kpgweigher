@@ -86,11 +86,76 @@ namespace Mndz
                     return data.ToString("F1");
                 }
             }
+            static public string GMKFormat(ref double v)
+            {
+                string r;
+                if (v > 1e+9)
+                {
+                    v = v / 1e+9;
+                    r = "G";
+                }
+                else if (v > 1e+6)
+                {
+                    v = v / 1e+6;
+                    r = "M";
+                }
+                else
+                {
+                    v = v / 1e+3;
+                    r = "k";
+                }
+                return r;
+            }
             public static void Test()
             {
                 //string abc = FormatDat(10, 9);
             }
+            public static double my_min(IEnumerable<double> values)
+            {
+                if (values.Count() < 1)
+                    return 0;
+                return values.Min();
+            }
+            public static double my_max(IEnumerable<double> values)
+            {
+                if (values.Count() < 1)
+                    return 0;
+                return values.Max();
+            }
+            public static double my_sum(IEnumerable<double> values)
+            {
+                if (values.Count() < 1)
+                    return 0;
+                return values.Sum();
+            }
+            public static double my_avg(IEnumerable<double> values)
+            {
+                if (values.Count() < 1)
+                    return 0;
 
+                return values.Average();
+            }
+            public static double my_sqrtsum(IEnumerable<double> values)
+            {
+                if (values.Count() < 2)
+                    return 0;
+                double avg = my_avg(values);
+                if (Math.Abs(avg) < 1e-15)
+                    return 1e-15;
+                double sqr = values.Select<double, double>((o) => { return o * (o - avg); }).Sum();
+                sqr = Math.Sqrt(sqr / (values.Count() - 1)) / avg;
+                return sqr;
+            }
+            public static double[] to_ppm_array(IEnumerable<double> values)
+            {
+                if (values.Count() < 2)
+                    return new double[] { };
+
+                double avg = my_avg(values);
+                if (Math.Abs(avg) < 1e-15)
+                    avg = 1e-15;
+                return values.Select<double, double>((o) => { return (o - avg) * 1e6 / avg; }).ToArray();
+            }
     }
     public class IniHandler
     {
@@ -223,7 +288,7 @@ namespace Mndz
                     sw.Close();
                     fsLog.Close();
                 }
-                catch (System.Exception ex)
+                catch
                 {
                 }
             }
@@ -257,7 +322,7 @@ namespace Mndz
                 }
                 fsLog.Close();
             }
-            catch (System.Exception ex)
+            catch
             {
             }
         }
@@ -273,7 +338,7 @@ namespace Mndz
                 }
                 fsLog.Close();
             }
-            catch (System.Exception ex)
+            catch
             {
             }
         }
@@ -282,11 +347,11 @@ namespace Mndz
     internal static class GlobalConfig
     {
 
-        public static bool ISDEBUG = true;
+        public static bool ISDEBUG = false;
         public static string sSwiPort = "COM5";
         public static string sCmdPort = "COM4";
         public static string sADPort = "COM99";
-        public static string sAD2Port = "COM3";
+        public static string sAD2Port = "COM15"; //FOR VX reading
         public static string sNavmeter = "PZ158";
         public static string sNavmeter2 = "PZ158";
         public static string udiskdir = @"c:\\Code\\GoogleCode\\g_lxhbucket\\raysting\\QJ55AUTO\\Zddq2\\Zddq2\\bin\\Debug";
@@ -323,12 +388,26 @@ namespace Mndz
             str_tbl["clr"] = "清除";
             str_tbl["quit"] = "退出";
             str_tbl["ok"] = "确定";
+
             
+            str_tbl["vxzero"] = "Vx清零";
+            str_tbl["vgzero"] = "指零仪清零";
+            str_tbl["selectrx"] = "请选择被测电阻步进值";
+            str_tbl["inputrs"] = "请输入标准电阻值({0})";
+            str_tbl["selectes"] = "请选择标准电压步进值";
+
+            str_tbl["inputda"] = "请输入DA零位值";
+            str_tbl["inputaddelay"] = "请输入测量延时值(秒)";
+            str_tbl["selectvx"] = "请选择被测电压值Vx";
+            str_tbl["inputrs"] = "请输入Rs({0})实际值";
+            str_tbl["inputes"] = "请输入Es({0})实际值";
+            str_tbl["out_of_range"] = "输入值无效";
+
             str_tbl["NAV_INIT_PZ158"] = "Un%01;00\r";
 //            str_tbl["NAV_10MV_PZ158"] = "Un%01;12;02\r";
-            str_tbl["NAV_120MV_PZ158"] = "Un%01;12;00\r";
+//            str_tbl["NAV_120MV_PZ158"] = "Un%01;12;00\r";
             str_tbl["NAV_1V_PZ158"] = "Un%01;12;01\r";
-//          str_tbl["NAV_30V_PZ158"] = "Un%01;12;02\r";
+            str_tbl["NAV_30V_PZ158"] = "Un%01;12;02\r";
             str_tbl["NAV_AFLTOFF_PZ158"] = "Un%01;26\r";
             str_tbl["NAV_AFLTON_PZ158"] = "Un%01;27\r";
             str_tbl["NAV_ZEROON_PZ158"] = "Un%01;06\r";
@@ -370,7 +449,7 @@ namespace Mndz
             }
 
         }
-
+       
         public static string str(string key)
         {
             if (str_tbl.ContainsKey(key))
