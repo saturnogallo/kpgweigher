@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mndz", "Mndz\Mndz.csproj", "{F230B33B-3A70-4D0E-8789-AAE3CDD97766}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RT-SDL-CE", "Mndz\RT-SDL-CE.csproj", "{F230B33B-3A70-4D0E-8789-AAE3CDD97766}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

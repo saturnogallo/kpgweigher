@@ -270,7 +270,10 @@ namespace Jmbo
                 string lastio = GetCurrentIO();
                 FormAction("clear_graph", "");
                 #region collect up switch temperature
-                SetTemperature(setpoint + 10);
+                
+                decimal uprange =  Decimal.Parse(Util.ConstIni.StringValue("CONDITION", "UPRANGE"));
+                SetTemperature(setpoint + uprange);
+                FormAction("show_status", String.Format("上切换值测量中...."));
                 while (true)
                 {
                     if (!wd1529.HasReading(1))
@@ -306,7 +309,7 @@ namespace Jmbo
                                 this[ckey] = rdg.reading;
                         }
                     }
-                    if (alldone || IsDiffSmall(rdg.reading, setpoint + 12, 2))
+                    if (alldone || IsDiffSmall(rdg.reading, setpoint + uprange+2, 2))
                         break;
                 }
                 testdoc.AutoCaculation();
@@ -314,7 +317,9 @@ namespace Jmbo
 
                 #region collect down switch temperature
                 lastio = GetCurrentIO();
-                SetTemperature(setpoint - 10);
+                decimal dnrange = Decimal.Parse(Util.ConstIni.StringValue("CONDITION", "DNRANGE"));
+                SetTemperature(setpoint + dnrange);
+                FormAction("show_status", String.Format("下切换值测量中...."));
                 while (true)
                 {
                     if (!wd1529.HasReading(1))
@@ -349,7 +354,7 @@ namespace Jmbo
                                 this[ckey] = rdg.reading;
                         }
                     }
-                    if (alldone || IsDiffSmall(rdg.reading, setpoint - 12, 2))
+                    if (alldone || IsDiffSmall(rdg.reading, setpoint + dnrange - 2, 2))
                         break;
                 }
                 testdoc.AutoCaculation();

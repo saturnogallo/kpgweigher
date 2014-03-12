@@ -143,7 +143,7 @@ namespace Mndz
             public int bmHeight;
             public int bmWidthBytes;
             public ushort bmPlanes;
-            public ushort bmBitsPixel;
+            public ushort bmBitsPixel ;
             public byte[] bmBits;
         }
 

@@ -265,13 +265,57 @@ namespace Jmbo
                             }
                             else
                             {
-                                this["c_" + sch.ToString() + "_" + ipoint.ToString() + "bc_" + round.ToString()] = rnow*GetMultiply();
+                                if(wire == WIREMODE.MODE_3WIRE)
+                                {
+                                    this["c_" + sch.ToString() + "_" + ipoint.ToString() + "bcw3_" + round.ToString()] = rnow*GetMultiply();
+                                }
+                                else{
+                                    this["c_" + sch.ToString() + "_" + ipoint.ToString() + "bc_" + round.ToString()] = rnow * GetMultiply();
+                                }
                                 FormGraphAction(sindex, Convert.ToDouble(rnow * GetMultiply()), "ohm");
                             }
                             CheckCancel(2);
                         }
+                        if (wire == WIREMODE.MODE_3WIRE) //another roudn for 2 wire measure
+                        {
+                            int nsindex = 0;
+                            for (int sch = 0; sch < 24; sch++)
+                            {
+                                if (sch > 0)
+                                {
+                                    if (!testdoc.IsValueAvailable(new string[] { "m_" + sch.ToString() + "_dj" }))
+                                        continue;
+
+                                    string cdpt = "m_" + "abcdef"[(sch - 1) / 4].ToString();
+                                    if (testdoc.IsValueAvailable(new string[] { cdpt + "_1jddwd" }) && (testdoc.StrValue(cdpt + "_1jddwd") == testdoc.StrValue(sdwd)))
+                                        nsindex++;
+                                    else if (testdoc.IsValueAvailable(new string[] { cdpt + "_2jddwd" }) && (testdoc.StrValue(cdpt + "_2jddwd") == testdoc.StrValue(sdwd)))
+                                        nsindex++;
+                                    else if (testdoc.IsValueAvailable(new string[] { cdpt + "_3jddwd" }) && (testdoc.StrValue(cdpt + "_3jddwd") == testdoc.StrValue(sdwd)))
+                                        nsindex++;
+                                    else
+                                        continue;
+                                }
+                                if (nsindex == 0)
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    FormAction("show_status", String.Format("正在采集被检温度计 {0} 数据...", sindex));
+                                    scanner.ScanTo(nsindex, WIREMODE.MODE_2WIRE);
+                                }
+                                CheckCancel(scandelay);
+                                bridge.ClearBuffer();
+                                rnow = ReadF700(goodcnt);
+                                this["c_" + sch.ToString() + "_" + ipoint.ToString() + "bcw2_" + round.ToString()] = rnow * GetMultiply();
+                                FormGraphAction(sindex, Convert.ToDouble(rnow * GetMultiply()), "ohm");
+                                CheckCancel(2);
+                                testdoc.AutoCaculation(true);
+                            }
+                        }
                     }
-                    testdoc.AutoCaculation();
+                    testdoc.AutoCaculation(false);
                 }
             }
             scanner.ScanTo(0,WIREMODE.MODE_4WIRE);

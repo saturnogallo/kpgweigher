@@ -23,7 +23,7 @@ using System.Drawing.Drawing2D;
  * 
  */
 
-namespace DmitryBrant.CustomControls
+namespace Mndz
 {
     public class SevenSegment : UserControl
     {
@@ -43,7 +43,14 @@ namespace DmitryBrant.CustomControls
             segPoints = new Point[7][];
             for (int i = 0; i < 7; i++) segPoints[i] = new Point[6];
 
+            this.Click += new EventHandler(SevenSegment_Click);
             RecalculatePoints();
+        }
+
+        void SevenSegment_Click(object sender, EventArgs e)
+        {
+            SevenSegmentArray ssa = (this.Parent as SevenSegmentArray);
+            ssa.Invoke(new EventHandler(ssa.DoClick), new object[] {sender, e });
         }
         private System.Drawing.Bitmap backBuffer = null;
         private Graphics graphic;
@@ -316,7 +323,5 @@ namespace DmitryBrant.CustomControls
             e.Graphics.DrawImage(backBuffer, 0, 0);
             //by sojo e.Graphics.EndContainer(containerState);
         }
-
-
     }
 }

@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
-using DmitryBrant.CustomControls;
 namespace Mndz
 {
     public partial class Form1 : Form
@@ -38,34 +37,69 @@ namespace Mndz
                 dlg_choice.Init(StringResource.str("selectrx"), Processor._RxTitles, -1, null, new KbdDataHandler(KbdData));
             });
 
-            led_rx.ColorLight = Color.Red;
+            led_rx.ColorLight = Color.Pink;
+            led_rx.ColorDark = this.BackColor;
             led_rx.ColorBackground = this.BackColor;
             led_rx.ElementWidth = 12;
             led_rx.RecreateSegments(led_rx.ArrayCount);
 
-            led_rs.ColorLight = Color.Green;
+            led_rs.ColorLight = Color.Black;
+            led_rs.ColorDark = this.BackColor;
             led_rs.ColorBackground = this.BackColor;
             led_rs.ElementWidth = 10;
             led_rs.RecreateSegments(led_rs.ArrayCount);
+            led_rs.Click += new EventHandler((o, e) =>
+            {
+                dlg_kbd.Init(String.Format(StringResource.str("inputrs"), Processor._RsTitles[processor.RsIndex]), "inputrs", false, new KbdDataHandler(KbdData));
+            });
 
             led_vx.ColorLight = Color.Black;
+            led_vx.ColorDark = this.BackColor;
             led_vx.ColorBackground = this.BackColor;
             led_vx.ElementWidth = 10;
             led_vx.RecreateSegments(led_vx.ArrayCount);
+            led_vx.Value = "0.000";
+            led_vx.Click += new EventHandler((o, e) =>
+            {
+                dlg_choice.bNo0Choice = true;
+                dlg_choice.param = "selectvx";
 
-            led_vs.ColorLight = Color.Black;
-            led_vs.ColorBackground = this.BackColor;
-            led_vs.ElementWidth = 10;
-            led_vs.RecreateSegments(led_vs.ArrayCount);
+                dlg_choice.Init(StringResource.str("selectvx"), Processor._MulTitles, - 1, null, new KbdDataHandler(KbdData));
+            });
+
+            
+            led_es.ColorLight = Color.Black;
+            led_es.ColorDark = this.BackColor;
+            led_es.ColorBackground = this.BackColor;
+            led_es.ElementWidth = 10;
+            led_es.RecreateSegments(led_es.ArrayCount);
+            led_es.Click += new EventHandler((o, e) =>
+            {
+                dlg_choice.bNo0Choice = true;
+                dlg_choice.param = "selectes";
+                dlg_choice.Init(StringResource.str("selectes"), Processor._EsTitles, -1, null, new KbdDataHandler(KbdData));
+            });
 
             btn_zeroon.BackColor = this.BackColor;
             btn_zeroon.colorTop = Color.Bisque;
             btn_zeroon.Style = MyButtonType.rectButton;
-            btn_zeroon.Text = "清零";
+            btn_zeroon.Label = StringResource.str("vxzero");
+
             btn_zeroon.ValidClick += new EventHandler((o, e) =>
             {
                 processor.ZeroON();
             });
+
+            btn_zeroon2.BackColor = this.BackColor;
+            btn_zeroon2.colorTop = Color.Bisque;
+            btn_zeroon2.Style = MyButtonType.rectButton;
+            btn_zeroon2.Label = StringResource.str("vgzero");
+
+            btn_zeroon2.ValidClick += new EventHandler((o, e) =>
+            {
+                processor.ZeroON2();
+            });
+
 
             btn_turnon.BackColor = this.BackColor;
             btn_turnon.colorTop = Color.Green;
@@ -76,10 +110,13 @@ namespace Mndz
                 if (!processor.bOn)
                     dt_lastoutput = DateTime.Now.AddSeconds(2);
                 processor.bOn = !processor.bOn;
-                RefreshDisplay(false);
+                RefreshDisplay(true);
             });
 
             rectMeter1.BgResId = "BGMETER";
+            DeviceMgr.Reset();
+            processor.ToDAValue(0);
+ 
             tm = new Timer();
             tm.Interval = 500;
             tm.Tick += new EventHandler((o, e) =>
@@ -87,15 +124,45 @@ namespace Mndz
                 lbl_datetime.Text = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
                 if (DateTime.Now.Subtract(dt_lastoutput).TotalSeconds < 1)
                 {
-                    dt_lastoutput = DateTime.Now;
                     return;
                 }
-                processor.RefreshOutput();
+                dt_lastoutput = DateTime.Now.AddSeconds(processor.RefreshOutput());
+                if (processor.bOn)
+                {
+                    double v = Convert.ToDouble(processor.Rx) ;
+                    string newv;
+                    newv = Util.GMKFormat(ref v);
+                    if(lbl_ohm.Text != newv)
+                        lbl_ohm.Text = newv;
+
+                    newv = v.ToString("F8").Substring(0, 7);
+                    if (led_rx.Value != newv)
+                    {
+                        led_rx.Value = newv;
+                    }
+                    if (processor.bStable)
+                    {
+                        if (led_rx.ColorLight != Color.Red)
+                            led_rx.ColorLight = Color.Red;
+                    }
+                    else
+                    {
+                        if (led_rx.ColorLight != Color.Pink)
+                            led_rx.ColorLight = Color.Pink;
+                    }
+
+                    newv = processor.VxMeasure.ToString("F7").Substring(0, 6);
+                    if(led_vx.Value != newv)
+                    {
+                        led_vx.Value = newv;
+                        rectMeter1.Angle = processor.Percent;
+                    }
+                }
             });
             tm.Enabled = true;
             tm.Start();
             DeviceMgr.Reset();
-            
+
             RefreshDisplay(true);
         }
         private DateTime dt_lastoutput = DateTime.Now;
@@ -113,15 +180,73 @@ namespace Mndz
         private void KbdData(string id, string param)
         {
                     Decimal a;
-                    if (id == "daoffset")
+                    if (id == "daoffset" || id == "rsreal" || id == "esreal" || id == "addelay")
                     {
                         if (!Util.TryDecimalParse(param, out a))
                             return;
 
-                        processor.daoffset = a + processor.daoffset;
-                        
+                        if (id == "daoffset")
+                            processor.daoffset = a + processor.daoffset;
+
+                        if (id == "rsreal")
+                            processor.RsValue = a;
+
+                        if (id == "esreal")
+                            processor.EsValue = a;
+                        if (id == "addelay")
+                            processor.ADdelay = Convert.ToInt32(a);
+                        RefreshDisplay(true);
                     }
-                    if (id == "value")
+                    
+                    if (id == "selectrx" || id == "selectes" || id == "selectvx")
+                    {
+                        
+                        try
+                        {
+                            int b = Int32.Parse(param);
+                            if (b >= 0)
+                            {
+                                if (id == "selectrx")
+                                    processor.RxIndex = b;
+                                if (id == "selectes")
+                                    processor.EsIndex = b;
+                                if (id == "selectvx")
+                                {
+                                    int value = Processor.MulValues[b];
+                                    if (value == 10)// 10V
+                                    {
+                                        processor.VxMultiplier = 1;
+                                    }
+                                    else if (value == 100)
+                                    {
+                                        processor.VxMultiplier = 10;
+                                    }
+                                    else if (value == 1000)
+                                    {
+                                        processor.VxMultiplier = 100;
+                                    }
+                                    else if (value == 2000)
+                                    {
+                                        processor.VxMultiplier = 100;
+                                    }
+                                    else if (value == 5000)
+                                    {
+                                        processor.VxMultiplier = 500;
+                                    }
+                                    else if (value == 10000)
+                                    {
+                                        processor.VxMultiplier = 1000;
+                                    }
+                                    processor.VxOutput = value/10;
+                                }
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        RefreshDisplay(true);
+                    }
+                    if (id == "inputrs")
                     {
                         if (param == "65890192")
                         {
@@ -146,66 +271,103 @@ namespace Mndz
                         {
                             this.Invoke(new Action(() =>
                             {
-                                dlg_kbd.Init("请输入DA零位值", "daoffset", false, KbdData);
+                                dlg_kbd.Init(StringResource.str("inputda"), "daoffset", false, KbdData);
                             }));
                             return;
+                        }
+                        if (param == "00001") //input real es value
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                dlg_kbd.Init(String.Format(StringResource.str("inputes"), Processor._EsTitles[processor.EsIndex]), "esreal", false, KbdData);
+                            }));
+                            RefreshDisplay(true);
+                            return;
+                        }
+                        if (param == "00002") //input real es value
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                dlg_kbd.Init(String.Format(StringResource.str("inputrs"), Processor._RsTitles[processor.RsIndex]), "rsreal", false, KbdData);
+                            }));
+                            RefreshDisplay(true);
+                            return;
+                        }
+                        if (param == "00003") //input ad delay
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                dlg_kbd.Init(StringResource.str("inputaddelay"), "addelay", false, KbdData);
+                            }));
+                            return; return;
                         }
                         if (!Util.TryDecimalParse(param, out a))
                             return;
-                        int newrange = -1;//Processor.CheckRange(a, processor.iRange);
-                        if (newrange < 0)
+                        
+                        if (a < 0)
                         {
                             this.Invoke(new Action(() => {
-                                Program.MsgShow("输入值超出范围");
+                                Program.MsgShow(StringResource.str("out_of_range"));
                             }));
                             return;
                         }
+                        processor.RsValue = a;
                         RefreshDisplay(true);
+                        
                     }
         }
-        public void led_ohm_Click(object sender, object e)
-        {
-                dlg_kbd.Init("请输入模拟电阻值", "value", false, KbdData);
-        }
-        private RectButton[] digi_dnbtns;
-        private RectButton[] digi_upbtns;
-        private RectButton[] real_btns;
 
-        private RectButton[] range_btns;
-        
-        private RectButton Button(string type, int index)
-        {
-            if (type == "digi_up")
-                return digi_upbtns[index];
-            if (type == "digi_dn")
-                return digi_dnbtns[index];
-            if (type == "real")
-                return real_btns[index];
-            return null;
-        }
-        //up or down the digit based on position highest ditig is 1 lowest digit is 6
-        public void UpdateCurrent(double reading)
-        {
-        }
         private void RefreshDisplay(bool bRangeChange)
         {
             if (processor.bOn)
             {
-                btn_turnon.Text = "ON";
                 btn_turnon.bOn = true;
+                
             }
             else
             {
-                btn_turnon.Text = "OFF";
                 btn_turnon.bOn = false;
+                
+                double v = Convert.ToDouble(processor.RxNominal);
+                lbl_ohm.Text = Util.GMKFormat(ref v);
+                led_rx.Value = v.ToString("F8").Substring(0, 7);
+                led_vx.Value = processor.VxOutput.ToString("F7").Substring(0, 6);
+                rectMeter1.Angle = processor.Percent;
+                
             }
-            //TODO update display
+            
+
+            if (bRangeChange)
+            {
+                if (processor.bOn)
+                {
+                    led_rx.ColorLight = Color.Pink;
+                    led_vx.ColorLight = Color.Black;
+                    btn_turnon.colorTop = Color.Green;
+                btn_turnon.Label = "ON";
+                }
+                else
+                {
+                    led_rx.ColorLight = Color.LightPink;
+                    led_vx.ColorLight = Color.DarkGray;
+                    btn_turnon.colorTop = Color.LightGray;
+                btn_turnon.Label = "OFF";
+                }
+                Double v = Math.Abs(Convert.ToDouble(processor.RsValue));
+   
+                lbl_rsscale.Text = Util.GMKFormat(ref v);
+                
+                led_rs.Value = v.ToString("F6").Substring(0, 5);
+
+                led_es.Value = processor.EsValue.ToString("F7").Substring(0, 6);
+               
+            }
+            
         }
         //PC side command
         //resi: 1.234 on
         //resi: 1.345 off
         //resi? return resi: 1.234 on|off
-        //curr? return curr: 1.234
         private Regex resi_set_mode = new Regex(@"resi:\s+([0-9.Mk]+)\s+(on|off)");
         internal void pc_cmd(string cmd)
         {
@@ -224,38 +386,10 @@ namespace Mndz
                 return;
             }
             Match m;
-
+            //TODO add command list
         }
 
-        private void lbl_range_Click(object sender, EventArgs e)
-        {
 
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void sevenSegmentArray1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void rectButton1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void btn_turnon_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
     }
     #region duplicate windows class
     public class GraphicsPath
@@ -301,7 +435,7 @@ namespace Mndz
     // Summary:
     //     Represents padding or margin information associated with a user interface
     //     (UI) element.
-    #endregion
+    
     [Serializable]
     public struct Padding
     {
@@ -595,4 +729,5 @@ namespace Mndz
             return String.Format("{0},{1},{2},{3}", this.Left, this.Top, this.Right, this.Bottom);
         }
     }
+    #endregion
 }

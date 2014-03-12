@@ -92,7 +92,7 @@ namespace Jmbo
                 // flag may not have been set, even though
                 // CancelAsync was called.
                 // todo
-                
+                MessageBox.Show("测试意外终止:"+e.Result.ToString());
             }
             else
             {
@@ -138,6 +138,7 @@ namespace Jmbo
             }catch(Exception ex)
             {
                 string line = ex.Message;
+                Logger.Log("Quit with error" + ex.Message + ex.StackTrace);
                 e.Cancel = true;
                 return;
             }
@@ -466,19 +467,5 @@ namespace Jmbo
 
 
 
-        private void 生成检定报告ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (process.bRunning)
-                return;
-
-            saveFileDialog1.DefaultExt = ".doc";
-            saveFileDialog1.Filter = "DOC File(*.doc)|*.doc|All Files(*.*)|*.*";
-
-
-            saveFileDialog1.FileName = DateTime.Now.ToString("yyyy-MM-dd") + "检测报告.doc";
-            if (saveFileDialog1.ShowDialog() != DialogResult.OK)
-                return;
-            test.FillInDocument(REPORT_TYPE.CALI_REPORT, saveFileDialog1.FileName);
-        }
     }
 }

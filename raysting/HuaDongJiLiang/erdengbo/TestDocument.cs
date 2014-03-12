@@ -320,7 +320,34 @@ namespace Jmbo
                     doctool.SaveWord(tofile);
                 docopen = false;
             }
+        }
+        internal void FillInRawData(string tofile)
+        {
+            bool docopen = false;
+            string tmpl = "原始记录单";
+            try
+            {
+                string src = Path.Combine(Util.basedir, "报告模板\\"+tmpl+".doc");
+                File.Copy(src, tofile, true);
+                doctool.PrepareWord(tofile);
+                docopen = true;
 
+                doctool.FillInField(tofile, data_record.Properties());
+
+                doctool.FillInHeader(tofile, data_record.Properties(), Microsoft.Office.Interop.Word.WdSeekView.wdSeekCurrentPageHeader);
+                doctool.FillInHeader(tofile, data_record.Properties(), Microsoft.Office.Interop.Word.WdSeekView.wdSeekPrimaryHeader);
+
+                doctool.SaveWord(tofile);
+                MessageBox.Show("导出" + tmpl + "成功");
+                docopen = false;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show("导出报告失败: " + ex.Message);
+                if (docopen)
+                    doctool.SaveWord(tofile);
+                docopen = false;
+            }
         }
         internal void FillInDocument( REPORT_TYPE rule, string tofile)
         {
@@ -523,8 +550,32 @@ namespace Jmbo
             return Convert.ToDecimal(d);
         }
 
-        internal void AutoCaculation()
+        internal void AutoCaculation(bool min)
         {
+            
+            #region 3 WIRE caculation
+            //this["c_" + sch.ToString() + "_" + ipoint.ToString() + "bcw3_" + round.ToString()] = rnow*GetMultiply();
+            for (int round = 1; round <= 4; round++)
+            {
+                for (int ipoint = 1; ipoint <= MAX_PT_1PAGE; ipoint++)
+                {
+                    Decimal sum = 0;
+                    Decimal count = 0;
+                    for (int sch = 0; sch < 24; sch++)
+                    {
+                        string w3 = "c_" + sch.ToString() + "_" + ipoint.ToString() + "bcw3_" + round.ToString();
+                        string w2 = "c_" + sch.ToString() + "_" + ipoint.ToString() + "bcw2_" + round.ToString();
+                        if (IsValueAvailable(new string[] { w3,w2}))
+                        {
+                            this["c_" + sch.ToString() + "_" + ipoint.ToString() + "bc_" + round.ToString()]= 2 * Value(w3)-Value(w2);
+                        }
+                    }
+                }
+            }
+            #endregion
+
+            if (min)
+                return;
             #region average caculation
             //c_1_1sjwd, c_1_1bc1,c_1_2bc1,c_1_3bc1 ... c_1_3bc4
             string[] avg_key = new string[] { "a_{0}sjwd", "b_{0}sjwd","c_{0}sjwd","d_{0}sjwd", "1_{0}bc", "2_{0}bc", "3_{0}bc", "4_{0}bc", "5_{0}bc", "6_{0}bc", "7_{0}bc", "8_{0}bc", "9_{0}bc", "10_{0}bc","11_{0}bc","12_{0}bc" };

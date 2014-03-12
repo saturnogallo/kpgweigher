@@ -113,8 +113,7 @@
             // 
             this.生成检定报告ToolStripMenuItem.Name = "生成检定报告ToolStripMenuItem";
             this.生成检定报告ToolStripMenuItem.Size = new System.Drawing.Size(99, 23);
-            this.生成检定报告ToolStripMenuItem.Text = "生成检测报告";
-            this.生成检定报告ToolStripMenuItem.Click += new System.EventHandler(this.生成检定报告ToolStripMenuItem_Click);
+            this.生成检定报告ToolStripMenuItem.Text = "生成检定报告";
             // 
             // toolStripMenuItem2
             // 

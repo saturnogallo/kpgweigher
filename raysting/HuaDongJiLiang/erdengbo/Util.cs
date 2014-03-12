@@ -8,7 +8,7 @@ namespace Jmbo
 {
     static class Util
     {
-        public static bool ISDEBUG = true;
+        public static bool ISDEBUG = false;
         public static bool GPIBDBG = false;
         public static IniHandler ConstIni; 
         static Util()

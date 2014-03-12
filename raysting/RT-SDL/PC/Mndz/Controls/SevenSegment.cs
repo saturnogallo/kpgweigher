@@ -23,7 +23,7 @@ using System.Drawing.Drawing2D;
  * 
  */
 
-namespace DmitryBrant.CustomControls
+namespace Mndz
 {
     public class SevenSegment : UserControl
     {

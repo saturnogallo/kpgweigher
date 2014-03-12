@@ -466,6 +466,17 @@ namespace Jmbo
                 dev.Send(String.Format("LFST4012 {0} {1} 2\r", serial, position), true);
             else
                 return false;
+            Thread.Sleep(1000);
+            if (lastpos == position)//send command again for the 4012 to enable channel
+            {
+                if (wire == WIREMODE.MODE_2WIRE)
+                    dev.Send(String.Format("LFST4012 {0} {1} 0\r", serial, position), true);
+                else if (wire == WIREMODE.MODE_3WIRE)
+                    dev.Send(String.Format("LFST4012 {0} {1} 1\r", serial, position), true);
+                else if (wire == WIREMODE.MODE_4WIRE)
+                    dev.Send(String.Format("LFST4012 {0} {1} 2\r", serial, position), true);
+
+            }
             lastpos = position;
             lastmode = wire;
             Thread.Sleep(2000);
@@ -1031,7 +1042,7 @@ fr:   -4.50 C
             if (dev.Open())
             {
                 dev.ClearInBuffer();
-                bInUse = (TalkTryThree("*IDN?") == Serial);
+                bInUse = (TalkTryThree("*IDN?").StartsWith(Serial));
                 if (!bInUse)
                     dev.Close();
             }

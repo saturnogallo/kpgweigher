@@ -237,12 +237,15 @@ void idle()
 /*
 */
 // clear code is set to 0x0007ffff; since we enabled buffer function
-#define MYCLR_CODE 	0x0007ffff
+//#define MYCLR_CODE 	0x0007ffff
+#define MYCLR_CODE 	0x00000000
 #define CONFIG_MODE	RBUF_ON|OPGND_DIS|DACTRI_DIS|BIN_2SC_BIN|SDO_EN|LIN_COMP_10
 //end interface routine
 void main()
 {
 	unsigned char temp;
+	unsigned char temp1;
+	unsigned char temp2;
 	unsigned char *dacbuf;
 	unsigned char *clrbuf;
 	unsigned char sid;//id of serial to send 
@@ -273,9 +276,10 @@ void main()
 	if(asp_rx);//set the asp_rx to be input pin
 
 //	sjSerialSendByte('?');
-	swiReset();
-	swiDelay(0x0f,0xff);
-
+//	swiReset();
+//	swiDelay(0x0f,0xff);
+	P0 = 0x04; //VOLT OFF
+	P1 = 0x20; //MUL OFF
 	/*
 	*	Protocal routine: 
 	*	1.	HMARK sid(!=HMARK) :set sid
@@ -299,6 +303,7 @@ void main()
 	AD5791Registers[CONTROL] = 0;
 	AD5791Registers[CLEARCODE] = MYCLR_CODE;
 
+	swiDelay(0x0f,0xff);
 	while(1)
 	{
 
@@ -437,10 +442,16 @@ void main()
 			}
 			if(sid == 't')
 			{
-				P0=sjSerialWaitForOneByte();
-				P1=sjSerialWaitForOneByte();
+				temp1=sjSerialWaitForOneByte();
+				temp2=sjSerialWaitForOneByte(); //temp2 is check sum
+
+				if( (temp1 + temp2 + temp) & 0xff == 0xff)
+				{
+					P0 = temp;
+					P1 = temp1;
+				}
 				sid = "";
-//				sjSerialSendByte(EMARK);
+				sjSerialSendByte(EMARK);
 			}
 		}
 		if(kbhit())

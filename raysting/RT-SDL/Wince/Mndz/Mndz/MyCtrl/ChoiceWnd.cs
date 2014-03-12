@@ -15,9 +15,10 @@ namespace Mndz
     public partial class ChoiceWnd : Form
     {
         public KbdDataHandler choice_handler;
-        //at lease one choice should be made
-        public bool bNo0Choice {get;set;} 
-        
+        //at least one choice should be made
+        public bool bNo0Choice {get;set;}
+        //parameter for identify
+        public string param { get; set; }
         //choice of items
         public string[] items { get;set; }
         //choice name
@@ -26,11 +27,10 @@ namespace Mndz
         //last choice for MutliSelection case
         public bool[] states { get; set; }
 
-        private static int deep = 0; //depth of multiple selection
+        private static int deep = 0; //depth of multiple selection dialog
         //can be multiple select or single selection.
         private bool bMultiSelect { get; set; }
-        //parameter for identify
-        private string param { get; set; }
+        
         private int totalnum = 0;
         private Color btColor = Color.LightBlue;
         public ChoiceWnd()
@@ -42,12 +42,14 @@ namespace Mndz
             btn_quit.colorTop = Color.Beige;
             btn_quit.Style = MyButtonType.roundButton;
             btn_quit.Text = StringResource.str("quit");
+            btn_quit.bOn = true;
             btn_quit.ValidClick += new EventHandler(btn_quit_ValidClick);
             bNo0Choice = true;
             RectButton btn;
             foreach (int x in Enumerable.Range(1, MAX_NUMBER))
             {
                 btn = find_btn(x);
+                btn.Font = new System.Drawing.Font("Arial Narrow", 24F, System.Drawing.FontStyle.Bold);
                 btn.colorShadow = this.BackColor;
                 btn.colorTop = btColor;
                 btn.Style = MyButtonType.rectButton;
@@ -77,7 +79,7 @@ namespace Mndz
             }
         }
 
-        private const int MAX_NUMBER = 12;
+        private const int MAX_NUMBER = 18;
         void btn_quit_ValidClick(object sender, EventArgs e)
         {
             if (bMultiSelect)
@@ -125,24 +127,58 @@ namespace Mndz
         private void ReLayout()
         {
             int total = items.Length;
-            bool twocol = (total > (MAX_NUMBER/2));
+            bool tricol = (total > (MAX_NUMBER * 2 / 3));
+            bool twocol = (!tricol) && (total > (MAX_NUMBER/3));
+
             RectButton btn;
-            if (twocol)
+            if (tricol)
             {
                 int basey = btn_quit.Height + 20;
-                int h = (this.Height - basey) / (total/2);
-                
+                int h = (this.Height - basey) / ((total+2) / 3);
+
                 foreach (int i in Enumerable.Range(1, MAX_NUMBER))
                 {
                     btn = find_btn(i);
-                    if(i <= total)
+                    if (i <= total)
                         btn.Text = items[i - 1];
-                    btn.Width = (this.Width*2) / 5;
+                    btn.Width = (this.Width * 2) / 10;
+
+                    if (i % 3 == 1)
+                        btn.Left = this.Width / 6 - btn.Width / 2;
+                    else if (i % 3 == 2)
+                        btn.Left = this.Width  / 2  - btn.Width / 2;
+                    else
+                        btn.Left = this.Width * 5 / 6 - btn.Width / 2;
+
+                    btn.Top = basey;
+
+                    if (h > 70)
+                        btn.Height = 65;
+                    else
+                        btn.Height = h - 5;
+
+                    if (i % 3 == 0)
+                        basey = basey + h;
+                    btn.Visible = (i <= total);
+                    btn.colorTop = btColor;
+                }
+            }
+            else if (twocol)
+            {
+                int basey = btn_quit.Height + 20;
+                int h = (this.Height - basey) / ((total+1) / 2);
+
+                foreach (int i in Enumerable.Range(1, MAX_NUMBER))
+                {
+                    btn = find_btn(i);
+                    if (i <= total)
+                        btn.Text = items[i - 1];
+                    btn.Width = (this.Width * 2) / 5;
 
                     if (i % 2 == 1)
-                        btn.Left = this.Width/4 - btn.Width/2;
+                        btn.Left = this.Width / 4 - btn.Width / 2;
                     else
-                        btn.Left = this.Width*3 / 4 - btn.Width / 2;
+                        btn.Left = this.Width * 3 / 4 - btn.Width / 2;
                     btn.Top = basey;
 
                     if (h > 70)
@@ -154,23 +190,22 @@ namespace Mndz
                         basey = basey + h;
                     btn.Visible = (i <= total);
                     btn.colorTop = btColor;
-                    btn.Style = MyButtonType.rectButton;
                 }
             }
             else
             {
                 int basey = btn_quit.Height + 20;
-                int h = (this.Height - basey)/total;
-                
+                int h = (this.Height - basey) / total;
+
                 foreach (int i in Enumerable.Range(1, MAX_NUMBER))
                 {
                     btn = find_btn(i);
                     if (i <= total)
                         btn.Text = items[i - 1];
-                    btn.Width = (this.Width - 90);
-                    btn.Left = (this.Width - btn.Width)/2;
+                    btn.Width = (this.Width / 2);
+                    btn.Left = (this.Width - btn.Width) / 2;
                     btn.Top = basey;
-                    
+
                     if (h > 70)
                         btn.Height = 65;
                     else
@@ -178,25 +213,27 @@ namespace Mndz
                     basey = basey + h;
                     btn.Visible = (i <= total);
                     btn.colorTop = btColor;
-                    btn.Style = MyButtonType.rectButton;
                 }
             }
             this.Invalidate();
         }
         private void UpdateState(int id)
         {
-            
             RectButton btn;
             foreach (int i in Enumerable.Range(1, totalnum))
             {
                 if (i != id && id != 0)
                     continue;
                 btn = find_btn(i);
-                
-                if (bMultiSelect)
-                    find_btn(i).bOn = states[i - 1];
-                else
-                    find_btn(i).bOn = ((i - 1) == index);
+
+                if (btn is RectButton)
+                {
+                    if (bMultiSelect)
+                        btn.bOn = states[i - 1];
+                    else
+                        btn.bOn = ((i - 1) != index);
+                    btn.Label = items[i-1];
+                }
             }
         }
         private RectButton find_btn(int id)

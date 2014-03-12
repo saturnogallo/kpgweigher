@@ -27,107 +27,100 @@ namespace Mndz
             InitializeComponent();
 
             string mypath = Path.Combine(GlobalConfig.udiskdir2, "screen");
-            if (Directory.Exists(mypath))
-                btn_capture.Visible = true;
+//            if (Directory.Exists(mypath)) 
+//                btn_capture.Visible = true;
             Cursor.Hide();
             processor = new Processor();
             
-            digi_upbtns = new RectButton[] { rbtn_1up, rbtn_2up, rbtn_3up, rbtn_4up, rbtn_5up, rbtn_6up  };
-            digi_dnbtns = new RectButton[] { rbtn_1dn, rbtn_2dn, rbtn_3dn, rbtn_4dn, rbtn_5dn, rbtn_6dn  };
-            real_btns = new RectButton[] { rbtn_real1,rbtn_real2,rbtn_real3,rbtn_real4,rbtn_real5,rbtn_real6,rbtn_real7, rbtn_real8, rbtn_real9, rbtn_real10,
-                                            rbtn_real11,rbtn_real12,rbtn_real13,rbtn_real14,rbtn_real15};
             dlg_choice = new ChoiceWnd();
             dlg_kbd = new kbdWnd();
-            range_btns = new RectButton[] { btn_rangeReal, btn_range0, btn_range1, btn_range2, btn_range3 };
-            string[] range_string = new String[] { "实物电阻", "20mΩ", "200mΩ", "2Ω", "20Ω" };
-            led_ohm.ColorLight = Color.Red;
-            led_ohm.ColorBackground = this.BackColor;
-            led_ohm.ElementWidth = 12;
-            led_ohm.RecreateSegments(led_ohm.ArrayCount);
-            led_current.ColorLight = Color.DarkGreen;
-            led_current.ColorBackground = this.BackColor;
-            led_current.ElementWidth = 8;
-            led_current.RecreateSegments(led_current.ArrayCount);
-            led_current.Value = "0.0000";
+            led_rx.Value = "0.000000";
+            led_rx.Click += new EventHandler((o,e)=>{
+                dlg_choice.bNo0Choice = true;
+                dlg_choice.param = "selectrx";
+                dlg_choice.Init(StringResource.str("selectrx"), Processor._RxTitles, -1, null, new KbdDataHandler(KbdData));
+            });
 
-            btn_zeroon.bgColor = this.BackColor;
-            btn_zeroon.SetStyle(Color.Bisque, MyButtonType.roundRectButton);
-            btn_zeroon.Text = "清零";
+            led_rx.ColorLight = Color.Pink;
+            led_rx.ColorDark = this.BackColor;
+            led_rx.ColorBackground = this.BackColor;
+            led_rx.ElementWidth = 12;
+            led_rx.RecreateSegments(led_rx.ArrayCount);
+
+            led_rs.ColorLight = Color.Black;
+            led_rs.ColorDark = this.BackColor;
+            led_rs.ColorBackground = this.BackColor;
+            led_rs.ElementWidth = 10;
+            led_rs.RecreateSegments(led_rs.ArrayCount);
+            led_rs.Click += new EventHandler((o, e) =>
+            {
+                dlg_kbd.Init(String.Format(StringResource.str("inputrs"), Processor._RsTitles[processor.RsIndex]), "inputrs", false, new KbdDataHandler(KbdData));
+            });
+
+            led_vx.ColorLight = Color.Black;
+            led_vx.ColorDark = this.BackColor;
+            led_vx.ColorBackground = this.BackColor;
+            led_vx.ElementWidth = 10;
+            led_vx.RecreateSegments(led_vx.ArrayCount);
+            led_vx.Value = "0.000";
+            led_vx.Click += new EventHandler((o, e) =>
+            {
+                dlg_choice.bNo0Choice = true;
+                dlg_choice.param = "selectvx";
+
+                dlg_choice.Init(StringResource.str("selectvx"), Processor._MulTitles, - 1, null, new KbdDataHandler(KbdData));
+            });
+
+            
+            led_es.ColorLight = Color.Black;
+            led_es.ColorDark = this.BackColor;
+            led_es.ColorBackground = this.BackColor;
+            led_es.ElementWidth = 10;
+            led_es.RecreateSegments(led_es.ArrayCount);
+            led_es.Click += new EventHandler((o, e) =>
+            {
+                dlg_choice.bNo0Choice = true;
+                dlg_choice.param = "selectes";
+                dlg_choice.Init(StringResource.str("selectes"), Processor._EsTitles, -1, null, new KbdDataHandler(KbdData));
+            });
+
+            btn_zeroon.BackColor = this.BackColor;
+            btn_zeroon.colorTop = Color.Bisque;
+            btn_zeroon.Style = MyButtonType.rectButton;
+            btn_zeroon.Label = StringResource.str("vxzero");
+
             btn_zeroon.ValidClick += new EventHandler((o, e) =>
             {
-                led_current.Value = "     ";
                 processor.ZeroON();
             });
 
-            btn_turnon.bgColor = this.BackColor;
-            for (int i = 0; i < digi_upbtns.Length; i++)
-            {
-                RectButton rb = digi_upbtns[i];
-                rb.bgColor = this.BackColor;
-                rb.SetStyle(Color.DarkOrange, MyButtonType.triangleupButton);
+            btn_zeroon2.BackColor = this.BackColor;
+            btn_zeroon2.colorTop = Color.Bisque;
+            btn_zeroon2.Style = MyButtonType.rectButton;
+            btn_zeroon2.Label = StringResource.str("vgzero");
 
-                rb.ValidClick += new EventHandler((o, e) =>
-                {
-                    if (processor.iRange >= 0)
-                    {
-                        TickDigit(digi_upbtns.Length - NameInArray(o, digi_upbtns), true);
-                        RefreshDisplay(false);
-                    }
-                });
-            }
-            for (int i = 0; i < digi_dnbtns.Length; i++)
+            btn_zeroon2.ValidClick += new EventHandler((o, e) =>
             {
-                RectButton rb = digi_dnbtns[i];
-                rb.bgColor = this.BackColor;
-                rb.SetStyle(Color.DarkOrange, MyButtonType.trianglednButton);
-                rb.ValidClick += new EventHandler((o,e)=>
-                {
-                    if (processor.iRange >= 0)
-                    {
-                        TickDigit(digi_upbtns.Length - NameInArray(o, digi_dnbtns) , false);
-                        RefreshDisplay(false);
-                    }
-                });
-            }
-            for(int i = 0;i < real_btns.Length; i++)
-            {
-                RectButton rb = real_btns[i];
-                rb.bgColor = this.BackColor;
-                rb.SetStyle(Color.DarkOrange, MyButtonType.roundButton);
-                rb.Text = Processor.real_title[i] + "Ω";
-                rb.ValidClick += new EventHandler((o, e) =>
-                {
-                    processor.iReal = NameInArray(o, real_btns);
-                    RefreshDisplay(false);
-                });
-            }
-            btn_turnon.SetStyle(Color.Green, MyButtonType.round2Button);
+                processor.ZeroON2();
+            });
+
+
+            btn_turnon.BackColor = this.BackColor;
+            btn_turnon.colorTop = Color.Green;
+            btn_turnon.Style = MyButtonType.roundButton;
             btn_turnon.Text = "OFF";
             btn_turnon.Click += new EventHandler((o, e) =>
             {
                 if (!processor.bOn)
                     dt_lastoutput = DateTime.Now.AddSeconds(2);
                 processor.bOn = !processor.bOn;
-                RefreshDisplay(false);
+                RefreshDisplay(true);
             });
 
-            for (int i = 0; i < range_btns.Length; i++)
-            {
-                RectButton rb = range_btns[i];
-                rb.bgColor = this.BackColor;
-                rb.Text = range_string[i];
-                rb.SetStyle(Color.Green, MyButtonType.roundRectButton);
-
-                rb.ValidClick += new EventHandler((o, e) => 
-                {
-                    int newrange = NameInArray(o, range_btns)-1;
-                    if( newrange == processor.iRange)
-                        return;
-
-                    processor.iRange = newrange;
-                    RefreshDisplay(true); 
-                });
-            }
+            rectMeter1.BgResId = "BGMETER";
+            DeviceMgr.Reset();
+            processor.ToDAValue(0);
+ 
             tm = new Timer();
             tm.Interval = 500;
             tm.Tick += new EventHandler((o, e) =>
@@ -135,20 +128,44 @@ namespace Mndz
                 lbl_datetime.Text = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
                 if (DateTime.Now.Subtract(dt_lastoutput).TotalSeconds < 1)
                 {
-                    dt_lastoutput = DateTime.Now;
                     return;
                 }
-                processor.RefreshOutput();
-                if (processor.Current > -999)
+                dt_lastoutput = DateTime.Now.AddSeconds(processor.RefreshOutput());
+                if (processor.bOn)
                 {
-                    UpdateCurrent(processor.Current);
-                    processor.Current = -9999;
+                    double v = Convert.ToDouble(processor.Rx) ;
+                    string newv;
+                    newv = Util.GMKFormat(ref v);
+                    if(lbl_ohm.Text != newv)
+                        lbl_ohm.Text = newv;
+
+                    newv = v.ToString("F8").Substring(0, 7);
+                    if (led_rx.Value != newv)
+                    {
+                        led_rx.Value = newv;
+                    }
+                    if (processor.bStable)
+                    {
+                        if (led_rx.ColorLight != Color.Red)
+                            led_rx.ColorLight = Color.Red;
+                    }
+                    else
+                    {
+                        if (led_rx.ColorLight != Color.Pink)
+                            led_rx.ColorLight = Color.Pink;
+                    }
+
+                    newv = processor.VxMeasure.ToString("F7").Substring(0, 6);
+                    if(led_vx.Value != newv)
+                    {
+                        led_vx.Value = newv;
+                        rectMeter1.Angle = processor.Percent;
+                    }
                 }
             });
             tm.Enabled = true;
-            led_ohm.Click += new EventHandler(led_ohm_Click);
             DeviceMgr.Reset();
-            
+
             RefreshDisplay(true);
         }
         private DateTime dt_lastoutput = DateTime.Now;
@@ -163,28 +180,76 @@ namespace Mndz
             }
             return -1;
         }
-        public static void SaveScreen()
-        {
-      
-            string mypath = Path.Combine(GlobalConfig.udiskdir2, "screen");
-            if (!Directory.Exists(mypath))
-                return;
-
-            Random rnd = new Random();
-            CaptureScreen.SaveScreenToFile(Path.Combine(mypath,rnd.Next().ToString()+".bmp"));
-        }
         private void KbdData(string id, string param)
         {
                     Decimal a;
-                    if (id == "daoffset")
+                    if (id == "daoffset" || id == "rsreal" || id == "esreal" || id == "addelay")
                     {
                         if (!Util.TryDecimalParse(param, out a))
                             return;
 
-                        processor.daoffset = a + processor.daoffset;
-                        
+                        if (id == "daoffset")
+                            processor.daoffset = a + processor.daoffset;
+
+                        if (id == "rsreal")
+                            processor.RsValue = a;
+
+                        if (id == "esreal")
+                            processor.EsValue = a;
+                        if (id == "addelay")
+                            processor.ADdelay = Convert.ToInt32(a);
+                        RefreshDisplay(true);
                     }
-                    if (id == "value")
+                    
+                    if (id == "selectrx" || id == "selectes" || id == "selectvx")
+                    {
+                        
+                        try
+                        {
+                            int b = Int32.Parse(param);
+                            if (b >= 0)
+                            {
+                                if (id == "selectrx")
+                                    processor.RxIndex = b;
+                                if (id == "selectes")
+                                    processor.EsIndex = b;
+                                if (id == "selectvx")
+                                {
+                                    int value = Processor.MulValues[b];
+                                    if (value == 10)// 10V
+                                    {
+                                        processor.VxMultiplier = 1;
+                                    }
+                                    else if (value == 100)
+                                    {
+                                        processor.VxMultiplier = 10;
+                                    }
+                                    else if (value == 1000)
+                                    {
+                                        processor.VxMultiplier = 100;
+                                    }
+                                    else if (value == 2000)
+                                    {
+                                        processor.VxMultiplier = 100;
+                                    }
+                                    else if (value == 5000)
+                                    {
+                                        processor.VxMultiplier = 500;
+                                    }
+                                    else if (value == 10000)
+                                    {
+                                        processor.VxMultiplier = 1000;
+                                    }
+                                    processor.VxOutput = value/10;
+                                }
+                            }
+                        }
+                        catch
+                        {
+                        }
+                        RefreshDisplay(true);
+                    }
+                    if (id == "inputrs")
                     {
                         if (param == "65890192")
                         {
@@ -193,14 +258,11 @@ namespace Mndz
                         }
                         if (param == "12345678") //calibration screen
                         {
-                            Form1.TouchCalibrate();
-                            /*
                             Process app = new Process();
                             app.StartInfo.WorkingDirectory = @"\Windows";
                             app.StartInfo.FileName = @"\Windows\TouchKit.exe";
                             app.StartInfo.Arguments = "";
                             app.Start();
-                             */
                             return;
                         }
                         if (param == "00000")
@@ -212,243 +274,125 @@ namespace Mndz
                         {
                             this.Invoke(new Action(() =>
                             {
-                                dlg_kbd.Init("请输入DA零位值", "daoffset", false, KbdData);
+                                dlg_kbd.Init(StringResource.str("inputda"), "daoffset", false, KbdData);
                             }));
                             return;
+                        }
+                        if (param == "00001") //input real es value
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                dlg_kbd.Init(String.Format(StringResource.str("inputes"), Processor._EsTitles[processor.EsIndex]), "esreal", false, KbdData);
+                            }));
+                            RefreshDisplay(true);
+                            return;
+                        }
+                        if (param == "00002") //input real es value
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                dlg_kbd.Init(String.Format(StringResource.str("inputrs"), Processor._RsTitles[processor.RsIndex]), "rsreal", false, KbdData);
+                            }));
+                            RefreshDisplay(true);
+                            return;
+                        }
+                        if (param == "00003") //input ad delay
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                dlg_kbd.Init(StringResource.str("inputaddelay"), "addelay", false, KbdData);
+                            }));
+                            return; return;
                         }
                         if (!Util.TryDecimalParse(param, out a))
                             return;
-                        int newrange = Processor.CheckRange(a, processor.iRange);
-                        if (newrange < 0)
+                        
+                        if (a < 0)
                         {
                             this.Invoke(new Action(() => {
-                                Program.MsgShow("输入值超出范围");
+                                Program.MsgShow(StringResource.str("out_of_range"));
                             }));
                             return;
                         }
-                        processor.iRange = newrange;
-                        processor.resistance = a;
+                        processor.RsValue = a;
                         RefreshDisplay(true);
+                        
                     }
         }
-        public void led_ohm_Click(object sender, object e)
-        {
-            if (processor.iRange >= 0)
-            {
-                dlg_kbd.Init("请输入模拟电阻值", "value", false, KbdData);
-            }
-        }
-        private RectButton[] digi_dnbtns;
-        private RectButton[] digi_upbtns;
-        private RectButton[] real_btns;
 
-        private RectButton[] range_btns;
-        
-        private RectButton Button(string type, int index)
-        {
-            if (type == "digi_up")
-                return digi_upbtns[index];
-            if (type == "digi_dn")
-                return digi_dnbtns[index];
-            if (type == "real")
-                return real_btns[index];
-            return null;
-        }
-        //up or down the digit based on position highest ditig is 1 lowest digit is 6
-        internal void TickDigit(int position, bool bUp)
-        {
-            Decimal a;
-            if (processor.iRange < 0) //real resi case
-                return;
-
-            a = processor.resistance;
-            int unit = 0;
-            unit = processor.iRange - position - 1;
-            
-            if(bUp)
-                a = a + Convert.ToDecimal(Math.Pow(10,  unit));
-            else
-                a = a - Convert.ToDecimal(Math.Pow(10, unit));
-
-            double b = Convert.ToDouble(a);
-            if ((processor.iRange == 0) && (b > 0.02))
-                return;
-            if (((processor.iRange == 1) && (b > 0.2)))
-                return;
-            if (((processor.iRange == 2) && (b > 2)) )
-                return;
-            if (((processor.iRange == 3) && (b > 20)))
-                return;
-            if (b < 0)
-                return;
-            processor.resistance = a;
-        }
-        public void UpdateCurrent(double reading)
-        {
-            if(processor.iRange < 0 || processor.iRange > 3)
-            {
-                lbl_currscale.Text = "A";
-                led_current.Value = "     ";
-                return;
-            }
-
-            if(Math.Abs(reading) < 0.95)
-            {
-//                reading = reading * 1000;
-//                lbl_currscale.Text  = "mA";
-                lbl_currscale.Text = "A";
-            }else{
-                lbl_currscale.Text = "A";
-            }
-            string newcurr = reading.ToString("F6").Substring(0, 6);
-            if (newcurr != led_current.Value)
-                led_current.Value = newcurr;
-        }
         private void RefreshDisplay(bool bRangeChange)
         {
             if (processor.bOn)
             {
-                btn_turnon.Text = "ON";
                 btn_turnon.bOn = true;
+                
             }
             else
             {
-                btn_turnon.Text = "OFF";
                 btn_turnon.bOn = false;
+                
+                double v = Convert.ToDouble(processor.RxNominal);
+                lbl_ohm.Text = Util.GMKFormat(ref v);
+                led_rx.Value = v.ToString("F8").Substring(0, 7);
+                led_vx.Value = processor.VxOutput.ToString("F7").Substring(0, 6);
+                rectMeter1.Angle = processor.Percent;
+                
             }
+            
+
             if (bRangeChange)
             {
-                for (int i = 0; i < range_btns.Length; i++)
+                if (processor.bOn)
                 {
-                    range_btns[i].bOn = (processor.iRange == (i - 1));
+                    led_rx.ColorLight = Color.Pink;
+                    led_vx.ColorLight = Color.Black;
+                    btn_turnon.colorTop = Color.Green;
+                btn_turnon.Label = "ON";
                 }
-            }
-            bool realmode = (processor.iRange < 0); //real resistance case
-            
-            foreach (RectButton rb in digi_upbtns)
-            {
-                rb.Visible = !realmode;
-            }
-            foreach (RectButton rb in digi_dnbtns)
-            {
-                rb.Visible = !realmode;
-            }
-            gb_real.Visible = realmode;
-            foreach (RectButton rb in real_btns)
-            {
-                rb.bOn = false;
-            }
-            if (processor.iReal >= 0)
-                real_btns[processor.iReal].bOn = true;
+                else
+                {
+                    led_rx.ColorLight = Color.LightPink;
+                    led_vx.ColorLight = Color.DarkGray;
+                    btn_turnon.colorTop = Color.LightGray;
+                btn_turnon.Label = "OFF";
+                }
+                Double v = Math.Abs(Convert.ToDouble(processor.RsValue));
+   
+                lbl_rsscale.Text = Util.GMKFormat(ref v);
+                
+                led_rs.Value = v.ToString("F6").Substring(0, 5);
 
-            if (realmode)
-            {
-                if (processor.iReal >= 0)
-                {
-                    led_ohm.Value = Processor.real_dispvalue[processor.iReal].ToString(); //real case
-                    lbl_ohm.Text = Processor.real_disptitle[processor.iReal]+"Ω";
-                }
-                else
-                {
-                    led_ohm.Value = "       ";
-                    lbl_ohm.Text = "Ω";
-                }
+                led_es.Value = processor.EsValue.ToString("F7").Substring(0, 6);
+               
             }
-            else
-            {
-                double a = Convert.ToDouble(processor.resistance);
-                if (processor.iRange < 2)
-                {
-                    lbl_ohm.Text = "mΩ";
-                    a = a * 1000.0;
-                    led_ohm.Value = a.ToString("F" + (4 - processor.iRange).ToString());
-                }
-                else
-                {
-                    lbl_ohm.Text = "Ω";
-                    led_ohm.Value = a.ToString("F" + (7 - processor.iRange).ToString());
-                }
-            }
+            
         }
         //PC side command
-	//H reset
-	//ZERO zero current reading
         //resi: 1.234 on
         //resi: 1.345 off
-        //resi? return resi: 1.234 on|off -1
-        //curr? return curr: 1.234
-        private Regex resi_set_mode = new Regex(@"resi:\s+([0-9.Mk]+)\s+(on|off)\s+([-0-9]+)");
+        //resi? return resi: 1.234 on|off
+        private Regex resi_set_mode = new Regex(@"resi:\s+([0-9.Mk]+)\s+(on|off)");
         internal void pc_cmd(string cmd)
         {
             Logger.SysLog(cmd);
-            if (cmd == "resi?")
-            {
-                if (processor.bOn)
-                    DeviceMgr.Report("resi: " + processor.resistance.ToString() + " on");
-                else
-                    DeviceMgr.Report("resi: " + processor.resistance.ToString() + " off"); ;
-                return;
-            }
-            if (cmd == "current?")
-            {
-                DeviceMgr.Report("curr: " + led_current.Value );
-                return;
-            }
-            if (cmd == "ZERO")
-            {
-                Program.mainwnd.processor.ZeroON();
-            }
             if (cmd == "H")
             {
                 DeviceMgr.Reset();
+                return;
+            }
+            if (cmd == "resi?")
+            {
+                if (processor.bOn)
+                    DeviceMgr.Report("resi: " + led_rx.Value + " on");
+                else
+                    DeviceMgr.Report("resi: " + led_rx.Value + " off");;
+                return;
             }
             Match m;
-
-            m = resi_set_mode.Match(cmd);
-            if (m.Success)
-            {
-                
-                string rvalue = m.Groups[1].ToString();
-                int newrange = Int32.Parse(m.Groups[3].ToString());
-                if (newrange < -1 || newrange > 3)
-                    return;
-                    
-                if (newrange == -1)
-                {
-                    int i = 0;
-                    for (i = 0; i < Processor.real_title.Length; i++)
-                    {
-                        if (rvalue == Processor.real_title[i])
-                            break;
-                    }
-                    if (i >= Processor.real_title.Length)
-                        return;
-                    processor.iRange = -1;
-                    processor.iReal = i;
-                }
-                else
-                {
-                    Decimal a;
-                    if (!Util.TryDecimalParse(m.Groups[1].ToString(), out a))
-                        return;
-                    processor.iRange = newrange;
-                    processor.resistance = a;
-                }    
-                processor.bOn = (m.Groups[2].ToString() == "on");
-            }
-            RefreshDisplay(true);            
+            //TODO add command list
         }
 
-        private void btn_capture_Click(object sender, EventArgs e)
-        {
-            btn_capture.Visible = false;
-            this.Invoke(new Action(() =>
-            {
-                Form1.SaveScreen();
-                btn_capture.Visible = true;
-                MessageBox.Show("1-DONE!");
-            }));
-        }
+
     }
     #region duplicate windows class
     public class GraphicsPath
@@ -494,7 +438,7 @@ namespace Mndz
     // Summary:
     //     Represents padding or margin information associated with a user interface
     //     (UI) element.
-    #endregion
+    
     [Serializable]
     public struct Padding
     {
@@ -788,4 +732,5 @@ namespace Mndz
             return String.Format("{0},{1},{2},{3}", this.Left, this.Top, this.Right, this.Bottom);
         }
     }
+    #endregion
 }
