@@ -77,7 +77,7 @@ namespace Jmbo
             }
             if (fd < 0)
                 fd = -fd;
-            Decimal ret = Convert.ToInt32(Math.Floor(data / fd)) * fd;
+            Decimal ret = Convert.ToInt32(Math.Floor(Convert.ToDecimal(0.5) + data / fd)) * fd;
             if(bNeg)
                 ret = -ret;
             return ret.ToString();

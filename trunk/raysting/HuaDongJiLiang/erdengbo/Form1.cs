@@ -91,7 +91,7 @@ namespace Jmbo
                 // flag may not have been set, even though
                 // CancelAsync was called.
                 // todo
-                MessageBox.Show("测试意外终止:"+e.Result.ToString());
+                MessageBox.Show("测试已终止:" + lasterr);
             }
             else
             {
@@ -99,7 +99,7 @@ namespace Jmbo
                 // succeeded.
                 // todo
                 test.FillInPage(this);
-                MessageBox.Show("测试成功完成");
+                MessageBox.Show("测试成功完成.");
             }
             uilock.Reset();
             process.bRunning = false;
@@ -126,7 +126,7 @@ namespace Jmbo
             }
         }
 
- 
+        private string lasterr = "";
         void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
@@ -139,7 +139,7 @@ namespace Jmbo
             {
                 string line = ex.Message;
                 e.Cancel = true;
-                e.Result = ex.Message;
+                lasterr = ex.Message;
                 return;
             }
 
