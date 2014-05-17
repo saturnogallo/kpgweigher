@@ -670,7 +670,7 @@ namespace Jmbo
                         bool valid1 = false;
                         bool valid2 = false;
                         bool valid3 = false;
-                        string dg = StrValue("m_" + ibc.ToString() + "_dj").ToString().Trim();
+                        string dg = StrValue("m_" + ibc.ToString() + "_dj").ToString().Trim().ToUpper();
                         
                         if (dg == "AA")
                             valid1 = (Math.Abs(r0 - 100) <= 0.039);
@@ -761,7 +761,7 @@ namespace Jmbo
             string dg = "";
             Match m = Regex.Match(jp.Name,"(m|c)_(\\d)_");
             if(m.Success)
-                dg = this["m_" + m.Groups[2].Value + "_dj"].ToString().Trim();
+                dg = this["m_" + m.Groups[2].Value + "_dj"].ToString().Trim().ToUpper();
 
             if (Regex.IsMatch(jp.Name, ("\\d(sjwd)_\\d")) ||
                 Regex.IsMatch(jp.Name, ("\\d(sjwd|xzwd|sjzwd)")))

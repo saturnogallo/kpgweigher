@@ -124,7 +124,7 @@ uchar byte_read(uint byte_addr)
 	ISP_ADDRH = (uchar)(byte_addr >> 8);	        /* 地址赋值     */
 	ISP_ADDRL = (uchar)(byte_addr & 0x00ff);
 	ISP_CMD   = ISP_CMD	& 0xf8;			/* 清除低3位 	*/
-	ISP_CMD   = ISP_CMD	| RdCommand;	       /* 写入读命令	*/
+	ISP_CMD   = ISP_CMD	| RdCommand;	        /* 写入读命令	*/
 	ISPgoon();					/* 触发执行	*/
 	ISP_IAP_disable();				/* 关闭ISP,IAP功能*/
 	return (ISP_DATA);				/* 返回读到的数据*/

@@ -76,7 +76,7 @@ namespace Jmbo
             backgroundWorker1.WorkerReportsProgress = true;
             backgroundWorker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(backgroundWorker1_RunWorkerCompleted);
         }
-
+        private string lasterr = "";
         void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
@@ -92,7 +92,7 @@ namespace Jmbo
                 // flag may not have been set, even though
                 // CancelAsync was called.
                 // todo
-                MessageBox.Show("测试意外终止:"+e.Result.ToString());
+                MessageBox.Show("测试意外终止:"+lasterr);
             }
             else
             {
@@ -140,6 +140,7 @@ namespace Jmbo
                 string line = ex.Message;
                 Logger.Log("Quit with error" + ex.Message + ex.StackTrace);
                 e.Cancel = true;
+                lasterr = ex.Message;
                 return;
             }
 

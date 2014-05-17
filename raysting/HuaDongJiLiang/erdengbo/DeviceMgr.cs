@@ -143,7 +143,7 @@ namespace Jmbo
                 Thread.Sleep(50);
                     if ((li.ibsta & c.ERR) != 0)                          // throw an error 
                     {
-                        MessageBox.Show("命令发送失败");
+                        throw new Exception("命令发送失败");
                         return;
                     }
                 
