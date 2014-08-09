@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using Raysting.Common;
 namespace Zddq2
 {
     public partial class RxConfigWnd : Form
@@ -14,6 +14,7 @@ namespace Zddq2
         public RxConfigWnd()
         {
             InitializeComponent();
+            /*
             btn_current.SetStyle(Color.White, MyButtonType.round2RectButton);
             btn_serial.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_stdchan.SetStyle(Color.Beige, MyButtonType.roundRectButton);
@@ -26,7 +27,7 @@ namespace Zddq2
             btn_ch2.SetStyle(Color.Beige, MyButtonType.round2Button);
             btn_ch3.SetStyle(Color.Beige, MyButtonType.round2Button);
             btn_ch4.SetStyle(Color.Beige, MyButtonType.round2Button);
-
+            */
             btn_vmode.Visible = false;
             lbl_vmode.Visible = false;
             lbl_range.Text = StringResource.str("rrange");
@@ -39,7 +40,7 @@ namespace Zddq2
             btn_range1k.Text = "1k";
             btn_range10k.Text = "10k";
             btn_range100k.Text = "100k";
-
+/*
             btn_rangeP001.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_rangeP01.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_rangeP1.SetStyle(Color.Beige, MyButtonType.round2RectButton);
@@ -49,7 +50,7 @@ namespace Zddq2
             btn_range1k.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_range10k.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_range100k.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-
+*/
             btn_rangeP001.ValidClick += new EventHandler(btn_rangeP001_ValidClick);
             btn_rangeP01.ValidClick += new EventHandler(btn_rangeP01_ValidClick);
             btn_rangeP1.ValidClick += new EventHandler(btn_rangeP1_ValidClick);
@@ -85,7 +86,7 @@ namespace Zddq2
             btn_stdchan.Visible = false;
             lbl_stdchan.Visible = false;
             btn_enable.Visible = false;
-
+/*
             btn_chan.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_chan.ValidClick += new EventHandler(btn_dummy);
 
@@ -107,7 +108,7 @@ namespace Zddq2
             btn_SysConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_SysConfig.Text = StringResource.str("sysconfig");
             btn_SysConfig.ValidClick += new EventHandler(btn_SysConfig_ValidClick);
-            
+*/            
         }
 
         void btn_rangeP001_ValidClick(object sender, EventArgs e)
@@ -247,7 +248,7 @@ namespace Zddq2
 
         void input_GotFocus(object sender, EventArgs e)
         {
-            string regname = (sender as RectButton).Name.Replace("btn_",""); //remove btn_
+            string regname = (sender as Control).Name.Replace("btn_",""); //remove btn_
             Program.kbd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
         }
 
@@ -297,7 +298,7 @@ namespace Zddq2
             
             
             RxInfo rx = Program.lst_rxinfo[iRx];
-            btn_chan.Text = "CH " + (iRx+1).ToString();
+//            btn_chan.Text = "CH " + (iRx+1).ToString();
             if (rx.bEnabled)
             {
                 if (rx.iIx == -1)

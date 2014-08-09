@@ -31,12 +31,12 @@
             this.lbl_reading = new System.Windows.Forms.Label();
             this.lbl_aux1 = new System.Windows.Forms.Label();
             this.lbl_aux2 = new System.Windows.Forms.Label();
-            this.btn_right = new Zddq2.RectButton();
-            this.btn_aux1 = new Zddq2.RectButton();
-            this.btn_aux2 = new Zddq2.RectButton();
-            this.btn_bigdisp = new Zddq2.RectButton();
-            this.btn_left = new Zddq2.RectButton();
-            this.btn_chan = new Zddq2.RectButton();
+            this.btn_right = new Raysting.Controls.RectButton();
+            this.btn_aux1 = new Raysting.Controls.RectButton();
+            this.btn_aux2 = new Raysting.Controls.RectButton();
+            this.btn_bigdisp = new Raysting.Controls.RectButton();
+            this.btn_left = new Raysting.Controls.RectButton();
+            this.btn_chan = new Raysting.Controls.RectButton();
             this.SuspendLayout();
             // 
             // lbl_reading
@@ -75,7 +75,7 @@
             // btn_right
             // 
             this.btn_right.BackColor = System.Drawing.Color.Blue;
-            this.btn_right.bEnabled = true;
+            this.btn_right.Enabled = true;
             this.btn_right.bOn = true;
             this.btn_right.Location = new System.Drawing.Point(109, 93);
             this.btn_right.Name = "btn_right";
@@ -85,7 +85,7 @@
             // btn_aux1
             // 
             this.btn_aux1.BackColor = System.Drawing.Color.Blue;
-            this.btn_aux1.bEnabled = true;
+            this.btn_aux1.Enabled = true;
             this.btn_aux1.bOn = true;
             this.btn_aux1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_aux1.Location = new System.Drawing.Point(35, 93);
@@ -96,7 +96,7 @@
             // btn_aux2
             // 
             this.btn_aux2.BackColor = System.Drawing.Color.Blue;
-            this.btn_aux2.bEnabled = true;
+            this.btn_aux2.Enabled = true;
             this.btn_aux2.bOn = true;
             this.btn_aux2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_aux2.Location = new System.Drawing.Point(424, 93);
@@ -107,7 +107,7 @@
             // btn_bigdisp
             // 
             this.btn_bigdisp.BackColor = System.Drawing.Color.Blue;
-            this.btn_bigdisp.bEnabled = true;
+            this.btn_bigdisp.Enabled = true;
             this.btn_bigdisp.bOn = true;
             this.btn_bigdisp.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_bigdisp.Location = new System.Drawing.Point(38, 21);
@@ -118,7 +118,7 @@
             // btn_left
             // 
             this.btn_left.BackColor = System.Drawing.Color.Blue;
-            this.btn_left.bEnabled = true;
+            this.btn_left.Enabled = true;
             this.btn_left.bOn = true;
             this.btn_left.Location = new System.Drawing.Point(16, 93);
             this.btn_left.Name = "btn_left";
@@ -128,7 +128,7 @@
             // btn_chan
             // 
             this.btn_chan.BackColor = System.Drawing.Color.Blue;
-            this.btn_chan.bEnabled = true;
+            this.btn_chan.Enabled = true;
             this.btn_chan.bOn = true;
             this.btn_chan.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_chan.Location = new System.Drawing.Point(592, 7);
@@ -162,13 +162,13 @@
         #endregion
 
         private System.Windows.Forms.Label lbl_reading;
-        private RectButton btn_bigdisp;
-        private RectButton btn_aux2;
+        private Raysting.Controls.RectButton btn_bigdisp;
+        private Raysting.Controls.RectButton btn_aux2;
         private System.Windows.Forms.Label lbl_aux1;
         private System.Windows.Forms.Label lbl_aux2;
-        private RectButton btn_aux1;
-        private RectButton btn_left;
-        private RectButton btn_right;
-        private RectButton btn_chan;
+        private Raysting.Controls.RectButton btn_aux1;
+        private Raysting.Controls.RectButton btn_left;
+        private Raysting.Controls.RectButton btn_right;
+        private Raysting.Controls.RectButton btn_chan;
     }
 }

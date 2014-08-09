@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Data;
+using Raysting.Common;
 namespace Zddq2
 {
     public delegate void StrEventHandler(object sender, string e);

@@ -30,22 +30,22 @@
         {
             this.panel1 = new System.Windows.Forms.Panel();
             this.lbl_serial = new System.Windows.Forms.Label();
-            this.btn_serial = new Zddq2.RectButton();
-            this.btn_next = new Zddq2.RectButton();
-            this.btn_last = new Zddq2.RectButton();
+            this.btn_serial = new Raysting.Controls.RectButton();
+            this.btn_next = new Raysting.Controls.RectButton();
+            this.btn_last = new Raysting.Controls.RectButton();
             this.lbl_beta = new System.Windows.Forms.Label();
             this.lbl_rvalue = new System.Windows.Forms.Label();
             this.lbl_temp = new System.Windows.Forms.Label();
             this.lbl_alpha = new System.Windows.Forms.Label();
-            this.btn_chan = new Zddq2.RectButton();
-            this.btn_rbeta = new Zddq2.RectButton();
-            this.btn_rvalue = new Zddq2.RectButton();
-            this.btn_temp = new Zddq2.RectButton();
-            this.btn_ralpha = new Zddq2.RectButton();
-            this.btn_quit = new Zddq2.RectButton();
-            this.btn_SysConfig = new Zddq2.RectButton();
-            this.btn_RxConfig = new Zddq2.RectButton();
-            this.btn_RsConfig = new Zddq2.RectButton();
+            this.btn_chan = new Raysting.Controls.RectButton();
+            this.btn_rbeta = new Raysting.Controls.RectButton();
+            this.btn_rvalue = new Raysting.Controls.RectButton();
+            this.btn_temp = new Raysting.Controls.RectButton();
+            this.btn_ralpha = new Raysting.Controls.RectButton();
+            this.btn_quit = new Raysting.Controls.RectButton();
+            this.btn_SysConfig = new Raysting.Controls.RectButton();
+            this.btn_RxConfig = new Raysting.Controls.RectButton();
+            this.btn_RsConfig = new Raysting.Controls.RectButton();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -83,7 +83,7 @@
             // btn_serial
             // 
             this.btn_serial.BackColor = System.Drawing.Color.Red;
-            this.btn_serial.bEnabled = true;
+            this.btn_serial.Enabled = true;
             this.btn_serial.bOn = true;
             this.btn_serial.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_serial.Location = new System.Drawing.Point(190, 93);
@@ -95,7 +95,7 @@
             // btn_next
             // 
             this.btn_next.BackColor = System.Drawing.Color.Red;
-            this.btn_next.bEnabled = true;
+            this.btn_next.Enabled = true;
             this.btn_next.bOn = true;
             this.btn_next.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_next.Location = new System.Drawing.Point(199, 20);
@@ -107,7 +107,7 @@
             // btn_last
             // 
             this.btn_last.BackColor = System.Drawing.Color.Red;
-            this.btn_last.bEnabled = true;
+            this.btn_last.Enabled = true;
             this.btn_last.bOn = true;
             this.btn_last.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_last.Location = new System.Drawing.Point(30, 20);
@@ -159,7 +159,7 @@
             // btn_chan
             // 
             this.btn_chan.BackColor = System.Drawing.Color.Red;
-            this.btn_chan.bEnabled = true;
+            this.btn_chan.Enabled = true;
             this.btn_chan.bOn = true;
             this.btn_chan.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_chan.Location = new System.Drawing.Point(88, 20);
@@ -171,7 +171,7 @@
             // btn_rbeta
             // 
             this.btn_rbeta.BackColor = System.Drawing.Color.Red;
-            this.btn_rbeta.bEnabled = true;
+            this.btn_rbeta.Enabled = true;
             this.btn_rbeta.bOn = true;
             this.btn_rbeta.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_rbeta.Location = new System.Drawing.Point(570, 174);
@@ -183,7 +183,7 @@
             // btn_rvalue
             // 
             this.btn_rvalue.BackColor = System.Drawing.Color.Red;
-            this.btn_rvalue.bEnabled = true;
+            this.btn_rvalue.Enabled = true;
             this.btn_rvalue.bOn = true;
             this.btn_rvalue.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_rvalue.Location = new System.Drawing.Point(570, 93);
@@ -195,7 +195,7 @@
             // btn_temp
             // 
             this.btn_temp.BackColor = System.Drawing.Color.Red;
-            this.btn_temp.bEnabled = true;
+            this.btn_temp.Enabled = true;
             this.btn_temp.bOn = true;
             this.btn_temp.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_temp.Location = new System.Drawing.Point(190, 248);
@@ -207,7 +207,7 @@
             // btn_ralpha
             // 
             this.btn_ralpha.BackColor = System.Drawing.Color.Red;
-            this.btn_ralpha.bEnabled = true;
+            this.btn_ralpha.Enabled = true;
             this.btn_ralpha.bOn = true;
             this.btn_ralpha.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_ralpha.Location = new System.Drawing.Point(190, 174);
@@ -219,7 +219,7 @@
             // btn_quit
             // 
             this.btn_quit.BackColor = System.Drawing.Color.Blue;
-            this.btn_quit.bEnabled = true;
+            this.btn_quit.Enabled = true;
             this.btn_quit.bOn = true;
             this.btn_quit.Location = new System.Drawing.Point(708, 1);
             this.btn_quit.Name = "btn_quit";
@@ -229,7 +229,7 @@
             // btn_SysConfig
             // 
             this.btn_SysConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_SysConfig.bEnabled = true;
+            this.btn_SysConfig.Enabled = true;
             this.btn_SysConfig.bOn = true;
             this.btn_SysConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_SysConfig.Location = new System.Drawing.Point(12, 12);
@@ -241,7 +241,7 @@
             // btn_RxConfig
             // 
             this.btn_RxConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_RxConfig.bEnabled = true;
+            this.btn_RxConfig.Enabled = true;
             this.btn_RxConfig.bOn = true;
             this.btn_RxConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_RxConfig.Location = new System.Drawing.Point(316, 12);
@@ -253,7 +253,7 @@
             // btn_RsConfig
             // 
             this.btn_RsConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_RsConfig.bEnabled = true;
+            this.btn_RsConfig.Enabled = true;
             this.btn_RsConfig.bOn = true;
             this.btn_RsConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_RsConfig.Location = new System.Drawing.Point(164, 12);
@@ -287,23 +287,23 @@
         }
         #endregion
 
-        private RectButton btn_RsConfig;
-        private RectButton btn_SysConfig;
-        private RectButton btn_quit;
-        private RectButton btn_RxConfig;
-        private RectButton btn_next;
+        private Raysting.Controls.RectButton btn_RsConfig;
+        private Raysting.Controls.RectButton btn_SysConfig;
+        private Raysting.Controls.RectButton btn_quit;
+        private Raysting.Controls.RectButton btn_RxConfig;
+        private Raysting.Controls.RectButton btn_next;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label lbl_serial;
-        private RectButton btn_serial;
-        private RectButton btn_last;
+        private Raysting.Controls.RectButton btn_serial;
+        private Raysting.Controls.RectButton btn_last;
         private System.Windows.Forms.Label lbl_beta;
         private System.Windows.Forms.Label lbl_rvalue;
         private System.Windows.Forms.Label lbl_alpha;
-        private RectButton btn_chan;
-        private RectButton btn_rbeta;
-        private RectButton btn_rvalue;
-        private RectButton btn_ralpha;
+        private Raysting.Controls.RectButton btn_chan;
+        private Raysting.Controls.RectButton btn_rbeta;
+        private Raysting.Controls.RectButton btn_rvalue;
+        private Raysting.Controls.RectButton btn_ralpha;
         private System.Windows.Forms.Label lbl_temp;
-        private RectButton btn_temp;
+        private Raysting.Controls.RectButton btn_temp;
     }
 }

@@ -9,9 +9,10 @@ using System.Windows.Forms;
 
 namespace Zddq2
 {
-
+   
     public partial class GraphPane : UserControl
     {
+        public double average;
         private Graphics gHdc;
         private XAxis xAxis;
         private YAxis yAxis;
@@ -96,12 +97,40 @@ namespace Zddq2
         }
 
         public string[] channels=null;
+        private int first_point_index
+        {
+            get
+            {
+                for (int i = 0; i < PointList.Count;i++ )
+                {
+                    if (!PointList[i].excluded)
+                        return i;
+                }
+                return -1;
+            }
+        }
+        private int valid_points
+        {
+            get
+            {
+                int i = 0;
+                foreach (PointPair v in PointList)
+                {
+                    if (!v.excluded)
+                        i = i + 1;
+                }
+                return i;
+            }
+        }
+
+        public List<PointPair> PointList;
 
         private const int ticLength = 2;
         Point origin = new Point(25, 20);
         public GraphPane()
         {
             InitializeComponent();
+            this.PointList = new List<PointPair>();
             this._linePen = new Pen(Color.Gray, 1);
             this._pointPen = new Pen(Color.Orange, 1);
         }
@@ -121,7 +150,6 @@ namespace Zddq2
             b.Dispose();
         }
         
-        private double average;
         public static readonly Color[] myColor = { Color.Black, Color.Orange, Color.Blue, Color.Red };
         private void DrawLines(Graphics gHdc)
         {

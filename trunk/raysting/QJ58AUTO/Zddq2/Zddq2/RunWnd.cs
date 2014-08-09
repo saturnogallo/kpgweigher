@@ -9,6 +9,8 @@ using System.Text;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using Raysting.Common;
+using Raysting.Controls;
 namespace Zddq2
 {
 
@@ -611,6 +613,11 @@ namespace Zddq2
             ReDraw(false);
         }
         #endregion
+
+        private void RunWnd_Load_1(object sender, EventArgs e)
+        {
+
+        }
 
     }
 }

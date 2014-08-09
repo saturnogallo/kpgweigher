@@ -33,27 +33,27 @@
             this.lbl_flttype = new System.Windows.Forms.Label();
             this.lbl_fltlength = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.btn_shifttimes = new Zddq2.RectButton();
+            this.btn_shifttimes = new Raysting.Controls.RectButton();
             this.lbl_navmeter = new System.Windows.Forms.Label();
-            this.btn_navmeter = new Zddq2.RectButton();
-            this.btn_export = new Zddq2.RectButton();
+            this.btn_navmeter = new Raysting.Controls.RectButton();
+            this.btn_export = new Raysting.Controls.RectButton();
             this.lbl_date = new System.Windows.Forms.Label();
-            this.btn_date = new Zddq2.RectButton();
-            this.btn_ktt = new Zddq2.RectButton();
+            this.btn_date = new Raysting.Controls.RectButton();
+            this.btn_ktt = new Raysting.Controls.RectButton();
             this.lbl_ktt = new System.Windows.Forms.Label();
             this.lbl_shifttimes = new System.Windows.Forms.Label();
             this.lbl_meastimes = new System.Windows.Forms.Label();
             this.lbl_throw = new System.Windows.Forms.Label();
-            this.btn_meastimes = new Zddq2.RectButton();
-            this.btn_throw = new Zddq2.RectButton();
-            this.btn_measdelay = new Zddq2.RectButton();
-            this.btn_fltlength = new Zddq2.RectButton();
-            this.btn_flttype = new Zddq2.RectButton();
-            this.btn_sampletimes = new Zddq2.RectButton();
-            this.btn_SysConfig = new Zddq2.RectButton();
-            this.btn_RxConfig = new Zddq2.RectButton();
-            this.btn_RsConfig = new Zddq2.RectButton();
-            this.btn_quit = new Zddq2.RectButton();
+            this.btn_meastimes = new Raysting.Controls.RectButton();
+            this.btn_throw = new Raysting.Controls.RectButton();
+            this.btn_measdelay = new Raysting.Controls.RectButton();
+            this.btn_fltlength = new Raysting.Controls.RectButton();
+            this.btn_flttype = new Raysting.Controls.RectButton();
+            this.btn_sampletimes = new Raysting.Controls.RectButton();
+            this.btn_SysConfig = new Raysting.Controls.RectButton();
+            this.btn_RxConfig = new Raysting.Controls.RectButton();
+            this.btn_RsConfig = new Raysting.Controls.RectButton();
+            this.btn_quit = new Raysting.Controls.RectButton();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -129,7 +129,7 @@
             // btn_shifttimes
             // 
             this.btn_shifttimes.BackColor = System.Drawing.Color.Red;
-            this.btn_shifttimes.bEnabled = true;
+            this.btn_shifttimes.Enabled = true;
             this.btn_shifttimes.bOn = true;
             this.btn_shifttimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_shifttimes.Location = new System.Drawing.Point(186, 181);
@@ -151,7 +151,7 @@
             // btn_navmeter
             // 
             this.btn_navmeter.BackColor = System.Drawing.Color.Red;
-            this.btn_navmeter.bEnabled = true;
+            this.btn_navmeter.Enabled = true;
             this.btn_navmeter.bOn = true;
             this.btn_navmeter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_navmeter.Location = new System.Drawing.Point(551, 237);
@@ -163,7 +163,7 @@
             // btn_export
             // 
             this.btn_export.BackColor = System.Drawing.Color.Blue;
-            this.btn_export.bEnabled = true;
+            this.btn_export.Enabled = true;
             this.btn_export.bOn = true;
             this.btn_export.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_export.Location = new System.Drawing.Point(19, 299);
@@ -185,7 +185,7 @@
             // btn_date
             // 
             this.btn_date.BackColor = System.Drawing.Color.Red;
-            this.btn_date.bEnabled = true;
+            this.btn_date.Enabled = true;
             this.btn_date.bOn = true;
             this.btn_date.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_date.Location = new System.Drawing.Point(526, 294);
@@ -197,7 +197,7 @@
             // btn_ktt
             // 
             this.btn_ktt.BackColor = System.Drawing.Color.Red;
-            this.btn_ktt.bEnabled = true;
+            this.btn_ktt.Enabled = true;
             this.btn_ktt.bOn = true;
             this.btn_ktt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_ktt.Location = new System.Drawing.Point(551, 12);
@@ -249,7 +249,7 @@
             // btn_meastimes
             // 
             this.btn_meastimes.BackColor = System.Drawing.Color.Red;
-            this.btn_meastimes.bEnabled = true;
+            this.btn_meastimes.Enabled = true;
             this.btn_meastimes.bOn = true;
             this.btn_meastimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_meastimes.Location = new System.Drawing.Point(186, 68);
@@ -261,7 +261,7 @@
             // btn_throw
             // 
             this.btn_throw.BackColor = System.Drawing.Color.Red;
-            this.btn_throw.bEnabled = true;
+            this.btn_throw.Enabled = true;
             this.btn_throw.bOn = true;
             this.btn_throw.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_throw.Location = new System.Drawing.Point(186, 237);
@@ -273,7 +273,7 @@
             // btn_measdelay
             // 
             this.btn_measdelay.BackColor = System.Drawing.Color.Red;
-            this.btn_measdelay.bEnabled = true;
+            this.btn_measdelay.Enabled = true;
             this.btn_measdelay.bOn = true;
             this.btn_measdelay.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_measdelay.Location = new System.Drawing.Point(551, 68);
@@ -285,7 +285,7 @@
             // btn_fltlength
             // 
             this.btn_fltlength.BackColor = System.Drawing.Color.Red;
-            this.btn_fltlength.bEnabled = true;
+            this.btn_fltlength.Enabled = true;
             this.btn_fltlength.bOn = true;
             this.btn_fltlength.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_fltlength.Location = new System.Drawing.Point(551, 124);
@@ -297,7 +297,7 @@
             // btn_flttype
             // 
             this.btn_flttype.BackColor = System.Drawing.Color.Red;
-            this.btn_flttype.bEnabled = true;
+            this.btn_flttype.Enabled = true;
             this.btn_flttype.bOn = true;
             this.btn_flttype.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_flttype.Location = new System.Drawing.Point(186, 124);
@@ -309,7 +309,7 @@
             // btn_sampletimes
             // 
             this.btn_sampletimes.BackColor = System.Drawing.Color.Red;
-            this.btn_sampletimes.bEnabled = true;
+            this.btn_sampletimes.Enabled = true;
             this.btn_sampletimes.bOn = true;
             this.btn_sampletimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_sampletimes.Location = new System.Drawing.Point(186, 12);
@@ -321,7 +321,7 @@
             // btn_SysConfig
             // 
             this.btn_SysConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_SysConfig.bEnabled = true;
+            this.btn_SysConfig.Enabled = true;
             this.btn_SysConfig.bOn = true;
             this.btn_SysConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_SysConfig.Location = new System.Drawing.Point(12, 12);
@@ -333,7 +333,7 @@
             // btn_RxConfig
             // 
             this.btn_RxConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_RxConfig.bEnabled = true;
+            this.btn_RxConfig.Enabled = true;
             this.btn_RxConfig.bOn = true;
             this.btn_RxConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_RxConfig.Location = new System.Drawing.Point(312, 12);
@@ -345,7 +345,7 @@
             // btn_RsConfig
             // 
             this.btn_RsConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_RsConfig.bEnabled = true;
+            this.btn_RsConfig.Enabled = true;
             this.btn_RsConfig.bOn = true;
             this.btn_RsConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btn_RsConfig.Location = new System.Drawing.Point(164, 12);
@@ -357,7 +357,7 @@
             // btn_quit
             // 
             this.btn_quit.BackColor = System.Drawing.Color.Blue;
-            this.btn_quit.bEnabled = true;
+            this.btn_quit.Enabled = true;
             this.btn_quit.bOn = true;
             this.btn_quit.Location = new System.Drawing.Point(674, 1);
             this.btn_quit.Name = "btn_quit";
@@ -387,31 +387,31 @@
 
         #endregion
 
-        private RectButton btn_quit;
-        private RectButton btn_SysConfig;
-        private RectButton btn_RxConfig;
-        private RectButton btn_RsConfig;
+        private Raysting.Controls.RectButton btn_quit;
+        private Raysting.Controls.RectButton btn_SysConfig;
+        private Raysting.Controls.RectButton btn_RxConfig;
+        private Raysting.Controls.RectButton btn_RsConfig;
         private System.Windows.Forms.Label lbl_sampletimes;
-        private RectButton btn_sampletimes;
-        private RectButton btn_measdelay;
+        private Raysting.Controls.RectButton btn_sampletimes;
+        private Raysting.Controls.RectButton btn_measdelay;
         private System.Windows.Forms.Label lbl_measdelay;
-        private RectButton btn_flttype;
+        private Raysting.Controls.RectButton btn_flttype;
         private System.Windows.Forms.Label lbl_flttype;
-        private RectButton btn_fltlength;
+        private Raysting.Controls.RectButton btn_fltlength;
         private System.Windows.Forms.Label lbl_fltlength;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Label lbl_meastimes;
-        private RectButton btn_meastimes;
-        private RectButton btn_ktt;
+        private Raysting.Controls.RectButton btn_meastimes;
+        private Raysting.Controls.RectButton btn_ktt;
         private System.Windows.Forms.Label lbl_ktt;
         private System.Windows.Forms.Label lbl_date;
-        private RectButton btn_date;
-        private RectButton btn_export;
+        private Raysting.Controls.RectButton btn_date;
+        private Raysting.Controls.RectButton btn_export;
         private System.Windows.Forms.Label lbl_throw;
-        private RectButton btn_throw;
+        private Raysting.Controls.RectButton btn_throw;
         private System.Windows.Forms.Label lbl_navmeter;
-        private RectButton btn_navmeter;
-        private RectButton btn_shifttimes;
+        private Raysting.Controls.RectButton btn_navmeter;
+        private Raysting.Controls.RectButton btn_shifttimes;
         private System.Windows.Forms.Label lbl_shifttimes;
     }
 }

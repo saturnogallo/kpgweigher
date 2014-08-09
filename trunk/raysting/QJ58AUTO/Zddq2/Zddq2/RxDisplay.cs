@@ -6,7 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using Raysting.Common;
 namespace Zddq2
 {
     public enum RXDISP_MODE
@@ -37,27 +37,27 @@ namespace Zddq2
             winid++;
             InitializeComponent();
 
-            btn_aux1.bgColor = Color.LightGreen;
-            btn_aux1.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+            btn_aux1.BackColor = Color.LightGreen;
+ //           btn_aux1.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_aux1.ValidClick += new EventHandler(btn_aux1_ValidClick);
 
 
-            btn_left.bgColor = Color.LightGreen;
+            btn_left.BackColor = Color.LightGreen;
             btn_left.Text = "<";
-            btn_left.SetStyle(Color.LightGreen, MyButtonType.round2RectButton);
+   //         btn_left.SetStyle(Color.LightGreen, MyButtonType.round2RectButton);
             btn_left.ValidClick += new EventHandler(btn_left_ValidClick);
 
-            btn_right.bgColor = Color.LightGreen;
+            btn_right.BackColor = Color.LightGreen;
             btn_right.Text = ">";
-            btn_right.SetStyle(Color.LightGreen, MyButtonType.round2RectButton);
+     //       btn_right.SetStyle(Color.LightGreen, MyButtonType.round2RectButton);
             btn_right.ValidClick += new EventHandler(btn_right_ValidClick);
 
-            btn_aux2.bgColor = Color.LightGreen;
-            btn_aux2.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+            btn_aux2.BackColor = Color.LightGreen;
+//            btn_aux2.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_aux2.ValidClick +=new EventHandler(btn_aux2_ValidClick);
 
-            btn_bigdisp.bgColor = Color.LightGreen;
-            btn_bigdisp.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+            btn_bigdisp.BackColor = Color.LightGreen;
+       //     btn_bigdisp.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_bigdisp.ValidClick += new EventHandler(btn_bigdisp_ValidClick);
 
             AdjustPanel();
@@ -182,7 +182,7 @@ namespace Zddq2
             }
             if (mode == RXDATA_MODE.RX)
             {
-                return Util.FormatData(Program.data.my_last(config.sChannel).dTValue, 8) + " Ω";
+                return Util.FormatData(Program.data.my_last(config.sChannel), 8) + " Ω";
             }
 
             if (mode == RXDATA_MODE.RS)

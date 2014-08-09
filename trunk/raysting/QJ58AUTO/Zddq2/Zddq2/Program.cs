@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
-
+using Raysting.Controls;
 namespace Zddq2
 {
     static class Program
@@ -17,7 +17,6 @@ namespace Zddq2
             Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
             mainwnd = new RunWnd();
-            Util.Test();
             Application.Run(mainwnd);
         }
 
