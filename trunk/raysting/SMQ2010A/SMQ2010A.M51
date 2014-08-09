@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V5.01                                                        11/30/2010  18:23:05  PAGE 1
+BL51 BANKED LINKER/LOCATER V5.01                                                        06/22/2014  16:21:44  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V5.01, INVOKED BY:
@@ -39,27 +39,27 @@ LINK MAP OF MODULE:  SMQ2010A (MAIN)
             CODE    0020H     0003H     UNIT         ?CO?ZLG7289
             CODE    0023H     0003H     ABSOLUTE     
             CODE    0026H     03D9H     UNIT         ?PR?DIS_PLAY?MAIN
-            CODE    03FFH     0126H     UNIT         ?PR?MAIN?MAIN
-            CODE    0525H     00C4H     UNIT         ?PR?WITH_KEY?MAIN
-            CODE    05E9H     00A1H     UNIT         ?PR?_D595?MAIN
-            CODE    068AH     0050H     UNIT         ?PR?_?ZLG7289_KEY?ZLG7289
-            CODE    06DAH     004FH     UNIT         ?PR?_?ZLG7289_SPI_READ?ZLG7289
-            CODE    0729H     0048H     UNIT         ?PR?_?ZLG7289_SPI_WRITE?ZLG7289
-            CODE    0771H     0035H     UNIT         ?PR?_ZLG7289_CMD_DAT?ZLG7289
-            CODE    07A6H     0026H     UNIT         ?C?LIB_CODE
-            CODE    07CCH     0025H     UNIT         ?PR?_ZLG7289_CMD?ZLG7289
-            CODE    07F1H     001BH     UNIT         ?PR?_ZLG7289_INIT?ZLG7289
-            CODE    080CH     0018H     UNIT         ?PR?UART_232?MAIN
-            CODE    0824H     0017H     UNIT         ?PR?_DELAY?MAIN
-            CODE    083BH     000CH     UNIT         ?C_C51STARTUP
-            CODE    0847H     000AH     UNIT         ?PR?INT_JDQ?MAIN
-            CODE    0851H     000AH     UNIT         ?PR?_UART_SENDBIT?MAIN
-            CODE    085BH     0009H     UNIT         ?PR?SERIAL?MAIN
+            CODE    03FFH     0132H     UNIT         ?PR?MAIN?MAIN
+            CODE    0531H     00C4H     UNIT         ?PR?WITH_KEY?MAIN
+            CODE    05F5H     00A1H     UNIT         ?PR?_D595?MAIN
+            CODE    0696H     0050H     UNIT         ?PR?_?ZLG7289_KEY?ZLG7289
+            CODE    06E6H     004FH     UNIT         ?PR?_?ZLG7289_SPI_READ?ZLG7289
+            CODE    0735H     0048H     UNIT         ?PR?_?ZLG7289_SPI_WRITE?ZLG7289
+            CODE    077DH     0035H     UNIT         ?PR?_ZLG7289_CMD_DAT?ZLG7289
+            CODE    07B2H     0026H     UNIT         ?C?LIB_CODE
+            CODE    07D8H     0025H     UNIT         ?PR?_ZLG7289_CMD?ZLG7289
+            CODE    07FDH     001BH     UNIT         ?PR?_ZLG7289_INIT?ZLG7289
+            CODE    0818H     0018H     UNIT         ?PR?UART_232?MAIN
+            CODE    0830H     0017H     UNIT         ?PR?_DELAY?MAIN
+            CODE    0847H     000CH     UNIT         ?C_C51STARTUP
+            CODE    0853H     000AH     UNIT         ?PR?INT_JDQ?MAIN
+            CODE    085DH     000AH     UNIT         ?PR?_UART_SENDBIT?MAIN
+            CODE    0867H     0009H     UNIT         ?PR?SERIAL?MAIN
 
 
 
 OVERLAY MAP OF MODULE:   SMQ2010A (MAIN)
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 2
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 2
 
 
 
@@ -119,7 +119,7 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   ----------------------------------
 
   -------         MODULE        MAIN
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 3
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 3
 
 
   C:0000H         SYMBOL        _ICE_DUMMY_
@@ -127,11 +127,11 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   D:0090H         PUBLIC        P1
   D:00A0H         PUBLIC        P2
   D:00B0H         PUBLIC        P3
-  C:085BH         PUBLIC        serial
+  C:0867H         PUBLIC        serial
   D:00E8H         PUBLIC        P4
   D:0021H         PUBLIC        key_7289
   B:00A8H.7       PUBLIC        EA
-  C:0851H         PUBLIC        _UART_SENDBIT
+  C:085DH         PUBLIC        _UART_SENDBIT
   D:0022H         PUBLIC        keying
   D:0023H         PUBLIC        dlying
   D:00A8H         PUBLIC        IE
@@ -148,8 +148,8 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   D:0098H         PUBLIC        SCON
   D:0089H         PUBLIC        TMOD
   D:0088H         PUBLIC        TCON
-  C:080CH         PUBLIC        uart_232
-  C:05F9H         PUBLIC        _D595
+  C:0818H         PUBLIC        uart_232
+  C:0605H         PUBLIC        _D595
   B:00A8H.3       PUBLIC        ET1
   D:008DH         PUBLIC        TH1
   D:008BH         PUBLIC        TL1
@@ -160,11 +160,11 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   D:0026H         PUBLIC        MAIN_DAT
   B:00A0H.0       PUBLIC        CLR
   D:00C8H         PUBLIC        T2CON
-  C:0525H         PUBLIC        with_key
+  C:0531H         PUBLIC        with_key
   B:00A0H.4       PUBLIC        SER
   B:0020H.0       PUBLIC        lineing
-  C:0847H         PUBLIC        int_jdq
-  C:0824H         PUBLIC        _delay
+  C:0853H         PUBLIC        int_jdq
+  C:0830H         PUBLIC        _delay
   D:0027H         PUBLIC        UART_DAT
   D:00D0H         PUBLIC        PSW
   -------         PROC          _DELAY
@@ -172,27 +172,27 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   -------         DO            
   D:0004H         SYMBOL        i
   -------         ENDDO         
-  C:0824H         LINE#         17
-  C:0824H         LINE#         18
-  C:0824H         LINE#         20
-  C:082EH         LINE#         21
-  C:082EH         LINE#         22
-  C:082FH         LINE#         23
-  C:0830H         LINE#         24
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 4
+  C:0830H         LINE#         17
+  C:0830H         LINE#         18
+  C:0830H         LINE#         20
+  C:083AH         LINE#         21
+  C:083AH         LINE#         22
+  C:083BH         LINE#         23
+  C:083CH         LINE#         24
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 4
 
 
-  C:0831H         LINE#         25
-  C:0832H         LINE#         26
-  C:0833H         LINE#         28
-  C:083AH         LINE#         29
+  C:083DH         LINE#         25
+  C:083EH         LINE#         26
+  C:083FH         LINE#         28
+  C:0846H         LINE#         29
   -------         ENDPROC       _DELAY
-  C:05EFH         SYMBOL        L?0164
-  C:05F1H         SYMBOL        L?0165
-  -------         PROC          L?0163
-  -------         ENDPROC       L?0163
-  C:05EFH         SYMBOL        L?0164
-  C:05F1H         SYMBOL        L?0165
+  C:05FBH         SYMBOL        L?0167
+  C:05FDH         SYMBOL        L?0168
+  -------         PROC          L?0166
+  -------         ENDPROC       L?0166
+  C:05FBH         SYMBOL        L?0167
+  C:05FDH         SYMBOL        L?0168
   -------         PROC          _D595
   D:0001H         SYMBOL        DA1
   D:0006H         SYMBOL        DA2
@@ -201,57 +201,57 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   -------         DO            
   D:0005H         SYMBOL        i
   -------         ENDDO         
-  C:05F9H         LINE#         31
-  C:05FFH         LINE#         32
-  C:05FFH         LINE#         33
-  C:0601H         LINE#         34
-  C:0601H         LINE#         35
-  C:0601H         LINE#         36
-  C:0605H         LINE#         37
-  C:060BH         LINE#         38
-  C:0611H         LINE#         39
-  C:0615H         LINE#         40
-  C:0619H         LINE#         42
-  C:061BH         LINE#         43
-  C:061BH         LINE#         44
-  C:061FH         LINE#         45
-  C:0625H         LINE#         46
-  C:062FH         LINE#         47
-  C:0633H         LINE#         48
-  C:0637H         LINE#         50
-  C:0639H         LINE#         51
-  C:0639H         LINE#         52
-  C:063DH         LINE#         53
-  C:0643H         LINE#         54
-  C:064DH         LINE#         55
-  C:0651H         LINE#         56
-  C:0655H         LINE#         58
-  C:0657H         LINE#         59
-  C:0657H         LINE#         60
-  C:065BH         LINE#         61
-  C:0662H         LINE#         62
-  C:0670H         LINE#         63
-  C:0674H         LINE#         64
-  C:0678H         LINE#         65
-  C:067AH         LINE#         66
-  C:067BH         LINE#         67
-  C:067CH         LINE#         68
-  C:067EH         LINE#         69
-  C:0680H         LINE#         70
-  C:0687H         LINE#         71
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 5
+  C:0605H         LINE#         31
+  C:060BH         LINE#         32
+  C:060BH         LINE#         33
+  C:060DH         LINE#         34
+  C:060DH         LINE#         35
+  C:060DH         LINE#         36
+  C:0611H         LINE#         37
+  C:0617H         LINE#         38
+  C:061DH         LINE#         39
+  C:0621H         LINE#         40
+  C:0625H         LINE#         42
+  C:0627H         LINE#         43
+  C:0627H         LINE#         44
+  C:062BH         LINE#         45
+  C:0631H         LINE#         46
+  C:063BH         LINE#         47
+  C:063FH         LINE#         48
+  C:0643H         LINE#         50
+  C:0645H         LINE#         51
+  C:0645H         LINE#         52
+  C:0649H         LINE#         53
+  C:064FH         LINE#         54
+  C:0659H         LINE#         55
+  C:065DH         LINE#         56
+  C:0661H         LINE#         58
+  C:0663H         LINE#         59
+  C:0663H         LINE#         60
+  C:0667H         LINE#         61
+  C:066EH         LINE#         62
+  C:067CH         LINE#         63
+  C:0680H         LINE#         64
+  C:0684H         LINE#         65
+  C:0686H         LINE#         66
+  C:0687H         LINE#         67
+  C:0688H         LINE#         68
+  C:068AH         LINE#         69
+  C:068CH         LINE#         70
+  C:0693H         LINE#         71
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 5
 
 
-  C:0689H         LINE#         73
+  C:0695H         LINE#         73
   -------         ENDPROC       _D595
   -------         PROC          INT_JDQ
-  C:0847H         LINE#         75
-  C:0847H         LINE#         76
-  C:0847H         LINE#         77
-  C:084BH         LINE#         79
-  C:084EH         LINE#         81
-  C:084FH         LINE#         83
-  C:0850H         LINE#         84
+  C:0853H         LINE#         75
+  C:0853H         LINE#         76
+  C:0853H         LINE#         77
+  C:0857H         LINE#         79
+  C:085AH         LINE#         81
+  C:085BH         LINE#         83
+  C:085CH         LINE#         84
   -------         ENDPROC       INT_JDQ
   -------         PROC          DIS_PLAY
   C:0026H         LINE#         89
@@ -299,7 +299,7 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   C:0115H         LINE#         133
   C:0115H         LINE#         134
   C:0120H         LINE#         135
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 6
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 6
 
 
   C:0125H         LINE#         136
@@ -359,7 +359,7 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   C:024AH         LINE#         190
   C:0251H         LINE#         191
   C:0253H         LINE#         192
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 7
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 7
 
 
   C:025FH         LINE#         193
@@ -419,7 +419,7 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   C:0371H         LINE#         247
   C:0371H         LINE#         248
   C:0373H         LINE#         249
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 8
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 8
 
 
   C:0373H         LINE#         250
@@ -447,134 +447,134 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   C:03FEH         LINE#         272
   -------         ENDPROC       DIS_PLAY
   -------         PROC          WITH_KEY
-  C:0525H         LINE#         274
-  C:0525H         LINE#         275
-  C:0525H         LINE#         276
-  C:057CH         LINE#         277
-  C:057CH         LINE#         278
-  C:057CH         LINE#         279
-  C:057FH         LINE#         280
-  C:0580H         LINE#         281
-  C:0580H         LINE#         282
-  C:0583H         LINE#         283
-  C:0584H         LINE#         284
-  C:0584H         LINE#         285
-  C:0587H         LINE#         286
-  C:0588H         LINE#         287
-  C:0588H         LINE#         288
-  C:058BH         LINE#         289
-  C:058CH         LINE#         290
-  C:058CH         LINE#         291
-  C:058FH         LINE#         292
-  C:0590H         LINE#         293
-  C:0590H         LINE#         294
-  C:0593H         LINE#         295
-  C:0594H         LINE#         296
-  C:0594H         LINE#         297
-  C:0597H         LINE#         298
-  C:0598H         LINE#         299
-  C:0598H         LINE#         300
-  C:059BH         LINE#         301
-  C:059CH         LINE#         302
-  C:059CH         LINE#         303
-  C:059FH         LINE#         304
-  C:05A0H         LINE#         305
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 9
+  C:0531H         LINE#         274
+  C:0531H         LINE#         275
+  C:0531H         LINE#         276
+  C:0588H         LINE#         277
+  C:0588H         LINE#         278
+  C:0588H         LINE#         279
+  C:058BH         LINE#         280
+  C:058CH         LINE#         281
+  C:058CH         LINE#         282
+  C:058FH         LINE#         283
+  C:0590H         LINE#         284
+  C:0590H         LINE#         285
+  C:0593H         LINE#         286
+  C:0594H         LINE#         287
+  C:0594H         LINE#         288
+  C:0597H         LINE#         289
+  C:0598H         LINE#         290
+  C:0598H         LINE#         291
+  C:059BH         LINE#         292
+  C:059CH         LINE#         293
+  C:059CH         LINE#         294
+  C:059FH         LINE#         295
+  C:05A0H         LINE#         296
+  C:05A0H         LINE#         297
+  C:05A3H         LINE#         298
+  C:05A4H         LINE#         299
+  C:05A4H         LINE#         300
+  C:05A7H         LINE#         301
+  C:05A8H         LINE#         302
+  C:05A8H         LINE#         303
+  C:05ABH         LINE#         304
+  C:05ACH         LINE#         305
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 9
 
 
-  C:05A0H         LINE#         306
-  C:05A3H         LINE#         307
-  C:05A4H         LINE#         308
-  C:05A4H         LINE#         309
-  C:05A7H         LINE#         310
-  C:05A8H         LINE#         311
-  C:05A8H         LINE#         312
-  C:05ABH         LINE#         313
-  C:05ACH         LINE#         314
-  C:05ACH         LINE#         315
-  C:05AFH         LINE#         316
-  C:05B0H         LINE#         317
-  C:05B0H         LINE#         318
-  C:05B3H         LINE#         319
-  C:05B4H         LINE#         320
-  C:05B4H         LINE#         321
-  C:05B7H         LINE#         322
-  C:05B8H         LINE#         323
-  C:05B8H         LINE#         324
-  C:05BBH         LINE#         325
-  C:05BCH         LINE#         326
-  C:05BCH         LINE#         327
-  C:05BFH         LINE#         328
-  C:05C0H         LINE#         329
-  C:05C0H         LINE#         330
-  C:05C3H         LINE#         331
-  C:05C4H         LINE#         332
-  C:05C4H         LINE#         333
-  C:05C7H         LINE#         334
-  C:05C8H         LINE#         335
-  C:05C8H         LINE#         336
-  C:05CBH         LINE#         337
-  C:05CCH         LINE#         338
-  C:05CCH         LINE#         339
-  C:05CFH         LINE#         340
-  C:05D0H         LINE#         341
-  C:05D0H         LINE#         342
-  C:05D3H         LINE#         343
-  C:05D4H         LINE#         344
-  C:05D4H         LINE#         345
-  C:05D7H         LINE#         346
-  C:05D8H         LINE#         347
-  C:05D8H         LINE#         348
-  C:05DBH         LINE#         349
-  C:05DCH         LINE#         350
-  C:05DCH         LINE#         351
-  C:05DCH         LINE#         352
-  C:05DEH         LINE#         353
-  C:05DEH         LINE#         354
-  C:05E0H         LINE#         355
-  C:05E0H         LINE#         356
-  C:05E0H         LINE#         357
-  C:05E8H         LINE#         358
-  C:05E8H         LINE#         359
-  C:05E8H         LINE#         360
-  C:05E8H         LINE#         362
-  C:05E8H         LINE#         363
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 10
+  C:05ACH         LINE#         306
+  C:05AFH         LINE#         307
+  C:05B0H         LINE#         308
+  C:05B0H         LINE#         309
+  C:05B3H         LINE#         310
+  C:05B4H         LINE#         311
+  C:05B4H         LINE#         312
+  C:05B7H         LINE#         313
+  C:05B8H         LINE#         314
+  C:05B8H         LINE#         315
+  C:05BBH         LINE#         316
+  C:05BCH         LINE#         317
+  C:05BCH         LINE#         318
+  C:05BFH         LINE#         319
+  C:05C0H         LINE#         320
+  C:05C0H         LINE#         321
+  C:05C3H         LINE#         322
+  C:05C4H         LINE#         323
+  C:05C4H         LINE#         324
+  C:05C7H         LINE#         325
+  C:05C8H         LINE#         326
+  C:05C8H         LINE#         327
+  C:05CBH         LINE#         328
+  C:05CCH         LINE#         329
+  C:05CCH         LINE#         330
+  C:05CFH         LINE#         331
+  C:05D0H         LINE#         332
+  C:05D0H         LINE#         333
+  C:05D3H         LINE#         334
+  C:05D4H         LINE#         335
+  C:05D4H         LINE#         336
+  C:05D7H         LINE#         337
+  C:05D8H         LINE#         338
+  C:05D8H         LINE#         339
+  C:05DBH         LINE#         340
+  C:05DCH         LINE#         341
+  C:05DCH         LINE#         342
+  C:05DFH         LINE#         343
+  C:05E0H         LINE#         344
+  C:05E0H         LINE#         345
+  C:05E3H         LINE#         346
+  C:05E4H         LINE#         347
+  C:05E4H         LINE#         348
+  C:05E7H         LINE#         349
+  C:05E8H         LINE#         350
+  C:05E8H         LINE#         351
+  C:05E8H         LINE#         352
+  C:05EAH         LINE#         353
+  C:05EAH         LINE#         354
+  C:05ECH         LINE#         355
+  C:05ECH         LINE#         356
+  C:05ECH         LINE#         357
+  C:05F4H         LINE#         358
+  C:05F4H         LINE#         359
+  C:05F4H         LINE#         360
+  C:05F4H         LINE#         362
+  C:05F4H         LINE#         363
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 10
 
 
-  C:05E8H         LINE#         364
+  C:05F4H         LINE#         364
   -------         ENDPROC       WITH_KEY
   -------         PROC          UART_232
-  C:080CH         LINE#         368
-  C:080CH         LINE#         369
-  C:080CH         LINE#         370
-  C:080FH         LINE#         371
-  C:0812H         LINE#         372
-  C:0818H         LINE#         373
-  C:081BH         LINE#         375
-  C:081DH         LINE#         376
-  C:081FH         LINE#         377
-  C:0821H         LINE#         378
-  C:0823H         LINE#         379
+  C:0818H         LINE#         368
+  C:0818H         LINE#         369
+  C:0818H         LINE#         370
+  C:081BH         LINE#         371
+  C:081EH         LINE#         372
+  C:0824H         LINE#         373
+  C:0827H         LINE#         375
+  C:0829H         LINE#         376
+  C:082BH         LINE#         377
+  C:082DH         LINE#         378
+  C:082FH         LINE#         379
   -------         ENDPROC       UART_232
   -------         PROC          _UART_SENDBIT
   D:0007H         SYMBOL        UART_data
-  C:0851H         LINE#         381
-  C:0851H         LINE#         382
-  C:0851H         LINE#         383
-  C:0853H         LINE#         384
-  C:0855H         LINE#         385
-  C:0858H         LINE#         386
-  C:085AH         LINE#         387
+  C:085DH         LINE#         381
+  C:085DH         LINE#         382
+  C:085DH         LINE#         383
+  C:085FH         LINE#         384
+  C:0861H         LINE#         385
+  C:0864H         LINE#         386
+  C:0866H         LINE#         387
   -------         ENDPROC       _UART_SENDBIT
   -------         PROC          SERIAL
-  C:085BH         LINE#         390
-  C:085BH         LINE#         393
-  C:085EH         LINE#         394
-  C:085EH         LINE#         395
-  C:0861H         LINE#         397
-  C:0863H         LINE#         399
-  C:0863H         LINE#         400
+  C:0867H         LINE#         390
+  C:0867H         LINE#         393
+  C:086AH         LINE#         394
+  C:086AH         LINE#         395
+  C:086DH         LINE#         397
+  C:086FH         LINE#         399
+  C:086FH         LINE#         400
   -------         ENDPROC       SERIAL
   -------         PROC          MAIN
   -------         DO            
@@ -599,7 +599,7 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   C:0422H         LINE#         423
   C:0427H         LINE#         424
   C:042DH         LINE#         425
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 11
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 11
 
 
   C:042DH         LINE#         426
@@ -659,18 +659,20 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   C:0501H         LINE#         483
   C:0501H         LINE#         484
   C:0511H         LINE#         485
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 12
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 12
 
 
-  C:0516H         LINE#         486
-  C:0519H         LINE#         487
-  C:0519H         LINE#         488
-  C:051BH         LINE#         489
-  C:051BH         LINE#         490
-  C:051EH         LINE#         491
-  C:0521H         LINE#         530
-  C:0521H         LINE#         531
-  C:0522H         LINE#         532
+  C:0519H         LINE#         486
+  C:051BH         LINE#         487
+  C:0522H         LINE#         488
+  C:0525H         LINE#         489
+  C:0525H         LINE#         490
+  C:0527H         LINE#         491
+  C:0527H         LINE#         492
+  C:052AH         LINE#         493
+  C:052DH         LINE#         532
+  C:052DH         LINE#         533
+  C:052EH         LINE#         534
   -------         ENDPROC       MAIN
   -------         ENDMOD        MAIN
 
@@ -681,20 +683,20 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   D:00E8H         PUBLIC        P4
   B:00B0H.2       PUBLIC        ZLG7289_pinCS
   D:00A8H         PUBLIC        IE
-  C:06DAH         PUBLIC        _?ZLG7289_SPI_Read
+  C:06E6H         PUBLIC        _?ZLG7289_SPI_Read
   D:00B8H         PUBLIC        IP
-  C:07F1H         PUBLIC        _ZLG7289_Init
-  C:0729H         PUBLIC        _?ZLG7289_SPI_Write
+  C:07FDH         PUBLIC        _ZLG7289_Init
+  C:0735H         PUBLIC        _?ZLG7289_SPI_Write
   D:0098H         PUBLIC        SCON
   D:0088H         PUBLIC        TCON
-  C:07CCH         PUBLIC        _ZLG7289_cmd
+  C:07D8H         PUBLIC        _ZLG7289_cmd
   C:0003H         PUBLIC        _ZLG7289_Download
   B:00B0H.3       PUBLIC        ZLG7289_pinCLK
   B:00B0H.4       PUBLIC        ZLG7289_pinDIO
-  C:0771H         PUBLIC        _ZLG7289_cmd_dat
+  C:077DH         PUBLIC        _ZLG7289_cmd_dat
   D:00C8H         PUBLIC        T2CON
   D:001FH         PUBLIC        ZLG7289_Delay_t
-  C:068AH         PUBLIC        _?ZLG7289_Key
+  C:0696H         PUBLIC        _?ZLG7289_Key
   D:00D0H         PUBLIC        PSW
   -------         PROC          _?ZLG7289_SPI_WRITE
   i:0002H         SYMBOL        dat
@@ -708,20 +710,20 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   i:0001H         SYMBOL        t
   -------         ENDDO         
   -------         ENDDO         
-  C:0729H         LINE#         39
-  C:0733H         LINE#         41
-  C:0737H         LINE#         43
-  C:0737H         LINE#         44
-  C:0740H         LINE#         45
-  C:0748H         LINE#         46
-  C:074AH         LINE#         47
-  C:0756H         LINE#         48
-  C:0758H         LINE#         49
-  C:0764H         LINE#         50
-  C:076AH         LINE#         51
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 13
+  C:0735H         LINE#         39
+  C:073FH         LINE#         41
+  C:0743H         LINE#         43
+  C:0743H         LINE#         44
+  C:074CH         LINE#         45
+  C:0754H         LINE#         46
+  C:0756H         LINE#         47
+  C:0762H         LINE#         48
+  C:0764H         LINE#         49
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 13
 
 
+  C:0770H         LINE#         50
+  C:0776H         LINE#         51
   -------         ENDPROC       _?ZLG7289_SPI_WRITE
   -------         PROC          _?ZLG7289_SPI_READ
   -------         DO            
@@ -735,19 +737,19 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   i:0002H         SYMBOL        t
   -------         ENDDO         
   -------         ENDDO         
-  C:06DAH         LINE#         58
-  C:06E0H         LINE#         61
-  C:06E5H         LINE#         62
-  C:06E7H         LINE#         64
-  C:06E7H         LINE#         65
-  C:06E9H         LINE#         66
-  C:06F7H         LINE#         67
-  C:0701H         LINE#         68
-  C:0707H         LINE#         69
-  C:0709H         LINE#         70
-  C:0717H         LINE#         71
-  C:071EH         LINE#         72
-  C:0722H         LINE#         73
+  C:06E6H         LINE#         58
+  C:06ECH         LINE#         61
+  C:06F1H         LINE#         62
+  C:06F3H         LINE#         64
+  C:06F3H         LINE#         65
+  C:06F5H         LINE#         66
+  C:0703H         LINE#         67
+  C:070DH         LINE#         68
+  C:0713H         LINE#         69
+  C:0715H         LINE#         70
+  C:0723H         LINE#         71
+  C:072AH         LINE#         72
+  C:072EH         LINE#         73
   -------         ENDPROC       _?ZLG7289_SPI_READ
   -------         PROC          _ZLG7289_CMD
   D:0007H         SYMBOL        cmd
@@ -761,27 +763,27 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   D:0018H         SYMBOL        t
   -------         ENDDO         
   -------         ENDDO         
-  C:07CCH         LINE#         80
-  C:07CCH         LINE#         81
-  C:07CCH         LINE#         82
-  C:07CEH         LINE#         83
-  C:07D1H         LINE#         84
-  C:07D3H         LINE#         85
-  C:07DEH         LINE#         86
-  C:07E1H         LINE#         87
-  C:07E3H         LINE#         88
-  C:07EEH         LINE#         89
-  C:07F0H         LINE#         90
+  C:07D8H         LINE#         80
+  C:07D8H         LINE#         81
+  C:07D8H         LINE#         82
+  C:07DAH         LINE#         83
+  C:07DDH         LINE#         84
+  C:07DFH         LINE#         85
+  C:07EAH         LINE#         86
+  C:07EDH         LINE#         87
+  C:07EFH         LINE#         88
+  C:07FAH         LINE#         89
+  C:07FCH         LINE#         90
   -------         ENDPROC       _ZLG7289_CMD
   -------         PROC          _ZLG7289_CMD_DAT
   D:0007H         SYMBOL        cmd
   D:0005H         SYMBOL        dat
   -------         DO            
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 14
+
+
   D:0006H         SYMBOL        sav
   -------         DO            
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 14
-
-
   D:001BH         SYMBOL        t
   D:001BH         SYMBOL        t
   D:001BH         SYMBOL        t
@@ -794,19 +796,19 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   D:001BH         SYMBOL        t
   -------         ENDDO         
   -------         ENDDO         
-  C:0771H         LINE#         98
-  C:0771H         LINE#         99
-  C:0771H         LINE#         100
-  C:0773H         LINE#         101
-  C:0776H         LINE#         102
-  C:0778H         LINE#         103
-  C:0783H         LINE#         104
-  C:0786H         LINE#         105
-  C:0791H         LINE#         106
-  C:0796H         LINE#         107
-  C:0798H         LINE#         108
-  C:07A3H         LINE#         109
-  C:07A5H         LINE#         110
+  C:077DH         LINE#         98
+  C:077DH         LINE#         99
+  C:077DH         LINE#         100
+  C:077FH         LINE#         101
+  C:0782H         LINE#         102
+  C:0784H         LINE#         103
+  C:078FH         LINE#         104
+  C:0792H         LINE#         105
+  C:079DH         LINE#         106
+  C:07A2H         LINE#         107
+  C:07A4H         LINE#         108
+  C:07AFH         LINE#         109
+  C:07B1H         LINE#         110
   -------         ENDPROC       _ZLG7289_CMD_DAT
   -------         PROC          _ZLG7289_DOWNLOAD
   D:0007H         SYMBOL        mod
@@ -837,48 +839,48 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
   i:0001H         SYMBOL        t
   -------         ENDDO         
   -------         DO            
-  i:0001H         SYMBOL        t
-  i:0001H         SYMBOL        t
-BL51 BANKED LINKER/LOCATER V5.01                                                      11/30/2010  18:23:05  PAGE 15
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/22/2014  16:21:44  PAGE 15
 
 
+  i:0001H         SYMBOL        t
+  i:0001H         SYMBOL        t
   -------         ENDDO         
   -------         DO            
   i:0001H         SYMBOL        t
   -------         ENDDO         
   -------         ENDDO         
-  C:068AH         LINE#         146
-  C:068EH         LINE#         149
-  C:0690H         LINE#         150
-  C:06A1H         LINE#         151
-  C:06A6H         LINE#         152
-  C:06B7H         LINE#         153
-  C:06BEH         LINE#         154
-  C:06C0H         LINE#         155
-  C:06D1H         LINE#         156
-  C:06D5H         LINE#         157
+  C:0696H         LINE#         146
+  C:069AH         LINE#         149
+  C:069CH         LINE#         150
+  C:06ADH         LINE#         151
+  C:06B2H         LINE#         152
+  C:06C3H         LINE#         153
+  C:06CAH         LINE#         154
+  C:06CCH         LINE#         155
+  C:06DDH         LINE#         156
+  C:06E1H         LINE#         157
   -------         ENDPROC       _?ZLG7289_KEY
   -------         PROC          _ZLG7289_INIT
   D:0007H         SYMBOL        t
   -------         DO            
   D:0004H         SYMBOL        x
   -------         ENDDO         
-  C:07F1H         LINE#         169
-  C:07F1H         LINE#         170
-  C:07F1H         LINE#         173
-  C:07F3H         LINE#         174
-  C:07F5H         LINE#         175
-  C:07F7H         LINE#         178
-  C:07F9H         LINE#         180
-  C:07FBH         LINE#         181
-  C:07FBH         LINE#         182
-  C:0807H         LINE#         183
-  C:080BH         LINE#         184
+  C:07FDH         LINE#         169
+  C:07FDH         LINE#         170
+  C:07FDH         LINE#         173
+  C:07FFH         LINE#         174
+  C:0801H         LINE#         175
+  C:0803H         LINE#         178
+  C:0805H         LINE#         180
+  C:0807H         LINE#         181
+  C:0807H         LINE#         182
+  C:0813H         LINE#         183
+  C:0817H         LINE#         184
   -------         ENDPROC       _ZLG7289_INIT
   -------         ENDMOD        ZLG7289
 
   -------         MODULE        ?C?CCASE
-  C:07A6H         PUBLIC        ?C?CCASE
+  C:07B2H         PUBLIC        ?C?CCASE
   -------         ENDMOD        ?C?CCASE
 
   -------         MODULE        ?C_IBP
@@ -888,5 +890,5 @@ SYMBOL TABLE OF MODULE:  SMQ2010A (MAIN)
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?_UART_SENDBIT?MAIN
 
-Program Size: data=41.2 xdata=0 code=2148
+Program Size: data=41.2 xdata=0 code=2160
 LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  0 ERROR(S)
