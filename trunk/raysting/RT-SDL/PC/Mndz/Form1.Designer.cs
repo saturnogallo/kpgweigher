@@ -54,6 +54,7 @@
             this.label13 = new System.Windows.Forms.Label();
             this.btn_zeroon2 = new Mndz.RectButton();
             this.label3 = new System.Windows.Forms.Label();
+            this.btn_hvout = new Mndz.RectButton();
             this.SuspendLayout();
             // 
             // lbl_range
@@ -343,12 +344,29 @@
             this.label3.TabIndex = 13;
             this.label3.Text = "Ω";
             // 
+            // btn_hvout
+            // 
+            this.btn_hvout.BackColor = System.Drawing.Color.Blue;
+            this.btn_hvout.bgScale = 3;
+            this.btn_hvout.bOn = true;
+            this.btn_hvout.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_hvout.colorTop = System.Drawing.Color.Pink;
+            this.btn_hvout.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25743F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_hvout.Label = null;
+            this.btn_hvout.Location = new System.Drawing.Point(832, 91);
+            this.btn_hvout.Margin = new System.Windows.Forms.Padding(6, 6, 6, 6);
+            this.btn_hvout.Name = "btn_hvout";
+            this.btn_hvout.Size = new System.Drawing.Size(139, 47);
+            this.btn_hvout.Style = Mndz.MyButtonType.roundButton;
+            this.btn_hvout.TabIndex = 14;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.LightSkyBlue;
             this.ClientSize = new System.Drawing.Size(1018, 568);
+            this.Controls.Add(this.btn_hvout);
             this.Controls.Add(this.label13);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.rectMeter1);
@@ -408,6 +426,7 @@
         private System.Windows.Forms.Label label13;
         private RectButton btn_zeroon2;
         private System.Windows.Forms.Label label3;
+        private RectButton btn_hvout;
     }
 }
 

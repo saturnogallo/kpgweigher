@@ -53,6 +53,7 @@
             this.btn_zeroon2 = new Mndz.RectButton();
             this.label3 = new System.Windows.Forms.Label();
             this.btn_capture = new System.Windows.Forms.Button();
+            this.btn_hvout = new Mndz.RectButton();
             this.SuspendLayout();
             // 
             // lbl_range
@@ -301,6 +302,19 @@
             this.btn_capture.Text = "Capture";
             this.btn_capture.Visible = false;
             // 
+            // btn_hvout
+            // 
+            this.btn_hvout.BackColor = System.Drawing.Color.Blue;
+            this.btn_hvout.bgScale = 3;
+            this.btn_hvout.bOn = true;
+            this.btn_hvout.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_hvout.colorTop = System.Drawing.Color.Pink;
+            this.btn_hvout.Font = new System.Drawing.Font("Microsoft Sans Serif", 14.25743F, System.Drawing.FontStyle.Regular);
+            this.btn_hvout.Location = new System.Drawing.Point(856, 110);
+            this.btn_hvout.Name = "btn_hvout";
+            this.btn_hvout.Size = new System.Drawing.Size(139, 47);
+            this.btn_hvout.TabIndex = 11;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -314,6 +328,7 @@
             this.Controls.Add(this.label13);
             this.Controls.Add(this.rectMeter1);
             this.Controls.Add(this.btn_zeroon2);
+            this.Controls.Add(this.btn_hvout);
             this.Controls.Add(this.btn_zeroon);
             this.Controls.Add(this.lbl_datetime);
             this.Controls.Add(this.label12);
@@ -369,6 +384,7 @@
         private RectButton btn_zeroon2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btn_capture;
+        private RectButton btn_hvout;
     }
 }
 

@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
+using Microsoft.Win32;
 namespace Mndz
 {
     public partial class Form1 : Form
@@ -21,7 +22,9 @@ namespace Mndz
         [DllImport("user32.dll", EntryPoint = "ShowCursor", CharSet = CharSet.Auto)]
 
         public static extern int ShowCursor(int bShow);
-
+        private void DoBeep2()
+        {
+        }
         public Form1()
         {
             InitializeComponent();
@@ -32,6 +35,7 @@ namespace Mndz
             dlg_kbd = new kbdWnd();
             led_rx.Value = "0.000000";
             led_rx.Click += new EventHandler((o,e)=>{
+                DoBeep2();
                 dlg_choice.bNo0Choice = true;
                 dlg_choice.param = "selectrx";
                 dlg_choice.Init(StringResource.str("selectrx"), Processor._RxTitles, -1, null, new KbdDataHandler(KbdData));
@@ -50,6 +54,7 @@ namespace Mndz
             led_rs.RecreateSegments(led_rs.ArrayCount);
             led_rs.Click += new EventHandler((o, e) =>
             {
+                DoBeep2();
                 dlg_kbd.Init(String.Format(StringResource.str("inputrs"), Processor._RsTitles[processor.RsIndex]), "inputrs", false, new KbdDataHandler(KbdData));
             });
 
@@ -61,6 +66,7 @@ namespace Mndz
             led_vx.Value = "0.000";
             led_vx.Click += new EventHandler((o, e) =>
             {
+                DoBeep2();
                 dlg_choice.bNo0Choice = true;
                 dlg_choice.param = "selectvx";
 
@@ -75,10 +81,34 @@ namespace Mndz
             led_es.RecreateSegments(led_es.ArrayCount);
             led_es.Click += new EventHandler((o, e) =>
             {
+                DoBeep2();
                 dlg_choice.bNo0Choice = true;
                 dlg_choice.param = "selectes";
                 dlg_choice.Init(StringResource.str("selectes"), Processor._EsTitles, -1, null, new KbdDataHandler(KbdData));
             });
+
+            btn_hvout.BackColor = this.BackColor;
+            btn_hvout.colorTop = Color.LightYellow;
+            btn_hvout.Style = MyButtonType.rectButton;
+            btn_hvout.Label = StringResource.str("hvout");
+            btn_hvout.ValidClick += new EventHandler((o, e) =>
+            {
+                DoBeep2();
+                if (!processor.bDirectOutputOn)
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        dlg_kbd.Init(StringResource.str("inputhv"), "hvout", false, KbdData);
+                    }));
+                }
+                else
+                {
+                    processor.DirectOutputClose();
+                    RefreshDisplay(true);
+                }
+                return;                
+            });
+
 
             btn_zeroon.BackColor = this.BackColor;
             btn_zeroon.colorTop = Color.Bisque;
@@ -87,7 +117,8 @@ namespace Mndz
 
             btn_zeroon.ValidClick += new EventHandler((o, e) =>
             {
-                processor.ZeroON();
+                DoBeep2();
+                processor.ZeroON2();
             });
 
             btn_zeroon2.BackColor = this.BackColor;
@@ -97,7 +128,8 @@ namespace Mndz
 
             btn_zeroon2.ValidClick += new EventHandler((o, e) =>
             {
-                processor.ZeroON2();
+                DoBeep2();
+                processor.ZeroON();
             });
 
 
@@ -107,6 +139,7 @@ namespace Mndz
             btn_turnon.Text = "OFF";
             btn_turnon.Click += new EventHandler((o, e) =>
             {
+                DoBeep2();
                 if (!processor.bOn)
                     dt_lastoutput = DateTime.Now.AddSeconds(2);
                 processor.bOn = !processor.bOn;
@@ -126,9 +159,31 @@ namespace Mndz
                 {
                     return;
                 }
-                dt_lastoutput = DateTime.Now.AddSeconds(processor.RefreshOutput());
-                if (processor.bOn)
+                dt_lastoutput = DateTime.Now;
+                if (processor.bDirectOutputOn)
                 {
+                    DateTime.Now.AddSeconds(processor.RefreshDirectOutput());
+                    string newv = processor.VxMeasure.ToString("F7").Substring(0, 6);
+                    if (led_vx.Value != newv)
+                    {
+                        led_vx.Value = newv;
+                        rectMeter1.Angle = processor.Percent;
+                    }
+                    if (processor.bDirectStable)
+                    {
+                        if (led_vx.ColorLight != Color.Red)
+                            led_vx.ColorLight = Color.Red;
+                    }
+                    else
+                    {
+                        if (led_vx.ColorLight != Color.Orange)
+                            led_vx.ColorLight = Color.Orange;
+                    }
+
+
+                }else if (processor.bOn)
+                {
+                    dt_lastoutput = DateTime.Now.AddSeconds(processor.RefreshOutput());
                     double v = Convert.ToDouble(processor.Rx) ;
                     string newv;
                     newv = Util.GMKFormat(ref v);
@@ -151,6 +206,7 @@ namespace Mndz
                             led_rx.ColorLight = Color.Pink;
                     }
 
+
                     newv = processor.VxMeasure.ToString("F7").Substring(0, 6);
                     if(led_vx.Value != newv)
                     {
@@ -160,7 +216,6 @@ namespace Mndz
                 }
             });
             tm.Enabled = true;
-            tm.Start();
             DeviceMgr.Reset();
 
             RefreshDisplay(true);
@@ -179,8 +234,9 @@ namespace Mndz
         }
         private void KbdData(string id, string param)
         {
+                    
                     Decimal a;
-                    if (id == "daoffset" || id == "rsreal" || id == "esreal" || id == "addelay")
+                    if (id == "daoffset" || id == "rsreal" || id == "esreal" || id == "addelay" || id == "hvout")
                     {
                         if (!Util.TryDecimalParse(param, out a))
                             return;
@@ -195,6 +251,18 @@ namespace Mndz
                             processor.EsValue = a;
                         if (id == "addelay")
                             processor.ADdelay = Convert.ToInt32(a);
+
+                        if (id == "hvout")
+                        {
+                            if (a < 1)
+                                return;
+                            if(!processor.bDirectOutputOn)
+                            {
+                                processor.DirectOutputOpen(a);
+                                dt_lastoutput = DateTime.Now.AddSeconds(3);
+                            }
+                            
+                        }
                         RefreshDisplay(true);
                     }
                     
@@ -227,7 +295,7 @@ namespace Mndz
                                     }
                                     else if (value == 2000)
                                     {
-                                        processor.VxMultiplier = 100;
+                                        processor.VxMultiplier = 500;// not 100;
                                     }
                                     else if (value == 5000)
                                     {
@@ -299,7 +367,7 @@ namespace Mndz
                             {
                                 dlg_kbd.Init(StringResource.str("inputaddelay"), "addelay", false, KbdData);
                             }));
-                            return; return;
+                            return;
                         }
                         if (!Util.TryDecimalParse(param, out a))
                             return;
@@ -313,7 +381,6 @@ namespace Mndz
                         }
                         processor.RsValue = a;
                         RefreshDisplay(true);
-                        
                     }
         }
 
@@ -344,14 +411,14 @@ namespace Mndz
                     led_rx.ColorLight = Color.Pink;
                     led_vx.ColorLight = Color.Black;
                     btn_turnon.colorTop = Color.Green;
-                btn_turnon.Label = "ON";
+                    btn_turnon.Label = "ON";
                 }
                 else
                 {
                     led_rx.ColorLight = Color.LightPink;
                     led_vx.ColorLight = Color.DarkGray;
                     btn_turnon.colorTop = Color.LightGray;
-                btn_turnon.Label = "OFF";
+                    btn_turnon.Label = "OFF";
                 }
                 Double v = Math.Abs(Convert.ToDouble(processor.RsValue));
    
@@ -362,7 +429,16 @@ namespace Mndz
                 led_es.Value = processor.EsValue.ToString("F7").Substring(0, 6);
                
             }
-            
+            if (processor.bDirectOutputOn)
+            {
+
+                btn_hvout.colorTop = Color.Orange;
+                led_vx.ColorLight = Color.Orange;
+            }
+            else
+            {
+                btn_hvout.colorTop = Color.LightYellow;
+            }
         }
         //PC side command
         //resi: 1.234 on

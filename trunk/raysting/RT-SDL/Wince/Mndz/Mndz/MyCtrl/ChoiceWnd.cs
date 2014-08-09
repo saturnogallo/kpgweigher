@@ -71,7 +71,7 @@ namespace Mndz
             else
             {
                 choice_handler(param, i.ToString());
-                deep--;
+                //deep--;
                 if (deep <= 0)
                     Hide();
                 else
@@ -96,7 +96,7 @@ namespace Mndz
             {
                 choice_handler(param, "quit");
             }
-            deep--;
+            //deep--;
             if (deep <= 0)
                 Hide();
             else
@@ -120,7 +120,7 @@ namespace Mndz
                 ReLayout();
             }
             UpdateState(0);
-            deep++;
+            //deep++;
             this.Show();
         }
 
