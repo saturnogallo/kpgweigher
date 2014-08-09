@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Mndz")]
+[assembly: AssemblyTitle("电流源软件")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Raysting Instrument")]
-[assembly: AssemblyProduct("Mndz")]
-[assembly: AssemblyCopyright("Copyright ©Raysting Instrument2013")]
+[assembly: AssemblyProduct("上海兰斯汀仪表研究所-电流源软件")]
+[assembly: AssemblyCopyright("Copyright ©Raysting Instrument2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

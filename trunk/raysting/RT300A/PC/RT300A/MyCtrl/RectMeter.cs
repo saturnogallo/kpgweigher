@@ -16,7 +16,6 @@ namespace Mndz.MyCtrl
         {
             InitializeComponent();
             PointColor = Color.Yellow;
-            
             this.Paint += new PaintEventHandler(RectMeter_Paint);
             this.Resize += new EventHandler(RectMeter_Load);
         }

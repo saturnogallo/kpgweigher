@@ -109,7 +109,7 @@
             this.lbl_version.Location = new System.Drawing.Point(891, 38);
             this.lbl_version.Name = "lbl_version";
             this.lbl_version.Size = new System.Drawing.Size(114, 17);
-            this.lbl_version.Text = "版本:2014-07-26";
+            this.lbl_version.Text = "版本:2014-08-09";
             this.lbl_version.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // lbl_datetime

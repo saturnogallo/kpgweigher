@@ -36,7 +36,7 @@ namespace Mndz
 
             InitializeComponent();
             myBeep = new Beep("PWM1:");
-            s_scale = this.label1.Text.Substring(0, this.label1.Text.IndexOf("A"));
+            s_scale = this.label3.Text.Substring(0, this.label1.Text.IndexOf("A")-1);
             scale = Decimal.Parse(s_scale);
             this.BackColor = Color.LightSkyBlue;
             led_current.ColorDark = this.BackColor;
@@ -79,7 +79,7 @@ namespace Mndz
                 rb.BackColor = this.BackColor;
                 rb.colorShadow = this.BackColor;
                 rb.colorTop = Color.LightGray;
-
+                rb.Style = MyButtonType.rectButton;
                 rb.ValidClick += new EventHandler((o, e) =>
                 {
                     if (processor.bOn)
@@ -178,11 +178,8 @@ namespace Mndz
             btn_turnon.Click += new EventHandler((o, e) =>
             {
                 this.Beep();
-                if (!processor.bOn)
-                {
-                    dt_lastoutput = DateTime.Now.AddSeconds(0.5);
-                    btn_turnon.colorTop = Color.LightYellow; //switching
-                }
+                dt_lastoutput = DateTime.Now.AddSeconds(0.5);
+                btn_turnon.colorTop = Color.LightYellow; //switching
             });
 
             tm = new Timer();
@@ -217,7 +214,7 @@ namespace Mndz
                 }
             });
             tm.Enabled = true;
-            DeviceMgr.Reset();
+            processor.Reset();
             
             RefreshDisplay(true);
         }
@@ -374,6 +371,14 @@ namespace Mndz
                         processor.daoffset = a + processor.daoffset;
                         
                     }
+                    if (id == "adscale")
+                    {
+                        double d;
+                        if (!Util.TryDoubleParse(param, out d))
+                            return;
+                        if (!processor.CalibrateADScale(d))
+                            Program.MsgShow("校准AD失败.");
+                    }
                     if (id == "value")
                     {
                         if (param == "5555555")
@@ -403,6 +408,14 @@ namespace Mndz
                             this.Invoke(new Action(() =>
                             {
                                 dlg_kbd.Init("请输入DA零位值", "daoffset", false, KbdData);
+                            }));
+                            return;
+                        }
+                        if (param == "1111111") //input external voltage value
+                        {
+                            this.Invoke(new Action(() =>
+                            {
+                                dlg_kbd.Init("请输入标准AD电压值", "adscale", false, KbdData);
                             }));
                             return;
                         }
@@ -560,10 +573,15 @@ namespace Mndz
         //curr: 1.345 off
         //setting? return setting: 1.234 on|off
         //curr? return curr: 1.234
-        private Regex resi_set_mode = new Regex(@"curr:\s+([0-9.Mk]+)\s+(on|off)");
+        private Regex resi_set_mode = new Regex(@"curr:\s+([0-9.Mk]+)\s+(on|off)\s+(1|10|100|300|600|1000)$");
         internal void pc_cmd(string cmd)
         {
             Logger.SysLog(cmd);
+            if (cmd == "*IDN?")
+            {
+                DeviceMgr.Report("RAYSTING RT" + s_scale + "A");
+                return;
+            }
             if (cmd == "H")
             {
                 DeviceMgr.Reset();
@@ -579,15 +597,7 @@ namespace Mndz
                 if (processor.bOn)
                     DeviceMgr.Report("curr: " + led_current.Value + " on");
                 else
-                    DeviceMgr.Report("curr: " + led_current.Value + " off"); ;
-                return;
-            }
-            if (cmd == "setting?")
-            {
-                if (processor.bOn)
-                    DeviceMgr.Report("setting: " + led_setting.Value + " on");
-                else
-                    DeviceMgr.Report("setting: " + led_setting.Value + " off"); ;
+                    DeviceMgr.Report("curr: " + led_current.Value + " off");
                 return;
             }
             Match m;
@@ -595,22 +605,31 @@ namespace Mndz
             m = resi_set_mode.Match(cmd);
             if (m.Success)
             {
-                
                 string rvalue = m.Groups[1].ToString();
-
                     Decimal a;
                     if (!Util.TryDecimalParse(m.Groups[1].ToString(), out a))
                         return;
                     if(!IsValidCurrent(a))  //range check
                         return;
                     
+                    int rng = Int32.Parse(m.Groups[3].ToString());
+                    if (a > rng)
+                        return;
+                    processor.range = rng;
                     processor.setting = a;
-
-                    
-                processor.bOn = (m.Groups[2].ToString() == "on");
-                RefreshDisplay(true);
+                    processor.bOn = (m.Groups[2].ToString() == "on");
+                    RefreshDisplay(true);
+                    cmd = "setting?";
+            }
+            if (cmd == "setting?")
+            {
+                if (processor.bOn)
+                    DeviceMgr.Report("setting: " + led_setting.Value + " on " + processor.range.ToString());
+                else
+                    DeviceMgr.Report("setting: " + led_setting.Value + " off " + processor.range.ToString());
                 return;
             }
+
         }
         public static bool IsValidCurrent(Decimal a)
         {

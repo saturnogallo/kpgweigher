@@ -15,7 +15,7 @@ namespace Mndz
 {
     public partial class Form1 : Form
     {
-        private Processor processor;
+        private ProcessorPC processor;
         private ChoiceWnd dlg_choice;
         private kbdWnd dlg_kbd;
         private System.Windows.Forms.Timer tm;
@@ -36,6 +36,7 @@ namespace Mndz
             InitializeComponent();
             s_scale = this.label1.Text.Substring(0, this.label1.Text.IndexOf("A"));
             scale = Decimal.Parse(s_scale);
+            this.Load += new EventHandler(Form1_Load);
             this.BackColor = Color.LightSkyBlue;
             led_current.ColorDark = this.BackColor;
             led_setting.ColorDark = this.BackColor;
@@ -45,7 +46,7 @@ namespace Mndz
             btn_turnon.BackColor = this.BackColor;
             rectMeter1.BgResId = "BGMETER";
             //ShowCursor(0);
-            processor = new Processor();
+            processor = new ProcessorPC();
             data = new StringBuilder(10);
             kbd_btns = new RectButton[]{ lbButton0,lbButton1,lbButton2,lbButton3,lbButton4,lbButton5,lbButton6,lbButton7,lbButton8,lbButton9,
                 lbButtonCancel,lbButtonOK,lbButtonPT,lbButtonPercent};
@@ -73,7 +74,7 @@ namespace Mndz
                 rb.BackColor = this.BackColor;
                 rb.colorShadow = this.BackColor;
                 rb.colorTop = Color.LightGray;
-
+                rb.Style = MyButtonType.rectButton;
                 rb.ValidClick += new EventHandler((o, e) =>
                 {
                     if (processor.bOn)
@@ -172,15 +173,12 @@ namespace Mndz
             btn_turnon.Click += new EventHandler((o, e) =>
             {
                 this.Beep();
-                if (!processor.bOn)
-                {
-                    dt_lastoutput = DateTime.Now.AddSeconds(0.5);
-                    btn_turnon.colorTop = Color.LightYellow; //switching
-                }
+                dt_lastoutput = DateTime.Now.AddSeconds(1);
+                btn_turnon.colorTop = Color.LightYellow; //switching
             });
 
             tm = new Timer();
-            tm.Interval = 500;
+            tm.Interval = 1000;
             tm.Tick += new EventHandler((o, e) =>
             {
                 foreach (RectButton btn in kbd_btns)
@@ -191,7 +189,7 @@ namespace Mndz
                 if (btn_turnon.colorTop == Color.LightYellow) //still booting up
                 {
                     processor.bOn = !processor.bOn;
-                    RefreshDisplay(false);
+                    RefreshDisplay(true);
                     return;
                 }
                 lbl_datetime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -212,10 +210,28 @@ namespace Mndz
             });
 
             tm.Enabled = true;
-            tm.Start();
-            DeviceMgr.Reset();
+            
+            
+                tm.Start();
+                processor.Reset();
+                RefreshDisplay(true);
+                return;
+            
 
-            RefreshDisplay(true);
+        }
+
+        void Form1_Load(object sender, EventArgs e)
+        {
+            if (!DeviceMgrPC.SearchDevice())
+            {
+                this.Invoke(new Action(() =>
+                {
+                    Program.MsgShow("未找到设备,请检查连接后重试");
+                    Process.GetCurrentProcess().Kill();
+                }));
+                return;
+            }
+            DeviceMgrPC.Report("setting?");
         }
         //up or down the digit based on position highest ditig is 1 lowest digit is 7
         //return value mean whether is valid or not
@@ -247,7 +263,7 @@ namespace Mndz
         }
         private void Beep()
         {
-            Console.Beep(1000, 200); //1kHz, 200ms duration
+            //Console.Beep(1000, 200); //1kHz, 200ms duration
         }
         private DateTime dt_lastoutput = DateTime.Now;
         private void CancelInput()
@@ -255,6 +271,11 @@ namespace Mndz
             data.Remove(0, data.Length);
             led_setting.ColorLight = Color.DarkGreen;
             RefreshDisplay(false);
+        }
+        internal void pc_cmd(string cmd)
+        {
+            if(processor.pc_cmd(cmd))
+                RefreshDisplay(true);
         }
         private void KeypadTick(int c)
         {
@@ -330,46 +351,10 @@ namespace Mndz
         private void KbdData(string id, string param)
         {
                     Decimal a;
-                    if (id == "daoffset")
-                    {
-                        if (!Util.TryDecimalParse(param, out a))
-                            return;
 
-                        processor.daoffset = a + processor.daoffset;
-                        
-                    }
                     if (id == "value")
                     {
-                        if (param == "5555555")
-                        {
-                            Process.GetCurrentProcess().Kill();
-                            return;
-                        }
-                        if (param == "1234567") //calibration screen
-                        {
-                            Process app = new Process();
-                            /*
-                            Process app = new Process();
-                            app.StartInfo.WorkingDirectory = @"\Windows";
-                            app.StartInfo.FileName = @"\Windows\TouchKit.exe";
-                            app.StartInfo.Arguments = "";
-                            app.Start();
-                             */
-                            return;
-                        }
-                        if (param == "00000")
-                        {
-                            Program.Upgrade();
-                            return;
-                        }
-                        if (param == "6589019") //input standard resistance
-                        {
-                            this.Invoke(new Action(() =>
-                            {
-                                dlg_kbd.Init("请输入DA零位值", "daoffset", false, KbdData);
-                            }));
-                            return;
-                        }
+
                         if (!Util.TryDecimalParse(param, out a))
                             return;
 
@@ -519,63 +504,7 @@ namespace Mndz
                 }
             }
         }
-        //PC side command
-        //curr: 1.234 on
-        //curr: 1.345 off
-        //setting? return setting: 1.234 on|off
-        //curr? return curr: 1.234
-        private Regex resi_set_mode = new Regex(@"curr:\s+([0-9.Mk]+)\s+(on|off)");
-        internal void pc_cmd(string cmd)
-        {
-            Logger.SysLog(cmd);
-            if (cmd == "H")
-            {
-                DeviceMgr.Reset();
-                return;
-            }
-            if (cmd == "ZERO")
-            {
-                processor.ZeroON();
-                return;
-            }
-            if (cmd == "curr?")
-            {
-                if (processor.bOn)
-                    DeviceMgr.Report("curr: " + led_current.Value + " on");
-                else
-                    DeviceMgr.Report("curr: " + led_current.Value + " off"); ;
-                return;
-            }
-            if (cmd == "setting?")
-            {
-                if (processor.bOn)
-                    DeviceMgr.Report("setting: " + led_setting.Value + " on");
-                else
-                    DeviceMgr.Report("setting: " + led_setting.Value + " off"); ;
-                return;
-            }
-            Match m;
 
-            m = resi_set_mode.Match(cmd);
-            if (m.Success)
-            {
-                
-                string rvalue = m.Groups[1].ToString();
-
-                    Decimal a;
-                    if (!Util.TryDecimalParse(m.Groups[1].ToString(), out a))
-                        return;
-                    if(!IsValidCurrent(a))  //range check
-                        return;
-                    
-                    processor.setting = a;
-
-                    
-                processor.bOn = (m.Groups[2].ToString() == "on");
-                RefreshDisplay(true);
-                return;
-            }
-        }
         public static bool IsValidCurrent(Decimal a)
         {
             if (Form1.s_scale == "300")
