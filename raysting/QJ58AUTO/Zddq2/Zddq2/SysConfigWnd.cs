@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO;
+using Raysting.Common;
 namespace Zddq2
 {
     public partial class SysConfigWnd : Form
@@ -43,7 +44,7 @@ namespace Zddq2
             lbl_navmeter.Text = StringResource.str("navmeter");
             lbl_shifttimes.Text = StringResource.str("shifttimes");
 
-            btn_quit.SetStyle(Color.Beige, MyButtonType.round2Button);
+//            btn_quit.SetStyle(Color.Beige, MyButtonType.round2Button);
             btn_quit.Text = StringResource.str("quit");
             btn_quit.ValidClick += new EventHandler((s, e) =>
             {
@@ -51,50 +52,50 @@ namespace Zddq2
                 Program.mainwnd.Invoke(new Action<bool>(Program.mainwnd.ReDraw), new object[] { false }); 
             });
 
-            btn_flttype.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+//            btn_flttype.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_flttype.ValidClick += new EventHandler(btn_flttype_ValidClick);
 
-            btn_ktt.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+            //btn_ktt.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_ktt.ValidClick += new EventHandler((s, e) => { Program.kbd.Init(StringResource.str("enter_ktt"), "ktt", false, KbdData); });
 
-            btn_throw.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+//            btn_throw.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_throw.ValidClick += new EventHandler(btn_throw_ValidClick);
 
 
-            btn_navmeter.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+  //          btn_navmeter.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_navmeter.ValidClick += new EventHandler(btn_navmeter_ValidClick);
 
-            btn_measdelay.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+    //        btn_measdelay.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_measdelay.ValidClick += new EventHandler(input_GotFocus);
 
-            btn_meastimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+      //      btn_meastimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_meastimes.ValidClick += new EventHandler(input_GotFocus);
 
-            btn_shifttimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+        //    btn_shifttimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_shifttimes.ValidClick += new EventHandler(input_GotFocus);
 
-            btn_date.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+          //  btn_date.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_date.ValidClick += new EventHandler((s,e) =>{Program.kbd.Init(StringResource.str("enter_newdate"), "newdate", false, KbdData);});
 
-            btn_sampletimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+//            btn_sampletimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_sampletimes.ValidClick += new EventHandler(input_GotFocus);
 
-            btn_fltlength.SetStyle(Color.Beige, MyButtonType.roundRectButton);
+  //          btn_fltlength.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_fltlength.ValidClick += new EventHandler(input_GotFocus);
 
-            btn_RsConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+    //        btn_RsConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_RsConfig.Text = StringResource.str("rsconfig");
             btn_RsConfig.ValidClick += new EventHandler((s, e) => { Program.SwitchWindow("rsconfig"); });
 
-            btn_RxConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+      //      btn_RxConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_RxConfig.Text = StringResource.str("rxconfig");
             btn_RxConfig.ValidClick += new EventHandler((s, e) => { Program.SwitchWindow("rxconfig"); });
 
-            btn_SysConfig.SetStyle(Color.LightBlue, MyButtonType.round2RectButton);
+        //    btn_SysConfig.SetStyle(Color.LightBlue, MyButtonType.round2RectButton);
             btn_SysConfig.Text = StringResource.str("sysconfig");
             btn_SysConfig.ValidClick += new EventHandler( (s,e) => {});
 
-            btn_export.SetStyle(Color.LightSeaGreen, MyButtonType.round2RectButton);
+          //  btn_export.SetStyle(Color.LightSeaGreen, MyButtonType.round2RectButton);
             btn_export.Text = StringResource.str("export");
             btn_export.ValidClick += new EventHandler(btn_export_ValidClick);
             InitDisplay();
@@ -125,7 +126,7 @@ namespace Zddq2
             }
             try
             {
-                string basedir = StringResource.baseDir;
+                string basedir = StringResource.str("basedir");
                 foreach (string fname in Directory.GetFiles(basedir, "20*.txt"))
                 {
                     FileInfo fi = new FileInfo(fname);
@@ -244,7 +245,7 @@ namespace Zddq2
 
         void input_GotFocus(object sender, EventArgs e)
         {
-            string regname = (sender as RectButton).Name.Remove(0, 4);
+            string regname = (sender as Control).Name.Remove(0, 4);
             Program.kbd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
         }
 

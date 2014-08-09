@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Xml.Linq;
 using System.IO;
+using Raysting.Common;
 namespace Zddq2
 {
     /*
@@ -93,8 +94,21 @@ namespace Zddq2
         }
         public double dRxInput  //target rx value
         {
-            get;
-            set;
+            get
+            {
+                try
+                {
+                    return (double)this["dRxInput"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dRxInput"] = value;
+            }
         }
         public RxInfo(int id)
         {
@@ -255,6 +269,17 @@ namespace Zddq2
         public RsInfo(int id)
         {
             config = new SqlConfig("RsInfo", id.ToString());
+        }
+        public int iRRange
+        {
+            get
+            {
+                return (int)this["iRRange"];
+            }
+            set
+            {
+                this["iRRange"] = value;
+            }
         }
         public double dTValue
         {
@@ -664,7 +689,7 @@ namespace Zddq2
         private string sql_grp;
         static void SetConnection()
         {
-            sql_con = new SQLiteConnection("Data Source="+StringResource.baseDir+"Config.db2;Version=3;New=False;Compress=True;");
+            sql_con = new SQLiteConnection("Data Source="+StringResource.str("basedir")+"Config.db2;Version=3;New=False;Compress=True;");
         }
         private Dictionary<string, string> curr_conf; //store all the configuration string
         public SqlConfig(string sql_tbl,string group)
@@ -779,96 +804,6 @@ namespace Zddq2
         
     }
 
-    internal class StringResource
-    {
-        private static Dictionary<string, string> str_tbl;
-        static public string language;
-        public static string baseDir = "c:\\Code\\GoogleCode\\g_lxhbucket\\raysting\\QJ58AUTO\\Zddq2\\Zddq2\\bin\\Debug\\";
-        static public void SetLanguage(string lang)
-        {
-            language = lang;
-            string lang_file = "Zddq2.Resource." + lang + ".xml";
-            StreamReader sr = new StreamReader(System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(lang_file));
-            XDocument xml_doc = XDocument.Load(sr);
-
-            IEnumerable<XElement> regs = xml_doc.Descendants("string");
-            //str_tbl.Clear();
-            foreach (XElement reg in regs)
-            {
-                str_tbl[reg.Attribute("skey").Value] = reg.Value;
-            }
-        }
-        static StringResource()
-        {
-            str_tbl = new Dictionary<string, string>();
-            if (!File.Exists(baseDir + "\\history.log"))
-                File.Create(baseDir + "\\history.log").Close();
-            FileStream fsLog = new FileStream(baseDir + "\\history.log", FileMode.Truncate, FileAccess.Write, FileShare.Read);
-            fsLog.Close();
-            SetLanguage("zh-CN");
-
-
-            str_tbl["NAV_INIT_PZ158"] = "Un%%01;00\r";
-            str_tbl["NAV_10MV_PZ158"] = "Un%%01;12;00\r";
-            str_tbl["NAV_120MV_PZ158"] = "Un%%01;12;00\r";
-            str_tbl["NAV_1V_PZ158"] = "Un%%01;12;01\r";
-            str_tbl["NAV_30V_PZ158"] = "Un%%01;12;02\r";
-            str_tbl["NAV_AFLTOFF_PZ158"] = "Un%%01;26\r";
-            str_tbl["NAV_AFLTON_PZ158"] = "Un%%01;27\r";
-            str_tbl["NAV_ZEROON_PZ158"] = "Un%%01;06\r";
-            str_tbl["NAV_READ_PZ158"] = "Un%%01;01\r";
-
-            str_tbl["NAV_INIT_PZ2182"] = "Un%%01;00\r";
-            str_tbl["NAV_10MV_PZ2182"] = "Un%%01;12;00\r";
-            str_tbl["NAV_120MV_PZ2182"] = "Un%%01;12;01\r";
-            str_tbl["NAV_1V_PZ2182"] = "Un%%01;12;02\r";
-            str_tbl["NAV_30V_PZ2182"] = "Un%%01;12;02\r";
-            str_tbl["NAV_AFLTOFF_PZ2182"] = "Un%%01;26\r";
-            str_tbl["NAV_AFLTON_PZ2182"] = "Un%%01;27\r";
-            str_tbl["NAV_ZEROON_PZ2182"] = "Un%%01;06\r";
-            str_tbl["NAV_READ_PZ2182"] = "Un%%01;01\r";
-
-            str_tbl["NAV_INIT_2182"] = "Un*RST\n*CLS\n:init:cont on;:ABORT\n:sens:func 'volt:dc'\n:sense:chan 1\n:sens:volt:rang:auto on\n:sens:volt:chan1:lpas off\n:SENS:VOLT:DC:NPLC 1\nVOLT:DIG 8\n:syst:azer on\n";
-            str_tbl["NAV_10MV_2182"] = "Un:sens:volt:chan1:rang 0.01\n";
-            str_tbl["NAV_120MV_2182"] = "Un:sens:volt:chan1:rang 0.1\n";
-            str_tbl["NAV_1V_2182"] = "Un:sens:volt:chan1:auto on\n";
-            str_tbl["NAV_30V_2182"] = "Un:sens:volt:chan1:auto on\n";
-            str_tbl["NAV_AFLTOFF_2182"] = "Un:sens:volt:chan1:dfil:stat off\n";
-            str_tbl["NAV_AFLTON_2182"] = "Un:sens:volt:chan1:dfil:wind 5\n:sens:volt:chan1:dfil:coun 10\n:sens:volt:chan1:dfil:tcon mov\n:sens:volt:chan1:dfil:stat on\n";
-            str_tbl["NAV_ZEROON_2182"] = "Un:sens:volt:ref:acq\n:sens:volt:ref:stat on\n";
-            str_tbl["NAV_READ_2182"] = "Un:fetc?\n";
-        }
-        static public void dolog(string log)
-        {
-            try
-            {
-                FileStream fsLog = new FileStream("history.log", FileMode.Append, FileAccess.Write, FileShare.Read);
-                StreamWriter sw = new StreamWriter(fsLog);
-                sw.WriteLine(DateTime.Now.ToString("G") + "\t" + log);
-                sw.Close();
-                fsLog.Close();
-            }
-            catch (System.Exception)
-            {
-
-            }
-
-        }
-
-        public static string str(string key)
-        {
-            if (str_tbl.ContainsKey(key))
-            {
-                return str_tbl[key];
-            }
-            else
-            {
-                return "Invalid String Key";
-            }
-
-        }
-        private StringResource() { }
-
-    }
+ 
 
 }

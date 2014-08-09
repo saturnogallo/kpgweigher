@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-
+using Raysting.Common;
 namespace Zddq2
 {
     public partial class RsConfigWnd : Form
@@ -17,14 +17,14 @@ namespace Zddq2
         public RsConfigWnd()
         {
             InitializeComponent();
-            btn_RsConfig.SetStyle(Color.LightBlue, MyButtonType.round2RectButton);
+            //btn_RsConfig.SetStyle(Color.LightBlue, MyButtonType.round2RectButton);
             btn_RsConfig.Text = StringResource.str("rsconfig");
-            btn_RsConfig.ValidClick += new EventHandler(btn_RsConfig_ValidClick);
+            //btn_RsConfig.ValidClick += new EventHandler(btn_RsConfig_ValidClick);
 
-            btn_RxConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+            //btn_RxConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_RxConfig.Text = StringResource.str("rxconfig");
             btn_RxConfig.ValidClick += new EventHandler(btn_RxConfig_ValidClick);
-
+            /*
             btn_quit.SetStyle(Color.Beige, MyButtonType.round2Button);
             btn_chan.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_next.SetStyle(Color.Beige, MyButtonType.round2RectButton);
@@ -34,7 +34,7 @@ namespace Zddq2
             btn_ralpha.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_rbeta.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_temp.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-
+            */
             btn_quit.Text = StringResource.str("quit");
             lbl_serial.Text = StringResource.str("serial");
             lbl_rvalue.Text = StringResource.str("rvalue");
@@ -54,7 +54,7 @@ namespace Zddq2
             btn_last.ValidClick += new EventHandler(btn_last_ValidClick);
             btn_next.ValidClick += new EventHandler(btn_next_ValidClick);
 
-            btn_SysConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+//            btn_SysConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_SysConfig.Text = StringResource.str("sysconfig");
             btn_SysConfig.ValidClick += new EventHandler(btn_SysConfig_ValidClick);
 
@@ -116,7 +116,7 @@ namespace Zddq2
 
         void input_GotFocus(object sender, EventArgs e)
         {
-            string regname = (sender as RectButton).Name.Replace("btn_", ""); //remove btn_
+            string regname = (sender as Control).Name.Replace("btn_", ""); //remove btn_
             Program.kbd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
         }
 

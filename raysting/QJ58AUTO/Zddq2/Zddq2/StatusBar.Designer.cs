@@ -30,7 +30,7 @@
         {
             this.lbl_datetime = new System.Windows.Forms.Label();
             this.bt_run = new System.Windows.Forms.Button();
-            this.bt_menu = new Zddq2.RectButton();
+            this.bt_menu = new Raysting.Controls.RectButton();
             this.SuspendLayout();
             // 
             // lbl_datetime
@@ -57,7 +57,7 @@
             // bt_menu
             // 
             this.bt_menu.BackColor = System.Drawing.Color.Blue;
-            this.bt_menu.bEnabled = false;
+            this.bt_menu.Enabled = false;
             this.bt_menu.bOn = true;
             this.bt_menu.Location = new System.Drawing.Point(3, 4);
             this.bt_menu.Name = "bt_menu";
@@ -81,7 +81,7 @@
 
         #endregion
 
-        private RectButton bt_menu;
+        private Raysting.Controls.RectButton bt_menu;
         private System.Windows.Forms.Label lbl_datetime;
         private System.Windows.Forms.Button bt_run;
     }

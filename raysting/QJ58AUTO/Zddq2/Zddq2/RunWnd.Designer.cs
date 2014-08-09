@@ -35,7 +35,7 @@
             this.rxDisplay4 = new Zddq2.RxDisplay();
             this.dataGrid2 = new System.Windows.Forms.DataGridView();
             this.graphPane2 = new Zddq2.GraphPane();
-            this.btn_dispmode = new Zddq2.RectButton();
+            this.btn_dispmode = new Raysting.Controls.RectButton();
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid2)).BeginInit();
             this.SuspendLayout();
             // 
@@ -119,12 +119,16 @@
             // btn_dispmode
             // 
             this.btn_dispmode.BackColor = System.Drawing.Color.Blue;
-            this.btn_dispmode.bEnabled = true;
+            this.btn_dispmode.bgScale = 3;
             this.btn_dispmode.bOn = true;
+            this.btn_dispmode.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_dispmode.colorTop = System.Drawing.Color.Pink;
             this.btn_dispmode.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_dispmode.Label = null;
             this.btn_dispmode.Location = new System.Drawing.Point(630, 145);
             this.btn_dispmode.Name = "btn_dispmode";
             this.btn_dispmode.Size = new System.Drawing.Size(91, 42);
+            this.btn_dispmode.Style = Raysting.Controls.MyButtonType.roundButton;
             this.btn_dispmode.TabIndex = 5;
             // 
             // RunWnd
@@ -144,6 +148,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "RunWnd";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.RunWnd_Load_1);
             ((System.ComponentModel.ISupportInitialize)(this.dataGrid2)).EndInit();
             this.ResumeLayout(false);
 
@@ -158,7 +163,7 @@
         private RxDisplay rxDisplay4;
         private System.Windows.Forms.DataGridView dataGrid2;
         private GraphPane graphPane2;
-        private RectButton btn_dispmode;
+        private Raysting.Controls.RectButton btn_dispmode;
 
     }
 }

@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
-
+using Raysting.Common;
 namespace Zddq2
 {
     public partial class StatusBar : UserControl
@@ -27,7 +27,7 @@ namespace Zddq2
         }
         [DllImport("coredll")]
         public static extern bool SetLocalTime(ref SystemTime sysTime); //设置本地时
-        
+
         public event EventHandler MenuClick;
         public event EventHandler PauseResumeClick;
         public event EventHandler StartStopClick;
@@ -181,13 +181,21 @@ namespace Zddq2
             uiTimer.Tick += new EventHandler(uiTimer_Tick);
             uiTimer.Interval = 1000; //250ms for UI update
             uiTimer.Enabled = true;
-            bt_menu.bgColor = Color.Black;
-            bt_menu.SetStyle(Color.LightBlue, MyButtonType.round2RectButton);
+            bt_menu.BackColor = Color.Black;
+//            bt_menu.SetStyle(Color.LightBlue, MyButtonType.round2RectButton);
             bt_menu.Text = StringResource.str("menu");
             bt_menu.ValidClick += new EventHandler(bt_menu_ValidClick);
             bt_run.Click += new EventHandler(bt_run_Click);
+            this.Click += new EventHandler(StatusBar_DoubleClick);
         }
 
+        void StatusBar_DoubleClick(object sender, EventArgs e)
+        {
+            if (this.lbl_datetime.Bounds.Contains(MousePosition.X, MousePosition.Y))
+            {
+                
+            }
+        }
         void bt_run_Click(object sender, EventArgs e)
         {
             StartStopClick(sender, e);
@@ -202,7 +210,7 @@ namespace Zddq2
         }
         void uiTimer_Tick(object sender, EventArgs e)
         {
-            lbl_datetime.Text = DateTime.Now.ToShortTimeString();
+            lbl_datetime.Text = DateTime.Now.ToString("HH:mm");
         }
     }
 }
