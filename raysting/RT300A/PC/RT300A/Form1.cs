@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
+using Microsoft.Win32;
 namespace Mndz
 {
     public partial class Form1 : Form
@@ -48,7 +49,7 @@ namespace Mndz
             data = new StringBuilder(10);
             kbd_btns = new RectButton[]{ lbButton0,lbButton1,lbButton2,lbButton3,lbButton4,lbButton5,lbButton6,lbButton7,lbButton8,lbButton9,
                 lbButtonCancel,lbButtonOK,lbButtonPT,lbButtonPercent};
-            string[] btn_cap = "0,1,2,3,4,5,6,7,8,9,取消,确定,.,%".Split(new char[] { ',' });
+            string[] btn_cap = "0,1,2,3,4,5,6,7,8,9,取消,设定,.,%".Split(new char[] { ',' });
             for (int i = 0; i < kbd_btns.Length; i++)
             {
                 RectButton lbt = kbd_btns[i];
@@ -59,7 +60,7 @@ namespace Mndz
                 lbt.Style = MyButtonType.raiseButton;
                 lbt.Click += new EventHandler((o, e) =>
                 {
-                    Beep();
+                    this.Beep();
                     KeypadTick(NameInArray(o, kbd_btns));
                 });
             }
@@ -81,10 +82,25 @@ namespace Mndz
                     if (processor.setting > processor.range)
                         processor.setting = 0;
                     RefreshDisplay(false);
-                    Beep();
+                    this.Beep();
                 });
             }
-            rngbtn_1000.Visible = false;
+            if (s_scale == "300")
+            {
+                this.rngbtn_1000.Visible = false;
+                this.rngbtn_600.Visible = false;
+            }
+            if (s_scale == "600")
+            {
+                this.rngbtn_1000.Visible = false;
+            }
+            if (s_scale == "1000")
+            {
+                this.rngbtn_1.Visible = false;
+                this.rngbtn_300.Visible = false;
+                this.rngbtn_600.Visible = false;
+                this.rngbtn_1000.Top = this.rngbtn_300.Top;
+            }
             #endregion
             #region digi up and down
 
@@ -102,7 +118,7 @@ namespace Mndz
                 rb.Style = MyButtonType.triangleupButton;
                 rb.ValidClick += new EventHandler((o, e) =>
                 {
-                    Beep();
+                    this.Beep();
                     TickDigit(digi_upbtns.Length - NameInArray(o, digi_upbtns), true);
                     RefreshDisplay(false);
                 });
@@ -120,7 +136,7 @@ namespace Mndz
 
                 rb.ValidClick += new EventHandler((o, e) =>
                 {
-                    Beep();
+                    this.Beep();
                     TickDigit(digi_upbtns.Length - NameInArray(o, digi_dnbtns), false);
                     RefreshDisplay(false);
                 });
@@ -132,11 +148,11 @@ namespace Mndz
             dlg_kbd = new kbdWnd();
             led_setting.ColorLight = Color.DarkGreen;
             led_setting.ColorBackground = this.BackColor;
-            led_setting.ElementWidth = 12;
+            led_setting.ElementWidth = 10;
             //          led_setting.RecreateSegments(led_setting.ArrayCount);
             led_current.ColorLight = Color.Red;
             led_current.ColorBackground = this.BackColor;
-            led_current.ElementWidth = 10;
+            led_current.ElementWidth = 12;
             //          led_current.RecreateSegments(led_current.ArrayCount);
             led_current.Value = "0.0000";
             btn_zeroon.Style = MyButtonType.rectButton;
@@ -145,7 +161,7 @@ namespace Mndz
             btn_zeroon.Label = "电流表清零";
             btn_zeroon.ValidClick += new EventHandler((o, e) =>
             {
-                Beep();
+                this.Beep();
                 led_current.Value = "     ";
                 processor.ZeroON();
             });
@@ -155,7 +171,7 @@ namespace Mndz
             btn_turnon.Label = "OFF";
             btn_turnon.Click += new EventHandler((o, e) =>
             {
-                Beep();
+                this.Beep();
                 if (!processor.bOn)
                 {
                     dt_lastoutput = DateTime.Now.AddSeconds(0.5);
@@ -167,7 +183,12 @@ namespace Mndz
             tm.Interval = 500;
             tm.Tick += new EventHandler((o, e) =>
             {
-                if (btn_turnon.colorTop == Color.LightGreen) //still booting up
+                foreach (RectButton btn in kbd_btns)
+                {
+                    if (!btn.IsButtonUp)
+                        btn.IsButtonUp = true;
+                }
+                if (btn_turnon.colorTop == Color.LightYellow) //still booting up
                 {
                     processor.bOn = !processor.bOn;
                     RefreshDisplay(false);
@@ -205,11 +226,12 @@ namespace Mndz
             int unit = 0; //point position
             switch (processor.range)
             {
-                case 1: unit = 2 - position; break;
-                case 10: unit = 3 - position; break;
+                case 1: unit = 1 - position; break;
+                case 10: unit = 2 - position; break;
                 case 100:
                 case 300:
-                case 600: 
+                case 600:
+                    unit = 3 - position; break;
                 case 1000: unit = 4 - position; break;
                 default:
                     return;
@@ -231,7 +253,7 @@ namespace Mndz
         private void CancelInput()
         {
             data.Remove(0, data.Length);
-            led_setting.ColorLight = Color.Red;
+            led_setting.ColorLight = Color.DarkGreen;
             RefreshDisplay(false);
         }
         private void KeypadTick(int c)
@@ -436,6 +458,9 @@ namespace Mndz
                 case 600:
                     newcurr = reading.ToString("F4");
                     break;
+                case 1000:
+                    newcurr = reading.ToString("F3");
+                    break;
                 default: break; ;
             }
             if (newcurr != led_current.Value)
@@ -474,6 +499,9 @@ namespace Mndz
                 case 300:
                 case 600: 
                     led_setting.Value = processor.setting.ToString("F4");
+                    break;
+                case 1000:
+                    led_setting.Value = processor.setting.ToString("F3");
                     break;
                 default: break; ;
             }

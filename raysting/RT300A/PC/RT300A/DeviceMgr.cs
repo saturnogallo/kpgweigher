@@ -72,10 +72,10 @@ namespace Mndz
                 0x10,0x19,0x00,0x09,0x12,0x1B,0x01,0x08,
                 0x25,0x2C,0x24,0x2D,0x27,0x2E,0x26,0x2F};
             string[] abbr_relay = {"REG21",     "REG22",    "REG23",     "REG24", 
-                                   "REG11:300A","REG12:600A",    "REG13",     "REG14",
+                                   "REG11",     "REG12",    "REG13",     "REG14",
                                    "REG61",     "REG62",    "REG63",     "REG64",
                                    "REG51",     "REG52",    "REG53",     "REG54",
-                                   "REG31",     "REG32",    "REG33",     "REG34",
+                                   "REG31:300A","REG32:600A",    "REG33",     "REG34",
                                    "REG41",     "REG42",    "REG43",     "REG44"
                                   };
             int i;
@@ -458,7 +458,7 @@ namespace Mndz
         static private string oldreal = "";  //old real resistance
         static private string oldoutput = ""; //old output status
         //static private string[] coiltbl = new string[] { "COIL_10T", "COIL_100T", "COIL_1T", "COIL_REAL" };
-        static private string[] outputtbl = new string[] { "300A", "600A" };
+        static private string[] outputtbl = new string[] { "300A", "600A"};
         static private byte[] UsHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('s'), Convert.ToByte('U'), Convert.ToByte('U') };
         static private byte[] UdHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('d') };
         static private byte[] UsTail = new byte[] { Convert.ToByte('V') };
@@ -498,6 +498,8 @@ namespace Mndz
                 if (!Form1.IsValidCurrent(value) )
                     return;
                 _setting = value;
+                _track_setting = _setting;
+                trackfilter.Clear();
                 Util.ConstIni.WriteString("LASTSETTING", "setting", _setting.ToString());
             }
         }
@@ -543,8 +545,27 @@ namespace Mndz
                 {
                     DeviceMgr.RelayState("ALL_OFF");
                 }
+                _track_setting = _setting;
+                trackfilter.Clear();
                 ToVoltage(_setting);                
+
                 _bOn = true;
+            }
+        }
+        private Double _adscale;
+        internal Double adscale  //AD scale for calibration
+        {
+            get
+            {
+                return _adscale;
+            }
+            set
+            {
+                if (Math.Abs(Convert.ToDouble(value -1 )) > 0.01) //too much variance
+                    return;
+                _adscale = value;
+
+                Util.ConstIni.WriteString("LASTSETTING", "adscale", _adscale.ToString());
             }
         }
         private Decimal _daoffset;
@@ -582,26 +603,64 @@ namespace Mndz
         }
 
         private Queue<double> datafilter;
-
+        private Queue<double> trackfilter;
+        public bool bTracking = true;
         
         internal Processor()
         {
             datafilter = new Queue<double>();
-            
+            trackfilter = new Queue<double>();
             
             _setting = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "setting"));
             _range = Int32.Parse(Util.ConstIni.StringValue("LASTSETTING", "range"));
             _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
+
+            _adscale = 1;
+            if("" != Util.ConstIni.StringValue("LASTSETTING", "adscale"))
+                _adscale = Double.Parse(Util.ConstIni.StringValue("LASTSETTING", "adscale")); //
+
+            bTracking = true; // (Util.ConstIni.StringValue("LASTSETTING", "tracking") != "");
+                
             if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.01) //10mV
                 _daoffset = 0;        
             
             bOn = false;
         }
+        private Decimal _track_setting = 0;
         public void RefreshOutput()
         {
             UpdateCurrentOnly();
             if (bOn)
-                ToVoltage(_setting);
+            {
+                if (bTracking)
+                {
+                    double _dsetting = Convert.ToDouble(_setting);
+                    if ((Math.Abs(_dsetting - Current) < _dsetting * 1e-3) &&  //close enough to setting 
+                        (Math.Abs(_dsetting - Current) > _dsetting * 2e-6) &&  //bigger than 2 ppm
+                        (_dsetting >= range * 0.01))   //setting is big enough
+                    {
+                        trackfilter.Enqueue(Current);
+                        if (trackfilter.Count > 5)
+                            trackfilter.Dequeue();
+                        if (trackfilter.Count == 5)
+                        {
+                            trackfilter.Dequeue(); //throw 1st value;
+                            double avg_current = ((trackfilter.Sum() - trackfilter.Max() - trackfilter.Min()) / (trackfilter.Count - 2));
+                            _track_setting = _track_setting + Convert.ToDecimal((_dsetting - avg_current) / 1.7);
+                            ToVoltage(_track_setting);
+                            trackfilter.Clear();
+                        }
+                    }
+                    else
+                    {
+                        ToVoltage(_track_setting);
+                    }
+                }
+                else
+                {
+                    ToVoltage(_setting);
+                }
+            }
         }
         private bool CollectVoltage(out double reading)
         {
@@ -703,8 +762,12 @@ namespace Mndz
             {
                 if (range == 600 || range == 1000)
                     Current = va * 1000.0; // 0-0.6V=>600A 0-1V=>1000A
-                else
+                else if (range == 300)
                     Current = va * range / 10.0; //0-10V=>range
+                else if(range == 10 || range == 100)
+                    Current = va * range;  //0-1V=>range
+                else
+                    Current = va * range;  //0-1V=>range
             }
             return true;
         }
@@ -773,7 +836,7 @@ namespace Mndz
             double volt = voltage - Convert.ToDouble(daoffset);
             if (volt < 0)
                 volt = 0;
-            if (Math.Abs(volt) > 8.1) //turn off output or invalid adreading
+            if (Math.Abs(volt) > 10) //turn off output or invalid adreading
                 return false;
 
                 Int32 d = Convert.ToInt32(Math.Round((volt+10) * (1048576 - 1) / 20.0));
