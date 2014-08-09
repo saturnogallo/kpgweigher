@@ -34,10 +34,11 @@ uchar strlen(uchar *s);
 #define PG_MENU2	3
 #define PG_SETRS	4
 #define PG_SETDELAY	5
-#define PG_SET232	6
+//#define PG_SET232	6
+#define PG_ZERO		6
 #define PG_SETRATE	7
-#define PG_HELP		8
-
+#define PG_CALIBRATE 8
+//#define PG_HELP		8
 #define BUF_MAX		8
 
 #define DELAY_MULTIPLE	10
@@ -49,6 +50,7 @@ typedef struct _RUNDATA
 	uchar	Samplerate;
 	uchar	Baudrate;
 	uchar 	Ratio;
+	double	cali_ratio;
 
 	double 	Is;
 	double 	Ix;
@@ -56,6 +58,7 @@ typedef struct _RUNDATA
 	uchar	delay_cnt;
 	uchar	StateId;
 	uchar	pos_len;
+	uchar	placeholder;
 	char	tempbuf[BUF_MAX];
 	
 }RUNDATA;

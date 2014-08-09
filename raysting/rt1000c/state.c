@@ -15,6 +15,10 @@ extern ulong code Sector[10][4];
 #define SAMPLE_REG 	Sector[1][1]	//[2]
 #define RS232_REG 	Sector[1][2]	//[3]
 #define RATIO_REG 	Sector[1][3]	//[4]
+#define CALI_REG1	Sector[2][0]	//[0]
+#define CALI_REG2	Sector[2][1]
+#define CALI_REG3	Sector[2][2]
+#define CALI_REG4	Sector[2][3]	
 void LoadFromEEPROM()
 {
 	uchar* arr = (uchar*)&rdata;
@@ -26,12 +30,17 @@ void LoadFromEEPROM()
 	*arr++ = byte_read(SAMPLE_REG);
 	*arr++ = byte_read(RS232_REG);
 	*arr++ = byte_read(RATIO_REG);
+	*arr++ = byte_read(CALI_REG1);
+	*arr++ = byte_read(CALI_REG2);
+	*arr++ = byte_read(CALI_REG3);
+	*arr++ = byte_read(CALI_REG4);
 }
 void SaveToEEPROM()
 {
 	uchar* arr = (uchar*)&rdata;
 	SectorErase(RS_REG1);
 	SectorErase(DELAY_REG);
+	SectorErase(CALI_REG1);
 
 	byte_write(RS_REG1,*arr++);
 	byte_write(RS_REG2,*arr++);
@@ -41,20 +50,25 @@ void SaveToEEPROM()
 	byte_write(SAMPLE_REG,*arr++);
 	byte_write(RS232_REG,*arr++);
 	byte_write(RATIO_REG,*arr++);
+	byte_write(CALI_REG1,*arr++);
+	byte_write(CALI_REG2,*arr++);
+	byte_write(CALI_REG3,*arr++);
+	byte_write(CALI_REG4,*arr++);
 }
 void State_Init()
 {
 	rdata.StateId = PG_MAIN;
 	rdata.pos_len = 0;
-	rdata.Rs = 1.1;
-	rdata.Is = 1.2;
-	rdata.Rx = 1.3;
-	rdata.Ix = 1.4;
+	rdata.Rs = 1.0;
+	rdata.Is = 1.0;
+	rdata.Rx = 0.0;
+	rdata.Ix = 1.0;
 	rdata.Delay = 10;
 	rdata.delay_cnt = rdata.Delay << DELAY_MULTIPLE;
 	rdata.Samplerate = 1;
 	rdata.Baudrate = 1;
 	rdata.Ratio = KEY_SCA10;
+	rdata.cali_ratio = 1;
 	LoadFromEEPROM();
 	display_scale();
 	State_Display();
@@ -84,7 +98,7 @@ void State_Change(uchar key)
 			return;
 
 		case  KEY_NUM3: 
-			rdata.StateId = PG_SET232;
+			rdata.StateId = PG_ZERO;
 			rdata.pos_len = rdata.Baudrate;
 			return;
 
@@ -94,7 +108,7 @@ void State_Change(uchar key)
 			return;
 
 		case  KEY_NUM5: 
-			rdata.StateId = PG_HELP;
+			rdata.StateId = PG_CALIBRATE;
 			rdata.pos_len = 0;
 			return;
 
@@ -105,10 +119,10 @@ void State_Change(uchar key)
 			
 		case  KEY_DN:
 			if(rdata.pos_len == PG_SETRS)
-				rdata.pos_len = PG_HELP;
+				rdata.pos_len = PG_CALIBRATE;
 			return;
 		case  KEY_UP:
-			if(rdata.pos_len == PG_HELP)
+			if(rdata.pos_len == PG_CALIBRATE)
 				rdata.pos_len = PG_SETRS;
 			return;
 		case KEY_OK:
@@ -188,6 +202,7 @@ void State_Change(uchar key)
 		}
 		return;
 	}
+	/*
 	if(rdata.StateId == PG_SET232) { //list box with None,2400,4800,9600,12800
 		if(key == KEY_UP) {
 			rdata.pos_len++;
@@ -223,6 +238,7 @@ void State_Change(uchar key)
 		}
 		return;
 	}
+	*/
 	if(rdata.StateId == PG_SETRATE) {
 		if((key >= KEY_NUM0) && (key <= KEY_NUM9) )
 		{
@@ -250,11 +266,12 @@ void State_Change(uchar key)
 		}
 		return;
 	}
+	/*
 	if(rdata.StateId == PG_HELP) {
 		rdata.pos_len = rdata.StateId;
 		rdata.StateId = PG_MENU1;
 		return;
 	}
-	
+	*/
 	return;
 }
