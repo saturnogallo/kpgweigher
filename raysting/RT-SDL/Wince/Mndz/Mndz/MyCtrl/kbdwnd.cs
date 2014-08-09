@@ -19,6 +19,7 @@ namespace Mndz
         public bool password { get; set; }
         public KbdDataHandler kbdhandler;
         private Color btColor = Color.LightBlue;
+        
         public kbdWnd()
         {
             InitializeComponent();
@@ -84,7 +85,7 @@ namespace Mndz
             param = init_param;
             password = init_pwd;
             kbdhandler = handler;
-            deep++;
+            //deep++;
             UpdateData();
             this.Show();
         }
@@ -103,6 +104,7 @@ namespace Mndz
         }
         private void addchar(char c)
         {
+            Form1.DoBeep();
             if (data.Length >= 15)
                 return;
             if (c >= '0' && c <= '9')
@@ -199,7 +201,7 @@ namespace Mndz
         {
             string llimit = StringResource.str(param + "_llimit");
             string ulimit = StringResource.str(param + "_ulimit");
-
+            Form1.DoBeep();
             if (data.ToString() == "")
             {
 //              Program.MsgShow(StringResource.str("emptydata"));
@@ -207,6 +209,7 @@ namespace Mndz
             }
             try
             {
+
                 if (llimit == "Invalid String Key") //no limits setting
                 {
                     kbdhandler(param, data.ToString());
@@ -237,7 +240,7 @@ namespace Mndz
                 Program.MsgShow(err.Message);
                 return;
             }
-            deep--;
+            //deep--;
             if (deep <= 0)
                 Hide();
             else
@@ -246,12 +249,14 @@ namespace Mndz
 
         private void btn_clr_Click(object sender, EventArgs e)
         {
+            Form1.DoBeep();
             data.Remove(0, data.Length);
             UpdateData();
         }
 
         private void btn_backspace_Click(object sender, EventArgs e)
         {
+            Form1.DoBeep();
             if (data.Length > 0)
             {
                 data.Remove(data.Length - 1, 1);
@@ -261,6 +266,7 @@ namespace Mndz
 
         private void btn_quit_Click(object sender, EventArgs e)
         {
+            Form1.DoBeep();
             Hide();
         }
     }

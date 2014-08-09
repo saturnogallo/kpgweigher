@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
-
+using System.Threading;
 namespace Mndz
 {
     class Util
@@ -89,12 +89,12 @@ namespace Mndz
             static public string GMKFormat(ref double v)
             {
                 string r;
-                if (v > 1e+9)
+                if (v >= 1e+9)
                 {
                     v = v / 1e+9;
                     r = "G";
                 }
-                else if (v > 1e+6)
+                else if (v >= 1e+6)
                 {
                     v = v / 1e+6;
                     r = "M";
@@ -402,6 +402,8 @@ namespace Mndz
             str_tbl["inputrs"] = "请输入Rs({0})实际值";
             str_tbl["inputes"] = "请输入Es({0})实际值";
             str_tbl["out_of_range"] = "输入值无效";
+            str_tbl["hvout"] = "校验高压表";
+            str_tbl["inputhv"] = "请输入高压表校验电压(V)";
 
             str_tbl["NAV_INIT_PZ158"] = "Un%01;00\r";
 //            str_tbl["NAV_10MV_PZ158"] = "Un%01;12;02\r";

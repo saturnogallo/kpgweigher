@@ -512,7 +512,7 @@ namespace Mndz
         static private string oldmultiply = "";  //old resistance divider
         static private string[] volttbl = new string[] { "VOLT_1V", "VOLT_2V", "VOLT_5V", "VOLT_10V", "VOLT_20V","VOLT_50V", "VOLT_OFF" };
         static private string[] multbl = new string[] { "MUL_1", "MUL_10", "MUL_100", "MUL_500", "MUL_1000", "MUL_OFF"};
-        static private string[] outputtbl = new string[] { "ON", "OFF" };
+        //static private string[] outputtbl = new string[] { "ON", "OFF" };
         static private byte[] UsHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('s'), Convert.ToByte('U'), Convert.ToByte('U') };
         static private byte[] UtHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('t')};
         static private byte[] UdHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('d') };
@@ -658,10 +658,14 @@ namespace Mndz
             set
             {
                 if (value < 0)
+                {
+                    _VxOutput = 0;
                     return;
-                if (value / VxMultiplier >= 10) //over 10 volt
-                    return;
-                _VxOutput = value / VxMultiplier;
+                }
+                if (value / VxMultiplier > 10) //over 10 volt
+                    _VxOutput = 10 ;
+                else
+                    _VxOutput = value / VxMultiplier;
             }
         }
         internal Decimal RxNominal = 0;
@@ -785,6 +789,7 @@ namespace Mndz
                 if ((value == false) ||(EsIndex < 0 || RxIndex < 0))
                 {
                     ToDAValue(0);
+                    _VxOutput = 0;
                     DeviceMgr.RelayState("VOLT_OFF", "MUL_OFF");
                     _bOn = false;
                     return;
@@ -795,6 +800,30 @@ namespace Mndz
                 ToDAValue(_VxOutput);
                 _bOn = true;
             }
+        }
+        internal bool bDirectOutputOn = false;
+        internal void DirectOutputOpen(Decimal volt)
+        {
+            double nv = Convert.ToDouble(volt) / 1000.0;//fixed 10kv port
+            if (nv > 10) //over 10 volt 
+                return;
+            VxMultiplier = 1000;
+            VxOutput = Convert.ToDouble(volt);
+            
+            RescueDA();
+            Thread.Sleep(200);
+            DeviceMgr.RelayState("VOLT_OFF", "MUL_1000");
+            ToDAValue(nv);
+            lastDirectOutput = nv * VxMultiplier;
+            bDirectOutputOn = true;
+        }
+        internal void DirectOutputClose()
+        {
+            ToDAValue(0);
+            _VxOutput = 0;
+            DeviceMgr.RelayState("VOLT_OFF", "MUL_OFF");
+            bDirectOutputOn = false;
+            return;
         }
         private Decimal _daoffset;
         internal Decimal daoffset  //DA offset
@@ -823,7 +852,7 @@ namespace Mndz
         private int[] _EsTables; //index to values
         private int[] _RsTables; //index to values
         private int[] _MulTables;//multiply for Vx Voltage
-
+        private Decimal RNav; //input res of nav meter Vg;
         internal Processor()
         {
             _EsTables = new int[]     { IND_ES_1V, IND_ES_10V, IND_ES_10V, IND_ES_10V, IND_ES_10V, IND_ES_20V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_5V, IND_ES_10V, IND_ES_10V };
@@ -844,8 +873,26 @@ namespace Mndz
             _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
             if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.0001) //100uV
                 _daoffset = 0;
+
+            string rn = Util.ConstIni.StringValue("LASTSETTING", "rnav");
+            RNav = 10000000;//10M
+            if (rn != "")
+                RNav = Decimal.Parse(rn);
+            else
+                Util.ConstIni.WriteString("LASTSETTING", "rnav", "10000000");
             
             bOn = false;
+        }
+        public int RefreshDirectOutput()
+        {
+            if (!bDirectOutputOn)
+            {
+                return 0;
+            }
+            else
+            {
+                return UpdateDirectVxOutput();
+            }
         }
         public int RefreshOutput()
         {
@@ -1073,7 +1120,7 @@ namespace Mndz
                 double va;
                 if (CollectVoltage(out va))
                 {
-                    if (Math.Abs(va) < 0.00001) // < 10uV
+                    if (Math.Abs(va) < 0.0001) // < 100uV
                         DeviceMgr.Action("navzero", 0);
                     break;
                 }
@@ -1088,17 +1135,114 @@ namespace Mndz
                 double va;
                 if (CollectVoltage2(out va))
                 {
-                    if (Math.Abs(va) < 0.00001) // < 10uV
+                    if (Math.Abs(va) < 0.0001) // < 100uV
                         DeviceMgr.Action2("navzero", 0);
                     break;
                 }
                 System.Threading.Thread.Sleep(1000);
             }
         }
+        #region direct voltage output
+        private Queue<double> q_dvgs = new Queue<double>(6);
+        public int ADdirect_delay = 3;
+        public bool bDirectStable = false;
+        private int bDirectStableCnt = 0;
+        private double lastDirectOutput = 0;
+        //return value is the time interval for next reading
+        private int UpdateDirectVxOutput()
+        {
+            bDirectStable = false;
+            //update Voltage output
+            if (GlobalConfig.ISDEBUG) //debug use
+            {
+                ToDAValue(0);
+                return 0;// DeviceMgr.success;
+            }
+            
+            double Vx;
+            if (!CollectVoltage2(out Vx))
+                return 0;
+
+            VxMeasure = Vx * VxMultiplier * 10;
+            double thisVx = VxMeasure;
+            
+            //variation < 5/10000 or < 1volt
+            if ((Math.Abs(VxOutput - thisVx) < 0.0005) ||
+                (Math.Abs(VxOutput - thisVx) < VxOutput * 0.0005))
+            {
+                if(bDirectStableCnt++ > 2)
+                    bDirectStable = true;
+                return 0; //no delay for next reading
+            }
+            bDirectStableCnt = 0;
+            double volt = (VxOutput - VxMeasure) / (2);
+            if(Math.Abs(volt) > (VxMultiplier * 10.00 / 262144)) //bigger than 10 counts
+            {
+                lastDirectOutput = lastDirectOutput + volt;
+                if (!ToDAValue(lastDirectOutput/VxMultiplier))
+                    return 0;
+                return ADdirect_delay;//3 seconds for stable
+            }
+            return 0;
+        }
+
+        #endregion
+
         private Queue<double> q_vgs = new Queue<double>(6);
-        public int ADdelay = 3;
+        private int nADdelay = -1;
+        private double dPercent
+        {
+            get
+            {
+                double dRsValue = Convert.ToDouble(RsValue);
+                if (dRsValue <= 1.1e4)
+                    return 1e-4;
+                if (dRsValue <= 1.1e6)
+                    return 2e-4;
+                if (dRsValue <= 1.1e7)
+                    return 1e-3;
+                if (dRsValue <= 1.1e8)
+                    return 2e-3;
+                if (dRsValue <= 1.1e9)
+                    return 5e-3;
+                if (dRsValue <= 1.1e10)
+                    return 1e-2;
+                if (dRsValue <= 1.1e11)
+                    return 2e-2;
+//                if (dRsValue <= 1.1e12)
+                    return 5e-2;
+
+            }
+        }
+
+        public int ADdelay{
+            get
+            {
+                if (nADdelay > 0)
+                    return nADdelay;
+                double dRsValue = Convert.ToDouble(RsValue);
+                if (dRsValue <= 1e7)
+                    return 2;
+                if (dRsValue <= 1e8)
+                    return 3;
+                if (dRsValue <= 1e9)
+                    return 4;
+                if (dRsValue <= 1e10)
+                    return 5;
+                if (dRsValue <= 1e11)
+                    return 6;
+//                if (dRsValue <= 1e12)
+                    return 7;
+
+            }
+            set
+            {
+                nADdelay = value;
+            }
+        }
         public bool bStable = false;
         //return value is the interval for next reading
+        private int bStableCnt = 0;
         private int UpdateVxOutput()
         {
             bStable = false;
@@ -1123,15 +1267,20 @@ namespace Mndz
             
             VxMeasure = Vx * VxMultiplier*10; 
             double thisRx;
-            thisRx = ((VxMeasure + Vg) * Convert.ToDouble(RsValue) / (Convert.ToDouble(EsValue) - Vg));
+            thisRx = ((VxMeasure + Vg) * Convert.ToDouble(RsValue) / (Convert.ToDouble(EsValue) - Vg - Vg * Convert.ToDouble(RsValue) / Convert.ToDouble(RNav)));
+            if (thisRx < 0)
+            {
+                thisRx = ((VxMeasure + Vg) * Convert.ToDouble(RsValue) / (Convert.ToDouble(EsValue) - Vg));
+            }
             //Vg < Vmeasure/1000 and variation < 5/10000
-            if (Math.Abs(Convert.ToDouble(lastRx) - thisRx) < Math.Abs(Convert.ToDouble(lastRx) * 0.0001) && (Math.Abs(Vg) < Math.Abs(VxMeasure) * 0.00005))
+            if (Math.Abs(Convert.ToDouble(lastRx) - thisRx) < Math.Abs(Convert.ToDouble(lastRx) * dPercent) && (Math.Abs(Vg) < Math.Abs(VxMeasure) * 0.00005))
             {
                 lastRx = Convert.ToDecimal(thisRx);
-                bStable = true;
+                if(bStableCnt++ > 2)
+                    bStable = true;
                 return 0; //no delay for next reading
             }
-            
+            bStableCnt = 0;
             lastRx = Convert.ToDecimal(thisRx);
             double newVx = thisRx * Convert.ToDouble(EsValue) /  Convert.ToDouble(RsValue);
 
@@ -1142,7 +1291,7 @@ namespace Mndz
                 q_vgs.Clear();
                 if(!ToDAValue(_VxOutput))
                     return 0;
-                return ADdelay;//5 seconds for stable
+                return ADdelay;//3 seconds for stable
             }
             q_vgs.Enqueue(volt);
             if (q_vgs.Count > 5)
