@@ -225,10 +225,11 @@ namespace Zddq2
                 btn_serial.Text = rx.sSerial;
                 btn_stdchan.Text = rx.iStdChan.ToString();
 
-                if ((rx.iRRange == ActionMgr.RNG_10K && rx.bSqrt) || (rx.iRRange == ActionMgr.RNG_100K && rx.bSqrt))
+/*                if ((rx.iRRange == ActionMgr.RNG_10K && rx.bSqrt) || (rx.iRRange == ActionMgr.RNG_100K && rx.bSqrt))
                 {
                     rx.bSqrt = false;
                 }
+ */
                 if (rx.bSqrt)
                 {
                     btn_sqrt.Text = "x2";
@@ -249,11 +250,6 @@ namespace Zddq2
             btn_stdchan.bOn = rx.bEnabled;
             //btn_sqrt.bOn = rx.bEnabled && (rx.iVMode == 0);
             //btn_vmode.bOn = rx.bEnabled;
-        }
-
-        private void panel1_GotFocus(object sender, EventArgs e)
-        {
-
         }
 
     }

@@ -482,10 +482,5 @@ namespace Zddq2
         {
 
         }
-
-        private void lbl_fltlength_ParentChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 }

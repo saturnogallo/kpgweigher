@@ -602,15 +602,5 @@ namespace Zddq2
         {
 
         }
-
-        private void RxDisplay_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void lbl_aux1_ParentChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 }
