@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DeviceMgrPC.cs" />
     <Compile Include="MyCtrl\ChoiceWnd.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -56,7 +57,6 @@
       <DependentUpon>ChoiceWnd.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\ColorMng.cs" />
-    <Compile Include="DeviceMgr.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

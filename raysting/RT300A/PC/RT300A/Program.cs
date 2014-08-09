@@ -30,6 +30,7 @@ namespace Mndz
         {
             Program.msg.Init(line);
         }
+        /*
         public static void Upgrade()
         {
             string diskdir = "";
@@ -48,9 +49,6 @@ namespace Mndz
                 Process.GetCurrentProcess().Kill();
                 return;
             }
-            
-
-        }
-
+        }*/
     }
 }

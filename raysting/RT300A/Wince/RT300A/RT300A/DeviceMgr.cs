@@ -497,10 +497,13 @@ namespace Mndz
 
                 if (!Form1.IsValidCurrent(value) )
                     return;
-                _setting = value;
+                if (_setting != value)
+                {
+                    _setting = value;
+                    //Util.ConstIni.WriteString("LASTSETTING", "setting", _setting.ToString());
+                }
                 _track_setting = _setting;
                 trackfilter.Clear();
-                Util.ConstIni.WriteString("LASTSETTING", "setting", _setting.ToString());
             }
         }
         private void SaveDA()
@@ -563,9 +566,12 @@ namespace Mndz
             {
                 if (Math.Abs(Convert.ToDouble(value -1 )) > 0.01) //too much variance
                     return;
-                _adscale = value;
 
-                Util.ConstIni.WriteString("LASTSETTING", "adscale", _adscale.ToString());
+                if (_adscale != value)
+                {
+                    _adscale = value;
+                    Util.ConstIni.WriteString("LASTSETTING", "adscale", _adscale.ToString());
+                }
             }
         }
         private Decimal _daoffset;
@@ -579,10 +585,12 @@ namespace Mndz
             {
                 if (Math.Abs(Convert.ToDouble(value)) > 0.01) //too much offset
                     return;
-                _daoffset = value;
-
-                Util.ConstIni.WriteString("LASTSETTING", "daoffset", _daoffset.ToString());
-
+                
+                if (_daoffset != value)
+                {
+                    _daoffset = value;
+                    Util.ConstIni.WriteString("LASTSETTING", "daoffset", _daoffset.ToString());
+                }
             }
         }
         private int[] validrng = new int[] { 1, 10, 100, 300, 600, 1000 };
@@ -590,15 +598,25 @@ namespace Mndz
         internal int range{
             get
             {
-                
                 if (!validrng.Contains(_range))
-                    _range = 1;
+                {
+                    if (Form1.s_scale == "1000")
+                        _range = 10;
+                    else
+                        _range = 1;
+                }
                 return _range;
             }
             set
             {
                 if (validrng.Contains(value))
-                    _range = value;
+                {
+                    if (_range != value)
+                    {
+                        _range = value;
+                        //Util.ConstIni.WriteString("LASTSETTING", "range", _range.ToString());
+                    }
+                }
             }
         }
 
@@ -610,20 +628,33 @@ namespace Mndz
         {
             datafilter = new Queue<double>();
             trackfilter = new Queue<double>();
-            
-            _setting = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "setting"));
-            _range = Int32.Parse(Util.ConstIni.StringValue("LASTSETTING", "range"));
-            _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
 
+            _setting = 0;  //Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "setting"));
+            _range = 10; // Int32.Parse(Util.ConstIni.StringValue("LASTSETTING", "range"));
+
+            try
+            {
+                _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
+            }
+            catch
+            {
+                _daoffset = 0;
+            }
             _adscale = 1;
-            if("" != Util.ConstIni.StringValue("LASTSETTING", "adscale"))
-                _adscale = Double.Parse(Util.ConstIni.StringValue("LASTSETTING", "adscale")); //
-
+            try
+            {
+                _adscale = Double.Parse(Util.ConstIni.StringValue("LASTSETTING", "adscale"));
+            }
+            catch
+            {
+                _adscale = 1;
+            }
+           
             bTracking = true; // (Util.ConstIni.StringValue("LASTSETTING", "tracking") != "");
-                
+
             if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.01) //10mV
-                _daoffset = 0;        
-            
+                _daoffset = 0;
+
             bOn = false;
         }
         private Decimal _track_setting = 0;
@@ -751,11 +782,31 @@ namespace Mndz
             return sqr * delta;
         }
         internal double Current = -9999;
+        public bool CalibrateADScale(double std)
+        {
+            double va;
+            double sum = 0;
+            //average of ten readings
+            for (int i = 0; i < 10; i++)
+            {
+                if (!CollectVoltage(out va))
+                    return false;
+                sum = sum + va;
+            }
+            sum = sum / 10;
+            adscale = std / sum;
+            return true;
+        }
+        public void Reset()
+        {
+            DeviceMgr.Reset();
+        }
         private bool UpdateCurrentOnly()
         {
             double va;
             if (!CollectVoltage(out va))
                 return false;
+            va = va * adscale;
             if((Form1.s_scale == "300") )
                Current = va * 1000.0; // 0-0.3V=>300A
             if ((Form1.s_scale == "600") || (Form1.s_scale == "1000"))

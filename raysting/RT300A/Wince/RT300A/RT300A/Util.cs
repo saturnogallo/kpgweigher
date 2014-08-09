@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.Win32;
 namespace Mndz
 {
     class Util
@@ -13,7 +14,7 @@ namespace Mndz
         public static IniHandler ConstIni; 
         static Util()
         {
-            ConstIni = new IniHandler(Path.Combine(GlobalConfig.basedir,"define.ini"), "");
+            ConstIni = new IniHandler(Path.Combine(GlobalConfig.basedir,"define.txt"), "");
         }
         public static bool TryDoubleParse(string val, out double result)
         {
@@ -150,6 +151,15 @@ namespace Mndz
         {
             try
             {
+                RegistryKey key3 = Registry.CurrentUser.OpenSubKey("ControlPanel", true).OpenSubKey("BackLight", true);
+                return key3.GetValue(key).ToString();
+            }
+            catch
+            {
+                return "";
+            }
+            try
+            {
                 StreamReader sr = File.OpenText(_fn);
                 if (sr is StreamReader)
                 {
@@ -159,6 +169,8 @@ namespace Mndz
                         if (line.StartsWith(key + "="))
                         {
                             sr.Close();
+                            sr.Dispose();
+                            sr = null;
                             return line.Remove(0, (key + "=").Length);
                         }
                     }
@@ -167,20 +179,24 @@ namespace Mndz
                 //return tmpbuf.ToString();
                 return "";
             }
-            catch //for unavailable key please return 9999
+            catch(Exception ex) //for unavailable key please return 9999
             {
                 return "";
             }
         }
         public void WriteString(string section, string key, object value)
         {
-            //WritePrivateProfileString(section + _head, key, value.ToString(), _fn);
             try
             {
+                RegistryKey key3 = Registry.CurrentUser.OpenSubKey("ControlPanel", true).OpenSubKey("BackLight", true);
+
+                key3.SetValue(key, value, RegistryValueKind.String);
+
+                return;
                 string newfile = _fn + ".bak";
                 if (File.Exists(newfile))
                     File.Delete(newfile);
-                StreamWriter sw = new StreamWriter(_fn + ".bak");
+                StreamWriter sw = new StreamWriter(newfile,false);
                 if (sw is StreamWriter)
                 {
                     StreamReader sr = File.OpenText(_fn);
@@ -199,14 +215,23 @@ namespace Mndz
                             }
                         }
                         sr.Close();
+                        sr.Dispose();
+                        sr = null;
                     }
                     sw.Close();
+                    sw.Dispose();
+                    sw = null;
                 }
+                Thread.Sleep(50);
                 File.Delete(_fn);
-                File.Move(newfile, _fn);
+                Thread.Sleep(50);
+                File.Copy(newfile, _fn,true);
+                Thread.Sleep(50);
             }
-            catch
+            catch(Exception ex)
             {
+                //Logger.Log(ex.Message + ex.StackTrace);
+                Program.MsgShow(ex.Message);
             }
         }
     }

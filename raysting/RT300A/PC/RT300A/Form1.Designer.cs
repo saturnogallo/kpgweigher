@@ -137,9 +137,9 @@
             this.label1.ForeColor = System.Drawing.Color.MediumBlue;
             this.label1.Location = new System.Drawing.Point(249, -3);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(527, 44);
+            this.label1.Size = new System.Drawing.Size(550, 44);
             this.label1.TabIndex = 0;
-            this.label1.Text = "300A 精密直流大功率恒流源";
+            this.label1.Text = "1000A 精密直流大功率恒流源";
             // 
             // btn_zeroon
             // 
@@ -149,6 +149,7 @@
             this.btn_zeroon.colorShadow = System.Drawing.Color.LightGray;
             this.btn_zeroon.colorTop = System.Drawing.Color.Pink;
             this.btn_zeroon.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.980198F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_zeroon.IsButtonUp = true;
             this.btn_zeroon.Label = "电流表清零";
             this.btn_zeroon.Location = new System.Drawing.Point(42, 249);
             this.btn_zeroon.Margin = new System.Windows.Forms.Padding(6);
@@ -165,6 +166,7 @@
             this.lbButton1.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton1.colorTop = System.Drawing.Color.Pink;
             this.lbButton1.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton1.IsButtonUp = true;
             this.lbButton1.Label = null;
             this.lbButton1.Location = new System.Drawing.Point(705, 439);
             this.lbButton1.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -181,6 +183,7 @@
             this.lbButton2.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton2.colorTop = System.Drawing.Color.Pink;
             this.lbButton2.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton2.IsButtonUp = true;
             this.lbButton2.Label = null;
             this.lbButton2.Location = new System.Drawing.Point(774, 439);
             this.lbButton2.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -197,6 +200,7 @@
             this.lbButton3.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton3.colorTop = System.Drawing.Color.Pink;
             this.lbButton3.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton3.IsButtonUp = true;
             this.lbButton3.Label = null;
             this.lbButton3.Location = new System.Drawing.Point(843, 439);
             this.lbButton3.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -213,6 +217,7 @@
             this.lbButton4.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton4.colorTop = System.Drawing.Color.Pink;
             this.lbButton4.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton4.IsButtonUp = true;
             this.lbButton4.Label = null;
             this.lbButton4.Location = new System.Drawing.Point(705, 379);
             this.lbButton4.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -229,6 +234,7 @@
             this.lbButton5.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton5.colorTop = System.Drawing.Color.Pink;
             this.lbButton5.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton5.IsButtonUp = true;
             this.lbButton5.Label = null;
             this.lbButton5.Location = new System.Drawing.Point(774, 379);
             this.lbButton5.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -245,6 +251,7 @@
             this.lbButton6.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton6.colorTop = System.Drawing.Color.Pink;
             this.lbButton6.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton6.IsButtonUp = true;
             this.lbButton6.Label = null;
             this.lbButton6.Location = new System.Drawing.Point(843, 379);
             this.lbButton6.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -261,6 +268,7 @@
             this.lbButton7.colorShadow = System.Drawing.Color.Black;
             this.lbButton7.colorTop = System.Drawing.Color.Pink;
             this.lbButton7.Font = new System.Drawing.Font("Arial", 12.11881F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton7.IsButtonUp = true;
             this.lbButton7.Label = "7";
             this.lbButton7.Location = new System.Drawing.Point(705, 319);
             this.lbButton7.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -277,6 +285,7 @@
             this.lbButton8.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton8.colorTop = System.Drawing.Color.Pink;
             this.lbButton8.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton8.IsButtonUp = true;
             this.lbButton8.Label = null;
             this.lbButton8.Location = new System.Drawing.Point(774, 319);
             this.lbButton8.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -293,6 +302,7 @@
             this.lbButton9.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton9.colorTop = System.Drawing.Color.Pink;
             this.lbButton9.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton9.IsButtonUp = true;
             this.lbButton9.Label = null;
             this.lbButton9.Location = new System.Drawing.Point(843, 319);
             this.lbButton9.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -309,6 +319,7 @@
             this.lbButton0.colorShadow = System.Drawing.Color.LightGray;
             this.lbButton0.colorTop = System.Drawing.Color.Pink;
             this.lbButton0.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButton0.IsButtonUp = true;
             this.lbButton0.Label = null;
             this.lbButton0.Location = new System.Drawing.Point(705, 499);
             this.lbButton0.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -325,6 +336,7 @@
             this.lbButtonPT.colorShadow = System.Drawing.Color.LightGray;
             this.lbButtonPT.colorTop = System.Drawing.Color.Pink;
             this.lbButtonPT.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButtonPT.IsButtonUp = true;
             this.lbButtonPT.Label = null;
             this.lbButtonPT.Location = new System.Drawing.Point(774, 499);
             this.lbButtonPT.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -341,6 +353,7 @@
             this.lbButtonCancel.colorShadow = System.Drawing.Color.LightGray;
             this.lbButtonCancel.colorTop = System.Drawing.Color.Pink;
             this.lbButtonCancel.Font = new System.Drawing.Font("Arial", 22.09901F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButtonCancel.IsButtonUp = true;
             this.lbButtonCancel.Label = "取消";
             this.lbButtonCancel.Location = new System.Drawing.Point(912, 319);
             this.lbButtonCancel.Margin = new System.Windows.Forms.Padding(15, 14, 15, 14);
@@ -357,6 +370,7 @@
             this.lbButtonOK.colorShadow = System.Drawing.Color.LightGray;
             this.lbButtonOK.colorTop = System.Drawing.Color.Pink;
             this.lbButtonOK.Font = new System.Drawing.Font("Arial", 22.09901F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButtonOK.IsButtonUp = true;
             this.lbButtonOK.Label = "确定";
             this.lbButtonOK.Location = new System.Drawing.Point(912, 439);
             this.lbButtonOK.Margin = new System.Windows.Forms.Padding(15, 14, 15, 14);
@@ -373,6 +387,7 @@
             this.lbButtonPercent.colorShadow = System.Drawing.Color.LightGray;
             this.lbButtonPercent.colorTop = System.Drawing.Color.Pink;
             this.lbButtonPercent.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbButtonPercent.IsButtonUp = true;
             this.lbButtonPercent.Label = null;
             this.lbButtonPercent.Location = new System.Drawing.Point(843, 499);
             this.lbButtonPercent.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -399,6 +414,7 @@
             this.btn_turnon.colorShadow = System.Drawing.Color.LightGray;
             this.btn_turnon.colorTop = System.Drawing.Color.Pink;
             this.btn_turnon.Font = new System.Drawing.Font("Microsoft Sans Serif", 36.35643F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_turnon.IsButtonUp = true;
             this.btn_turnon.Label = "ON";
             this.btn_turnon.Location = new System.Drawing.Point(868, 78);
             this.btn_turnon.Margin = new System.Windows.Forms.Padding(15, 14, 15, 14);
@@ -427,6 +443,7 @@
             this.rbtn_up2.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_up2.colorTop = System.Drawing.Color.Pink;
             this.rbtn_up2.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_up2.IsButtonUp = true;
             this.rbtn_up2.Label = null;
             this.rbtn_up2.Location = new System.Drawing.Point(392, 347);
             this.rbtn_up2.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -443,6 +460,7 @@
             this.rbtn_up3.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_up3.colorTop = System.Drawing.Color.Pink;
             this.rbtn_up3.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_up3.IsButtonUp = true;
             this.rbtn_up3.Label = null;
             this.rbtn_up3.Location = new System.Drawing.Point(320, 347);
             this.rbtn_up3.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -459,6 +477,7 @@
             this.rbtn_up4.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_up4.colorTop = System.Drawing.Color.Pink;
             this.rbtn_up4.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_up4.IsButtonUp = true;
             this.rbtn_up4.Label = null;
             this.rbtn_up4.Location = new System.Drawing.Point(239, 347);
             this.rbtn_up4.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -475,6 +494,7 @@
             this.rbtn_up5.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_up5.colorTop = System.Drawing.Color.Pink;
             this.rbtn_up5.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_up5.IsButtonUp = true;
             this.rbtn_up5.Label = null;
             this.rbtn_up5.Location = new System.Drawing.Point(160, 347);
             this.rbtn_up5.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -491,6 +511,7 @@
             this.rbtn_up6.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_up6.colorTop = System.Drawing.Color.Pink;
             this.rbtn_up6.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_up6.IsButtonUp = true;
             this.rbtn_up6.Label = null;
             this.rbtn_up6.Location = new System.Drawing.Point(87, 347);
             this.rbtn_up6.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -507,6 +528,7 @@
             this.rbtn_up7.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_up7.colorTop = System.Drawing.Color.Pink;
             this.rbtn_up7.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_up7.IsButtonUp = true;
             this.rbtn_up7.Label = null;
             this.rbtn_up7.Location = new System.Drawing.Point(10, 347);
             this.rbtn_up7.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -523,6 +545,7 @@
             this.rbtn_up1.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_up1.colorTop = System.Drawing.Color.Pink;
             this.rbtn_up1.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_up1.IsButtonUp = true;
             this.rbtn_up1.Label = null;
             this.rbtn_up1.Location = new System.Drawing.Point(471, 347);
             this.rbtn_up1.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -539,6 +562,7 @@
             this.rbtn_dn1.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_dn1.colorTop = System.Drawing.Color.Pink;
             this.rbtn_dn1.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_dn1.IsButtonUp = true;
             this.rbtn_dn1.Label = null;
             this.rbtn_dn1.Location = new System.Drawing.Point(471, 514);
             this.rbtn_dn1.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -555,6 +579,7 @@
             this.rbtn_dn2.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_dn2.colorTop = System.Drawing.Color.Pink;
             this.rbtn_dn2.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_dn2.IsButtonUp = true;
             this.rbtn_dn2.Label = null;
             this.rbtn_dn2.Location = new System.Drawing.Point(392, 514);
             this.rbtn_dn2.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -571,6 +596,7 @@
             this.rbtn_dn3.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_dn3.colorTop = System.Drawing.Color.Pink;
             this.rbtn_dn3.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_dn3.IsButtonUp = true;
             this.rbtn_dn3.Label = null;
             this.rbtn_dn3.Location = new System.Drawing.Point(320, 514);
             this.rbtn_dn3.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -587,6 +613,7 @@
             this.rbtn_dn4.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_dn4.colorTop = System.Drawing.Color.Pink;
             this.rbtn_dn4.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_dn4.IsButtonUp = true;
             this.rbtn_dn4.Label = null;
             this.rbtn_dn4.Location = new System.Drawing.Point(239, 514);
             this.rbtn_dn4.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -603,6 +630,7 @@
             this.rbtn_dn5.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_dn5.colorTop = System.Drawing.Color.Pink;
             this.rbtn_dn5.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_dn5.IsButtonUp = true;
             this.rbtn_dn5.Label = null;
             this.rbtn_dn5.Location = new System.Drawing.Point(160, 514);
             this.rbtn_dn5.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -619,6 +647,7 @@
             this.rbtn_dn6.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_dn6.colorTop = System.Drawing.Color.Pink;
             this.rbtn_dn6.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_dn6.IsButtonUp = true;
             this.rbtn_dn6.Label = null;
             this.rbtn_dn6.Location = new System.Drawing.Point(87, 514);
             this.rbtn_dn6.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -635,6 +664,7 @@
             this.rbtn_dn7.colorShadow = System.Drawing.Color.LightGray;
             this.rbtn_dn7.colorTop = System.Drawing.Color.Pink;
             this.rbtn_dn7.Font = new System.Drawing.Font("Arial", 12F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rbtn_dn7.IsButtonUp = true;
             this.rbtn_dn7.Label = null;
             this.rbtn_dn7.Location = new System.Drawing.Point(10, 514);
             this.rbtn_dn7.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -651,6 +681,7 @@
             this.rngbtn_1.colorShadow = System.Drawing.Color.LightGray;
             this.rngbtn_1.colorTop = System.Drawing.Color.Pink;
             this.rngbtn_1.Font = new System.Drawing.Font("Arial", 12.11881F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rngbtn_1.IsButtonUp = true;
             this.rngbtn_1.Label = "  1 A";
             this.rngbtn_1.Location = new System.Drawing.Point(577, 361);
             this.rngbtn_1.Margin = new System.Windows.Forms.Padding(31, 27, 31, 27);
@@ -667,6 +698,7 @@
             this.rngbtn_10.colorShadow = System.Drawing.Color.LightGray;
             this.rngbtn_10.colorTop = System.Drawing.Color.Pink;
             this.rngbtn_10.Font = new System.Drawing.Font("Arial", 12.11881F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rngbtn_10.IsButtonUp = true;
             this.rngbtn_10.Label = " 10 A";
             this.rngbtn_10.Location = new System.Drawing.Point(577, 400);
             this.rngbtn_10.Margin = new System.Windows.Forms.Padding(28, 27, 28, 27);
@@ -683,6 +715,7 @@
             this.rngbtn_100.colorShadow = System.Drawing.Color.LightGray;
             this.rngbtn_100.colorTop = System.Drawing.Color.Pink;
             this.rngbtn_100.Font = new System.Drawing.Font("Arial", 12.11881F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rngbtn_100.IsButtonUp = true;
             this.rngbtn_100.Label = "100 A";
             this.rngbtn_100.Location = new System.Drawing.Point(577, 439);
             this.rngbtn_100.Margin = new System.Windows.Forms.Padding(28, 27, 28, 27);
@@ -699,6 +732,7 @@
             this.rngbtn_300.colorShadow = System.Drawing.Color.LightGray;
             this.rngbtn_300.colorTop = System.Drawing.Color.Pink;
             this.rngbtn_300.Font = new System.Drawing.Font("Arial", 12.11881F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rngbtn_300.IsButtonUp = true;
             this.rngbtn_300.Label = "300 A";
             this.rngbtn_300.Location = new System.Drawing.Point(577, 478);
             this.rngbtn_300.Margin = new System.Windows.Forms.Padding(28, 27, 28, 27);
@@ -715,6 +749,7 @@
             this.rngbtn_600.colorShadow = System.Drawing.Color.LightGray;
             this.rngbtn_600.colorTop = System.Drawing.Color.Pink;
             this.rngbtn_600.Font = new System.Drawing.Font("Arial", 12.11881F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rngbtn_600.IsButtonUp = true;
             this.rngbtn_600.Label = "600 A";
             this.rngbtn_600.Location = new System.Drawing.Point(577, 517);
             this.rngbtn_600.Margin = new System.Windows.Forms.Padding(28, 27, 28, 27);
@@ -741,7 +776,8 @@
             this.rngbtn_1000.colorShadow = System.Drawing.Color.LightGray;
             this.rngbtn_1000.colorTop = System.Drawing.Color.Pink;
             this.rngbtn_1000.Font = new System.Drawing.Font("Arial", 12.11881F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.rngbtn_1000.Label = "600 A";
+            this.rngbtn_1000.IsButtonUp = true;
+            this.rngbtn_1000.Label = "1000 A";
             this.rngbtn_1000.Location = new System.Drawing.Point(577, 555);
             this.rngbtn_1000.Margin = new System.Windows.Forms.Padding(28, 27, 28, 27);
             this.rngbtn_1000.Name = "rngbtn_1000";
@@ -801,7 +837,7 @@
             this.Controls.Add(this.label1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.Name = "Form1";
-            this.Text = "ON";
+            this.Text = "上海兰斯汀仪表研究所-电流源软件";
             this.ResumeLayout(false);
             this.PerformLayout();
 
