@@ -482,7 +482,9 @@ void main( void )
 				(uart_buffer[0] > '0') && (uart_buffer[0] <= '2')) //12A case
 			{
 				keying = (uart_buffer[0] - '0')*10+(uart_buffer[1] - '0');
-				if(keying < 13)
+				if(lineing==1 && keying < 13) //4 wire
+					dis_play( );
+				else if (keying < 25) //2 wire
 					dis_play( );
 				uart_ptr = 0;
 				continue;
