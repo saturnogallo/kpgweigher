@@ -101,7 +101,21 @@ namespace Mndz
             
             this.Resize += new EventHandler(RectButton_Load);
         }
-
+        //check the status whether the button is in normal status
+        public bool IsButtonUp
+        {
+            get
+            {
+                    return _state == btnState.BUTTON_UP;
+            }
+            set
+            {
+                if (value && _state == btnState.BUTTON_UP)
+                    return;
+                _state = btnState.BUTTON_UP;
+                Invalidate();
+            }
+        }
         void RectButton_DoubleClick(object sender, EventArgs e)
         {
             RectButton_MouseUp(sender, null);

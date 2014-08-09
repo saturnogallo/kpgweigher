@@ -19,26 +19,33 @@ namespace Mndz
         private kbdWnd dlg_kbd;
         private System.Windows.Forms.Timer tm;
         private RectButton[] kbd_btns;
+        private RectButton[] rng_btns;
+        private RectButton[] digi_upbtns;
+        private RectButton[] digi_dnbtns;
         [DllImport("user32.dll", EntryPoint = "ShowCursor", CharSet = CharSet.Auto)]
 
         public static extern int ShowCursor(int bShow);
         private StringBuilder data;
-
+        public static Decimal scale = 300;
+        public static string s_scale = "300";
         public Form1()
         {
 
-            
+
             InitializeComponent();
+            s_scale = this.label1.Text.Substring(0, this.label1.Text.IndexOf("A"));
+            scale = Decimal.Parse(s_scale);
             this.BackColor = Color.LightSkyBlue;
             led_current.ColorDark = this.BackColor;
             led_setting.ColorDark = this.BackColor;
             btn_turnon.BackColor = this.BackColor;
+            btn_zeroon.BackColor = this.BackColor;
             rectMeter1.BackColor = this.BackColor;
             btn_turnon.BackColor = this.BackColor;
             rectMeter1.BgResId = "BGMETER";
             //ShowCursor(0);
             processor = new Processor();
-            data = new StringBuilder(10);   
+            data = new StringBuilder(10);
             kbd_btns = new RectButton[]{ lbButton0,lbButton1,lbButton2,lbButton3,lbButton4,lbButton5,lbButton6,lbButton7,lbButton8,lbButton9,
                 lbButtonCancel,lbButtonOK,lbButtonPT,lbButtonPercent};
             string[] btn_cap = "0,1,2,3,4,5,6,7,8,9,取消,确定,.,%".Split(new char[] { ',' });
@@ -52,55 +59,85 @@ namespace Mndz
                 lbt.Style = MyButtonType.raiseButton;
                 lbt.Click += new EventHandler((o, e) =>
                 {
-                        KeypadTick(NameInArray(o, kbd_btns));
+                    Beep();
+                    KeypadTick(NameInArray(o, kbd_btns));
                 });
             }
-            #region (NO USE) digi up and down
-            /*
-            digi_upbtns = new RectButton[] { rbtn_1up, rbtn_2up, rbtn_3up, rbtn_4up, rbtn_5up, rbtn_6up  };
-            digi_dnbtns = new RectButton[] { rbtn_1dn, rbtn_2dn, rbtn_3dn, rbtn_4dn, rbtn_5dn, rbtn_6dn  };
-            for (int i = 0; i < digi_upbtns.Length; i++)
+            #region range switch
+            rng_btns = new RectButton[] { rngbtn_1, rngbtn_10, rngbtn_100, rngbtn_300, rngbtn_600, rngbtn_1000 };
+
+            for (int i = 0; i < rng_btns.Length; i++)
             {
-                RectButton rb = digi_upbtns[i];
-                rb.bgColor = this.BackColor;
-                rb.SetStyle(Color.DarkOrange, MyButtonType.triangleupButton);
+                RectButton rb = rng_btns[i];
+                rb.BackColor = this.BackColor;
+                rb.colorShadow = this.BackColor;
+                rb.colorTop = Color.LightGray;
 
                 rb.ValidClick += new EventHandler((o, e) =>
                 {
-                    if (processor.iRange >= 0)
-                    {
-                        TickDigit(digi_upbtns.Length - NameInArray(o, digi_upbtns), true);
-                        RefreshDisplay(false);
-                    }
+                    if (processor.bOn)
+                        return;
+                    processor.range = Int32.Parse((o as RectButton).Name.Remove(0, "rngbtn_".Length));
+                    if (processor.setting > processor.range)
+                        processor.setting = 0;
+                    RefreshDisplay(false);
+                    Beep();
+                });
+            }
+            rngbtn_1000.Visible = false;
+            #endregion
+            #region digi up and down
+
+            digi_upbtns = new RectButton[] { rbtn_up1, rbtn_up2, rbtn_up3, rbtn_up4, rbtn_up5, rbtn_up6, rbtn_up7 };
+            digi_dnbtns = new RectButton[] { rbtn_dn1, rbtn_dn2, rbtn_dn3, rbtn_dn4, rbtn_dn5, rbtn_dn6, rbtn_dn7 };
+            for (int i = 0; i < digi_upbtns.Length; i++)
+            {
+                RectButton rb = digi_upbtns[i];
+                rb.BackColor = this.BackColor;
+                rb.colorShadow = this.BackColor;
+                rb.colorTop = Color.DarkOrange;
+
+                rb.bgScale = 3;
+                rb.bOn = true;
+                rb.Style = MyButtonType.triangleupButton;
+                rb.ValidClick += new EventHandler((o, e) =>
+                {
+                    Beep();
+                    TickDigit(digi_upbtns.Length - NameInArray(o, digi_upbtns), true);
+                    RefreshDisplay(false);
                 });
             }
             for (int i = 0; i < digi_dnbtns.Length; i++)
             {
                 RectButton rb = digi_dnbtns[i];
-                rb.bgColor = this.BackColor;
-                rb.SetStyle(Color.DarkOrange, MyButtonType.trianglednButton);
+                rb.BackColor = this.BackColor;
+                rb.colorShadow = this.BackColor;
+                rb.colorTop = Color.DarkOrange;
+
+                rb.bgScale = 3;
+                rb.bOn = true;
+                rb.Style = MyButtonType.trianglednButton;
+
                 rb.ValidClick += new EventHandler((o, e) =>
                 {
-                    if (processor.iRange >= 0)
-                    {
-                        TickDigit(digi_upbtns.Length - NameInArray(o, digi_dnbtns), false);
-                        RefreshDisplay(false);
-                    }
+                    Beep();
+                    TickDigit(digi_upbtns.Length - NameInArray(o, digi_dnbtns), false);
+                    RefreshDisplay(false);
                 });
             }
-             * */
+
             #endregion
 
             dlg_choice = new ChoiceWnd();
             dlg_kbd = new kbdWnd();
-            led_setting.ColorLight = Color.Red;
+            led_setting.ColorLight = Color.DarkGreen;
             led_setting.ColorBackground = this.BackColor;
             led_setting.ElementWidth = 12;
-//            led_setting.RecreateSegments(led_setting.ArrayCount);
-            led_current.ColorLight = Color.DarkGreen;
+            //          led_setting.RecreateSegments(led_setting.ArrayCount);
+            led_current.ColorLight = Color.Red;
             led_current.ColorBackground = this.BackColor;
             led_current.ElementWidth = 10;
-//          led_current.RecreateSegments(led_current.ArrayCount);
+            //          led_current.RecreateSegments(led_current.ArrayCount);
             led_current.Value = "0.0000";
             btn_zeroon.Style = MyButtonType.rectButton;
             btn_zeroon.colorShadow = this.BackColor;
@@ -108,6 +145,7 @@ namespace Mndz
             btn_zeroon.Label = "电流表清零";
             btn_zeroon.ValidClick += new EventHandler((o, e) =>
             {
+                Beep();
                 led_current.Value = "     ";
                 processor.ZeroON();
             });
@@ -117,16 +155,24 @@ namespace Mndz
             btn_turnon.Label = "OFF";
             btn_turnon.Click += new EventHandler((o, e) =>
             {
+                Beep();
                 if (!processor.bOn)
+                {
                     dt_lastoutput = DateTime.Now.AddSeconds(0.5);
-                processor.bOn = !processor.bOn;
-                RefreshDisplay(false);
+                    btn_turnon.colorTop = Color.LightYellow; //switching
+                }
             });
 
             tm = new Timer();
             tm.Interval = 500;
             tm.Tick += new EventHandler((o, e) =>
             {
+                if (btn_turnon.colorTop == Color.LightGreen) //still booting up
+                {
+                    processor.bOn = !processor.bOn;
+                    RefreshDisplay(false);
+                    return;
+                }
                 lbl_datetime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                 if (DateTime.Now.Subtract(dt_lastoutput).TotalSeconds < 1)
                 {
@@ -143,12 +189,43 @@ namespace Mndz
                     }
                 }
             });
-            
+
             tm.Enabled = true;
             tm.Start();
             DeviceMgr.Reset();
-            
+
             RefreshDisplay(true);
+        }
+        //up or down the digit based on position highest ditig is 1 lowest digit is 7
+        //return value mean whether is valid or not
+        internal void TickDigit(int position, bool bUp)
+        {
+            Decimal a;
+            a = processor.setting;
+            int unit = 0; //point position
+            switch (processor.range)
+            {
+                case 1: unit = 2 - position; break;
+                case 10: unit = 3 - position; break;
+                case 100:
+                case 300:
+                case 600: 
+                case 1000: unit = 4 - position; break;
+                default:
+                    return;
+            }
+
+            if (bUp)
+                a = a + Convert.ToDecimal(Math.Pow(10, unit));
+            else
+                a = a - Convert.ToDecimal(Math.Pow(10, unit));
+            if((a < 0) || (a > processor.range))
+                return;
+            processor.setting = a;
+        }
+        private void Beep()
+        {
+            Console.Beep(1000, 200); //1kHz, 200ms duration
         }
         private DateTime dt_lastoutput = DateTime.Now;
         private void CancelInput()
@@ -277,12 +354,24 @@ namespace Mndz
                         if (!IsValidCurrent(a))  //range check
                         {
                             this.Invoke(new Action(() => {
-                                Program.MsgShow("输入值超出范围 (0-400 A)");
+                                if (Form1.s_scale == "300")
+                                    Program.MsgShow("输入值超出范围 (0-400 A)");
+                                if (Form1.s_scale == "600")
+                                    Program.MsgShow("输入值超出范围 (0-600 A)");
+                                if (Form1.s_scale == "1000")
+                                    Program.MsgShow("输入值超出范围 (0-1000 A)");
+
                             }));
                             return;
                         }
                         processor.setting = a;
-                        rectMeter1.Angle = Convert.ToInt32(Math.Floor( Convert.ToDouble(a) * 180 / 360.0));
+                        if (Form1.s_scale == "300")
+                            rectMeter1.Angle = Convert.ToInt32(Math.Floor( Convert.ToDouble(a) * 180 / 300.0));
+                        if (Form1.s_scale == "600")
+                            rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(a) * 180 / (processor.range*1.0)));
+                        if (Form1.s_scale == "1000")
+                            rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(a) * 180 / (processor.range * 1.0)));
+                        
                         RefreshDisplay(true);
                     }
         }
@@ -334,11 +423,30 @@ namespace Mndz
         #endregion
         public void UpdateCurrent(double reading)
         {
-            string newcurr = reading.ToString("F4");
+            string newcurr = "";
+            switch(processor.range){
+                case 1:
+                    newcurr = reading.ToString("F6");
+                    break;
+                case 10:
+                    newcurr = reading.ToString("F5");
+                    break;
+                case 100:
+                case 300:
+                case 600:
+                    newcurr = reading.ToString("F4");
+                    break;
+                default: break; ;
+            }
             if (newcurr != led_current.Value)
             {
                 led_current.Value = newcurr;
-                rectMeter1.Angle = Convert.ToInt32(Math.Floor(reading * 180 / 360.0));
+                if (Form1.s_scale == "300")
+                    rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(reading) * 180 / 300.0));
+                if (Form1.s_scale == "600")
+                    rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(reading) * 180 / (processor.range * 1.0)));
+                if (Form1.s_scale == "1000")
+                    rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(reading) * 180 / (processor.range * 1.0)));
             }
         }
         private void RefreshDisplay(bool bRangeChange)
@@ -355,7 +463,33 @@ namespace Mndz
                 btn_turnon.colorTop = Color.LightGray;
                 //btn_turnon.bOn = false;
             }
-            led_setting.Value = processor.setting.ToString("F3");
+            switch(processor.range){
+                case 1:
+                    led_setting.Value = processor.setting.ToString("F6");
+                    break;
+                case 10:
+                    led_setting.Value = processor.setting.ToString("F5");
+                    break;
+                case 100:
+                case 300:
+                case 600: 
+                    led_setting.Value = processor.setting.ToString("F4");
+                    break;
+                default: break; ;
+            }
+            foreach (RectButton rb in rng_btns)
+            {
+                if (Int32.Parse(rb.Name.Remove(0, "rngbtn_".Length)) == processor.range)
+                {
+                    if (rb.colorTop != Color.Orange)
+                        rb.colorTop = Color.Orange;
+                }
+                else
+                {
+                    if(rb.colorTop != Color.Gray)
+                        rb.colorTop = Color.Gray;
+                }
+            }
         }
         //PC side command
         //curr: 1.234 on
@@ -369,6 +503,11 @@ namespace Mndz
             if (cmd == "H")
             {
                 DeviceMgr.Reset();
+                return;
+            }
+            if (cmd == "ZERO")
+            {
+                processor.ZeroON();
                 return;
             }
             if (cmd == "curr?")
@@ -402,14 +541,23 @@ namespace Mndz
                         return;
                     
                     processor.setting = a;
+
                     
                 processor.bOn = (m.Groups[2].ToString() == "on");
+                RefreshDisplay(true);
                 return;
             }
         }
         public static bool IsValidCurrent(Decimal a)
         {
-            return !(a < 0 || a > 400);
+            if (Form1.s_scale == "300")
+                return !(a < 0 || a > 400);
+            if (Form1.s_scale == "600")
+                return !(a < 0 || a > 600);
+            if (Form1.s_scale == "1000")
+                return !(a < 0 || a > 1000);
+
+            return false;
         }
 
   
