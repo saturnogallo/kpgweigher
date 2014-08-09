@@ -23,12 +23,13 @@ namespace Mndz
 
         public static extern int ShowCursor(int bShow);
         private StringBuilder data;
-
+        public static string s_scale = "300";
         public Form1()
         {
 
             
             InitializeComponent();
+            s_scale = this.label1.Text.Substring(0, this.label1.Text.IndexOf('A'));
             this.BackColor = Color.LightSkyBlue;
             led_current.ColorDark = this.BackColor;
             led_setting.ColorDark = this.BackColor;
@@ -231,7 +232,8 @@ namespace Mndz
         public delegate void VoidDelegate();
         private void Alert()
         {
-            Program.MsgShow("输入值超出范围 (0-400 A)");
+            if(Form1.s_scale == "300")
+                Program.MsgShow("输入值超出范围 (0-400 A)");
         }
 
         private void KbdData(string id, string param)
@@ -253,7 +255,8 @@ namespace Mndz
                             return;
                         }
                         processor.setting = a;
-                        rectMeter1.Angle = Convert.ToInt32(Math.Floor( Convert.ToDouble(a) * 180 / 360.0));
+                        if (Form1.s_scale == "300")
+                            rectMeter1.Angle = Convert.ToInt32(Math.Floor( Convert.ToDouble(a) * 180 / 400.0));
                         RefreshDisplay(true);
                     }
         }
@@ -309,7 +312,8 @@ namespace Mndz
             if (newcurr != led_current.Value)
             {
                 led_current.Value = newcurr;
-                rectMeter1.Angle = Convert.ToInt32(Math.Floor(reading * 180 / 360.0));
+                if (Form1.s_scale == "300")
+                    rectMeter1.Angle = Convert.ToInt32(Math.Floor(reading * 180 / 400.0));
             }
         }
         private void RefreshDisplay(bool bRangeChange)
@@ -336,7 +340,9 @@ namespace Mndz
   
         public static bool IsValidCurrent(Decimal a)
         {
-            return !(a < 0 || a > 400);
+            if (Form1.s_scale == "300")
+                return !(a < 0 || a > 400);
+            return false;
         }
 
   

@@ -67,7 +67,7 @@ namespace Mndz
                     Logger.SysLog(ex.Message + ";" + ex.StackTrace);
                 }
             }
-            MessageBox.Show("未找到300A 精密直流大功率恒流源装置，请检查串口线和电源");
+            MessageBox.Show("未找到"+Form1.s_scale+"A 精密直流大功率恒流源装置，请检查串口线和电源");
             Process.GetCurrentProcess().Kill();
             #endregion
         }

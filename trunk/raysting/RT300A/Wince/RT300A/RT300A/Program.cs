@@ -6,6 +6,8 @@ using System.IO;
 using System.Diagnostics;
 namespace Mndz
 {
+    //Log changes:
+    //2014-7-26 :  add voltage tracking function
     static class Program
     {
         /// <summary>

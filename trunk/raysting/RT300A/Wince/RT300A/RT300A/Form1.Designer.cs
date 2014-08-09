@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.lbl_currscale = new System.Windows.Forms.Label();
-            this.lbl_ohm = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.lbl_version = new System.Windows.Forms.Label();
@@ -55,23 +54,35 @@
             this.led_current = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.led_setting = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.btn_turnon = new Mndz.RectButton();
+            this.rbtn_up7 = new Mndz.RectButton();
+            this.rbtn_up6 = new Mndz.RectButton();
+            this.rbtn_up5 = new Mndz.RectButton();
+            this.rbtn_up4 = new Mndz.RectButton();
+            this.rbtn_up3 = new Mndz.RectButton();
+            this.rbtn_up2 = new Mndz.RectButton();
+            this.rbtn_up1 = new Mndz.RectButton();
+            this.rbtn_dn1 = new Mndz.RectButton();
+            this.rbtn_dn2 = new Mndz.RectButton();
+            this.rbtn_dn3 = new Mndz.RectButton();
+            this.rbtn_dn4 = new Mndz.RectButton();
+            this.rbtn_dn5 = new Mndz.RectButton();
+            this.rbtn_dn6 = new Mndz.RectButton();
+            this.rbtn_dn7 = new Mndz.RectButton();
+            this.rngbtn_1 = new Mndz.RectButton();
+            this.rngbtn_10 = new Mndz.RectButton();
+            this.rngbtn_100 = new Mndz.RectButton();
+            this.rngbtn_300 = new Mndz.RectButton();
+            this.rngbtn_600 = new Mndz.RectButton();
+            this.rngbtn_1000 = new Mndz.RectButton();
             this.SuspendLayout();
             // 
             // lbl_currscale
             // 
-            this.lbl_currscale.Font = new System.Drawing.Font("Tahoma", 26F, System.Drawing.FontStyle.Regular);
-            this.lbl_currscale.Location = new System.Drawing.Point(937, 115);
+            this.lbl_currscale.Font = new System.Drawing.Font("KaiTi", 26F, System.Drawing.FontStyle.Bold);
+            this.lbl_currscale.Location = new System.Drawing.Point(581, 317);
             this.lbl_currscale.Name = "lbl_currscale";
-            this.lbl_currscale.Size = new System.Drawing.Size(45, 60);
-            this.lbl_currscale.Text = "A";
-            // 
-            // lbl_ohm
-            // 
-            this.lbl_ohm.Font = new System.Drawing.Font("Tahoma", 26F, System.Drawing.FontStyle.Regular);
-            this.lbl_ohm.Location = new System.Drawing.Point(781, 257);
-            this.lbl_ohm.Name = "lbl_ohm";
-            this.lbl_ohm.Size = new System.Drawing.Size(62, 53);
-            this.lbl_ohm.Text = "A";
+            this.lbl_currscale.Size = new System.Drawing.Size(103, 44);
+            this.lbl_currscale.Text = "量程";
             // 
             // label3
             // 
@@ -80,13 +91,13 @@
             this.label3.Location = new System.Drawing.Point(136, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(736, 55);
-            this.label3.Text = "300A 精密直流大功率恒流源";
+            this.label3.Text = "1000A 精密直流大功率恒流源";
             this.label3.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // label4
             // 
             this.label4.Font = new System.Drawing.Font("KaiTi", 28F, System.Drawing.FontStyle.Bold);
-            this.label4.Location = new System.Drawing.Point(-3, 115);
+            this.label4.Location = new System.Drawing.Point(198, 317);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(177, 44);
             this.label4.Text = "设定电流";
@@ -98,7 +109,7 @@
             this.lbl_version.Location = new System.Drawing.Point(891, 38);
             this.lbl_version.Name = "lbl_version";
             this.lbl_version.Size = new System.Drawing.Size(114, 17);
-            this.lbl_version.Text = "版本:2013-11-22";
+            this.lbl_version.Text = "版本:2014-07-26";
             this.lbl_version.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // lbl_datetime
@@ -122,18 +133,18 @@
             // label1
             // 
             this.label1.Font = new System.Drawing.Font("KaiTi", 28F, System.Drawing.FontStyle.Bold);
-            this.label1.Location = new System.Drawing.Point(-3, 266);
+            this.label1.Location = new System.Drawing.Point(401, 257);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(177, 44);
-            this.label1.Text = "输出电流";
+            this.label1.Size = new System.Drawing.Size(259, 44);
+            this.label1.Text = "输出电流(A)";
             this.label1.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // rectMeter1
             // 
             this.rectMeter1.BackColor = System.Drawing.Color.LightSkyBlue;
-            this.rectMeter1.Location = new System.Drawing.Point(13, 360);
+            this.rectMeter1.Location = new System.Drawing.Point(1, 119);
             this.rectMeter1.Name = "rectMeter1";
-            this.rectMeter1.Size = new System.Drawing.Size(437, 224);
+            this.rectMeter1.Size = new System.Drawing.Size(171, 89);
             this.rectMeter1.TabIndex = 45;
             // 
             // lbButtonPT
@@ -148,7 +159,7 @@
             // lbButtonOK
             // 
             this.lbButtonOK.Font = new System.Drawing.Font("Arial", 24F, System.Drawing.FontStyle.Bold);
-            this.lbButtonOK.Label = "确定";
+            this.lbButtonOK.Label = "设定";
             this.lbButtonOK.Location = new System.Drawing.Point(909, 478);
             this.lbButtonOK.Name = "lbButtonOK";
             this.lbButtonOK.Size = new System.Drawing.Size(96, 106);
@@ -266,17 +277,18 @@
             // 
             this.btn_zeroon.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
             this.btn_zeroon.Label = "电流表清零";
-            this.btn_zeroon.Location = new System.Drawing.Point(862, 257);
+            this.btn_zeroon.Location = new System.Drawing.Point(42, 249);
             this.btn_zeroon.Name = "btn_zeroon";
-            this.btn_zeroon.Size = new System.Drawing.Size(143, 53);
+            this.btn_zeroon.Size = new System.Drawing.Size(105, 33);
             this.btn_zeroon.TabIndex = 10;
             // 
             // led_current
             // 
             this.led_current.ArrayCount = 7;
-            this.led_current.Location = new System.Drawing.Point(207, 232);
+            this.led_current.ElementWidth = 12;
+            this.led_current.Location = new System.Drawing.Point(178, 68);
             this.led_current.Name = "led_current";
-            this.led_current.Size = new System.Drawing.Size(558, 109);
+            this.led_current.Size = new System.Drawing.Size(686, 177);
             this.led_current.TabIndex = 1;
             // 
             // led_setting
@@ -284,19 +296,229 @@
             this.led_setting.ArrayCount = 7;
             this.led_setting.DecimalShow = true;
             this.led_setting.ElementWidth = 10;
-            this.led_setting.Location = new System.Drawing.Point(174, 58);
+            this.led_setting.Location = new System.Drawing.Point(18, 411);
             this.led_setting.Name = "led_setting";
-            this.led_setting.Size = new System.Drawing.Size(760, 157);
+            this.led_setting.Size = new System.Drawing.Size(538, 117);
             this.led_setting.TabIndex = 1;
             // 
             // btn_turnon
             // 
             this.btn_turnon.Font = new System.Drawing.Font("Arial", 14F, System.Drawing.FontStyle.Bold);
             this.btn_turnon.Label = "OFF";
-            this.btn_turnon.Location = new System.Drawing.Point(520, 400);
+            this.btn_turnon.Location = new System.Drawing.Point(868, 78);
             this.btn_turnon.Name = "btn_turnon";
-            this.btn_turnon.Size = new System.Drawing.Size(137, 128);
+            this.btn_turnon.Size = new System.Drawing.Size(146, 146);
             this.btn_turnon.TabIndex = 25;
+            // 
+            // rbtn_up7
+            // 
+            this.rbtn_up7.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_up7.Label = "电流表清零";
+            this.rbtn_up7.Location = new System.Drawing.Point(18, 366);
+            this.rbtn_up7.Name = "rbtn_up7";
+            this.rbtn_up7.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_up7.TabIndex = 52;
+            // 
+            // rbtn_up6
+            // 
+            this.rbtn_up6.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_up6.Label = "电流表清零";
+            this.rbtn_up6.Location = new System.Drawing.Point(95, 366);
+            this.rbtn_up6.Name = "rbtn_up6";
+            this.rbtn_up6.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_up6.TabIndex = 53;
+            // 
+            // rbtn_up5
+            // 
+            this.rbtn_up5.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_up5.Label = "电流表清零";
+            this.rbtn_up5.Location = new System.Drawing.Point(168, 366);
+            this.rbtn_up5.Name = "rbtn_up5";
+            this.rbtn_up5.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_up5.TabIndex = 54;
+            // 
+            // rbtn_up4
+            // 
+            this.rbtn_up4.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_up4.Label = "电流表清零";
+            this.rbtn_up4.Location = new System.Drawing.Point(247, 366);
+            this.rbtn_up4.Name = "rbtn_up4";
+            this.rbtn_up4.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_up4.TabIndex = 55;
+            // 
+            // rbtn_up3
+            // 
+            this.rbtn_up3.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_up3.Label = "电流表清零";
+            this.rbtn_up3.Location = new System.Drawing.Point(325, 366);
+            this.rbtn_up3.Name = "rbtn_up3";
+            this.rbtn_up3.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_up3.TabIndex = 56;
+            // 
+            // rbtn_up2
+            // 
+            this.rbtn_up2.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_up2.Label = "电流表清零";
+            this.rbtn_up2.Location = new System.Drawing.Point(401, 366);
+            this.rbtn_up2.Name = "rbtn_up2";
+            this.rbtn_up2.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_up2.TabIndex = 57;
+            // 
+            // rbtn_up1
+            // 
+            this.rbtn_up1.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_up1.Label = "电流表清零";
+            this.rbtn_up1.Location = new System.Drawing.Point(479, 366);
+            this.rbtn_up1.Name = "rbtn_up1";
+            this.rbtn_up1.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_up1.TabIndex = 58;
+            // 
+            // rbtn_dn1
+            // 
+            this.rbtn_dn1.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_dn1.Label = "电流表清零";
+            this.rbtn_dn1.Location = new System.Drawing.Point(479, 534);
+            this.rbtn_dn1.Name = "rbtn_dn1";
+            this.rbtn_dn1.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_dn1.TabIndex = 65;
+            // 
+            // rbtn_dn2
+            // 
+            this.rbtn_dn2.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_dn2.Label = "电流表清零";
+            this.rbtn_dn2.Location = new System.Drawing.Point(401, 534);
+            this.rbtn_dn2.Name = "rbtn_dn2";
+            this.rbtn_dn2.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_dn2.TabIndex = 64;
+            // 
+            // rbtn_dn3
+            // 
+            this.rbtn_dn3.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_dn3.Label = "电流表清零";
+            this.rbtn_dn3.Location = new System.Drawing.Point(326, 534);
+            this.rbtn_dn3.Name = "rbtn_dn3";
+            this.rbtn_dn3.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_dn3.TabIndex = 63;
+            // 
+            // rbtn_dn4
+            // 
+            this.rbtn_dn4.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_dn4.Label = "电流表清零";
+            this.rbtn_dn4.Location = new System.Drawing.Point(247, 534);
+            this.rbtn_dn4.Name = "rbtn_dn4";
+            this.rbtn_dn4.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_dn4.TabIndex = 62;
+            // 
+            // rbtn_dn5
+            // 
+            this.rbtn_dn5.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_dn5.Label = "电流表清零";
+            this.rbtn_dn5.Location = new System.Drawing.Point(168, 534);
+            this.rbtn_dn5.Name = "rbtn_dn5";
+            this.rbtn_dn5.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_dn5.TabIndex = 61;
+            // 
+            // rbtn_dn6
+            // 
+            this.rbtn_dn6.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_dn6.Label = "电流表清零";
+            this.rbtn_dn6.Location = new System.Drawing.Point(95, 534);
+            this.rbtn_dn6.Name = "rbtn_dn6";
+            this.rbtn_dn6.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_dn6.TabIndex = 60;
+            // 
+            // rbtn_dn7
+            // 
+            this.rbtn_dn7.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.rbtn_dn7.Label = "电流表清零";
+            this.rbtn_dn7.Location = new System.Drawing.Point(18, 534);
+            this.rbtn_dn7.Name = "rbtn_dn7";
+            this.rbtn_dn7.Size = new System.Drawing.Size(60, 39);
+            this.rbtn_dn7.TabIndex = 59;
+            // 
+            // rngbtn_1
+            // 
+            this.rngbtn_1.BackColor = System.Drawing.Color.Transparent;
+            this.rngbtn_1.bgScale = 3;
+            this.rngbtn_1.bOn = true;
+            this.rngbtn_1.colorShadow = System.Drawing.Color.LightGray;
+            this.rngbtn_1.colorTop = System.Drawing.Color.Pink;
+            this.rngbtn_1.Font = new System.Drawing.Font("Arial", 16F, System.Drawing.FontStyle.Bold);
+            this.rngbtn_1.Label = "  1 A";
+            this.rngbtn_1.Location = new System.Drawing.Point(581, 366);
+            this.rngbtn_1.Name = "rngbtn_1";
+            this.rngbtn_1.Size = new System.Drawing.Size(100, 34);
+            this.rngbtn_1.TabIndex = 66;
+            // 
+            // rngbtn_10
+            // 
+            this.rngbtn_10.BackColor = System.Drawing.Color.Transparent;
+            this.rngbtn_10.bgScale = 3;
+            this.rngbtn_10.bOn = true;
+            this.rngbtn_10.colorShadow = System.Drawing.Color.LightGray;
+            this.rngbtn_10.colorTop = System.Drawing.Color.Pink;
+            this.rngbtn_10.Font = new System.Drawing.Font("Arial", 16F, System.Drawing.FontStyle.Bold);
+            this.rngbtn_10.Label = " 10 A";
+            this.rngbtn_10.Location = new System.Drawing.Point(581, 406);
+            this.rngbtn_10.Name = "rngbtn_10";
+            this.rngbtn_10.Size = new System.Drawing.Size(100, 34);
+            this.rngbtn_10.TabIndex = 67;
+            // 
+            // rngbtn_100
+            // 
+            this.rngbtn_100.BackColor = System.Drawing.Color.Transparent;
+            this.rngbtn_100.bgScale = 3;
+            this.rngbtn_100.bOn = true;
+            this.rngbtn_100.colorShadow = System.Drawing.Color.LightGray;
+            this.rngbtn_100.colorTop = System.Drawing.Color.Pink;
+            this.rngbtn_100.Font = new System.Drawing.Font("Arial", 16F, System.Drawing.FontStyle.Bold);
+            this.rngbtn_100.Label = "100 A";
+            this.rngbtn_100.Location = new System.Drawing.Point(581, 446);
+            this.rngbtn_100.Name = "rngbtn_100";
+            this.rngbtn_100.Size = new System.Drawing.Size(100, 34);
+            this.rngbtn_100.TabIndex = 68;
+            // 
+            // rngbtn_300
+            // 
+            this.rngbtn_300.BackColor = System.Drawing.Color.Transparent;
+            this.rngbtn_300.bgScale = 3;
+            this.rngbtn_300.bOn = true;
+            this.rngbtn_300.colorShadow = System.Drawing.Color.LightGray;
+            this.rngbtn_300.colorTop = System.Drawing.Color.Pink;
+            this.rngbtn_300.Font = new System.Drawing.Font("Arial", 16F, System.Drawing.FontStyle.Bold);
+            this.rngbtn_300.Label = "300 A";
+            this.rngbtn_300.Location = new System.Drawing.Point(581, 486);
+            this.rngbtn_300.Name = "rngbtn_300";
+            this.rngbtn_300.Size = new System.Drawing.Size(100, 34);
+            this.rngbtn_300.TabIndex = 69;
+            // 
+            // rngbtn_600
+            // 
+            this.rngbtn_600.BackColor = System.Drawing.Color.Transparent;
+            this.rngbtn_600.bgScale = 3;
+            this.rngbtn_600.bOn = true;
+            this.rngbtn_600.colorShadow = System.Drawing.Color.LightGray;
+            this.rngbtn_600.colorTop = System.Drawing.Color.Pink;
+            this.rngbtn_600.Font = new System.Drawing.Font("Arial", 16F, System.Drawing.FontStyle.Bold);
+            this.rngbtn_600.Label = "600 A";
+            this.rngbtn_600.Location = new System.Drawing.Point(581, 526);
+            this.rngbtn_600.Name = "rngbtn_600";
+            this.rngbtn_600.Size = new System.Drawing.Size(100, 34);
+            this.rngbtn_600.TabIndex = 70;
+            // 
+            // rngbtn_1000
+            // 
+            this.rngbtn_1000.BackColor = System.Drawing.Color.Transparent;
+            this.rngbtn_1000.bgScale = 3;
+            this.rngbtn_1000.bOn = true;
+            this.rngbtn_1000.colorShadow = System.Drawing.Color.LightGray;
+            this.rngbtn_1000.colorTop = System.Drawing.Color.Pink;
+            this.rngbtn_1000.Font = new System.Drawing.Font("Arial", 16F, System.Drawing.FontStyle.Bold);
+            this.rngbtn_1000.Label = "1000 A";
+            this.rngbtn_1000.Location = new System.Drawing.Point(581, 566);
+            this.rngbtn_1000.Name = "rngbtn_1000";
+            this.rngbtn_1000.Size = new System.Drawing.Size(100, 34);
+            this.rngbtn_1000.TabIndex = 77;
             // 
             // Form1
             // 
@@ -305,6 +527,26 @@
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(1024, 600);
             this.ControlBox = false;
+            this.Controls.Add(this.rngbtn_1000);
+            this.Controls.Add(this.rngbtn_600);
+            this.Controls.Add(this.rngbtn_300);
+            this.Controls.Add(this.rngbtn_100);
+            this.Controls.Add(this.rngbtn_10);
+            this.Controls.Add(this.rngbtn_1);
+            this.Controls.Add(this.rbtn_dn1);
+            this.Controls.Add(this.rbtn_dn2);
+            this.Controls.Add(this.rbtn_dn3);
+            this.Controls.Add(this.rbtn_dn4);
+            this.Controls.Add(this.rbtn_dn5);
+            this.Controls.Add(this.rbtn_dn6);
+            this.Controls.Add(this.rbtn_dn7);
+            this.Controls.Add(this.rbtn_up1);
+            this.Controls.Add(this.rbtn_up2);
+            this.Controls.Add(this.rbtn_up3);
+            this.Controls.Add(this.rbtn_up4);
+            this.Controls.Add(this.rbtn_up5);
+            this.Controls.Add(this.rbtn_up6);
+            this.Controls.Add(this.rbtn_up7);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.rectMeter1);
             this.Controls.Add(this.lbButtonPT);
@@ -326,7 +568,6 @@
             this.Controls.Add(this.lbl_version);
             this.Controls.Add(this.btn_zeroon);
             this.Controls.Add(this.label3);
-            this.Controls.Add(this.lbl_ohm);
             this.Controls.Add(this.lbl_currscale);
             this.Controls.Add(this.led_current);
             this.Controls.Add(this.led_setting);
@@ -345,7 +586,6 @@
         private DmitryBrant.CustomControls.SevenSegmentArray led_setting;
         private DmitryBrant.CustomControls.SevenSegmentArray led_current;
         private System.Windows.Forms.Label lbl_currscale;
-        private System.Windows.Forms.Label lbl_ohm;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private RectButton btn_turnon;
@@ -369,6 +609,26 @@
         private RectButton lbButtonCancel;
         private RectButton lbButtonOK;
         private Mndz.MyCtrl.RectMeter rectMeter1;
+        private RectButton rbtn_up7;
+        private RectButton rbtn_up6;
+        private RectButton rbtn_up5;
+        private RectButton rbtn_up4;
+        private RectButton rbtn_up3;
+        private RectButton rbtn_up2;
+        private RectButton rbtn_up1;
+        private RectButton rbtn_dn1;
+        private RectButton rbtn_dn2;
+        private RectButton rbtn_dn3;
+        private RectButton rbtn_dn4;
+        private RectButton rbtn_dn5;
+        private RectButton rbtn_dn6;
+        private RectButton rbtn_dn7;
+        private RectButton rngbtn_1;
+        private RectButton rngbtn_10;
+        private RectButton rngbtn_100;
+        private RectButton rngbtn_300;
+        private RectButton rngbtn_600;
+        private RectButton rngbtn_1000;
     }
 }
 

@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Mndz")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Agilent Technologies")]
+[assembly: AssemblyCompany("Raysting Instrument")]
 [assembly: AssemblyProduct("Mndz")]
-[assembly: AssemblyCopyright("Copyright © Agilent Technologies 2013")]
+[assembly: AssemblyCopyright("Copyright ©Raysting Instrument2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

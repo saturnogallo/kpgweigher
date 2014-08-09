@@ -67,6 +67,8 @@ namespace Mndz.MyCtrl
                     v = 180;
                 if (value < 0)
                     v = 0;
+                if (Math.Abs(_angle - v) < 0.5) //no refresh for 0.5 degree
+                    return;
                 _angle = v;
                 Invalidate();
             }
@@ -102,7 +104,7 @@ namespace Mndz.MyCtrl
             }
 
             //draw the pointer
-            int ofy = 10;
+            int ofy = 2;
             int Height = ClientRectangle.Height - ofy;
             int Width = ClientRectangle.Width;
             
@@ -129,7 +131,7 @@ namespace Mndz.MyCtrl
 
             graphic.FillPolygon(myPen, tria);
             
-            int irad = 15;
+            int irad = 8;
             graphic.FillEllipse(myPen, Width / 2 - irad, (Height - irad) - ofy, 2 * irad, 2 * irad);
             graphic.DrawLine(new Pen(Color.Red), Width/2, Height -ofy, tria[0].X, tria[0].Y);
             
