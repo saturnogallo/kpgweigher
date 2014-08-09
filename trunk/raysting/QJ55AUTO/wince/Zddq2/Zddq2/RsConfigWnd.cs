@@ -264,18 +264,13 @@ namespace Zddq2
                 lbl_error.Visible = true;
                 return true;
             }
-            if ((rx.iRRange == ActionMgr.RNG_10K && rx.bSqrt) || (rx.iRRange == ActionMgr.RNG_100K && rx.bSqrt))
+            /*if ((rx.iRRange == ActionMgr.RNG_10K && rx.bSqrt) || (rx.iRRange == ActionMgr.RNG_100K && rx.bSqrt))
             {
                 lbl_error.Text = StringResource.str("nox2_4big");
                 lbl_error.Visible = true;
                 return true;
-            }
+            }*/
             return false;
-        }
-
-        private void lbl_rvalue_ParentChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
