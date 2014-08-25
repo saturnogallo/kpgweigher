@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.IO;
 using Microsoft.Win32;
+using System.Threading;
 namespace Mndz
 {
     public partial class Form1 : Form
@@ -182,7 +183,7 @@ namespace Mndz
                 btn_turnon.colorTop = Color.LightYellow; //switching
             });
 
-            tm = new Timer();
+            tm = new System.Windows.Forms.Timer();
             tm.Interval = 500;
             tm.Tick += new EventHandler((o, e) =>
             {
@@ -236,8 +237,11 @@ namespace Mndz
         private void btn_capture_Click(object sender, EventArgs e)
         {
             btn_capture.Visible = false;
+            this.Invalidate();
+            Thread.Sleep(100);
             this.Invoke(new Action(() =>
             {
+                Thread.Sleep(100);
                 Form1.SaveScreen();
                 btn_capture.Visible = true;
                 MessageBox.Show("1-DONE!");
@@ -376,8 +380,16 @@ namespace Mndz
                         double d;
                         if (!Util.TryDoubleParse(param, out d))
                             return;
-                        if (!processor.CalibrateADScale(d))
-                            Program.MsgShow("校准AD失败.");
+                        if (processor.range.ToString() != s_scale)
+                        {
+                            Program.MsgShow("请选择满量程进行校准");
+                            return;
+                        }
+
+                        if ((s_scale == "1000" && !processor.CalibrateADScale(d/1000.0)) ||
+                            (s_scale == "600" && !processor.CalibrateADScale(d/1000.0)) ||
+                            (s_scale == "300" && !processor.CalibrateADScale(d/1000.0)) )
+                            Program.MsgShow("校准电流值失败.");
                     }
                     if (id == "value")
                     {
@@ -415,7 +427,7 @@ namespace Mndz
                         {
                             this.Invoke(new Action(() =>
                             {
-                                dlg_kbd.Init("请输入标准AD电压值", "adscale", false, KbdData);
+                                dlg_kbd.Init("请输入接入电流源实际值", "adscale", false, KbdData);
                             }));
                             return;
                         }

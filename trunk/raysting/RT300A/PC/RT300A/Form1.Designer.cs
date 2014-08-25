@@ -139,7 +139,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(550, 44);
             this.label1.TabIndex = 0;
-            this.label1.Text = "1000A 精密直流大功率恒流源";
+            this.label1.Text = "RT1000A直流标准电流源";
             // 
             // btn_zeroon
             // 
