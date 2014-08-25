@@ -35,6 +35,7 @@ namespace Mndz
 
             InitializeComponent();
             s_scale = this.label1.Text.Substring(0, this.label1.Text.IndexOf("A"));
+            s_scale = s_scale.Replace("RT", "");
             scale = Decimal.Parse(s_scale);
             this.Load += new EventHandler(Form1_Load);
             this.BackColor = Color.LightSkyBlue;
