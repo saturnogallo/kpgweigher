@@ -42,6 +42,7 @@ namespace Mndz
             btn_quit.colorTop = Color.Beige;
             btn_quit.Style = MyButtonType.roundButton;
             btn_quit.Text = StringResource.str("quit");
+            btn_quit.Label = StringResource.str("quit");
             btn_quit.bOn = true;
             btn_quit.ValidClick += new EventHandler(btn_quit_ValidClick);
             bNo0Choice = true;
@@ -63,6 +64,7 @@ namespace Mndz
         void btn_ValidClick(object sender, EventArgs e)
         {
             int i = Int32.Parse((sender as RectButton).Name.Remove(0, "btn_choice".Length)) - 1;
+            Form1.DoBeep();
             if (bMultiSelect)
             {
                 states[i] = !states[i];
@@ -82,6 +84,7 @@ namespace Mndz
         private const int MAX_NUMBER = 18;
         void btn_quit_ValidClick(object sender, EventArgs e)
         {
+            Form1.DoBeep();
             if (bMultiSelect)
             {
                 if (bNo0Choice && (states.Count( x => x) <= 0))

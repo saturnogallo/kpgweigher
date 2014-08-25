@@ -6,6 +6,7 @@ using System.Xml.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.Win32;
 namespace Mndz
 {
     class Util
@@ -180,8 +181,15 @@ namespace Mndz
         private string _head; //US or CN
         private string _fn;   //File
         private StringBuilder tmpbuf;
+        private RegistryKey hklm;
+        private RegistryKey ctrl;
+        private RegistryKey aimdir;
         public IniHandler(string filename, string hd)
         {
+            hklm = Registry.CurrentUser;
+            ctrl = hklm.OpenSubKey("ControlPanel", true);
+            aimdir = ctrl.OpenSubKey("BackLight", true);
+
             head = hd;
             _fn = filename;
             tmpbuf = new StringBuilder("", 255);
@@ -203,7 +211,6 @@ namespace Mndz
         {
             try
             {
-                
                    return Int32.Parse(StringValue(section,key));
             }
             catch //for unavailable key please return 9999
@@ -211,8 +218,33 @@ namespace Mndz
                 return 999;
             }
         }
+        public void CheckValue(string section, string key, string def_value)
+        {
+            try
+            {
+                //HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\Timeouts
+                if (!aimdir.GetValueNames().Contains(key))
+                {
+                    aimdir.SetValue(key, def_value, RegistryValueKind.String);
+                }
+            }
+            catch
+            {
+                
+            }
+        }
         public string StringValue(string section, string key)
         {
+            try
+            {
+                //HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\Timeouts
+                return aimdir.GetValue(key).ToString();
+            }
+            catch
+            {
+                return "";
+            }
+            /*
             try
             {
                 StreamReader sr = File.OpenText(_fn);
@@ -236,9 +268,21 @@ namespace Mndz
             {
                 return "";
             }
+             */
         }
         public void WriteString(string section, string key, object value)
         {
+            try
+            {
+                //HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\Timeouts
+                aimdir.SetValue(key, value, RegistryValueKind.String);
+                aimdir.Flush();
+            }
+            catch
+            {
+                
+            }
+            /*
             //WritePrivateProfileString(section + _head, key, value.ToString(), _fn);
             try
             {
@@ -273,6 +317,7 @@ namespace Mndz
             catch
             {
             }
+             * */
         }
     }
     internal class Logger
@@ -484,8 +529,9 @@ namespace Mndz
             str_tbl["inputda"] = "请输入DA零位值";
             str_tbl["inputaddelay"] = "请输入测量延时值(秒)";
             str_tbl["selectvx"] = "请选择被测电压值Vx";
-            str_tbl["inputrs"] = "请输入Rs({0})实际值";
-            str_tbl["inputes"] = "请输入Es({0})实际值";
+            str_tbl["inputrs"] = "输入Rs值(ohm)";
+            str_tbl["inputrs1"] = "请输入Rs({0})实际值(ohm)";
+            str_tbl["inputes"] = "请输入Es({0})实际值(V)";
             str_tbl["out_of_range"] = "输入值无效";
             str_tbl["hvout"] = "校验高压表";
             str_tbl["inputhv"] = "请输入高压表校验电压(V)";

@@ -23,6 +23,7 @@ namespace Mndz
         public kbdWnd()
         {
             InitializeComponent();
+            
             RectButton[] btns = new RectButton[] {btn_backspace,btn_clr,btn_quit,btn_ok ,
                 btn_num0,btn_num1,btn_num2,btn_num3,btn_num4,
                 btn_num5,btn_num6,btn_num7,btn_num8,btn_num9,
@@ -35,6 +36,23 @@ namespace Mndz
                 btn.BackColor = this.BackColor;
                 btn.colorShadow = Color.Black;
             }
+            RectButton[] scalebtns = new RectButton[] { btn_kscale, btn_mscale, btn_gscale };
+            foreach (RectButton btn in scalebtns)
+            {
+                btn.Style = MyButtonType.roundButton;
+                btn.colorTop = Color.Orange;
+                btn.BackColor = this.BackColor;
+                btn.colorShadow = this.BackColor;
+            }
+            
+            btn_kscale.Label = "k";
+            btn_mscale.Label = "M";
+            btn_gscale.Label = "G";
+
+            btn_kscale.ValidClick += new EventHandler(btn_kscale_ValidClick);
+            btn_mscale.ValidClick += new EventHandler(btn_kscale_ValidClick);
+            btn_gscale.ValidClick += new EventHandler(btn_kscale_ValidClick);
+
             roundRect1.colorTop= Color.Beige;
             roundRect1.colorShadow = Color.Transparent;
             roundRect1.Style = MyButtonType.rectButton;
@@ -78,6 +96,24 @@ namespace Mndz
             Hide();
         }
 
+        void btn_kscale_ValidClick(object sender, EventArgs e)
+        {
+            if (sender != btn_kscale)
+                btn_kscale.bOn = false;
+            else
+                btn_kscale.bOn = !btn_kscale.bOn;
+
+            if (sender != btn_mscale)
+                btn_mscale.bOn = false;
+            else
+                btn_mscale.bOn = !btn_mscale.bOn;
+
+            if (sender != btn_gscale)
+                btn_gscale.bOn = false;
+            else
+                btn_gscale.bOn = !btn_gscale.bOn;
+        }
+
         public void Init(string init_note, string init_param, bool init_pwd, KbdDataHandler handler)
         {
             data.Remove(0, data.Length);
@@ -85,6 +121,13 @@ namespace Mndz
             param = init_param;
             password = init_pwd;
             kbdhandler = handler;
+
+            btn_kscale.bOn = false;
+            btn_mscale.bOn = false;
+            btn_gscale.bOn = false;
+            btn_kscale.Visible = note.IndexOf("(ohm)") > 0;
+            btn_mscale.Visible = note.IndexOf("(ohm)") > 0;
+            btn_gscale.Visible = note.IndexOf("(ohm)") > 0;
             //deep++;
             UpdateData();
             this.Show();
@@ -197,11 +240,19 @@ namespace Mndz
             addchar('-');
         }
         private static int deep = 0;
+        public Decimal scale = 1;
         private void btn_ok_Click(object sender, EventArgs e)
         {
             string llimit = StringResource.str(param + "_llimit");
             string ulimit = StringResource.str(param + "_ulimit");
             Form1.DoBeep();
+            scale = 1;
+            if (btn_kscale.bOn)
+                scale = 1000;
+            else if (btn_mscale.bOn)
+                    scale = 1000000;
+            else if (btn_gscale.bOn)
+                scale = 1000000000;
             if (data.ToString() == "")
             {
 //              Program.MsgShow(StringResource.str("emptydata"));
