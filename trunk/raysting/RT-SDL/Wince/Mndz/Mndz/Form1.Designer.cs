@@ -102,10 +102,10 @@
             // 
             // lbl_datetime
             // 
-            this.lbl_datetime.Location = new System.Drawing.Point(28, 546);
+            this.lbl_datetime.Location = new System.Drawing.Point(21, 564);
             this.lbl_datetime.Name = "lbl_datetime";
-            this.lbl_datetime.Size = new System.Drawing.Size(41, 15);
-            this.lbl_datetime.Text = "label2";
+            this.lbl_datetime.Size = new System.Drawing.Size(154, 22);
+            this.lbl_datetime.Text = "";
             // 
             // label1
             // 

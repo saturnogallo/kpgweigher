@@ -629,7 +629,7 @@ namespace Mndz
                 {
                     _EsIndex = value;
                 }
-                Util.ConstIni.WriteString("LASTSETTING", "esindex", _EsIndex.ToString());
+//                Util.ConstIni.WriteString("LASTSETTING", "esindex", _EsIndex.ToString());
             }
         }
         public int Percent
@@ -732,7 +732,7 @@ namespace Mndz
                 if (RsIndex >= 0 && RsIndex < _RsReals.Length)
                 {
                     _RsReals[RsIndex] = value;
-                    Util.ConstIni.WriteString("LASTSETTING", "rsreal" + RsIndex.ToString() , _RsReals[RsIndex].ToString());
+                    Util.ConstIni.WriteString("LASTSETTING", "rsreal" + RsIndex.ToString(), _RsReals[RsIndex].ToString());    
                 }
             }
         }
@@ -753,7 +753,7 @@ namespace Mndz
                 bOn = false;
                 _RsIndex = value;
 
-                Util.ConstIni.WriteString("LASTSETTING", "rsindex", _RsIndex.ToString());
+//              Util.ConstIni.WriteString("LASTSETTING", "rsindex", _RsIndex.ToString());
             }
         }
         private int _vxmultiplier = 1;
@@ -764,7 +764,7 @@ namespace Mndz
             }
             set
             {
-                Util.ConstIni.WriteString("LASTSETTING", "vxmultiplier", _vxmultiplier.ToString());
+//                Util.ConstIni.WriteString("LASTSETTING", "vxmultiplier", _vxmultiplier.ToString());
                 _vxmultiplier = value;
             }
         }
@@ -861,25 +861,47 @@ namespace Mndz
             datafilter = new Queue<double>();
             datafilter2 = new Queue<double>();
             
+            Util.ConstIni.CheckValue("LASTSETTING", "rsindex","3"); //1M ohm
             _RsIndex = Util.ConstIni.IntValue("LASTSETTING", "rsindex");
+
+            Util.ConstIni.CheckValue("LASTSETTING", "esindex","3"); //10V
             _EsIndex = Util.ConstIni.IntValue("LASTSETTING", "esindex");
+
+            Util.ConstIni.CheckValue("LASTSETTING", "vxmultiplier","10");
             VxMultiplier = Util.ConstIni.IntValue("LASTSETTING", "vxmultiplier");
+
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal0","1");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal1","2");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal2","5");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal3","10");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal4","20");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal5","50");
             for(int i = 0; i < _EsReals.Length;i++)
+            {
                 _EsReals[i] = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "esreal"+i.ToString()));
+            }
+
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal0", "1000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal1", "10000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal2", "100000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal3", "1000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal4", "10000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal5", "100000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal6", "1000000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal7", "10000000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal8", "100000000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal9", "1000000000000");
 
             for (int i = 0; i < _RsReals.Length; i++)
                 _RsReals[i] = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "rsreal" + i.ToString()));
             
+            Util.ConstIni.CheckValue("LASTSETTING", "daoffset","0");
             _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
             if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.0001) //100uV
                 _daoffset = 0;
 
-            string rn = Util.ConstIni.StringValue("LASTSETTING", "rnav");
-            RNav = 10000000;//10M
-            if (rn != "")
-                RNav = Decimal.Parse(rn);
-            else
-                Util.ConstIni.WriteString("LASTSETTING", "rnav", "10000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rnav","10000000");
+            RNav = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "rnav"));
             
             bOn = false;
         }
@@ -1240,9 +1262,12 @@ namespace Mndz
                 nADdelay = value;
             }
         }
+        public double Vg;
+        public double Vx;
         public bool bStable = false;
         //return value is the interval for next reading
         private int bStableCnt = 0;
+       
         private int UpdateVxOutput()
         {
             bStable = false;
@@ -1253,7 +1278,7 @@ namespace Mndz
                 return 0;// DeviceMgr.success;
             }
             //measurement of Rx 
-            double Vg;
+            //double Vg;
             if (!CollectVoltage(out Vg))
             {
                 CollectVoltage2(out Vg);
@@ -1261,7 +1286,7 @@ namespace Mndz
             }
             Vg = -Vg;
             //q_vgs.
-            double Vx;
+            
             if (!CollectVoltage2(out Vx))
                 return 0;
             

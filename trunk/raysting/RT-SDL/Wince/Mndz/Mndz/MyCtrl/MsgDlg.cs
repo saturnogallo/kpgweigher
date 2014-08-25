@@ -46,6 +46,7 @@ namespace Mndz
         }
         private void button1_Click(object sender, EventArgs e)
         {
+            Form1.DoBeep();
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }

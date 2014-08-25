@@ -34,20 +34,13 @@ namespace Mndz
         const int Warning = 0x00000030;
         const int Information = 0x00000040; 
 
+        
         private static Beep myBeep = null;
-        private Beep myBeep2 = null;
-        public void DoBeep2()
-        {
-            //if (myBeep is Beep)
-                myBeep2.BeepLoad();
-                DoBeep();
-            //myBeep1.BeepLoad();
-            //Console.Beep(1000, 200); //1kHz, 200ms duration
-        }
         public static void DoBeep()
         {
-            if(myBeep is Beep)
-                myBeep.BeepLoad();
+            //if (myBeep is Beep)
+            myBeep.BeepLoad();
+            //DoBeep();
             //myBeep1.BeepLoad();
             //Console.Beep(1000, 200); //1kHz, 200ms duration
         }
@@ -62,16 +55,38 @@ namespace Mndz
                 aimdir.SetValue("UseExt", (UInt32)0, RegistryValueKind.DWord);
         }
 
+        private void btn_capture_Click(object sender, EventArgs e)
+        {
+            btn_capture.Visible = false;
+            this.Invoke(new Action(() =>
+            {
+                Form1.SaveScreen();
+                btn_capture.Visible = true;
+                MessageBox.Show("1-DONE!");
+            }));
+        }
+        public static void SaveScreen()
+        {
+
+            string mypath = Path.Combine(GlobalConfig.udiskdir2, "screen");
+            if (!Directory.Exists(mypath))
+                return;
+
+            Random rnd = new Random();
+            CaptureScreen.SaveScreenToFile(Path.Combine(mypath, rnd.Next().ToString() + ".bmp"));
+        }
+
         public Form1()
         {
             DisablePowerSleep();
             InitializeComponent();
             //if(!(myBeep is Beep))
-                myBeep2 = new Beep("PWM0:");
-                myBeep = new Beep("PWM4:");
+                myBeep = new Beep("PWM1:");
+//          myBeep = new Beep("PWM4:");
+            btn_capture.Click +=new EventHandler(btn_capture_Click);
             string mypath = Path.Combine(GlobalConfig.udiskdir2, "screen");
-//            if (Directory.Exists(mypath)) 
-//                btn_capture.Visible = true;
+            if (Directory.Exists(mypath)) 
+                btn_capture.Visible = true;
             Cursor.Hide();
             processor = new Processor();
             
@@ -79,7 +94,7 @@ namespace Mndz
             dlg_kbd = new kbdWnd();
             led_rx.Value = "0.000000";
             led_rx.Click += new EventHandler((o,e)=>{
-                DoBeep2();
+                DoBeep();
                 dlg_choice.bNo0Choice = true;
                 dlg_choice.param = "selectrx";
                 dlg_choice.Init(StringResource.str("selectrx"), Processor._RxTitles, -1, null, new KbdDataHandler(KbdData));
@@ -98,7 +113,7 @@ namespace Mndz
             led_rs.RecreateSegments(led_rs.ArrayCount);
             led_rs.Click += new EventHandler((o, e) =>
             {
-                DoBeep2();
+                DoBeep();
                 dlg_kbd.Init(String.Format(StringResource.str("inputrs"), Processor._RsTitles[processor.RsIndex]), "inputrs", false, new KbdDataHandler(KbdData));
             });
 
@@ -110,10 +125,9 @@ namespace Mndz
             led_vx.Value = "0.000";
             led_vx.Click += new EventHandler((o, e) =>
             {
-                DoBeep2();
+                DoBeep();
                 dlg_choice.bNo0Choice = true;
                 dlg_choice.param = "selectvx";
-
                 dlg_choice.Init(StringResource.str("selectvx"), Processor._MulTitles, - 1, null, new KbdDataHandler(KbdData));
             });
 
@@ -125,7 +139,7 @@ namespace Mndz
             led_es.RecreateSegments(led_es.ArrayCount);
             led_es.Click += new EventHandler((o, e) =>
             {
-                DoBeep2();
+                DoBeep();
                 dlg_choice.bNo0Choice = true;
                 dlg_choice.param = "selectes";
                 dlg_choice.Init(StringResource.str("selectes"), Processor._EsTitles, -1, null, new KbdDataHandler(KbdData));
@@ -137,7 +151,7 @@ namespace Mndz
             btn_hvout.Label = StringResource.str("hvout");
             btn_hvout.ValidClick += new EventHandler((o, e) =>
             {
-                DoBeep2();
+                DoBeep();
                 if (!processor.bDirectOutputOn)
                 {
                     this.Invoke(new Action(() =>
@@ -161,7 +175,7 @@ namespace Mndz
 
             btn_zeroon.ValidClick += new EventHandler((o, e) =>
             {
-                DoBeep2();
+                DoBeep();
                 processor.ZeroON2();
             });
 
@@ -172,7 +186,7 @@ namespace Mndz
 
             btn_zeroon2.ValidClick += new EventHandler((o, e) =>
             {
-                DoBeep2();
+                DoBeep();
                 processor.ZeroON();
             });
 
@@ -183,7 +197,7 @@ namespace Mndz
             btn_turnon.Text = "OFF";
             btn_turnon.Click += new EventHandler((o, e) =>
             {
-                DoBeep2();
+                DoBeep();
                 if (!processor.bOn)
                     dt_lastoutput = DateTime.Now.AddSeconds(2);
                 processor.bOn = !processor.bOn;
@@ -198,7 +212,7 @@ namespace Mndz
             tm.Interval = 500;
             tm.Tick += new EventHandler((o, e) =>
             {
-                lbl_datetime.Text = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
+                //lbl_datetime.Text = DateTime.Now.ToString("yyyy-MM-dd hh:mm:ss");
                 if (DateTime.Now.Subtract(dt_lastoutput).TotalSeconds < 1)
                 {
                     return;
@@ -239,6 +253,7 @@ namespace Mndz
                     {
                         led_rx.Value = newv;
                     }
+                    this.lbl_datetime.Text = processor.Vg.ToString() + "," +processor.Vx.ToString();
                     if (processor.bStable)
                     {
                         if (led_rx.ColorLight != Color.Red)
@@ -289,7 +304,9 @@ namespace Mndz
                             processor.daoffset = a + processor.daoffset;
 
                         if (id == "rsreal")
+                        {
                             processor.RsValue = a;
+                        }
 
                         if (id == "esreal")
                             processor.EsValue = a;
@@ -396,11 +413,11 @@ namespace Mndz
                             RefreshDisplay(true);
                             return;
                         }
-                        if (param == "00002") //input real es value
+                        if (param == "00002") //input real rs value
                         {
                             this.Invoke(new Action(() =>
                             {
-                                dlg_kbd.Init(String.Format(StringResource.str("inputrs"), Processor._RsTitles[processor.RsIndex]), "rsreal", false, KbdData);
+                                dlg_kbd.Init(String.Format(StringResource.str("inputrs1"), Processor._RsTitles[processor.RsIndex]), "rsreal", false, KbdData);
                             }));
                             RefreshDisplay(true);
                             return;
@@ -413,9 +430,10 @@ namespace Mndz
                             }));
                             return;
                         }
+
                         if (!Util.TryDecimalParse(param, out a))
                             return;
-                        
+                        a = a * dlg_kbd.scale;
                         if (a < 0)
                         {
                             this.Invoke(new Action(() => {
