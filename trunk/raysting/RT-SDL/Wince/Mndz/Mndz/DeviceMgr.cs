@@ -801,18 +801,45 @@ namespace Mndz
                 _bOn = true;
             }
         }
+        internal string sDirectOutputPort = "";
         internal bool bDirectOutputOn = false;
         internal void DirectOutputOpen(Decimal volt)
         {
-            double nv = Convert.ToDouble(volt) / 1000.0;//fixed 10kv port
-            if (nv > 10) //over 10 volt 
+            double nv = Convert.ToDouble(volt);
+            if (sDirectOutputPort == "MUL_1000")
+            {
+                VxMultiplier = 1000;
+                nv = nv / VxMultiplier;//fixed 10kV port
+            }
+            else if (sDirectOutputPort == "MUL_500")
+            {
+                VxMultiplier = 500;
+                nv = nv / VxMultiplier;//fixed 5kV port
+            }
+            else if (sDirectOutputPort == "MUL_100")
+            {
+                VxMultiplier = 100;
+                nv = nv / VxMultiplier;//fixed 1kV port
+            }
+            else if (sDirectOutputPort == "MUL_10")
+            {
+                VxMultiplier = 10;
+                nv = nv / VxMultiplier;//fixed 100V port
+            }
+            else
+            {
                 return;
-            VxMultiplier = 1000;
+            }
+
+            if (nv > 10) //over 10 volt 
+            {
+                Program.MsgShow(StringResource.str("over10volt"));
+                return;
+            }
             VxOutput = Convert.ToDouble(volt);
-            
             RescueDA();
             Thread.Sleep(200);
-            DeviceMgr.RelayState("VOLT_OFF", "MUL_1000");
+            DeviceMgr.RelayState("VOLT_OFF", sDirectOutputPort);
             ToDAValue(nv);
             lastDirectOutput = nv * VxMultiplier;
             bDirectOutputOn = true;
@@ -1166,13 +1193,24 @@ namespace Mndz
         }
         #region direct voltage output
         private Queue<double> q_dvgs = new Queue<double>(6);
-        public int ADdirect_delay = 3;
+        
         public bool bDirectStable = false;
         private int bDirectStableCnt = 0;
         private double lastDirectOutput = 0;
         //return value is the time interval for next reading
         private int UpdateDirectVxOutput()
         {
+            int ADdirect_delay = 3;
+            int DirectStableCnt_max = 2;
+            if (RxIndex == 0 || RxIndex == 1) //100 or 1k
+            {
+                ADdirect_delay = 1;
+            }
+            if (RxIndex == 2 || RxIndex == 3) //10k or 100k
+            {
+                ADdirect_delay = 2;
+            }
+          
             bDirectStable = false;
             //update Voltage output
             if (GlobalConfig.ISDEBUG) //debug use
@@ -1192,7 +1230,7 @@ namespace Mndz
             if ((Math.Abs(VxOutput - thisVx) < 0.0005) ||
                 (Math.Abs(VxOutput - thisVx) < VxOutput * 0.0005))
             {
-                if(bDirectStableCnt++ > 2)
+                if (bDirectStableCnt++ > DirectStableCnt_max)
                     bDirectStable = true;
                 return 0; //no delay for next reading
             }
@@ -1243,6 +1281,10 @@ namespace Mndz
                 if (nADdelay > 0)
                     return nADdelay;
                 double dRsValue = Convert.ToDouble(RsValue);
+                if (dRsValue <= 1e4)
+                    return 0;
+                if (dRsValue <= 1e6)
+                    return 1;
                 if (dRsValue <= 1e7)
                     return 2;
                 if (dRsValue <= 1e8)

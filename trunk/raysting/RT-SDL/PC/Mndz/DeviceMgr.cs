@@ -629,7 +629,7 @@ namespace Mndz
                 {
                     _EsIndex = value;
                 }
-                Util.ConstIni.WriteString("LASTSETTING", "esindex", _EsIndex.ToString());
+//                Util.ConstIni.WriteString("LASTSETTING", "esindex", _EsIndex.ToString());
             }
         }
         public int Percent
@@ -732,7 +732,7 @@ namespace Mndz
                 if (RsIndex >= 0 && RsIndex < _RsReals.Length)
                 {
                     _RsReals[RsIndex] = value;
-                    Util.ConstIni.WriteString("LASTSETTING", "rsreal" + RsIndex.ToString() , _RsReals[RsIndex].ToString());
+                    Util.ConstIni.WriteString("LASTSETTING", "rsreal" + RsIndex.ToString(), _RsReals[RsIndex].ToString());    
                 }
             }
         }
@@ -753,7 +753,7 @@ namespace Mndz
                 bOn = false;
                 _RsIndex = value;
 
-                Util.ConstIni.WriteString("LASTSETTING", "rsindex", _RsIndex.ToString());
+//              Util.ConstIni.WriteString("LASTSETTING", "rsindex", _RsIndex.ToString());
             }
         }
         private int _vxmultiplier = 1;
@@ -764,7 +764,7 @@ namespace Mndz
             }
             set
             {
-                Util.ConstIni.WriteString("LASTSETTING", "vxmultiplier", _vxmultiplier.ToString());
+//                Util.ConstIni.WriteString("LASTSETTING", "vxmultiplier", _vxmultiplier.ToString());
                 _vxmultiplier = value;
             }
         }
@@ -801,18 +801,45 @@ namespace Mndz
                 _bOn = true;
             }
         }
+        internal string sDirectOutputPort = "";
         internal bool bDirectOutputOn = false;
         internal void DirectOutputOpen(Decimal volt)
         {
-            double nv = Convert.ToDouble(volt) / 1000.0;//fixed 10kv port
-            if (nv > 10) //over 10 volt 
+            double nv = Convert.ToDouble(volt);
+            if (sDirectOutputPort == "MUL_1000")
+            {
+                VxMultiplier = 1000;
+                nv = nv / VxMultiplier;//fixed 10kV port
+            }
+            else if (sDirectOutputPort == "MUL_500")
+            {
+                VxMultiplier = 500;
+                nv = nv / VxMultiplier;//fixed 5kV port
+            }
+            else if (sDirectOutputPort == "MUL_100")
+            {
+                VxMultiplier = 100;
+                nv = nv / VxMultiplier;//fixed 1kV port
+            }
+            else if (sDirectOutputPort == "MUL_10")
+            {
+                VxMultiplier = 10;
+                nv = nv / VxMultiplier;//fixed 100V port
+            }
+            else
+            {
                 return;
-            VxMultiplier = 1000;
+            }
+
+            if (nv > 10) //over 10 volt 
+            {
+                Program.MsgShow(StringResource.str("over10volt"));
+                return;
+            }
             VxOutput = Convert.ToDouble(volt);
-            
             RescueDA();
             Thread.Sleep(200);
-            DeviceMgr.RelayState("VOLT_OFF", "MUL_1000");
+            DeviceMgr.RelayState("VOLT_OFF", sDirectOutputPort);
             ToDAValue(nv);
             lastDirectOutput = nv * VxMultiplier;
             bDirectOutputOn = true;
@@ -861,25 +888,47 @@ namespace Mndz
             datafilter = new Queue<double>();
             datafilter2 = new Queue<double>();
             
+            Util.ConstIni.CheckValue("LASTSETTING", "rsindex","3"); //1M ohm
             _RsIndex = Util.ConstIni.IntValue("LASTSETTING", "rsindex");
+
+            Util.ConstIni.CheckValue("LASTSETTING", "esindex","3"); //10V
             _EsIndex = Util.ConstIni.IntValue("LASTSETTING", "esindex");
+
+            Util.ConstIni.CheckValue("LASTSETTING", "vxmultiplier","10");
             VxMultiplier = Util.ConstIni.IntValue("LASTSETTING", "vxmultiplier");
+
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal0","1");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal1","2");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal2","5");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal3","10");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal4","20");
+            Util.ConstIni.CheckValue("LASTSETTING", "esreal5","50");
             for(int i = 0; i < _EsReals.Length;i++)
+            {
                 _EsReals[i] = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "esreal"+i.ToString()));
+            }
+
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal0", "1000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal1", "10000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal2", "100000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal3", "1000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal4", "10000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal5", "100000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal6", "1000000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal7", "10000000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal8", "100000000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rsreal9", "1000000000000");
 
             for (int i = 0; i < _RsReals.Length; i++)
                 _RsReals[i] = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "rsreal" + i.ToString()));
             
+            Util.ConstIni.CheckValue("LASTSETTING", "daoffset","0");
             _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
             if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.0001) //100uV
                 _daoffset = 0;
 
-            string rn = Util.ConstIni.StringValue("LASTSETTING", "rnav");
-            RNav = 10000000;//10M
-            if (rn != "")
-                RNav = Decimal.Parse(rn);
-            else
-                Util.ConstIni.WriteString("LASTSETTING", "rnav", "10000000");
+            Util.ConstIni.CheckValue("LASTSETTING", "rnav","10000000");
+            RNav = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "rnav"));
             
             bOn = false;
         }
@@ -1144,13 +1193,24 @@ namespace Mndz
         }
         #region direct voltage output
         private Queue<double> q_dvgs = new Queue<double>(6);
-        public int ADdirect_delay = 3;
+        
         public bool bDirectStable = false;
         private int bDirectStableCnt = 0;
         private double lastDirectOutput = 0;
         //return value is the time interval for next reading
         private int UpdateDirectVxOutput()
         {
+            int ADdirect_delay = 3;
+            int DirectStableCnt_max = 2;
+            if (RxIndex == 0 || RxIndex == 1) //100 or 1k
+            {
+                ADdirect_delay = 1;
+            }
+            if (RxIndex == 2 || RxIndex == 3) //10k or 100k
+            {
+                ADdirect_delay = 2;
+            }
+          
             bDirectStable = false;
             //update Voltage output
             if (GlobalConfig.ISDEBUG) //debug use
@@ -1170,7 +1230,7 @@ namespace Mndz
             if ((Math.Abs(VxOutput - thisVx) < 0.0005) ||
                 (Math.Abs(VxOutput - thisVx) < VxOutput * 0.0005))
             {
-                if(bDirectStableCnt++ > 2)
+                if (bDirectStableCnt++ > DirectStableCnt_max)
                     bDirectStable = true;
                 return 0; //no delay for next reading
             }
@@ -1221,6 +1281,10 @@ namespace Mndz
                 if (nADdelay > 0)
                     return nADdelay;
                 double dRsValue = Convert.ToDouble(RsValue);
+                if (dRsValue <= 1e4)
+                    return 0;
+                if (dRsValue <= 1e6)
+                    return 1;
                 if (dRsValue <= 1e7)
                     return 2;
                 if (dRsValue <= 1e8)
@@ -1240,9 +1304,12 @@ namespace Mndz
                 nADdelay = value;
             }
         }
+        public double Vg;
+        public double Vx;
         public bool bStable = false;
         //return value is the interval for next reading
         private int bStableCnt = 0;
+       
         private int UpdateVxOutput()
         {
             bStable = false;
@@ -1253,7 +1320,7 @@ namespace Mndz
                 return 0;// DeviceMgr.success;
             }
             //measurement of Rx 
-            double Vg;
+            //double Vg;
             if (!CollectVoltage(out Vg))
             {
                 CollectVoltage2(out Vg);
@@ -1261,7 +1328,7 @@ namespace Mndz
             }
             Vg = -Vg;
             //q_vgs.
-            double Vx;
+            
             if (!CollectVoltage2(out Vx))
                 return 0;
             

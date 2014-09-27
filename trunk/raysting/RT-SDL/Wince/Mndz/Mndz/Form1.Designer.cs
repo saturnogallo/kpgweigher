@@ -54,6 +54,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.btn_capture = new System.Windows.Forms.Button();
             this.btn_hvout = new Mndz.RectButton();
+            this.label5 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lbl_range
@@ -105,7 +106,6 @@
             this.lbl_datetime.Location = new System.Drawing.Point(21, 564);
             this.lbl_datetime.Name = "lbl_datetime";
             this.lbl_datetime.Size = new System.Drawing.Size(154, 22);
-            this.lbl_datetime.Text = "";
             // 
             // label1
             // 
@@ -315,6 +315,13 @@
             this.btn_hvout.Size = new System.Drawing.Size(139, 47);
             this.btn_hvout.TabIndex = 11;
             // 
+            // label5
+            // 
+            this.label5.Location = new System.Drawing.Point(9, 580);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(182, 20);
+            this.label5.Text = " ";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -323,6 +330,7 @@
             this.BackColor = System.Drawing.Color.LightSkyBlue;
             this.ClientSize = new System.Drawing.Size(1024, 600);
             this.ControlBox = false;
+            this.Controls.Add(this.label5);
             this.Controls.Add(this.btn_capture);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label13);
@@ -385,6 +393,7 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btn_capture;
         private RectButton btn_hvout;
+        private System.Windows.Forms.Label label5;
     }
 }
 

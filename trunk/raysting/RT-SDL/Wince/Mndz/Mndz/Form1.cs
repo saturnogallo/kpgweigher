@@ -80,6 +80,7 @@ namespace Mndz
         {
             DisablePowerSleep();
             InitializeComponent();
+            label5.Text = "VERSION: 2014-09-27";
             //if(!(myBeep is Beep))
                 myBeep = new Beep("PWM1:");
 //          myBeep = new Beep("PWM4:");
@@ -156,7 +157,9 @@ namespace Mndz
                 {
                     this.Invoke(new Action(() =>
                     {
-                        dlg_kbd.Init(StringResource.str("inputhv"), "hvout", false, KbdData);
+                        dlg_choice.bNo0Choice = true;
+                        dlg_choice.param = "selecthvport";
+                        dlg_choice.Init(StringResource.str("selecthvport"), new string[] { "10 - 100V  端子输出", "100 - 1kV  端子输出", "500 - 5kV  端子输出", "1k - 10kV 端子输出" }, -1, null, new KbdDataHandler(KbdData));
                     }));
                 }
                 else
@@ -177,6 +180,10 @@ namespace Mndz
             {
                 DoBeep();
                 processor.ZeroON2();
+                if(btn_zeroon.colorTop != Color.LightSlateGray)
+                    btn_zeroon.colorTop = Color.LightSlateGray;
+                else
+                    btn_zeroon.colorTop = Color.Bisque;
             });
 
             btn_zeroon2.BackColor = this.BackColor;
@@ -188,6 +195,10 @@ namespace Mndz
             {
                 DoBeep();
                 processor.ZeroON();
+                if(btn_zeroon2.colorTop != Color.LightSlateGray)
+                    btn_zeroon2.colorTop = Color.LightSlateGray;
+                else
+                    btn_zeroon2.colorTop = Color.Bisque;
             });
 
 
@@ -295,7 +306,7 @@ namespace Mndz
         {
                     
                     Decimal a;
-                    if (id == "daoffset" || id == "rsreal" || id == "esreal" || id == "addelay" || id == "hvout")
+                    if (id == "daoffset" || id == "rsreal" || id == "esreal" || id == "addelay" || id == "hvout" || id == "selecthvport")
                     {
                         if (!Util.TryDecimalParse(param, out a))
                             return;
@@ -313,6 +324,38 @@ namespace Mndz
                         if (id == "addelay")
                             processor.ADdelay = Convert.ToInt32(a);
 
+                        if (id == "selecthvport")
+                        {
+                            try
+                            {
+                                int b = Int32.Parse(param);
+                               
+                                if (b == 0)
+                                {
+                                    processor.sDirectOutputPort = "MUL_10";
+                                }
+                                else if (b == 1)
+                                {
+                                    processor.sDirectOutputPort = "MUL_100";
+                                }
+                                else if (b == 2)
+                                {
+                                    processor.sDirectOutputPort = "MUL_500";
+                                }
+                                else if (b == 3)
+                                {
+                                    processor.sDirectOutputPort = "MUL_1000";
+                                }
+                                else
+                                    return;
+                                dlg_kbd.Init(StringResource.str("inputhv"), "hvout", false, KbdData);
+                            }
+                            catch
+                            {
+                                
+                            }
+                            return;
+                        }
                         if (id == "hvout")
                         {
                             if (a < 1)
@@ -322,14 +365,12 @@ namespace Mndz
                                 processor.DirectOutputOpen(a);
                                 dt_lastoutput = DateTime.Now.AddSeconds(3);
                             }
-                            
                         }
                         RefreshDisplay(true);
                     }
                     
                     if (id == "selectrx" || id == "selectes" || id == "selectvx")
                     {
-                        
                         try
                         {
                             int b = Int32.Parse(param);

@@ -98,7 +98,9 @@ namespace Mndz
                 {
                     this.Invoke(new Action(() =>
                     {
-                        dlg_kbd.Init(StringResource.str("inputhv"), "hvout", false, KbdData);
+                        dlg_choice.bNo0Choice = true;
+                        dlg_choice.param = "selecthvport";
+                        dlg_choice.Init(StringResource.str("selecthvport"), new string[] { "10 - 100V  端子输出", "100 - 1kV  端子输出", "500 - 5kV  端子输出", "1k - 10kV 端子输出" }, -1, null, new KbdDataHandler(KbdData));
                     }));
                 }
                 else
@@ -119,6 +121,10 @@ namespace Mndz
             {
                 DoBeep2();
                 processor.ZeroON2();
+                if(btn_zeroon.colorTop != Color.LightSlateGray)
+                    btn_zeroon.colorTop = Color.LightSlateGray;
+                else
+                    btn_zeroon.colorTop = Color.Bisque;
             });
 
             btn_zeroon2.BackColor = this.BackColor;
@@ -128,8 +134,12 @@ namespace Mndz
 
             btn_zeroon2.ValidClick += new EventHandler((o, e) =>
             {
-                DoBeep2();
+                DoBeep();
                 processor.ZeroON();
+                if(btn_zeroon2.colorTop != Color.LightSlateGray)
+                    btn_zeroon2.colorTop = Color.LightSlateGray;
+                else
+                    btn_zeroon2.colorTop = Color.Bisque;
             });
 
 
@@ -195,6 +205,7 @@ namespace Mndz
                     {
                         led_rx.Value = newv;
                     }
+                    this.lbl_datetime.Text = processor.Vg.ToString() + "," +processor.Vx.ToString();
                     if (processor.bStable)
                     {
                         if (led_rx.ColorLight != Color.Red)
@@ -236,7 +247,7 @@ namespace Mndz
         {
                     
                     Decimal a;
-                    if (id == "daoffset" || id == "rsreal" || id == "esreal" || id == "addelay" || id == "hvout")
+                    if (id == "daoffset" || id == "rsreal" || id == "esreal" || id == "addelay" || id == "hvout" || id == "selecthvport")
                     {
                         if (!Util.TryDecimalParse(param, out a))
                             return;
@@ -245,13 +256,47 @@ namespace Mndz
                             processor.daoffset = a + processor.daoffset;
 
                         if (id == "rsreal")
+                        {
                             processor.RsValue = a;
+                        }
 
                         if (id == "esreal")
                             processor.EsValue = a;
                         if (id == "addelay")
                             processor.ADdelay = Convert.ToInt32(a);
 
+                        if (id == "selecthvport")
+                        {
+                            try
+                            {
+                                int b = Int32.Parse(param);
+                               
+                                if (b == 0)
+                                {
+                                    processor.sDirectOutputPort = "MUL_10";
+                                }
+                                else if (b == 1)
+                                {
+                                    processor.sDirectOutputPort = "MUL_100";
+                                }
+                                else if (b == 2)
+                                {
+                                    processor.sDirectOutputPort = "MUL_500";
+                                }
+                                else if (b == 3)
+                                {
+                                    processor.sDirectOutputPort = "MUL_1000";
+                                }
+                                else
+                                    return;
+                                dlg_kbd.Init(StringResource.str("inputhv"), "hvout", false, KbdData);
+                            }
+                            catch
+                            {
+                                
+                            }
+                            return;
+                        }
                         if (id == "hvout")
                         {
                             if (a < 1)
@@ -261,14 +306,12 @@ namespace Mndz
                                 processor.DirectOutputOpen(a);
                                 dt_lastoutput = DateTime.Now.AddSeconds(3);
                             }
-                            
                         }
                         RefreshDisplay(true);
                     }
                     
                     if (id == "selectrx" || id == "selectes" || id == "selectvx")
                     {
-                        
                         try
                         {
                             int b = Int32.Parse(param);
@@ -352,11 +395,11 @@ namespace Mndz
                             RefreshDisplay(true);
                             return;
                         }
-                        if (param == "00002") //input real es value
+                        if (param == "00002") //input real rs value
                         {
                             this.Invoke(new Action(() =>
                             {
-                                dlg_kbd.Init(String.Format(StringResource.str("inputrs"), Processor._RsTitles[processor.RsIndex]), "rsreal", false, KbdData);
+                                dlg_kbd.Init(String.Format(StringResource.str("inputrs1"), Processor._RsTitles[processor.RsIndex]), "rsreal", false, KbdData);
                             }));
                             RefreshDisplay(true);
                             return;
@@ -369,9 +412,10 @@ namespace Mndz
                             }));
                             return;
                         }
+
                         if (!Util.TryDecimalParse(param, out a))
                             return;
-                        
+                        a = a * dlg_kbd.scale;
                         if (a < 0)
                         {
                             this.Invoke(new Action(() => {
