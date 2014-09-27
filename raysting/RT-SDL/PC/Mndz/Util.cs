@@ -399,12 +399,14 @@ namespace Mndz
             str_tbl["inputda"] = "请输入DA零位值";
             str_tbl["inputaddelay"] = "请输入测量延时值(秒)";
             str_tbl["selectvx"] = "请选择被测电压值Vx";
-            str_tbl["inputrs"] = "请输入Rs({0})实际值";
-            str_tbl["inputes"] = "请输入Es({0})实际值";
+            str_tbl["inputrs"] = "输入Rs值(ohm)";
+            str_tbl["inputrs1"] = "请输入Rs({0})实际值(ohm)";
+            str_tbl["inputes"] = "请输入Es({0})实际值(V)";
             str_tbl["out_of_range"] = "输入值无效";
             str_tbl["hvout"] = "校验高压表";
             str_tbl["inputhv"] = "请输入高压表校验电压(V)";
-
+            str_tbl["selecthvport"] = "请选择电压输出端子";
+            str_tbl["over10volt"] = "超出最大电压输出范围";
             str_tbl["NAV_INIT_PZ158"] = "Un%01;00\r";
 //            str_tbl["NAV_10MV_PZ158"] = "Un%01;12;02\r";
 //            str_tbl["NAV_120MV_PZ158"] = "Un%01;12;00\r";

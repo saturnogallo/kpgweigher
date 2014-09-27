@@ -535,7 +535,8 @@ namespace Mndz
             str_tbl["out_of_range"] = "输入值无效";
             str_tbl["hvout"] = "校验高压表";
             str_tbl["inputhv"] = "请输入高压表校验电压(V)";
-
+            str_tbl["selecthvport"] = "请选择电压输出端子";
+            str_tbl["over10volt"] = "超出最大电压输出范围";
             str_tbl["NAV_INIT_PZ158"] = "Un%01;00\r";
 //            str_tbl["NAV_10MV_PZ158"] = "Un%01;12;02\r";
 //            str_tbl["NAV_120MV_PZ158"] = "Un%01;12;00\r";
