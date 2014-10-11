@@ -1,0 +1,108 @@
+Protel Design System Design Rule Check
+PCB File : C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\×ÀÃæ\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB
+Date     : 2007-2-19
+Time     : 0:38:23
+
+Processing Rule : Width Constraint (Min=10mil) (Max=20mil) (Preferred=10mil) (InNet('CLK4'))
+   Violation between Track (9385mil,11345mil)(9393mil,11337mil)  TopLayer
+   Violation between Track (9393mil,11337mil)(9435mil,11295mil)  TopLayer
+   Violation between Track (9393mil,11337mil)(9480mil,11337mil)  TopLayer
+   Violation between Track (9435mil,11187.638mil)(9435mil,11295mil)  TopLayer
+   Violation between Track (9435mil,11138mil)(9435mil,11187.638mil)  TopLayer
+   Violation between Track (9630mil,11242mil)(9635mil,11237mil)  TopLayer
+   Violation between Track (9635mil,11237mil)(9635mil,11277mil)  TopLayer
+   Violation between Track (9635mil,11187.638mil)(9635mil,11237mil)  TopLayer
+   Violation between Track (9535mil,11187.638mil)(9535mil,11237mil)  TopLayer
+   Violation between Track (9535mil,11138mil)(9535mil,11187.638mil)  TopLayer
+   Violation between Track (8836mil,11409mil)(8900mil,11409mil)  TopLayer
+   Violation between Track (9385mil,11345mil)(9385mil,11392.362mil)  TopLayer
+   Violation between Track (8325.024mil,10225mil)(8553mil,10225mil)  TopLayer
+   Violation between Track (8296.024mil,10196mil)(8325.024mil,10225mil)  TopLayer
+   Violation between Track (8296.024mil,10143.938mil)(8296.024mil,10196mil)  TopLayer
+   Violation between Track (8061.874mil,9939mil)(8260mil,9939mil)  TopLayer
+   Violation between Track (8260mil,9939mil)(8270.434mil,9928.566mil)  TopLayer
+   Violation between Track (8270.434mil,9886.064mil)(8270.434mil,9928.566mil)  TopLayer
+   Violation between Track (8480.086mil,10622.086mil)(8603.11mil,10622.086mil)  TopLayer
+   Violation between Track (8900mil,11397.362mil)(8900mil,11409mil)  TopLayer
+   Violation between Track (8780mil,11465mil)(8836mil,11409mil)  TopLayer
+   Violation between Track (9535mil,11237mil)(9540mil,11242mil)  TopLayer
+   Violation between Track (9540mil,11242mil)(9630mil,11242mil)  TopLayer
+   Violation between Track (9530.414mil,11133.414mil)(9535mil,11138mil)  TopLayer
+   Violation between Track (9439.586mil,11133.414mil)(9530.414mil,11133.414mil)  TopLayer
+   Violation between Track (9435mil,11138mil)(9439.586mil,11133.414mil)  TopLayer
+   Violation between Track (9485mil,11342mil)(9485mil,11392.362mil)  TopLayer
+   Violation between Track (9480mil,11337mil)(9485mil,11342mil)  TopLayer
+   Violation between Track (8780mil,11572.362mil)(8780mil,11617mil)  BottomLayer
+   Violation between Track (8780mil,11465mil)(8780mil,11572.362mil)  BottomLayer
+   Violation between Track (8780mil,11465mil)(8812mil,11497mil)  BottomLayer
+   Violation between Track (8780mil,11617mil)(8802mil,11639mil)  BottomLayer
+   Violation between Track (8802mil,11639mil)(9540mil,11639mil)  BottomLayer
+   Violation between Track (9665mil,9755mil)(9665mil,9853mil)  BottomLayer
+   Violation between Track (9632.054mil,9885.946mil)(9665mil,9853mil)  BottomLayer
+   Violation between Track (9436.534mil,9885.946mil)(9632.054mil,9885.946mil)  BottomLayer
+   Violation between Track (9422.48mil,9900mil)(9436.534mil,9885.946mil)  BottomLayer
+   Violation between Track (9422.48mil,9900mil)(9422.48mil,9972.362mil)  BottomLayer
+Rule Violations :38
+
+Processing Rule : Width Constraint (Min=20mil) (Max=20mil) (Preferred=20mil) (InNet('NetT2_4'))
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=8mil) (Max=20mil) (Preferred=20mil) (InNet('VCC'))
+   Violation between Track (8237mil,10151mil)(8244.842mil,10151mil)  TopLayer
+   Violation between Track (8244.842mil,10143.938mil)(8244.842mil,10151mil)  TopLayer
+   Violation between Track (8237mil,10151mil)(8237mil,10338mil)  TopLayer
+Rule Violations :3
+
+Processing Rule : Hole Size Constraint (Min=1mil) (Max=200mil) (All)
+Rule Violations :0
+
+Processing Rule : Pads and Vias to follow the Drill pairs settings
+Rule Violations :0
+
+Processing Rule : Component Clearance Constraint (Quick Check Mode) ( Horizontal Gap = 10mil) (All),(All) 
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=5mil) (Max=20mil) (Preferred=10mil) (All)
+Rule Violations :0
+
+Processing Rule : Clearance Constraint (Gap=5mil) (All),(All)
+Rule Violations :0
+
+Processing Rule : Broken-Net Constraint ( (All) )
+Rule Violations :0
+
+Processing Rule : Short-Circuit Constraint (Allowed=No) (All),(All)
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=20mil) (Max=20mil) (Preferred=20mil) (InNet('RVCC'))
+   Violation between Track (9620.788mil,10877.402mil)(9620.788mil,10904mil)  TopLayer
+   Violation between Track (9620.788mil,10877.402mil)(9640mil,10877.402mil)  TopLayer
+   Violation between Track (9614.402mil,10877.402mil)(9620.788mil,10877.402mil)  TopLayer
+   Violation between Track (9620.788mil,11032.402mil)(9642.598mil,11032.402mil)  TopLayer
+   Violation between Track (9587.606mil,11032.402mil)(9620.788mil,11032.402mil)  TopLayer
+   Violation between Track (9620.788mil,10717.402mil)(9642.402mil,10717.402mil)  TopLayer
+   Violation between Track (9558mil,10717.402mil)(9620.788mil,10717.402mil)  TopLayer
+   Violation between Track (9610.788mil,10207.402mil)(9658mil,10207.402mil)  TopLayer
+   Violation between Track (9558mil,10207.402mil)(9610.788mil,10207.402mil)  TopLayer
+   Violation between Track (9610.788mil,10052.402mil)(9632.598mil,10052.402mil)  TopLayer
+   Violation between Track (9558mil,10052.402mil)(9610.788mil,10052.402mil)  TopLayer
+   Violation between Track (9632.598mil,10052.402mil)(9645mil,10040mil)  TopLayer
+   Violation between Track (9645mil,9955.212mil)(9645mil,10040mil)  TopLayer
+   Violation between Track (9610.788mil,9921mil)(9645mil,9955.212mil)  TopLayer
+   Violation between Track (9610.788mil,9892.402mil)(9610.788mil,9921mil)  TopLayer
+   Violation between Track (9558mil,10821mil)(9614.402mil,10877.402mil)  TopLayer
+   Violation between Track (9558mil,10542.402mil)(9615.788mil,10542.402mil)  TopLayer
+   Violation between Track (9642.402mil,10717.402mil)(9655mil,10730mil)  TopLayer
+   Violation between Track (9655mil,10730mil)(9655mil,10862.402mil)  TopLayer
+   Violation between Track (9640mil,10877.402mil)(9655mil,10862.402mil)  TopLayer
+   Violation between Track (9610.788mil,10362.402mil)(9658mil,10362.402mil)  TopLayer
+   Violation between Track (9620.788mil,10904mil)(9640mil,10904mil)  TopLayer
+   Violation between Track (9640mil,10904mil)(9655mil,10919mil)  TopLayer
+   Violation between Track (9655mil,10919mil)(9655mil,11020mil)  TopLayer
+   Violation between Track (9642.598mil,11032.402mil)(9655mil,11020mil)  TopLayer
+   Violation between Track (9558.446mil,11061.562mil)(9587.606mil,11032.402mil)  TopLayer
+Rule Violations :26
+
+
+Violations Detected : 67
+Time Elapsed        : 00:00:00

@@ -1,0 +1,306 @@
+C51 COMPILER V7.01  UART                                                                   04/27/2014 14:00:40 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE UART
+OBJECT MODULE PLACED IN UART.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE UART.C LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjDefine.h"
+   2          // UART.C
+   3          //
+   4          // Generic software uart written in C, requiring a timer set to 3 times
+   5          // the baud rate, and two software read/write pins for the receive and
+   6          // transmit functions.
+   7          //
+   8          // * Received characters are buffered
+   9          // * putchar(), getchar(), kbhit() and flush_input_buffer() are available
+  10          // * There is a facility for background processing while waiting for input
+  11          //
+  12          // Colin Gittins, Software Engineer, Halliburton Energy Services
+  13          //
+  14          // The baud rate can be configured by changing the BAUD_RATE macro as
+  15          // follows:
+  16          //
+  17          //
+  18          // The function init_uart() must be called before any comms can take place
+  19          //
+  20          // Interface routines required:
+  21          // 1. get_rx_pin_status()
+  22          //    Returns 0 or 1 dependent on whether the receive pin is high or low.
+  23          // 2. set_tx_pin_high()
+  24          //    Sets the transmit pin to the high state.
+  25          // 3. set_tx_pin_low()
+  26          //    Sets the transmit pin to the low state.
+  27          // 4. idle()
+  28          //    Background functions to execute while waiting for input.
+  29          // 5. timer_set( BAUD_RATE )
+  30          //    Sets the timer to 3 times the baud rate.
+  31          // 6. set_timer_interrupt( timer_isr )
+  32          //    Enables the timer interrupt.
+  33          //
+  34          // Functions provided:
+  35          // 1. void flush_input_buffer( void )
+  36          //    Clears the contents of the input buffer.
+  37          // 2. char io_hasc( void )
+  38          //    Tests whether an input character has been received.
+  39          // 3. char getchar( void )
+  40          //    Reads a character from the input buffer, waiting if necessary.
+  41          // 4. void turn_rx_on( void )
+  42          //    Turns on the receive function.
+  43          // 5. void turn_rx_off( void )
+  44          //    Turns off the receive function.
+  45          // 6. void putchar( char )
+  46          //    Writes a character to the serial port.
+  47          
+  48          #include <stdio.h>
+  49          
+  50          sbit asp_rx     = P3^6; //rx of simulated serial port1
+  51          sbit asp_tx = P3^7; //tx of simulated serial port1
+  52          
+  53          
+  54          sbit asp_rx2 = P3^4; //rx of simulated serial port2
+  55          sbit asp_tx2 = P3^5; //tx of simulated serial port2
+C51 COMPILER V7.01  UART                                                                   04/27/2014 14:00:40 PAGE 2   
+
+  56          
+  57          
+  58          
+  59          #define IN_BUF_SIZE 32
+  60          
+  61          
+  62          static pdata BYTE inbuf[IN_BUF_SIZE];
+  63          static unsigned char qin = 0;
+  64          static unsigned char qout = 0;
+  65          /*****************************************************
+  66          Interface Routine for I/O analog serial port (UART.C)
+  67          (added by songj)
+  68          // 1. get_rx_pin_status()
+  69          //    Returns 0 or 1 dependent on whether the receive pin is high or low.
+  70          // 2. set_tx_pin_high()
+  71          //    Sets the transmit pin to the high state.
+  72          // 3. set_tx_pin_low()
+  73          //    Sets the transmit pin to the low state.
+  74          // 4. idle()
+  75          //    Background functions to execute while waiting for input.
+  76          // 5. timer_set( BAUD_RATE )
+  77          //    Sets the timer to 3 times the baud rate.
+  78          // 6. set_timer_interrupt( timer_isr )
+  79          //    Enables the timer interrupt.
+  80          
+  81          ******************************************************/
+  82          
+  83          void asp_set_timer()
+  84          {
+  85   1              AUXR |= 0x80;           //1T mod
+  86   1              TMOD &= 0xF0;           //timer mode
+  87   1              TL0 = (65536-(FOSC/3/BAUD_RATE));
+  88   1          TH0 = (65536-(FOSC/3/BAUD_RATE))>>8;                      //initial timer0 and set reload value
+  89   1              
+  90   1              TF0 = 0;                //clear TF0
+  91   1          TR0 = 1;                            //tiemr0 start running
+  92   1      }
+  93          #define get_rx_pin_status()             asp_rx
+  94          
+  95          #define set_tx_pin_high()       asp_tx = 1
+  96          
+  97          #define set_tx_pin_low()        asp_tx = 0;
+  98          
+  99          #define turn_rx_on()    flag_rx_off = FALSE
+ 100          
+ 101          #define turn_rx_off()   flag_rx_off = TRUE
+ 102          
+ 103          
+ 104          void idle()
+ 105          {
+ 106   1      
+ 107   1      }
+ 108          
+ 109          
+ 110          
+ 111          
+ 112          static char  flag_rx_waiting_for_stop_bit;
+ 113          static char  flag_rx_off;
+ 114          static BYTE  rx_mask;
+ 115          static char  flag_rx_ready;
+ 116          static char  flag_tx_ready;
+ 117          static char  timer_rx_ctr;
+C51 COMPILER V7.01  UART                                                                   04/27/2014 14:00:40 PAGE 3   
+
+ 118          static char  timer_tx_ctr;
+ 119          static char  bits_left_in_rx;
+ 120          static char  bits_left_in_tx;
+ 121          static char  rx_num_of_bits;
+ 122          static char  tx_num_of_bits;
+ 123          static BYTE  internal_rx_buffer;
+ 124          //static char  internal_tx_buffer;
+ 125          static WORD  internal_tx_buffer;
+ 126          static BYTE user_tx_buffer;
+ 127          
+ 128          static  BYTE mask;
+ 129          static  char start_bit, flag_in;
+ 130          void asp_handler()
+ 131          {
+ 132   1              // Transmitter Section
+ 133   1              if ( flag_tx_ready )
+ 134   1              {
+ 135   2                      if ( --timer_tx_ctr<=0 )
+ 136   2                      {
+ 137   3                              mask = (BYTE)internal_tx_buffer ;
+ 138   3                              mask = mask & 0x01;
+ 139   3                              internal_tx_buffer >>= 1;
+ 140   3                              if ( mask )
+ 141   3                              {
+ 142   4                                      set_tx_pin_high();
+ 143   4                              }
+ 144   3                              else
+ 145   3                              {
+ 146   4                                      set_tx_pin_low();
+ 147   4                              }
+ 148   3                              timer_tx_ctr = 3;
+ 149   3                              if ( --bits_left_in_tx<=0 )
+ 150   3                              {
+ 151   4                                      flag_tx_ready = FALSE;
+ 152   4                              }
+ 153   3                      }
+ 154   2              }
+ 155   1              // Receiver Section
+ 156   1              if ( flag_rx_off==FALSE )
+ 157   1              {
+ 158   2                      if ( flag_rx_waiting_for_stop_bit )
+ 159   2                      {
+ 160   3                              if ( --timer_rx_ctr<=0 )
+ 161   3                              {
+ 162   4                                      flag_rx_waiting_for_stop_bit = FALSE;
+ 163   4                                      flag_rx_ready = FALSE;
+ 164   4                                      internal_rx_buffer &= 0xFF;
+ 165   4                                      if ( internal_rx_buffer!=0xC2 )
+ 166   4                                      {       
+ 167   5                                              inbuf[qin] = internal_rx_buffer;
+ 168   5                                              if ( ++qin>=IN_BUF_SIZE )
+ 169   5                                              {
+ 170   6                                                      qin = 0;
+ 171   6                                              }
+ 172   5                                      }       
+ 173   4                              }
+ 174   3                      }
+ 175   2                      else // rx_test_busy
+ 176   2                      {
+ 177   3                              if ( flag_rx_ready==FALSE )
+ 178   3                              {
+ 179   4                                      start_bit = get_rx_pin_status();
+C51 COMPILER V7.01  UART                                                                   04/27/2014 14:00:40 PAGE 4   
+
+ 180   4                                      // Test for Start Bit
+ 181   4                                      if ( start_bit==0 )
+ 182   4                                      {
+ 183   5                                              flag_rx_ready = TRUE;
+ 184   5                                              internal_rx_buffer = 0;
+ 185   5                                              timer_rx_ctr = 4;
+ 186   5                                              bits_left_in_rx = rx_num_of_bits;
+ 187   5                                              rx_mask = 1;
+ 188   5                                      }
+ 189   4                              }
+ 190   3                              else // rx_busy
+ 191   3                              {
+ 192   4                                      if ( --timer_rx_ctr<=0 )
+ 193   4                                      { 
+ 194   5                                              // rcv
+ 195   5                                              timer_rx_ctr = 3;
+ 196   5                                              flag_in = get_rx_pin_status();
+ 197   5                                              if ( flag_in )
+ 198   5                                              {
+ 199   6                                                      internal_rx_buffer |= rx_mask;
+ 200   6                                              }
+ 201   5                                              rx_mask <<= 1;
+ 202   5                                              if ( --bits_left_in_rx<=0 )
+ 203   5                                              {
+ 204   6                                                      flag_rx_waiting_for_stop_bit = TRUE;
+ 205   6                                              }
+ 206   5                                      }
+ 207   4                              }
+ 208   3                      }
+ 209   2              }
+ 210   1      }
+ 211          
+ 212          void init_uart( void )
+ 213          {
+ 214   1              asp_tx = 1;//set the asp_tx to be output pin
+ 215   1              if(asp_rx);//set the asp_rx to be input pin
+ 216   1      
+ 217   1              flag_tx_ready = FALSE;
+ 218   1              flag_rx_ready = FALSE;
+ 219   1              flag_rx_waiting_for_stop_bit = FALSE;
+ 220   1              flag_rx_off = FALSE;
+ 221   1              rx_num_of_bits = 8;//8 data ,one stop ,no check
+ 222   1              tx_num_of_bits = 10;//8 data,one stop ,no check
+ 223   1      
+ 224   1              set_tx_pin_low();
+ 225   1      
+ 226   1              turn_rx_on();//enable I/O serial
+ 227   1              qin = 0;
+ 228   1              qout = 0;
+ 229   1      
+ 230   1      
+ 231   1      }
+ 232          
+ 233          BYTE io_getc( void )
+ 234          {
+ 235   1              BYTE ch;
+ 236   1      
+ 237   1              do
+ 238   1              {
+ 239   2                      while ( qout==qin )
+ 240   2                      {
+ 241   3                              idle(); 
+C51 COMPILER V7.01  UART                                                                   04/27/2014 14:00:40 PAGE 5   
+
+ 242   3                      }
+ 243   2                      ch = inbuf[qout] & 0xFF;
+ 244   2                      if ( ++qout>=IN_BUF_SIZE )
+ 245   2                      {
+ 246   3                              qout = 0;
+ 247   3                      }
+ 248   2              }
+ 249   1              while (ch==0xC2);
+ 250   1              return( ch );
+ 251   1      }
+ 252          
+ 253          void io_putc( BYTE ch )
+ 254          {
+ 255   1              while ( flag_tx_ready );
+ 256   1              user_tx_buffer = ch;
+ 257   1      
+ 258   1              // invoke_UART_transmit
+ 259   1              timer_tx_ctr = 3;
+ 260   1              bits_left_in_tx = tx_num_of_bits;
+ 261   1              internal_tx_buffer = (user_tx_buffer<<1) | 0x200;
+ 262   1              flag_tx_ready = TRUE;
+ 263   1      }
+ 264          
+ 265          
+ 266          BYTE io_hasc( void )
+ 267          {
+ 268   1              if(qin ==qout)
+ 269   1                      return 0;
+ 270   1              if(qin > qout)
+ 271   1                      return qin-qout;
+ 272   1              return qin+IN_BUF_SIZE -qout;
+ 273   1      }
+ 274          
+ 275          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    457    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     20    ----
+   PDATA SIZE       =     32    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

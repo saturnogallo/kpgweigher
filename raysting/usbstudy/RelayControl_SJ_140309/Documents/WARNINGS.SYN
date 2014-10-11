@@ -1,0 +1,16 @@
+Protel Synchronisation warnings report
+=========================================================================
+Date : 2-Nov-2013 
+Time : 16:52:29
+
+Reference document: Documents\RelayControl.Sch
+Target document:    Documents\RelayControl.PCB
+=========================================================================
+
+MISSING FOOTPRINTS
+=========================================================================
+JMISO CON6
+R16 10K
+R15 10K
+R14 10K
+

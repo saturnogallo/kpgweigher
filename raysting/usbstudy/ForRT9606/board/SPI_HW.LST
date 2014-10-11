@@ -1,0 +1,137 @@
+C51 COMPILER V7.01  SPI_HW                                                                 04/23/2014 20:36:06 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SPI_HW
+OBJECT MODULE PLACED IN SPI_HW.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE SPI_HW.c LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          
+   2          
+   3          
+   4          
+   5          
+   6          /* CH374芯片 软件模拟SPI串行连接的硬件抽象层 V1.0 */
+   7          /* 提供I/O接口子程序,提供寄存器级读写子程序 */
+   8          
+   9          #include        "HAL.H"
+  10          
+  11          #define SPI_S0          0x04
+  12          #define SPI_S1          0x08
+  13          
+  14          #define SPIF            0x80                    //SPSTAT.7
+  15          #define WCOL            0x40                    //SPSTAT.6
+  16          
+  17          #define SSIG            0x80                    //SPCTL.7
+  18          #define SPEN            0x40                    //SPCTL.6
+  19          #define DORD            0x20                    //SPCTL.5
+  20          #define MSTR            0x10                    //SPCTL.4
+  21          #define CPOL            0x08                    //SPCTL.3
+  22          #define CPHA            0x04                    //SPCTL.2
+  23          #define SPDHH           0x00                    //CPU_CLK/4
+  24          #define SPDH            0x01                    //CPU_CLK/16
+  25          #define SPDL            0x02                    //CPU_CLK/64
+  26          #define SPDLL           0x03                    //CPU_CLK/128
+  27          
+  28          sbit SS             =   P5^5;                   //chip selection
+  29          
+  30          
+  31          
+  32          //#define       CH374_SPI_SCS                   P55             /* 假定CH374的SCS引脚 */
+  33          //#define       CH374_SPI_SDI                   P41             /* 假定CH374的SDI引脚 */
+  34          //#define       CH374_SPI_SDO                   P40             /* 假定CH374的SDO引脚 */
+  35          //#define       CH374_SPI_SCK                   P43             /* 假定CH374的SCK引脚 */
+  36          
+  37          void CH374_PORT_INIT( )  /* 由于使用通用I/O模拟并口读写时序,所以进行初始化 */
+  38          {
+  39   1              SPSTAT = SPIF | WCOL;                       //??SPI??
+  40   1          SS = 1;
+  41   1          SPCTL = SSIG | SPEN | MSTR;                 //??SPI????
+  42   1      
+  43   1      }
+  44          
+  45          /************************************************
+  46          SPI data exchange
+  47          
+  48              dat : byte to send
+  49          return :
+  50              data from unit
+  51          ************************************************/
+  52          BYTE SpiShift(BYTE dat)
+  53          {
+  54   1          SPDAT = dat;                                //??SPI??
+  55   1          while (!(SPSTAT & SPIF));                   //??SPI??????
+C51 COMPILER V7.01  SPI_HW                                                                 04/23/2014 20:36:06 PAGE 2   
+
+  56   1          SPSTAT = SPIF | WCOL;                       //??SPI??
+  57   1          
+  58   1          return SPDAT;
+  59   1      }
+  60          
+  61          
+  62          void    Spi374Start( UINT8 addr, UINT8 cmd )  /* SPI开始 */
+  63          {
+  64   1      //      CH374_SPI_SCS = 1;
+  65   1      /* 对于双向I/O引脚模拟SPI接口,那么必须确保已经设置SPI_SCS,SPI_SCK,SPI_SDI为输出方向,SPI_SDO为输入方向 */
+  66   1              SS = 0;  /* SPI片选有效 */
+  67   1              Spi374OutByte( addr );
+  68   1              Spi374OutByte( cmd );
+  69   1      }
+  70          void  MySpi374Stop()    /* SPI结束 */
+  71          { 
+  72   1              SS = 1; 
+  73   1      }  
+  74          #define Spi374Stop( )   { SS = 1; }  /* SPI结束 */
+  75          //void  Spi374Stop( void )  /* SPI结束 */
+  76          //{
+  77          //      CH374_SPI_SCS = 1;      /* SPI片选无效 */
+  78          //}
+  79          
+  80          UINT8   Read374Byte( UINT8 mAddr )  /* 从指定寄存器读取数据 */
+  81          {
+  82   1              UINT8   d;
+  83   1              Spi374Start( mAddr, CMD_SPI_374READ );
+  84   1              d = Spi374InByte( );
+  85   1              Spi374Stop( );
+  86   1              return( d );
+  87   1      }
+  88          
+  89          void    Write374Byte( UINT8 mAddr, UINT8 mData )  /* 向指定寄存器写入数据 */
+  90          {
+  91   1              Spi374Start( mAddr, CMD_SPI_374WRITE );
+  92   1              Spi374OutByte( mData );
+  93   1              Spi374Stop( );
+  94   1      }
+  95          
+  96          void    Read374Block( UINT8 mAddr, UINT8 mLen, PUINT8 mBuf )  /* 从指定起始地址读出数据块 */
+  97          {
+  98   1              Spi374Start( mAddr, CMD_SPI_374READ );
+  99   1              while ( mLen -- ) *mBuf++ = Spi374InByte( );
+ 100   1              Spi374Stop( );
+ 101   1      }
+ 102          
+ 103          void    Write374Block( UINT8 mAddr, UINT8 mLen, PUINT8 mBuf )  /* 向指定起始地址写入数据块 */
+ 104          {
+ 105   1              Spi374Start( mAddr, CMD_SPI_374WRITE );
+ 106   1              while ( mLen -- ) Spi374OutByte( *mBuf++ );
+ 107   1              Spi374Stop( );
+ 108   1      }
+ 109          
+ 110          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    147    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       6
+   PDATA SIZE       =   ----    ----
+C51 COMPILER V7.01  SPI_HW                                                                 04/23/2014 20:36:06 PAGE 3   
+
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

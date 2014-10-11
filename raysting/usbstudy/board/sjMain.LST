@@ -1,0 +1,225 @@
+C51 COMPILER V7.01  SJMAIN                                                                 04/27/2014 14:00:40 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
+OBJECT MODULE PLACED IN sjMain.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE sjMain.c LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjDefine.h"
+   2          #include "sjSerial.h"
+   3          #include "AD5791.h"
+   4          #include "CH374INC.h"
+   5          #include "HAL.h"
+   6          #include <stdio.h>
+   7          
+   8          
+   9          
+  10          unsigned char delayc;
+  11          
+  12          /*
+  13          */
+  14          //end interface routine
+  15          extern int      test( void );
+  16          extern void DBGS(const char* s);
+  17          extern void DBG(unsigned char);
+  18          
+  19          extern void     FlushToEndp2(unsigned char);
+  20          extern void     FlushToEndp1();
+  21          extern void     UsbSendByte(UINT8);
+  22          
+  23          
+  24          void CommandProcessor()
+  25          {
+  26   1              UINT8 temp,temp1,temp2;
+  27   1              UINT8 sid;
+  28   1              USBGetChar();
+  29   1              if(temp != HMARK)
+  30   1                      return;
+  31   1              
+  32   1              USBGetChar();
+  33   1              sid = temp;
+  34   1              switch(sid)
+  35   1              {
+  36   2              case 'd'://send to DAC //5 byte data , 1st byte is for sum check = 0x00, (2nd-4th byte is data), 5th byte
+             - is function code,
+  37   2                              cm_ad5791(temp);
+  38   2                              sid = "";
+  39   2                              break;
+  40   2              case 's'://send to switch
+  41   2                              cm_relay(temp);
+  42   2                              sid = "";
+  43   2                              break;
+  44   2              case 'n'://send to navmeter
+  45   2                              io_putc(temp);
+  46   2                              break;
+  47   2              case 't':
+  48   2                              {
+  49   3                                      temp1=sjSerialWaitForOneByte();
+  50   3                                      temp2=sjSerialWaitForOneByte(); //temp2 is check sum
+  51   3      
+  52   3                                      if( (temp1 + temp2 + temp) & 0xff == 0xff)
+  53   3                                      {
+  54   4                                              P0 = temp;
+C51 COMPILER V7.01  SJMAIN                                                                 04/27/2014 14:00:40 PAGE 2   
+
+  55   4                                              P1 = temp1;
+  56   4                                      }
+  57   3                                      sid = "";
+  58   3                                      sjSerialSendByte(EMARK);
+  59   3                              }
+  60   2                              break;
+  61   2              default:
+  62   2                              break;
+  63   2              }
+  64   1      }
+  65          extern void btnencode_loop();
+  66          unsigned long count = 0;
+  67          BOOL once = 0;
+  68          void timer_isr(void) interrupt 1 using 1
+  69          {
+  70   1              asp_handler();
+  71   1              asp_handler2();
+  72   1              TF0 = 0; //clear timer
+  73   1      }
+  74          extern int      test( void );
+  75          void main()
+  76          {
+  77   1              
+  78   1              unsigned char sid;//id of serial to send 
+  79   1              BYTE temp;
+  80   1              long i=1000;
+  81   1      
+  82   1      
+  83   1              IE = 0;//close int
+  84   1                                        // S1   CCP  SPI
+  85   1              P_SW1 = 0x08  ; // 0 0  0 0  1 0   0  0
+  86   1                                        // X X PWM6  PWM2345 X  S4_S S3_S S2_S
+  87   1          P_SW2 = 0x07  ; // 0 0  0      0     0    1    1     1
+  88   1      
+  89   1              AUXR = 0x10 ;// t0x12  t1x12  m0x6 t2r t2ct t2x12 extram s1st2
+  90   1                                       // 0       0      0    1   0     0      0     0
+  91   1              T4T3M = 0x88;// t4r  t4ct  t4x12 t4clko t3r t3ct t3x12 t3clk
+  92   1                                       //     1     0     0      0      1  0    0     0
+  93   1              INT_CLKO = 0x00;  //x ex4 ex3 ex2 x t2 t1 t0
+  94   1      
+  95   1      
+  96   1              sjSerialInit(); //init COM1 and COM2 buffer
+  97   1      
+  98   1              //CLK_DIV = 0x40; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0 //24Mhz
+  99   1                                              //      0      1        0    0     0      0       0 0  
+ 100   1              CLK_DIV = 0x80; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0  //12Mhz
+ 101   1                                              //      1      0        0    0     0      0       0 0  
+ 102   1              init_uart();  //fake serial port 3
+ 103   1              init_uart2(); //fake serial port 4
+ 104   1      
+ 105   1              asp_set_timer();
+ 106   1      
+ 107   1      
+ 108   1              sid = 0;
+ 109   1              
+ 110   1              AD5791Init();
+ 111   1              
+ 112   1              sjRelayInit();
+ 113   1      
+ 114   1              /*
+ 115   1              *       Protocal routine: 
+ 116   1              *       1.      HMARK sid(!=HMARK) :set sid
+C51 COMPILER V7.01  SJMAIN                                                                 04/27/2014 14:00:40 PAGE 3   
+
+ 117   1              *   2.  normal HMARK is repeated
+ 118   1              */
+ 119   1              
+ 120   1              //DBGS("STARTUP DONE\r\n");     
+ 121   1      
+ 122   1              //test();
+ 123   1              mDelaymS(5000);
+ 124   1      
+ 125   1      
+ 126   1              CH374_PORT_INIT( );  /* CH374接口初始化 */
+ 127   1      
+ 128   1              temp = 0;
+ 129   1              while(temp != 0x01)
+ 130   1              {
+ 131   2                      mDelaymS(50);
+ 132   2      //              DBGS("\r\nSYSINFO = ");
+ 133   2                      temp = Read374Byte(REG_SYS_INFO) & 0x03;
+ 134   2      //              DBG(temp);
+ 135   2      //              temp = temp & 0x03;
+ 136   2              }
+ 137   1              mDelaymS(50);
+ 138   1              CH374_PORT_INIT( );  /* CH374接口初始化 */
+ 139   1              Init374Device( );  // 初始化USB设备
+ 140   1      
+ 141   1      
+ 142   1      
+ 143   1              TR1 = 1;                //ENABLE COM1
+ 144   1              AUXR |= 0x10;   //Enable COM2
+ 145   1      
+ 146   1              PT0 = 1;                //improve timer0 interrupt priority
+ 147   1          ET0 = 1;        //enable timer0 interrupt
+ 148   1      
+ 149   1              IE = 0x92;//enable serial int and timer0 interrupt//IE=90
+ 150   1              IE2 = 1;
+ 151   1              EA = 1;
+ 152   1              DBGS("\r\nSTARTUP DONE ");
+ 153   1      
+ 154   1              while(1)
+ 155   1              {
+ 156   2      //              test();
+ 157   2                      if ( Query374Interrupt( ) )
+ 158   2                  {
+ 159   3      //                      sjSerialSendByte('<');
+ 160   3                              USB_DeviceInterrupt( );  // 等待USB设备中断，然后处理USB设备中断
+ 161   3      //                      sjSerialSendByte('>');
+ 162   3                      }
+ 163   2      //              if (sjSerialIsDataWaiting())
+ 164   2      //              {
+ 165   2      //                      temp = sjSerialWaitForOneByte();
+ 166   2      //                      FlushToEndp2(BIT_EP2_TRAN_TOG);
+ 167   2      //              }
+ 168   2                      if (sjSerialIsDataWaiting())
+ 169   2                      {
+ 170   3                              temp = sjSerialWaitForOneByte();
+ 171   3                              sjSerialSendByte(temp);
+ 172   3                      }       
+ 173   2                      if (sjSerialIsDataWaiting2())
+ 174   2                      {
+ 175   3                              temp = sjSerialWaitForOneByte2();
+ 176   3                              sjSerialSendByte2(temp);
+ 177   3                      }       
+ 178   2                      if (io_hasc())
+C51 COMPILER V7.01  SJMAIN                                                                 04/27/2014 14:00:40 PAGE 4   
+
+ 179   2                      {
+ 180   3                              temp = io_getc();
+ 181   3                              io_putc(temp);
+ 182   3                      }
+ 183   2                      if (io_hasc2())
+ 184   2                      {
+ 185   3                              temp = io_getc2();
+ 186   3                              io_putc2(temp);
+ 187   3                      }       
+ 188   2      
+ 189   2                      continue;
+ 190   2              }
+ 191   1      //      btnencode_loop();
+ 192   1      }
+ 193          
+ 194          
+ 195          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    358    ----
+   CONSTANT SIZE    =     17    ----
+   XDATA SIZE       =      6       9
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

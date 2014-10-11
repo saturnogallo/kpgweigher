@@ -1,0 +1,355 @@
+C51 COMPILER V7.01  SJMAIN                                                                 06/22/2014 12:30:41 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
+OBJECT MODULE PLACED IN sjMain.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE sjMain.c LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjDefine.h"
+   2          #include "sjSerial.h"
+   3          //#include "AD5791.h"
+   4          //#include "CH374INC.h"
+   5          #include "HAL.h"
+   6          #include <stdio.h>
+   7          
+   8          //the MARK of header ender and error and quest and reset
+   9          #define  HMARK 0x55     //U
+  10          #define  EMARK 0x56 //V
+  11          #define  QMARK 0x57 //W
+  12          #define  RMARK 0x58 //X
+  13            
+  14          //the length of the switch table ,
+  15          //which must lower than 3fh
+  16          #define  LINIT 32 
+  17          
+  18          //for P1 output
+  19          //for P0 output
+  20          const unsigned char code tbl[8]={0x7F,0xBF,0xDF,0xEF,0xF7,0xFB,0xFD,0xFE};
+  21          
+  22          
+  23          
+  24          
+  25          //for Init use(regaddr of pc)
+  26          const unsigned char code inittbl[LINIT]={
+  27          
+  28          /*********** 05-1-25  8:44 ****************/
+  29          
+  30          //  FKI1,FKI2,FKI3,OKI4,PKTT,FHP9,FHP7,FST2,
+  31              0x37,0x36,0x35,0x3D,0x33,0x32,0x31,0x30,
+  32          
+  33          //  FHP3,FHN3,FHP4,FHN4,FST1,FHX1,FHX2,FFX1,  
+  34                  0x26,0x27,0x24,0x25,0x22,0x23,0x20,0x21,
+  35          
+  36          //  FHP10,FHP1,FHN1,FHP2,FHN2,FHN5,FHP8,FHN6,
+  37                  0x17,0x16,0x15,0x14,0x13,0x12,0x11,0x10,
+  38          
+  39          //  FKN1,FKN2,FKN3,FKN4,FKN5,OKN6,FHP6,FHP5
+  40                  0x06,0x07,0x04,0x05,0x02,0x0A,0x00,0x01
+  41          /*******************************************
+  42          //  FKI1,FKI2,FKI3,OKI4,PKTT,FHP9,FHP7,FST2,
+  43              0x37,0x36,0x35,0x3D,0x33,0x17,0x11,0x30,
+  44          
+  45          //  FHP3,FHN3,FHP4,FHN4,FST1,FHX1,FHX2,FFX1,  
+  46                  0x24,0x27,0x01,0x25,0x22,0x23,0x20,0x21,
+  47          
+  48          //  FHP10,FHP1,FHN1,FHP2,FHN2,FHN5,FHP8,FHN6,
+  49                  0x32,0x14,0x15,0x26,0x13,0x12,0x32,0x10,
+  50          
+  51          //  FKN1,FKN2,FKN3,FKN4,FKN5,OKN6,FHP6,FHP5
+  52                  0x06,0x07,0x04,0x05,0x02,0x0A,0x31,0x00
+  53          ********************************************/
+  54          };
+  55          
+C51 COMPILER V7.01  SJMAIN                                                                 06/22/2014 12:30:41 PAGE 2   
+
+  56          //when modification is applied,
+  57          //no address should be modified ,just set the mcu addr= 256,
+  58          //and add new item in mcuaddr
+  59          //C? IT IS SO EASY ,
+  60          //BUT ,A NEW REGISTER MODEL WILL BE APPLIED IN THE FUTURE.
+  61          /*          board allocation (F,O)=P0*8+P1
+  62                          48,49   50,51   52,53   54,55   57,56   59,58   61,60   63,62   //HPo,HNo,??,HP0,H8,H7,STo,STi
+  63                          33,32   35,34   37,36   39,38   41,40   43,42   45,44   47,46   //HN4,HP4,HN3,HP3,HN6,HP6,HN5,HP5
+  64                          17,16   19,18   21,20   23,22   25,24   27,26   29,28   31,30   //KN4,KN3,KN2,KN1,H9,FX1,KTT,KN5
+  65                          0,1             2,3             4,5             6,7             9,8             11,10   13,12   15,14   //H2,H1,HX2,HX1,KI4,KI3,KI2,KI1
+  66          const unsigned char pcaddr[] ={
+  67                          0x16,0x14,0x26,0x24,0x01,0x00,0x31,0x11,0x32,0x17,//FHP 0-9 (pc addr)
+  68                          0x1f,0x1d,0x2f,0x2d,0x08,0x09,0x38,0x18,0x3b,0x1e,//OHP 10-19 (pc addr)
+  69                          0x15,0x13,0x27,0x25,0x12,0x10,                                    //FHN 20-25  (pc addr)
+  70                          0x1c,0x1a,0x2e,0x2c,0x1b,0x19,                                    //OHN 26-31  (pc addr)
+  71                          0x06,0x07,0x04,0x05,0x02,0x03,                                    //FKN 32-37  (pc addr)
+  72                          0x0f,0x0e,0x0d,0x0c,0x0b,0x0a,                                    //OKN 38-42  (pc addr)
+  73                          0x37,0x36,0x35,0x34,                                                      //FKI 44-47      (pc addr)
+  74                          0x3e,0x3f,0x3c,0x3d,                                                      //OKI 48-51      (pc addr)
+  75                          0x23,0x20,0x21,0x33,0x22,0x30,                                    //FHX1,FHX2,FFX1,PKTT,FSTI,FSTO 52-57  (pc addr)
+  76                          0x2a,0x29,0x28,0x3a,0x2b,0x39,                                    //OHX1,OHX2,OFX1,NKTT,OSTI,OSTO, 58-63 (pc addr)
+  77                          0x41,0x40,0x43,0x42};                                                     //FHPO,OHP0,FHNO,OHNO  (pc addr)
+  78          const unsigned char mcuaddr[] ={
+  79                       54,  2     ,  0,   39,      35,  47,  43,  59,  57, 25,   //FHP 0-9 (pc addr)
+  80                           55,  3 ,  1,   38,      34,  46,  42,  58,      56, 24,   //OHP 10-19 (pc addr)
+  81                           255, 255,  37,  33,  45,   41,                                    //FHN 20-25  (pc addr)
+  82                           255, 255,  36,  32,  44,   40,                    //OHN 26-31  (pc addr)
+  83                           23,   21,  19,  17,  31,  255,                                    //FKN 32-37  (pc addr) ?(54)
+  84                           22,   20,  18,  16,  30,  255,                    //OKN 38-42  (pc addr) ?(55)
+  85                           15,   13,  11,  9,                                                                //FKI 44-47     (pc addr)
+  86                           14,   12,  10,  8,                                                                //OKI 48-51     (pc addr)
+  87                           6,   4,   27,  29,  63,  61,                                      //FHX1,FHX2,FFX1,PKTT,FSTI,FSTO 52-57  (pc addr)
+  88                           7,   5,   26,  28,  62,  60,                                      //OHX1,OHX2,OFX1,NKTT,OSTI,OSTO, 58-63 (pc addr)
+  89                           48,  49,  50,  51};                                                       //FHPO,OHP0,FHNO,OHNO  (pc addr)
+  90          
+  91          */
+  92          const unsigned char code lut[]={
+  93          /*****05-1-25 8:44****
+  94          47,35,31,255,19,17,23,21,  //0-7
+  95          34,46,255,30,16,18,20,22,  //8-f
+  96          41,59,45,255,2,255,54,25,  //10-17
+  97          58,40,255,44,255,3,24,55,  //18-1f
+  98          4,27,63,6,39,33,0,37,      //20-27
+  99          26,5,7,62,32,38,36,1,      //28-2f
+ 100          61,43,57,29,9,11,13,15,    //30-37
+ 101          42,60,28,56,10,8,14,12,    //38-3f 
+ 102          49,48,51,50                                //40-43
+ 103          **********************/
+ 104          /*****05-1-25 8:44****/
+ 105          43,47,31,255,19,17,23,21,  //0-7  
+ 106          46,42,255,30,16,18,20,22,  //8-f
+ 107          41,57,45,255,0,255,2,54,  //10-17
+ 108          56,40,255,44,255,1,55,3,  //18-1f
+ 109          4,27,63,6,35,33,39,37,      //20-27
+ 110          26,5,7,62,32,34,36,38,      //28-2f
+ 111          61,59,25,29,9,11,13,15,    //30-37
+ 112          58,60,28,24,10,8,14,12,    //38-3f 
+ 113          49,48,51,50                                //40-43
+ 114          /**********************/
+ 115          };
+ 116          
+ 117          //delay loop
+C51 COMPILER V7.01  SJMAIN                                                                 06/22/2014 12:30:41 PAGE 3   
+
+ 118          void swiDelay(unsigned char dl1,unsigned char dl2)
+ 119          {
+ 120   1              unsigned char i,j;
+ 121   1              for(i=0;i<dl1;i++)
+ 122   1                      for(j=0;j<dl2;j++)
+ 123   1                              ;
+ 124   1      }
+ 125          
+ 126          
+ 127          void swiAction(unsigned char SwiID)
+ 128          {
+ 129   1              unsigned char exID;
+ 130   1      
+ 131   1              if(SwiID >= sizeof(lut))
+ 132   1                      return;
+ 133   1      
+ 134   1              exID = lut[SwiID];
+ 135   1              if(exID == 255)
+ 136   1                      return;
+ 137   1      
+ 138   1              P1 = tbl[(exID&7)];
+ 139   1              P0 = tbl[(exID>>3)];
+ 140   1              swiDelay(0x1f,0xff);
+ 141   1      
+ 142   1              P1 = 0xff;
+ 143   1              P0 = 0xff;
+ 144   1              swiDelay(0x06,0xff);
+ 145   1      }
+ 146          void swiReset()
+ 147          {
+ 148   1              unsigned char i;
+ 149   1              for(i=0;i<LINIT;i++)
+ 150   1              {
+ 151   2                      swiAction(inittbl[i]);
+ 152   2              }
+ 153   1      }
+ 154          
+ 155          unsigned char delayc;
+ 156          
+ 157          /*
+ 158          */
+ 159          //end interface routine
+ 160          extern int      test( void );
+ 161          extern void DBGS(const char* s);
+ 162          extern void DBG(unsigned char);
+ 163          
+ 164          
+ 165          //extern void btnencode_loop();
+ 166          unsigned long count = 0;
+ 167          BOOL once = 0;
+ 168          void timer_isr(void) interrupt 1 using 1
+ 169          {
+ 170   1              asp_handler();
+ 171   1              asp_handler2();
+ 172   1              TF0 = 0; //clear timer
+ 173   1      }
+ 174          extern int      test( void );
+ 175          void main()
+ 176          {
+ 177   1              
+ 178   1              unsigned char sid;//id of serial to send 
+ 179   1              BYTE temp;
+C51 COMPILER V7.01  SJMAIN                                                                 06/22/2014 12:30:41 PAGE 4   
+
+ 180   1              long i=1000;
+ 181   1      
+ 182   1      
+ 183   1              IE = 0;//close int
+ 184   1                                        // S1   CCP  SPI
+ 185   1              P_SW1 = 0x08  ; // 0 0  0 0  1 0   0  0
+ 186   1                                        // X X PWM6  PWM2345 X  S4_S S3_S S2_S
+ 187   1          P_SW2 = 0x07  ; // 0 0  0      0     0    1    1     1
+ 188   1      
+ 189   1              AUXR = 0x10 ;// t0x12  t1x12  m0x6 t2r t2ct t2x12 extram s1st2
+ 190   1                                       // 0       0      0    1   0     0      0     0
+ 191   1              T4T3M = 0x88;// t4r  t4ct  t4x12 t4clko t3r t3ct t3x12 t3clk
+ 192   1                                       //     1     0     0      0      1  0    0     0
+ 193   1              INT_CLKO = 0x00;  //x ex4 ex3 ex2 x t2 t1 t0
+ 194   1      
+ 195   1      
+ 196   1              sjSerialInit(); //init COM1 and COM2 buffer
+ 197   1      
+ 198   1              //CLK_DIV = 0x40; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0 //24Mhz
+ 199   1                                              //      0      1        0    0     0      0       0 0  
+ 200   1              CLK_DIV = 0x80; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0  //12Mhz
+ 201   1                                              //      1      0        0    0     0      0       0 0  
+ 202   1              init_uart();  //fake serial port 3
+ 203   1              init_uart2(); //fake serial port 4
+ 204   1      
+ 205   1              asp_set_timer();
+ 206   1      
+ 207   1      
+ 208   1              sid = 0;
+ 209   1              
+ 210   1      //      AD5791Init();
+ 211   1              
+ 212   1      //      sjRelayInit();
+ 213   1      
+ 214   1              /*
+ 215   1              *       Protocal routine: 
+ 216   1              *       1.      HMARK sid(!=HMARK) :set sid
+ 217   1              *   2.  normal HMARK is repeated
+ 218   1              */
+ 219   1              
+ 220   1              //DBGS("STARTUP DONE\r\n");     
+ 221   1      
+ 222   1              //test();
+ 223   1              //mDelaymS(5000);
+ 224   1      
+ 225   1      
+ 226   1              //CH374_PORT_INIT( );  /* CH374接口初始化 */
+ 227   1      
+ 228   1      
+ 229   1      //      mDelaymS(50);
+ 230   1      //      CH374_PORT_INIT( );  /* CH374接口初始化 */
+ 231   1      //      Init374Device( );  // 初始化USB设备
+ 232   1      
+ 233   1      
+ 234   1      
+ 235   1              TR1 = 1;                //ENABLE COM1
+ 236   1              AUXR |= 0x10;   //Enable COM2
+ 237   1      
+ 238   1              PT0 = 1;                //improve timer0 interrupt priority
+ 239   1          ET0 = 1;        //enable timer0 interrupt
+ 240   1      
+ 241   1              IE = 0x92;//enable serial int and timer0 interrupt//IE=90
+C51 COMPILER V7.01  SJMAIN                                                                 06/22/2014 12:30:41 PAGE 5   
+
+ 242   1              IE2 = 1;
+ 243   1              EA = 1;
+ 244   1      //      DBGS("\r\nSTARTUP DONE ");
+ 245   1      //      swiReset();
+ 246   1              /*
+ 247   1              *       Protocal routine: 
+ 248   1              *       1.      HMARK sid(!=HMARK) :set sid
+ 249   1              *   2.  normal HMARK is repeated
+ 250   1              */
+ 251   1      //      swiDelay(0x0f,0xff);
+ 252   1      //      sjSerialSendByte('!');
+ 253   1      
+ 254   1              while(1)
+ 255   1              {
+ 256   2                      if(sjSerialIsDataWaiting())
+ 257   2                      {
+ 258   3                              temp = sjSerialWaitForOneByte();
+ 259   3                              if(temp == HMARK)
+ 260   3                              {
+ 261   4                                      temp = sjSerialWaitForOneByte();                
+ 262   4                                      if(temp != HMARK)
+ 263   4                                      {
+ 264   5                                              sid = temp;
+ 265   5                                              continue;
+ 266   5                                      }
+ 267   4                              }
+ 268   3                              if(sid == 's')//send to switch
+ 269   3                              {
+ 270   4                                      if(temp == HMARK)
+ 271   4                                      {
+ 272   5                                              while(1)
+ 273   5                                              {
+ 274   6                                                      temp = sjSerialWaitForOneByte();
+ 275   6                                                      if(temp == EMARK)
+ 276   6                                                              break;
+ 277   6                                                      if(temp == RMARK)
+ 278   6                                                      {
+ 279   7      //                                                      swiReset();
+ 280   7                                                              continue;
+ 281   7                                                      }
+ 282   6                                                      if(temp == QMARK)
+ 283   6                                                              continue;
+ 284   6      //                                              swiAction(temp);
+ 285   6                                              }
+ 286   5                                              sjSerialSendByte(HMARK);
+ 287   5                                              temp = 0xff;//P2;
+ 288   5                                              sjSerialSendByte(temp);
+ 289   5                                              temp = 0xff;//P3;
+ 290   5      
+ 291   5                                              sjSerialSendByte(temp);
+ 292   5                                              sjSerialSendByte(EMARK);
+ 293   5                                      }
+ 294   4                              }
+ 295   3                              if(sid == 'n')//send to navmeter
+ 296   3                              {
+ 297   4                                      sjSerialSendByte2(temp);
+ 298   4                              }
+ 299   3                              if(sid == 't')
+ 300   3                              {
+ 301   4                                      //P0=sjSerialWaitForOneByte();
+ 302   4                                      //P1=sjSerialWaitForOneByte();
+ 303   4                                      sjSerialSendByte(0xff);
+C51 COMPILER V7.01  SJMAIN                                                                 06/22/2014 12:30:41 PAGE 6   
+
+ 304   4                                      sjSerialSendByte(0xff);
+ 305   4                                      sjSerialSendByte(EMARK);
+ 306   4                              }
+ 307   3                              if(sid == 'w') //send to switch
+ 308   3                              {       
+ 309   4                                      io_putc(temp);
+ 310   4                              }            
+ 311   3      
+ 312   3                      }
+ 313   2                      if(sjSerialIsDataWaiting2())
+ 314   2                      {
+ 315   3                              temp = sjSerialWaitForOneByte2();
+ 316   3                              sjSerialSendByte(temp);
+ 317   3                      }
+ 318   2              }
+ 319   1      }
+ 320          
+ 321          
+ 322          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    381    ----
+   CONSTANT SIZE    =    108    ----
+   XDATA SIZE       =      6       6
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

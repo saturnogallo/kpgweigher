@@ -1,0 +1,685 @@
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE USBDEVICE
+OBJECT MODULE PLACED IN USBDEVICE.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE USBDEVICE.C LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          /* CH374Ð¾Æ¬ Ó¦ÓÃ²ã V1.0 */
+   2          /* USBÉè±¸,Ä£ÄâCH372»òCH375µÄTEST³ÌÐòÓë¼ÆËã»úÍ¨Ñ¶ */
+   3          
+   4          #include        "HAL.H"                 // ÒÔMCS51ÎªÀý£¬ÆäËüµ¥Æ¬»úÐèÐÞ¸ÄHAL*Ó²¼þ³éÏó²ãµÄ¼¸¸öÎÄ¼þ
+   5          //#include      "HAL_BASE.C"    // »ù±¾×Ó³ÌÐò¼°ÖÐ¶Ï²éÑ¯×Ó³ÌÐò
+   6          
+   7          /* Ó²¼þ½Ó¿Ú²ã,ÒÔÏÂÁ¬½Ó·½Ê½ÈÎÑ¡Ò»ÖÖ */
+   8          //#include "..\PARA_HW.C"       /* Ó²¼þ±ê×¼8Î»²¢¿Ú */
+   9          //#include "..\PARA_SW.C"       /* Èí¼þI/OÄ£Äâ8Î»²¢¿Ú */
+  10          //#include "..\SPI_HW.C"        /* Ó²¼þ±ê×¼4ÏßSPI´®¿Ú */
+  11          //#include "SPI_SW.C"   /* Èí¼þI/OÄ£Äâ4ÏßSPI´®¿Ú */
+  12          //#include "..\SPI3_SW.C"       /* Èí¼þI/OÄ£Äâ3ÏßSPI´®¿Ú,SDOºÍSDIºÏÓÃÒ»¸öÒý½Å */
+  13          
+  14          // Éè±¸ÃèÊö·û
+  15          const   UINT8C  MyDevDescr[] = {0x12,  //length of desc, 18 bytes
+  16                                                                          0x01,  //type: dev desc is 01
+  17                                                                          0x10,0x01,  //USB version 1.1 , low byte first
+  18                                                                          0x00,0x00,0x00,//old one, 0xFF, 0x80, 0x37, //dev class (0xFF is owner defined, subclass, protocal
+             -, 
+  19                                                                          0x08, //max pack size (8byte) 
+  20                                                                          0x48, 0x43, 0x01, 0x05,  // ³§ÉÌIDºÍ²úÆ·ID
+  21                                                                          0x01, 0x00, //bcd Device version
+  22                                                                          0x01, 0x02, 0x00,       //index to manufacutre string , index to product string, index to serial string 
+             -(0 means no serial),
+  23                                                                          0x01 };                  // number of configuration. 
+  24          // ÅäÖÃÃèÊö·û
+  25          //
+  26          // old
+  27          /*   0x09, 0x02, 0x27, 0x00, 0x01, 0x01, 0x00, 0x80, 0x32,
+  28                                                                           0x09, 0x04, 0x00, 0x00, 0x03, 0xFF, 0x80, 0x37, 0x00,
+  29                                                                           0x07, 0x05, 0x82, 0x02, 0x40, 0x00, 0x00,
+  30                                                                           0x07, 0x05, 0x02, 0x02, 0x40, 0x00, 0x00,
+  31                                                                           0x07, 0x05, 0x81, 0x03, 0x08, 0x00, 0x00 */
+  32          const   UINT8C  MyCfgDescr[] = { 0x09, //len of desc
+  33                                           0x02, //type: cfg desc is 0x02
+  34                                           0x37,0x00,//total len
+  35                                           0x01, //num of interface
+  36                                           0x01, //config value;
+  37                                           0x00, //string index to this configuration, 00 means no string
+  38                                           0x80, //attribute, 1 0(1,selfpower) 0(1,remote wakeup) 0 0 0 0 0
+  39                                           0x64, //max power, 100*2 = 200mA
+  40                                                                           0x09, //len of interface
+  41                                                                           0x04, //type:  intf desc is 0x04
+  42                                                                           0x00, //index of this intf
+  43                                                                           0x00, //alternate setting
+  44                                                                           0x04, //number of endp
+  45                                                                           0x03, //old is 0xFF, //interface class
+  46                                                                           0x00, //old is 0x80, //subclass
+  47                                                                           0x00, //old is 0x37, //protocol
+  48                                                                           0x00, //string index to interface, 0 means no serial
+  49                                                                           //HID desc should be put here (after each interface)
+  50                                                                                  0x09, //len of HID
+  51                                                                                  0x21, //type: HID desc is 0x21
+  52                                                                                  0x10,0x01,// hid1.1
+  53                                                                                  0x21, //country(US)
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 2   
+
+  54                                                                                  0x01, //desc number2s
+  55                                                                                  0x22, //desc type (22 is report, 23 is physic)
+  56                                                                                  0x23,0x00, //(35byte of report desc
+  57          
+  58                                                   0x07, 0x05, 0x82, 0x02, 0x40, 0x00, 0x00,  //endp , len 0x07, type 0x05, address 0x82 (D7 means dir
+             -), attrib 0x02 (0,ctrl, 1,ISO, 2.batch, 3. interrupt), max packsize 0x0040,   interval 0
+  59                                                   0x07, 0x05, 0x02, 0x02, 0x40, 0x00, 0x00,  //batch, 64 byte at max, interval 20ms
+  60                                                   0x07, 0x05, 0x81, 0x03, 0x08, 0x00, 0x20, 
+  61                                                   0x07, 0x05, 0x01, 0x03, 0x08, 0x00, 0x20,};//interrupt, 8 byte at max, interval 20ms , the chip has 
+             -only 8 bytes buffer for endp0 and endp1, 64 bytes for endp2
+  62                                                   
+  63          //where is  Interface Descriptor and Endpoint desc and string desc
+  64          //USB2.0 has Device Qualifier Desc and Other speed Configuration desc
+  65          // ÓïÑÔÃèÊö·û
+  66          const   UINT8C  MyLangDescr[] = { 0x04, 0x03, 0x09, 0x04 }; //len of lang desc, type is 0x03, lang id 0 is 04
+             -09, //us english
+  67          // ³§¼ÒÐÅÏ¢
+  68          const   UINT8C  MyManuInfo[] = { 18, 0x03, 'R', 0, 'a', 0, 'y', 0, 's', 0, 't', 0, 'i', 0, 'n', 0,'g', 0}; //
+             -string desc len, type 0x03 is string, string in unicode
+  69          // ²úÆ·ÐÅÏ¢
+  70          const   UINT8C  MyProdInfo[] = { 16, 0x03, 'R', 0, 'T', 0, 'B', 0, 'o', 0, 'a', 0, 'r', 0, 'd', 0 }; //produc
+             -t string
+  71          // ±¨¸æÃèÊö·û
+  72          const   UINT8C MyReportDescr[] = {
+  73          0x06, 0x00 , 0xff,  //USAGE_PAGE (Vendor Defined page1)
+  74          0x09 ,0x01, //USAGE (Vendor Usage 1)
+  75          0xa1 ,0x01,  //COLLECTION (Application)
+  76          0x19 ,0x01, //USAGE_MINIMUM (Vendor Usage 1)
+  77          0x29 ,0x07, //USAGE_MAXIMUM (keypad)
+  78          0x15 ,0x00, // LOGICAL_MINIMUM is 0
+  79          0x26 ,0xff, 0x00,  //LOGICAL_MAXIMUM is 255
+  80          0x75 ,0x08, //REPORT_SIZE(8)
+  81          0x95 ,0x07, //REPORT_COUNT(7)
+  82          0x81 ,0x02, //INPUT data, var, abs, no wrap, linear, preferred state, no null, non volatile, bit field
+  83          0x19 ,0x01, //USAGE_MINIMUM (Vendor Usage 1)
+  84          0x29 ,0x07, //USAGE_MAXIMUM (keypad)
+  85          0x91 ,0x02, //output const, array, abs, no wrap, linear, preferred state, no null, non volatile, bit field
+  86          0x19 ,0x01, //USAGE_MINIMUM (Vendor Usage 1)
+  87          0x29 ,0x07, //USAGE_MAXIMUM (keypad)
+  88          0xb1 ,0x02, //FEATURE(data, var, abs, no wrap, linear, preferred state, no null, non volatile, bit field)
+  89          0xc0 //END COLLECTION
+  90          };
+  91          
+  92          UINT8   UsbConfig = 255;        // USBÅäÖÃ±êÖ¾
+  93          
+  94          void    USB_DeviceInterrupt( void );  // USBÉè±¸ÖÐ¶Ï·þÎñ³ÌÐò
+  95          
+  96          void    Init374Device( void );  // ³õÊ¼»¯USBÉè±¸
+  97          
+  98          extern void sjSerialSendByte(UINT8C d);
+  99          
+ 100          unsigned char code HexTable[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+ 101          void DBG(UINT8C d)
+ 102          {
+ 103   1              unsigned char b;
+ 104   1              b = HexTable[d & 0x0f];
+ 105   1              sjSerialSendByte(HexTable[d >> 4]);
+ 106   1              sjSerialSendByte(b);
+ 107   1      }
+ 108          
+ 109          void DBGS(const char* s)
+ 110          {
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 3   
+
+ 111   1              while(*s != 0x00)
+ 112   1              {
+ 113   2                      sjSerialSendByte(*s++);
+ 114   2              }
+ 115   1      }
+ 116          
+ 117          
+ 118          void DBGA(unsigned char s[],int l)
+ 119          {
+ 120   1              int cnt = 0;
+ 121   1              unsigned char b;
+ 122   1              while(cnt < l)
+ 123   1              {
+ 124   2                      b = HexTable[s[cnt] & 0x0f];
+ 125   2                      sjSerialSendByte(HexTable[s[cnt++] >> 4]);
+ 126   2                      sjSerialSendByte(b);
+ 127   2              }
+ 128   1      }
+ 129          
+ 130          extern void CommandProcessor();
+ 131          
+ 132          
+ 133          
+ 134          #define USBOUT_BUF_MAX  12
+ 135          UINT8   uo_buf[USBOUT_BUF_MAX];
+ 136          UINT8   uo_ptr_out = 0; //1st valid data to read
+ 137          UINT8   uo_ptr_in = 0; //next empty space
+ 138          
+ 139          void UsbSendByte(UINT8 c)
+ 140          {
+ 141   1              uo_buf[uo_ptr_in++] = c;
+ 142   1              if(uo_ptr_in >= USBOUT_BUF_MAX)
+ 143   1                      uo_ptr_in = 0;
+ 144   1      }
+ 145          
+ 146          UINT8 UsbGetByte()
+ 147          {
+ 148   1              UINT8 c;
+ 149   1              while(uo_ptr_out == uo_ptr_in)
+ 150   1                      ;
+ 151   1              c = uo_buf[uo_ptr_out++];
+ 152   1              if(uo_ptr_out >= USBOUT_BUF_MAX)
+ 153   1                      uo_ptr_out = 0;
+ 154   1              return c;
+ 155   1      }
+ 156          UINT8 UsbHasByteToSend()        
+ 157          {
+ 158   1              if(uo_ptr_in==uo_ptr_out)
+ 159   1                      return 0;
+ 160   1              if(uo_ptr_in > uo_ptr_out)
+ 161   1                      return uo_ptr_in - uo_ptr_out;
+ 162   1              else
+ 163   1                      return uo_ptr_in + USBOUT_BUF_MAX - uo_ptr_out;
+ 164   1      }
+ 165          UINT8    FlushToEndp1() //interrupt endp;
+ 166          {
+ 167   1      
+ 168   1              UINT8 len = UsbHasByteToSend();
+ 169   1              UINT8 cnt;
+ 170   1                      return 0;
+ 171   1              if(len == 0)
+ 172   1              {
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 4   
+
+ 173   2                      return 0;
+ 174   2              }
+ 175   1              
+ 176   1              if(len > 8)             len = 8; //8 byte at max
+ 177   1              cnt = len;
+ 178   1              
+ 179   1              Spi374Start( RAM_ENDP1_TRAN, CMD_SPI_374WRITE );
+ 180   1              while ( len-- ) 
+ 181   1              {
+ 182   2                      Spi374OutByte( UsbGetByte() );
+ 183   2              }
+ 184   1              MySpi374Stop();
+ 185   1              Write374Byte( REG_USB_LENGTH, cnt );
+ 186   1              return cnt;
+ 187   1      
+ 188   1      
+ 189   1      }
+ 190          
+ 191          
+ 192          UINT8 ep2busy = 0;
+ 193          
+ 194          UINT8    FlushToEndp2(UINT8 toggle) //batch endp
+ 195          {
+ 196   1              UINT8 cnt = 0;
+ 197   1              UINT8 len = 0;
+ 198   1              
+ 199   1              if(UsbConfig == 255) //not setup yet
+ 200   1                      return 0;
+ 201   1      
+ 202   1              if(ep2busy > 0)
+ 203   1                      return 0;
+ 204   1      
+ 205   1              len = sjSerialIsDataWaiting()+io_hasc();
+ 206   1              if(len == 0)
+ 207   1              {
+ 208   2                              Write374Byte( REG_USB_ENDP2, M_SET_EP2_TRAN_NAK( Read374Byte( REG_USB_ENDP2 ) ) ^ toggle );
+ 209   2                              ep2busy = 0;
+ 210   2                              return 0;
+ 211   2              }
+ 212   1              ep2busy = 1;
+ 213   1      
+ 214   1              Spi374Start( RAM_ENDP2_TRAN, CMD_SPI_374WRITE );
+ 215   1              //head
+ 216   1              Spi374OutByte(0xAA); 
+ 217   1              Spi374OutByte(0x55);
+ 218   1              cnt = 2;
+ 219   1              //usb buffer
+ 220   1              len = UsbHasByteToSend();
+ 221   1              Spi374OutByte(len);
+ 222   1              cnt++;
+ 223   1              while ( len-- > 0 && cnt < 64 ) //64 bytes at most
+ 224   1              {
+ 225   2                      Spi374OutByte( UsbGetByte());
+ 226   2                      cnt++;
+ 227   2              }
+ 228   1              //serial port 1
+ 229   1              len = sjSerialIsDataWaiting();
+ 230   1              Spi374OutByte(len);
+ 231   1              cnt++;
+ 232   1              while ( len-- > 0 && cnt < 64 ) //64 bytes at most
+ 233   1              {
+ 234   2                      Spi374OutByte( sjSerialWaitForOneByte());
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 5   
+
+ 235   2                      cnt++;
+ 236   2              }
+ 237   1              //analog serial port2
+ 238   1              len = io_hasc();
+ 239   1              Spi374OutByte(len);
+ 240   1              cnt++;
+ 241   1              while ( len-- > 0 && cnt < 64 ) //64 bytes at most
+ 242   1              {
+ 243   2                      Spi374OutByte( io_getc());
+ 244   2                      cnt++;
+ 245   2              }
+ 246   1      
+ 247   1      
+ 248   1              MySpi374Stop( );
+ 249   1              
+ 250   1              Write374Byte( REG_USB_LENGTH, cnt );
+ 251   1              Write374Byte( REG_USB_ENDP2, M_SET_EP2_TRAN_ACK( Read374Byte( REG_USB_ENDP2 )  ) ^ toggle );
+ 252   1                      
+ 253   1      
+ 254   1              return cnt;
+ 255   1      }
+ 256          UINT8   buf[64];
+ 257          UINT8   len;
+ 258          UINT8   ptr;
+ 259          void    USB_DeviceInterrupt( void )  // USBÉè±¸ÖÐ¶Ï·þÎñ³ÌÐò
+ 260          {
+ 261   1              UINT8   s, l;
+ 262   1              static  UINT8   SetupReq, SetupLen;
+ 263   1              static  PUINT8  pDescr;
+ 264   1              s = Read374Byte( REG_INTER_FLAG );  // »ñÈ¡ÖÐ¶Ï×´Ì¬
+ 265   1      
+ 266   1              if ( s & BIT_IF_BUS_RESET ) {  // USB×ÜÏß¸´Î»
+ 267   2      
+ 268   2                      Write374Byte( REG_USB_ADDR, 0x00 );  // ÇåUSBÉè±¸µØÖ·, 3¸ö¶Ëµã
+ 269   2                      Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_NAK( 0 ) ); //¿ØÖÆ´«Êä
+ 270   2                      Write374Byte( REG_USB_ENDP1, M_SET_EP1_TRAN_NAK( 0 ) ); //ÖÐ¶Ï¶Ëµã
+ 271   2                      Write374Byte( REG_USB_ENDP2, M_SET_EP2_TRAN_NAK( 0 ) ); //ÅúÁ¿¶Ëµã
+ 272   2                      Write374Byte( REG_INTER_FLAG, BIT_IF_USB_PAUSE | BIT_IF_BUS_RESET );  // ÇåÖÐ¶Ï±êÖ¾
+ 273   2                      return;
+ 274   2              }
+ 275   1              if ( s & BIT_IF_TRANSFER ) {  // USB´«ÊäÍê³É
+ 276   2      //              DBGS("*");
+ 277   2                      s = Read374Byte( REG_USB_STATUS );
+ 278   2      //              DBG(s);
+ 279   2                      switch( s & BIT_STAT_PID_ENDP ) {  // USBÉè±¸ÖÐ¶Ï×´Ì¬
+ 280   3                              //ÅúÁ¿¶Ëµã
+ 281   3                              case USB_INT_EP2_OUT: {  // ÅúÁ¿¶ËµãÏÂ´«³É¹¦ 
+ 282   4                                      
+ 283   4                                      if ( s & BIT_STAT_TOG_MATCH ) {  // ½öÍ¬²½°ü
+ 284   5                                              l = Read374Byte( REG_USB_LENGTH );
+ 285   5                                              Read374Block( RAM_ENDP2_RECV, l, buf );
+ 286   5                                              
+ 287   5                                              DBGA(buf,l);
+ 288   5                                              len = l;
+ 289   5                                              ptr = 0;
+ 290   5      //                                      CommandProcessor();
+ 291   5      //                              if(FlushToEndp2() > 0)
+ 292   5      //                              {
+ 293   5      //                                      Write374Byte( REG_USB_ENDP2, M_SET_EP2_TRAN_ACK( Read374Byte( REG_USB_ENDP2 )  ) ^ BIT_EP2_RECV_TOG
+             - );  // DATA1
+ 294   5      //                                      ep2busy = 1;
+ 295   5      //                              }
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 6   
+
+ 296   5      //                              else
+ 297   5      //                              {
+ 298   5                                              Write374Byte( REG_USB_ENDP2, M_SET_EP2_TRAN_NAK( Read374Byte( REG_USB_ENDP2 ) ) ^ BIT_EP2_RECV_TOG );
+ 299   5      //                              }
+ 300   5                                      DBGS("EP2_OUT\r\n");
+ 301   5                                      UsbSendByte(0x01);
+ 302   5                                      UsbSendByte(0x07);
+ 303   5                                      UsbSendByte(0x32);
+ 304   5                                      UsbSendByte(0x33);
+ 305   5                                      UsbSendByte(0x34);
+ 306   5                                      UsbSendByte(0x35);
+ 307   5                                      UsbSendByte(0x36);
+ 308   5      
+ 309   5      //                                      Write374Index( REG_USB_ENDP2 );  // ¶ÔÓÚ²¢¿ÚÁ¬½Ó¿ÉÒÔÓÃ±¾ÐÐ¼°ÏÂÃæÒ»ÐÐ´úÌæÉÏÒ»ÐÐµÄ³ÌÐò,¼õÉÙÐ´Ò»´Îinde
+             -xµÄÊ±¼ä,Ìá¸ßÐ§ÂÊ
+ 310   5      //                                      Write374Data( M_SET_EP2_TRAN_ACK( Read374Data0( ) ) ^ BIT_EP2_RECV_TOG );
+ 311   5                                      }
+ 312   4                                      break;
+ 313   4                              }
+ 314   3                              case USB_INT_EP2_IN: {  // ÅúÁ¿¶ËµãÉÏ´«³É¹¦
+ 315   4                                      ep2busy = 0;
+ 316   4                                      //FlushToEndp2(BIT_EP2_TRAN_TOG);
+ 317   4                                      Write374Byte( REG_USB_ENDP2, M_SET_EP2_TRAN_NAK( Read374Byte( REG_USB_ENDP2 ) ) );
+ 318   4                                      DBGS("EP2_IN\r\n");
+ 319   4      
+ 320   4                                              
+ 321   4      
+ 322   4      
+ 323   4      
+ 324   4      //                              Write374Index( REG_USB_ENDP2 );  // ¶ÔÓÚ²¢¿ÚÁ¬½Ó¿ÉÒÔÓÃ±¾ÐÐ¼°ÏÂÃæÒ»ÐÐ´úÌæÉÏÒ»ÐÐµÄ³ÌÐò,¼õÉÙÐ´Ò»´Îindex
+             -µÄÊ±¼ä,Ìá¸ßÐ§ÂÊ
+ 325   4      //                              Write374Data( M_SET_EP2_TRAN_NAK( Read374Data0( ) ) ^ BIT_EP2_TRAN_TOG );
+ 326   4                                      break;
+ 327   4                              }
+ 328   3                              //ÖÐ¶Ï¶Ëµã
+ 329   3                              case USB_INT_EP1_OUT:{ // download done
+ 330   4                                      UINT8 len;
+ 331   4                                                                              DBGS("EP1_OUT\r\n");
+ 332   4      //                              if ( s & BIT_STAT_TOG_MATCH ) {  // ½öÍ¬²½°ü
+ 333   4                                              l = Read374Byte( REG_USB_LENGTH );
+ 334   4                                              DBG(l);
+ 335   4                                              Read374Block( RAM_ENDP1_RECV, l, buf );
+ 336   4                                              DBGA(buf,l);
+ 337   4                                      len = FlushToEndp1();
+ 338   4                                      DBGS("EP1_IN\r\n");
+ 339   4                                      if(0 == len)
+ 340   4                                              Write374Byte( REG_USB_ENDP1, M_SET_EP1_TRAN_NAK( Read374Byte( REG_USB_ENDP1 ) )^ BIT_EP1_RECV_TOG );
+ 341   4                                      else
+ 342   4                                              Write374Byte( REG_USB_ENDP1, M_SET_EP1_TRAN_ACK( Read374Byte( REG_USB_ENDP1 ), len ) ^ BIT_EP1_RECV_T
+             -OG );  // DATA1                                       
+ 343   4      
+ 344   4      
+ 345   4      //                              }
+ 346   4                                      break;
+ 347   4                              }
+ 348   3                              case USB_INT_EP1_IN: {  // ÖÐ¶Ï¶ËµãÉÏ´«³É¹¦,Î´´¦Àí
+ 349   4                                      UINT8 len = FlushToEndp1();
+ 350   4                                      DBGS("EP1_IN\r\n");
+ 351   4                                      if(0 == len)
+ 352   4                                              Write374Byte( REG_USB_ENDP1, M_SET_EP1_TRAN_NAK( Read374Byte( REG_USB_ENDP1 ) )^ BIT_EP1_TRAN_TOG );
+ 353   4                                      else
+ 354   4                                              Write374Byte( REG_USB_ENDP1, M_SET_EP1_TRAN_ACK( Read374Byte( REG_USB_ENDP1 ), len ) ^ BIT_EP1_TRAN_T
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 7   
+
+             -OG );  // DATA1                                       
+ 355   4                                      break;
+ 356   4                              }
+ 357   3                              //¿ØÖÆ¶Ëµã
+ 358   3                              case USB_INT_EP0_SETUP: {  // ¿ØÖÆ´«Êä
+ 359   4                                      USB_SETUP_REQ   SetupReqBuf;
+ 360   4                                      DBGS("SETUP_:");
+ 361   4                                      l = Read374Byte( REG_USB_LENGTH );
+ 362   4                                      if ( l == sizeof( USB_SETUP_REQ ) ) {
+ 363   5                                              Read374Block( RAM_ENDP0_RECV, l, (PUINT8)&SetupReqBuf );
+ 364   5                                              SetupLen = SetupReqBuf.wLengthL;
+ 365   5                                              if ( SetupReqBuf.wLengthH || SetupLen > 0x7F ) SetupLen = 0x7F;  // ÏÞÖÆ×Ü³¤¶È
+ 366   5                                              l = 0;  // Ä¬ÈÏÎª³É¹¦²¢ÇÒÉÏ´«0³¤¶È
+ 367   5                                              if ( ( SetupReqBuf.bType & DEF_USB_REQ_TYPE ) == DEF_USB_REQ_CLASS ) {  /* Ö»Ö§³Ö±ê×¼ÇëÇó ºÍ DEF_USB_
+             -REQ_CLASS, DEF_USB_REQ_VENDOR ²»´¦Àí*/
+ 368   6                                                      DBGS("REQ_CLASS_");
+ 369   6                                                      SetupReq = SetupReqBuf.bReq;
+ 370   6                                                      switch(SetupReq) {
+ 371   7                                                              case 0x0A : //SET_IDLE //TODO
+ 372   7                                                                      DBGS("SET_IDLE\r\n");
+ 373   7                                                                      break;
+ 374   7                                                              default: //TODO
+ 375   7                                                                      DBG(SetupReqBuf.bReq);
+ 376   7                                                                      DBGS("??1\r\n");
+ 377   7                                                                      break;
+ 378   7                                                      }
+ 379   6                                              }
+ 380   5                                              else if ( ( SetupReqBuf.bType & DEF_USB_REQ_TYPE ) == DEF_USB_REQ_STAND ) 
+ 381   5                                              {  // ±ê×¼ÇëÇó
+ 382   6                                                      DBGS("REQ_STAND_");
+ 383   6                                                      SetupReq = SetupReqBuf.bReq;  // ÇëÇóÂë
+ 384   6                                                      switch( SetupReq ) {
+ 385   7                                                              case DEF_USB_GET_DESCR: //0x60
+ 386   7                                                                      DBGS("GET_DESC_");
+ 387   7                                                                      switch( SetupReqBuf.wValueH ) {
+ 388   8                                                                              case 1: //dev string
+ 389   8                                                                                      DBGS("dev_desc\r\n");
+ 390   8                                                                                      pDescr = (PUINT8)( &MyDevDescr[0] );
+ 391   8                                                                                      l = sizeof( MyDevDescr );
+ 392   8                                                                                      break;
+ 393   8                                                                              case 2: //cfg string
+ 394   8                                                                                      DBGS("cfg_desc\r\n");
+ 395   8                                                                                      pDescr = (PUINT8)( &MyCfgDescr[0] );
+ 396   8                                                                                      l = sizeof( MyCfgDescr );
+ 397   8                                                                                      break;
+ 398   8                                                                              case 0x22: //report desc
+ 399   8                                                                                      DBGS("rpt_desc\r\n");
+ 400   8                                                                                      pDescr = (PUINT8)( &MyReportDescr[0] );
+ 401   8                                                                                      l = sizeof( MyReportDescr );
+ 402   8                                                                                      break;
+ 403   8                                                                              case 3: //string index
+ 404   8                                                                                      DBGS("str_desc\r\n");
+ 405   8                                                                                      switch( SetupReqBuf.wValueL ) {
+ 406   9                                                                                              case 1: //id = 1
+ 407   9                                                                                                      pDescr = (PUINT8)( &MyManuInfo[0] );
+ 408   9                                                                                                      l = sizeof( MyManuInfo );
+ 409   9                                                                                                      break;
+ 410   9                                                                                              case 2: //id=2
+ 411   9                                                                                                      pDescr = (PUINT8)( &MyProdInfo[0] );
+ 412   9                                                                                                      l = sizeof( MyProdInfo );
+ 413   9                                                                                                      break;
+ 414   9                                                                                              case 0: //id=0
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 8   
+
+ 415   9                                                                                                      pDescr = (PUINT8)( &MyLangDescr[0] );
+ 416   9                                                                                                      l = sizeof( MyLangDescr );
+ 417   9                                                                                                      break;
+ 418   9                                                                                              default:
+ 419   9                                                                                                      l = 0xFF;  // ²Ù×÷Ê§°Ü
+ 420   9                                                                                                      break;
+ 421   9                                                                                      }
+ 422   8                                                                                      break;
+ 423   8                                                                              default:
+ 424   8                                                                                      DBG(SetupReqBuf.wValueH);
+ 425   8                                                                                      DBGS("??2\r\n");
+ 426   8                                                                                      l = 0xFF;  // ²Ù×÷Ê§°Ü
+ 427   8                                                                                      break;
+ 428   8                                                                      }
+ 429   7                                                                      if ( SetupLen > l ) SetupLen = l;  // ÏÞÖÆ×Ü³¤¶È
+ 430   7                                                                      l = SetupLen >= RAM_ENDP0_SIZE ? RAM_ENDP0_SIZE : SetupLen;  // ±¾´Î´«Êä³¤¶È
+ 431   7                                                                      Write374Block( RAM_ENDP0_TRAN, l, pDescr );  /* ¼ÓÔØÉÏ´«Êý¾Ý */
+ 432   7                                                                      SetupLen -= l;
+ 433   7                                                                      pDescr += l;
+ 434   7                                                                      break;
+ 435   7                                                              case DEF_USB_SET_ADDRESS:
+ 436   7                                                                      DBGS("SET_ADDR\r\n");
+ 437   7                                                                      SetupLen = SetupReqBuf.wValueL;  // ÔÝ´æUSBÉè±¸µØÖ·
+ 438   7                                                                      break;
+ 439   7                                                              case DEF_USB_GET_CONFIG:
+ 440   7                                                                      DBGS("GET_CFG\r\n");
+ 441   7                                                                      Write374Byte( RAM_ENDP0_TRAN, UsbConfig );
+ 442   7                                                                      if ( SetupLen >= 1 ) l = 1; //already have a address
+ 443   7                                                                      break;
+ 444   7                                                              case DEF_USB_SET_CONFIG:
+ 445   7                                                                      DBGS("SET_CFG\r\n");
+ 446   7                                                                      UsbConfig = SetupReqBuf.wValueL;
+ 447   7                                                                      break;
+ 448   7                                                              case DEF_USB_CLR_FEATURE:
+ 449   7                                                                      DBGS("CLR_FEATURE\r\n");
+ 450   7                                                                      if ( ( SetupReqBuf.bType & 0x1F ) == 0x02 ) {  // ²»ÊÇ¶Ëµã²»Ö§³Ö
+ 451   8                                                                              DBG(SetupReqBuf.wIndexL);
+ 452   8                                                                              switch( SetupReqBuf.wIndexL ) {
+ 453   9                                                                                      case 0x82: //batch endp
+ 454   9                                                                                              Write374Byte( REG_USB_ENDP2, M_SET_EP2_TRAN_NAK( Read374Byte( REG_USB_ENDP2 ) ) );
+ 455   9                                                                                              break;
+ 456   9                                                                                      case 0x02:
+ 457   9                                                                                              Write374Byte( REG_USB_ENDP2, M_SET_EP2_RECV_NAK( Read374Byte( REG_USB_ENDP2 ) ) );
+ 458   9                                                                                              break;
+ 459   9                                                                                      case 0x81://interrupt endp
+ 460   9                                                                                              Write374Byte( REG_USB_ENDP1, M_SET_EP1_TRAN_NAK( Read374Byte( REG_USB_ENDP1 ) ) );
+ 461   9                                                                                              break;
+ 462   9                                                                                      case 0x01:
+ 463   9                                                                                              Write374Byte( REG_USB_ENDP1, M_SET_EP1_RECV_NAK( Read374Byte( REG_USB_ENDP1 ) ) );
+ 464   9                                                                                              break;
+ 465   9                                                                                      default:
+ 466   9                                                                                              l = 0xFF;  // ²Ù×÷Ê§°Ü
+ 467   9                                                                                              break;
+ 468   9                                                                              }
+ 469   8                                                                      }
+ 470   7                                                                      else l = 0xFF;  // ²Ù×÷Ê§°Ü
+ 471   7                                                                      break;
+ 472   7                                                              case DEF_USB_GET_INTERF:
+ 473   7                                                                      DBGS("GET_INTERF\r\n");
+ 474   7                                                                      Write374Byte( RAM_ENDP0_TRAN, 0 );
+ 475   7                                                                      if ( SetupLen >= 1 ) l = 1;
+ 476   7                                                                      break;
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 9   
+
+ 477   7                                                              case DEF_USB_GET_STATUS:
+ 478   7                                                                      DBGS("GET_STATUS\r\n");
+ 479   7                                                                      Write374Byte( RAM_ENDP0_TRAN, 0 );
+ 480   7                                                                      Write374Byte( RAM_ENDP0_TRAN + 1, 0 );
+ 481   7                                                                      if ( SetupLen >= 2 ) l = 2;
+ 482   7                                                                      else l = SetupLen;
+ 483   7                                                                      break;
+ 484   7                                                              default:
+ 485   7                                                                      DBG(SetupReq);
+ 486   7                                                                      DBGS("??3\r\n");
+ 487   7                                                                      l = 0xFF;  // ²Ù×÷Ê§°Ü
+ 488   7                                                                      break;
+ 489   7                                                      }
+ 490   6                                              }
+ 491   5                                              else
+ 492   5                                              {
+ 493   6                                                      l = 0xFF;
+ 494   6                                              }
+ 495   5                                      }
+ 496   4                                      else l = 0xFF;  // ²Ù×÷Ê§°Ü
+ 497   4                                      if ( l == 0xFF ) {  // ²Ù×÷Ê§°Ü
+ 498   5                                              Write374Byte( REG_USB_ENDP0, M_SET_EP0_RECV_STA( M_SET_EP0_TRAN_STA( 0 ) ) );  // STALL
+ 499   5                                      }
+ 500   4                                      else if ( l <= RAM_ENDP0_SIZE ) {  // ÉÏ´«Êý¾Ý
+ 501   5                                              Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_ACK( M_SET_EP0_RECV_ACK( Read374Byte( REG_USB_ENDP0 ) ), 
+             -l ) | BIT_EP0_TRAN_TOG );  // DATA1
+ 502   5                                      }
+ 503   4                                      else {  // ÏÂ´«Êý¾Ý»òÆäËü
+ 504   5                                              Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_NAK( M_SET_EP0_RECV_ACK( Read374Byte( REG_USB_ENDP0 ) ) )
+             - | BIT_EP0_RECV_TOG );  // DATA1
+ 505   5                                      }
+ 506   4                                      break;
+ 507   4                              }
+ 508   3                              case USB_INT_EP0_IN: {
+ 509   4                                      DBGS("IN_");
+ 510   4                                      switch( SetupReq ) { //SetupReq here is the one in last USB_INT_EP0_SETUP command
+ 511   5                                              case DEF_USB_GET_DESCR:
+ 512   5                                                      l = SetupLen >= RAM_ENDP0_SIZE ? RAM_ENDP0_SIZE : SetupLen;  // ±¾´Î´«Êä³¤¶È
+ 513   5                                                      Write374Block( RAM_ENDP0_TRAN, l, pDescr );  /* ¼ÓÔØÉÏ´«Êý¾Ý */
+ 514   5                                                      SetupLen -= l;
+ 515   5                                                      pDescr += l;
+ 516   5                                                      Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_ACK( Read374Byte( REG_USB_ENDP0 ), l ) ^ BIT_EP0_TRAN_TO
+             -G );
+ 517   5                                                      DBGS("DESC\r\n");
+ 518   5                                                      break;
+ 519   5                                              case DEF_USB_SET_ADDRESS:
+ 520   5                                                      Write374Byte( REG_USB_ADDR, SetupLen );
+ 521   5                                                      Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_NAK( 0 ) );  // ½áÊø
+ 522   5                                                      DBGS("SETADDR\r\n");
+ 523   5                                                      break;
+ 524   5                                              case DEF_USB_SET_CONFIG: //no action for configuration setting
+ 525   5                                                      Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_NAK( 0 ) );  // ½áÊø
+ 526   5                                                      DBGS("SETCFG\r\n");
+ 527   5                                                      break;
+ 528   5                                              case DEF_USB_GET_CONFIG:
+ 529   5                                                      Write374Byte( RAM_ENDP0_TRAN, UsbConfig );
+ 530   5                                                      Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_ACK( Read374Byte( REG_USB_ENDP0 ), 1 ) ^ BIT_EP0_TRAN_TO
+             -G );
+ 531   5                                                      DBGS("GETCFG\r\n");
+ 532   5                                                      break;
+ 533   5                                              default:
+ 534   5                                                      Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_NAK( 0 ) );  // ½áÊø
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 10  
+
+ 535   5                                                      DBG(SetupReq);
+ 536   5                                                      DBGS("??4\r\n");
+ 537   5                                                      break;
+ 538   5                                      }
+ 539   4                                      break;
+ 540   4                              }
+ 541   3                              case USB_INT_EP0_OUT: {//SetupReq here is the one in last USB_INT_EP0_SETUP command
+ 542   4                                      DBGS("OUT_");
+ 543   4                                      switch( SetupReq ) {
+ 544   5      //                                      case download:
+ 545   5      //                                              get_data;
+ 546   5      //                                              break;
+ 547   5                                              case DEF_USB_GET_DESCR:
+ 548   5                                                      Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_NAK( 0 ) );  // ½áÊø
+ 549   5                                                      DBGS("DESC\r\n");
+ 550   5                                                      break;
+ 551   5      
+ 552   5                                              default:
+ 553   5                                                      Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_NAK( 0 ) );  // ½áÊø
+ 554   5                                                      DBG(SetupReq);
+ 555   5                                                      DBGS("??5\r\n");
+ 556   5      
+ 557   5                                                      break;
+ 558   5                                      }
+ 559   4                                      break;
+ 560   4                              }
+ 561   3                              default: {
+ 562   4                                      DBG(s);
+ 563   4                                      DBGS("\r\n");
+ 564   4                                      break;
+ 565   4                              }
+ 566   3                      }
+ 567   2                      Write374Byte( REG_INTER_FLAG, BIT_IF_USB_PAUSE | BIT_IF_TRANSFER );  // ÇåÖÐ¶Ï±êÖ¾
+ 568   2                      return;
+ 569   2              }
+ 570   1              if ( s & BIT_IF_USB_SUSPEND ) {  // USB×ÜÏß¹ÒÆð
+ 571   2                      Write374Byte( REG_INTER_FLAG, BIT_IF_USB_PAUSE | BIT_IF_USB_SUSPEND );  // ÇåÖÐ¶Ï±êÖ¾
+ 572   2                      Write374Byte( REG_SYS_CTRL, Read374Byte( REG_SYS_CTRL ) | BIT_CTRL_OSCIL_OFF );  // Ê±ÖÓÕñµ´Æ÷Í£Ö¹Õñµ´,½
+             -øÈëË¯Ãß×´Ì¬
+ 573   2                      return;
+ 574   2              }
+ 575   1              if ( s & BIT_IF_WAKE_UP ) {  // Ð¾Æ¬»½ÐÑÍê³É
+ 576   2                      Write374Byte( REG_INTER_FLAG, BIT_IF_USB_PAUSE | BIT_IF_WAKE_UP );  // ÇåÖÐ¶Ï±êÖ¾
+ 577   2                      return;
+ 578   2              }
+ 579   1              DBGS("WRONG");
+ 580   1              // ÒâÍâµÄÖÐ¶Ï,²»¿ÉÄÜ·¢ÉúµÄÇé¿ö,³ýÁËÓ²¼þËð»µ
+ 581   1              Write374Byte( REG_INTER_FLAG, BIT_IF_USB_PAUSE | BIT_IF_INTER_FLAG );  // ÇåÖÐ¶Ï±êÖ¾
+ 582   1      }
+ 583          
+ 584          void    Init374Device( void )  // ³õÊ¼»¯USBÉè±¸
+ 585          {
+ 586   1              mDelaymS(50);   
+ 587   1              Write374Byte( REG_USB_ADDR, 0x00 );
+ 588   1              Write374Byte( REG_USB_ENDP0, M_SET_EP0_TRAN_NAK( 0 ) );
+ 589   1              Write374Byte( REG_USB_ENDP1, M_SET_EP1_TRAN_NAK( 0 ) );
+ 590   1              Write374Byte( REG_USB_ENDP2, M_SET_EP2_TRAN_NAK( 0 ) );
+ 591   1              Write374Byte( REG_INTER_FLAG, BIT_IF_USB_PAUSE | BIT_IF_INTER_FLAG );  // ÇåËùÓÐÖÐ¶Ï±êÖ¾
+ 592   1              Write374Byte( REG_INTER_EN, BIT_IE_TRANSFER | BIT_IE_BUS_RESET | BIT_IE_USB_SUSPEND );  // ÔÊÐí´«ÊäÍê³ÉÖÐ
+             -¶ÏºÍUSB×ÜÏß¸´Î»ÖÐ¶ÏÒÔ¼°USB×ÜÏß¹ÒÆðÖÐ¶Ï,Ð¾Æ¬»½ÐÑÍê³ÉÖÐ¶Ï
+ 593   1              Write374Byte( REG_SYS_CTRL, BIT_CTRL_OE_POLAR );  // ¶ÔÓÚCH374T»òÕßUENÒý½ÅÐü¿ÕµÄCH374S±ØÐëÖÃBIT_CTRL_OE_P
+             -OLARÎª1
+C51 COMPILER V7.01  USBDEVICE                                                              04/27/2014 14:00:41 PAGE 11  
+
+ 594   1              Write374Byte( REG_USB_SETUP, BIT_SETP_TRANS_EN | BIT_SETP_PULLUP_EN);  // Æô¶¯USBÉè±¸, //DEVICE MODE AND 
+             -PULLUPM 
+ 595   1      }
+ 596          
+ 597          int     test( void )  // USB device
+ 598          {
+ 599   1              BYTE d;
+ 600   1      //      P1&=0xF8; // Èç¹ûÔÚUÅÌÎÄ¼þ¶ÁÐ´Ä£¿éÉÏÊÔÓÃ±¾³ÌÐò±ØÐë¼ÓÉÏ±¾ÐÐ
+ 601   1              mDelaymS( 50 );  // µÈ´ýCH374¸´Î»Íê³É
+ 602   1      
+ 603   1              d = Read374Byte(REG_SYS_INFO);
+ 604   1              DBG(d);
+ 605   1              return 0;
+ 606   1      //      CH374_PORT_INIT( );  // CH374½Ó¿Ú³õÊ¼»¯
+ 607   1      //      Init374Device( );  // ³õÊ¼»¯USBÉè±¸
+ 608   1      //      while ( 1 ) {
+ 609   1      //              if ( Query374Interrupt( ) ) USB_DeviceInterrupt( );  // µÈ´ýUSBÉè±¸ÖÐ¶Ï£¬È»ºó´¦ÀíUSBÉè±¸ÖÐ¶Ï
+ 610   1      //      }
+ 611   1      }
+ 612          
+ 613          BOOL USBHasChar()       {
+ 614   1              return ptr < len;
+ 615   1      }
+ 616          unsigned char USBGetChar()      {
+ 617   1              if(ptr < len)   
+ 618   1              {
+ 619   2                      return buf[ptr++]; 
+ 620   2              }
+ 621   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   2271    ----
+   CONSTANT SIZE    =    449    ----
+   XDATA SIZE       =     87      27
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
