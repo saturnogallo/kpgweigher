@@ -1,0 +1,604 @@
+<html>
+<body>
+<pre>
+<h1>µVision2 Build Log</h1>
+<h2>Project:</h2>
+C:\Code\GoogleCode\g_lxhbucket\raysting\usbstudy\board\ch374.uv2
+Project File Date:  02/17/2014
+
+<h2>Output:</h2>
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+USBDEVICE.C(18): error C141: syntax error near '0x00'
+USBDEVICE.C(35): error C141: syntax error near '0x01'
+USBDEVICE.C(74): error C141: syntax error near '0xa1'
+USBDEVICE.C(115): error C141: syntax error near 's', expected ')'
+USBDEVICE.C(116): error C158: '_DBGA': function contains unnamed parameter
+USBDEVICE.C(118): error C202: 'l': undefined identifier
+USBDEVICE.C(120): error C202: 's': undefined identifier
+USBDEVICE.C(121): error C202: 's': undefined identifier
+USBDEVICE.C(124): error C141: syntax error near 'void'
+USBDEVICE.C(126): error C202: 'l': undefined identifier
+USBDEVICE.C(127): error C141: syntax error near 'static'
+USBDEVICE.C(127): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(128): error C141: syntax error near 'static'
+USBDEVICE.C(128): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(129): error C202: 's': undefined identifier
+USBDEVICE.C(130): error C202: 's': undefined identifier
+USBDEVICE.C(138): error C202: 's': undefined identifier
+USBDEVICE.C(139): error C202: 's': undefined identifier
+USBDEVICE.C(140): error C202: 's': undefined identifier
+USBDEVICE.C(145): error C202: 's': undefined identifier
+USBDEVICE.C(146): error C202: 'l': undefined identifier
+USBDEVICE.C(147): error C202: 'l': undefined identifier
+USBDEVICE.C(148): error C202: 's': undefined identifier
+USBDEVICE.C(149): error C202: 's': undefined identifier
+USBDEVICE.C(150): error C202: 'l': undefined identifier
+USBDEVICE.C(151): error C202: 'l': undefined identifier
+USBDEVICE.C(153): error C202: 'l': undefined identifier
+USBDEVICE.C(180): error C141: syntax error near 'USB_SETUP_REQ'
+USBDEVICE.C(180): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(181): error C202: 'l': undefined identifier
+USBDEVICE.C(182): error C202: 'l': undefined identifier
+USBDEVICE.C(183): error C202: 'l': undefined identifier
+USBDEVICE.C(184): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(186): error C202: 'l': undefined identifier
+USBDEVICE.C(187): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(189): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(190): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(191): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(195): error C141: syntax error near '}'
+USBDEVICE.C(197): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(200): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(201): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(202): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(205): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(206): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(208): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(209): error C202: 'l': undefined identifier
+USBDEVICE.C(212): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(213): error C202: 'l': undefined identifier
+USBDEVICE.C(216): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(217): error C202: 'l': undefined identifier
+USBDEVICE.C(220): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(222): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(223): error C202: 'l': undefined identifier
+USBDEVICE.C(226): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(227): error C202: 'l': undefined identifier
+USBDEVICE.C(230): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(231): error C202: 'l': undefined identifier
+USBDEVICE.C(234): error C202: 'l': undefined identifier
+USBDEVICE.C(239): error C202: 'l': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(243): error C202: 'l': undefined identifier
+USBDEVICE.C(244): error C202: 'l': undefined identifier
+USBDEVICE.C(245): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(246): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(250): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'l': undefined identifier
+USBDEVICE.C(259): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(263): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(264): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(265): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(279): error C202: 'l': undefined identifier
+USBDEVICE.C(283): error C202: 'l': undefined identifier
+USBDEVICE.C(288): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(288): error C202: 'l': undefined identifier
+USBDEVICE.C(294): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(294): error C202: 'l': undefined identifier
+USBDEVICE.C(295): error C202: 'l': undefined identifier
+USBDEVICE.C(298): error C202: 'l': undefined identifier
+USBDEVICE.C(304): error C202: 'l': undefined identifier
+USBDEVICE.C(307): error C202: 'l': undefined identifier
+USBDEVICE.C(308): error C202: 'l': undefined identifier
+USBDEVICE.C(311): error C202: 'l': undefined identifier
+USBDEVICE.C(312): error C202: 'l': undefined identifier
+USBDEVICE.C(321): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(322): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(324): error C202: 'l': undefined identifier
+USBDEVICE.C(325): error C202: 'l': undefined identifier
+USBDEVICE.C(326): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(327): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(328): error C202: 'l': undefined identifier
+USBDEVICE.C(331): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(340): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(341): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(359): error C202: 's': undefined identifier
+USBDEVICE.C(364): error C202: 's': undefined identifier
+Target not created
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+USBDEVICE.C(19): error C141: syntax error near '0x08'
+USBDEVICE.C(35): error C141: syntax error near '0x01'
+USBDEVICE.C(74): error C141: syntax error near '0xa1'
+USBDEVICE.C(115): error C141: syntax error near 's', expected ')'
+USBDEVICE.C(116): error C158: '_DBGA': function contains unnamed parameter
+USBDEVICE.C(118): error C202: 'l': undefined identifier
+USBDEVICE.C(120): error C202: 's': undefined identifier
+USBDEVICE.C(121): error C202: 's': undefined identifier
+USBDEVICE.C(124): error C141: syntax error near 'void'
+USBDEVICE.C(126): error C202: 'l': undefined identifier
+USBDEVICE.C(127): error C141: syntax error near 'static'
+USBDEVICE.C(127): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(128): error C141: syntax error near 'static'
+USBDEVICE.C(128): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(129): error C202: 's': undefined identifier
+USBDEVICE.C(130): error C202: 's': undefined identifier
+USBDEVICE.C(138): error C202: 's': undefined identifier
+USBDEVICE.C(139): error C202: 's': undefined identifier
+USBDEVICE.C(140): error C202: 's': undefined identifier
+USBDEVICE.C(145): error C202: 's': undefined identifier
+USBDEVICE.C(146): error C202: 'l': undefined identifier
+USBDEVICE.C(147): error C202: 'l': undefined identifier
+USBDEVICE.C(148): error C202: 's': undefined identifier
+USBDEVICE.C(149): error C202: 's': undefined identifier
+USBDEVICE.C(150): error C202: 'l': undefined identifier
+USBDEVICE.C(151): error C202: 'l': undefined identifier
+USBDEVICE.C(153): error C202: 'l': undefined identifier
+USBDEVICE.C(180): error C141: syntax error near 'USB_SETUP_REQ'
+USBDEVICE.C(180): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(181): error C202: 'l': undefined identifier
+USBDEVICE.C(182): error C202: 'l': undefined identifier
+USBDEVICE.C(183): error C202: 'l': undefined identifier
+USBDEVICE.C(184): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(186): error C202: 'l': undefined identifier
+USBDEVICE.C(187): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(189): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(190): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(191): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(195): error C141: syntax error near '}'
+USBDEVICE.C(197): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(200): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(201): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(202): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(205): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(206): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(208): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(209): error C202: 'l': undefined identifier
+USBDEVICE.C(212): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(213): error C202: 'l': undefined identifier
+USBDEVICE.C(216): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(217): error C202: 'l': undefined identifier
+USBDEVICE.C(220): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(222): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(223): error C202: 'l': undefined identifier
+USBDEVICE.C(226): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(227): error C202: 'l': undefined identifier
+USBDEVICE.C(230): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(231): error C202: 'l': undefined identifier
+USBDEVICE.C(234): error C202: 'l': undefined identifier
+USBDEVICE.C(239): error C202: 'l': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(243): error C202: 'l': undefined identifier
+USBDEVICE.C(244): error C202: 'l': undefined identifier
+USBDEVICE.C(245): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(246): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(250): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'l': undefined identifier
+USBDEVICE.C(259): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(263): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(264): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(265): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(279): error C202: 'l': undefined identifier
+USBDEVICE.C(283): error C202: 'l': undefined identifier
+USBDEVICE.C(288): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(288): error C202: 'l': undefined identifier
+USBDEVICE.C(294): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(294): error C202: 'l': undefined identifier
+USBDEVICE.C(295): error C202: 'l': undefined identifier
+USBDEVICE.C(298): error C202: 'l': undefined identifier
+USBDEVICE.C(304): error C202: 'l': undefined identifier
+USBDEVICE.C(307): error C202: 'l': undefined identifier
+USBDEVICE.C(308): error C202: 'l': undefined identifier
+USBDEVICE.C(311): error C202: 'l': undefined identifier
+USBDEVICE.C(312): error C202: 'l': undefined identifier
+USBDEVICE.C(321): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(322): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(324): error C202: 'l': undefined identifier
+USBDEVICE.C(325): error C202: 'l': undefined identifier
+USBDEVICE.C(326): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(327): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(328): error C202: 'l': undefined identifier
+USBDEVICE.C(331): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(340): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(341): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(359): error C202: 's': undefined identifier
+USBDEVICE.C(364): error C202: 's': undefined identifier
+Target not created
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+USBDEVICE.C(115): error C141: syntax error near 's', expected ')'
+USBDEVICE.C(116): error C158: '_DBGA': function contains unnamed parameter
+USBDEVICE.C(118): error C202: 'l': undefined identifier
+USBDEVICE.C(120): error C202: 's': undefined identifier
+USBDEVICE.C(121): error C202: 's': undefined identifier
+USBDEVICE.C(124): error C141: syntax error near 'void'
+USBDEVICE.C(126): error C202: 'l': undefined identifier
+USBDEVICE.C(127): error C141: syntax error near 'static'
+USBDEVICE.C(127): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(128): error C141: syntax error near 'static'
+USBDEVICE.C(128): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(129): error C202: 's': undefined identifier
+USBDEVICE.C(130): error C202: 's': undefined identifier
+USBDEVICE.C(138): error C202: 's': undefined identifier
+USBDEVICE.C(139): error C202: 's': undefined identifier
+USBDEVICE.C(140): error C202: 's': undefined identifier
+USBDEVICE.C(145): error C202: 's': undefined identifier
+USBDEVICE.C(146): error C202: 'l': undefined identifier
+USBDEVICE.C(147): error C202: 'l': undefined identifier
+USBDEVICE.C(148): error C202: 's': undefined identifier
+USBDEVICE.C(149): error C202: 's': undefined identifier
+USBDEVICE.C(150): error C202: 'l': undefined identifier
+USBDEVICE.C(151): error C202: 'l': undefined identifier
+USBDEVICE.C(153): error C202: 'l': undefined identifier
+USBDEVICE.C(180): error C141: syntax error near 'USB_SETUP_REQ'
+USBDEVICE.C(180): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(181): error C202: 'l': undefined identifier
+USBDEVICE.C(182): error C202: 'l': undefined identifier
+USBDEVICE.C(183): error C202: 'l': undefined identifier
+USBDEVICE.C(184): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(186): error C202: 'l': undefined identifier
+USBDEVICE.C(187): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(189): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(190): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(191): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(195): error C141: syntax error near '}'
+USBDEVICE.C(197): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(200): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(201): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(202): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(205): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(206): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(208): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(209): error C202: 'l': undefined identifier
+USBDEVICE.C(212): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(213): error C202: 'l': undefined identifier
+USBDEVICE.C(216): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(217): error C202: 'l': undefined identifier
+USBDEVICE.C(220): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(222): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(223): error C202: 'l': undefined identifier
+USBDEVICE.C(226): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(227): error C202: 'l': undefined identifier
+USBDEVICE.C(230): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(231): error C202: 'l': undefined identifier
+USBDEVICE.C(234): error C202: 'l': undefined identifier
+USBDEVICE.C(239): error C202: 'l': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(243): error C202: 'l': undefined identifier
+USBDEVICE.C(244): error C202: 'l': undefined identifier
+USBDEVICE.C(245): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(246): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(250): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'l': undefined identifier
+USBDEVICE.C(259): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(263): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(264): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(265): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(279): error C202: 'l': undefined identifier
+USBDEVICE.C(283): error C202: 'l': undefined identifier
+USBDEVICE.C(288): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(288): error C202: 'l': undefined identifier
+USBDEVICE.C(294): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(294): error C202: 'l': undefined identifier
+USBDEVICE.C(295): error C202: 'l': undefined identifier
+USBDEVICE.C(298): error C202: 'l': undefined identifier
+USBDEVICE.C(304): error C202: 'l': undefined identifier
+USBDEVICE.C(307): error C202: 'l': undefined identifier
+USBDEVICE.C(308): error C202: 'l': undefined identifier
+USBDEVICE.C(311): error C202: 'l': undefined identifier
+USBDEVICE.C(312): error C202: 'l': undefined identifier
+USBDEVICE.C(321): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(322): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(324): error C202: 'l': undefined identifier
+USBDEVICE.C(325): error C202: 'l': undefined identifier
+USBDEVICE.C(326): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(327): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(328): error C202: 'l': undefined identifier
+USBDEVICE.C(331): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(340): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(341): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(359): error C202: 's': undefined identifier
+USBDEVICE.C(364): error C202: 's': undefined identifier
+Target not created
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+USBDEVICE.C(115): error C141: syntax error near 's', expected ')'
+USBDEVICE.C(116): error C158: '_DBGA': function contains unnamed parameter
+USBDEVICE.C(118): error C202: 'l': undefined identifier
+USBDEVICE.C(120): error C202: 's': undefined identifier
+USBDEVICE.C(121): error C202: 's': undefined identifier
+USBDEVICE.C(124): error C141: syntax error near 'void'
+USBDEVICE.C(126): error C202: 'l': undefined identifier
+USBDEVICE.C(127): error C141: syntax error near 'static'
+USBDEVICE.C(127): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(128): error C141: syntax error near 'static'
+USBDEVICE.C(128): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(129): error C202: 's': undefined identifier
+USBDEVICE.C(130): error C202: 's': undefined identifier
+USBDEVICE.C(138): error C202: 's': undefined identifier
+USBDEVICE.C(139): error C202: 's': undefined identifier
+USBDEVICE.C(140): error C202: 's': undefined identifier
+USBDEVICE.C(145): error C202: 's': undefined identifier
+USBDEVICE.C(146): error C202: 'l': undefined identifier
+USBDEVICE.C(147): error C202: 'l': undefined identifier
+USBDEVICE.C(148): error C202: 's': undefined identifier
+USBDEVICE.C(149): error C202: 's': undefined identifier
+USBDEVICE.C(150): error C202: 'l': undefined identifier
+USBDEVICE.C(151): error C202: 'l': undefined identifier
+USBDEVICE.C(153): error C202: 'l': undefined identifier
+USBDEVICE.C(180): error C141: syntax error near 'USB_SETUP_REQ'
+USBDEVICE.C(180): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(181): error C202: 'l': undefined identifier
+USBDEVICE.C(182): error C202: 'l': undefined identifier
+USBDEVICE.C(183): error C202: 'l': undefined identifier
+USBDEVICE.C(184): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(186): error C202: 'l': undefined identifier
+USBDEVICE.C(187): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(189): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(190): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(191): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(195): error C141: syntax error near '}'
+USBDEVICE.C(197): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(200): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(201): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(202): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(205): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(206): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(208): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(209): error C202: 'l': undefined identifier
+USBDEVICE.C(212): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(213): error C202: 'l': undefined identifier
+USBDEVICE.C(216): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(217): error C202: 'l': undefined identifier
+USBDEVICE.C(220): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(222): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(223): error C202: 'l': undefined identifier
+USBDEVICE.C(226): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(227): error C202: 'l': undefined identifier
+USBDEVICE.C(230): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(231): error C202: 'l': undefined identifier
+USBDEVICE.C(234): error C202: 'l': undefined identifier
+USBDEVICE.C(239): error C202: 'l': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(243): error C202: 'l': undefined identifier
+USBDEVICE.C(244): error C202: 'l': undefined identifier
+USBDEVICE.C(245): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(246): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(250): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'l': undefined identifier
+USBDEVICE.C(259): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(263): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(264): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(265): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(279): error C202: 'l': undefined identifier
+USBDEVICE.C(283): error C202: 'l': undefined identifier
+USBDEVICE.C(288): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(288): error C202: 'l': undefined identifier
+USBDEVICE.C(294): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(294): error C202: 'l': undefined identifier
+USBDEVICE.C(295): error C202: 'l': undefined identifier
+USBDEVICE.C(298): error C202: 'l': undefined identifier
+USBDEVICE.C(304): error C202: 'l': undefined identifier
+USBDEVICE.C(307): error C202: 'l': undefined identifier
+USBDEVICE.C(308): error C202: 'l': undefined identifier
+USBDEVICE.C(311): error C202: 'l': undefined identifier
+USBDEVICE.C(312): error C202: 'l': undefined identifier
+USBDEVICE.C(321): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(322): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(324): error C202: 'l': undefined identifier
+USBDEVICE.C(325): error C202: 'l': undefined identifier
+USBDEVICE.C(326): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(327): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(328): error C202: 'l': undefined identifier
+USBDEVICE.C(331): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(340): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(341): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(359): error C202: 's': undefined identifier
+USBDEVICE.C(364): error C202: 's': undefined identifier
+Target not created
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+USBDEVICE.C(124): error C141: syntax error near 'void'
+USBDEVICE.C(127): error C141: syntax error near 'static'
+USBDEVICE.C(127): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(128): error C141: syntax error near 'static'
+USBDEVICE.C(128): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(180): error C141: syntax error near 'USB_SETUP_REQ'
+USBDEVICE.C(180): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(183): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(184): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(187): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(189): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(190): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(191): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(195): error C141: syntax error near '}'
+USBDEVICE.C(197): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(200): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(201): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(202): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(205): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(206): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(208): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(212): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(216): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(217): error C202: 'MyReportDescr': undefined identifier
+USBDEVICE.C(220): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(222): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(226): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(230): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(242): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(243): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(244): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(245): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(246): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(250): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(255): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(259): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(263): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(264): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(265): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(288): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(294): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(295): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(321): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(322): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(324): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(325): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(326): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(327): error C202: 'pDescr': undefined identifier
+USBDEVICE.C(331): error C202: 'SetupLen': undefined identifier
+USBDEVICE.C(340): error C202: 'SetupReq': undefined identifier
+USBDEVICE.C(341): error C202: 'SetupReq': undefined identifier
+Target not created
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+USBDEVICE.C(180): error C141: syntax error near 'USB_SETUP_REQ'
+USBDEVICE.C(180): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(183): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(184): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(185): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(187): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(189): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(190): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(195): error C141: syntax error near '}'
+USBDEVICE.C(197): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(200): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(201): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(205): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(206): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(216): error C202: 'MyReportDescr': undefined identifier
+USBDEVICE.C(217): error C202: 'MyReportDescr': undefined identifier
+USBDEVICE.C(220): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(250): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(259): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(263): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(264): error C202: 'SetupReqBuf': undefined identifier
+USBDEVICE.C(265): error C202: 'SetupReqBuf': undefined identifier
+Target not created
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+USBDEVICE.C(195): error C141: syntax error near '}'
+USBDEVICE.C(216): error C202: 'MyReportDescr': undefined identifier
+USBDEVICE.C(217): error C202: 'MyReportDescr': undefined identifier
+Target not created
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+USBDEVICE.C(69): error C242: 'array[]': too many initializers
+USBDEVICE.C(121): error C193: '>>': bad operand type
+Target not created
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?WAIT374INTERRUPT?HAL_BASE
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?TEST?USBDEVICE
+Program Size: data=25.0 xdata=220 code=4754
+creating hex file from "rtest1p2"...
+"rtest1p2" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?WAIT374INTERRUPT?HAL_BASE
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?TEST?USBDEVICE
+Program Size: data=25.0 xdata=220 code=4754
+creating hex file from "rtest1p2"...
+"rtest1p2" - 0 Error(s), 2 Warning(s).
+Build target 'Target 1'
+compiling sjSerial.c...
+compiling UART.C...
+compiling sjMain.c...
+compiling AD5791.c...
+compiling SPI_SW.C...
+compiling HAL_BASE.C...
+compiling USBDEVICE.C...
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?WAIT374INTERRUPT?HAL_BASE
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?TEST?USBDEVICE
+Program Size: data=25.0 xdata=220 code=4754
+creating hex file from "rtest1p2"...
+"rtest1p2" - 0 Error(s), 2 Warning(s).

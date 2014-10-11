@@ -1,0 +1,13 @@
+"sjSerial.obj",
+"UART.obj",
+"sjMain.obj",
+"AD5791.obj",
+"HAL_BASE.obj",
+"USBDEVICE.obj",
+"sjRelay.obj",
+"UART2.obj",
+"encoder.obj",
+"SPI_SW.obj" 
+TO "rtusb" 
+RAMSIZE(256) 
+XDATA( 0X0000-0X06FF )

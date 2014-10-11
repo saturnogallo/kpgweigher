@@ -1,0 +1,35 @@
+Protel Design System Design Rule Check
+PCB File : Documents\RelayControl.PCB
+Date     : 7-Nov-2013 
+Time     : 13:20:13
+
+Processing Rule : Width Constraint (Min=20mil) (Max=20mil) (Prefered=20mil) (Is on net GND )
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=20mil) (Max=20mil) (Prefered=20mil) (Is on net VCC )
+Rule Violations :0
+
+Processing Rule : Hole Size Constraint (Min=1mil) (Max=200mil) (On the board )
+Rule Violations :0
+
+Processing Rule : Pads and Vias to follow the Drill pairs settings
+Rule Violations :0
+
+Processing Rule : Component Clearance Constraint (Gap=10mil) (On the board ),(On the board )
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=10mil) (Max=20mil) (Prefered=10mil) (On the board )
+Rule Violations :0
+
+Processing Rule : Clearance Constraint (Gap=10mil) (On the board ),(On the board )
+Rule Violations :0
+
+Processing Rule : Broken-Net Constraint ( (On the board ) )
+Rule Violations :0
+
+Processing Rule : Short-Circuit Constraint (Allowed=Not Allowed) (On the board ),(On the board )
+Rule Violations :0
+
+
+Violations Detected : 0
+Time Elapsed        : 00:00:00

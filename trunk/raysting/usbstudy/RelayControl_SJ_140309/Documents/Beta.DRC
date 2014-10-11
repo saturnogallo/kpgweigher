@@ -1,0 +1,31 @@
+Protel Design System Design Rule Check
+PCB File : Documents\Beta.PCB
+Date     : 28-Jun-2002
+Time     : 10:58:29
+
+Processing Rule : Broken-Net Constraint ( (On the board ) )
+Rule Violations :0
+
+Processing Rule : Clearance Constraint (Gap=0.254mm) (On the board ),(On the board )
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=0.254mm) (Max=0.254mm) (Prefered=0.254mm) (On the board )
+   Violation         Track (540.004mm,859.536mm)(540.004mm,872.236mm)  TopLayer  Actual Width = 0.5mm
+   Violation         Track (542.544mm,871.22mm)(544.068mm,869.696mm)  TopLayer  Actual Width = 0.5mm
+   Violation         Track (540.512mm,853.948mm)(544.068mm,857.504mm)  TopLayer  Actual Width = 0.5mm
+   Violation         Track (544.068mm,857.504mm)(544.068mm,869.696mm)  TopLayer  Actual Width = 0.5mm
+   Violation         Track (542.544mm,871.22mm)(542.544mm,872.236mm)  TopLayer  Actual Width = 0.5mm
+Rule Violations :5
+
+Processing Rule : Hole Size Constraint (Min=0.0254mm) (Max=2.54mm) (On the board )
+   Violation         Pad Designator20-(510.667mm,847.979mm)  MultiLayer  Actual Hole Size = 2.794mm
+   Violation         Pad Designator20-(510.794mm,873.0234mm)  MultiLayer  Actual Hole Size = 2.794mm
+   Violation         Pad Free-99(726.948mm,875.284mm)  MultiLayer  Actual Hole Size = 3mm
+   Violation         Pad Free-102(500.38mm,726.44mm)  MultiLayer  Actual Hole Size = 3mm
+   Violation         Pad Free-101(726.948mm,726.44mm)  MultiLayer  Actual Hole Size = 3mm
+   Violation         Pad Free-100(499.364mm,877.316mm)  MultiLayer  Actual Hole Size = 3mm
+Rule Violations :6
+
+
+Violations Detected : 11
+Time Elapsed        : 00:00:01

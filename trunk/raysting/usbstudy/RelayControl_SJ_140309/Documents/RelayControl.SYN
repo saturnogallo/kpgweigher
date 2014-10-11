@@ -1,0 +1,127 @@
+Protel Synchronization report
+=========================================================================
+Date : 10-Mar-2014
+Time : 22:00:01
+
+Reference document: Documents\RelayControl.Sch
+Target document:    Documents\RelayControl.PCB
+=========================================================================
+
+ERRORS: 6 macros can not be executed:
+-------------------------------------------------------------------------
+Macro 1: New Node
+Add node P4-4 to net SPI_RST
+Error: Node not found
+
+Macro 2: New Node
+Add node P4-6 to net SPI_RST
+Error: Node not found
+
+Macro 3: New Node
+Add node P4-5 to net SPI_RST
+Error: Node not found
+
+Macro 4: New Node
+Add node P4-1 to net USB_V
+Error: Node not found
+
+Macro 5: New Node
+Add node P4-3 to net UD+
+Error: Node not found
+
+Macro 6: New Node
+Add node P4-2 to net UD-
+Error: Node not found
+
+
+
+22 macros to be executed:
+-------------------------------------------------------------------------
+Macro 1: New Component
+Add new component P4
+
+
+Macro 2: New Component
+Add new component Q2
+
+
+Macro 3: New Component
+Add new component Q3
+
+
+Macro 4: New Component
+Add new component Q5
+
+
+Macro 5: New Component
+Add new component Q6
+
+
+Macro 6: New Component
+Add new component R13
+
+
+Macro 7: Component Footprint Change
+Update component U1 footprint DIP20 to SO-G20/D13
+
+
+Macro 8: New Node
+Add node R13-2 to net XI
+
+
+Macro 9: New Node
+Add node Q6-3 to net F6
+
+
+Macro 10: New Node
+Add node Q5-3 to net F5
+
+
+Macro 11: New Node
+Add node Q3-3 to net F3
+
+
+Macro 12: New Node
+Add node Q2-3 to net F2
+
+
+Macro 13: New Node
+Add node Q3-1 to net RVCC
+
+
+Macro 14: New Node
+Add node Q2-1 to net RVCC
+
+
+Macro 15: New Node
+Add node Q6-1 to net RVCC
+
+
+Macro 16: New Node
+Add node Q5-1 to net RVCC
+
+
+Macro 17: New Node
+Add node Q5-2 to net NetR5_2
+
+
+Macro 18: New Node
+Add node Q6-2 to net NetR6_2
+
+
+Macro 19: New Node
+Add node Q2-2 to net NetR2_2
+
+
+Macro 20: New Node
+Add node Q3-2 to net NetR3_2
+
+
+Macro 21: New Node
+Add node R13-1 to net CLOCKO
+
+
+Macro 22: Add Component Class
+Add Component Class (RelayControl)
+
+

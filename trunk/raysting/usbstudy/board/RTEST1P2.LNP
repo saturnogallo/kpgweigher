@@ -1,0 +1,9 @@
+"sjSerial.obj",
+"UART.obj",
+"sjMain.obj",
+"AD5791.obj",
+"SPI_SW.obj",
+"HAL_BASE.obj",
+"USBDEVICE.obj" 
+TO "rtest1p2" 
+RAMSIZE(256) 

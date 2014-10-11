@@ -1,0 +1,540 @@
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html">
+<style type="text/css">
+		h1, h2, h3, h4, h5, h6 {
+			font-family : sans-serif;
+			color : white;
+			background-color : #21489e;
+			padding: 0.3em;
+		}
+		body {
+			font-family : verdana;
+		}
+		td, th {
+			padding: 0.5em;
+			text-align : center;
+			width : 18%;
+		}
+		th {
+			background-color : #A6CAF0;
+
+		}
+		th.column1, td.column1 {
+			text-align: left;
+			width : auto;
+		}
+		table {
+			width : 100%;
+		}
+		
+		.DRC_summary_header {							
+			padding-bottom : 0.1em;
+			border : 0px solid black;							
+			width: 100%;
+                        align: right;
+                        
+		}
+
+		.DRC_summary_header_col1, 
+		.DRC_summary_header_col2, 
+		.DRC_summary_header_col3
+		{
+			color : black;
+			font-size:150%;
+                        padding : 0em;
+			padding-top : 0.2em;
+			padding-bottom 0.2: 0em;
+			border : 0px solid black;
+			width : auto;
+			vertical-align: top;
+			font-weight: bold;				
+		}
+		
+		.DRC_summary_header_col1 	
+		{		                       
+			text-align: right;
+                        width: auto;	
+		}
+
+		.DRC_summary_header_col2 	
+		{		
+			text-align: center;	
+		}
+
+		.DRC_summary_header_col3 	
+		{		
+			text-align: left;	
+		}
+
+
+		
+		.header_holder
+		{
+		Width = 100%;
+		border = 0px solid green;
+		padding = 0;
+		}
+		
+		
+		
+		.front_matter, .front_matter_column1, .front_matter_column2, .front_matter_column3
+                {
+			left:0;
+			top:0;
+			padding-top : 0.1em;			
+			border : 0px solid black;
+			width : 100%;
+			vertical-align: top
+
+		}
+		.front_matter {	
+			
+			margin-top: 5px;
+ 			margin-left: 0px;					 			
+ 			horizontal-align: left;
+		}
+				
+		
+		.front_matter_column1 {
+			width : 10em;	
+			text-align  : right;
+			padding-right:0.1em;
+			
+		}
+		
+		.front_matter_column2 {
+                        width: 0.1em;
+			align: center;
+			text-align : center;
+			margin-right  : 0.1em;	
+			margin-left   : 0.1em;
+		}
+		.front_matter_column3 {
+			width         : auto;  
+			text-align    : left;	
+			margin-right  : 0.5em;				
+		}
+		
+		.total_column1, .total_column {
+			font-weight : bold;
+		}
+		.total_column1 {
+			text-align : right;
+		}
+		.warning, .error {
+			color : red;
+			font-weight : bold;
+		}
+		tr.onmouseout_odd {
+			background-color : #EEEEE0 
+		}
+		tr.onmouseout_even { 
+			background-color : #F3F3E3   
+		}
+		tr.onmouseover_odd, tr.onmouseover_even { 
+			background-color : lightYellow
+		} 
+		a:link, a:visited, .q a:link,.q a:active,.q {
+			color: #21489e; 
+		}
+		a:link.callback, a:visited.callback { 
+			color: #008000 
+		}
+		a:link.customize, a:visited.customize {
+			color: #C0C0C0;
+			position: absolute; 
+			right: 10px;
+		}	
+		p.contents_level1 {
+			font-weight : bold;
+			font-size : 110%;
+			margin : 0.5em;
+		}
+		p.contents_level2 {
+			position : relative;
+			left : 20px;
+			margin : 0.5em;
+		}
+	</style><script type="text/javascript">
+		function coordToMils(coord) {
+			var number = coord / 10000;
+			
+			if (number != number.toFixed(3))
+				number = number.toFixed(3);
+
+			return number + 'mil'
+		}
+
+		function coordToMM(coord) {
+			var number = 0.0254 * coord / 10000;
+			
+			if (number != number.toFixed(4))
+				number = number.toFixed(4);
+			
+			return number + 'mm'
+		}
+	
+		function convertCoord(coordNode, units) {
+			for (var i = 0; i < coordNode.childNodes.length; i++) {
+				coordNode.removeChild(coordNode.childNodes[i]);
+			}
+
+			var coord = coordNode.getAttribute('value');
+			if (coord != null) {
+				if (units == 'mm') {
+					textNode = document.createTextNode(coordToMM(coord));
+					coordNode.appendChild(textNode);
+				} else if (units == 'mil') {
+					textNode = document.createTextNode(coordToMils(coord));		
+					coordNode.appendChild(textNode);	
+				}
+			}
+		}
+	
+		function convertUnits(unitNode, units) {
+			for (var i = 0; i < unitNode.childNodes.length; i++) {
+				unitNode.removeChild(unitNode.childNodes[i]);		
+			}
+		
+			textNode = document.createTextNode(units); 
+			unitNode.appendChild(textNode);
+		}
+	
+		function changeUnits(radio_input, units) {
+			if (radio_input.checked) {
+			
+				var elements = document.getElementsByName('coordinate');
+				if (elements) {
+					for (var i = 0; i < elements.length; i++) {
+						convertCoord(elements[i], units);
+					}
+				}
+	
+				var elements = document.getElementsByName('units');
+				if (elements) {
+					for (var i = 0; i < elements.length; i++) {
+						convertUnits(elements[i], units);
+					}
+				}
+			}
+		}
+	</script></head>
+<body onload=""><img ALT="Altium" src="
+			file://C:\ALTIUM DESIGNER 6.9\ALTIUM DESIGNER 6.9\Templates\AD-rgb_logo_223x64.gif
+		"><a href="dxpprocess://Client:SetupPreferences?Server=PCB|PageName=Reports" class="customize"><acronym title="dxpprocess://Client:SetupPreferences?Server=PCB|PageName=Reports">customize</acronym></a><h1>Design Rule Verification Report</h1>
+<table class="header_holder">
+<td Style="width:70%">
+<table class="front_matter">
+<tr class="front_matter">
+<td class="front_matter_column1">Date</td>
+<td class="front_matter_column2">:</td>
+<td class="front_matter_column3">2007-2-19</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Time</td>
+<td class="front_matter_column2">:</td>
+<td class="front_matter_column3">0:38:23</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Elapsed Time</td>
+<td class="front_matter_column2">:</td>
+<td class="front_matter_column3">00:00:00</td>
+</tr>
+<tr class="front_matter">
+<td class="front_matter_column1">Filename</td>
+<td class="front_matter_column2">:</td>
+<td class="front_matter_column3"><a href="file:///C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB" class="file"><acronym title="C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB">C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB</acronym></a></td>
+</tr>
+</table>
+</td>
+<td Style="Width:30%">
+<table class="DRC_summary_header">
+<tr>
+<td class="DRC_summary_header_col1">Warnings</td>
+<td class="DRC_summary_header_col2">:</td>
+<td class="DRC_summary_header_col3">0</td></tr>
+<tr>
+<td class="DRC_summary_header_col1">Rule Violations</td>
+<td class="DRC_summary_header_col2">:</td>
+<td class="DRC_summary_header_col3" style="color : red">67</td></tr>
+</table>
+</td>
+</table>
+<hr><a name="IDATASRK"><h2>Summary</h2></a><table>
+<tr>
+<th class="column1">Warnings</th>
+<th class="column2">Count</th>
+</tr>
+<tr>
+<td style="font-weight : bold; text-align : right" class="column1">Total</td>
+<td style="font-weight : bold" class="column2">0</td>
+</tr>
+</table><br><table>
+<tr>
+<th class="column1">Rule Violations</th>
+<th class="column2">Count</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDAFBSRK">Width Constraint (Min=10mil) (Max=20mil) (Preferred=10mil) (InNet('CLK4'))</a></td>
+<td class="column2">38</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDASQSRK">Width Constraint (Min=20mil) (Max=20mil) (Preferred=20mil) (InNet('NetT2_4'))</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDAYQSRK">Width Constraint (Min=8mil) (Max=20mil) (Preferred=20mil) (InNet('VCC'))</a></td>
+<td class="column2">3</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDAQRSRK">Hole Size Constraint (Min=1mil) (Max=200mil) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDAWRSRK">Pads and Vias to follow the Drill pairs settings</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDA2RSRK">Component Clearance Constraint (Quick Check Mode) ( Horizontal Gap = 10mil) (All),(All) </a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDACSSRK">Width Constraint (Min=5mil) (Max=20mil) (Preferred=10mil) (All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDAISSRK">Clearance Constraint (Gap=5mil) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDAOSSRK">Broken-Net Constraint ( (All) )</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="#IDAUSSRK">Short-Circuit Constraint (Allowed=No) (All),(All)</a></td>
+<td class="column2">0</td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="#IDA0SSRK">Width Constraint (Min=20mil) (Max=20mil) (Preferred=20mil) (InNet('RVCC'))</a></td>
+<td class="column2">26</td>
+</tr>
+<tr>
+<td style="font-weight : bold; text-align : right" class="column1">Total</td>
+<td style="font-weight : bold" class="column2">67</td>
+</tr>
+</table><br><hr><a name="IDAFBSRK"><table>
+<tr>
+<th style="text-align : left" colspan="1" class="rule">Width Constraint (Min=10mil) (Max=20mil) (Preferred=10mil) (InNet('CLK4'))</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7606.34mil|Location2.X=11171.66mil|Location1.Y=10284.02mil|Location2.Y=12397.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7606.34mil|Location2.X=11171.66mil|Location1.Y=10284.02mil|Location2.Y=12397.98mil|Absolute=True">Track (9385mil,11345mil)(9393mil,11337mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7631.34mil|Location2.X=11196.66mil|Location1.Y=10259.02mil|Location2.Y=12372.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7631.34mil|Location2.X=11196.66mil|Location1.Y=10259.02mil|Location2.Y=12372.98mil|Absolute=True">Track (9393mil,11337mil)(9435mil,11295mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7653.84mil|Location2.X=11219.16mil|Location1.Y=10280.02mil|Location2.Y=12393.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7653.84mil|Location2.X=11219.16mil|Location1.Y=10280.02mil|Location2.Y=12393.98mil|Absolute=True">Track (9393mil,11337mil)(9480mil,11337mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7652.34mil|Location2.X=11217.66mil|Location1.Y=10184.339mil|Location2.Y=12298.299mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7652.34mil|Location2.X=11217.66mil|Location1.Y=10184.339mil|Location2.Y=12298.299mil|Absolute=True">Track (9435mil,11187.638mil)(9435mil,11295mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7652.34mil|Location2.X=11217.66mil|Location1.Y=10105.839mil|Location2.Y=12219.799mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7652.34mil|Location2.X=11217.66mil|Location1.Y=10105.839mil|Location2.Y=12219.799mil|Absolute=True">Track (9435mil,11138mil)(9435mil,11187.638mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7849.84mil|Location2.X=11415.16mil|Location1.Y=10182.52mil|Location2.Y=12296.48mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7849.84mil|Location2.X=11415.16mil|Location1.Y=10182.52mil|Location2.Y=12296.48mil|Absolute=True">Track (9630mil,11242mil)(9635mil,11237mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7852.34mil|Location2.X=11417.66mil|Location1.Y=10200.02mil|Location2.Y=12313.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7852.34mil|Location2.X=11417.66mil|Location1.Y=10200.02mil|Location2.Y=12313.98mil|Absolute=True">Track (9635mil,11237mil)(9635mil,11277mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7852.34mil|Location2.X=11417.66mil|Location1.Y=10155.339mil|Location2.Y=12269.299mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7852.34mil|Location2.X=11417.66mil|Location1.Y=10155.339mil|Location2.Y=12269.299mil|Absolute=True">Track (9635mil,11187.638mil)(9635mil,11237mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7752.34mil|Location2.X=11317.66mil|Location1.Y=10155.339mil|Location2.Y=12269.299mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7752.34mil|Location2.X=11317.66mil|Location1.Y=10155.339mil|Location2.Y=12269.299mil|Absolute=True">Track (9535mil,11187.638mil)(9535mil,11237mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7752.34mil|Location2.X=11317.66mil|Location1.Y=10105.839mil|Location2.Y=12219.799mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7752.34mil|Location2.X=11317.66mil|Location1.Y=10105.839mil|Location2.Y=12219.799mil|Absolute=True">Track (9535mil,11138mil)(9535mil,11187.638mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7085.34mil|Location2.X=10650.66mil|Location1.Y=10352.02mil|Location2.Y=12465.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7085.34mil|Location2.X=10650.66mil|Location1.Y=10352.02mil|Location2.Y=12465.98mil|Absolute=True">Track (8836mil,11409mil)(8900mil,11409mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7602.34mil|Location2.X=11167.66mil|Location1.Y=10311.701mil|Location2.Y=12425.661mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7602.34mil|Location2.X=11167.66mil|Location1.Y=10311.701mil|Location2.Y=12425.661mil|Absolute=True">Track (9385mil,11345mil)(9385mil,11392.362mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9168.02mil|Location2.Y=11281.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9168.02mil|Location2.Y=11281.98mil|Absolute=True">Track (8325.024mil,10225mil)(8553mil,10225mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9153.52mil|Location2.Y=11267.48mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9153.52mil|Location2.Y=11267.48mil|Absolute=True">Track (8296.024mil,10196mil)(8325.024mil,10225mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9112.989mil|Location2.Y=11226.949mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9112.989mil|Location2.Y=11226.949mil|Absolute=True">Track (8296.024mil,10143.938mil)(8296.024mil,10196mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=8882.02mil|Location2.Y=10995.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=8882.02mil|Location2.Y=10995.98mil|Absolute=True">Track (8061.874mil,9939mil)(8260mil,9939mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=8876.803mil|Location2.Y=10990.763mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=8876.803mil|Location2.Y=10990.763mil|Absolute=True">Track (8260mil,9939mil)(8270.434mil,9928.566mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=8850.335mil|Location2.Y=10964.295mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=8850.335mil|Location2.Y=10964.295mil|Absolute=True">Track (8270.434mil,9886.064mil)(8270.434mil,9928.566mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9565.106mil|Location2.Y=11679.066mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9565.106mil|Location2.Y=11679.066mil|Absolute=True">Track (8480.086mil,10622.086mil)(8603.11mil,10622.086mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7117.34mil|Location2.X=10682.66mil|Location1.Y=10346.201mil|Location2.Y=12460.161mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7117.34mil|Location2.X=10682.66mil|Location1.Y=10346.201mil|Location2.Y=12460.161mil|Absolute=True">Track (8900mil,11397.362mil)(8900mil,11409mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7025.34mil|Location2.X=10590.66mil|Location1.Y=10380.02mil|Location2.Y=12493.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7025.34mil|Location2.X=10590.66mil|Location1.Y=10380.02mil|Location2.Y=12493.98mil|Absolute=True">Track (8780mil,11465mil)(8836mil,11409mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7754.84mil|Location2.X=11320.16mil|Location1.Y=10182.52mil|Location2.Y=12296.48mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7754.84mil|Location2.X=11320.16mil|Location1.Y=10182.52mil|Location2.Y=12296.48mil|Absolute=True">Track (9535mil,11237mil)(9540mil,11242mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7802.34mil|Location2.X=11367.66mil|Location1.Y=10185.02mil|Location2.Y=12298.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7802.34mil|Location2.X=11367.66mil|Location1.Y=10185.02mil|Location2.Y=12298.98mil|Absolute=True">Track (9540mil,11242mil)(9630mil,11242mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7750.047mil|Location2.X=11315.367mil|Location1.Y=10078.727mil|Location2.Y=12192.687mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7750.047mil|Location2.X=11315.367mil|Location1.Y=10078.727mil|Location2.Y=12192.687mil|Absolute=True">Track (9530.414mil,11133.414mil)(9535mil,11138mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7702.34mil|Location2.X=11267.66mil|Location1.Y=10076.434mil|Location2.Y=12190.394mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7702.34mil|Location2.X=11267.66mil|Location1.Y=10076.434mil|Location2.Y=12190.394mil|Absolute=True">Track (9439.586mil,11133.414mil)(9530.414mil,11133.414mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7654.633mil|Location2.X=11219.953mil|Location1.Y=10078.727mil|Location2.Y=12192.687mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7654.633mil|Location2.X=11219.953mil|Location1.Y=10078.727mil|Location2.Y=12192.687mil|Absolute=True">Track (9435mil,11138mil)(9439.586mil,11133.414mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7702.34mil|Location2.X=11267.66mil|Location1.Y=10310.201mil|Location2.Y=12424.161mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7702.34mil|Location2.X=11267.66mil|Location1.Y=10310.201mil|Location2.Y=12424.161mil|Absolute=True">Track (9485mil,11342mil)(9485mil,11392.362mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7699.84mil|Location2.X=11265.16mil|Location1.Y=10282.52mil|Location2.Y=12396.48mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7699.84mil|Location2.X=11265.16mil|Location1.Y=10282.52mil|Location2.Y=12396.48mil|Absolute=True">Track (9480mil,11337mil)(9485mil,11342mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6997.34mil|Location2.X=10562.66mil|Location1.Y=10537.701mil|Location2.Y=12651.661mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6997.34mil|Location2.X=10562.66mil|Location1.Y=10537.701mil|Location2.Y=12651.661mil|Absolute=True">Track (8780mil,11572.362mil)(8780mil,11617mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6997.34mil|Location2.X=10562.66mil|Location1.Y=10461.701mil|Location2.Y=12575.661mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6997.34mil|Location2.X=10562.66mil|Location1.Y=10461.701mil|Location2.Y=12575.661mil|Absolute=True">Track (8780mil,11465mil)(8780mil,11572.362mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7013.34mil|Location2.X=10578.66mil|Location1.Y=10424.02mil|Location2.Y=12537.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7013.34mil|Location2.X=10578.66mil|Location1.Y=10424.02mil|Location2.Y=12537.98mil|Absolute=True">Track (8780mil,11465mil)(8812mil,11497mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7008.34mil|Location2.X=10573.66mil|Location1.Y=10571.02mil|Location2.Y=12684.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7008.34mil|Location2.X=10573.66mil|Location1.Y=10571.02mil|Location2.Y=12684.98mil|Absolute=True">Track (8780mil,11617mil)(8802mil,11639mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7388.34mil|Location2.X=10953.66mil|Location1.Y=10582.02mil|Location2.Y=12695.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7388.34mil|Location2.X=10953.66mil|Location1.Y=10582.02mil|Location2.Y=12695.98mil|Absolute=True">Track (8802mil,11639mil)(9540mil,11639mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7882.34mil|Location2.X=11447.66mil|Location1.Y=8747.02mil|Location2.Y=10860.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7882.34mil|Location2.X=11447.66mil|Location1.Y=8747.02mil|Location2.Y=10860.98mil|Absolute=True">Track (9665mil,9755mil)(9665mil,9853mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7865.867mil|Location2.X=11431.187mil|Location1.Y=8812.493mil|Location2.Y=10926.453mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7865.867mil|Location2.X=11431.187mil|Location1.Y=8812.493mil|Location2.Y=10926.453mil|Absolute=True">Track (9632.054mil,9885.946mil)(9665mil,9853mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7751.634mil|Location2.X=11316.954mil|Location1.Y=8828.966mil|Location2.Y=10942.926mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7751.634mil|Location2.X=11316.954mil|Location1.Y=8828.966mil|Location2.Y=10942.926mil|Absolute=True">Track (9436.534mil,9885.946mil)(9632.054mil,9885.946mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7646.847mil|Location2.X=11212.167mil|Location1.Y=8835.993mil|Location2.Y=10949.953mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7646.847mil|Location2.X=11212.167mil|Location1.Y=8835.993mil|Location2.Y=10949.953mil|Absolute=True">Track (9422.48mil,9900mil)(9436.534mil,9885.946mil)  BottomLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7639.82mil|Location2.X=11205.14mil|Location1.Y=8879.201mil|Location2.Y=10993.161mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7639.82mil|Location2.X=11205.14mil|Location1.Y=8879.201mil|Location2.Y=10993.161mil|Absolute=True">Track (9422.48mil,9900mil)(9422.48mil,9972.362mil)  BottomLayer</acronym></a><br></td>
+</tr>
+</table></a><a href="#top">Back to top</a><br><br><a name="IDAYQSRK"><table>
+<tr>
+<th style="text-align : left" colspan="1" class="rule">Width Constraint (Min=8mil) (Max=20mil) (Preferred=20mil) (InNet('VCC'))</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9094.02mil|Location2.Y=11207.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9094.02mil|Location2.Y=11207.98mil|Absolute=True">Track (8237mil,10151mil)(8244.842mil,10151mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9090.489mil|Location2.Y=11204.449mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9090.489mil|Location2.Y=11204.449mil|Absolute=True">Track (8244.842mil,10143.938mil)(8244.842mil,10151mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9187.52mil|Location2.Y=11301.48mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=6876.477mil|Location2.X=10441.797mil|Location1.Y=9187.52mil|Location2.Y=11301.48mil|Absolute=True">Track (8237mil,10151mil)(8237mil,10338mil)  TopLayer</acronym></a><br></td>
+</tr>
+</table></a><a href="#top">Back to top</a><br><br><a name="IDA0SSRK"><table>
+<tr>
+<th style="text-align : left" colspan="1" class="rule">Width Constraint (Min=20mil) (Max=20mil) (Preferred=20mil) (InNet('RVCC'))</th>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7838.128mil|Location2.X=11403.448mil|Location1.Y=9833.721mil|Location2.Y=11947.681mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7838.128mil|Location2.X=11403.448mil|Location1.Y=9833.721mil|Location2.Y=11947.681mil|Absolute=True">Track (9620.788mil,10877.402mil)(9620.788mil,10904mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7847.734mil|Location2.X=11413.054mil|Location1.Y=9820.422mil|Location2.Y=11934.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7847.734mil|Location2.X=11413.054mil|Location1.Y=9820.422mil|Location2.Y=11934.382mil|Absolute=True">Track (9620.788mil,10877.402mil)(9640mil,10877.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7834.935mil|Location2.X=11400.255mil|Location1.Y=9820.422mil|Location2.Y=11934.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7834.935mil|Location2.X=11400.255mil|Location1.Y=9820.422mil|Location2.Y=11934.382mil|Absolute=True">Track (9614.402mil,10877.402mil)(9620.788mil,10877.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7849.033mil|Location2.X=11414.353mil|Location1.Y=9975.422mil|Location2.Y=12089.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7849.033mil|Location2.X=11414.353mil|Location1.Y=9975.422mil|Location2.Y=12089.382mil|Absolute=True">Track (9620.788mil,11032.402mil)(9642.598mil,11032.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7821.537mil|Location2.X=11386.857mil|Location1.Y=9975.422mil|Location2.Y=12089.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7821.537mil|Location2.X=11386.857mil|Location1.Y=9975.422mil|Location2.Y=12089.382mil|Absolute=True">Track (9587.606mil,11032.402mil)(9620.788mil,11032.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7848.935mil|Location2.X=11414.255mil|Location1.Y=9660.422mil|Location2.Y=11774.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7848.935mil|Location2.X=11414.255mil|Location1.Y=9660.422mil|Location2.Y=11774.382mil|Absolute=True">Track (9620.788mil,10717.402mil)(9642.402mil,10717.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7806.734mil|Location2.X=11372.054mil|Location1.Y=9660.422mil|Location2.Y=11774.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7806.734mil|Location2.X=11372.054mil|Location1.Y=9660.422mil|Location2.Y=11774.382mil|Absolute=True">Track (9558mil,10717.402mil)(9620.788mil,10717.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7851.734mil|Location2.X=11417.054mil|Location1.Y=9150.422mil|Location2.Y=11264.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7851.734mil|Location2.X=11417.054mil|Location1.Y=9150.422mil|Location2.Y=11264.382mil|Absolute=True">Track (9610.788mil,10207.402mil)(9658mil,10207.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7801.734mil|Location2.X=11367.054mil|Location1.Y=9150.422mil|Location2.Y=11264.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7801.734mil|Location2.X=11367.054mil|Location1.Y=9150.422mil|Location2.Y=11264.382mil|Absolute=True">Track (9558mil,10207.402mil)(9610.788mil,10207.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7839.033mil|Location2.X=11404.353mil|Location1.Y=8995.422mil|Location2.Y=11109.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7839.033mil|Location2.X=11404.353mil|Location1.Y=8995.422mil|Location2.Y=11109.382mil|Absolute=True">Track (9610.788mil,10052.402mil)(9632.598mil,10052.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7801.734mil|Location2.X=11367.054mil|Location1.Y=8995.422mil|Location2.Y=11109.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7801.734mil|Location2.X=11367.054mil|Location1.Y=8995.422mil|Location2.Y=11109.382mil|Absolute=True">Track (9558mil,10052.402mil)(9610.788mil,10052.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7856.139mil|Location2.X=11421.459mil|Location1.Y=8989.221mil|Location2.Y=11103.181mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7856.139mil|Location2.X=11421.459mil|Location1.Y=8989.221mil|Location2.Y=11103.181mil|Absolute=True">Track (9632.598mil,10052.402mil)(9645mil,10040mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7862.34mil|Location2.X=11427.66mil|Location1.Y=8940.626mil|Location2.Y=11054.586mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7862.34mil|Location2.X=11427.66mil|Location1.Y=8940.626mil|Location2.Y=11054.586mil|Absolute=True">Track (9645mil,9955.212mil)(9645mil,10040mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7845.234mil|Location2.X=11410.554mil|Location1.Y=8881.126mil|Location2.Y=10995.086mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7845.234mil|Location2.X=11410.554mil|Location1.Y=8881.126mil|Location2.Y=10995.086mil|Absolute=True">Track (9610.788mil,9921mil)(9645mil,9955.212mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7828.128mil|Location2.X=11393.448mil|Location1.Y=8849.721mil|Location2.Y=10963.681mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7828.128mil|Location2.X=11393.448mil|Location1.Y=8849.721mil|Location2.Y=10963.681mil|Absolute=True">Track (9610.788mil,9892.402mil)(9610.788mil,9921mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7803.541mil|Location2.X=11368.861mil|Location1.Y=9792.221mil|Location2.Y=11906.181mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7803.541mil|Location2.X=11368.861mil|Location1.Y=9792.221mil|Location2.Y=11906.181mil|Absolute=True">Track (9558mil,10821mil)(9614.402mil,10877.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7804.234mil|Location2.X=11369.554mil|Location1.Y=9485.422mil|Location2.Y=11599.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7804.234mil|Location2.X=11369.554mil|Location1.Y=9485.422mil|Location2.Y=11599.382mil|Absolute=True">Track (9558mil,10542.402mil)(9615.788mil,10542.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7866.041mil|Location2.X=11431.361mil|Location1.Y=9666.721mil|Location2.Y=11780.681mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7866.041mil|Location2.X=11431.361mil|Location1.Y=9666.721mil|Location2.Y=11780.681mil|Absolute=True">Track (9642.402mil,10717.402mil)(9655mil,10730mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7872.34mil|Location2.X=11437.66mil|Location1.Y=9739.221mil|Location2.Y=11853.181mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7872.34mil|Location2.X=11437.66mil|Location1.Y=9739.221mil|Location2.Y=11853.181mil|Absolute=True">Track (9655mil,10730mil)(9655mil,10862.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7864.84mil|Location2.X=11430.16mil|Location1.Y=9812.922mil|Location2.Y=11926.882mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7864.84mil|Location2.X=11430.16mil|Location1.Y=9812.922mil|Location2.Y=11926.882mil|Absolute=True">Track (9640mil,10877.402mil)(9655mil,10862.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7851.734mil|Location2.X=11417.054mil|Location1.Y=9305.422mil|Location2.Y=11419.382mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7851.734mil|Location2.X=11417.054mil|Location1.Y=9305.422mil|Location2.Y=11419.382mil|Absolute=True">Track (9610.788mil,10362.402mil)(9658mil,10362.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7847.734mil|Location2.X=11413.054mil|Location1.Y=9847.02mil|Location2.Y=11960.98mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7847.734mil|Location2.X=11413.054mil|Location1.Y=9847.02mil|Location2.Y=11960.98mil|Absolute=True">Track (9620.788mil,10904mil)(9640mil,10904mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7864.84mil|Location2.X=11430.16mil|Location1.Y=9854.52mil|Location2.Y=11968.48mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7864.84mil|Location2.X=11430.16mil|Location1.Y=9854.52mil|Location2.Y=11968.48mil|Absolute=True">Track (9640mil,10904mil)(9655mil,10919mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7872.34mil|Location2.X=11437.66mil|Location1.Y=9912.52mil|Location2.Y=12026.48mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7872.34mil|Location2.X=11437.66mil|Location1.Y=9912.52mil|Location2.Y=12026.48mil|Absolute=True">Track (9655mil,10919mil)(9655mil,11020mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_odd" onmouseover="className = 'onmouseover_odd'" onmouseout="className = 'onmouseout_odd'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7866.139mil|Location2.X=11431.459mil|Location1.Y=9969.221mil|Location2.Y=12083.181mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7866.139mil|Location2.X=11431.459mil|Location1.Y=9969.221mil|Location2.Y=12083.181mil|Absolute=True">Track (9642.598mil,11032.402mil)(9655mil,11020mil)  TopLayer</acronym></a><br></td>
+</tr>
+<tr class="onmouseout_even" onmouseover="className = 'onmouseover_even'" onmouseout="className = 'onmouseout_even'">
+<td class="column1"><a href="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\%E6%A1%8C%E9%9D%A2\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7790.366mil|Location2.X=11355.686mil|Location1.Y=9990.002mil|Location2.Y=12103.962mil|Absolute=True" class="callback"><acronym title="dxpprocess://PCB:Zoom?document=C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\桌面\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl.PCB;viewname=PCBEditor;Action=Area|Location1.X=7790.366mil|Location2.X=11355.686mil|Location1.Y=9990.002mil|Location2.Y=12103.962mil|Absolute=True">Track (9558.446mil,11061.562mil)(9587.606mil,11032.402mil)  TopLayer</acronym></a><br></td>
+</tr>
+</table></a><a href="#top">Back to top</a><br><br></body>
+</html>

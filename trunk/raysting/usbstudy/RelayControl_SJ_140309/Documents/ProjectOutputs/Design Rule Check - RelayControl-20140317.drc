@@ -1,0 +1,50 @@
+Protel Design System Design Rule Check
+PCB File : C:\Documents and Settings\Shen Honghua.HOME-2D2F12489C\×ÀÃæ\RelayControl_140309\altium\RelayControl_SJ_140309\Documents\RelayControl-20140317.pcb
+Date     : 2007-2-20
+Time     : 0:51:23
+
+Processing Rule : Width Constraint (Min=10mil) (Max=20mil) (Preferred=10mil) (InNet('GND'))
+   Violation between Track (8270.434mil,9886.064mil)(8270.434mil,9932.566mil)  TopLayer
+   Violation between Track (8265mil,9938mil)(8270.434mil,9932.566mil)  TopLayer
+   Violation between Track (8060.874mil,9938mil)(8265mil,9938mil)  TopLayer
+   Violation between Track (8481.616mil,10498.702mil)(8590mil,10607.086mil)  TopLayer
+   Violation between Track (8590mil,10607.086mil)(8623.11mil,10607.086mil)  TopLayer
+Rule Violations :5
+
+Processing Rule : Width Constraint (Min=8mil) (Max=20mil) (Preferred=20mil) (InNet('VCC'))
+   Violation between Track (8244.842mil,10096.158mil)(8244.842mil,10143.938mil)  TopLayer
+   Violation between Track (8244.842mil,10096.158mil)(8280mil,10061mil)  TopLayer
+   Violation between Track (8280mil,10061mil)(8316mil,10061mil)  TopLayer
+   Violation between Track (8316mil,10061mil)(8398mil,9979mil)  TopLayer
+   Violation between Track (8560mil,10690.078mil)(8580mil,10670.078mil)  TopLayer
+   Violation between Track (8580mil,10670.078mil)(8623.11mil,10670.078mil)  TopLayer
+   Violation between Track (8623.11mil,10670.078mil)(8745mil,10670.078mil)  TopLayer
+Rule Violations :7
+
+Processing Rule : Hole Size Constraint (Min=1mil) (Max=200mil) (All)
+Rule Violations :0
+
+Processing Rule : Pads and Vias to follow the Drill pairs settings
+Rule Violations :0
+
+Processing Rule : Component Clearance Constraint (Quick Check Mode) ( Horizontal Gap = 10mil) (All),(All) 
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=5mil) (Max=20mil) (Preferred=10mil) (All)
+Rule Violations :0
+
+Processing Rule : Clearance Constraint (Gap=5mil) (All),(All)
+Rule Violations :0
+
+Processing Rule : Broken-Net Constraint ( (All) )
+Rule Violations :0
+
+Processing Rule : Short-Circuit Constraint (Allowed=No) (All),(All)
+Rule Violations :0
+
+Processing Rule : Width Constraint (Min=10mil) (Max=20mil) (Preferred=20mil) (InNet('RVCC'))
+Rule Violations :0
+
+
+Violations Detected : 12
+Time Elapsed        : 00:00:00

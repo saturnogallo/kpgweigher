@@ -1,0 +1,555 @@
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
+OBJECT MODULE PLACED IN sjMain.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE sjMain.c LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjDefine.h"
+   2          #include "sjSerial.h"
+   3          //#include "AD5791.h"
+   4          //#include "CH374INC.h"
+   5          #include "HAL.h"
+   6          #include "stdio.h"
+   7          #include "stdlib.h"
+   8          
+   9          #define uchar   unsigned char
+  10          #define u8      unsigned char
+  11          #define ulong   unsigned long
+  12          #define uint    unsigned int
+  13          unsigned char delayc;
+  14          
+  15          //#define CMD_DBG               0xc0
+  16          //#define CMD_DBG2              0xc3
+  17          #define CMD_READ        0xc1
+  18          #define CMD_ZERO        0xc2 //zero offset of navmeter
+  19          /*
+  20          */
+  21          //end interface routine
+  22          extern int      test( void );
+  23          extern void DBGS(const char* s);
+  24          extern void DBG(unsigned char);
+  25          
+  26          void delay (uint us) 
+  27          {
+  28   1              while(us--);
+  29   1      }
+  30          /*
+  31          void delay1 (uint ms) 
+  32          {
+  33                  int i,j;
+  34                  for(i=0;i<ms;i++)
+  35                  for(j=0;j<1000;j++)
+  36                          ;
+  37                          
+  38          }
+  39          */
+  40          char lowc(uchar x)
+  41          {
+  42   1              x = x&0x0f;
+  43   1              if(x > 0x09)
+  44   1                      return 'A'+x-0x0a;
+  45   1              else
+  46   1                      return '0'+x;
+  47   1      }
+  48          char highc(uchar x)
+  49          {
+  50   1      
+  51   1              x = x>>4;
+  52   1              if(x > 0x09)
+  53   1                      return 'A'+x-0x0a;
+  54   1              else
+  55   1                      return '0'+x;
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 2   
+
+  56   1      }
+  57          
+  58          /*计算字符串长度*/
+  59          uchar strlen(uchar *s)
+  60          {
+  61   1              uchar len = 0;
+  62   1              while(*s++) len ++;
+  63   1              
+  64   1              return len;
+  65   1      }
+  66          
+  67          
+  68          
+  69          //extern void btnencode_loop();
+  70          unsigned long count = 0;
+  71          BOOL once = 0;
+  72          void timer_isr(void) interrupt 1 using 1
+  73          {
+  74   1              asp_handler();
+  75   1              asp_handler2();
+  76   1              TF0 = 0; //clear timer
+  77   1      }
+  78          extern int      test( void );
+  79          
+  80          uchar  xdata da[4];
+  81          void ComOutStr(ulong dT)
+  82          {
+  83   1        uchar xyw;
+  84   1        da[3] =  dT&0xff; 
+  85   1        da[2] =  dT>>8&0xff;
+  86   1        da[1] =  dT>>16&0xff;
+  87   1        da[0] =  dT>>24&0xff; 
+  88   1        xyw=(da[0]+da[1]+da[2]+da[3]) & 0xff; 
+  89   1        xyw = ~xyw;
+  90   1        
+  91   1        sjSerialSendByte(da[0]);
+  92   1        sjSerialSendByte(da[1]);
+  93   1        sjSerialSendByte(da[2]);
+  94   1        sjSerialSendByte(da[3]);
+  95   1        xyw=da[0]+da[1]+da[2]+da[3];  
+  96   1        xyw = ~xyw;
+  97   1        sjSerialSendByte(xyw);
+  98   1      }
+  99          
+ 100          static uchar navlen1 = 0;
+ 101          static uchar navlen2 = 0;
+ 102          static double reading1 = -1000;
+ 103          static double reading2 = -1000;
+ 104          static double reading1r = -1000;
+ 105          static double reading2r = -1000;
+ 106          
+ 107          static char navread1[20];
+ 108          static char navread1b[20];
+ 109          static char navread2[20];
+ 110          static char navread2b[20];
+ 111          
+ 112          static uchar navcmd[12];                                                                  
+ 113          #define NAV_INVALID     -1000
+ 114          #define NAV_VALID       -2000
+ 115          
+ 116          #define NAV_INIT        1
+ 117          #define NAV_30V         2
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 3   
+
+ 118          #define NAV_1V          3
+ 119          #define NAV_120MV       4
+ 120          #define NAV_AFLTOFF     5
+ 121          #define NAV_AFLTON      6
+ 122          #define NAV_SLOWMODE    7
+ 123          #define NAV_ZEROON      8
+ 124          #define NAV_READ        9
+ 125          
+ 126          void ResetNav(char port)
+ 127          {
+ 128   1              if(port == '1')
+ 129   1              {
+ 130   2                      navlen1 = 0;   reading1 = NAV_INVALID;  
+ 131   2              }
+ 132   1              if(port == '2')
+ 133   1              {
+ 134   2                      navlen2 = 0;   reading2 = NAV_INVALID;  
+ 135   2              }
+ 136   1      }
+ 137          void prints(u8 *str, u8 length, char uart_port)
+ 138          {
+ 139   1              if(uart_port == '0')
+ 140   1              {
+ 141   2                         while(length-- > 0){  
+ 142   3      //                              sjSerialSendByte(*str);
+ 143   3                      sjSerialSendByte(*str++);            
+ 144   3                                      }
+ 145   2              }
+ 146   1              if(uart_port == '1')
+ 147   1              {
+ 148   2      //                                      sjSerialSendByte('1');
+ 149   2                 while(length-- > 0){  
+ 150   3      //                              sjSerialSendByte(*str);
+ 151   3                      io_putc(*str++);            
+ 152   3                 }
+ 153   2              }
+ 154   1              if(uart_port == '2')
+ 155   1              {
+ 156   2      //                                  sjSerialSendByte('2');
+ 157   2                 while(length-- > 0){
+ 158   3      
+ 159   3      //                              sjSerialSendByte(*str);
+ 160   3                      io_putc2(*str++);            
+ 161   3                 }
+ 162   2              }
+ 163   1      }
+ 164          void nav_command(uchar cmd, char port)
+ 165          {
+ 166   1      //        if(cmd == NAV_30V)
+ 167   1      //             sprintf(navcmd,"%%01;12;02\r");
+ 168   1              if(cmd == NAV_1V)
+ 169   1                     sprintf(navcmd,"%%01;12;02\r\n");
+ 170   1              if(cmd == NAV_120MV)
+ 171   1                     sprintf(navcmd,"%%01;12;01\r\n");
+ 172   1              if(cmd == NAV_AFLTOFF)
+ 173   1                     sprintf(navcmd,"%%01;26\r");
+ 174   1              if(cmd == NAV_AFLTON)
+ 175   1                     sprintf(navcmd,"%%01;27\r");
+ 176   1              if(cmd == NAV_SLOWMODE)
+ 177   1                     sprintf(navcmd,"%%01;27\r");
+ 178   1              if(cmd == NAV_ZEROON)    
+ 179   1              {
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 4   
+
+ 180   2                     sprintf(navcmd,"%%01;06\r\n");
+ 181   2              }
+ 182   1              if(cmd == NAV_INIT) 
+ 183   1              {           
+ 184   2                      ResetNav(port);
+ 185   2                      sprintf(navcmd,"%%01;00\r\n");        
+ 186   2              }
+ 187   1              if(cmd == NAV_READ)
+ 188   1              {       
+ 189   2                      ResetNav(port);
+ 190   2                      sprintf(navcmd,"%%01;01\r");
+ 191   2              }                       
+ 192   1              prints(navcmd,strlen(navcmd),port);
+ 193   1      }
+ 194          
+ 195          unsigned long navtime;
+ 196          double nav_read1()
+ 197          {                       
+ 198   1              nav_command(NAV_READ,'1');
+ 199   1              navtime = 0;        
+ 200   1              while(1)
+ 201   1              {
+ 202   2                      if(reading1 < NAV_INVALID) //make sure it is a valid reading
+ 203   2                      {              
+ 204   3                           reading1 = atof(navread1b);
+ 205   3                           return reading1;
+ 206   3                      }       
+ 207   2                      if(navtime++ > 655350)
+ 208   2                      {          
+ 209   3                           nav_command(NAV_READ,'1');   
+ 210   3                           navtime = 0;
+ 211   3                      }                
+ 212   2                      delay(10);
+ 213   2              }
+ 214   1              return 1.0;
+ 215   1      }
+ 216          double nav_read2()
+ 217          {                       
+ 218   1              nav_command(NAV_READ,'2');
+ 219   1              navtime = 0;        
+ 220   1              while(1)
+ 221   1              {
+ 222   2                      if(reading2 < NAV_INVALID) //make sure it is a valid reading
+ 223   2                      {              
+ 224   3                           reading2 = atof(navread2b);
+ 225   3                           return reading2;
+ 226   3                      }       
+ 227   2                      if(navtime++ > 655350)
+ 228   2                      {          
+ 229   3                           nav_command(NAV_READ,'2');   
+ 230   3                           navtime = 0;
+ 231   3                      }                
+ 232   2                      delay(10);
+ 233   2              }
+ 234   1              return 1.0;
+ 235   1      }
+ 236          //incoming data hander of navameter
+ 237          void nav_uart_push1(uchar dat)
+ 238          {
+ 239   1      //              sjSerialSendByte(dat);                            
+ 240   1      //              return;
+ 241   1              if(navlen1 >= 19)
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 5   
+
+ 242   1              {                          
+ 243   2                      ResetNav('1');
+ 244   2              }
+ 245   1              if(((dat >= '0') && (dat <= '9')) ||
+ 246   1                      (dat == '.') ||
+ 247   1                      (dat == '-') ||
+ 248   1                      (dat == '+') ||
+ 249   1                      (dat == 'e') ||
+ 250   1                      (dat == 'E') )
+ 251   1              {                    
+ 252   2                      navread1[navlen1++] = dat;
+ 253   2                      reading1 = NAV_INVALID;
+ 254   2                      return;
+ 255   2              }
+ 256   1                                              
+ 257   1              if(navlen1 < 4) //not enough digits
+ 258   1              {
+ 259   2                      ResetNav('1');
+ 260   2                      return;
+ 261   2              }
+ 262   1              navread1[navlen1] = '\0';        
+ 263   1              navlen1 = 0;         
+ 264   1              reading1 =  NAV_VALID; //valid data
+ 265   1              reading1r = atof(navread1);
+ 266   1                      ResetNav('1');
+ 267   1      
+ 268   1      /*
+ 269   1              navread1b[navlen1] = '\0';        
+ 270   1              do
+ 271   1              {
+ 272   1                      navread1b[navlen1] = navread1[navlen1];
+ 273   1              }while(navlen1-- > 0);
+ 274   1      */
+ 275   1      }
+ 276          void nav_uart_push2(uchar dat)
+ 277          {
+ 278   1      //              sjSerialSendByte(dat);                            
+ 279   1      //              return;
+ 280   1              if(navlen2 >= 19)
+ 281   1              {                          
+ 282   2                      ResetNav('2');
+ 283   2              }
+ 284   1              if(((dat >= '0') && (dat <= '9')) ||
+ 285   1                      (dat == '.') ||
+ 286   1                      (dat == '-') ||
+ 287   1                      (dat == '+') ||
+ 288   1                      (dat == 'e') ||
+ 289   1                      (dat == 'E') )
+ 290   1              {                    
+ 291   2                      navread2[navlen2++] = dat;
+ 292   2                      reading2 = NAV_INVALID;
+ 293   2                      return;
+ 294   2              }
+ 295   1                                              
+ 296   1              if(navlen2 < 4) //not enough digits
+ 297   1              {
+ 298   2                      ResetNav('2');
+ 299   2                      return;
+ 300   2              }
+ 301   1              navread2[navlen2] = '\0';        
+ 302   1              navlen2 = 0;         
+ 303   1              reading2 =  NAV_VALID; //valid data
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 6   
+
+ 304   1              reading2r = atof(navread2);
+ 305   1                      ResetNav('2');                  
+ 306   1      /*
+ 307   1              navread2b[navlen2] = '\0';        
+ 308   1              do
+ 309   1              {
+ 310   1      
+ 311   1                      navread2b[navlen2] = navread2[navlen2];
+ 312   1                                                                      sjSerialSendByte(navread2b[navlen2]);
+ 313   1              }while(navlen2-- > 0);
+ 314   1                      sprintf(navcmd,"%5f",reading2r);
+ 315   1              prints(navcmd,strlen(navcmd),'0');
+ 316   1      */
+ 317   1      }
+ 318          void main()
+ 319          {
+ 320   1              
+ 321   1              unsigned char sid;//id of serial to send 
+ 322   1              BYTE temp;
+ 323   1              BYTE fail_cnt;
+ 324   1              BYTE curr_rng;
+ 325   1              double nn;
+ 326   1              ulong c;
+ 327   1              long i=1000;
+ 328   1              nn = 1.234;
+ 329   1      
+ 330   1              c = 0x42C8077F;
+ 331   1              nn = *(double*)(&c);
+ 332   1      //      ComOutStr(*(ulong*)(&nn));
+ 333   1      
+ 334   1      
+ 335   1              IE = 0;//close int
+ 336   1                                        // S1   CCP  SPI
+ 337   1              P_SW1 = 0x08  ; // 0 0  0 0  1 0   0  0
+ 338   1                                        // X X PWM6  PWM2345 X  S4_S S3_S S2_S
+ 339   1          P_SW2 = 0x07  ; // 0 0  0      0     0    1    1     1
+ 340   1      
+ 341   1              AUXR = 0x10 ;// t0x12  t1x12  m0x6 t2r t2ct t2x12 extram s1st2
+ 342   1                                       // 0       0      0    1   0     0      0     0
+ 343   1              T4T3M = 0x88;// t4r  t4ct  t4x12 t4clko t3r t3ct t3x12 t3clk
+ 344   1                                       //     1     0     0      0      1  0    0     0
+ 345   1              INT_CLKO = 0x00;  //x ex4 ex3 ex2 x t2 t1 t0
+ 346   1      
+ 347   1      
+ 348   1              sjSerialInit(); //init COM1 and COM2 buffer
+ 349   1      
+ 350   1              //CLK_DIV = 0x40; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0 //24Mhz
+ 351   1                                              //      0      1        0    0     0      0       0 0  
+ 352   1              CLK_DIV = 0x80; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0  //12Mhz
+ 353   1                                              //      1      0        0    0     0      0       0 0  
+ 354   1              init_uart();  //fake serial port 3
+ 355   1              init_uart2(); //fake serial port 4
+ 356   1      
+ 357   1              asp_set_timer();
+ 358   1      
+ 359   1      
+ 360   1              sid = 0;
+ 361   1              
+ 362   1      //      AD5791Init();
+ 363   1              
+ 364   1      //      sjRelayInit();
+ 365   1      
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 7   
+
+ 366   1              /*
+ 367   1              *       Protocal routine: 
+ 368   1              *       1.      HMARK sid(!=HMARK) :set sid
+ 369   1              *   2.  normal HMARK is repeated
+ 370   1              */
+ 371   1              
+ 372   1              //DBGS("STARTUP DONE\r\n");     
+ 373   1      
+ 374   1              //test();
+ 375   1              //mDelaymS(5000);
+ 376   1      
+ 377   1      
+ 378   1              //CH374_PORT_INIT( );  /* CH374接口初始化 */
+ 379   1      
+ 380   1      
+ 381   1      //      mDelaymS(50);
+ 382   1      //      CH374_PORT_INIT( );  /* CH374接口初始化 */
+ 383   1      //      Init374Device( );  // 初始化USB设备
+ 384   1      
+ 385   1      
+ 386   1      
+ 387   1              TR1 = 1;                //ENABLE COM1
+ 388   1              AUXR |= 0x10;   //Enable COM2
+ 389   1      
+ 390   1              PT0 = 1;                //improve timer0 interrupt priority
+ 391   1          ET0 = 1;        //enable timer0 interrupt
+ 392   1      
+ 393   1              IE = 0x92;//enable serial int and timer0 interrupt//IE=90
+ 394   1              IE2 = 1;
+ 395   1              EA = 1;
+ 396   1      //      DBGS("\r\nSTARTUP DONE ");
+ 397   1      //      swiReset();
+ 398   1              /*
+ 399   1              *       Protocal routine: 
+ 400   1              *       1.      HMARK sid(!=HMARK) :set sid
+ 401   1              *   2.  normal HMARK is repeated
+ 402   1              */
+ 403   1      //      swiDelay(0x0f,0xff);
+ 404   1      
+ 405   1              reading1r = -1000;
+ 406   1              reading2r = -1000;
+ 407   1              fail_cnt = 5;
+ 408   1              while(fail_cnt > 0)
+ 409   1              {
+ 410   2                      delay(50000);
+ 411   2                      fail_cnt--;
+ 412   2              }
+ 413   1              curr_rng = -1;
+ 414   1      
+ 415   1              while(1)
+ 416   1              {
+ 417   2                      if(io_hasc())
+ 418   2                      {
+ 419   3                              nav_uart_push1(io_getc());
+ 420   3                      }
+ 421   2                      if(io_hasc2())
+ 422   2                      {
+ 423   3                              nav_uart_push2(io_getc2());
+ 424   3                      }
+ 425   2      
+ 426   2                      if(sjSerialIsDataWaiting())
+ 427   2                      {
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 8   
+
+ 428   3                              temp = sjSerialWaitForOneByte();
+ 429   3                              if (temp == CMD_ZERO)
+ 430   3                              {
+ 431   4                                      reading1r = -1000;
+ 432   4                                      reading2r = -1000;
+ 433   4                                      nav_command(NAV_ZEROON,'1');
+ 434   4                                      nav_command(NAV_ZEROON,'2');
+ 435   4                                      delay(10000);
+ 436   4                                      nav_command(NAV_ZEROON,'1');
+ 437   4                                      nav_command(NAV_ZEROON,'2');
+ 438   4                              }
+ 439   3                              if(temp == CMD_READ)
+ 440   3                              {
+ 441   4                                      if(curr_rng == -1)
+ 442   4                                      {
+ 443   5                                              nav_command(NAV_1V,'1');
+ 444   5                                              nav_command(NAV_1V,'2');
+ 445   5                                              curr_rng = 1;
+ 446   5                                              delay(10000);
+ 447   5                                              nav_command(NAV_1V,'1');
+ 448   5                                              nav_command(NAV_1V,'2');
+ 449   5                                              delay(10000);
+ 450   5                                              continue;
+ 451   5                                      }
+ 452   4                                      reading1r = -1000;
+ 453   4                                      reading2r = -1000;
+ 454   4                                      if(fail_cnt > 2)
+ 455   4                                      {
+ 456   5                                              if(curr_rng != 1)
+ 457   5                                              {
+ 458   6                                                      nav_command(NAV_1V,'1');
+ 459   6                                                      nav_command(NAV_1V,'2');
+ 460   6                                                      curr_rng = 1;
+ 461   6                                                      fail_cnt = 0;
+ 462   6                                                      delay(10000);
+ 463   6                                                      nav_command(NAV_1V,'1');
+ 464   6                                                      nav_command(NAV_1V,'2');
+ 465   6                                                      delay(10000);
+ 466   6                                                      continue;
+ 467   6                                              }
+ 468   5                                      }
+ 469   4                                      nav_command(NAV_READ,'1');
+ 470   4                                      nav_command(NAV_READ,'2');
+ 471   4                                      if(fail_cnt < 10)
+ 472   4                                              fail_cnt++;
+ 473   4      
+ 474   4                              }
+ 475   3                      }
+ 476   2                      if((reading1r > -999) && (reading2r > -999)) //make sure it is a valid reading
+ 477   2              {
+ 478   3                              if(curr_rng == 0)
+ 479   3                              {
+ 480   4                                      reading1r = reading1r/1000.0;
+ 481   4                                      reading2r = reading2r/1000.0;
+ 482   4                              }
+ 483   3                              if((curr_rng != 0) && (reading1r < 0.12) && (reading1r > -0.12) &&
+ 484   3                              (reading2r < 0.12) && (reading2r > -0.12))
+ 485   3                              {
+ 486   4                                      nav_command(NAV_120MV,'1');
+ 487   4                                      nav_command(NAV_120MV,'2');
+ 488   4                                      curr_rng = 0;
+ 489   4                                      fail_cnt = 0;
+C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 9   
+
+ 490   4                                      delay(10000);
+ 491   4                                      nav_command(NAV_120MV,'1');
+ 492   4                                      nav_command(NAV_120MV,'2');
+ 493   4                                      delay(10000);
+ 494   4                              }
+ 495   3                              if(((reading1r > 10) || (reading2r > 10)))
+ 496   3                              {
+ 497   4                                      nav_command(NAV_1V,'1');
+ 498   4                                      nav_command(NAV_1V,'2');
+ 499   4                                      curr_rng = 1;
+ 500   4                                      fail_cnt = 0;
+ 501   4                                      delay(10000);
+ 502   4                                      nav_command(NAV_1V,'1');
+ 503   4                                      nav_command(NAV_1V,'2');
+ 504   4                                      delay(10000);
+ 505   4                              }
+ 506   3                              ComOutStr(*(ulong*)(&reading1r));
+ 507   3                              reading1r = -1000;
+ 508   3                              ComOutStr(*(ulong*)(&reading2r));
+ 509   3                              reading2r = -1000;
+ 510   3                              fail_cnt = 0;
+ 511   3              }       
+ 512   2              }
+ 513   1      }
+ 514          
+ 515          
+ 516          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1909    ----
+   CONSTANT SIZE    =     73    ----
+   XDATA SIZE       =    124      26
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,13 @@
+Removed Pin From Net: NetName=CLK4 Pin=JPLED-3
+Removed Pin From Net: NetName=CLK4 Pin=JTODA-2
+Removed Pin From Net: NetName=CLK4 Pin=U7-31
+Change Component Footprint: Designator=JPIN Old Footprint=SIP5 New Footprint=HDR1X5
+Change Component Footprint: Designator=JPLED Old Footprint=SIP5 New Footprint=HDR1X5
+Change Component Comment : Designator=JPLED Old Comment= New Comment=Header 5
+Change Net Name : Old Net Name=CLK4 New Net Name=GND
+Added Pin To Net: NetName=CLK4 Pin=JPLED-3
+Added Pin To Net: NetName=CLK4 Pin=JTODA-2
+Added Pin To Net: NetName=CLK4 Pin=U7-31
+Added Net: Name=CLK4
+Added Pin To Net: NetName=OL+ Pin=JPIN-3
+Added Net: Name=OL+

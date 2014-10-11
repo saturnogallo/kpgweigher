@@ -1,0 +1,7 @@
+"sjSerial.obj",
+"UART.obj",
+"sjMain.obj",
+"UART2.obj" 
+TO "rtusb" 
+RAMSIZE(256) 
+XDATA( 0X0000-0X06FF )
