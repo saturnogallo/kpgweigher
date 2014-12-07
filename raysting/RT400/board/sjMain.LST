@@ -1,0 +1,429 @@
+C51 COMPILER V7.01  SJMAIN                                                                 12/06/2014 17:38:54 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
+OBJECT MODULE PLACED IN sjMain.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE sjMain.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjDefine.h"
+   2          #include "sjSerial.h"
+   3          #include "AD5791.h"
+   4          //#include "CH374INC.h"
+   5          #include "HAL.h"
+   6          #include "lcd.h"
+   7          #include "font.h"
+   8          #include "window.h"
+   9          #include "math.h"
+  10          #include <stdio.h>
+  11          
+  12          //the MARK of header ender and error and quest and reset
+  13          #define  HMARK 0x55     //U
+  14          #define  EMARK 0x56 //V
+  15          #define  QMARK 0x57 //W
+  16          #define  RMARK 0x58 //X
+  17            
+  18          //the length of the switch table ,
+  19          //which must lower than 3fh
+  20          #define  LINIT 32 
+  21          
+  22          //for P1 output
+  23          //for P0 output
+  24          const unsigned char code tbl[8]={0x7F,0xBF,0xDF,0xEF,0xF7,0xFB,0xFD,0xFE};
+  25          
+  26          
+  27          
+  28          
+  29          //for Init use(regaddr of pc)
+  30          const unsigned char code inittbl[LINIT]={
+  31          
+  32          /*********** 05-1-25  8:44 ****************/
+  33          
+  34          //  FKI1,FKI2,FKI3,OKI4,PKTT,FHP9,FHP7,FST2,
+  35              0x37,0x36,0x35,0x3D,0x33,0x32,0x31,0x30,
+  36          
+  37          //  FHP3,FHN3,FHP4,FHN4,FST1,FHX1,FHX2,FFX1,  
+  38                  0x26,0x27,0x24,0x25,0x22,0x23,0x20,0x21,
+  39          
+  40          //  FHP10,FHP1,FHN1,FHP2,FHN2,FHN5,FHP8,FHN6,
+  41                  0x17,0x16,0x15,0x14,0x13,0x12,0x11,0x10,
+  42          
+  43          //  FKN1,FKN2,FKN3,FKN4,FKN5,OKN6,FHP6,FHP5
+  44                  0x06,0x07,0x04,0x05,0x02,0x0A,0x00,0x01
+  45          /*******************************************
+  46          //  FKI1,FKI2,FKI3,OKI4,PKTT,FHP9,FHP7,FST2,
+  47              0x37,0x36,0x35,0x3D,0x33,0x17,0x11,0x30,
+  48          
+  49          //  FHP3,FHN3,FHP4,FHN4,FST1,FHX1,FHX2,FFX1,  
+  50                  0x24,0x27,0x01,0x25,0x22,0x23,0x20,0x21,
+  51          
+  52          //  FHP10,FHP1,FHN1,FHP2,FHN2,FHN5,FHP8,FHN6,
+  53                  0x32,0x14,0x15,0x26,0x13,0x12,0x32,0x10,
+  54          
+  55          //  FKN1,FKN2,FKN3,FKN4,FKN5,OKN6,FHP6,FHP5
+C51 COMPILER V7.01  SJMAIN                                                                 12/06/2014 17:38:54 PAGE 2   
+
+  56                  0x06,0x07,0x04,0x05,0x02,0x0A,0x31,0x00
+  57          ********************************************/
+  58          };
+  59          
+  60          //when modification is applied,
+  61          //no address should be modified ,just set the mcu addr= 256,
+  62          //and add new item in mcuaddr
+  63          //C? IT IS SO EASY ,
+  64          //BUT ,A NEW REGISTER MODEL WILL BE APPLIED IN THE FUTURE.
+  65          /*          board allocation (F,O)=P0*8+P1
+  66                          48,49   50,51   52,53   54,55   57,56   59,58   61,60   63,62   //HPo,HNo,??,HP0,H8,H7,STo,STi
+  67                          33,32   35,34   37,36   39,38   41,40   43,42   45,44   47,46   //HN4,HP4,HN3,HP3,HN6,HP6,HN5,HP5
+  68                          17,16   19,18   21,20   23,22   25,24   27,26   29,28   31,30   //KN4,KN3,KN2,KN1,H9,FX1,KTT,KN5
+  69                          0,1             2,3             4,5             6,7             9,8             11,10   13,12   15,14   //H2,H1,HX2,HX1,KI4,KI3,KI2,KI1
+  70          const unsigned char pcaddr[] ={
+  71                          0x16,0x14,0x26,0x24,0x01,0x00,0x31,0x11,0x32,0x17,//FHP 0-9 (pc addr)
+  72                          0x1f,0x1d,0x2f,0x2d,0x08,0x09,0x38,0x18,0x3b,0x1e,//OHP 10-19 (pc addr)
+  73                          0x15,0x13,0x27,0x25,0x12,0x10,                                    //FHN 20-25  (pc addr)
+  74                          0x1c,0x1a,0x2e,0x2c,0x1b,0x19,                                    //OHN 26-31  (pc addr)
+  75                          0x06,0x07,0x04,0x05,0x02,0x03,                                    //FKN 32-37  (pc addr)
+  76                          0x0f,0x0e,0x0d,0x0c,0x0b,0x0a,                                    //OKN 38-42  (pc addr)
+  77                          0x37,0x36,0x35,0x34,                                                      //FKI 44-47      (pc addr)
+  78                          0x3e,0x3f,0x3c,0x3d,                                                      //OKI 48-51      (pc addr)
+  79                          0x23,0x20,0x21,0x33,0x22,0x30,                                    //FHX1,FHX2,FFX1,PKTT,FSTI,FSTO 52-57  (pc addr)
+  80                          0x2a,0x29,0x28,0x3a,0x2b,0x39,                                    //OHX1,OHX2,OFX1,NKTT,OSTI,OSTO, 58-63 (pc addr)
+  81                          0x41,0x40,0x43,0x42};                                                     //FHPO,OHP0,FHNO,OHNO  (pc addr)
+  82          const unsigned char mcuaddr[] ={
+  83                       54,  2     ,  0,   39,      35,  47,  43,  59,  57, 25,   //FHP 0-9 (pc addr)
+  84                           55,  3 ,  1,   38,      34,  46,  42,  58,      56, 24,   //OHP 10-19 (pc addr)
+  85                           255, 255,  37,  33,  45,   41,                                    //FHN 20-25  (pc addr)
+  86                           255, 255,  36,  32,  44,   40,                    //OHN 26-31  (pc addr)
+  87                           23,   21,  19,  17,  31,  255,                                    //FKN 32-37  (pc addr) ?(54)
+  88                           22,   20,  18,  16,  30,  255,                    //OKN 38-42  (pc addr) ?(55)
+  89                           15,   13,  11,  9,                                                                //FKI 44-47     (pc addr)
+  90                           14,   12,  10,  8,                                                                //OKI 48-51     (pc addr)
+  91                           6,   4,   27,  29,  63,  61,                                      //FHX1,FHX2,FFX1,PKTT,FSTI,FSTO 52-57  (pc addr)
+  92                           7,   5,   26,  28,  62,  60,                                      //OHX1,OHX2,OFX1,NKTT,OSTI,OSTO, 58-63 (pc addr)
+  93                           48,  49,  50,  51};                                                       //FHPO,OHP0,FHNO,OHNO  (pc addr)
+  94          
+  95          */
+  96          const unsigned char code lut[]={
+  97          /*****05-1-25 8:44****
+  98          47,35,31,255,19,17,23,21,  //0-7
+  99          34,46,255,30,16,18,20,22,  //8-f
+ 100          41,59,45,255,2,255,54,25,  //10-17
+ 101          58,40,255,44,255,3,24,55,  //18-1f
+ 102          4,27,63,6,39,33,0,37,      //20-27
+ 103          26,5,7,62,32,38,36,1,      //28-2f
+ 104          61,43,57,29,9,11,13,15,    //30-37
+ 105          42,60,28,56,10,8,14,12,    //38-3f 
+ 106          49,48,51,50                                //40-43
+ 107          **********************/
+ 108          /*****05-1-25 8:44****/
+ 109          43,47,31,255,19,17,23,21,  //0-7  
+ 110          46,42,255,30,16,18,20,22,  //8-f
+ 111          41,57,45,255,0,255,2,54,  //10-17
+ 112          56,40,255,44,255,1,55,3,  //18-1f
+ 113          4,27,63,6,35,33,39,37,      //20-27
+ 114          26,5,7,62,32,34,36,38,      //28-2f
+ 115          61,59,25,29,9,11,13,15,    //30-37
+ 116          58,60,28,24,10,8,14,12,    //38-3f 
+ 117          49,48,51,50                                //40-43
+C51 COMPILER V7.01  SJMAIN                                                                 12/06/2014 17:38:54 PAGE 3   
+
+ 118          /**********************/
+ 119          };
+ 120          
+ 121          //delay loop
+ 122          void swiDelay(unsigned char dl1,unsigned char dl2)
+ 123          {
+ 124   1              unsigned char i,j;
+ 125   1              for(i=0;i<dl1;i++)
+ 126   1                      for(j=0;j<dl2;j++)
+ 127   1                              ;
+ 128   1      }
+ 129          
+ 130          
+ 131          void swiAction(unsigned char SwiID)
+ 132          {
+ 133   1              unsigned char exID;
+ 134   1      
+ 135   1              if(SwiID >= sizeof(lut))
+ 136   1                      return;
+ 137   1      
+ 138   1              exID = lut[SwiID];
+ 139   1              if(exID == 255)
+ 140   1                      return;
+ 141   1      
+ 142   1              P1 = tbl[(exID&7)];
+ 143   1              P0 = tbl[(exID>>3)];
+ 144   1              swiDelay(0x1f,0xff);
+ 145   1      
+ 146   1              P1 = 0xff;
+ 147   1              P0 = 0xff;
+ 148   1              swiDelay(0x06,0xff);
+ 149   1      }
+ 150          void swiReset()
+ 151          {
+ 152   1              unsigned char i;
+ 153   1              for(i=0;i<LINIT;i++)
+ 154   1              {
+ 155   2                      swiAction(inittbl[i]);
+ 156   2              }
+ 157   1      }
+ 158          
+ 159          unsigned char delayc;
+ 160          
+ 161          /*
+ 162          */
+ 163          //end interface routine
+ 164          extern int      test( void );
+ 165          extern void DBGS(char* s);
+ 166          extern void DBG(unsigned char);
+ 167          
+ 168          
+ 169          //extern void btnencode_loop();
+ 170          unsigned long count = 0;
+ 171          BOOL once = 0;
+ 172          void timer_isr(void) interrupt 1 using 1
+ 173          {
+ 174   1              asp_handler();
+ 175   1              asp_handler2();
+ 176   1              TF0 = 0; //clear timer
+ 177   1      }
+ 178          extern int      test( void );
+ 179          extern void sleepms(unsigned int);
+C51 COMPILER V7.01  SJMAIN                                                                 12/06/2014 17:38:54 PAGE 4   
+
+ 180          #define ONEMS   1000
+ 181          
+ 182          uchar dispbuf[20];
+ 183          LABEL code bootup = {LBL_HZ16,30,30,7,"正在启动..."};
+ 184          
+ 185          LABEL code statelbl = {LBL_HZ16,30,30,26,dispbuf};
+ 186          
+ 187          uchar nav1v = 1;
+ 188          void navto120mv()
+ 189          {               
+ 190   1         nav1v = 0;  
+ 191   1         nav_command(NAV_120MV);
+ 192   1         sleepms(200*ONEMS);            
+ 193   1      }           
+ 194          
+ 195          void navto1v()
+ 196          {            
+ 197   1          nav1v = 1;
+ 198   1          nav_command(NAV_1V);
+ 199   1          sleepms(200*ONEMS);
+ 200   1      }
+ 201          
+ 202          void DBGS(const char* s)
+ 203          {
+ 204   1              while(*s != 0x00)
+ 205   1              {
+ 206   2                      sjSerialSendByte(*s++);
+ 207   2              }
+ 208   1      }
+ 209          
+ 210          #define VX_MULTI        100.0
+ 211          void main()
+ 212          {
+ 213   1              unsigned char sid;//id of serial to send 
+ 214   1              BYTE temp,key;
+ 215   1              BOOL bOn = false;
+ 216   1              unsigned char bBlick = 0;
+ 217   1              double VxMeasure;   //feedback voltage reading
+ 218   1              double lastDirectOutput = 0; //current da output
+ 219   1              double VxOutput; //new da output
+ 220   1              double thisVx,volt;
+ 221   1              unsigned char bStableCnt = 0;
+ 222   1              long i=1000;
+ 223   1      
+ 224   1      
+ 225   1              IE = 0;//close int
+ 226   1                                        // S1   CCP  SPI
+ 227   1              P_SW1 = 0x08  ; // 0 0  0 0  1 0   0  0
+ 228   1                                        // X X PWM6  PWM2345 X  S4_S S3_S S2_S
+ 229   1          P_SW2 = 0x07  ; // 0 0  0      0     0    1    1     1
+ 230   1      
+ 231   1              AUXR = 0x10 ;// t0x12  t1x12  m0x6 t2r t2ct t2x12 extram s1st2
+ 232   1                                       // 0       0      0    1   0     0      0     0
+ 233   1              T4T3M = 0x88;// t4r  t4ct  t4x12 t4clko t3r t3ct t3x12 t3clk
+ 234   1                                       //     1     0     0      0      1  0    0     0
+ 235   1              INT_CLKO = 0x00;  //x ex4 ex3 ex2 x t2 t1 t0
+ 236   1      
+ 237   1      
+ 238   1              sjSerialInit(); //init COM1 and COM2 buffer
+ 239   1      
+ 240   1              CLK_DIV = 0x40; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0 //24Mhz
+ 241   1                                              //      0      1        0    0     0      0       0 0  
+C51 COMPILER V7.01  SJMAIN                                                                 12/06/2014 17:38:54 PAGE 5   
+
+ 242   1              //CLK_DIV = 0x80; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0  //12Mhz
+ 243   1                                              //      1      0        0    0     0      0       0 0  
+ 244   1              init_uart();  //fake serial port 3
+ 245   1              init_uart2(); //fake serial port 4
+ 246   1      
+ 247   1              asp_set_timer();
+ 248   1      
+ 249   1      
+ 250   1              sid = 0;
+ 251   1              
+ 252   1              AD5791Init();
+ 253   1              
+ 254   1      //      sjRelayInit();
+ 255   1      
+ 256   1              /*
+ 257   1              *       Protocal routine: 
+ 258   1              *       1.      HMARK sid(!=HMARK) :set sid
+ 259   1              *   2.  normal HMARK is repeated
+ 260   1              */
+ 261   1      
+ 262   1              //test();
+ 263   1              //mDelaymS(5000);
+ 264   1      
+ 265   1      
+ 266   1              //CH374_PORT_INIT( );  /* CH374接口初始化 */
+ 267   1      
+ 268   1      
+ 269   1      //      mDelaymS(50);
+ 270   1      //      CH374_PORT_INIT( );  /* CH374接口初始化 */
+ 271   1      //      Init374Device( );  // 初始化USB设备
+ 272   1      
+ 273   1      
+ 274   1      
+ 275   1              TR1 = 1;                //ENABLE COM1
+ 276   1              AUXR |= 0x10;   //Enable COM2
+ 277   1      
+ 278   1              PT0 = 1;                //improve timer0 interrupt priority
+ 279   1          ET0 = 1;        //enable timer0 interrupt
+ 280   1      
+ 281   1              IE = 0x92;//enable serial int and timer0 interrupt//IE=90
+ 282   1              IE2 = 1;
+ 283   1              EA = 1;
+ 284   1      
+ 285   1              DBGS("STARTUP DONE\r\n");       
+ 286   1      //      swiReset();
+ 287   1              /*
+ 288   1              *       Protocal routine: 
+ 289   1              *       1.      HMARK sid(!=HMARK) :set sid
+ 290   1              *   2.  normal HMARK is repeated
+ 291   1              */
+ 292   1      //      swiDelay(0x0f,0xff);
+ 293   1      //      sjSerialSendByte('!');
+ 294   1      
+ 295   1                  // intialize LED. 
+ 296   1          sleepms(20*ONEMS);
+ 297   1                              DBGS("123");
+ 298   1          LCD_Init();
+ 299   1                              DBGS("456");
+ 300   1          wnd_msgbox(&bootup);
+ 301   1                              DBGS("789");
+ 302   1          //init the DMM
+ 303   1      /*    nav_command(NAV_INIT);              
+C51 COMPILER V7.01  SJMAIN                                                                 12/06/2014 17:38:54 PAGE 6   
+
+ 304   1          sleepms(200*ONEMS);                                
+ 305   1          navto1v();
+ 306   1          nav_command(NAV_SLOWMODE);
+ 307   1          sleepms(200*ONEMS);
+ 308   1          nav_command(NAV_AFLTON);
+ 309   1          sleepms(200*ONEMS);
+ 310   1                           
+ 311   1          sleepms(2*ONEMS); //wait until all the node is ready after power up        
+ 312   1              key = KEY_INVALID;
+ 313   1      */
+ 314   1              display_buttons(KEY_BTN1,bOn); //bOn is false
+ 315   1              cm_ad5791(DACMD_RESCUE, 0);
+ 316   1              i =0;
+ 317   1              while(1)
+ 318   1              {
+ 319   2                              if (i == 10)
+ 320   2                              {
+ 321   3                                                              cm_ad5791(DACMD_OUTPUT, 1.2);
+ 322   3                              }
+ 323   2                              if(i>20)
+ 324   2                              {
+ 325   3                                      cm_ad5791(DACMD_OUTPUT, 1.2);
+ 326   3                                      i = 0;
+ 327   3                              }
+ 328   2                              i++;
+ 329   2              //              sjSerialSendByte2('?');
+ 330   2              //              DBGS("...");
+ 331   2                                              VxMeasure = nav_read() * VX_MULTI*10.0; //mulitplier is 100
+ 332   2                                                      sprintf(dispbuf,"%.3f", VxMeasure);
+ 333   2                                                          sleepms(1000*ONEMS);        
+ 334   2                                              draw_label(&statelbl,SW_NORMAL);                        
+ 335   2                                                      //      DBGS(dispbuf);
+ 336   2                                                      //      DBGS("\r\n");
+ 337   2              }
+ 338   1              while(1)
+ 339   1              {
+ 340   2                      if(key != KEY_INVALID)
+ 341   2                      {
+ 342   3                              if(key == KEY_BTN1)
+ 343   3                              {
+ 344   4                                      bOn = 1 - bOn;
+ 345   4                                      display_buttons(KEY_BTN1,bOn);
+ 346   4                              }
+ 347   3                              if (bOn)
+ 348   3                              {
+ 349   4                                      //display the feedback current and adjust it
+ 350   4                                      VxMeasure = nav_read() * VX_MULTI*10.0; //mulitplier is 100
+ 351   4                                      thisVx = VxMeasure;
+ 352   4                                      //variation < 5/10000 or < 1volt
+ 353   4                                      if( (fabs(VxOutput - thisVx) < 0.0005) ||
+ 354   4                                              (fabs(VxOutput - thisVx) < VxOutput*0.0005))
+ 355   4                                      {
+ 356   5                                              if(bStableCnt++ > 2)
+ 357   5                                                      bStableCnt = 3; //stick to 3
+ 358   5                                              sprintf(dispbuf,"%.3f", VxMeasure);
+ 359   5                                      }else{
+ 360   5                                              bStableCnt = 0;
+ 361   5                                              volt = (VxOutput - VxMeasure) / (2.0*VX_MULTI);
+ 362   5                                              if(fabs(volt) > (10 / 262144.0)) //bigger than 10 counts
+ 363   5                                              {
+ 364   6                                                      lastDirectOutput = lastDirectOutput + volt;
+ 365   6                                                      if(lastDirectOutput > 10)
+C51 COMPILER V7.01  SJMAIN                                                                 12/06/2014 17:38:54 PAGE 7   
+
+ 366   6                                                              lastDirectOutput = 10;
+ 367   6                                                      if(lastDirectOutput < 0)
+ 368   6                                                              lastDirectOutput = 0;
+ 369   6      
+ 370   6                                                      cm_ad5791(DACMD_OUTPUT, (lastDirectOutput));
+ 371   6                                              }
+ 372   5                                              //toggle Blick status
+ 373   5                                              bBlick = 1 + bBlick;
+ 374   5                                              if(bBlick > 3)
+ 375   5                                                      bBlick = 0;
+ 376   5      
+ 377   5                                              if (bBlick == 0)
+ 378   5                                              {       sprintf(dispbuf,"%.3f -", VxMeasure);
+ 379   6                                              }else if (bBlick == 1){
+ 380   6                                                      sprintf(dispbuf,"%.3f \\", VxMeasure);
+ 381   6                                              }else if (bBlick == 2){
+ 382   6                                                      sprintf(dispbuf,"%.3f |", VxMeasure);
+ 383   6                                              }else{
+ 384   6                                                      sprintf(dispbuf,"%.3f /", VxMeasure);
+ 385   6                                              }
+ 386   5                                      }
+ 387   4                              }
+ 388   3                      }
+ 389   2              }
+ 390   1      }
+*** WARNING C280 IN LINE 214 OF SJMAIN.C: 'temp': unreferenced local variable
+ 391          
+ 392          
+ 393          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    537    ----
+   CONSTANT SIZE    =    202    ----
+   XDATA SIZE       =     27      33
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  1 WARNING(S),  0 ERROR(S)

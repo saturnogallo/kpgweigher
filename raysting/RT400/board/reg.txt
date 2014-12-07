@@ -1,0 +1,50 @@
+to AD:
+02 26 30 20 31 30 30 34 33 35 30 30 30 30 30 30 0D
+
+DEBUG COMMAND
+//5 byte data , 1st byte is for sum check = 0x00, (2nd-4th byte is data), 5th byte is function code,
+55 64 fe 00 01 00 01  //output 00 01 00  //OUTPUT DAVALUE
+55 64 ef 00 10 00 01  //output 10 00 01
+55 64 fe 00 00 00 02  //hardware clear	 //clear
+55 64 fd 00 00 00 03  //hardware reset	 //reset
+55 64 fc 00 00 00 04  //set control      //set control
+55 64 fb 00 00 00 05  //query control and DAC	
+
+
+
+ON OFF 
+
+40 41  REG21
+42 43  REG22
+13 1A  REG23
+1E 17  REG24
+
+
+11 18  REG11
+31 38  REG12
+30 39  REG13
+22 2B  REG14
+
+05 0C  REG61
+04 0D  REG62
+07 0E  REG63
+06 0F  REG64
+
+
+
+32 3B  REG51
+21 28  REG52
+33 3A  REG53
+02 0B  REG54
+
+10 19  REG31
+00 09  REG32
+12 1B  REG33
+01 08  REG34
+
+25 2C  REG41
+24 2D  REG42
+27 2E  REG43
+26 2F  REG44
+
+

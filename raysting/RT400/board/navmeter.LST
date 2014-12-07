@@ -1,0 +1,140 @@
+C51 COMPILER V7.01  NAVMETER                                                               12/06/2014 17:38:54 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE NAVMETER
+OBJECT MODULE PLACED IN navmeter.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE navmeter.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjDefine.h"
+   2          #include "typedef.h"
+   3          #include "stdio.h"
+   4          #include "stdlib.h"
+   5          #include "sjSerial.h"
+   6          
+   7          static uchar navlen = 0;
+   8          static double reading = -1000;
+   9          static char navread[20];
+  10          static char navread2[20];
+  11          
+  12          
+  13          static uchar navcmd[12];                                                                  
+  14          #define NAV_INVALID     -1000
+  15          #define NAV_VALID       -2000
+  16          #define RESETNAV       navlen = 0;   reading = NAV_INVALID;  
+  17          
+  18          
+  19          
+  20          
+  21          void nav_command(uchar cmd)
+  22          {
+  23   1      //        if(cmd == NAV_30V)
+  24   1      //               sprintf(navcmd,"%%01;12;02\r");
+  25   1              if(cmd == NAV_1V)
+  26   1                     sprintf(navcmd,"%%01;12;01\r");
+  27   1              if(cmd == NAV_120MV)
+  28   1                     sprintf(navcmd,"%%01;12;00\r");
+  29   1              if(cmd == NAV_AFLTOFF)
+  30   1                     sprintf(navcmd,"%%01;26\r");
+  31   1              if(cmd == NAV_AFLTON)
+  32   1                     sprintf(navcmd,"%%01;27\r");
+  33   1              if(cmd == NAV_SLOWMODE)
+  34   1                     sprintf(navcmd,"%%01;27\r");
+  35   1              if(cmd == NAV_ZEROON)    
+  36   1              {
+  37   2                     sprintf(navcmd,"%%01;06\r");
+  38   2              }
+  39   1              if(cmd == NAV_INIT) 
+  40   1              {           
+  41   2                      RESETNAV;
+  42   2                      sprintf(navcmd,"%%01;00\r");        
+  43   2              }
+  44   1              if(cmd == NAV_READ)
+  45   1              {       
+  46   2                      RESETNAV;
+  47   2                      sprintf(navcmd,"%%01;01\r");
+  48   2              }                       
+  49   1      //                com1_putc('?');
+  50   1              prints(navcmd,strlen(navcmd),PORT_NAV);
+  51   1      }
+  52          
+  53          
+  54          unsigned long navtime;
+  55          double nav_read()
+C51 COMPILER V7.01  NAVMETER                                                               12/06/2014 17:38:54 PAGE 2   
+
+  56          {                       
+  57   1      //        if(DEBUG == 1)
+  58   1      //                return 1.0; 
+  59   1              nav_command(NAV_READ);
+  60   1              navtime = 0;        
+  61   1              while(1)
+  62   1              {
+  63   2      
+  64   2                      if(reading < NAV_INVALID) //make sure it is a valid reading
+  65   2                      {              
+  66   3                           reading = atof(navread2);
+  67   3                           return reading;
+  68   3                      }       
+  69   2                      if(navtime++ > 655350)
+  70   2                      {          
+  71   3                           nav_command(NAV_READ);   
+  72   3                           navtime = 0;
+  73   3                      }                
+  74   2                      sleepms(1);
+  75   2                                      if(io_hasc())
+  76   2                                      {
+  77   3                                              nav_uart_push(io_getc());
+  78   3                                      }
+  79   2              }
+  80   1              return 1.0;
+  81   1      }            
+  82          //incoming data hander of navameter
+  83          void nav_uart_push(uchar dat)
+  84          {                            
+  85   1              if(navlen >= 19)
+  86   1              {                          
+  87   2                      RESETNAV;
+  88   2              }
+  89   1              if(((dat >= '0') && (dat <= '9')) ||
+  90   1                      (dat == '.') ||
+  91   1                      (dat == '-') ||
+  92   1                      (dat == '+') ||
+  93   1                      (dat == 'e') ||
+  94   1                      (dat == 'E') )
+  95   1              {                    
+  96   2                      navread[navlen++] = dat;
+  97   2                      reading = NAV_INVALID;
+  98   2                      return;
+  99   2              }
+ 100   1                                              
+ 101   1              if(navlen < 4) //not enough digits
+ 102   1              {
+ 103   2                      RESETNAV;
+ 104   2                      return;
+ 105   2              }
+ 106   1              navread[navlen] = '\0';        
+ 107   1              do
+ 108   1              {
+ 109   2                      navread2[navlen] = navread[navlen];
+ 110   2              }while(navlen-- > 0);
+ 111   1              navlen = 0;         
+ 112   1              reading =  NAV_VALID; //valid data
+ 113   1      }               
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    561    ----
+C51 COMPILER V7.01  NAVMETER                                                               12/06/2014 17:38:54 PAGE 3   
+
+   CONSTANT SIZE    =     69    ----
+   XDATA SIZE       =     61       1
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

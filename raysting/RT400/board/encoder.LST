@@ -1,0 +1,463 @@
+C51 COMPILER V7.01  ENCODER                                                                06/17/2014 20:43:54 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE ENCODER
+OBJECT MODULE PLACED IN encoder.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE encoder.c LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "sjDefine.h"
+   2          
+   3          #define uchar   unsigned char
+   4          
+   5          //0xfc,0x60,0xda,0xf2,0x66,0xb6,0xbe,0xe0,0xfe,0xf6,0xff
+   6          unsigned char code led_code[]={0x77,0x41,0x3B,0x6B,0x4D,0x6E,0x7E,0x43,0x7F,0x6F,0xFF};//LED显示
+   7                          //0x40,0x79,0x24,0x30,0x19,0x12,0x02,0x78,0x00,0x10,0xFF,0x7F
+   8          /*
+   9                           0xfc,0x60,0xda,0xf2,0x66,0xb6,0xbe,0xe0,0xfe,0xe6,
+  10                           0x03,0x62,0xda,0xf2,0x66,0xb6,0xbe,0xe0,0xfe,0xe6,
+  11                           0xfd,0x61,0xdB,0xf2,0x66,0xb6,0xbe,0xe0,0xfe,0xe6,
+  12          */
+  13          #define LED_HF      0x08
+  14          #define LED_SPACE   0x00
+  15          #define LED_PT      0x80
+  16          #define LEDPT_OP    |
+  17          
+  18          #define _nop_() 
+  19          //bits for LED display
+  20          sbit dat1 = P2^2;
+  21          sbit clk1 = P2^1;
+  22          sbit rst1 = P2^0;
+  23          
+  24          void d164(uchar c)   //74164串行移位一个数
+  25          {
+  26   1          uchar i=0;
+  27   1           do{  
+  28   2              if(c&0x01)     
+  29   2                    dat1=1;
+  30   2              else
+  31   2               dat1=0;
+  32   2            c>>=1;        //数组tabel中的第N个数向右移动一位
+  33   2            _nop_(); _nop_();
+  34   2              clk1=0;            //下降沿将数据写入164，拉高时钟端停止，再拉低等待下一次写入
+  35   2              _nop_(); _nop_();
+  36   2            clk1=1;
+  37   2            _nop_(); _nop_();
+  38   2              clk1=0;
+  39   2            _nop_(); _nop_();
+  40   2              i++;
+  41   2          }
+  42   1          while(i<8);
+  43   1      }
+  44          
+  45          //bits for row output
+  46          sbit dat2 = P2^5;
+  47          sbit clk2 = P2^4;
+  48          sbit rst2 = P2^3;
+  49          
+  50          void c164(uchar c)   //74164串行移位一个bit
+  51          {
+  52   1              if(c)     
+  53   1                    dat2=1;
+  54   1              else
+  55   1               dat2=0;
+C51 COMPILER V7.01  ENCODER                                                                06/17/2014 20:43:54 PAGE 2   
+
+  56   1            _nop_(); _nop_();
+  57   1              clk2=0;            //下降沿将数据写入164，拉高时钟端停止，再拉低等待下一次写入
+  58   1              _nop_(); _nop_();
+  59   1            clk2=1;
+  60   1            _nop_(); _nop_();
+  61   1              clk2=0;
+  62   1            _nop_(); _nop_();
+  63   1      }
+  64          void pause()
+  65          {
+  66   1         while(1)
+  67   1         {
+  68   2            if(sjSerialWaitForOneByte() == '!')   
+  69   2               return;
+  70   2         }
+  71   1      }
+  72          
+  73          #define POINTPOS   7   //position of point
+  74          #define MAXROWS      16   //total rows for one pan
+  75          #define FULLCOLS    11    //total pans
+  76          #define SCALECOLS   10   //total scale pan number
+  77          #define TYPECOL      10   //index of type pan 11th
+  78          #define TOTALLEDS   12   //total leds
+  79          #define MAXRETRY   10  //max retry times
+  80          xdata uchar keypos[FULLCOLS];
+  81          uchar wait;   //wait times count
+  82          void sleepms(unsigned int i)
+  83          {
+  84   1         while(i-- > 0)
+  85   1            ;
+  86   1      }
+  87          uchar bUpdate = 1;
+  88          
+  89          
+  90          
+  91          xdata char leds[TOTALLEDS]; //led code, total 12 LEDS,
+  92          xdata char out_12knob[TOTALLEDS]; //data buffer for serial output
+  93          xdata char cmp_leds[TOTALLEDS]; //buffer to compare the new data to old data
+  94          
+  95                               //   N001  N01  N1    P1   P10    P100   P1K   P10K    P100K   P1M  Z_SCA   Z_10   Z_
+             -1      Z_P1
+  96          //uchar code knobcol[MAXCOLS] = {0,    1,   2,   3,    4,     5,    6,     7,      8,     9,   10,      11
+             -,      12,      13};
+  97          
+  98          //translate real col value to ideal col value //real col index to pan index
+  99          uchar code coltbls[16] = {1,3,5,7,9,0xff,0xff,0xff,0,0xff,0xff,10,8,6,4,2};
+ 100          //uchar code coltbls[16] = {1,    3,   5,   7,    9,   0xff,  13,    11,   12,    10, 0xff,    8,   6,    
+             -4,   2,  0};
+ 101          //translate real row value to ideal row value //real row index to num index
+ 102          //uchar code rowtbls[16] = {1,0,5,6,7,2,3,4,9,8,0xff,0xff,0xff,10,11,2};
+ 103          //0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+ 104          uchar code rowtbls[16] = {9,10,5,4,3,8,7,6,1,2,0xff,0xff,0xff,0,11};
+ 105          //parse the column position of 1 in P0 and P1
+ 106          xdata uchar hitrow[FULLCOLS];
+ 107          void getcols(uchar row)
+ 108          {
+ 109   1         uchar pv0,pv1,pos;
+ 110   1         pv0 = P0;
+ 111   1         pv1 = P1;
+ 112   1      
+ 113   1         pos = 8;
+ 114   1         while(pos < 16)
+C51 COMPILER V7.01  ENCODER                                                                06/17/2014 20:43:54 PAGE 3   
+
+ 115   1         {
+ 116   2            if((pv1 & 0x01) == 0)
+ 117   2            {
+ 118   3               if((rowtbls[row] != 0xff) && (coltbls[pos] != 0xff)) 
+ 119   3               {
+ 120   4                  hitrow[coltbls[pos]] = 1;
+ 121   4                  if((keypos[coltbls[pos]] != rowtbls[row]) || (wait < MAXRETRY))
+ 122   4                  {
+ 123   5      /*debug only
+ 124   5                     sjSerialSendByte(pos);
+ 125   5                     sjSerialSendByte(keypos[coltbls[pos]]);
+ 126   5                     sjSerialSendByte(row);
+ 127   5                     sjSerialSendByte(rowtbls[row]);
+ 128   5                     sjSerialSendByte('.');
+ 129   5                     pause();
+ 130   5      */               
+ 131   5                     bUpdate = 1;
+ 132   5                  }
+ 133   4                  keypos[coltbls[pos]] = rowtbls[row];
+ 134   4               }
+ 135   3            }
+ 136   2            pos++;
+ 137   2            pv1 = pv1 >> 1;
+ 138   2         }
+ 139   1         pos = 0;
+ 140   1         while(pos < 8)
+ 141   1         {
+ 142   2            if((pv0 & 0x01) == 0)
+ 143   2            {
+ 144   3               if((rowtbls[row] != 0xff) && (coltbls[pos] != 0xff)) 
+ 145   3               {
+ 146   4                  hitrow[coltbls[pos]] = 1;
+ 147   4                  if((keypos[coltbls[pos]] != rowtbls[row]) || (wait < MAXRETRY))
+ 148   4                  {
+ 149   5      /*debug only
+ 150   5                     sjSerialSendByte(pos);
+ 151   5                     sjSerialSendByte(keypos[coltbls[pos]]);
+ 152   5                     sjSerialSendByte(row);
+ 153   5                     sjSerialSendByte(rowtbls[row]);
+ 154   5                     sjSerialSendByte('.');
+ 155   5                     pause();
+ 156   5      */
+ 157   5                     bUpdate = 1;
+ 158   5                  }
+ 159   4                  keypos[coltbls[pos]] = rowtbls[row];
+ 160   4               }
+ 161   3            }
+ 162   2            pos++;
+ 163   2            pv0 = pv0 >> 1;
+ 164   2         }
+ 165   1      }
+ 166          void clearrows()
+ 167          {
+ 168   1         uchar i;
+ 169   1         for(i = 0; i < MAXROWS; i++) 
+ 170   1         {
+ 171   2            c164(1); //clear out all the output to 1   
+ 172   2         }
+ 173   1      }
+ 174          
+ 175          void scanrows()
+ 176          {
+C51 COMPILER V7.01  ENCODER                                                                06/17/2014 20:43:54 PAGE 4   
+
+ 177   1         uchar i = 0;
+ 178   1      
+ 179   1         for(i = 0; i < FULLCOLS; i++)
+ 180   1            hitrow[i] = 0xff;
+ 181   1      //      sjSerialSendByte(0xaa);
+ 182   1         for(i = 0; i < MAXROWS; i++)
+ 183   1         {
+ 184   2            c164(i);    //only 1 '0' will be shift out
+ 185   2            sleepms(100);
+ 186   2      
+ 187   2            getcols(i); //fill the column with current col value
+ 188   2      //      sjSerialSendByte(P0);
+ 189   2      //      sjSerialSendByte(P1);
+ 190   2      //      if((P0 != 0xff) && (P1 != 0xff))
+ 191   2      //         pause();
+ 192   2      
+ 193   2         }
+ 194   1      //         sjSerialSendByte(0x55);
+ 195   1      //   pause();
+ 196   1         clearrows();
+ 197   1         
+ 198   1         for(i = 0; i < FULLCOLS; i++)
+ 199   1         {
+ 200   2            if(hitrow[i] == 0xff) //no number found for one col
+ 201   2            {
+ 202   3      //         if(keypos[i] != 0xff)
+ 203   3      //            bUpdate = 1;   
+ 204   3               keypos[i] = 0xff;
+ 205   3            }
+ 206   2         }
+ 207   1      }
+ 208          //clear leds and out
+ 209          void clear_12knob()
+ 210          {
+ 211   1         uchar p;
+ 212   1         for(p = 0;p < TOTALLEDS;p++)
+ 213   1         {
+ 214   2            leds[p] = LED_SPACE; //delight all the lines
+ 215   2            out_12knob[p] = '0';
+ 216   2         }
+ 217   1      }
+ 218          //set le
+ 219          void update_12knob()
+ 220          {
+ 221   1         uchar pre = 0; //进位
+ 222   1         uchar p,i;
+ 223   1      
+ 224   1          leds[11] = led_code[0];
+ 225   1         out_12knob[11] = '0';
+ 226   1         for(p = 0;p < SCALECOLS;p++)
+ 227   1         {
+ 228   2            i = keypos[p] + pre;
+ 229   2            if(i == 0xff)
+ 230   2               break;
+ 231   2            if(i >= 10)
+ 232   2            {
+ 233   3               pre = 1;
+ 234   3               i = i-10;
+ 235   3            }else{
+ 236   3               pre = 0;
+ 237   3            }
+ 238   2            out_12knob[SCALECOLS-p] = i+'0';
+C51 COMPILER V7.01  ENCODER                                                                06/17/2014 20:43:54 PAGE 5   
+
+ 239   2            leds[SCALECOLS-p] = led_code[i];
+ 240   2         }
+ 241   1         leds[POINTPOS] = leds[POINTPOS] LEDPT_OP LED_PT;   //set the point
+ 242   1         if(pre == 1) //has pre
+ 243   1         {
+ 244   2            out_12knob[0] = '1';
+ 245   2            leds[0] = led_code[1];
+ 246   2         }else{
+ 247   2            out_12knob[0] = '0';
+ 248   2            leds[0] = led_code[0];
+ 249   2         }
+ 250   1         if(p < SCALECOLS)   //invalid value
+ 251   1         {
+ 252   2            clear_12knob();
+ 253   2            return;
+ 254   2         }
+ 255   1      }
+ 256          void output_12knob()
+ 257          {
+ 258   1         uchar p;
+ 259   1         uchar head = 0; //whether leading non-zero value is found
+ 260   1         
+ 261   1         for(p = 0;p < TOTALLEDS;p++)
+ 262   1         {
+ 263   2            if(out_12knob[p] !='0')
+ 264   2            {
+ 265   3               head = 1;
+ 266   3            }
+ 267   2            if((p < POINTPOS) && (head == 0)) //remove leading zero
+ 268   2               continue;
+ 269   2            sjSerialSendByte(out_12knob[p]);
+ 270   2            if(p == POINTPOS)
+ 271   2               sjSerialSendByte('.');
+ 272   2         }
+ 273   1      }
+ 274          
+ 275          
+ 276          //display 17 led code in leds based on hardware setting
+ 277          void led_show()
+ 278          {
+ 279   1         uchar cnt;
+ 280   1         for(cnt = 0;cnt < TOTALLEDS;cnt++)
+ 281   1         {
+ 282   2            d164(LED_SPACE);
+ 283   2         }
+ 284   1         for(cnt = 0;cnt < TOTALLEDS;cnt++)
+ 285   1         {
+ 286   2            d164(leds[cnt]);
+ 287   2         }
+ 288   1      }
+ 289          void update_fixknob(char type)
+ 290          {
+ 291   1         uchar cnt;
+ 292   1         for(cnt = 0;cnt < POINTPOS;cnt++)
+ 293   1         {
+ 294   2            leds[cnt] = LED_SPACE;
+ 295   2            out_12knob[cnt] = '0';
+ 296   2         }
+ 297   1         for(cnt = POINTPOS;cnt < TOTALLEDS;cnt++)
+ 298   1         {
+ 299   2            leds[cnt] = led_code[0];
+ 300   2            out_12knob[cnt] = '0';
+C51 COMPILER V7.01  ENCODER                                                                06/17/2014 20:43:54 PAGE 6   
+
+ 301   2         }
+ 302   1         leds[type+2] = led_code[1];
+ 303   1         out_12knob[type+2] = 1+'0';
+ 304   1         leds[POINTPOS] = leds[POINTPOS] LEDPT_OP LED_PT;
+ 305   1      }
+ 306          void update_scaleknob(int type)
+ 307          {
+ 308   1         uchar pre = 0; //进位
+ 309   1         uchar d   = 0;
+ 310   1         uchar cnt;
+ 311   1         int kcnt;
+ 312   1         d = keypos[type];
+ 313   1         if(d >= 10)
+ 314   1         {
+ 315   2            pre = 1;
+ 316   2            d = d - 10;
+ 317   2         }
+ 318   1         for(cnt = 0;cnt < TOTALLEDS; cnt++)
+ 319   1         {
+ 320   2            kcnt = SCALECOLS-cnt;
+ 321   2            if(cnt < POINTPOS)
+ 322   2               leds[cnt] = LED_SPACE;
+ 323   2            else
+ 324   2               leds[cnt] = led_code[0];
+ 325   2            out_12knob[cnt] = '0';
+ 326   2            if((type+1) == kcnt)
+ 327   2            {
+ 328   3               if(pre > 0)
+ 329   3               {
+ 330   4                  leds[cnt] = led_code[pre];
+ 331   4                  out_12knob[cnt] = pre+'0';
+ 332   4               }
+ 333   3            }
+ 334   2            if((type) == (kcnt))
+ 335   2            {
+ 336   3               leds[cnt] = led_code[d];
+ 337   3               out_12knob[cnt] = d+'0';
+ 338   3            }
+ 339   2            if(type > kcnt)
+ 340   2            {
+ 341   3               leds[cnt] = led_code[0];
+ 342   3               out_12knob[cnt] = '0';
+ 343   3            }
+ 344   2         }
+ 345   1         for(cnt = 1;cnt  < POINTPOS;cnt++)
+ 346   1         {
+ 347   2            if((leds[cnt-1] == LED_SPACE) && ((leds[cnt] == led_code[0]) || (leds[cnt] == LED_SPACE)))
+ 348   2               leds[cnt] = LED_SPACE;
+ 349   2            else
+ 350   2               break;
+ 351   2         }
+ 352   1      
+ 353   1         leds[POINTPOS] = leds[POINTPOS] LEDPT_OP LED_PT;
+ 354   1      }
+ 355          
+ 356          void btnencode_loop()
+ 357          {
+ 358   1              uchar type;
+ 359   1       while(1)
+ 360   1       {
+ 361   2            scanrows();
+ 362   2            type = keypos[TYPECOL];
+C51 COMPILER V7.01  ENCODER                                                                06/17/2014 20:43:54 PAGE 7   
+
+ 363   2      //      type = 6; //debug only
+ 364   2            if(type < 12)   
+ 365   2            {
+ 366   3               if(type < 6)
+ 367   3                  update_scaleknob(type);
+ 368   3               if(type == 6)
+ 369   3                  update_12knob();
+ 370   3               if(type > 6)
+ 371   3                  update_fixknob(type-2);
+ 372   3      /*
+ 373   3               if((type <=4) || (type > 9))
+ 374   3               {
+ 375   3                  if(type == 4)
+ 376   3                     update_12knob();
+ 377   3                  if(type > 9)
+ 378   3                     update_scaleknob(type - 10);
+ 379   3                  if(type < 4)
+ 380   3                     update_scaleknob(type + 2);
+ 381   3               }else{
+ 382   3                  update_fixknob(type);
+ 383   3               }
+ 384   3      */
+ 385   3            }else{
+ 386   3               clear_12knob();
+ 387   3            }
+ 388   2            if(bUpdate == 1)
+ 389   2            {
+ 390   3            /*
+ 391   3               if(wait == 0) 
+ 392   3               {   //copy leds to cmp_leds
+ 393   3                  for(cnt = 0;cnt < TOTALLEDS; cnt++)
+ 394   3                     cmp_leds[cnt] = leds[cnt];
+ 395   3                  wait = 1;
+ 396   3                  continue;
+ 397   3               }else{
+ 398   3                  for(cnt = 0;cnt < TOTALLEDS; cnt++)
+ 399   3                  {
+ 400   3                     if(cmp_leds[cnt] != leds[cnt])
+ 401   3                        break;
+ 402   3                  }            
+ 403   3                  if(cnt < TOTALLEDS)
+ 404   3                  {
+ 405   3                     wait = 0;
+ 406   3                     continue;
+ 407   3                  }
+ 408   3                  if(wait == MAXRETRY)
+ 409   3                  {
+ 410   3                  }
+ 411   3                  if(wait < MAXRETRY)   //retry 10 time before update
+ 412   3                  {
+ 413   3                     wait++;
+ 414   3                     continue;
+ 415   3                  }
+ 416   3               }*/
+ 417   3               wait = MAXRETRY;
+ 418   3               led_show();
+ 419   3      
+ 420   3               bUpdate = 0;
+ 421   3            }
+ 422   2              }
+ 423   1      }
+
+C51 COMPILER V7.01  ENCODER                                                                06/17/2014 20:43:54 PAGE 8   
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1257    ----
+   CONSTANT SIZE    =     43    ----
+   XDATA SIZE       =     60       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

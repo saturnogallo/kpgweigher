@@ -1,0 +1,21 @@
+﻿1. 类似高压电阻箱输出电压
+2. 用4串口板+LCD显示
+屏幕功能只有，设置电压和输出
+键盘
+7,8,9,TAB
+4,5,6,<-
+1,2,3,->
+.,0,CE,OK
+
+小灯,ON ,OFF
+
+code in board is used for RT400.
+
+used for RT400
+com1 for command download
+com2 for LCD&KBD 
+com3 for navmeter,
+SPI for daoutput
+com4 for external PC command,
+
+
