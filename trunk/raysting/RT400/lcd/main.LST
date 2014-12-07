@@ -1,0 +1,306 @@
+C51 COMPILER V7.01  MAIN                                                                   12/04/2011 13:12:40 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE main.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          /*
+   2          */
+   3          #include "stc51.h"
+   4          #include "utili.h"
+   5          #include "lcd.h"
+   6          #include "key.h"
+   7          #include "window.h"
+   8          #include "math.h"
+   9          #include "font.h"
+  10          uchar key;
+  11          sbit sktt = P3^7;
+  12          sbit srs1 = P3^5;
+  13          sbit srs2 = P3^4;
+  14          void analog_timer()     interrupt 1
+  15          {
+  16   1              Key_Scan();
+  17   1      }
+  18          void sleepms(unsigned int i)
+  19          {
+  20   1              while(i-- > 0)
+  21   1                      ;
+  22   1                      
+  23   1      }
+  24          void initiate_timer(void)
+  25          {
+  26   1         //set serial port parameter (clock 11.0592M)
+  27   1         //9600 baut rate 8 data non parity and 1 stop.
+  28   1         SCON = 0x70;
+  29   1         PCON = 0x80;//0x00 = 9600, 80 = 57600;
+  30   1      
+  31   1         //use timer 1 to be serial
+  32   1         //timer count
+  33   1         TH1 = 0xFF;//0xfD = 9600,0xff = 57600;
+  34   1      
+  35   1         //use timer 0 to be heart beat
+  36   1         TH0 = -4608/256;   // 4608 , 4608/(11.0592M/12) = 0.005s = 5ms
+  37   1         TL0 = -4608%256;
+  38   1      
+  39   1      
+  40   1         TMOD = 0x21;
+  41   1         TR1 = 1;
+  42   1      
+  43   1         ET0=1;
+  44   1         EA=1;
+  45   1         TR0 = 1;
+  46   1      }
+  47          
+  48          /*
+  49                  Command protocal related definition
+  50           */
+  51          #define SPIDLE  0
+  52          #define SPBUSY  1
+  53          uchar   spSFlag=SPIDLE;
+  54          #define write(A)        SBUF=A; while(spSFlag==SPBUSY);
+  55          
+C51 COMPILER V7.01  MAIN                                                                   12/04/2011 13:12:40 PAGE 2   
+
+  56          #define LOOP_BUF_MAX    80
+  57          uchar   inbuf[LOOP_BUF_MAX];
+  58          uchar   inwrite_pos = 0;  //pointer for storing SBUF
+  59          uchar   in_leds = KEY_INVALID;
+  60          
+  61          #define MARK_HEAD        0xAA
+  62          #define MARK_TAIL        0x55
+  63          #define MARK_IDLE        0x66
+  64          
+  65          #define STATUS_IDLE      0xF0
+  66          #define STATUS_ERR       0xF1
+  67          #define STATUS_DRAW      0xF2
+  68          #define STATUS_DONE      0xF3
+  69                 
+  70          #define CMDO_DISPLAYBTN  0x02
+  71          #define CMDO_LCD_INIT    0x03
+  72          #define CMDO_LCD_CLS     0x04
+  73          #define CMDO_LCD_REVERSE 0x05
+  74          #define CMDO_LCD_CLSBLK  0x06
+  75          #define CMDO_LCD_RECT    0x07
+  76          #define CMDO_LCD_HZ12    0x08
+  77          #define CMDO_LCD_HZ16    0x09
+  78          #define CMDO_LCD_68      0x10
+  79          #define CMDO_LCD_816     0x11
+  80          #define CMDO_TOIDLE      0x12
+  81          
+  82          uchar   state = STATUS_IDLE;
+  83          uchar   lastc;
+  84          void SerialHandler(void) interrupt 4 using 2
+  85          {
+  86   1              if(TI)  //just handle serial interrupt 1
+  87   1              {
+  88   2                      TI = 0;
+  89   2                      spSFlag = SPIDLE;
+  90   2              }
+  91   1              if(RI)
+  92   1              {
+  93   2                      lastc = SBUF;
+  94   2                      if(lastc == MARK_HEAD)
+  95   2                      {
+  96   3                              inwrite_pos = 0;
+  97   3                              state = STATUS_IDLE;
+  98   3                      }else{
+  99   3                              if(lastc == MARK_TAIL)
+ 100   3                              {
+ 101   4                                      if(state == STATUS_IDLE)
+ 102   4                                      {
+ 103   5                                              state = STATUS_DRAW;
+ 104   5                                      }
+ 105   4                              }else{
+ 106   4                                      if(inwrite_pos < LOOP_BUF_MAX)
+ 107   4                                              inbuf[inwrite_pos++] = lastc;
+ 108   4                              }
+ 109   3                      }
+ 110   2                      RI = 0;
+ 111   2              }
+ 112   1      }
+ 113          unsigned long timeout;
+ 114          void parse_cmd()
+ 115          {
+ 116   1              uchar len;
+ 117   1              uchar i;
+C51 COMPILER V7.01  MAIN                                                                   12/04/2011 13:12:40 PAGE 3   
+
+ 118   1              uchar sum;
+ 119   1              uchar l,h;
+ 120   1      
+ 121   1              if(state == STATUS_DRAW)        //completion of a command
+ 122   1              {
+ 123   2                      write(STATUS_DRAW);
+ 124   2                      len = inwrite_pos;
+ 125   2                      sum = 0;
+ 126   2                      for(i=0;i<(len);i = i+2)
+ 127   2                      {
+ 128   3                              if(inbuf[i] <= '9')
+ 129   3                                      h = inbuf[i] - '0';
+ 130   3                              else
+ 131   3                                      h = inbuf[i] - 'A' + 0x0A;                      
+ 132   3      
+ 133   3                              if(inbuf[i+1] <= '9')
+ 134   3                                      l = inbuf[i+1] - '0';
+ 135   3                              else
+ 136   3                                      l = inbuf[i+1] - 'A' + 0x0A;                    
+ 137   3      
+ 138   3                              inbuf[i>>1] = ((h<<4) | l);
+ 139   3                              sum = sum + inbuf[i>>1];
+ 140   3                      }
+ 141   2                      if(sum != 0xff) //check sum failure
+ 142   2                      {
+ 143   3                              state = STATUS_ERR;
+ 144   3                              write(STATUS_ERR);
+ 145   3                              return;
+ 146   3                      }
+ 147   2      
+ 148   2                      switch(inbuf[0])
+ 149   2                      {
+ 150   3                      case CMDO_TOIDLE:
+ 151   3                              state = STATUS_IDLE;
+ 152   3                              write(STATUS_IDLE);
+ 153   3                              return;
+ 154   3                      case CMDO_DISPLAYBTN:
+ 155   3                              in_leds = inbuf[1];
+ 156   3                              break;
+ 157   3                      case CMDO_LCD_INIT:
+ 158   3                              LCD_Init();
+ 159   3                              break;
+ 160   3                      case CMDO_LCD_CLS:
+ 161   3                              LCD_Cls();
+ 162   3                              break;
+ 163   3                      case CMDO_LCD_REVERSE:
+ 164   3                              LCD_ReverseRect(inbuf[1],inbuf[2],inbuf[3],inbuf[4]);
+ 165   3                              break;
+ 166   3                      case CMDO_LCD_CLSBLK:
+ 167   3                              LCD_ClsBlock(inbuf[1],inbuf[2],inbuf[3],inbuf[4]);
+ 168   3                              break;
+ 169   3                      case CMDO_LCD_RECT:
+ 170   3                              LCD_Rectange(inbuf[1],inbuf[2],inbuf[3],inbuf[4]);
+ 171   3                              break;
+ 172   3                      case CMDO_LCD_HZ12:
+ 173   3                              LCD_PrintHz12(inbuf[1],inbuf[2],inbuf+4);
+ 174   3                              break;
+ 175   3                      case CMDO_LCD_HZ16:
+ 176   3                              LCD_PrintHz16(inbuf[1],inbuf[2],inbuf+4);
+ 177   3                              break;
+ 178   3                      case CMDO_LCD_68:
+ 179   3                              LCD_Print6X8(inbuf[1],inbuf[2],inbuf+4);
+C51 COMPILER V7.01  MAIN                                                                   12/04/2011 13:12:40 PAGE 4   
+
+ 180   3                              break;
+ 181   3                      case CMDO_LCD_816:
+ 182   3                              LCD_Print8X16(inbuf[1],inbuf[2],inbuf+4);
+ 183   3                              break;
+ 184   3                      default:
+ 185   3                              break;
+ 186   3                      }
+ 187   2                      state = STATUS_IDLE;
+ 188   2                      write(STATUS_IDLE);
+ 189   2                      timeout = 0;
+ 190   2                      return;
+ 191   2              }
+ 192   1      }
+ 193          void main()
+ 194          {
+ 195   1      
+ 196   1               IE = 0;//close int
+ 197   1               /* Initiate timer */
+ 198   1               initiate_timer();
+ 199   1      
+ 200   1               Key_Init();
+ 201   1      
+ 202   1               inwrite_pos = 0;
+ 203   1               state = STATUS_IDLE;
+ 204   1               IE = 0x92;//enable serial int and timer0 interrupt
+ 205   1      
+ 206   1               key = KEY_INVALID;
+ 207   1               timeout = 0;
+ 208   1      
+ 209   1               while(1)
+ 210   1               {
+ 211   2                      parse_cmd();
+ 212   2      
+ 213   2                      if(timeout++ > 20000)
+ 214   2                      {
+ 215   3                              write(state);
+ 216   3                              timeout = 0;
+ 217   3                      }
+ 218   2                      if(key != KEY_INVALID)
+ 219   2                      {
+ 220   3                              write(key);
+ 221   3                              key = KEY_INVALID;
+ 222   3                      }
+ 223   2                      if(in_leds != KEY_INVALID)
+ 224   2                      {
+ 225   3                              if(in_leds == KEY_BTN1)
+ 226   3                                      display_buttons(KEY_BTN1,1);
+ 227   3                              if(in_leds == KEY_BTN2)
+ 228   3                                      display_buttons(KEY_BTN2,1);
+ 229   3                              if(in_leds == KEY_BTN3)
+ 230   3                                      display_buttons(KEY_BTN3,1);
+ 231   3                              if(in_leds == KEY_BTN4)
+ 232   3                                      display_buttons(KEY_BTN4,1);
+ 233   3      
+ 234   3                              if(in_leds == KEY_KTT)//PKTT
+ 235   3                              {
+ 236   4                                      sktt = 1;                               
+ 237   4                              }
+ 238   3                              if(in_leds == CLR_KTT)//NKTT
+ 239   3                              {
+ 240   4                                      sktt = 0;
+ 241   4                              }
+C51 COMPILER V7.01  MAIN                                                                   12/04/2011 13:12:40 PAGE 5   
+
+ 242   3                              if(in_leds == KEY_RS)//RS
+ 243   3                              {
+ 244   4                                      srs1 = 0;
+ 245   4                                      srs2 = 0;
+ 246   4                                      srs1 = 1;
+ 247   4                                      sleepms(10000);
+ 248   4                                      srs1 = 0;
+ 249   4                              }
+ 250   3                              if(in_leds == CLR_RS)//RX
+ 251   3                              {
+ 252   4                                      srs1 = 0;
+ 253   4                                      srs2 = 0;
+ 254   4                                      srs2 = 1;
+ 255   4                                      sleepms(10000);
+ 256   4                                      srs2 = 0;
+ 257   4                              }
+ 258   3                                                      
+ 259   3                              if(in_leds == CLR_BTN1)
+ 260   3                                      display_buttons(KEY_BTN1,0);
+ 261   3                              if(in_leds == CLR_BTN2)
+ 262   3                                      display_buttons(KEY_BTN2,0);
+ 263   3                              if(in_leds == CLR_BTN3)
+ 264   3                                      display_buttons(KEY_BTN3,0);
+ 265   3                              if(in_leds == CLR_BTN4)
+ 266   3                                      display_buttons(KEY_BTN4,0);
+ 267   3      
+ 268   3                              in_leds = KEY_INVALID;
+ 269   3                      }
+ 270   2              }       
+ 271   1      }
+ 272          
+ 273          
+ 274          
+ 275          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    947    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     90       2
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

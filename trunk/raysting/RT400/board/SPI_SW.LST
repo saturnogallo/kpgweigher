@@ -1,0 +1,145 @@
+C51 COMPILER V7.01  SPI_SW                                                                 06/17/2014 20:43:43 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SPI_SW
+OBJECT MODULE PLACED IN SPI_SW.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE SPI_SW.C LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          /* CH374芯片 软件模拟SPI串行连接的硬件抽象层 V1.0 */
+   2          /* 提供I/O接口子程序,提供寄存器级读写子程序 */
+   3          
+   4          #include        "HAL.H"
+   5          /* 本例中的硬件连接方式如下(实际应用电路可以参照修改下述定义及子程序) */
+   6          /* 单片机的引脚    CH374芯片的引脚
+   7                P1.4                 SCS#
+   8                P1.5                 SDI
+   9                P1.6                 SDO
+  10                P1.7                 SCK      */
+  11          sbit    CH374_SPI_SCS                                   =   P5^5;
+  12          sbit    CH374_SPI_SDO                                   =   P4^1;
+  13          sbit    CH374_SPI_SDI                                   =       P4^0;
+  14          sbit    CH374_SPI_SCK                                   =       P4^3;
+  15          
+  16          #define MYSLOW()        //mDelayuS(1)
+  17          
+  18          //#define       CH374_SPI_SCS                   P55             /* 假定CH374的SCS引脚 */
+  19          //#define       CH374_SPI_SDI                   P41             /* 假定CH374的SDI引脚 */
+  20          //#define       CH374_SPI_SDO                   P40             /* 假定CH374的SDO引脚 */
+  21          //#define       CH374_SPI_SCK                   P43             /* 假定CH374的SCK引脚 */
+  22          
+  23          void CH374_PORT_INIT( )  /* 由于使用通用I/O模拟并口读写时序,所以进行初始化 */
+  24          {
+  25   1              UINT8 i;
+  26   1      /* 如果是硬件SPI接口,那么可使用mode3(CPOL=1&CPHA=1)或mode0(CPOL=0&CPHA=0),CH374在时钟上升沿采样输入,下降沿
+             -输出,数据位是高位在前 */
+  27   1              CH374_SPI_SCS = 1;  /* 禁止SPI片选 */
+  28   1              CH374_SPI_SCK = 1;  /* 默认为高电平,SPI模式3,也可以用SPI模式0,但模拟程序可能需稍做修改 */
+  29   1      /* 对于双向I/O引脚模拟SPI接口,那么必须在此设置SPI_SCS,SPI_SCK,SPI_SDI为输出方向,SPI_SDO为输入方向 */
+  30   1              //Added by song,jie
+  31   1              CH374_SPI_SDI = 1;
+  32   1              i = CH374_SPI_SDO;
+  33   1      }
+  34          
+  35          void    Spi374OutByte( UINT8 d )  /* SPI输出8个位数据 */
+  36          {  /* 如果是硬件SPI接口,应该是先将数据写入SPI数据寄存器,然后查询SPI状态寄存器以等待SPI字节传输完成 */
+  37   1              UINT8   i;
+  38   1              for ( i = 0; i < 8; i ++ ) {
+  39   2                      CH374_SPI_SCK = 0;MYSLOW();
+  40   2      
+  41   2                      if ( d & 0x80 ) CH374_SPI_SDI = 1;
+  42   2                      else CH374_SPI_SDI = 0;
+  43   2      
+  44   2                      MYSLOW();
+  45   2                      d <<= 1;  /* 数据位是高位在前 */
+  46   2                      CH374_SPI_SCK = 1;  /* CH374在时钟上升沿采样输入 */
+  47   2                      MYSLOW();
+  48   2              }
+  49   1      }
+  50          
+  51          UINT8   Spi374InByte( void )  /* SPI输入8个位数据 */
+  52          {  /* 如果是硬件SPI接口,应该是先查询SPI状态寄存器以等待SPI字节传输完成,然后从SPI数据寄存器读出数据 */
+  53   1              UINT8   i, d;
+  54   1              d = 0;
+C51 COMPILER V7.01  SPI_SW                                                                 06/17/2014 20:43:43 PAGE 2   
+
+  55   1      /* 如果SPI的SDO和SDI合用一个I/O引脚，那么必须在此设置该I/O方向为输入 */
+  56   1              for ( i = 0; i < 8; i ++ ) {
+  57   2                      CH374_SPI_SCK = 0;  /* CH374在时钟下降沿输出 */
+  58   2                      MYSLOW();
+  59   2                      d <<= 1;  /* 数据位是高位在前 */
+  60   2                      if ( CH374_SPI_SDO ) d ++;
+  61   2                      CH374_SPI_SCK = 1;
+  62   2                      MYSLOW();
+  63   2              }
+  64   1              return( d );
+  65   1      }
+  66          
+  67          void    Spi374Start( UINT8 addr, UINT8 cmd )  /* SPI开始 */
+  68          {
+  69   1      //      CH374_SPI_SCS = 1;
+  70   1      /* 对于双向I/O引脚模拟SPI接口,那么必须确保已经设置SPI_SCS,SPI_SCK,SPI_SDI为输出方向,SPI_SDO为输入方向 */
+  71   1              CH374_SPI_SCS = 0;  /* SPI片选有效 */
+  72   1              MYSLOW();
+  73   1              Spi374OutByte( addr );
+  74   1              Spi374OutByte( cmd );
+  75   1      }
+  76          void  MySpi374Stop()    /* SPI结束 */
+  77          { 
+  78   1              CH374_SPI_SCS = 1; 
+  79   1      }  
+  80          #define Spi374Stop( )   { CH374_SPI_SCS = 1; }  /* SPI结束 */
+  81          //void  Spi374Stop( void )  /* SPI结束 */
+  82          //{
+  83          //      CH374_SPI_SCS = 1;      /* SPI片选无效 */
+  84          //}
+  85          
+  86          UINT8   Read374Byte( UINT8 mAddr )  /* 从指定寄存器读取数据 */
+  87          {
+  88   1              UINT8   d;
+  89   1              Spi374Start( mAddr, CMD_SPI_374READ );
+  90   1              d = Spi374InByte( );
+  91   1              Spi374Stop( );
+  92   1              return( d );
+  93   1      }
+  94          
+  95          void    Write374Byte( UINT8 mAddr, UINT8 mData )  /* 向指定寄存器写入数据 */
+  96          {
+  97   1              Spi374Start( mAddr, CMD_SPI_374WRITE );
+  98   1              Spi374OutByte( mData );
+  99   1              Spi374Stop( );
+ 100   1      }
+ 101          
+ 102          void    Read374Block( UINT8 mAddr, UINT8 mLen, PUINT8 mBuf )  /* 从指定起始地址读出数据块 */
+ 103          {
+ 104   1              Spi374Start( mAddr, CMD_SPI_374READ );
+ 105   1              while ( mLen -- ) *mBuf++ = Spi374InByte( );
+ 106   1              Spi374Stop( );
+ 107   1      }
+ 108          
+ 109          void    Write374Block( UINT8 mAddr, UINT8 mLen, PUINT8 mBuf )  /* 向指定起始地址写入数据块 */
+ 110          {
+ 111   1              Spi374Start( mAddr, CMD_SPI_374WRITE );
+ 112   1              while ( mLen -- ) Spi374OutByte( *mBuf++ );
+ 113   1              Spi374Stop( );
+ 114   1      }
+ 115          
+ 116          
+C51 COMPILER V7.01  SPI_SW                                                                 06/17/2014 20:43:43 PAGE 3   
+
+ 117          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    183    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       7
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

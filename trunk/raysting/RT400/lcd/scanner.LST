@@ -1,0 +1,35 @@
+C51 COMPILER V7.01  SCANNER                                                                01/12/2011 21:04:25 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE SCANNER
+OBJECT MODULE PLACED IN scanner.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE scanner.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include "stc51.h"
+   2          #include "utili.h"
+   3          
+   4          /*
+   5          void scanner_set_mode(uchar ch)
+   6          {
+   7          }
+   8          void scanner_set_channel(uchar ch)
+   9          {
+  10          }
+  11          */
+  12          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

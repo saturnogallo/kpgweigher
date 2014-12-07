@@ -1,0 +1,11 @@
+"sjSerial.obj",
+"UART.obj",
+"sjMain.obj",
+"UART2.obj",
+"lcd.obj",
+"font.obj",
+"window.obj",
+"AD5791.obj",
+"navmeter.obj" 
+TO "rtusb" 
+RAMSIZE(256) 

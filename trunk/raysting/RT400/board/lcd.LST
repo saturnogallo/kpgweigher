@@ -1,0 +1,503 @@
+C51 COMPILER V7.01  LCD                                                                    12/06/2014 17:38:54 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE LCD
+OBJECT MODULE PLACED IN lcd.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE lcd.c LARGE OPTIMIZE(SIZE) BROWSE DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          #include <string.h>
+   2          #include "font.h"
+   3          #include "lcd.h"
+   4          //#include "sjDefine.h"
+   5          #include "sjSerial.h"
+   6          
+   7          void sleepms(unsigned int i)
+   8          {
+   9   1         while(i-- > 0)
+  10   1            ;
+  11   1            
+  12   1      }
+  13          #define MARK_HEAD        0xAA
+  14          #define MARK_TAIL        0x55
+  15          
+  16          
+  17          extern void sjSerialSendByte2(u8);
+  18          extern void io_putc(unsigned char);
+  19          void prints(u8 *str, u8 length, char uart_port)
+  20          {
+  21   1              if(uart_port == PORT_KBD)
+  22   1              {
+  23   2                      while(length-- > 0){    
+  24   3                      sjSerialSendByte2(*str++);            
+  25   3              }
+  26   2              }
+  27   1              if(uart_port == PORT_NAV)
+  28   1              {
+  29   2                      while(length-- > 0){    
+  30   3                      io_putc(*str++);            
+  31   3              }
+  32   2              }
+  33   1      }
+  34          
+  35          
+  36          uchar key;             
+  37          static uchar kbd_state;
+  38          void kbd_uart_push(uchar dat)
+  39          {           
+  40   1              if(dat == STATUS_IDLE||
+  41   1                 dat == STATUS_ERR||
+  42   1                 dat == STATUS_DRAW||
+  43   1                 dat == STATUS_DONE) //lcd acknowledge
+  44   1              {
+  45   2                      kbd_state = dat;
+  46   2                      return;
+  47   2              }  
+  48   1              if(key == KEY_INVALID)                              
+  49   1                      key = dat;
+  50   1      }  
+  51          static u8 lcdcmd[40];
+  52          
+  53          static u8 head[3] = {MARK_HEAD,MARK_HEAD,MARK_HEAD};
+  54          static u8 tail[3] = {MARK_TAIL,MARK_TAIL,MARK_TAIL};
+  55          
+C51 COMPILER V7.01  LCD                                                                    12/06/2014 17:38:54 PAGE 2   
+
+  56          static u8 hex2ch[2];  
+  57          void hex2char(uchar a)
+  58          {
+  59   1              uchar h,l;
+  60   1              h = (a & 0xf0) >> 4;
+  61   1              l = (a & 0x0f);
+  62   1              if(h <= 9)              
+  63   1                      hex2ch[0] = (h+'0');
+  64   1              else
+  65   1                      hex2ch[0] = (h+'A'-0x0a);
+  66   1              if(l <= 9)
+  67   1                      hex2ch[1] = (l+'0');
+  68   1              else
+  69   1                      hex2ch[1] = (l+'A'-0x0a);               
+  70   1      }
+  71          void onecmd(uchar len)
+  72          {    
+  73   1           uchar i = 0;
+  74   1           uchar sum;
+  75   1           sum = 0;
+  76   1           prints(head,3,PORT_KBD); //send head
+  77   1           for(i = 0;i<len;i++)     //caculate cksum     
+  78   1           {              
+  79   2              hex2char(lcdcmd[i]);
+  80   2                      prints(hex2ch,2,PORT_KBD);
+  81   2              sum = sum + lcdcmd[i];
+  82   2           }                        
+  83   1           lcdcmd[i] = 0xff - sum;
+  84   1           hex2char(lcdcmd[i]);
+  85   1           prints(hex2ch,2,PORT_KBD);
+  86   1           prints(tail,3,PORT_KBD); //send tail      
+  87   1      }
+  88          static u8 idle[10] = {MARK_HEAD,MARK_HEAD,MARK_HEAD,'1','2','E','D',MARK_TAIL,MARK_TAIL,MARK_TAIL};
+  89          void sendcmd(uchar len)
+  90          {
+  91   1           ulong timeout;  
+  92   1      //     if(DEBUG == 1)        return;
+  93   1           while(kbd_state != STATUS_IDLE)
+  94   1           {
+  95   2                      if(sjSerialIsDataWaiting2())
+  96   2                      {
+  97   3                              kbd_uart_push(sjSerialWaitForOneByte2());
+  98   3                      }
+  99   2              if(kbd_state == STATUS_DRAW)
+ 100   2                      continue;
+ 101   2              if(kbd_state == STATUS_ERR)
+ 102   2              {
+ 103   3                      prints(idle,10,PORT_KBD);
+ 104   3                      kbd_state = STATUS_DRAW;     
+ 105   3              }   
+ 106   2           }                                  
+ 107   1           onecmd(len);  
+ 108   1           timeout = 0;
+ 109   1           kbd_state = STATUS_DONE;
+ 110   1           while(kbd_state != STATUS_IDLE)
+ 111   1           {
+ 112   2                      if(sjSerialIsDataWaiting2())
+ 113   2                      {
+ 114   3                              kbd_uart_push(sjSerialWaitForOneByte2());
+ 115   3                      }
+ 116   2               if(kbd_state == STATUS_ERR)
+ 117   2               {
+C51 COMPILER V7.01  LCD                                                                    12/06/2014 17:38:54 PAGE 3   
+
+ 118   3                      onecmd(len);     
+ 119   3                      timeout = 0;
+ 120   3               }
+ 121   2               if(timeout < 655350)
+ 122   2               {
+ 123   3                      sleepms(2);
+ 124   3                      timeout++;    
+ 125   3               }else{                    
+ 126   3                      onecmd(len);
+ 127   3                      timeout = 0;
+ 128   3               }
+ 129   2           }
+ 130   1      }
+ 131          /*------------------初始化-----------------*/
+ 132          void LCD_Init (void) 
+ 133          {   
+ 134   1              kbd_state = STATUS_IDLE;
+ 135   1              lcdcmd[0] = CMDO_LCD_INIT;
+ 136   1              sendcmd(1);
+ 137   1              //do it twice avoid the missing of first command on boot up
+ 138   1              lcdcmd[0] = CMDO_LCD_INIT;
+ 139   1              sendcmd(1);
+ 140   1              
+ 141   1      }
+ 142          
+ 143          /********************************************************/
+ 144          /* 清屏                                                 */
+ 145          /********************************************************/
+ 146          void LCD_Cls(void) 
+ 147          {           
+ 148   1              lcdcmd[0] = CMDO_LCD_CLS;
+ 149   1              sendcmd(1);
+ 150   1      }
+ 151          void LCD_ClsBlock(uchar x1,uchar y1,uchar x2,uchar y2)
+ 152          {
+ 153   1              lcdcmd[0] = CMDO_LCD_CLSBLK;
+ 154   1              lcdcmd[1] = x1;
+ 155   1              lcdcmd[2] = y1;
+ 156   1              lcdcmd[3] = x2;
+ 157   1              lcdcmd[4] = y2;                
+ 158   1              sendcmd(5);
+ 159   1      }
+ 160          void display_buttons(uchar btn_pos,uchar btn_val)   //send led status to sub board
+ 161          {              
+ 162   1              lcdcmd[0] = CMDO_DISPLAYBTN;
+ 163   1              if(btn_val == 0)
+ 164   1                    btn_pos += 4; //change from 'a'-'d' to 'e'-'h'   //add 4
+ 165   1              lcdcmd[1] = btn_pos;      
+ 166   1              sendcmd(2);
+ 167   1      }
+ 168          
+ 169          
+ 170          /*      设定图形x,y值*/
+ 171          /*
+ 172          void LCD_GraphSetAddr(uchar x,uchar y) 
+ 173          {
+ 174                  uint xy;
+ 175                  xy=y;
+ 176                  xy=xy*16+x+256;
+ 177                  //LCD_CE(0);
+ 178                  LCD_Write2(xy&0xff,xy/256,0x24);
+ 179          }
+C51 COMPILER V7.01  LCD                                                                    12/06/2014 17:38:54 PAGE 4   
+
+ 180          */
+ 181          /*      设定文本x,y值   */
+ 182          /*
+ 183          void LCD_TextSetAddr(uchar x,uchar y) 
+ 184          {
+ 185                  //LCD_CE(0);
+ 186                  LCD_Write2(y*16+x,0,0x24);
+ 187          }
+ 188          */
+ 189          /*      清除一点*/
+ 190          /*
+ 191          void LCD_ClrPixel(uchar x,uchar y) 
+ 192          {
+ 193                  uchar b;
+ 194                  uint addr = LCD_GRAPH_HOME_ADDR + y * LCD_WIDTH + x / 8;
+ 195          
+ 196                  b = 7 - (x % 8);
+ 197                  
+ 198                  LCD_WriteInt(addr,0x24);
+ 199                  LCD_Comm(0xf0|b);
+ 200          }
+ 201          */
+ 202          /*      点亮一点        */
+ 203          /*
+ 204          void LCD_Putpixel(uchar x,uchar y) 
+ 205          {
+ 206                  uchar b;
+ 207                  uint addr = LCD_GRAPH_HOME_ADDR + ((uint)y * LCD_WIDTH) + x>>3;
+ 208          
+ 209                  b = 7 - (x % 8);
+ 210                  
+ 211                  LCD_WriteInt(addr,0x24);
+ 212                  LCD_Comm(0xf8|b);
+ 213          }
+ 214          */
+ 215          /*      x,y处显示光标   */
+ 216          /*
+ 217          void LCD_ShowCursor(uchar x,uchar y) 
+ 218          {
+ 219                  return;
+ 220                  //LCD_CE(0);
+ 221                  LCD_Comm(0x97); //光标开
+ 222                  LCD_Write2(x,y,0x21);
+ 223          }
+ 224          
+ 225          //      取消光标
+ 226          
+ 227          void LCD_HideCursor(void)  
+ 228          {
+ 229                  return; 
+ 230                  //LCD_CE(0);
+ 231                  LCD_Comm(0x9c); 
+ 232          }
+ 233          */
+ 234          /*
+ 235          void LCD_PrintNumStr(uchar x,uchar y,uchar *s) 
+ 236          {
+ 237                  x =(x / 8) * 8;
+ 238          
+ 239                  while(*s)
+ 240                  {
+ 241                          LCD_PutImg(x,y,1,11,Num_Tab + (*s - '0') * 11);
+C51 COMPILER V7.01  LCD                                                                    12/06/2014 17:38:54 PAGE 5   
+
+ 242                          
+ 243                          x = x + 8;
+ 244                          
+ 245                          s++;
+ 246                  }
+ 247          }
+ 248          
+ 249          
+ 250          void LCD_PrintBlackBlock(uchar x,uchar y,bool not_empty)
+ 251          {
+ 252                  x =(x / 8) * 8;
+ 253                  LCD_PutImg(x,y,1,11,BlockTab + (not_empty?0:1) * 11);
+ 254          }
+ 255          */
+ 256          
+ 257          void LCD_ReverseRect(uchar x,uchar y,uchar w,uchar h)
+ 258          {
+ 259   1              lcdcmd[0] = CMDO_LCD_REVERSE;
+ 260   1              lcdcmd[1] = x;
+ 261   1              lcdcmd[2] = y;
+ 262   1              lcdcmd[3] = w;
+ 263   1              lcdcmd[4] = h;                
+ 264   1              sendcmd(5);
+ 265   1      }
+ 266          /*--------------显示字符------------------*/
+ 267          /*
+ 268          void LCD_TextPutchar(uchar x,uchar y,uchar c) 
+ 269          {
+ 270                  //LCD_CE(0);
+ 271                  LCD_WriteInt(LCD_TEXT_HOME_ADDR + LCD_WIDTH * y + x,0x24);
+ 272                  LCD_Comm(0xb0);
+ 273                  LCD_AutoWrite(c - 0x20);
+ 274                  LCD_Comm(0xb2);
+ 275          }
+ 276          
+ 277          void LCD_TextPrint(uchar x,uchar y,char *s) 
+ 278          {
+ 279                  //LCD_CE(0);
+ 280                  LCD_WriteInt(LCD_TEXT_HOME_ADDR + LCD_WIDTH * y + x,0x24);
+ 281                  LCD_Comm(0xb0);
+ 282                  while(*s)
+ 283                  {
+ 284                          LCD_AutoWrite(*s - 0x20);
+ 285                          s++;
+ 286                  }
+ 287                  LCD_Comm(0xb2);
+ 288          }
+ 289          void LCD_TextPrintWord(uchar x,uchar y,uint16 n,uchar start) 
+ 290          {
+ 291                  uchar buf[4];
+ 292                  int i;
+ 293                  
+ 294                  if(start > 3) start = 0;
+ 295                  
+ 296                  for(i = 0; i < 4; i++)
+ 297                  {
+ 298                          buf[i] = n % 10;   
+ 299                          n /= 10;
+ 300                  }
+ 301                  
+ 302                  for(i = 3-start; i >= 0; i--)
+ 303                  {
+C51 COMPILER V7.01  LCD                                                                    12/06/2014 17:38:54 PAGE 6   
+
+ 304                          LCD_TextPutchar(x,y,'0' + buf[i]);
+ 305                          x ++;
+ 306                  }
+ 307          }
+ 308          
+ 309          void LCD_TextPrintHex(uchar x,uchar y,uchar hex) 
+ 310          {
+ 311                  uchar c1,c2;
+ 312                  //低4位
+ 313                  c1 = hex & 0x0f;        //lo
+ 314                  //高4位
+ 315                  c2 = (hex >> 4) & 0x0f; //hi
+ 316                  
+ 317                  LCD_TextPutchar(x,y,HexTable[c2]);
+ 318                  LCD_TextPutchar(x+1,y,HexTable[c1]);
+ 319          }
+ 320          */
+ 321          /************************************************/
+ 322          /*画线。任意方向的斜线,直线数学方程 aX+bY=1     */
+ 323          /************************************************/
+ 324          /*
+ 325          void LCD_Linexy(uchar x0,uchar y0,uchar xt,uchar yt) 
+ 326          {
+ 327                  register uchar t;
+ 328                  int xerr=0,yerr=0,delta_x,delta_y,distance;
+ 329                  int incx,incy,uRow,uCol;
+ 330          
+ 331                  delta_x = xt-x0;                                //计算坐标增量
+ 332                  delta_y = yt-y0;
+ 333                  uRow = x0;
+ 334                  uCol = y0;
+ 335                  if(delta_x>0) incx=1;                           //设置单步方向
+ 336                  else if( delta_x==0 ) incx=0;                   //垂直线
+ 337                  else {incx=-1;delta_x=-delta_x;}
+ 338          
+ 339                  if(delta_y>0) incy=1;
+ 340                  else if( delta_y==0 ) incy=0;                   //水平线
+ 341                  else {incy=-1;delta_y=-delta_y;}
+ 342          
+ 343                  if( delta_x > delta_y ) distance=delta_x;       //选取基本增量坐标轴
+ 344                  else distance=delta_y;
+ 345          
+ 346                  //LCD_CE(0);
+ 347                  for( t=0;t <= distance+1; t++ )
+ 348                  {                                       //画线输出
+ 349                          LCD_Putpixel(uRow,uCol);                        //画点
+ 350                          xerr += delta_x ;
+ 351                          yerr += delta_y ;
+ 352                          
+ 353                          if( xerr > distance )
+ 354                          {
+ 355                                  xerr-=distance;
+ 356                                  uRow+=incx;
+ 357                          }
+ 358                          if( yerr > distance )
+ 359                          {
+ 360                                  yerr-=distance;
+ 361                                  uCol+=incy;
+ 362                          }
+ 363                  }
+ 364          }
+ 365          */
+C51 COMPILER V7.01  LCD                                                                    12/06/2014 17:38:54 PAGE 7   
+
+ 366          /*
+ 367          void LCD_LineH(uchar y) 
+ 368          {
+ 369                  char i;
+ 370                  
+ 371                  //LCD_CE(0);
+ 372                  LCD_WriteInt(LCD_GRAPH_HOME_ADDR + LCD_WIDTH * y ,0x24);
+ 373                  LCD_Comm(0xb0);
+ 374                  for(i=0;i<LCD_WIDTH;i++)
+ 375                          LCD_AutoWrite(0xff);
+ 376                  LCD_Comm(0xb2);
+ 377          }
+ 378          */
+ 379          /*
+ 380          void LCD_LineV(uchar x,uchar y1,uchar y2) 
+ 381          {
+ 382                  int i;
+ 383                  //LCD_CE(0);
+ 384                  for(i = y1; i < y2; i++)
+ 385                  {
+ 386                          LCD_Putpixel(x,i);              
+ 387                  }
+ 388          }
+ 389          */
+ 390          
+ 391          void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2)
+ 392          {
+ 393   1              lcdcmd[0] = CMDO_LCD_RECT;
+ 394   1              lcdcmd[1] = x1;
+ 395   1              lcdcmd[2] = y1;
+ 396   1              lcdcmd[3] = x2;
+ 397   1              lcdcmd[4] = y2;                
+ 398   1              sendcmd(5);
+ 399   1      }                        
+ 400          void LCD_PrintChar(uchar cmd, uchar x,uchar y,uchar *s)
+ 401          {                
+ 402   1              uchar pos = 0;        
+ 403   1              lcdcmd[0] = cmd;
+ 404   1              lcdcmd[1] = x;
+ 405   1              lcdcmd[2] = y;
+ 406   1              pos = 1;
+ 407   1              while(*s)
+ 408   1              {      
+ 409   2                      lcdcmd[(uchar)(pos + 3)] = *s++;
+ 410   2                      pos = pos + 1;
+ 411   2              }      
+ 412   1              lcdcmd[(uchar)(pos+3)] = 0x00;
+ 413   1              lcdcmd[3] = pos;
+ 414   1              pos = pos + 4;
+ 415   1              sendcmd(pos);
+ 416   1      }
+ 417          void LCD_PrintHz12(uchar x,uchar y,uchar *s)
+ 418          {                     
+ 419   1              LCD_PrintChar(CMDO_LCD_HZ12,x,y,s);
+ 420   1      }
+ 421          void LCD_PrintHz16(uchar x,uchar y,uchar *s)
+ 422          {
+ 423   1              LCD_PrintChar(CMDO_LCD_HZ16,x,y,s);
+ 424   1      }
+ 425          //显示6x8的数字
+ 426          void LCD_Print6X8(uchar x, uchar y,uchar *s)
+ 427          {                                  
+C51 COMPILER V7.01  LCD                                                                    12/06/2014 17:38:54 PAGE 8   
+
+ 428   1              LCD_PrintChar(CMDO_LCD_68,x,y,s);
+ 429   1      }
+ 430          
+ 431          //显示6x8的数字
+ 432          void LCD_Print8X16(uchar x, uchar y,uchar *s)
+ 433          {                                
+ 434   1              LCD_PrintChar(CMDO_LCD_816,x,y,s);
+ 435   1      }
+ 436          
+ 437          //显示24x32的数字
+ 438          /*
+ 439          void LCD_Print24X32(uchar x, uchar y,uchar *s)
+ 440          {
+ 441                  //x坐标必需是8位对齐
+ 442                  x =(x / 8) * 8;
+ 443                  while(*s)
+ 444                  {
+ 445                          if( *s >= '0' && *s <= '9')     //显示
+ 446                          {
+ 447                                  LCD_PutImg(x,y,3,32,Font24X32[*s-'0']);
+ 448                                  x += 24;
+ 449                          }
+ 450                          else if( *s == ' ')
+ 451                          {
+ 452                                  x += 8;
+ 453                          }
+ 454                          else if( *s == '-')
+ 455                          {
+ 456                                  LCD_PutImg(x,y,3,32,Font24X32[12]);
+ 457                                  x += 24;
+ 458                          }
+ 459                          else
+ 460                          {
+ 461                                  LCD_PutImg(x,y+16,1,16,ASC8x16[*s]);    //
+ 462                                  x += 8;
+ 463                          }
+ 464                          s ++;
+ 465                  }
+ 466          }*/
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    896    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     60      43
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
