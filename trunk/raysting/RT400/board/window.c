@@ -1,9 +1,9 @@
 #include "window.h"
 #include "lcd.h"
-//#include "stdio.h"
+#include "stdio.h"
 #include "stdlib.h"
 //#include "sjDefine.h"
-MSG_HANDLER curr_window = 0;             
+//MSG_HANDLER curr_window = 0;             
 
 
 extern uchar pos_databuf;     
@@ -63,7 +63,7 @@ u8 pos_databuf; //position in data buffer
 u8 max_databuf;
 u8 data_sign;   // sign of the data
 LABEL code datalbl = {LBL_HZ16,10,10,8,strbuf};
-LABEL code datalbl2 = {LBL_HZ6X8,140,54,8,"UP:+/-,DN:'E'"};
+LABEL code datalbl2 = {LBL_HZ6X8,140,54,8,"DN:'E'"};
 LABEL code datalbl3 = {LBL_HZ6X8,140,54,8,"UP/DN:'A'-'Z'"};
 LABEL code databox = {LBL_HZ16,20,30,9,databuf};
 
@@ -89,7 +89,7 @@ uchar wnd_intinput(uchar lastval)
 		{
 			LCD_Cls();
 			draw_label(&datalbl,SW_NORMAL);
-			draw_inputbox(&databox);
+			draw_inputbox(&databox, TRUE);
 //			LCD_ShowCursor(databox.x,databox.y);
 
 		}
@@ -161,14 +161,17 @@ uchar wnd_intinput(uchar lastval)
 		key = KEY_INVALID;
 	}
 }
+
+void draw_box(LABEL *lbl);
 double wnd_floatinput(double lastval)
 {
 	uchar msg;
 
 	databuf[0] = '+';
-        databuf[1] = '\0';
-        pos_databuf = 1;
-        data_sign = 0;	
+    databuf[1] = '\0';
+    pos_databuf = 1;
+    data_sign = 0;	
+	max_databuf = 8;
 	key = MSG_INIT;
 	while(1)
 	{
@@ -181,10 +184,13 @@ double wnd_floatinput(double lastval)
 		}
 		if(msg == MSG_INIT)
 		{
-			LCD_Cls();
-			draw_label(&datalbl,SW_NORMAL);
-			draw_label(&datalbl2,SW_NORMAL);			
-			draw_inputbox(&databox);
+//			LCD_Cls();
+//			draw_label(&datalbl,SW_NORMAL);
+//			draw_label(&datalbl2,SW_NORMAL);
+			draw_box(&databox);
+			sprintf(databuf,"        ");
+			msg = MSG_REFRESH;
+//			draw_inputbox(&databox,TRUE);
 //			LCD_ShowCursor(databox.x,databox.y);
 		}
 
@@ -192,6 +198,7 @@ double wnd_floatinput(double lastval)
 		{                                          
 		        msg = MSG_REFRESH;
 		}
+		/*
 		if(msg == KEY_UP) {                                
 		        if(pos_databuf == 1)
 		        {              
@@ -219,6 +226,7 @@ double wnd_floatinput(double lastval)
 		        }
 		        msg = MSG_REFRESH;
 		}
+		
 		if(msg == KEY_DN) {
                		if((pos_databuf < max_databuf) && ((data_sign & 0x04) == 0))    //no E in string
         		{
@@ -230,7 +238,8 @@ double wnd_floatinput(double lastval)
 		        }
 		
 			msg = MSG_REFRESH;
-		}                                      
+		}
+        */                              
 		if( msg == KEY_DOT)
 		{
                		if((pos_databuf < max_databuf) && ((data_sign & 0x02) == 0))      //no dot in string
@@ -252,7 +261,7 @@ double wnd_floatinput(double lastval)
 		}
 		if(msg == KEY_CE) {
 //			LCD_HideCursor();
-		key = KEY_INVALID;
+			key = KEY_INVALID;
 			return lastval;
 		}
 		if(msg == KEY_OK){
@@ -261,10 +270,11 @@ double wnd_floatinput(double lastval)
 			return buf2double();
 		}
 		if(msg == MSG_REFRESH) {
-			draw_label(&databox,SW_NORMAL);
+			draw_label(&databox,SW_NORMAL|SW_OVERLAP);
+			msg = KEY_INVALID;
 //			LCD_ShowCursor(databox.x+pos_databuf*16,databox.y);
 		}                                 
-				key = KEY_INVALID;
+		key = KEY_INVALID;
 	}
 }
 //display a message box
@@ -277,19 +287,36 @@ void wnd_msgbox(LABEL *lbl)
 
 }
 
-void draw_inputbox(LABEL *lbl)
+//display a message box
+void wnd_msgbox2(LABEL *lbl)
 {
-	LCD_ClsBlock(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 , lbl->y+19);
-	LCD_Rectange(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 , lbl->y+19);
+	draw_label(lbl, SW_NORMAL | SW_OVERLAP);	
+	LCD_Rectange(lbl->x - 8,lbl->y - 1,lbl->x + lbl->width * 16 - 16 , lbl->y+17);
+}
+
+void draw_box(LABEL *lbl)
+{
+	LCD_Rectange(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 -14, lbl->y+19);
+//	LCD_Rectange(lbl->x - 8,lbl->y - 1,lbl->x + lbl->width * 16 - 16 , lbl->y+17);
+}
+void draw_inputbox(LABEL *lbl,BOOL redraw)
+{
+	if(redraw)
+	{
+		LCD_ClsBlock(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 , lbl->y+19);
+		LCD_Rectange(lbl->x - 10,lbl->y - 3,lbl->x + lbl->width * 16 , lbl->y+19);
+	}
 	draw_label(lbl, SW_NORMAL);	
 }
 
 void draw_label(LABEL *lbl,uchar reverse) {
 	uchar len = lbl->width;
+
 	if(lbl->type == LBL_HZ6X8) {
 		if(reverse & SW_NORMAL) {
 			if((reverse & SW_OVERLAP) == 0)
 				LCD_ClsBlock( lbl->x, lbl->y, lbl->x + (len<<3), lbl->y + 8);
+
 			LCD_Print6X8( lbl->x, lbl->y, lbl->param);
 			return;			
 		}
@@ -308,8 +335,10 @@ void draw_label(LABEL *lbl,uchar reverse) {
 			LCD_ReverseRect(lbl->x, lbl->y, len * 1, 16);
 		return;
 	}
-	/*
+	
 	if(lbl->type == LBL_HZ24X32) {
+		if(lbl->param[0] == '-') //using small -
+			lbl->param[0] = '~';
 		if(reverse & SW_NORMAL) {
 			if((reverse & SW_OVERLAP) == 0)
 				LCD_ClsBlock( lbl->x, lbl->y, lbl->x + len * 24, lbl->y + 32);
@@ -319,7 +348,7 @@ void draw_label(LABEL *lbl,uchar reverse) {
 			LCD_ReverseRect(lbl->x, lbl->y, len * 3, 32);
 		return;
 	}
-	*/
+	
 	if(lbl->type == LBL_HZ12) {
 		if(reverse & SW_NORMAL) {
 			if((reverse & SW_OVERLAP) == 0)

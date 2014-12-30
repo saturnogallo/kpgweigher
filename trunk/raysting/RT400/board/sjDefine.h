@@ -319,9 +319,9 @@ BOOL sjSerialIsDataWaiting();
 BYTE sjSerialWaitForOneByte();
 void sjSerialSendByte(BYTE);
 
-BOOL sjSerialIsDataWaiting2();
-BYTE sjSerialWaitForOneByte2();
-void sjSerialSendByte2(BYTE);
+//BOOL sjSerialIsDataWaiting2();
+//BYTE sjSerialWaitForOneByte2();
+//void sjSerialSendByte2(BYTE);
 
 void io_putc(unsigned char);
 BYTE io_getc();
@@ -414,6 +414,9 @@ unsigned char strlen(unsigned char *s);
 void sleepms(unsigned int i);
 void nav_command(unsigned char);
 double nav_read();
+
+void sleepms(unsigned int);
+#define ONEMS	4000
 
 #endif
 

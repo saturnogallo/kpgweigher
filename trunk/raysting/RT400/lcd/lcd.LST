@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 1   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE LCD
@@ -62,7 +62,7 @@ stmt level    source
   53                  0x38, // 00   000 
   54                  0x44, // 0 000 00 
   55                  0x04, // 00000 00 
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 2   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 2   
 
   56                  0x08, // 0000 000 
   57                  0x10, // 000 0000 
@@ -126,7 +126,7 @@ stmt level    source
  115                  // 55 0x37 '7' 
  116                  0x00, // 00000000 
  117                  0x00, // 00000000 
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 3   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 3   
 
  118                  0x7c, // 0     00 
  119                  0x04, // 00000 00 
@@ -190,7 +190,7 @@ stmt level    source
  177                  0x00, // 00000000 
  178                  0x00, // 00000000 
  179                  0x00, // 00000000 
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 4   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 4   
 
  180                  0x00, // 00000000 
  181          };
@@ -254,7 +254,7 @@ stmt level    source
  239   1      }
  240          
  241          /*------------写命令或数据到LCD--------------*/
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 5   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 5   
 
  242          void LCD_Write1 (uchar dat,uchar comm)       //写一个数据和一个命令
  243          {
@@ -318,7 +318,7 @@ stmt level    source
  301          }
  302          */
  303          void LCD_Comm (uchar comm)       //写命令
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 6   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 6   
 
  304          {
  305   1              LCD_CE = 0;
@@ -382,7 +382,7 @@ stmt level    source
  363   2              }
  364   1              LCD_Comm(LC_AUT_OVR);           // 自动写结束
  365   1              LCD_Write2(0x00,0x00,LC_ADD_POS);// 重置地址指针
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 7   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 7   
 
  366   1      }
  367          
@@ -446,7 +446,7 @@ stmt level    source
  425                  b = 7 - (x % 8);
  426                  
  427                  LCD_WriteInt(addr,0x24);
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 8   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 8   
 
  428                  LCD_Comm(0xf0|b);
  429          }
@@ -510,7 +510,7 @@ stmt level    source
  487   2                      addr += LCD_WIDTH;
  488   2              }
  489   1      }
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 9   
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 9   
 
  490          /*
  491          void LCD_PrintNumStr(uchar x,uchar y,uchar *s) 
@@ -574,7 +574,7 @@ stmt level    source
  549                  
  550                  for(i = 3-start; i >= 0; i--)
  551                  {
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 10  
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 10  
 
  552                          LCD_PutImg(x,y,1,11,Num_Tab + buf[i] * 11);
  553                          
@@ -638,7 +638,7 @@ stmt level    source
  611          
  612          void LCD_TextPrint(uchar x,uchar y,char *s) 
  613          {
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 11  
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 11  
 
  614                  //LCD_CE = 0;
  615                  LCD_WriteInt(LCD_TEXT_HOME_ADDR + LCD_WIDTH * y + x,0x24);
@@ -702,7 +702,7 @@ stmt level    source
  673          
  674                  if(delta_y>0) incy=1;
  675                  else if( delta_y==0 ) incy=0;                   //水平线
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 12  
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 12  
 
  676                  else {incy=-1;delta_y=-delta_y;}
  677          
@@ -766,7 +766,7 @@ stmt level    source
  735          void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2)
  736          {
  737   1              LCD_LineXX(x1,x2,y1);
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 13  
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 13  
 
  738   1              LCD_LineXX(x1,x2,y2);
  739   1              LCD_LineV(x1,y1,y2);
@@ -830,7 +830,7 @@ stmt level    source
  797          
  798          void LCD_PrintHz16(uchar x,uchar y,uchar *s)
  799          {
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 14  
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 14  
 
  800   1              uchar c1,c2;
  801   1              //x坐标必需是8位对齐
@@ -888,44 +888,44 @@ stmt level    source
  853   1      }
  854          
  855          //显示24x32的数字
- 856          /*
+ 856          
  857          void LCD_Print24X32(uchar x, uchar y,uchar *s)
  858          {
- 859                  //x坐标必需是8位对齐
- 860                  x =(x / 8) * 8;
- 861                  while(*s)
-C51 COMPILER V7.01  LCD                                                                    12/04/2011 13:12:40 PAGE 15  
+ 859   1              //x坐标必需是8位对齐
+ 860   1              x =(x / 8) * 8;
+ 861   1              while(*s)
+C51 COMPILER V7.01  LCD                                                                    12/25/2014 16:12:00 PAGE 15  
 
- 862                  {
- 863                          if( *s >= '0' && *s <= '9')     //显示
- 864                          {
- 865                                  LCD_PutImg(x,y,3,32,Font24X32[*s-'0']);
- 866                                  x += 24;
- 867                          }
- 868                          else if( *s == ' ')
- 869                          {
- 870                                  x += 8;
- 871                          }
- 872                          else if( *s == '-')
- 873                          {
- 874                                  LCD_PutImg(x,y,3,32,Font24X32[12]);
- 875                                  x += 24;
- 876                          }
- 877                          else
- 878                          {
- 879                                  LCD_PutImg(x,y+16,1,16,ASC8x16[*s]);    //
- 880                                  x += 8;
- 881                          }
- 882                          s ++;
- 883                  }
- 884          }*/
+ 862   1              {
+ 863   2                      if( *s >= '0' && *s <= '9')     //显示
+ 864   2                      {
+ 865   3                              LCD_PutImg(x,y,3,32,Font24X32[*s-'0']);
+ 866   3                              x += 24;
+ 867   3                      }
+ 868   2                      else if( *s == ' ')
+ 869   2                      {
+ 870   3                              x += 8;
+ 871   3                      }
+ 872   2                      else if( *s == '-')
+ 873   2                      {
+ 874   3                              LCD_PutImg(x,y,3,32,Font24X32[12]);
+ 875   3                              x += 24;
+ 876   3                      }
+ 877   2                      else
+ 878   2                      {
+ 879   3                              LCD_PutImg(x,y+16,1,16,ASC8x16[*s]);    //
+ 880   3                              x += 8;
+ 881   3                      }
+ 882   2                      s ++;
+ 883   2              }
+ 884   1      }
  885          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1812    ----
+   CODE SIZE        =   2020    ----
    CONSTANT SIZE    =     17    ----
-   XDATA SIZE       =   ----      62
+   XDATA SIZE       =   ----      67
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----      10
    IDATA SIZE       =   ----    ----

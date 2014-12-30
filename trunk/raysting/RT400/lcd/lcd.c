@@ -853,7 +853,7 @@ void LCD_Print8X16(uchar x, uchar y,uchar *s)
 }
 
 //显示24x32的数字
-/*
+
 void LCD_Print24X32(uchar x, uchar y,uchar *s)
 {
 	//x坐标必需是8位对齐
@@ -881,5 +881,5 @@ void LCD_Print24X32(uchar x, uchar y,uchar *s)
 		}
 		s ++;
 	}
-}*/
+}
 

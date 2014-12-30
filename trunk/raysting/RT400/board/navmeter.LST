@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  NAVMETER                                                               12/06/2014 17:38:54 PAGE 1   
+C51 COMPILER V7.01  NAVMETER                                                               12/30/2014 10:26:50 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE NAVMETER
@@ -60,78 +60,74 @@ stmt level    source
   51   1      }
   52          
   53          
-  54          unsigned long navtime;
+  54          unsigned long navtime = 0;
   55          double nav_read()
-C51 COMPILER V7.01  NAVMETER                                                               12/06/2014 17:38:54 PAGE 2   
+C51 COMPILER V7.01  NAVMETER                                                               12/30/2014 10:26:50 PAGE 2   
 
   56          {                       
   57   1      //        if(DEBUG == 1)
   58   1      //                return 1.0; 
-  59   1              nav_command(NAV_READ);
-  60   1              navtime = 0;        
-  61   1              while(1)
-  62   1              {
-  63   2      
-  64   2                      if(reading < NAV_INVALID) //make sure it is a valid reading
-  65   2                      {              
-  66   3                           reading = atof(navread2);
-  67   3                           return reading;
-  68   3                      }       
-  69   2                      if(navtime++ > 655350)
-  70   2                      {          
-  71   3                           nav_command(NAV_READ);   
-  72   3                           navtime = 0;
-  73   3                      }                
-  74   2                      sleepms(1);
-  75   2                                      if(io_hasc())
-  76   2                                      {
-  77   3                                              nav_uart_push(io_getc());
-  78   3                                      }
-  79   2              }
-  80   1              return 1.0;
-  81   1      }            
-  82          //incoming data hander of navameter
-  83          void nav_uart_push(uchar dat)
-  84          {                            
-  85   1              if(navlen >= 19)
-  86   1              {                          
-  87   2                      RESETNAV;
-  88   2              }
-  89   1              if(((dat >= '0') && (dat <= '9')) ||
-  90   1                      (dat == '.') ||
-  91   1                      (dat == '-') ||
-  92   1                      (dat == '+') ||
-  93   1                      (dat == 'e') ||
-  94   1                      (dat == 'E') )
-  95   1              {                    
-  96   2                      navread[navlen++] = dat;
-  97   2                      reading = NAV_INVALID;
-  98   2                      return;
-  99   2              }
- 100   1                                              
- 101   1              if(navlen < 4) //not enough digits
- 102   1              {
- 103   2                      RESETNAV;
- 104   2                      return;
- 105   2              }
- 106   1              navread[navlen] = '\0';        
- 107   1              do
- 108   1              {
- 109   2                      navread2[navlen] = navread[navlen];
- 110   2              }while(navlen-- > 0);
- 111   1              navlen = 0;         
- 112   1              reading =  NAV_VALID; //valid data
- 113   1      }               
+  59   1                      if(navtime == 0)
+  60   1                      nav_command(NAV_READ);
+  61   1                      navtime++;
+  62   1              if(navtime++ > 65535)
+  63   1                   navtime = 0;
+  64   1       
+  65   1              if(reading < NAV_INVALID) //make sure it is a valid reading
+  66   1              {              
+  67   2                  reading = atof(navread2);
+  68   2                  return reading;
+  69   2               }      
+  70   1      //       sleepms(1);
+  71   1                      while(io_hasc())
+  72   1                      {
+  73   2                              nav_uart_push(io_getc());
+  74   2                      }
+  75   1              return NAV_INVALID;
+  76   1      }            
+  77          //incoming data hander of navameter
+  78          void nav_uart_push(uchar dat)
+  79          {        
+  80   1                      //sjSerialSendByte(dat);                    
+  81   1              if(navlen >= 19)
+  82   1              {                          
+  83   2                      RESETNAV;
+  84   2              }
+  85   1              if(((dat >= '0') && (dat <= '9')) ||
+  86   1                      (dat == '.') ||
+  87   1                      (dat == '-') ||
+  88   1                      (dat == '+') ||
+  89   1                      (dat == 'e') ||
+  90   1                      (dat == 'E') )
+  91   1              {                    
+  92   2                      navread[navlen++] = dat;
+  93   2                      reading = NAV_INVALID;
+  94   2                      return;
+  95   2              }
+  96   1                                              
+  97   1              if(navlen < 4) //not enough digits
+  98   1              {
+  99   2                      RESETNAV;
+ 100   2                      return;
+ 101   2              }
+ 102   1              navread[navlen] = '\0';        
+ 103   1              do
+ 104   1              {
+ 105   2                      navread2[navlen] = navread[navlen];
+ 106   2              }while(navlen-- > 0);
+ 107   1              navlen = 0;         
+ 108   1              reading =  NAV_VALID; //valid data
+ 109   1      }               
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    561    ----
-C51 COMPILER V7.01  NAVMETER                                                               12/06/2014 17:38:54 PAGE 3   
-
+   CODE SIZE        =    588    ----
    CONSTANT SIZE    =     69    ----
    XDATA SIZE       =     61       1
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
+C51 COMPILER V7.01  NAVMETER                                                               12/30/2014 10:26:50 PAGE 3   
+
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

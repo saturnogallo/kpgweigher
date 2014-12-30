@@ -6,9 +6,13 @@
 
 void sleepms(unsigned int i)
 {
-   while(i-- > 0)
-      ;
-      
+    unsigned int j;
+	j = 10;
+	while(j-- > 0)
+	{
+   		while(i-- > 0)
+      		;
+	}
 }
 #define MARK_HEAD        0xAA
 #define MARK_TAIL        0x55
@@ -32,9 +36,10 @@ void prints(u8 *str, u8 length, char uart_port)
 	}
 }
 
+uchar key;
 
-uchar key;             
 static uchar kbd_state;
+extern void DBG(unsigned char);
 void kbd_uart_push(uchar dat)
 {           
         if(dat == STATUS_IDLE||
@@ -45,8 +50,9 @@ void kbd_uart_push(uchar dat)
                 kbd_state = dat;
                 return;
         }  
-        if(key == KEY_INVALID)                              
-                key = dat;
+		if(key == KEY_INVALID)
+	        	key = dat;
+	
 }  
 static u8 lcdcmd[40];
 
@@ -92,10 +98,6 @@ void sendcmd(uchar len)
 //     if(DEBUG == 1)        return;
      while(kbd_state != STATUS_IDLE)
      {
-	 	if(sjSerialIsDataWaiting2())
-		{
-			kbd_uart_push(sjSerialWaitForOneByte2());
-		}
         if(kbd_state == STATUS_DRAW)
                 continue;
         if(kbd_state == STATUS_ERR)
@@ -109,10 +111,6 @@ void sendcmd(uchar len)
      kbd_state = STATUS_DONE;
      while(kbd_state != STATUS_IDLE)
      {
- 	 	if(sjSerialIsDataWaiting2())
-		{
-			kbd_uart_push(sjSerialWaitForOneByte2());
-		}
          if(kbd_state == STATUS_ERR)
          {
                 onecmd(len);     
@@ -393,8 +391,8 @@ void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2)
         lcdcmd[0] = CMDO_LCD_RECT;
         lcdcmd[1] = x1;
         lcdcmd[2] = y1;
-        lcdcmd[3] = x2;
-        lcdcmd[4] = y2;                
+        lcdcmd[3] = x2+1;
+        lcdcmd[4] = y2+1;                
         sendcmd(5);
 }                        
 void LCD_PrintChar(uchar cmd, uchar x,uchar y,uchar *s)
@@ -435,32 +433,8 @@ void LCD_Print8X16(uchar x, uchar y,uchar *s)
 }
 
 //显示24x32的数字
-/*
+
 void LCD_Print24X32(uchar x, uchar y,uchar *s)
 {
-	//x坐标必需是8位对齐
-	x =(x / 8) * 8;
-	while(*s)
-	{
-		if( *s >= '0' && *s <= '9')	//显示
-		{
-			LCD_PutImg(x,y,3,32,Font24X32[*s-'0']);
-			x += 24;
-		}
-		else if( *s == ' ')
-		{
-			x += 8;
-		}
-		else if( *s == '-')
-		{
-			LCD_PutImg(x,y,3,32,Font24X32[12]);
-			x += 24;
-		}
-		else
-		{
-			LCD_PutImg(x,y+16,1,16,ASC8x16[*s]);	//
-			x += 8;
-		}
-		s ++;
-	}
-}*/
+        LCD_PrintChar(CMDO_LCD_2432,x,y,s);
+}

@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  UART                                                                   12/06/2014 17:38:54 PAGE 1   
+C51 COMPILER V7.01  UART                                                                   12/30/2014 10:26:50 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE UART
@@ -62,7 +62,7 @@ stmt level    source
   53          
   54          sbit asp_rx2 = P3^4; //rx of simulated serial port2
   55          sbit asp_tx2 = P3^5; //tx of simulated serial port2
-C51 COMPILER V7.01  UART                                                                   12/06/2014 17:38:54 PAGE 2   
+C51 COMPILER V7.01  UART                                                                   12/30/2014 10:26:50 PAGE 2   
 
   56          
   57          
@@ -126,7 +126,7 @@ stmt level    source
  115          static char  flag_rx_ready;
  116          static char  flag_tx_ready;
  117          static char  timer_rx_ctr;
-C51 COMPILER V7.01  UART                                                                   12/06/2014 17:38:54 PAGE 3   
+C51 COMPILER V7.01  UART                                                                   12/30/2014 10:26:50 PAGE 3   
 
  118          static char  timer_tx_ctr;
  119          static char  bits_left_in_rx;
@@ -190,7 +190,7 @@ stmt level    source
  177   3                              if ( flag_rx_ready==FALSE )
  178   3                              {
  179   4                                      start_bit = get_rx_pin_status();
-C51 COMPILER V7.01  UART                                                                   12/06/2014 17:38:54 PAGE 4   
+C51 COMPILER V7.01  UART                                                                   12/30/2014 10:26:50 PAGE 4   
 
  180   4                                      // Test for Start Bit
  181   4                                      if ( start_bit==0 )
@@ -254,7 +254,7 @@ stmt level    source
  239   2                      while ( qout==qin )
  240   2                      {
  241   3                              idle(); 
-C51 COMPILER V7.01  UART                                                                   12/06/2014 17:38:54 PAGE 5   
+C51 COMPILER V7.01  UART                                                                   12/30/2014 10:26:50 PAGE 5   
 
  242   3                      }
  243   2                      ch = inbuf[qout] & 0xFF;

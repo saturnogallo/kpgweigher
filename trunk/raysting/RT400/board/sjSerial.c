@@ -82,6 +82,7 @@ void sjSerialHandler(void) interrupt 4 using 2
 *	Add the byte recieved to the 
 *	Tail of the buffer
 ********************************/
+extern void kbd_uart_push(uchar);
 void sjSerialHandler2(void) interrupt 8 using 3
 {
 	//just handle serial interrupt 1
@@ -93,10 +94,14 @@ void sjSerialHandler2(void) interrupt 8 using 3
 	if (S2CON & S2RI)
 	{
 		*spTail2 = S2BUF;
+		S2CON &= ~S2RI;
+		kbd_uart_push(*spTail2);
+		/*
 		spTail2 = spTail2 + 1;
 		if(spTail2 == (spbuf2+SP_BUFFER_MAX))
 			spTail2 = spbuf2;
-		S2CON &= ~S2RI;
+		*/
+		
 	}
 }
 /**
@@ -171,12 +176,13 @@ void sjSerialSendByte2(BYTE udata)
 	while(spSFlag2 == SPBUSY)	
 		;
 }
+
 /**
 *	Wait One Byte until that appeared,
 *	it perform read byte function at the same time
 *	@param PortID serial port to use
 *	@return Byte we received
-*/
+
 BYTE sjSerialWaitForOneByte2()
 {
 	BYTE udata;
@@ -189,7 +195,7 @@ BYTE sjSerialWaitForOneByte2()
 		spHead2 = spbuf2;
 	return udata;
 }
-
+*/
 /**
 *	@brief Set Initially for all serial port(under construction)
 *	
