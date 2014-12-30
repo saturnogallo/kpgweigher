@@ -176,14 +176,29 @@ void timer_isr(void) interrupt 1 using 1
 	TF0 = 0; //clear timer
 }
 extern int	test( void );
-extern void sleepms(unsigned int);
-#define ONEMS	1000
 
 uchar dispbuf[20];
-LABEL code bootup = {LBL_HZ16,30,30,7,"正在启动..."};
+uchar setptbuf[20];
+LABEL code bootup = {LBL_HZ16,30,25,13,"Raysting Instrument"};
+LABEL code bootup1 = {LBL_HZ16,30,25,13,"Raysting RT400 启动."};
+LABEL code bootup2 = {LBL_HZ16,30,25,13,"Raysting RT400 启动.."};
+LABEL code promptlbl = {LBL_HZ16,10,5,10,"设定电流(A)"};
+LABEL code calilbl = {LBL_HZ16,10,5,10,"校准电流(A)"};
+LABEL code setptlbl = {LBL_HZ6X8,100,50,10,setptbuf};
+LABEL code statelbl = {LBL_HZ24X32,25,12,8,dispbuf};
 
-LABEL code statelbl = {LBL_HZ16,30,30,26,dispbuf};
+LABEL code signneg = {LBL_HZ16,13,18,1,"-"};
+LABEL code signpos = {LBL_HZ16,13,18,1," "};
 
+extern void WriteEEPROM();
+extern void ReadEEPROM();
+double adscale = 1;
+
+#define OUTS_MAX	6
+double outs[OUTS_MAX] = {0,0,0,0,0,0};
+BYTE ptr_outs = 0;
+
+#define NAV_INVALID	-1000
 uchar nav1v = 1;
 void navto120mv()
 {               
@@ -206,20 +221,36 @@ void DBGS(const char* s)
 		sjSerialSendByte(*s++);
 	}
 }
+void DBG(unsigned char s)
+{
+	sjSerialSendByte(s);
+}
 
+extern void kbd_uart_push(uchar dat);
+extern uchar key;
 #define VX_MULTI	100.0
+
+#define nSTATE_BOOTUP		1
+#define nSTATE_MAIN_INIT	2
+#define nSTATE_MAIN_OFF		3
+#define nSTATE_MAIN_ON		4
+#define nSTATE_INPUT_INIT	5
+#define nSTATE_CALIB_INIT	6
+
 void main()
 {
 	unsigned char sid;//id of serial to send 
-	BYTE temp,key;
-	BOOL bOn = false;
+	BYTE state = nSTATE_BOOTUP;
+	BOOL bOn = 1;
+	BOOL bPos = 1;
 	unsigned char bBlick = 0;
-	double VxMeasure;   //feedback voltage reading
+	double VxMeasure,VxTemp,LastVxMeasure;   //feedback voltage reading
 	double lastDirectOutput = 0; //current da output
 	double VxOutput; //new da output
+	double userTemp; //store the userInput
 	double thisVx,volt;
 	unsigned char bStableCnt = 0;
-	long i=1000;
+	int i=1000;
 
 
 	IE = 0;//close int
@@ -249,7 +280,6 @@ void main()
 
 	sid = 0;
 	
-	AD5791Init();
 	
 //	sjRelayInit();
 
@@ -283,6 +313,8 @@ void main()
 	EA = 1;
 
 	DBGS("STARTUP DONE\r\n");	
+
+
 //	swiReset();
 	/*
 	*	Protocal routine: 
@@ -292,97 +324,252 @@ void main()
 //	swiDelay(0x0f,0xff);
 //	sjSerialSendByte('!');
 
-	    // intialize LED. 
-    sleepms(20*ONEMS);
-			DBGS("123");
+    // intialize LED. 
+    //sleepms(1000*ONEMS);
     LCD_Init();
-			DBGS("456");
-    wnd_msgbox(&bootup);
-			DBGS("789");
+    sleepms(20*ONEMS);
     //init the DMM
 /*    nav_command(NAV_INIT);              
-    sleepms(200*ONEMS);                                
-    navto1v();
-    nav_command(NAV_SLOWMODE);
-    sleepms(200*ONEMS);
-    nav_command(NAV_AFLTON);
-    sleepms(200*ONEMS);
-                     
+    sleepms(200*ONEMS);    navto1v();    nav_command(NAV_SLOWMODE);    sleepms(200*ONEMS);    nav_command(NAV_AFLTON);    sleepms(200*ONEMS);             
     sleepms(2*ONEMS); //wait until all the node is ready after power up        
 	key = KEY_INVALID;
 */
-	display_buttons(KEY_BTN1,bOn); //bOn is false
-	cm_ad5791(DACMD_RESCUE, 0);
-	i =0;
+
+	state = nSTATE_BOOTUP;
 	while(1)
 	{
-			if (i == 10)
+		if(state == nSTATE_BOOTUP)
+		{
+			key = KEY_INVALID;
+			VxMeasure = 0.0;
+			LastVxMeasure = 0;
+		    wnd_msgbox(&bootup);	//bootup logo
+			cm_ad5791(DACMD_OUTPUT, 0);
+			display_buttons(KEY_BTN1,bOn); //running or not
+			display_buttons(KEY_BTN2,0);   //zero on
+			display_buttons(KEY_BTN3,0);   //calibrate
+			display_buttons(KEY_BTN4,0);   //reset
+
+			bOn = 0;
+			display_buttons(KEY_BTN1,bOn); //bOn is false
+			AD5791Init();
+		    wnd_msgbox2(&bootup1);
+			ReadEEPROM();
+			if((adscale < 0.99) || (adscale > 1.01))
+				adscale = 1;
+			VxOutput = 0; //default user input;
+			lastDirectOutput = 0;
+			while(1)
 			{
-							cm_ad5791(DACMD_OUTPUT, 1.2);
+				VxTemp = nav_read();
+				if(fabs(VxTemp) < 20)
+					break;
 			}
-			if(i>20)
+			VxMeasure = VxTemp  *adscale * VX_MULTI*10.0; //mulitplier is 100
+		    wnd_msgbox2(&bootup2);
+			cm_ad5791(DACMD_RESCUE,0);	//rescue da
+			state = nSTATE_MAIN_INIT;
+			LCD_Cls();
+			cm_ad5791(DACMD_OUTPUT, 0);
+		}
+		if(state == nSTATE_MAIN_INIT)
+		{
+			display_buttons(KEY_BTN1,bOn);
+			LastVxMeasure = 0;
+			//VxMeasure = nav_read() * VX_MULTI*10.0; //mulitplier is 100
+			if (bOn)
 			{
-				cm_ad5791(DACMD_OUTPUT, 1.2);
-				i = 0;
+				lastDirectOutput = VxOutput / VX_MULTI;
+				cm_ad5791(DACMD_OUTPUT, lastDirectOutput);
+				state = nSTATE_MAIN_ON;
+			}else{
+				cm_ad5791(DACMD_OUTPUT,0);
+				cm_ad5791(DACMD_RESCUE,0);	//rescue da
+				state = nSTATE_MAIN_OFF;
 			}
-			i++;
-	//		sjSerialSendByte2('?');
-	//		DBGS("...");
-					VxMeasure = nav_read() * VX_MULTI*10.0; //mulitplier is 100
-						sprintf(dispbuf,"%.3f", VxMeasure);
-						    sleepms(1000*ONEMS);        
-					draw_label(&statelbl,SW_NORMAL);                        
-						//	DBGS(dispbuf);
-						//	DBGS("\r\n");
-	}
-	while(1)
-	{
+			sprintf(setptbuf,"set%c:%6f ", 'A'+ptr_outs, outs[ptr_outs]);
+			draw_label(&setptlbl,SW_NORMAL|SW_OVERLAP);                        
+		}
+		if(VxMeasure < 0)
+			bPos = 0;
+		else
+			bPos = 1;
+
+		if(state == nSTATE_MAIN_ON)
+		{
+			if(bStableCnt >= 3)
+			{
+				if(LastVxMeasure != VxMeasure)
+				{
+					sprintf(dispbuf,"%7f A ", fabs(VxMeasure));
+					draw_label(&statelbl,SW_NORMAL|SW_OVERLAP);
+					if(bPos == 1)
+						draw_label(&signpos,SW_NORMAL|SW_OVERLAP);
+					else
+						draw_label(&signneg,SW_NORMAL|SW_OVERLAP);
+					LastVxMeasure = VxMeasure;
+				}
+
+			}else{
+				//toggle Blick status
+				bBlick = 1 + bBlick;
+				if(bBlick > 3)
+				bBlick = 0;
+				
+				if (bBlick == 0)
+				{	sprintf(dispbuf,"%7f ~ ", fabs(VxMeasure));
+				}else if (bBlick == 1){
+					sprintf(dispbuf,"%7f \\ ", fabs(VxMeasure));
+				}else if (bBlick == 2){
+					sprintf(dispbuf,"%7f | ", fabs(VxMeasure));
+				}else{
+					sprintf(dispbuf,"%7f / ", fabs(VxMeasure));
+				}
+				draw_label(&statelbl,SW_NORMAL|SW_OVERLAP);
+				if(bPos == 1)
+					draw_label(&signpos,SW_NORMAL|SW_OVERLAP);
+				else
+					draw_label(&signneg,SW_NORMAL|SW_OVERLAP);
+			}
+		}
+		if(state == nSTATE_MAIN_OFF)
+		{
+			if(LastVxMeasure != VxMeasure)
+			{
+				draw_label(&setptlbl,SW_NORMAL|SW_OVERLAP);                        
+				sprintf(dispbuf,"%7f A ", fabs(VxMeasure));
+				if(bPos == 1)
+					draw_label(&signpos,SW_NORMAL|SW_OVERLAP);
+				else
+					draw_label(&signneg,SW_NORMAL|SW_OVERLAP);
+
+				draw_label(&statelbl,SW_NORMAL|SW_OVERLAP);
+				LastVxMeasure = VxMeasure;
+			}
+		}
+		if(state == nSTATE_CALIB_INIT)
+		{
+			LCD_Cls();
+			draw_label(&calilbl,SW_NORMAL|SW_OVERLAP);                        
+			userTemp = wnd_floatinput(-1);
+
+			if((fabs(VxMeasure) < 1.01*fabs(userTemp)) &&
+ 			   (fabs(VxMeasure) > 0.99*fabs(userTemp)) &&
+			   (fabs(userTemp) > 10))
+			{
+				adscale = 	fabs(userTemp) / fabs(VxMeasure);
+				WriteEEPROM();
+			}
+			LCD_Cls();
+			state = nSTATE_MAIN_INIT;
+			//display_buttons(KEY_BTN3,0);
+		}
+		if(state == nSTATE_INPUT_INIT)
+		{
+			LCD_Cls();
+			draw_label(&promptlbl,SW_NORMAL|SW_OVERLAP);                        
+			userTemp = wnd_floatinput(VxOutput);
+			if((userTemp >= 0) && (userTemp <=(10*VX_MULTI)))
+			{
+				outs[ptr_outs] = userTemp;
+				VxOutput = userTemp;
+			}
+			bOn = 0; //turn off the setting
+			LCD_Cls();
+			state = nSTATE_MAIN_INIT;
+		}
 		if(key != KEY_INVALID)
 		{
 			if(key == KEY_BTN1)
 			{
 				bOn = 1 - bOn;
-				display_buttons(KEY_BTN1,bOn);
+				state = nSTATE_MAIN_INIT;
 			}
-			if (bOn)
+			if(key == KEY_BTN2)
 			{
-				//display the feedback current and adjust it
-				VxMeasure = nav_read() * VX_MULTI*10.0; //mulitplier is 100
-				thisVx = VxMeasure;
-				//variation < 5/10000 or < 1volt
-				if( (fabs(VxOutput - thisVx) < 0.0005) ||
-					(fabs(VxOutput - thisVx) < VxOutput*0.0005))
+				display_buttons(KEY_BTN2,1);
+				while(1)
 				{
-					if(bStableCnt++ > 2)
-						bStableCnt = 3;	//stick to 3
-					sprintf(dispbuf,"%.3f", VxMeasure);
-				}else{
-					bStableCnt = 0;
-					volt = (VxOutput - VxMeasure) / (2.0*VX_MULTI);
-					if(fabs(volt) > (10 / 262144.0)) //bigger than 10 counts
-					{
-						lastDirectOutput = lastDirectOutput + volt;
-						if(lastDirectOutput > 10)
-							lastDirectOutput = 10;
-						if(lastDirectOutput < 0)
-							lastDirectOutput = 0;
-
-						cm_ad5791(DACMD_OUTPUT, (lastDirectOutput));
-					}
-					//toggle Blick status
-					bBlick = 1 + bBlick;
-					if(bBlick > 3)
-						bBlick = 0;
-
-					if (bBlick == 0)
-					{	sprintf(dispbuf,"%.3f -", VxMeasure);
-					}else if (bBlick == 1){
-						sprintf(dispbuf,"%.3f \\", VxMeasure);
-					}else if (bBlick == 2){
-						sprintf(dispbuf,"%.3f |", VxMeasure);
-					}else{
-						sprintf(dispbuf,"%.3f /", VxMeasure);
-					}
+					VxTemp = nav_read();
+					if(fabs(VxTemp) < 20)
+						break;
+				}
+				if(VxTemp < 0.01) //< 10mV
+					nav_command(NAV_ZEROON);
+				//display_buttons(KEY_BTN2,0);
+			}
+			if(key == KEY_BTN3)
+			{
+				state = nSTATE_CALIB_INIT;
+				display_buttons(KEY_BTN3,1);
+			}
+			if(key == KEY_BTN4)
+			{
+				state = nSTATE_BOOTUP;
+				display_buttons(KEY_BTN4,1);
+				LCD_Cls();
+			}
+			if(key == KEY_TAB)
+			{
+				state = nSTATE_INPUT_INIT;
+			}
+			if(key == KEY_DN)
+			{
+				bOn = 0; //turn off
+				ptr_outs = ptr_outs - 1;
+				if(ptr_outs < 0)
+					ptr_outs = 0;
+				if(outs[ptr_outs] < 0)
+					outs[ptr_outs] = 0;
+				
+				VxOutput = outs[ptr_outs];
+				sprintf(setptbuf,"set%c:%6f ", 'A'+ptr_outs, outs[ptr_outs]);
+				draw_label(&setptlbl,SW_NORMAL|SW_OVERLAP);                        
+				state = nSTATE_MAIN_INIT;
+				
+			}
+			if(key == KEY_UP)
+			{
+				bOn = 0; //turn off
+				ptr_outs = ptr_outs + 1;
+				if(ptr_outs >= OUTS_MAX )
+					ptr_outs = OUTS_MAX - 1 ;
+				if(outs[ptr_outs] < 0)
+					outs[ptr_outs] = 0;
+				
+				VxOutput = outs[ptr_outs];
+				sprintf(setptbuf,"set%c:%6f ", 'A'+ptr_outs, outs[ptr_outs]);
+				draw_label(&setptlbl,SW_NORMAL|SW_OVERLAP);                        
+				state = nSTATE_MAIN_INIT;
+			}
+			key = KEY_INVALID;
+		}
+		VxTemp = nav_read();
+		if(fabs(VxTemp) > 2)
+			continue;
+		VxMeasure = VxTemp * VX_MULTI*10.0; //mulitplier is 100		
+		if (bOn)
+		{
+			//display the feedback current and adjust it
+			thisVx = VxMeasure;
+			//variation < 5/10000 or < 1volt
+			if( (fabs(VxOutput - thisVx) < 0.0005) ||
+				(fabs(VxOutput - thisVx) < VxOutput*0.0005))
+			{
+				if(bStableCnt++ > 2)
+					bStableCnt = 3;	//stick to 3
+			}else{
+				bStableCnt = 0;
+				volt = (VxOutput - VxMeasure) / (2.0*VX_MULTI);
+				if((fabs(volt) > (10 / 262144.0)) && //bigger than 10 counts
+					(fabs(volt) < 0.5))	//tuning only within 0.5 volts ranges
+				{
+					lastDirectOutput = lastDirectOutput + volt;
+					if(lastDirectOutput > 10)
+						lastDirectOutput = 10;
+					if(lastDirectOutput < 0)
+						lastDirectOutput = 0;
+					cm_ad5791(DACMD_OUTPUT, (lastDirectOutput));
 				}
 			}
 		}

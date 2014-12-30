@@ -78,6 +78,7 @@ uchar	in_leds = KEY_INVALID;
 #define CMDO_LCD_68      0x10
 #define CMDO_LCD_816     0x11
 #define CMDO_TOIDLE      0x12
+#define CMDO_LCD_2432    0x13
 
 uchar 	state = STATUS_IDLE;
 uchar 	lastc;
@@ -181,6 +182,9 @@ void parse_cmd()
 		case CMDO_LCD_816:
 			LCD_Print8X16(inbuf[1],inbuf[2],inbuf+4);
 			break;
+		case CMDO_LCD_2432:
+			LCD_Print24X32(inbuf[1],inbuf[2],inbuf+4);
+			break;
 		default:
 			break;
 		}
@@ -205,7 +209,11 @@ void main()
 
 	 key = KEY_INVALID;
 	 timeout = 0;
-
+	
+	 display_buttons(KEY_BTN1,1);	 
+	 display_buttons(KEY_BTN2,1);	 
+	 display_buttons(KEY_BTN3,1);	 
+	 display_buttons(KEY_BTN4,1);	 
 	 while(1)
 	 {
 	 	parse_cmd();

@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  SJSERIAL                                                               12/06/2014 17:38:54 PAGE 1   
+C51 COMPILER V7.01  SJSERIAL                                                               12/30/2014 10:26:49 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE SJSERIAL
@@ -62,7 +62,7 @@ stmt level    source
   53   1      }
   54          
   55          
-C51 COMPILER V7.01  SJSERIAL                                                               12/06/2014 17:38:54 PAGE 2   
+C51 COMPILER V7.01  SJSERIAL                                                               12/30/2014 10:26:49 PAGE 2   
 
   56          
   57          
@@ -93,140 +93,146 @@ stmt level    source
   82          *       Add the byte recieved to the 
   83          *       Tail of the buffer
   84          ********************************/
-  85          void sjSerialHandler2(void) interrupt 8 using 3
-  86          {
-  87   1              //just handle serial interrupt 1
-  88   1              if(S2CON & S2TI)
-  89   1              {
-  90   2                      S2CON &= ~S2TI;
-  91   2                      spSFlag2 = SPIDLE;      
-  92   2              }
-  93   1              if (S2CON & S2RI)
-  94   1              {
-  95   2                      *spTail2 = S2BUF;
-  96   2                      spTail2 = spTail2 + 1;
-  97   2                      if(spTail2 == (spbuf2+SP_BUFFER_MAX))
-  98   2                              spTail2 = spbuf2;
-  99   2                      S2CON &= ~S2RI;
- 100   2              }
- 101   1      }
- 102          /**
- 103          *       @return TRUE when data availabel ,FALSE while not
- 104          */
- 105          BYTE sjSerialIsDataWaiting()
- 106          {
- 107   1              if(spHead == spTail)
- 108   1                      return 0;
- 109   1              if(spTail > spHead)
- 110   1                      return spTail-spHead;
- 111   1      
- 112   1              return spTail+SP_BUFFER_MAX-spHead;
- 113   1      }
- 114          /**
- 115          *       Send One Byte on Serial port , (under construction)
- 116          *       and return with no wait for send finished
- 117          *       @param udata the Byte to send
-C51 COMPILER V7.01  SJSERIAL                                                               12/06/2014 17:38:54 PAGE 3   
+  85          extern void kbd_uart_push(uchar);
+  86          void sjSerialHandler2(void) interrupt 8 using 3
+  87          {
+  88   1              //just handle serial interrupt 1
+  89   1              if(S2CON & S2TI)
+  90   1              {
+  91   2                      S2CON &= ~S2TI;
+  92   2                      spSFlag2 = SPIDLE;      
+  93   2              }
+  94   1              if (S2CON & S2RI)
+  95   1              {
+  96   2                      *spTail2 = S2BUF;
+  97   2                      S2CON &= ~S2RI;
+  98   2                      kbd_uart_push(*spTail2);
+  99   2                      /*
+ 100   2                      spTail2 = spTail2 + 1;
+ 101   2                      if(spTail2 == (spbuf2+SP_BUFFER_MAX))
+ 102   2                              spTail2 = spbuf2;
+ 103   2                      */
+ 104   2                      
+ 105   2              }
+ 106   1      }
+ 107          /**
+ 108          *       @return TRUE when data availabel ,FALSE while not
+ 109          */
+ 110          BYTE sjSerialIsDataWaiting()
+ 111          {
+ 112   1              if(spHead == spTail)
+ 113   1                      return 0;
+ 114   1              if(spTail > spHead)
+ 115   1                      return spTail-spHead;
+ 116   1      
+ 117   1              return spTail+SP_BUFFER_MAX-spHead;
+C51 COMPILER V7.01  SJSERIAL                                                               12/30/2014 10:26:49 PAGE 3   
 
- 118          *       @param PortID serial port to use
- 119          */
- 120          void sjSerialSendByte(BYTE udata)
- 121          {
- 122   1              spSFlag=SPBUSY;
- 123   1              //Send the udata
- 124   1              SBUF = udata;
- 125   1              while(spSFlag == SPBUSY)        
- 126   1                      ;
- 127   1      }
- 128          /**
- 129          *       Wait One Byte until that appeared,
- 130          *       it perform read byte function at the same time
- 131          *       @param PortID serial port to use
- 132          *       @return Byte we received
- 133          */
- 134          BYTE sjSerialWaitForOneByte()
- 135          {
- 136   1              BYTE udata;
- 137   1              while(spHead == spTail) 
- 138   1              {
- 139   2              }
- 140   1              udata = *spHead;
- 141   1              spHead = spHead+1;
- 142   1              if(spHead == (spbuf+SP_BUFFER_MAX))
- 143   1                      spHead = spbuf;
- 144   1              return udata;
- 145   1      }
- 146          
- 147          //=================COM 2 related functions
- 148          /**
- 149          *       @return TRUE when data availabel ,FALSE while not
- 150          */
- 151          BYTE sjSerialIsDataWaiting2()
- 152          {
- 153   1              if(spHead2 == spTail2)
- 154   1                      return 0;
- 155   1              if(spTail2 > spHead2)
- 156   1                      return spTail2-spHead2;
- 157   1      
- 158   1              return spTail2 + SP_BUFFER_MAX-spHead;
- 159   1      }
- 160          /**
- 161          *       Send One Byte on Serial port , (under construction)
- 162          *       and return with no wait for send finished
- 163          *       @param udata the Byte to send
- 164          *       @param PortID serial port to use
- 165          */
- 166          void sjSerialSendByte2(BYTE udata)
- 167          {
- 168   1              spSFlag2=SPBUSY;
- 169   1              //Send the udata
- 170   1              S2BUF = udata;
- 171   1              while(spSFlag2 == SPBUSY)       
- 172   1                      ;
- 173   1      }
- 174          /**
- 175          *       Wait One Byte until that appeared,
- 176          *       it perform read byte function at the same time
- 177          *       @param PortID serial port to use
- 178          *       @return Byte we received
- 179          */
-C51 COMPILER V7.01  SJSERIAL                                                               12/06/2014 17:38:54 PAGE 4   
+ 118   1      }
+ 119          /**
+ 120          *       Send One Byte on Serial port , (under construction)
+ 121          *       and return with no wait for send finished
+ 122          *       @param udata the Byte to send
+ 123          *       @param PortID serial port to use
+ 124          */
+ 125          void sjSerialSendByte(BYTE udata)
+ 126          {
+ 127   1              spSFlag=SPBUSY;
+ 128   1              //Send the udata
+ 129   1              SBUF = udata;
+ 130   1              while(spSFlag == SPBUSY)        
+ 131   1                      ;
+ 132   1      }
+ 133          /**
+ 134          *       Wait One Byte until that appeared,
+ 135          *       it perform read byte function at the same time
+ 136          *       @param PortID serial port to use
+ 137          *       @return Byte we received
+ 138          */
+ 139          BYTE sjSerialWaitForOneByte()
+ 140          {
+ 141   1              BYTE udata;
+ 142   1              while(spHead == spTail) 
+ 143   1              {
+ 144   2              }
+ 145   1              udata = *spHead;
+ 146   1              spHead = spHead+1;
+ 147   1              if(spHead == (spbuf+SP_BUFFER_MAX))
+ 148   1                      spHead = spbuf;
+ 149   1              return udata;
+ 150   1      }
+ 151          
+ 152          //=================COM 2 related functions
+ 153          /**
+ 154          *       @return TRUE when data availabel ,FALSE while not
+ 155          */
+ 156          BYTE sjSerialIsDataWaiting2()
+ 157          {
+ 158   1              if(spHead2 == spTail2)
+ 159   1                      return 0;
+ 160   1              if(spTail2 > spHead2)
+ 161   1                      return spTail2-spHead2;
+ 162   1      
+ 163   1              return spTail2 + SP_BUFFER_MAX-spHead;
+ 164   1      }
+ 165          /**
+ 166          *       Send One Byte on Serial port , (under construction)
+ 167          *       and return with no wait for send finished
+ 168          *       @param udata the Byte to send
+ 169          *       @param PortID serial port to use
+ 170          */
+ 171          void sjSerialSendByte2(BYTE udata)
+ 172          {
+ 173   1              spSFlag2=SPBUSY;
+ 174   1              //Send the udata
+ 175   1              S2BUF = udata;
+ 176   1              while(spSFlag2 == SPBUSY)       
+ 177   1                      ;
+ 178   1      }
+ 179          
+C51 COMPILER V7.01  SJSERIAL                                                               12/30/2014 10:26:49 PAGE 4   
 
- 180          BYTE sjSerialWaitForOneByte2()
- 181          {
- 182   1              BYTE udata;
- 183   1              while(spHead2 == spTail2)       
- 184   1              {
- 185   2              }
- 186   1              udata = *spHead2;
- 187   1              spHead2 = spHead2 + 1;
- 188   1              if(spHead2 == (spbuf2 + SP_BUFFER_MAX))
- 189   1                      spHead2 = spbuf2;
- 190   1              return udata;
- 191   1      }
- 192          
- 193          /**
- 194          *       @brief Set Initially for all serial port(under construction)
- 195          *       
- 196          *       Serial port format will be set identically
- 197          */
- 198          void sjSerialInit()
- 199          {
- 200   1              spHead=spbuf;
- 201   1              spTail=spbuf;
- 202   1              spSFlag=SPIDLE;
- 203   1      
- 204   1              spHead2=spbuf2;
- 205   1              spTail2=spbuf2;
- 206   1              spSFlag2=SPIDLE;
- 207   1      
- 208   1              InitCOM1();
- 209   1              InitCOM2();
- 210   1      }
+ 180          /**
+ 181          *       Wait One Byte until that appeared,
+ 182          *       it perform read byte function at the same time
+ 183          *       @param PortID serial port to use
+ 184          *       @return Byte we received
+ 185          
+ 186          BYTE sjSerialWaitForOneByte2()
+ 187          {
+ 188                  BYTE udata;
+ 189                  while(spHead2 == spTail2)       
+ 190                  {
+ 191                  }
+ 192                  udata = *spHead2;
+ 193                  spHead2 = spHead2 + 1;
+ 194                  if(spHead2 == (spbuf2 + SP_BUFFER_MAX))
+ 195                          spHead2 = spbuf2;
+ 196                  return udata;
+ 197          }
+ 198          */
+ 199          /**
+ 200          *       @brief Set Initially for all serial port(under construction)
+ 201          *       
+ 202          *       Serial port format will be set identically
+ 203          */
+ 204          void sjSerialInit()
+ 205          {
+ 206   1              spHead=spbuf;
+ 207   1              spTail=spbuf;
+ 208   1              spSFlag=SPIDLE;
+ 209   1      
+ 210   1              spHead2=spbuf2;
+ 211   1              spTail2=spbuf2;
+ 212   1              spSFlag2=SPIDLE;
+ 213   1      
+ 214   1              InitCOM1();
+ 215   1              InitCOM2();
+ 216   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    745    ----
+   CODE SIZE        =    618    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =     78    ----
    PDATA SIZE       =   ----    ----

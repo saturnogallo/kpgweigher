@@ -51,37 +51,33 @@ void nav_command(uchar cmd)
 }
 
 
-unsigned long navtime;
+unsigned long navtime = 0;
 double nav_read()
 {                       
 //        if(DEBUG == 1)
 //                return 1.0; 
-        nav_command(NAV_READ);
-        navtime = 0;        
-        while(1)
-        {
-
-                if(reading < NAV_INVALID) //make sure it is a valid reading
-                {              
-                     reading = atof(navread2);
-                     return reading;
-                }       
-                if(navtime++ > 655350)
-                {          
-                     nav_command(NAV_READ);   
-                     navtime = 0;
-                }                
-                sleepms(1);
-				if(io_hasc())
-				{
-					nav_uart_push(io_getc());
-				}
-        }
-        return 1.0;
+		if(navtime == 0)
+	        nav_command(NAV_READ);
+		navtime++;
+        if(navtime++ > 65535)
+             navtime = 0;
+ 
+        if(reading < NAV_INVALID) //make sure it is a valid reading
+        {              
+            reading = atof(navread2);
+            return reading;
+         }      
+//       sleepms(1);
+		while(io_hasc())
+		{
+			nav_uart_push(io_getc());
+		}
+        return NAV_INVALID;
 }            
 //incoming data hander of navameter
 void nav_uart_push(uchar dat)
-{                            
+{        
+		//sjSerialSendByte(dat);                    
         if(navlen >= 19)
         {                          
                 RESETNAV;

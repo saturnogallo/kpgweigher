@@ -189,33 +189,4 @@ void sjRelayInit()
 	swiReset();
 	swiDelay(0x0f,0xff);
 }
-/*
-void cm_relay(unsigned char temp)
-{
-				if(temp == HMARK)
-				{
-					while(1)
-					{
-						temp = sjSerialWaitForOneByte();
-						if(temp == EMARK)
-							break;
-						if(temp == RMARK)
-						{
-							swiReset();
-							continue;
-						}
-						if(temp == QMARK)
-							continue;
-						swiAction(temp);
-					}
-					//sid = "";
-					sjSerialSendByte(HMARK);
-					temp = 0; //for DAC board should not read P2 here
-					sjSerialSendByte(temp);
-					temp = 0; //for DAC board should not read P3 here
-					sjSerialSendByte(temp);
-					sjSerialSendByte(EMARK);
-				}
 
-}
-*/

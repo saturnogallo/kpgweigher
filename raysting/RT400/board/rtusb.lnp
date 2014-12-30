@@ -6,6 +6,7 @@
 "font.obj",
 "window.obj",
 "AD5791.obj",
-"navmeter.obj" 
+"navmeter.obj",
+".\eeprom2.obj" 
 TO "rtusb" 
 RAMSIZE(256) 

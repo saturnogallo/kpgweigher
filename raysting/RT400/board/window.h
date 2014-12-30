@@ -2,7 +2,7 @@
 #define _WINDOW_H_
 #include "typedef.h"
 
-typedef void (*MSG_HANDLER)(uchar key);
+//typedef void (*MSG_HANDLER)(uchar key);
 #define SW_NORMAL	1
 #define SW_REVERSE	2
 #define SW_OVERLAP	4
@@ -14,13 +14,13 @@ typedef void (*MSG_HANDLER)(uchar key);
 #define MSG_INIT	0xff
 #define MSG_REFRESH	0xfe
 
-
+/*
 typedef code struct typWINDOW
 {
 	uchar page_id;	      //id of the page
 	MSG_HANDLER handler;  //message handler of current window, a static variable can be declared in the function
 }WINDOW;											
-
+*/
 #define LBL_HZ6X8	1
 #define LBL_HZ8X16	2
 #define LBL_HZ24X32	3
@@ -45,12 +45,13 @@ typedef code struct  typLABEL
 
 void draw_label(LABEL *lbl, uchar reverse);
 void wnd_msgbox(LABEL *lbl);
-void draw_inputbox(LABEL *lbl);
+void wnd_msgbox2(LABEL *lbl);
+void draw_inputbox(LABEL *lbl,BOOL redraw);
 double wnd_floatinput(double oldval);
 uchar wnd_intinput(uchar oldval);
 
-extern MSG_HANDLER curr_window;
-extern MSG_HANDLER caller;
+//extern MSG_HANDLER curr_window;
+//extern MSG_HANDLER caller;
 extern uchar max_databuf;
 #define window_setup(A)	max_databuf = A
 #endif

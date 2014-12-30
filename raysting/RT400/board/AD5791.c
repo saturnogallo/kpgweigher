@@ -12,6 +12,7 @@
 
 //#include "AD5791.h"
 //#include "AD5791Driver.h"
+#include "sjDefine.h"
 #include "AD5791.h"
 #include "stdio.h"
 #include "math.h"
@@ -26,7 +27,7 @@ unsigned char ch_dummy;
 
 #define AD5791OutputBit(A,B)	A=B;
 
-#define AD5791DelayUs(i)	swiDelay(1,i);
+#define AD5791DelayUs(i)	sleepms(1);
 
 #define AD5791InputBit(A)  (A) 
 
@@ -98,9 +99,9 @@ void AD5791Init()
 
 	dacbuf = (unsigned char*)(AD5791Registers + DAC_VALUE);
 	clrbuf = (unsigned char*)(AD5791Registers + CLEARCODE);
-
+	sleepms(50*ONEMS);
 	AD5791Initialization();
-	swiDelay(0x0f,0xff);
+	sleepms(50*ONEMS);//swiDelay(0x0f,0xff);
 
 	AD5791Registers[CONTROL] = CONFIG_MODE;
 	WriteToAD5791ViaSPI(CONTROL, AD5791Registers);
@@ -110,10 +111,10 @@ void AD5791Init()
 
 	AD5791Registers[DAC_VALUE] = MYCLR_CODE;	
 	WriteToAD5791ViaSPI(DAC_VALUE, AD5791Registers);
+	sleepms(50*ONEMS);
 	AD5791HardwareLoad();	
 	AD5791Registers[CONTROL] = 0;
 	AD5791Registers[CLEARCODE] = MYCLR_CODE;
-
 }
 
 void AD5791HardwareReset()
@@ -195,7 +196,11 @@ unsigned char cm_ad5791(unsigned char temp, double val)  //crc b1 b2 b3 func
 
 						if(temp == DACMD_OUTPUT)
 						{
-							d = floor(0.5+val*(1048576 - 1) / 10.0);
+            // Vout = (Vrefp-Vrefn)*D/(2^20-1)+Vrefn =>  D= (Vout-Vrefn)*(2^20-1)/(Vrefp-Vrefn)
+            // when BUF is enabled , Vrefp = 10V;  Vrefn = -10V; D = (Vout+10)*(2^20-1)/(20)
+            // D = Vout*(2^20-1)/10;
+
+							d = floor(0.5+ (val*(1048576 - 1) / 10.0));
 							if( d == lastd)
 							{
 								temp = 1;

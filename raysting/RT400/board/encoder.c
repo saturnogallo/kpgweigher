@@ -79,11 +79,12 @@ void pause()
 #define MAXRETRY   10  //max retry times
 xdata uchar keypos[FULLCOLS];
 uchar wait;   //wait times count
-void sleepms(unsigned int i)
+extern void sleepms(unsigned int i);
+/*
 {
    while(i-- > 0)
       ;
-}
+}*/
 uchar bUpdate = 1;
 
 

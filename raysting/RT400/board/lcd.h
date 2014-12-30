@@ -3,8 +3,8 @@
 
 #include "typedef.h"
 
-#define LCD_WIDTH      		32      //显示区宽度 16 * 8 = 128 dot
-#define LCD_HEIGHT		64	//64 dot
+#define LCD_WIDTH      		32      //显示区宽度 32 * 8 = 240 dot
+#define LCD_HEIGHT			64	//64 dot
 #define LCD_TEXT_HOME_ADDR     	0x0000  //文本显示区首地址
 #define LCD_GRAPH_HOME_ADDR     ((LCD_HEIGHT/8)*30)  //图形显示区首地址   =240
 
@@ -99,7 +99,7 @@ void LCD_Rectange(uchar x1,uchar y1,uchar x2,uchar y2);
 void LCD_ReverseRect(uchar x,uchar y,uchar w,uchar h);
 void LCD_PrintHz12(uchar x,uchar y,uchar *s);
 void LCD_PrintHz16(uchar x,uchar y,uchar *s);
-//void LCD_Print24X32(uchar x, uchar y,uchar *s);
+void LCD_Print24X32(uchar x, uchar y,uchar *s);
 void LCD_Print6X8(uchar x, uchar y,uchar *s);
 void LCD_Print8X16(uchar x, uchar y,uchar *s);
 
@@ -119,6 +119,7 @@ void LCD_Print8X16(uchar x, uchar y,uchar *s);
 #define CMDO_LCD_68      0x10
 #define CMDO_LCD_816     0x11
 #define CMDO_TOIDLE      0x12
+#define CMDO_LCD_2432    0x13
 
 
 #define KEY_INVALID '-'													  
@@ -144,6 +145,11 @@ void LCD_Print8X16(uchar x, uchar y,uchar *s);
 #define KEY_BTN4  	'd'
 #define KEY_KTT		'i'
 #define KEY_RS		'j'
+
+#define CLR_BTN1	'e'
+#define CLR_BTN2	'f'
+#define CLR_BTN3	'g'
+#define CLR_BTN4	'h'
 //'k'
 //'l'
 
