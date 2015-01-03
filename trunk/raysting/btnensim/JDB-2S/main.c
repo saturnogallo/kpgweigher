@@ -516,6 +516,11 @@ void main()
 		while(sjSerialIsDataWaiting() == TRUE)
 		{
 				temp = sjSerialWaitForOneByte();
+				if(temp == ':')  //incase :fetch?
+				{
+					sid = sjSerialWaitForOneByte();
+					continue;
+				}
 				if(temp == HMARK)
 				{
 					temp = sjSerialWaitForOneByte();		
@@ -554,6 +559,16 @@ void main()
 						output_12knob();
 //						sjSerialSendByte(0x0D);
 						sjSerialSendByte(0x0A);
+					}
+				}
+				if(sid == 'f') //incase of :fetch?
+				{
+					if(temp == '?')
+					{
+						output_12knob();
+						sjSerialSendByte(0x0D);
+						sjSerialSendByte(0x0A);
+						sid = ' ';
 					}
 				}
 		}		

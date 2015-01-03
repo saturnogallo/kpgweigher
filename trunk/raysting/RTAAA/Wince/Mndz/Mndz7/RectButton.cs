@@ -32,7 +32,11 @@ namespace Mndz7
         private bool _bEnabled = true;
         private Graphics graphic;
         private System.Drawing.Bitmap backBuffer;
-
+        public static Beep myBeep;
+        static RectButton()
+        {
+            myBeep = new Beep("PWM1:"); 
+        }
         public bool bEnabled
         {
             get
@@ -213,6 +217,7 @@ namespace Mndz7
         {
             if (bLock)
                 return;
+            myBeep.BeepLoad();
             bLock = true;
             Point p = System.Windows.Forms.Control.MousePosition;
             p = base.PointToClient(p);

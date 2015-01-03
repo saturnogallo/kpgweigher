@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 1   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ stmt level    source
   53   2                      TI = 0;
   54   2                      spSFlag = SPIDLE;       
   55   2              }
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 2   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 2   
 
   56   1              if(RI)
   57   1              {
@@ -126,7 +126,7 @@ stmt level    source
  115                                0xfd,0x61,0xdB,0xf2,0x66,0xb6,0xbe,0xe0,0xfe,0xe6,
  116          */
  117          #define LED_HF          0x08
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 3   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 3   
 
  118          #define LED_SPACE       0x00
  119          #define LED_PT          0x80
@@ -190,7 +190,7 @@ stmt level    source
  177          #define MAXROWS         16      //total rows for one pan
  178          
  179          #define POINTPOS        4       //position of point
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 4   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 4   
 
  180          #define FULLCOLS        11      //total pans
  181          #define SCALECOLS       10      //total scale pan number
@@ -254,7 +254,7 @@ stmt level    source
  237   5                                              bUpdate = 1;
  238   5                                      }
  239   4                                      keypos[coltbls[pos]] = rowtbls[row];
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 5   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 5   
 
  240   4                              }
  241   3                      }
@@ -318,7 +318,7 @@ stmt level    source
  299   2              }
  300   1      //                      sjSerialSendByte(0x55);
  301   1      //      pause();
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 6   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 6   
 
  302   1              clearrows();
  303   1              
@@ -382,7 +382,7 @@ stmt level    source
  361   2                      leds[0] = led_code[0];
  362   2              }
  363   1              if(p < SCALECOLS)       //invalid value
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 7   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 7   
 
  364   1              {
  365   2                      clear_12knob();
@@ -446,7 +446,7 @@ stmt level    source
  423   2                      }
  424   1                      if(i == 3)
  425   1                      {
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 8   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 8   
 
  426   2                              leds[ILEDVAL_POS+2] = led_code[2] LEDPT_OP LED_PT;
  427   2                              leds[ILEDVAL_POS+3] = led_code[0];
@@ -510,7 +510,7 @@ stmt level    source
  485   3                                      for(cnt = 0;cnt < TOTALLEDS; cnt++)
  486   3                                              cmp_leds[cnt] = leds[cnt];
  487   3                                      wait = 1;
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 9   
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 9   
 
  488   3                                      continue;
  489   3                              }else{
@@ -543,55 +543,70 @@ stmt level    source
  516   2                      while(sjSerialIsDataWaiting() == TRUE)
  517   2                      {
  518   3                                      temp = sjSerialWaitForOneByte();
- 519   3                                      if(temp == HMARK)
+ 519   3                                      if(temp == ':')  //incase :fetch?
  520   3                                      {
- 521   4                                              temp = sjSerialWaitForOneByte();                
- 522   4                                              if(temp != HMARK)
- 523   4                                              {
- 524   5                                                      sid = temp;
- 525   5                                                      continue;
- 526   5                                              }
- 527   4                                      }
- 528   3                                      if(sid == 's')//send to switch
- 529   3                                      {
- 530   4                                              if(temp == HMARK)
- 531   4                                              {
- 532   5                                                      while(1)
- 533   5                                                      {
- 534   6                                                              temp = sjSerialWaitForOneByte();
- 535   6                                                              if(temp == EMARK)
- 536   6                                                                      break;
- 537   6                                                              if(temp == RMARK)
- 538   6                                                                      continue;
- 539   6                                                              if(temp == QMARK)
- 540   6                                                                      continue;
- 541   6                                                      }
- 542   5                                                      sjSerialSendByte(HMARK);
- 543   5                                                      temp = 0xff;
- 544   5                                                      sjSerialSendByte(temp);
- 545   5                                                      temp = 0xff;
- 546   5                                                      sjSerialSendByte(temp);
- 547   5                                                      sjSerialSendByte(EMARK);
- 548   5                                              }
- 549   4                                      }
-C51 COMPILER V7.01  MAIN                                                                   12/06/2014 12:28:45 PAGE 10  
+ 521   4                                              sid = sjSerialWaitForOneByte();
+ 522   4                                              continue;
+ 523   4                                      }
+ 524   3                                      if(temp == HMARK)
+ 525   3                                      {
+ 526   4                                              temp = sjSerialWaitForOneByte();                
+ 527   4                                              if(temp != HMARK)
+ 528   4                                              {
+ 529   5                                                      sid = temp;
+ 530   5                                                      continue;
+ 531   5                                              }
+ 532   4                                      }
+ 533   3                                      if(sid == 's')//send to switch
+ 534   3                                      {
+ 535   4                                              if(temp == HMARK)
+ 536   4                                              {
+ 537   5                                                      while(1)
+ 538   5                                                      {
+ 539   6                                                              temp = sjSerialWaitForOneByte();
+ 540   6                                                              if(temp == EMARK)
+ 541   6                                                                      break;
+ 542   6                                                              if(temp == RMARK)
+ 543   6                                                                      continue;
+ 544   6                                                              if(temp == QMARK)
+ 545   6                                                                      continue;
+ 546   6                                                      }
+ 547   5                                                      sjSerialSendByte(HMARK);
+ 548   5                                                      temp = 0xff;
+ 549   5                                                      sjSerialSendByte(temp);
+C51 COMPILER V7.01  MAIN                                                                   12/20/2014 11:18:36 PAGE 10  
 
- 550   3                                      if(sid == 'n')//send to navmeter
- 551   3                                      {
- 552   4                                              if(temp == '?')
- 553   4                                              {
- 554   5                                                      output_12knob();
- 555   5      //                                              sjSerialSendByte(0x0D);
- 556   5                                                      sjSerialSendByte(0x0A);
- 557   5                                              }
- 558   4                                      }
- 559   3                      }               
- 560   2              }
- 561   1      }
+ 550   5                                                      temp = 0xff;
+ 551   5                                                      sjSerialSendByte(temp);
+ 552   5                                                      sjSerialSendByte(EMARK);
+ 553   5                                              }
+ 554   4                                      }
+ 555   3                                      if(sid == 'n')//send to navmeter
+ 556   3                                      {
+ 557   4                                              if(temp == '?')
+ 558   4                                              {
+ 559   5                                                      output_12knob();
+ 560   5      //                                              sjSerialSendByte(0x0D);
+ 561   5                                                      sjSerialSendByte(0x0A);
+ 562   5                                              }
+ 563   4                                      }
+ 564   3                                      if(sid == 'f') //incase of :fetch?
+ 565   3                                      {
+ 566   4                                              if(temp == '?')
+ 567   4                                              {
+ 568   5                                                      output_12knob();
+ 569   5                                                      sjSerialSendByte(0x0D);
+ 570   5                                                      sjSerialSendByte(0x0A);
+ 571   5                                                      sid = ' ';
+ 572   5                                              }
+ 573   4                                      }
+ 574   3                      }               
+ 575   2              }
+ 576   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   1024    ----
+   CODE SIZE        =   1069    ----
    CONSTANT SIZE    =     43    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

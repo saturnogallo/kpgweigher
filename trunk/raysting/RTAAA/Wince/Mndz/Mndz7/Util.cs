@@ -5,7 +5,8 @@ using System.Text;
 using System.Xml.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
-
+using System.Threading;
+using Microsoft.Win32;
 namespace Mndz7
 {
     class Util
@@ -383,5 +384,163 @@ namespace Mndz7
         private StringResource() { }
 
     }
+    /*
+     * h_spi = CreateFile(TEXT("SPI1:"), GENERIC_READ|GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 
+DWORD dwWritenSize = 0;
+DWORD dwWritenData[8] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08};
+
+SET_CONFIG  Set_SPI_Config;
+
+Set_SPI_Config.dwMode = SPI_MASTER_MODE;
+...
+Set_SPI_Config.bUseTxDMA = TRUE;
+
+DeviceIoControl(h_spi, SPI_IOCTL_SET_CONFIG, &Set_SPI_Config, sizeof(Set_SPI_Config), NULL, 0, NULL, NULL);
+DeviceIoControl(h_spi, SPI_IOCTL_START, NULL, 0, NULL, 0, NULL, NULL);
+
+WriteFile(h_spi, dwWritenData, 8, &dwWritenSize, NULL);
+     */
+    unsafe public class GPIO
+    {
+        const UInt32 OPEN_EXISTING = 3;
+        const UInt32 GENERIC_READ = 0x80000000;
+        const UInt32 GENERIC_WRITE = 0x40000000;
+        const Int32 INVALID_HANDLE_VALUE = -1;
+        private IntPtr hPort = (IntPtr)INVALID_HANDLE_VALUE;
+        //control word
+        //然后将该函数原型中的参数类型和C#中的数据类型进行比较得出C#的该函数原型如下
+        [DllImport("coredll.dll")]
+        public static extern IntPtr CreateFile(
+            String lpFileName,
+            UInt32 dwDesiredAccess,
+            UInt32 dwShareMode,
+            IntPtr lpSecurityAttributes,
+            UInt32 dwCreationDisposition,
+            UInt32 dwFlagsAndAttributes,
+            IntPtr hTemplateFile
+            );
+        [DllImport("coredll.dll")]
+        public static extern bool DeviceIoControl(
+            IntPtr hDevice,
+            UInt32 dwIoControlCode,
+            Byte[] lpInBuffer,
+            UInt32 nInBufferSize,
+            Byte[] lpOutBuffer,
+            UInt32 nOutBufferSize,
+            UInt32 lpBytesReturned,
+            IntPtr lpOverlapped
+            );
+        [DllImport("coredll.dll")]
+        public static extern bool CloseHandle(IntPtr hDevice);
+        public GPIO(string dev)
+        {
+            hPort = CreateFile(dev, GENERIC_READ | GENERIC_WRITE, 0, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
+
+        }
+        public void SetPort(string pin, bool bOn)
+        {
+            UInt32 bytesReturned;
+            if (hPort == (IntPtr)INVALID_HANDLE_VALUE)
+            {
+                return;
+            }
+            if (bOn)
+            {
+                DeviceIoControl(hPort, 0x02, null, 0, null, 0, 0, IntPtr.Zero);
+            }
+            else
+            {
+                DeviceIoControl(hPort, 0x07, null, 0, null, 0, 0, IntPtr.Zero);
+            }
+        }
+        public byte GetPort(string pin)
+        {
+            return (byte)0;
+        }
+    }
+    //控制蜂鸣器的步骤是1、打开流驱动接口2、操作硬件3、关闭流驱动接口
+    unsafe public class Beep
+    {
+        const UInt32 OPEN_EXISTING = 3;
+        const UInt32 GENERIC_READ = 0x80000000;
+        const UInt32 GENERIC_WRITE = 0x40000000;
+        const Int32 INVALID_HANDLE_VALUE = -1;
+        private IntPtr hPort = (IntPtr)INVALID_HANDLE_VALUE;
+        // PWM的控制字，http://www.doc88.com/p-200931819849.html
+        //const UInt32 IOCTL_PWM_SET_PRESCALER = 1;
+        const UInt32 IOCTL_PWM_SET_FREQ = 2;
+        const UInt32 IOCTL_PWM_SET_DUTY = 3;
+        const UInt32 IOCTL_PWM_STOP = 1;
+        //const UInt32 IOCTL_PWM_GET_FREQUENCY = 4;
+        //首先找到函数在dll库中的原型
+        //然后将该函数原型中的参数类型和C#中的数据类型进行比较得出C#的该函数原型如下
+        [DllImport("coredll.dll")]
+        public static extern IntPtr CreateFile(
+            String lpFileName,
+            UInt32 dwDesiredAccess,
+            UInt32 dwShareMode,
+            IntPtr lpSecurityAttributes,
+            UInt32 dwCreationDisposition,
+            UInt32 dwFlagsAndAttributes,
+            IntPtr hTemplateFile
+            );
+        [DllImport("coredll.dll")]
+        public static extern bool DeviceIoControl(
+            IntPtr hDevice,
+            UInt32 dwIoControlCode,
+            Byte[] lpInBuffer,
+            UInt32 nInBufferSize,
+            Byte[] lpOutBuffer,
+            UInt32 nOutBufferSize,
+            UInt32 lpBytesReturned,
+            IntPtr lpOverlapped
+            );
+        [DllImport("coredll.dll")]
+        public static extern bool CloseHandle(IntPtr hDevice);
+        UInt32[] prescale = new UInt32[2] { 0, 15 };//15
+        UInt32[] divider = new UInt32[2] { 0, 8 };//8
+        UInt32[] buff = new UInt32[3] { 0, 488, 244 };//488,244来源
+        /*int freq = 800;       // 工作频率初值
+         #define S3C2440_PCLK 50000000    // PCLK是50MHz
+         #define Prescaler0 15     // 预分频
+         #define MUX0   8     // 定时器分频值
+         #define TCNTB0   (S3C2440_PCLK/128/freq)   // 工作频率
+         #define TCMPB0   (TCNTB0>>1)    // 占空比，默认是50%
+         
+         BYTE prescale[2] = {0, Prescaler0};
+         BYTE divider[2] = {0, MUX0};
+         DWORD buff[3] = {0, TCNTB0, TCMPB0};*/
+        public Beep(string dev)
+        {
+            hPort = CreateFile(dev, GENERIC_READ | GENERIC_WRITE, 0, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
+        }
+        public void BeepLoad()
+        {
+            if (hPort == (IntPtr)INVALID_HANDLE_VALUE)
+            {
+                return;
+            }
+            FreqSet(hPort, 2000);
+            Thread.Sleep(50);
+            FreqSet(hPort, 0);
+
+        }
+        private void FreqSet(IntPtr hPort, UInt32 value)
+        {
+            byte[] sBuf = new byte[4];
+            UInt32 sInput;
+
+            if (hPort == (IntPtr)INVALID_HANDLE_VALUE)
+            {
+                return;
+            }
+            sInput = 50;
+            BitConverter.GetBytes(sInput).CopyTo(sBuf, 0);
+            DeviceIoControl(hPort, IOCTL_PWM_SET_DUTY, sBuf, 4, null, 0, 0, IntPtr.Zero);
+            sInput = value;
+            BitConverter.GetBytes(sInput).CopyTo(sBuf, 0);
+            DeviceIoControl(hPort, IOCTL_PWM_SET_FREQ, sBuf, 4, null, 0, 0, IntPtr.Zero);
+        }
+    }
 }

@@ -37,7 +37,14 @@ namespace Mndz
 
             InitializeComponent();
             myBeep = new Beep("PWM1:");
-            s_scale = this.label3.Text.Substring(0, this.label1.Text.IndexOf("A")-1);
+
+            if (this.label3.Text.IndexOf("1000A") >= 0)
+                s_scale = "1000";
+            else if (this.label3.Text.IndexOf("600A") >= 0)
+                s_scale = "600";
+            else
+                s_scale = "300";
+
             scale = Decimal.Parse(s_scale);
             this.BackColor = Color.LightSkyBlue;
             led_current.ColorDark = this.BackColor;

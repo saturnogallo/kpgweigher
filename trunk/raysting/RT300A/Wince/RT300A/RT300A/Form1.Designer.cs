@@ -91,7 +91,7 @@
             this.label3.Location = new System.Drawing.Point(136, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(736, 55);
-            this.label3.Text = "1000A 精密直流大功率恒流源";
+            this.label3.Text = "程控300A直流稳流源";
             this.label3.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // label4

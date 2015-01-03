@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  LCD                                                                    12/30/2014 10:26:50 PAGE 1   
+C51 COMPILER V7.01  LCD                                                                    01/03/2015 16:00:46 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE LCD
@@ -62,7 +62,7 @@ stmt level    source
   53   1                      if(key == KEY_INVALID)
   54   1                              key = dat;
   55   1              
-C51 COMPILER V7.01  LCD                                                                    12/30/2014 10:26:50 PAGE 2   
+C51 COMPILER V7.01  LCD                                                                    01/03/2015 16:00:46 PAGE 2   
 
   56   1      }  
   57          static u8 lcdcmd[40];
@@ -126,7 +126,7 @@ stmt level    source
  115   2               {
  116   3                      onecmd(len);     
  117   3                      timeout = 0;
-C51 COMPILER V7.01  LCD                                                                    12/30/2014 10:26:50 PAGE 3   
+C51 COMPILER V7.01  LCD                                                                    01/03/2015 16:00:46 PAGE 3   
 
  118   3               }
  119   2               if(timeout < 655350)
@@ -190,7 +190,7 @@ stmt level    source
  177          }
  178          */
  179          /*      设定文本x,y值   */
-C51 COMPILER V7.01  LCD                                                                    12/30/2014 10:26:50 PAGE 4   
+C51 COMPILER V7.01  LCD                                                                    01/03/2015 16:00:46 PAGE 4   
 
  180          /*
  181          void LCD_TextSetAddr(uchar x,uchar y) 
@@ -254,7 +254,7 @@ stmt level    source
  239                          LCD_PutImg(x,y,1,11,Num_Tab + (*s - '0') * 11);
  240                          
  241                          x = x + 8;
-C51 COMPILER V7.01  LCD                                                                    12/30/2014 10:26:50 PAGE 5   
+C51 COMPILER V7.01  LCD                                                                    01/03/2015 16:00:46 PAGE 5   
 
  242                          
  243                          s++;
@@ -318,7 +318,7 @@ stmt level    source
  301                  {
  302                          LCD_TextPutchar(x,y,'0' + buf[i]);
  303                          x ++;
-C51 COMPILER V7.01  LCD                                                                    12/30/2014 10:26:50 PAGE 6   
+C51 COMPILER V7.01  LCD                                                                    01/03/2015 16:00:46 PAGE 6   
 
  304                  }
  305          }
@@ -382,7 +382,7 @@ stmt level    source
  363          */
  364          /*
  365          void LCD_LineH(uchar y) 
-C51 COMPILER V7.01  LCD                                                                    12/30/2014 10:26:50 PAGE 7   
+C51 COMPILER V7.01  LCD                                                                    01/03/2015 16:00:46 PAGE 7   
 
  366          {
  367                  char i;
@@ -446,7 +446,7 @@ stmt level    source
  425          {                                  
  426   1              LCD_PrintChar(CMDO_LCD_68,x,y,s);
  427   1      }
-C51 COMPILER V7.01  LCD                                                                    12/30/2014 10:26:50 PAGE 8   
+C51 COMPILER V7.01  LCD                                                                    01/03/2015 16:00:46 PAGE 8   
 
  428          
  429          //显示6x8的数字

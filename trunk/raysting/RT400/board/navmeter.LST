@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  NAVMETER                                                               12/30/2014 10:26:50 PAGE 1   
+C51 COMPILER V7.01  NAVMETER                                                               01/03/2015 16:00:47 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE NAVMETER
@@ -62,7 +62,7 @@ stmt level    source
   53          
   54          unsigned long navtime = 0;
   55          double nav_read()
-C51 COMPILER V7.01  NAVMETER                                                               12/30/2014 10:26:50 PAGE 2   
+C51 COMPILER V7.01  NAVMETER                                                               01/03/2015 16:00:47 PAGE 2   
 
   56          {                       
   57   1      //        if(DEBUG == 1)
@@ -126,7 +126,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    XDATA SIZE       =     61       1
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
-C51 COMPILER V7.01  NAVMETER                                                               12/30/2014 10:26:50 PAGE 3   
+C51 COMPILER V7.01  NAVMETER                                                               01/03/2015 16:00:47 PAGE 3   
 
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----

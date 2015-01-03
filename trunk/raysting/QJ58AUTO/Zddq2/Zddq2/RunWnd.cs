@@ -16,20 +16,7 @@ namespace Zddq2
 
     public partial class RunWnd : Form
     {
-        [StructLayout(LayoutKind.Sequential)]
-        public struct SystemTime
-        {
-            public ushort wYear;
-            public ushort wMonth;
-            public ushort wDayOfWeek;
-            public ushort wDay;
-            public ushort wHour;
-            public ushort wMinute;
-            public ushort wSecond;
-            public ushort wMiliseconds;
-        }
-        [DllImport("coredll")]
-        public static extern bool SetLocalTime(ref SystemTime sysTime); //设置本地时
+
 
         public const int win_width = 800;
         public const int win_height = 600;

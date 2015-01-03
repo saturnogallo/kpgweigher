@@ -12,28 +12,34 @@ namespace Zddq2
 {
     /*
      * define channel info
+     * Store the temperary variables during Rx measuring
      */
     public class RX_VAR
     {
-        public double vRs;
-        public double vRx;
-        public double vCrossP;
-        public double vCrossN;
-        public double iSrc;
-        public double rRx;
-        public double rRs;
+        public double vRs;  //voltage on Rs
+        public double vRx;  //voltage on Rs
+        public double vCrossP; //cross voltage P
+        public double vCrossN; //cross voltage N
+        public double iSrc;    //current from current source , equals to (current go through Rx * iK ?);
+        public double rRx;     //measured rRx
+        public double rRs;     //Rs setting
         
-        public int iK;  
-        public Int32[] track_weight;
-        public byte ptr_tw;
-        public string errMsg;
-        public RX_VAR()
+        public int iK;         //current K value
+        public string errMsg;   //store error message
+        public RxInfo rx;
+        public RX_VAR(RxInfo rxinfo)
         {
-            track_weight = new Int32[4];
-            ptr_tw = 0;
+            rx = rxinfo;
+            Reset();
         }
-        public static int INIT_LOOP = 1000;
-        public static int MAX_LOOP = 8191;
+        public void Reset()
+        {
+            i_MeasCount = 0;
+            i_State = RUN_STATE.IDLE;
+            bRunning = false;
+        }
+        public static int INIT_LOOP = 800; //default K value on bootup
+        public static int MAX_LOOP = 8191; //max loop available.
         //Get a new K value in non tracking mode
         //return the difference between new K and current k value
         public int calc_capture_nextk()
@@ -54,9 +60,27 @@ namespace Zddq2
             rRx = (dK * (rRs + ((vCrossP - vCrossN) / (2.0 * Math.Abs(iSrc)))));
             return calc_capture_nextk();
         }
+        public int i_MeasCount //count of measure times
+        {
+            get;
+            set;
+        }
+        public RUN_STATE i_State     //state of Measurement
+        {
+            get;
+            set;
+        }
+        public bool bRunning   //whether the Rx is under measurement
+        {
+            get;
+            set;
+        }
     }
+
+    //Information related to Rx
     public class RxInfo : IComparable
     {
+        //for sorting of Rx according to channel number, and enabled channel goes first.
         public int CompareTo(object obj)
         {
             if (obj is RxInfo)
@@ -77,20 +101,11 @@ namespace Zddq2
         }
         private SqlConfig config;
         public RX_VAR var;
-        public int i_MeasCount //count of measure times
+        public RsInfo Rstd;
+        public RxInfo(int id)
         {
-            get;
-            set;
-        }
-        public RUN_STATE i_State     //state of Measurement
-        {
-            get;
-            set;
-        }
-        public bool bRunning   //whether the Rx is under measurement
-        {
-            get;
-            set;
+            config = new SqlConfig("RxInfo", id.ToString());
+            var = new RX_VAR(this);
         }
         public double dRxInput  //target rx value
         {
@@ -110,14 +125,62 @@ namespace Zddq2
                 this["dRxInput"] = value;
             }
         }
-        public RxInfo(int id)
+
+        public double dCoefA  //Coeficient A
         {
-            config = new SqlConfig("RxInfo", id.ToString());
-            var = new RX_VAR();
-            i_MeasCount = 0;
-            bRunning = false;
+            get
+            {
+                try
+                {
+                    return (double)this["dCoefA"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dCoefA"] = value;
+            }
         }
-        public int iMeasDelay
+        public double dCoefB  //Coeficient B
+        {
+            get
+            {
+                try
+                {
+                    return (double)this["dCoefB"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dCoefB"] = value;
+            }
+        }
+        public double dCoefC  //Coeficient C
+        {
+            get
+            {
+                try
+                {
+                    return (double)this["dCoefC"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dCoefC"] = value;
+            }
+        }
+        public int iMeasDelay   //delay between each voltage reading (second)
         {
             get
             {
@@ -128,7 +191,7 @@ namespace Zddq2
                 this["iMeasDelay"] = value;
             }
         }
-        public int iMeasTimes
+        public int iMeasTimes   //total measurement times
         {
             get
             {
@@ -139,18 +202,7 @@ namespace Zddq2
                 this["iMeasTimes"] = value;
             }
         }
-        public int iStdChan
-        {
-            get
-            {
-                return (int)this["iStdChan"];
-            }
-            set
-            {
-                this["iStdChan"] = value;
-            }
-        }
-        public int iIx
+        public int iIx  //index of current setting.
         {
             get
             {
@@ -161,7 +213,7 @@ namespace Zddq2
                 this["iIx"] = value;
             }
         }
-        public int iRRange
+        public int iRRange  //index of range for resistance
         {
             get
             {
@@ -170,28 +222,6 @@ namespace Zddq2
             set
             {
                 this["iRRange"] = value;
-            }
-        }
-        public int iVMode
-        {
-            get
-            {
-                return (int)this["iVMode"];
-            }
-            set
-            {
-                this["iVMode"] = value;
-            }
-        }
-        public char cStdChan
-        {
-            get
-            {
-                return (char)this["cStdChan"];
-            }
-            set
-            {
-                this["cStdChan"] = value;
             }
         }
         public char cChan
@@ -238,18 +268,53 @@ namespace Zddq2
                 this["sSerial"] = value;
             }
         }
+        public string sPTType
+        {
+            get
+            {
+                return (string)this["sPTType"];
+            }
+            set
+            {
+                this["sPTType"] = value;
+            }
+        }        
+        public RXDATA_MODE iMainData    //main display info
+        {
+            get
+            {
+                return (RXDATA_MODE)this["iMainData"];
+            }
+            set
+            {
+                this["iMainData"] = (int)value;
+            }
+        }
+        public RXDATA_MODE iAux1Data    //aux display info
+        {
+            get
+            {
+                return (RXDATA_MODE)this["iAux1Data"];
+            }
+            set
+            {
+                this["iAux1Data"] = (int)value;
+            }
+        }
         /*
          * Fixed configuration includes:
          * iMeasDelay :  delay between each sample (second)
          * iMeasTimes :  measure times
-         * iStdChan   :  channel index of standard
-         * cStdChan   :  A/B of standard channel
          * iChan      :  my channel index
          * cChan      :  A/B of my channel
          * bEnabled   :  whether it is enabled
          * iIx        :  current to use
          * bSqrt      :  sqrt function enabled or not
          * sSerial    :  serial number to use
+         * iMainData  :  main display info
+         * iAux1Data  :  1st aux display info
+         * dCoefA,B,C :  for temperature conversion
+         * sPTType    :  PT value
          */
         public object this[string id]
         {
@@ -266,10 +331,12 @@ namespace Zddq2
     public class RsInfo
     {
         private SqlConfig config;
+        
         public RsInfo(int id)
         {
             config = new SqlConfig("RsInfo", id.ToString());
         }
+        
         public int iRRange
         {
             get
@@ -281,14 +348,14 @@ namespace Zddq2
                 this["iRRange"] = value;
             }
         }
-        public double dTValue
+        public double dTValue   //adjusted value based on temperature
         {
             get
             {
                 return dValue * (1 + (1e-6) * dAlpha * (RunWnd.syscfg.dTemp - 20) + (1e-6) * dBeta * (RunWnd.syscfg.dTemp - 20) * (RunWnd.syscfg.dTemp - 20)); 
             }
         }
-        public double dValue
+        public double dValue    //nominal value
         {
             get
             {
@@ -299,7 +366,18 @@ namespace Zddq2
                 this["dValue"] = value;
             }
         }
-        public double dAlpha
+        public double dMaxCurr    //Maximum current
+        {
+            get
+            {
+                return (double)this["dMaxCurrent"];
+            }
+            set
+            {
+                this["dMaxCurrent"] = value;
+            }
+        }
+        public double dAlpha    //temperature coefficient of alpha
         {
             get
             {
@@ -310,7 +388,7 @@ namespace Zddq2
                 this["dAlpha"] = value;
             }
         }
-        public double dBeta
+        public double dBeta     //temperature coefficient of beta
         {
             get
             {
@@ -338,6 +416,7 @@ namespace Zddq2
          * dAlpha     : Alpha value
          * dBeta      : Beta value
          * sSerial    : Serial number
+         * dMaxCurrent: maximum current value     
          */
         public object this[string id]
         {
@@ -351,6 +430,7 @@ namespace Zddq2
             }
         }
     }
+    //variable for display setting configuration
     public class UIConfig
     {
         private SqlConfig config;
@@ -360,40 +440,7 @@ namespace Zddq2
             config = new SqlConfig("UIInfo", disp.ToString());
         }
 
-        public RXDATA_MODE iMainData
-        {
-            get
-            {
-                return (RXDATA_MODE)this["iMainData"];
-            }
-            set
-            {
-                this["iMainData"] = (int)value;
-            }
-        }
-        public RXDATA_MODE iAux1Data
-        {
-            get
-            {
-                return (RXDATA_MODE)this["iAux1Data"];
-            }
-            set
-            {
-                this["iAux1Data"] = (int)value;
-            }
-        }
-        public RXDATA_MODE iAux2Data
-        {
-            get
-            {
-                return (RXDATA_MODE)this["iAux2Data"];
-            }
-            set
-            {
-                this["iAux2Data"] = (int)value;
-            }
-        }
-        public RXDISP_MODE iDataMode
+        public RXDISP_MODE iDataMode    //current display mode
         {
             get
             {
@@ -404,7 +451,7 @@ namespace Zddq2
                 this["iDataMode"] = (int)value;
             }
         }
-        public string sChannel
+        public string sChannel  //current top channel display
         {
             get
             {
@@ -493,78 +540,6 @@ namespace Zddq2
                 this["iFilter"] = value;
             }
         }
-        public double d1Kcurr
-        {
-            get
-            {
-                double val = 0;
-                try
-                {
-
-                    val = double.Parse(this["d1Kcurr"].ToString());
-                }
-                catch
-                {
-
-                }
-                if (val < 1e-6)
-                    val = 1e-5;
-
-                return val;
-            }
-            set
-            {
-                this["d1Kcurr"] = value;
-            }
-        }
-
-        public double d10Kcurr
-        {
-            get
-            {
-                double val = 0;
-                try
-                {
-
-                    val = double.Parse(this["d10Kcurr"].ToString());
-                }
-                catch
-                {
-
-                }
-                if (val < 1e-6)
-                    val = 1e-5;
-                return val;
-            }
-            set
-            {
-                this["d10Kcurr"] = value;
-            }
-        }
-        public double d100Kcurr
-        {
-            get
-            {
-                double val = 0;
-                try
-                {
-
-                    val = double.Parse(this["d100Kcurr"].ToString());
-                }
-                catch
-                {
-
-                }
-                if (val < 1e-6)
-                    val = 1e-5;
-
-                return val;
-            }
-            set
-            {
-                this["d100Kcurr"] = value;
-            }
-        }
         public double dTemp
         {
             get
@@ -611,6 +586,17 @@ namespace Zddq2
                 this["sFilterType"] = value;
             }
         }
+        public string sConvertMethod
+        {
+            get
+            {
+                return (string)this["sConvertMethod"];
+            }
+            set
+            {
+                this["sConvertMethod"] = value;
+            }
+        }        
         public int iDisplay
         {
             get
@@ -689,7 +675,7 @@ namespace Zddq2
         private string sql_grp;
         static void SetConnection()
         {
-            sql_con = new SQLiteConnection("Data Source="+StringResource.str("basedir")+"Config.db2;Version=3;New=False;Compress=True;");
+            sql_con = new SQLiteConnection("Data Source="+Path.Combine(StringResource.str("basedir"),"Config.db2")+";Version=3;New=False;Compress=True;");
         }
         private Dictionary<string, string> curr_conf; //store all the configuration string
         public SqlConfig(string sql_tbl,string group)
@@ -722,14 +708,13 @@ namespace Zddq2
             }
             catch (System.Exception e)
             {
-                Program.MsgShow(e.Message);
+//              Program.MsgShow(e.Message);
                 return false;
             }
 
         }
         private bool SaveConfigToFile(string id, string val)
         {
-
             try
             {
                 //save the current configuration 
@@ -744,7 +729,7 @@ namespace Zddq2
             }
             catch (System.Exception e)
             {
-                Program.MsgShow(e.Message);
+//                Program.MsgShow(e.Message);
                 return false;
             }
         }
@@ -803,7 +788,5 @@ namespace Zddq2
         }
         
     }
-
- 
 
 }

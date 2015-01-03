@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  WINDOW                                                                 12/30/2014 10:26:50 PAGE 1   
+C51 COMPILER V7.01  WINDOW                                                                 01/03/2015 16:00:47 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE WINDOW
@@ -62,7 +62,7 @@ stmt level    source
   53   1         return tmp;
   54   1         */
   55   1      }
-C51 COMPILER V7.01  WINDOW                                                                 12/30/2014 10:26:50 PAGE 2   
+C51 COMPILER V7.01  WINDOW                                                                 01/03/2015 16:00:47 PAGE 2   
 
   56          
   57          
@@ -126,7 +126,7 @@ stmt level    source
  115   3                              }
  116   3      
  117   3                              if(databuf[pos_databuf-1] == '0')
-C51 COMPILER V7.01  WINDOW                                                                 12/30/2014 10:26:50 PAGE 3   
+C51 COMPILER V7.01  WINDOW                                                                 01/03/2015 16:00:47 PAGE 3   
 
  118   3                                      databuf[pos_databuf-1] = '9';
  119   3                              else
@@ -190,7 +190,7 @@ stmt level    source
  177   1              {
  178   2                      if(key != KEY_INVALID)
  179   2                      {
-C51 COMPILER V7.01  WINDOW                                                                 12/30/2014 10:26:50 PAGE 4   
+C51 COMPILER V7.01  WINDOW                                                                 01/03/2015 16:00:47 PAGE 4   
 
  180   3                              msg = key;
  181   3              
@@ -254,7 +254,7 @@ stmt level    source
  239   2                      
  240   2                              msg = MSG_REFRESH;
  241   2                      }
-C51 COMPILER V7.01  WINDOW                                                                 12/30/2014 10:26:50 PAGE 5   
+C51 COMPILER V7.01  WINDOW                                                                 01/03/2015 16:00:47 PAGE 5   
 
  242   2              */                              
  243   2                      if( msg == KEY_DOT)
@@ -318,7 +318,7 @@ stmt level    source
  301   1      }
  302          void draw_inputbox(LABEL *lbl,BOOL redraw)
  303          {
-C51 COMPILER V7.01  WINDOW                                                                 12/30/2014 10:26:50 PAGE 6   
+C51 COMPILER V7.01  WINDOW                                                                 01/03/2015 16:00:47 PAGE 6   
 
  304   1              if(redraw)
  305   1              {
@@ -382,7 +382,7 @@ stmt level    source
  363   2                      if(reverse & SW_NORMAL) {
  364   3                              if((reverse & SW_OVERLAP) == 0)
  365   3                                      LCD_ClsBlock( lbl->x, lbl->y, lbl->x + (len<<4), lbl->y + 16);
-C51 COMPILER V7.01  WINDOW                                                                 12/30/2014 10:26:50 PAGE 7   
+C51 COMPILER V7.01  WINDOW                                                                 01/03/2015 16:00:47 PAGE 7   
 
  366   3                              LCD_PrintHz16( lbl->x, lbl->y, lbl->param);
  367   3                      }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="RTWordAddin1">
+</Property><Property Name="Solution File" Value="C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\RTWordAddin1.sln">
+</Property><Property Name="User Options File" Value="C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\RTWordAddin1.suo">
+</Property><Property Name="Date" Value="Saturday, December 20, 2014">
+</Property><Property Name="Time" Value="12:34 PM">
+</Property></Properties><Event ErrorLevel="0" Project="" Source="RTWordAddin1.sln" Description="File successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\RTWordAddin1.sln">
+</Event><Event ErrorLevel="0" Project="" Source="RTWordAddin1.suo" Description="File successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\RTWordAddin1.suo">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="RaystingWordAddin.vbproj" Description="Project file successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\RaystingWordAddin.vbproj">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="RaystingWordAddin.vbproj.user" Description="Project user file successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\RaystingWordAddin.vbproj.user">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="AssemblyInfo.vb" Description="File successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\AssemblyInfo.vb">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="ConfigDlg.vb" Description="File successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\ConfigDlg.vb">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="Connect.vb" Description="File successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\Connect.vb">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="CRs232.vb" Description="File successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\CRs232.vb">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="ConfigDlg.resx" Description="File successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\ConfigDlg.resx">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="RaystingWordAddin.vbproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="RaystingWordAddin" Source="RaystingWordAddin.vbproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="MyAddin1Setup.vdproj" Source="MyAddin1Setup\MyAddin1Setup.vdproj" Description="Project file successfully backed up as C:\Code\GoogleCode\g_lxhbucket\raysting\RaystingWordAddin\Backup\MyAddin1Setup\MyAddin1Setup.vdproj">
+</Event><Event ErrorLevel="0" Project="" Source="RTWordAddin1.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="RTWordAddin1.sln" Description="Converted">
+</Event><Event ErrorLevel="0" Project="RaystingWordAddin" Source="RaystingWordAddin.vbproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="MyAddin1Setup.vdproj" Source="MyAddin1Setup\MyAddin1Setup.vdproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="MyAddin1Setup.vdproj" Source="MyAddin1Setup\MyAddin1Setup.vdproj" Description="Converted">
+</Event></UpgradeLog>

@@ -58,6 +58,7 @@
             this.btn_range4 = new Mndz7.RectButton();
             this.btn_range5 = new Mndz7.RectButton();
             this.btn_range6 = new Mndz7.RectButton();
+            this.lbl_status = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lbl_currscale
@@ -101,7 +102,7 @@
             this.lbl_version.Location = new System.Drawing.Point(688, 37);
             this.lbl_version.Name = "lbl_version";
             this.lbl_version.Size = new System.Drawing.Size(94, 17);
-            this.lbl_version.Text = "版本:2013-10-05";
+            this.lbl_version.Text = "版本:2014-11-15";
             this.lbl_version.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // lbl_datetime
@@ -110,7 +111,7 @@
             this.lbl_datetime.Location = new System.Drawing.Point(643, 10);
             this.lbl_datetime.Name = "lbl_datetime";
             this.lbl_datetime.Size = new System.Drawing.Size(146, 18);
-            this.lbl_datetime.Text = "2013-05-01 13:45:45";
+            this.lbl_datetime.Text = "2014-11-15 13:45:45";
             // 
             // rbtn_2dn
             // 
@@ -295,6 +296,13 @@
             this.btn_range6.Size = new System.Drawing.Size(114, 34);
             this.btn_range6.TabIndex = 10;
             // 
+            // lbl_status
+            // 
+            this.lbl_status.Location = new System.Drawing.Point(702, 95);
+            this.lbl_status.Name = "lbl_status";
+            this.lbl_status.Size = new System.Drawing.Size(95, 33);
+            this.lbl_status.Text = "输出饱和";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -302,6 +310,7 @@
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(800, 480);
             this.ControlBox = false;
+            this.Controls.Add(this.lbl_status);
             this.Controls.Add(this.btn_capture);
             this.Controls.Add(this.rbtn_2dn);
             this.Controls.Add(this.lbl_datetime);
@@ -372,6 +381,7 @@
         private RectButton btn_range4;
         private RectButton btn_range5;
         private RectButton btn_range6;
+        private System.Windows.Forms.Label lbl_status;
     }
 }
 
