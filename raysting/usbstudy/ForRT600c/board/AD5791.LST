@@ -1,0 +1,305 @@
+C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 1   
+
+
+C51 COMPILER V7.01, COMPILATION OF MODULE AD5791
+OBJECT MODULE PLACED IN AD5791.OBJ
+COMPILER INVOKED BY: C:\GreenTools\Keil\C51\BIN\C51.EXE AD5791.c LARGE OPTIMIZE(SIZE) BROWSE MODP2 DEBUG OBJECTEXTEND
+
+stmt level    source
+
+   1          /********************************************************************************
+   2           Author : CAC (China Applications Support Team) 
+   3          
+   4           Date :   January, 2012
+   5          
+   6           File name :   AD5791.c
+   7          
+   8           Description :   Use the GPIO to simulate the SPI communication of AD5791
+   9          
+  10           Hardware plateform :   AD5791 and AD5791
+  11          ********************************************************************************/
+  12          
+  13          //#include "AD5791.h"
+  14          //#include "AD5791Driver.h"
+  15          #include "sjDefine.h"
+  16          #include "AD5791.h"
+  17          #include "stdio.h"
+  18          #include "math.h"
+  19          extern void swiDelay(unsigned char dl1,unsigned char dl2);
+  20          
+  21          xdata unsigned long int AD5791Registers[5]={0,0,0,0,0};         // only low 24 bits are used for each register
+  22          
+  23          unsigned char *dacbuf;
+  24          unsigned char *clrbuf;
+  25          
+  26          unsigned char ch_dummy;
+  27          
+  28          #define AD5791OutputBit(A,B)    A=B;
+  29          
+  30          #define AD5791DelayUs(i)        sleepms(1);
+  31          
+  32          #define AD5791InputBit(A)  (A) 
+  33          
+  34          unsigned char AD5791SpiRead(unsigned char WriteData)
+  35          {
+  36   1               unsigned   char   ReadData;
+  37   1           unsigned   char  j;
+  38   1      
+  39   1        
+  40   1      
+  41   1            ReadData = 0;
+  42   1      
+  43   1            for(j=0; j<8; j++)
+  44   1            {
+  45   2               AD5791OutputBit(SCLK,1);
+  46   2      
+  47   2               if(0x80 == (WriteData & 0x80))
+  48   2               {
+  49   3                  AD5791OutputBit(SDI,1);     //Send one to SDI pin
+  50   3               }
+  51   2               else
+  52   2               {
+  53   3                  AD5791OutputBit(SDI,0);     //Send zero to SDI pin
+  54   3               }
+  55   2               WriteData = WriteData << 1;
+C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 2   
+
+  56   2               ReadData = (ReadData<<1) | AD5791InputBit(SDO); 
+  57   2      
+  58   2               AD5791OutputBit(SCLK,0);   /////
+  59   2      
+  60   2            }
+  61   1            return ReadData;
+  62   1      }
+  63          void AD5791SpiWrite(unsigned char WriteData)
+  64          {
+  65   1           unsigned   char   j;
+  66   1      
+  67   1      
+  68   1            for(j=0; j<8; j++)
+  69   1            {
+  70   2               AD5791OutputBit(SCLK,1);
+  71   2      
+  72   2               if(0x80 == (WriteData & 0x80))
+  73   2               {
+  74   3                  AD5791OutputBit(SDI,1);     //Send one to SDI pin
+  75   3               }
+  76   2               else
+  77   2               {
+  78   3                  AD5791OutputBit(SDI,0);     //Send zero to SDI pin
+  79   3               }
+  80   2               WriteData = WriteData << 1;
+  81   2      
+  82   2               AD5791OutputBit(SCLK,0);   /////
+  83   2            }
+  84   1      }
+  85             // clear code is set to 0x0007ffff; since we enabled buffer function
+  86          #define MYCLR_CODE      0x0007ffff
+  87          #define CONFIG_MODE     RBUF_ON|OPGND_DIS|DACTRI_DIS|BIN_2SC_BIN|SDO_EN|LIN_COMP_10
+  88          
+  89          void AD5791Init()
+  90          {
+  91   1         /* initialize the GPIOs for controlling the AD5791*/
+  92   1         AD5791OutputBit(LDAC, 1);
+  93   1         AD5791OutputBit(SYNC, 1);
+  94   1         AD5791OutputBit(CLR, 1);
+  95   1         AD5791OutputBit(SCLK, 1);
+  96   1         AD5791OutputBit(SDI, 1);
+  97   1         ch_dummy = AD5791InputBit(SDO);
+  98   1      
+  99   1      
+ 100   1              dacbuf = (unsigned char*)(AD5791Registers + DAC_VALUE);
+ 101   1              clrbuf = (unsigned char*)(AD5791Registers + CLEARCODE);
+ 102   1              sleepms(50*ONEMS);
+ 103   1              AD5791Initialization();
+ 104   1              sleepms(50*ONEMS);//swiDelay(0x0f,0xff);
+ 105   1      
+ 106   1              AD5791Registers[CONTROL] = CONFIG_MODE;
+ 107   1              WriteToAD5791ViaSPI(CONTROL, AD5791Registers);
+ 108   1      
+ 109   1              AD5791Registers[CLEARCODE] = MYCLR_CODE;        
+ 110   1              WriteToAD5791ViaSPI(CLEARCODE, AD5791Registers);
+ 111   1      
+ 112   1              AD5791Registers[DAC_VALUE] = MYCLR_CODE;        
+ 113   1              WriteToAD5791ViaSPI(DAC_VALUE, AD5791Registers);
+ 114   1              sleepms(50*ONEMS);
+ 115   1              AD5791HardwareLoad();   
+ 116   1              AD5791Registers[CONTROL] = 0;
+ 117   1              AD5791Registers[CLEARCODE] = MYCLR_CODE;
+C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 3   
+
+ 118   1      }
+ 119          
+ 120          void AD5791HardwareReset()
+ 121          {
+ 122   1              AD5791OutputBit(RESET,0);
+ 123   1              AD5791OutputBit(RESET,1);
+ 124   1              AD5791DelayUs(10);
+ 125   1      }
+ 126          
+ 127          void AD5791HardwareClear()
+ 128          {
+ 129   1              AD5791OutputBit(CLR,0);
+ 130   1              AD5791OutputBit(CLR,1);
+ 131   1      }
+ 132          
+ 133          void AD5791HardwareLoad()
+ 134          {
+ 135   1              AD5791OutputBit(LDAC,0);
+ 136   1              AD5791OutputBit(LDAC,1);
+ 137   1      }
+ 138          
+ 139          void AD5791Initialization()
+ 140          {
+ 141   1              AD5791HardwareReset();
+ 142   1              AD5791HardwareClear();
+ 143   1      }
+ 144          
+ 145          void WriteToAD5791ViaSPI(unsigned char RegisterStartAddress, unsigned long int *DataBuffer)
+ 146          {
+ 147   1              unsigned char  WriteData;
+ 148   1              
+ 149   1      
+ 150   1         AD5791OutputBit(SYNC,0);
+ 151   1         AD5791OutputBit(SCLK,1); 
+ 152   1      
+ 153   1                      WriteData = ((RegisterStartAddress)<<4) | (DataBuffer[RegisterStartAddress]>>16);
+ 154   1                      AD5791SpiWrite(WriteData);
+ 155   1                      WriteData = DataBuffer[RegisterStartAddress]>>8;
+ 156   1                      AD5791SpiWrite(WriteData);
+ 157   1                      WriteData = DataBuffer[RegisterStartAddress];
+ 158   1                      AD5791SpiWrite(WriteData);
+ 159   1      
+ 160   1         AD5791OutputBit(SCLK,1);
+ 161   1         AD5791OutputBit(SYNC,1);
+ 162   1      }
+ 163          
+ 164          void ReadFromAD5791ViaSPI(const unsigned char RegisterStartAddress,unsigned char *DataBuffer)
+ 165          {
+ 166   1              unsigned char  WriteData;
+ 167   1      
+ 168   1              AD5791OutputBit(SYNC,0);
+ 169   1              AD5791OutputBit(SCLK,1); 
+ 170   1      
+ 171   1              WriteData = 0x80 | ((RegisterStartAddress)<<4) ;        
+ 172   1              AD5791SpiWrite(WriteData);
+ 173   1              AD5791SpiWrite(NOP);
+ 174   1              AD5791SpiWrite(NOP);
+ 175   1              AD5791OutputBit(SCLK,1);
+ 176   1              AD5791OutputBit(SYNC,1);
+ 177   1      
+ 178   1              AD5791OutputBit(SCLK,0);
+ 179   1              AD5791OutputBit(SYNC,0);
+C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 4   
+
+ 180   1      
+ 181   1              DataBuffer[0] = 0x00;
+ 182   1              DataBuffer[1] = 0x0f & AD5791SpiRead(NOP);
+ 183   1              DataBuffer[2] = AD5791SpiRead(NOP);
+ 184   1              DataBuffer[3] = AD5791SpiRead(NOP);
+ 185   1      
+ 186   1              AD5791OutputBit(SYNC,1);
+ 187   1              AD5791OutputBit(SCLK,1);
+ 188   1      
+ 189   1      }
+ 190          
+ 191          
+ 192          unsigned long lastd = 0;
+ 193          unsigned char cm_ad5791b()
+ 194          {
+ 195   1      
+ 196   1                      WriteToAD5791ViaSPI(DAC_VALUE, AD5791Registers);
+ 197   1                      AD5791HardwareLoad();
+ 198   1                      swiDelay(0x0f,0xff);
+ 199   1                      AD5791Registers[CLEARCODE] = 0;
+ 200   1                      ReadFromAD5791ViaSPI(DAC_VALUE, clrbuf);
+ 201   1                      if(AD5791Registers[CLEARCODE] == AD5791Registers[DAC_VALUE])
+ 202   1                              return 1;
+ 203   1                      return 0;
+ 204   1      }
+ 205          unsigned char cm_ad5791(unsigned char temp, double val)  //crc b1 b2 b3 func
+ 206          {
+ 207   1              unsigned long d; //32bit
+ 208   1      
+ 209   1                                                      if(temp == DACMD_OUTPUT)
+ 210   1                                                      {
+ 211   2                  // Vout = (Vrefp-Vrefn)*D/(2^20-1)+Vrefn =>  D= (Vout-Vrefn)*(2^20-1)/(Vrefp-Vrefn)
+ 212   2                  // when BUF is enabled , Vrefp = 10V;  Vrefn = -10V; D = (Vout+10)*(2^20-1)/(20)
+ 213   2                  // D = Vout*(2^20-1)/10;
+ 214   2      
+ 215   2                                                              d = floor(0.5+ (val*(1048576 - 1) / 10.0));
+ 216   2                                                              if( d == lastd)
+ 217   2                                                              {
+ 218   3                                                                      temp = 1;
+ 219   3                                                              }else
+ 220   2                                                              {
+ 221   3                                                                      dacbuf[0] = (*((unsigned char*)(&d)+0));
+ 222   3                                                                      dacbuf[1] = (*((unsigned char*)(&d)+1));
+ 223   3                                                                      dacbuf[2] = (*((unsigned char*)(&d)+2));
+ 224   3                                                                      dacbuf[3] = (*((unsigned char*)(&d)+3));
+ 225   3                                                                      temp = cm_ad5791b();
+ 226   3                                                              }
+ 227   2                                                      }
+ 228   1                                                      else if(temp == DACMD_HWCLR)
+ 229   1                                                      {
+ 230   2                                                              AD5791HardwareClear();
+ 231   2                                                              temp = 1;
+ 232   2                                                      }
+ 233   1                                                      else if(temp == DACMD_HWRST)
+ 234   1                                                      {
+ 235   2                                                              AD5791HardwareReset();
+ 236   2                                                              temp = 1;
+ 237   2                                                      }
+ 238   1                                                      else if(temp ==DACMD_RESCUE)
+ 239   1                                                      {
+ 240   2                                                              AD5791Registers[CONTROL] = CONFIG_MODE;
+ 241   2                                                              WriteToAD5791ViaSPI(CONTROL, AD5791Registers);
+C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 5   
+
+ 242   2      
+ 243   2                                                              AD5791Registers[CLEARCODE] = MYCLR_CODE;        // clear code is set to 0
+ 244   2                                                              WriteToAD5791ViaSPI(CLEARCODE, AD5791Registers);
+ 245   2      
+ 246   2                                                              AD5791Registers[CONTROL] = 0;
+ 247   2                                                              AD5791Registers[CLEARCODE] = MYCLR_CODE;
+ 248   2                                                              temp = 1;
+ 249   2                                                      }
+ 250   1                                                      else if(temp == 0x05)
+ 251   1                                                      {
+ 252   2      /*
+ 253   2                                                              AD5791Registers[CLEARCODE] = 0;
+ 254   2                                                              ReadFromAD5791ViaSPI(CONTROL, clrbuf);
+ 255   2                                                              sjSerialSendByte(clrbuf[0]);
+ 256   2                                                              sjSerialSendByte(clrbuf[1]);
+ 257   2                                                              sjSerialSendByte(clrbuf[2]);
+ 258   2                                                              sjSerialSendByte(clrbuf[3]);
+ 259   2      
+ 260   2                                                              AD5791Registers[CLEARCODE] = 0;
+ 261   2                                                              ReadFromAD5791ViaSPI(DAC_VALUE, clrbuf);
+ 262   2                                                              sjSerialSendByte(clrbuf[0]);
+ 263   2                                                              sjSerialSendByte(clrbuf[1]);
+ 264   2                                                              sjSerialSendByte(clrbuf[2]);
+ 265   2                                                              sjSerialSendByte(clrbuf[3]);
+ 266   2      */
+ 267   2                                                              temp = 1;
+ 268   2                                                      }
+ 269   1                                                      else{
+ 270   2                                                              temp = 0;
+ 271   2                                                      }
+ 272   1                                              
+ 273   1                                              return temp;
+ 274   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    770    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     31      13
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

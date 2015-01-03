@@ -282,7 +282,7 @@ namespace Mndz7
     internal static class GlobalConfig
     {
 
-        public static bool ISDEBUG = true;
+        public static bool ISDEBUG = false;
         public static string sSwiPort = "COM5";
         public static string sCmdPort = "COM4";
         public static string sADPort = "COM99";

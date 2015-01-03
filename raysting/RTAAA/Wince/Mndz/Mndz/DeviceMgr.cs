@@ -890,7 +890,7 @@ namespace Mndz
             {
                 return false;
             }
-            return ToDAValue(volt);
+            return ToDAValue(Math.Abs(volt));
         }
         private byte[] lasttosend = new byte[] { 0x00,0x00,0xff, 0xff, 0xff, 0x00 };
         private bool ToDAValue(double voltage)

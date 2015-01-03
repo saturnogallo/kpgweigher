@@ -18,14 +18,14 @@ namespace Mndz7
         private ChoiceWnd dlg_choice;
         private kbdWnd dlg_kbd;
         private System.Windows.Forms.Timer tm;
-
+        
         [DllImport("coredll")]
         public static extern bool TouchCalibrate(); //设置本地时间
 
         public Form1()
         {
             InitializeComponent();
-
+            
             string mypath = Path.Combine(GlobalConfig.udiskdir2, "screen");
             if (Directory.Exists(mypath))
                 btn_capture.Visible = true;
@@ -89,7 +89,7 @@ namespace Mndz7
             }
             btn_turnon.SetStyle(Color.Green, MyButtonType.round2Button);
             btn_turnon.Text = "OFF";
-            btn_turnon.Click += new EventHandler((o, e) =>
+            btn_turnon.ValidClick += new EventHandler((o, e) =>
             {
                 if (!processor.bOn)
                     dt_lastoutput = DateTime.Now.AddSeconds(2);
@@ -220,6 +220,7 @@ namespace Mndz7
         }
         public void led_ohm_Click(object sender, object e)
         {
+            RectButton.myBeep.BeepLoad();
             if (processor.iRange >= 0)
             {
                 dlg_kbd.Init("请输入模拟电阻值(ohm)", "value", false, KbdData);
@@ -286,6 +287,10 @@ namespace Mndz7
         }
         private void RefreshDisplay(bool bRangeChange)
         {
+            if (processor.bOverLoad)
+                lbl_status.Text = "输出饱和";
+            else
+                lbl_status.Text = "";
             if (processor.bOn)
             {
                 btn_turnon.Text = "ON";

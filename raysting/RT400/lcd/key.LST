@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  KEY                                                                    12/25/2014 16:12:00 PAGE 1   
+C51 COMPILER V7.01  KEY                                                                    12/30/2014 14:57:00 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE KEY
@@ -62,7 +62,7 @@ stmt level    source
   53   5                 break;
   54   5             }
   55   4            } 
-C51 COMPILER V7.01  KEY                                                                    12/25/2014 16:12:00 PAGE 2   
+C51 COMPILER V7.01  KEY                                                                    12/30/2014 14:57:00 PAGE 2   
 
   56   3           k = _crol_(k,1);//移位，进入下一行扫描
   57   3          }while(k !=0xef);//超过范围退出    
@@ -126,7 +126,7 @@ stmt level    source
  115   2                              if(keycount >= KEYTIMEOUT)
  116   2                                      key = k;
  117   2                              return;
-C51 COMPILER V7.01  KEY                                                                    12/25/2014 16:12:00 PAGE 3   
+C51 COMPILER V7.01  KEY                                                                    12/30/2014 14:57:00 PAGE 3   
 
  118   2                      }
  119   1                      keycount++;
@@ -190,7 +190,7 @@ MODULE INFORMATION:   STATIC OVERLAYABLE
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =      1    ----
-C51 COMPILER V7.01  KEY                                                                    12/25/2014 16:12:00 PAGE 4   
+C51 COMPILER V7.01  KEY                                                                    12/30/2014 14:57:00 PAGE 4   
 
 END OF MODULE INFORMATION.
 

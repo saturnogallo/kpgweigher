@@ -14,12 +14,12 @@ namespace Mndz7
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
+            
             mainwnd = new Form1();
             msg = new MsgDlg();
             Application.Run(mainwnd);
         }
+        
         internal static Form1 mainwnd;
         internal static MsgDlg msg;
         internal static void Debug(string line)
@@ -43,7 +43,7 @@ namespace Mndz7
                 Process app = new Process();
                 app.StartInfo.WorkingDirectory = GlobalConfig.basedir;
                 app.StartInfo.FileName = GlobalConfig.basedir + @"\CEUpgrade.exe";
-                app.StartInfo.Arguments = "\"/from:" + diskdir + "\\MNDZ.exe\" \"/to:" + GlobalConfig.basedir + "\\tsioex.exe\"";
+                app.StartInfo.Arguments = "\"/from:" + diskdir + "\\Mndz7.exe\" \"/to:" + GlobalConfig.basedir + "\\tsioex.exe\"";
                 app.Start();
                 Process.GetCurrentProcess().Kill();
                 return;

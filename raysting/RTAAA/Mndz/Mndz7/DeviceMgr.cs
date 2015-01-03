@@ -134,7 +134,7 @@ namespace Mndz7
                 throw new Exception("Failed to open port A");
             #endregion
 
-
+/*
             #region init cmdport
             cmdport = new SerialPort();
             cmdport.BaudRate = 9600;
@@ -154,6 +154,7 @@ namespace Mndz7
             cmdport.DiscardInBuffer();
             cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
             #endregion
+ */
 /*
             #region init AD board port
             adport = new SerialPort();
@@ -377,6 +378,8 @@ namespace Mndz7
             cmdport.WriteLine(line);
         }
         static public string nav_range = "";
+        static byte[] togglecmd = new byte[] { 0x55,  0x73,  0x55, 0x55, 0x02, 0x56  };
+        static public int xstate = 1; //can be 1 or 10;
         static public void Action(string action, object param)
         {
             if (GlobalConfig.ISDEBUG)
@@ -440,6 +443,26 @@ namespace Mndz7
                 {
                     ScanPort();
                     Thread.Sleep(5);
+                }
+            }
+            if (action == "togglex")
+            {
+                //55 73 55 55 02 56 
+                success = false;
+                port.DiscardInBuffer();
+                port.Write(togglecmd, 0, togglecmd.Length);
+                int timeout = 400;
+                while ((timeout-- > 0) && (!success))
+                {
+                    ScanPort();
+                    Thread.Sleep(5);
+                }
+                if (success)
+                {
+                    if (xstate == 1)
+                        xstate = 10;
+                    else
+                        xstate = 1;
                 }
             }
         }
@@ -722,13 +745,17 @@ namespace Mndz7
                 }
                 if(iRange < RangeMin || iRange > RangeMax)
                 {
-                      DeviceMgr.RelayState("", "", "OFF");
+                      //DeviceMgr.RelayState("", "", "OFF");
                       _bOn = false; //uncertain real case
                       return;
                 }
                 else
                 {
-                    DeviceMgr.RelayState("", "", "ON");
+                    if ((RangeLimit < 1) && (DeviceMgr.xstate == 1))
+                            DeviceMgr.Action("togglex", "");
+                    if ((RangeLimit > 1) && (DeviceMgr.xstate == 10))
+                        DeviceMgr.Action("togglex", "");
+                    //DeviceMgr.RelayState("", "", "ON");
                 }
                 SaveDA();
                 _bOn = true;

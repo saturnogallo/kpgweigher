@@ -182,8 +182,8 @@ uchar setptbuf[20];
 LABEL code bootup = {LBL_HZ16,30,25,13,"Raysting Instrument"};
 LABEL code bootup1 = {LBL_HZ16,30,25,13,"Raysting RT400 启动."};
 LABEL code bootup2 = {LBL_HZ16,30,25,13,"Raysting RT400 启动.."};
-LABEL code promptlbl = {LBL_HZ16,10,5,10,"设定电流(A)"};
-LABEL code calilbl = {LBL_HZ16,10,5,10,"校准电流(A)"};
+LABEL code promptlbl = {LBL_HZ16,10,5,10,"设定电压(V)"};
+LABEL code calilbl = {LBL_HZ16,10,5,10,"校准电压(V)"};
 LABEL code setptlbl = {LBL_HZ6X8,100,50,10,setptbuf};
 LABEL code statelbl = {LBL_HZ24X32,25,12,8,dispbuf};
 
@@ -312,7 +312,7 @@ void main()
 	IE2 = 1;
 	EA = 1;
 
-	DBGS("STARTUP DONE\r\n");	
+
 
 
 //	swiReset();
@@ -326,6 +326,7 @@ void main()
 
     // intialize LED. 
     //sleepms(1000*ONEMS);
+	DBGS("STARTUP ");	
     LCD_Init();
     sleepms(20*ONEMS);
     //init the DMM
@@ -336,6 +337,7 @@ void main()
 */
 
 	state = nSTATE_BOOTUP;
+	DBGS("DONE\r\n");	
 	while(1)
 	{
 		if(state == nSTATE_BOOTUP)
@@ -387,7 +389,7 @@ void main()
 				cm_ad5791(DACMD_RESCUE,0);	//rescue da
 				state = nSTATE_MAIN_OFF;
 			}
-			sprintf(setptbuf,"set%c:%6f ", 'A'+ptr_outs, outs[ptr_outs]);
+			sprintf(setptbuf,"set%c:%6f ", '0'+ptr_outs, outs[ptr_outs]);
 			draw_label(&setptlbl,SW_NORMAL|SW_OVERLAP);                        
 		}
 		if(VxMeasure < 0)
@@ -401,7 +403,7 @@ void main()
 			{
 				if(LastVxMeasure != VxMeasure)
 				{
-					sprintf(dispbuf,"%7f A ", fabs(VxMeasure));
+					sprintf(dispbuf,"%7f V ", fabs(VxMeasure));
 					draw_label(&statelbl,SW_NORMAL|SW_OVERLAP);
 					if(bPos == 1)
 						draw_label(&signpos,SW_NORMAL|SW_OVERLAP);
@@ -437,7 +439,7 @@ void main()
 			if(LastVxMeasure != VxMeasure)
 			{
 				draw_label(&setptlbl,SW_NORMAL|SW_OVERLAP);                        
-				sprintf(dispbuf,"%7f A ", fabs(VxMeasure));
+				sprintf(dispbuf,"%7f V ", fabs(VxMeasure));
 				if(bPos == 1)
 					draw_label(&signpos,SW_NORMAL|SW_OVERLAP);
 				else
@@ -516,14 +518,14 @@ void main()
 			if(key == KEY_DN)
 			{
 				bOn = 0; //turn off
-				ptr_outs = ptr_outs - 1;
-				if(ptr_outs < 0)
-					ptr_outs = 0;
+				if(ptr_outs > 0)
+					ptr_outs = ptr_outs - 1;
+				
 				if(outs[ptr_outs] < 0)
 					outs[ptr_outs] = 0;
 				
 				VxOutput = outs[ptr_outs];
-				sprintf(setptbuf,"set%c:%6f ", 'A'+ptr_outs, outs[ptr_outs]);
+				sprintf(setptbuf,"set%c:%6f ", '0'+ptr_outs, outs[ptr_outs]);
 				draw_label(&setptlbl,SW_NORMAL|SW_OVERLAP);                        
 				state = nSTATE_MAIN_INIT;
 				
@@ -531,14 +533,14 @@ void main()
 			if(key == KEY_UP)
 			{
 				bOn = 0; //turn off
-				ptr_outs = ptr_outs + 1;
-				if(ptr_outs >= OUTS_MAX )
-					ptr_outs = OUTS_MAX - 1 ;
+				if(ptr_outs < (OUTS_MAX-1) )
+					ptr_outs = ptr_outs + 1;
+
 				if(outs[ptr_outs] < 0)
 					outs[ptr_outs] = 0;
 				
 				VxOutput = outs[ptr_outs];
-				sprintf(setptbuf,"set%c:%6f ", 'A'+ptr_outs, outs[ptr_outs]);
+				sprintf(setptbuf,"set%c:%6f ", '0'+ptr_outs, outs[ptr_outs]);
 				draw_label(&setptlbl,SW_NORMAL|SW_OVERLAP);                        
 				state = nSTATE_MAIN_INIT;
 			}

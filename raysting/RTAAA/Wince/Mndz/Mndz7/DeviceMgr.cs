@@ -377,6 +377,8 @@ namespace Mndz7
             cmdport.WriteLine(line);
         }
         static public string nav_range = "";
+        static byte[] togglecmd = new byte[] { 0x55,  0x73,  0x55, 0x55, 0x02, 0x56  };
+        static public int xstate = 1; //can be 1 or 10;
         static public void Action(string action, object param)
         {
             if (GlobalConfig.ISDEBUG)
@@ -442,6 +444,26 @@ namespace Mndz7
                     Thread.Sleep(5);
                 }
             }
+            if (action == "togglex")
+            {
+                //55 73 55 55 02 56 
+                success = false;
+                port.DiscardInBuffer();
+                port.Write(togglecmd, 0, togglecmd.Length);
+                int timeout = 400;
+                while ((timeout-- > 0) && (!success))
+                {
+                    ScanPort();
+                    Thread.Sleep(5);
+                }
+                if (success)
+                {
+                    if (xstate == 1)
+                        xstate = 10;
+                    else
+                        xstate = 1;
+                }
+            }
         }
         static public void Reset()
         {
@@ -463,6 +485,7 @@ namespace Mndz7
 
         static public void RelayState(string coil, string real, string output)
         {
+            return;
             if (((coil == oldcoil) || (coil == "")) &&
                 ((real == oldreal) || (real == "")) &&
                 ((output == oldoutput) || (output == "")))
@@ -550,7 +573,7 @@ namespace Mndz7
         }
 
 
-        internal double OPCurrentOffset = 5.0; 
+        internal double OPCurrentOffset = 0.0; 
         internal double OPCurrentScale
         {
             get
@@ -602,29 +625,29 @@ namespace Mndz7
         {
             get
             {
+                if (DeviceMgr.xstate == 1)
+                    return 600;
+                else
+                    return 60;
+
                 switch (iRange)
                 {
                     case 0: //200u  1V->600A
+                    case 1: //2m    
+                    case 2: //20m   
+                    case 3: //200m  
                         return 600;
-                    case 1: //2m    1V->200A
-                        return 200;
-                    case 2: //20m   1V->100A
-                        return 100;
-                    case 3: //200m  1V->10A
-                        return 10;
-                    case 4: //2     1V->10A
-                        return 10;
+                    case 4: //2     1V->60A
                     case 5: //4     1V->5A
-                        return 5;
                     case 6: //20    1V->1A
-                        return 1;
+                        return 60;
                     default:
                         return -1;
                 }
             }
         }
 
-        private int _iRange = -1;        //the range setting, -1 for null, 0 for 200uohm, 1 for 2mohm, 2 for 20mohm, 3 for 200mohm, 4 for 2ohm, 5 for 4ohm, 6 for 20ohm
+        private int _iRange = 0;        //the range setting, -1 for null, 0 for 200uohm, 1 for 2mohm, 2 for 20mohm, 3 for 200mohm, 4 for 2ohm, 5 for 4ohm, 6 for 20ohm
         internal int iRange{
             get
             {
@@ -702,6 +725,7 @@ namespace Mndz7
         {
             //sleep 500 ms, then reset configuration
             Thread.Sleep(600);
+            bOverLoad = false;
             DeviceMgr.Action("daoutput", new byte[] { 0x55, 0x64, 0xfc, 0x00, 0x00, 0x00, 0x04 }); //set control
             Thread.Sleep(100);
         }
@@ -714,21 +738,20 @@ namespace Mndz7
             }
             set
             {
-                if (value == false) 
+                if ((value == false) || (iRange < RangeMin || iRange > RangeMax))
                 {
                     DeviceMgr.RelayState("", "", "OFF");
+                    ToDAValue(0);
                     _bOn = false;
                     return;
                 }
-                if(iRange < RangeMin || iRange > RangeMax)
-                {
-                      DeviceMgr.RelayState("", "", "OFF");
-                      _bOn = false; //uncertain real case
-                      return;
-                }
                 else
                 {
-                    DeviceMgr.RelayState("", "", "ON");
+                    if ((RangeLimit < 1) && (DeviceMgr.xstate == 10))
+                            DeviceMgr.Action("togglex", "");
+                    if ((RangeLimit > 1) && (DeviceMgr.xstate == 1))
+                        DeviceMgr.Action("togglex", "");
+                    //DeviceMgr.RelayState("", "", "ON");
                 }
                 SaveDA();
                 _bOn = true;
@@ -791,7 +814,7 @@ namespace Mndz7
             }
             if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.0001) //100uV
                 _standard = 0;
-            iRange = Util.ConstIni.IntValue("LASTSETTING", "range");
+            iRange = 0;// Util.ConstIni.IntValue("LASTSETTING", "range");
             bOn = false;
         }
         public void RefreshOutput()
@@ -838,8 +861,7 @@ namespace Mndz7
                 else
                 {
                 }
-                //disable range change
-                if (false && (DeviceMgr.nav_range == "navto1v") && (Math.Abs(DeviceMgr.reading) < 0.1) && bOn)
+                if ((DeviceMgr.nav_range == "navto1v") && (Math.Abs(DeviceMgr.reading) < 0.10) && bOn)
                 {
                     badcount++;
                     if (badcount < 3)
@@ -857,6 +879,8 @@ namespace Mndz7
                     datafilter.Enqueue(DeviceMgr.reading / 1000);
                 else
                     datafilter.Enqueue(DeviceMgr.reading);
+                
+                /*old method
                 if (datafilter.Count < 5)
                     continue;
                 double sqr;
@@ -874,6 +898,28 @@ namespace Mndz7
                 }
                 badcount = 0;
                 reading = datafilter.Skip(2).Take(2).Average();
+                 */
+
+                if (datafilter.Count < 3)
+                    continue;
+                if(datafilter.Count > 3)
+                    datafilter.Dequeue();
+
+                double sqr;
+                sqr = datafilter.Max() - datafilter.Min();
+                
+                if ((DeviceMgr.nav_range == "navto120mv") && (sqr > 0.001)) //1mV
+                {
+                    badcount++;
+                    continue;
+                }
+                if ((DeviceMgr.nav_range == "navto1v") && (sqr > 0.01)) //10mv
+                {
+                    badcount++;
+                    continue;
+                }
+                badcount = 0;
+                reading = datafilter.Average();
                 return true;
             }
             return false;
@@ -941,27 +987,34 @@ namespace Mndz7
             volt = volt * va * FBCurrentScale;
             Current = va * FBCurrentScale;
 
-            return ToDAValue(volt);
+            return ToDAValue(Math.Abs(volt));
         }
         private byte[] lasttosend = new byte[] { 0x00,0x00,0xff, 0xff, 0xff, 0x00 };
+        public bool bOverLoad = false;
         private bool ToDAValue(double voltage)
         {
+            voltage = voltage / 2.0; //divide by 2 because hardware will multiple it with 2
+            double vrefp = 11;
+            double vrefn = 0;
             // Vout = (Vrefp-Vrefn)*D/(2^20-1)+Vrefn =>  D= (Vout-Vrefn)*(2^20-1)/(Vrefp-Vrefn)
             // when BUF is enabled , Vrefp = 10V;  Vrefn = -10V; D = (Vout+10)*(2^20-1)/(20)
-            // D = Vout*(2^20-1)/10;
+            // If vrefn = 0 and vrefp = 10 then D = Vout*(2^20-1)/10;
             byte[] tosend = new Byte[] { 0x55, 0x64, 0xff, 0x00, 0x00, 0x00, 0x01 };
             byte[] tosend2 = new Byte[] { 0x55, 0x64, 0x55, 0xff, 0x00, 0x00, 0x00, 0x01 };//special case for 0x55 leading value
 	    
             bool changed = false;
 
             double volt = voltage - Convert.ToDouble(daoffset) + OPCurrentOffset;
-            if (Math.Abs(volt) > 10) //turn off output or invalid adreading
+            if (Math.Abs(volt) > vrefp) //turn off output or invalid adreading
+            {
+                bOverLoad = true;
                 return false;
-
+            }
+            bOverLoad = false;
 
             
             
-                Int32 d = Convert.ToInt32(Math.Round((volt+10) * (1048576 - 1) / 20.0));
+                Int32 d = Convert.ToInt32(Math.Round((volt-vrefn) * (1048576 - 1) / (vrefp - vrefn)));
                 tosend[5] = Convert.ToByte(d % 256); d = d / 256;
                 tosend2[6] = tosend[5];
                 if (tosend[5] != lasttosend[5])

@@ -130,7 +130,7 @@ namespace Zddq2
                 foreach (string fname in Directory.GetFiles(basedir, "20*.txt"))
                 {
                     FileInfo fi = new FileInfo(fname);
-                    File.Copy(basedir + fi.Name, "\\Hard Disk\\" + fi.Name);
+                    File.Copy(Path.Combine(basedir,fi.Name), Path.Combine("\\Hard Disk\\", fi.Name));
                 }
                 MessageBox.Show(StringResource.str("export_done"));
             }

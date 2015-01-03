@@ -14,10 +14,12 @@ namespace Mndz7
         [MTAThread]
         static void Main()
         {
+            
             mainwnd = new Form1();
             msg = new MsgDlg();
             Application.Run(mainwnd);
         }
+        
         internal static Form1 mainwnd;
         internal static MsgDlg msg;
         internal static void Debug(string line)

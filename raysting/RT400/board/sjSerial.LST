@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  SJSERIAL                                                               12/30/2014 10:26:49 PAGE 1   
+C51 COMPILER V7.01  SJSERIAL                                                               01/03/2015 16:00:46 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE SJSERIAL
@@ -62,7 +62,7 @@ stmt level    source
   53   1      }
   54          
   55          
-C51 COMPILER V7.01  SJSERIAL                                                               12/30/2014 10:26:49 PAGE 2   
+C51 COMPILER V7.01  SJSERIAL                                                               01/03/2015 16:00:46 PAGE 2   
 
   56          
   57          
@@ -126,7 +126,7 @@ stmt level    source
  115   1                      return spTail-spHead;
  116   1      
  117   1              return spTail+SP_BUFFER_MAX-spHead;
-C51 COMPILER V7.01  SJSERIAL                                                               12/30/2014 10:26:49 PAGE 3   
+C51 COMPILER V7.01  SJSERIAL                                                               01/03/2015 16:00:46 PAGE 3   
 
  118   1      }
  119          /**
@@ -190,7 +190,7 @@ stmt level    source
  177   1                      ;
  178   1      }
  179          
-C51 COMPILER V7.01  SJSERIAL                                                               12/30/2014 10:26:49 PAGE 4   
+C51 COMPILER V7.01  SJSERIAL                                                               01/03/2015 16:00:46 PAGE 4   
 
  180          /**
  181          *       Wait One Byte until that appeared,

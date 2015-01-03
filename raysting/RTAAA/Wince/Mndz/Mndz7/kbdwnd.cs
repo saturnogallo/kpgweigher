@@ -122,7 +122,7 @@ namespace Mndz7
             btn_kscale.Visible = note.IndexOf("(ohm)") > 0;
             btn_mscale.Visible = note.IndexOf("(ohm)") > 0;
             //btn_gscale.Visible = note.IndexOf("(ohm)") > 0;
-            //deep++;
+            deep++;
             UpdateData();
             this.Show();
         }
@@ -284,7 +284,10 @@ namespace Mndz7
             }
             deep--;
             if (deep <= 0)
+            {
                 Hide();
+                deep = 0;
+            }
             else
                 Invalidate();
         }

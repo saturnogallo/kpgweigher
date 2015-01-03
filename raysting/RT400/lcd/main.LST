@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  MAIN                                                                   12/25/2014 16:12:00 PAGE 1   
+C51 COMPILER V7.01  MAIN                                                                   12/30/2014 14:57:00 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE MAIN
@@ -62,7 +62,7 @@ stmt level    source
   53          uchar   spSFlag=SPIDLE;
   54          #define write(A)        SBUF=A; while(spSFlag==SPBUSY);
   55          
-C51 COMPILER V7.01  MAIN                                                                   12/25/2014 16:12:00 PAGE 2   
+C51 COMPILER V7.01  MAIN                                                                   12/30/2014 14:57:00 PAGE 2   
 
   56          #define LOOP_BUF_MAX    80
   57          uchar   inbuf[LOOP_BUF_MAX];
@@ -126,7 +126,7 @@ stmt level    source
  115          void parse_cmd()
  116          {
  117   1              uchar len;
-C51 COMPILER V7.01  MAIN                                                                   12/25/2014 16:12:00 PAGE 3   
+C51 COMPILER V7.01  MAIN                                                                   12/30/2014 14:57:00 PAGE 3   
 
  118   1              uchar i;
  119   1              uchar sum;
@@ -190,7 +190,7 @@ stmt level    source
  177   3                              LCD_PrintHz16(inbuf[1],inbuf[2],inbuf+4);
  178   3                              break;
  179   3                      case CMDO_LCD_68:
-C51 COMPILER V7.01  MAIN                                                                   12/25/2014 16:12:00 PAGE 4   
+C51 COMPILER V7.01  MAIN                                                                   12/30/2014 14:57:00 PAGE 4   
 
  180   3                              LCD_Print6X8(inbuf[1],inbuf[2],inbuf+4);
  181   3                              break;
@@ -254,7 +254,7 @@ stmt level    source
  239   3                              if(in_leds == KEY_BTN4)
  240   3                                      display_buttons(KEY_BTN4,1);
  241   3      
-C51 COMPILER V7.01  MAIN                                                                   12/25/2014 16:12:00 PAGE 5   
+C51 COMPILER V7.01  MAIN                                                                   12/30/2014 14:57:00 PAGE 5   
 
  242   3                              if(in_leds == KEY_KTT)//PKTT
  243   3                              {
