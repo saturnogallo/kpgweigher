@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 1   
+C51 COMPILER V7.01  AD5791                                                                 01/13/2015 18:53:55 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE AD5791
@@ -62,7 +62,7 @@ stmt level    source
   53   3                  AD5791OutputBit(SDI,0);     //Send zero to SDI pin
   54   3               }
   55   2               WriteData = WriteData << 1;
-C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 2   
+C51 COMPILER V7.01  AD5791                                                                 01/13/2015 18:53:55 PAGE 2   
 
   56   2               ReadData = (ReadData<<1) | AD5791InputBit(SDO); 
   57   2      
@@ -126,7 +126,7 @@ stmt level    source
  115   1              AD5791HardwareLoad();   
  116   1              AD5791Registers[CONTROL] = 0;
  117   1              AD5791Registers[CLEARCODE] = MYCLR_CODE;
-C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 3   
+C51 COMPILER V7.01  AD5791                                                                 01/13/2015 18:53:55 PAGE 3   
 
  118   1      }
  119          
@@ -190,7 +190,7 @@ stmt level    source
  177   1      
  178   1              AD5791OutputBit(SCLK,0);
  179   1              AD5791OutputBit(SYNC,0);
-C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 4   
+C51 COMPILER V7.01  AD5791                                                                 01/13/2015 18:53:55 PAGE 4   
 
  180   1      
  181   1              DataBuffer[0] = 0x00;
@@ -254,7 +254,7 @@ stmt level    source
  239   1                                                      {
  240   2                                                              AD5791Registers[CONTROL] = CONFIG_MODE;
  241   2                                                              WriteToAD5791ViaSPI(CONTROL, AD5791Registers);
-C51 COMPILER V7.01  AD5791                                                                 01/03/2015 15:48:01 PAGE 5   
+C51 COMPILER V7.01  AD5791                                                                 01/13/2015 18:53:55 PAGE 5   
 
  242   2      
  243   2                                                              AD5791Registers[CLEARCODE] = MYCLR_CODE;        // clear code is set to 0
