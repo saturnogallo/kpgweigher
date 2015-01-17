@@ -37,7 +37,7 @@ namespace Mndz7
             dlg_choice = new ChoiceWnd();
             dlg_kbd = new kbdWnd();
             range_btns = new RectButton[] { btn_range0, btn_range1, btn_range2, btn_range3, btn_range4, btn_range5, btn_range6 };
-            string[] range_string = new String[] { "200µΩ", "2mΩ", "20mΩ", "200mΩ", "2Ω", "4Ω", "20Ω" };
+            string[] range_string = new String[] { "200µΩ/600A", "2mΩ/200A", "20mΩ/100A", "200mΩ/80A", "2Ω/10A", "4Ω/5A", "20Ω/1A" };
             led_ohm.ColorLight = Color.Red;
             led_ohm.ColorBackground = this.BackColor;
             led_ohm.ElementWidth = 12;
@@ -110,8 +110,21 @@ namespace Mndz7
                     if( newrange == processor.iRange)
                         return;
 
-                    processor.iRange = newrange;
-                    RefreshDisplay(true); 
+                    try
+                    {
+                        if (Math.Abs(double.Parse(led_current.Value)) < 0.1)
+                        {
+                            processor.iRange = newrange;
+                            RefreshDisplay(true);
+                        }
+                        else
+                        {
+                            Program.MsgShow("请关闭输入电流后，再进行量程切换。");
+                        }
+                    }
+                    catch
+                    {
+                    }
                 });
             }
             tm = new Timer();
@@ -408,6 +421,11 @@ namespace Mndz7
                 MessageBox.Show("1-DONE!");
             }));
         }
+
+
+
+
+
     }
     #region duplicate windows class
     public class GraphicsPath

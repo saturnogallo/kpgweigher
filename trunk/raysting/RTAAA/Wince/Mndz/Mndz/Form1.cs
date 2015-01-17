@@ -124,8 +124,7 @@ namespace Mndz
                     if( newrange == processor.iRange)
                         return;
 
-                    processor.iRange = newrange;
-                    RefreshDisplay(true); 
+
                 });
             }
             tm = new Timer();

@@ -136,8 +136,8 @@ void swiAction(unsigned char SwiID)
 		return;
 
 	P1 = tbl[(exID&7)];
-	P0 = tbl[(exID>>4)];//modified by songjie for rt600c only
-//	swiDelay(0x3f,0xff);
+	P0 = tbl[(exID>>3)];
+	swiDelay(0x3f,0xff);
 	sleepms(30*ONEMS);
 	P1 = 0xff;
 	P0 = 0xff;
@@ -260,7 +260,7 @@ void main()
 //	DBGS("\r\nSTARTUP DONE ");
 //	swiReset();
 	sleepms(100*ONEMS);
-	swiAction(0x02);
+//	swiAction(0x02);
 	/*
 	*	Protocal routine: 
 	*	1.	HMARK sid(!=HMARK) :set sid
@@ -280,8 +280,10 @@ void main()
 	cm_ad5791b();
 
 //	cm_ad5791(DACMD_OUTPUT,0);
-//	P1 = 0xff;
-//	P0 = 0xff;
+//	P1 = 0xDF; 
+//	P0 = 0x7F;
+	P1 = 0xfe;
+	P0 = 0xff;
 	while(1)
 	{
 		if(sjSerialIsDataWaiting())
@@ -375,6 +377,9 @@ void main()
 				P0=temp;
 				P1=sjSerialWaitForOneByte();
 				sid = "";
+				sjSerialSendByte(HMARK);
+				sjSerialSendByte(0);
+				sjSerialSendByte(0);
 				sjSerialSendByte(EMARK);
 			}
 		}

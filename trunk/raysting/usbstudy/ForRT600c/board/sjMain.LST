@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  SJMAIN                                                                 01/03/2015 15:48:00 PAGE 1   
+C51 COMPILER V7.01  SJMAIN                                                                 01/13/2015 18:53:55 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
@@ -62,7 +62,7 @@ stmt level    source
   53          ********************************************/
   54          };
   55          
-C51 COMPILER V7.01  SJMAIN                                                                 01/03/2015 15:48:00 PAGE 2   
+C51 COMPILER V7.01  SJMAIN                                                                 01/13/2015 18:53:55 PAGE 2   
 
   56          //when modification is applied,
   57          //no address should be modified ,just set the mcu addr= 256,
@@ -126,7 +126,7 @@ stmt level    source
  115          };
  116          
  117          //delay loop
-C51 COMPILER V7.01  SJMAIN                                                                 01/03/2015 15:48:00 PAGE 3   
+C51 COMPILER V7.01  SJMAIN                                                                 01/13/2015 18:53:55 PAGE 3   
 
  118          void swiDelay(unsigned char dl1,unsigned char dl2)
  119          {
@@ -149,8 +149,8 @@ stmt level    source
  136   1                      return;
  137   1      
  138   1              P1 = tbl[(exID&7)];
- 139   1              P0 = tbl[(exID>>4)];//modified by songjie for rt600c only
- 140   1      //      swiDelay(0x3f,0xff);
+ 139   1              P0 = tbl[(exID>>3)];
+ 140   1              swiDelay(0x3f,0xff);
  141   1              sleepms(30*ONEMS);
  142   1              P1 = 0xff;
  143   1              P0 = 0xff;
@@ -190,7 +190,7 @@ stmt level    source
  177   1          unsigned int j;
  178   1         j = 10;
  179   1         while(j-- > 0)
-C51 COMPILER V7.01  SJMAIN                                                                 01/03/2015 15:48:00 PAGE 4   
+C51 COMPILER V7.01  SJMAIN                                                                 01/13/2015 18:53:55 PAGE 4   
 
  180   1         {
  181   2               while(i-- > 0)
@@ -254,7 +254,7 @@ stmt level    source
  239   1              //mDelaymS(5000);
  240   1      
  241   1      
-C51 COMPILER V7.01  SJMAIN                                                                 01/03/2015 15:48:00 PAGE 5   
+C51 COMPILER V7.01  SJMAIN                                                                 01/13/2015 18:53:55 PAGE 5   
 
  242   1              //CH374_PORT_INIT( );  /* CH374接口初始化 */
  243   1      
@@ -277,7 +277,7 @@ stmt level    source
  260   1      //      DBGS("\r\nSTARTUP DONE ");
  261   1      //      swiReset();
  262   1              sleepms(100*ONEMS);
- 263   1              swiAction(0x02);
+ 263   1      //      swiAction(0x02);
  264   1              /*
  265   1              *       Protocal routine: 
  266   1              *       1.      HMARK sid(!=HMARK) :set sid
@@ -297,123 +297,128 @@ stmt level    source
  280   1              cm_ad5791b();
  281   1      
  282   1      //      cm_ad5791(DACMD_OUTPUT,0);
- 283   1      //      P1 = 0xff;
- 284   1      //      P0 = 0xff;
- 285   1              while(1)
- 286   1              {
- 287   2                      if(sjSerialIsDataWaiting())
- 288   2                      {
- 289   3                              temp = sjSerialWaitForOneByte();
- 290   3                              if(temp == HMARK)
- 291   3                              {
- 292   4                                      temp = sjSerialWaitForOneByte();                
- 293   4                                      if(temp != HMARK)
- 294   4                                      {
- 295   5                                              sid = temp;
- 296   5                                              continue;
- 297   5                                      }
- 298   4                              }
- 299   3                              if(sid == 's')//send to switch
- 300   3                              {
- 301   4                                      if(temp == HMARK)
- 302   4                                      {
- 303   5                                              while(1)
-C51 COMPILER V7.01  SJMAIN                                                                 01/03/2015 15:48:00 PAGE 6   
+ 283   1      //      P1 = 0xDF; 
+ 284   1      //      P0 = 0x7F;
+ 285   1              P1 = 0xfe;
+ 286   1              P0 = 0xff;
+ 287   1              while(1)
+ 288   1              {
+ 289   2                      if(sjSerialIsDataWaiting())
+ 290   2                      {
+ 291   3                              temp = sjSerialWaitForOneByte();
+ 292   3                              if(temp == HMARK)
+ 293   3                              {
+ 294   4                                      temp = sjSerialWaitForOneByte();                
+ 295   4                                      if(temp != HMARK)
+ 296   4                                      {
+ 297   5                                              sid = temp;
+ 298   5                                              continue;
+ 299   5                                      }
+ 300   4                              }
+ 301   3                              if(sid == 's')//send to switch
+ 302   3                              {
+ 303   4                                      if(temp == HMARK)
+C51 COMPILER V7.01  SJMAIN                                                                 01/13/2015 18:53:55 PAGE 6   
 
- 304   5                                              {
- 305   6                                                      temp = sjSerialWaitForOneByte();
- 306   6                                                      if(temp == EMARK)
- 307   6                                                              break;
- 308   6                                                      if(temp == RMARK)
- 309   6                                                      {
- 310   7                                                              swiReset();
- 311   7                                                              continue;
- 312   7                                                      }
- 313   6                                                      if(temp == QMARK)
- 314   6                                                              continue;
- 315   6                                                      swiAction(temp);
- 316   6                                              }
- 317   5                                              sid = "";
- 318   5                                              sjSerialSendByte(HMARK);
- 319   5                                              temp = 0x0;//P2;
- 320   5                                              sjSerialSendByte(temp);
- 321   5                                              temp = 0x0;//P3;
- 322   5      
- 323   5                                              sjSerialSendByte(temp);
- 324   5                                              sjSerialSendByte(EMARK);
- 325   5                                      }
- 326   4                              }
- 327   3                              if(sid == 'd')//send to DAC //5 byte data , 1st byte is for sum check = 0x00, (2nd-4th byte is data), 5
+ 304   4                                      {
+ 305   5                                              while(1)
+ 306   5                                              {
+ 307   6                                                      temp = sjSerialWaitForOneByte();
+ 308   6                                                      if(temp == EMARK)
+ 309   6                                                              break;
+ 310   6                                                      if(temp == RMARK)
+ 311   6                                                      {
+ 312   7                                                              swiReset();
+ 313   7                                                              continue;
+ 314   7                                                      }
+ 315   6                                                      if(temp == QMARK)
+ 316   6                                                              continue;
+ 317   6                                                      swiAction(temp);
+ 318   6                                              }
+ 319   5                                              sid = "";
+ 320   5                                              sjSerialSendByte(HMARK);
+ 321   5                                              temp = 0x0;//P2;
+ 322   5                                              sjSerialSendByte(temp);
+ 323   5                                              temp = 0x0;//P3;
+ 324   5      
+ 325   5                                              sjSerialSendByte(temp);
+ 326   5                                              sjSerialSendByte(EMARK);
+ 327   5                                      }
+ 328   4                              }
+ 329   3                              if(sid == 'd')//send to DAC //5 byte data , 1st byte is for sum check = 0x00, (2nd-4th byte is data), 5
              -th byte is function code,
- 328   3                              {
- 329   4                                              //example:      55 64 cc 00 11 22 01
- 330   4                                              //               :  55 64 ff 00 00 00 01
- 331   4                                              d0 = temp;              
- 332   4                                              d1 = sjSerialWaitForOneByte();          
- 333   4                                              d0 += d1;
- 334   4                                              d2 = sjSerialWaitForOneByte();          
- 335   4                                              d0 += d2;
- 336   4                                              d3 = sjSerialWaitForOneByte();          
- 337   4                                              d0 += d3;
- 338   4                                              temp = sjSerialWaitForOneByte();
- 339   4                                              d0 +=  temp;
- 340   4                                              if(d0 == 0x00)
- 341   4                                              {
- 342   5                                                      if(temp == 0x01)
- 343   5                                                      {
- 344   6                                                              dacbuf[0] = d0;
- 345   6                                                              dacbuf[1] = d1;
- 346   6                                                              dacbuf[2] = d2;
- 347   6                                                              dacbuf[3] = d3;
- 348   6                                                              temp = cm_ad5791b();
- 349   6                                                      }
- 350   5                                                      else{
- 351   6                                                              temp = cm_ad5791(temp,0);       //rescue da
- 352   6                                                      }
- 353   5                                              }else{
- 354   5                                                      temp = 0;
- 355   5                                              }
- 356   4                                              sid = "";
- 357   4                                              sjSerialSendByte(HMARK);
- 358   4                                              if(temp > 0) //success
- 359   4                                              {
- 360   5                                                      sjSerialSendByte(0);
- 361   5                                                      sjSerialSendByte(0);
- 362   5                                              }else{
- 363   5                                                      sjSerialSendByte(1);
- 364   5                                                      sjSerialSendByte(1);
-C51 COMPILER V7.01  SJMAIN                                                                 01/03/2015 15:48:00 PAGE 7   
+ 330   3                              {
+ 331   4                                              //example:      55 64 cc 00 11 22 01
+ 332   4                                              //               :  55 64 ff 00 00 00 01
+ 333   4                                              d0 = temp;              
+ 334   4                                              d1 = sjSerialWaitForOneByte();          
+ 335   4                                              d0 += d1;
+ 336   4                                              d2 = sjSerialWaitForOneByte();          
+ 337   4                                              d0 += d2;
+ 338   4                                              d3 = sjSerialWaitForOneByte();          
+ 339   4                                              d0 += d3;
+ 340   4                                              temp = sjSerialWaitForOneByte();
+ 341   4                                              d0 +=  temp;
+ 342   4                                              if(d0 == 0x00)
+ 343   4                                              {
+ 344   5                                                      if(temp == 0x01)
+ 345   5                                                      {
+ 346   6                                                              dacbuf[0] = d0;
+ 347   6                                                              dacbuf[1] = d1;
+ 348   6                                                              dacbuf[2] = d2;
+ 349   6                                                              dacbuf[3] = d3;
+ 350   6                                                              temp = cm_ad5791b();
+ 351   6                                                      }
+ 352   5                                                      else{
+ 353   6                                                              temp = cm_ad5791(temp,0);       //rescue da
+ 354   6                                                      }
+ 355   5                                              }else{
+ 356   5                                                      temp = 0;
+ 357   5                                              }
+ 358   4                                              sid = "";
+ 359   4                                              sjSerialSendByte(HMARK);
+ 360   4                                              if(temp > 0) //success
+ 361   4                                              {
+ 362   5                                                      sjSerialSendByte(0);
+ 363   5                                                      sjSerialSendByte(0);
+ 364   5                                              }else{
+C51 COMPILER V7.01  SJMAIN                                                                 01/13/2015 18:53:55 PAGE 7   
 
- 365   5                                              }
- 366   4                                              sjSerialSendByte(EMARK);
- 367   4                              }
- 368   3      
- 369   3                              if(sid == 'n')//send to navmeter
- 370   3                              {
- 371   4                                      sjSerialSendByte2(temp);
- 372   4                              }
- 373   3                              if(sid == 't')//direct io control
- 374   3                              {
- 375   4                                      P0=temp;
- 376   4                                      P1=sjSerialWaitForOneByte();
- 377   4                                      sid = "";
- 378   4                                      sjSerialSendByte(EMARK);
- 379   4                              }
- 380   3                      }
- 381   2                      if(sjSerialIsDataWaiting2())
- 382   2                      {
- 383   3                              temp = sjSerialWaitForOneByte2();
- 384   3                              sjSerialSendByte(temp);
+ 365   5                                                      sjSerialSendByte(1);
+ 366   5                                                      sjSerialSendByte(1);
+ 367   5                                              }
+ 368   4                                              sjSerialSendByte(EMARK);
+ 369   4                              }
+ 370   3      
+ 371   3                              if(sid == 'n')//send to navmeter
+ 372   3                              {
+ 373   4                                      sjSerialSendByte2(temp);
+ 374   4                              }
+ 375   3                              if(sid == 't')//direct io control
+ 376   3                              {
+ 377   4                                      P0=temp;
+ 378   4                                      P1=sjSerialWaitForOneByte();
+ 379   4                                      sid = "";
+ 380   4                                      sjSerialSendByte(HMARK);
+ 381   4                                      sjSerialSendByte(0);
+ 382   4                                      sjSerialSendByte(0);
+ 383   4                                      sjSerialSendByte(EMARK);
+ 384   4                              }
  385   3                      }
- 386   2              }
- 387   1      }
- 388          
- 389          
- 390          
+ 386   2                      if(sjSerialIsDataWaiting2())
+ 387   2                      {
+ 388   3                              temp = sjSerialWaitForOneByte2();
+ 389   3                              sjSerialSendByte(temp);
+ 390   3                      }
+ 391   2              }
+ 392   1      }
+ 393          
+ 394          
+ 395          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    738    ----
+   CODE SIZE        =    764    ----
    CONSTANT SIZE    =    109    ----
    XDATA SIZE       =      6      11
    PDATA SIZE       =   ----    ----
