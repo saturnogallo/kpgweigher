@@ -46,6 +46,8 @@ namespace Mndz
         }
         private static void DisablePowerSleep()
         {
+            if (GlobalConfig.ISDEBUG)
+                return;
             //HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Power\Timeouts
             RegistryKey hklm = Registry.CurrentUser;
             RegistryKey ctrl = hklm.OpenSubKey("ControlPanel", true);
