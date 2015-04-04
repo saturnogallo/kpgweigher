@@ -906,7 +906,8 @@ namespace Mndz
             double volt = voltage - Convert.ToDouble(daoffset);
             if (Math.Abs(volt) > 2.5) //turn off output or invalid adreading
                 return false;
-
+		if (volt <0)
+			volt = 0;
             
                 Int32 d = Convert.ToInt32(Math.Round((volt+10) * (1048576 - 1) / 20.0));
                 tosend[5] = Convert.ToByte(d % 256); d = d / 256;

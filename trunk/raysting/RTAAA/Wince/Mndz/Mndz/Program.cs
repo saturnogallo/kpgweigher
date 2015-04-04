@@ -14,6 +14,7 @@ namespace Mndz
         [MTAThread]
         static void Main()
         {
+
             mainwnd = new Form1();
             msg = new MsgDlg();
             Application.Run(mainwnd);

@@ -27,8 +27,10 @@ namespace Mndz7
             InitializeComponent();
             
             string mypath = Path.Combine(GlobalConfig.udiskdir2, "screen");
-            if (Directory.Exists(mypath))
-                btn_capture.Visible = true;
+            
+            btn_capture.Visible = false;
+            lbl_davalue.Visible = false;
+            
             //Cursor.Hide();
             processor = new Processor();
             
@@ -137,10 +139,11 @@ namespace Mndz7
                     dt_lastoutput = DateTime.Now;
                     return;
                 }
+                lbl_davalue.Text = processor.DAValue;
                 processor.RefreshOutput();
                 if (processor.Current > -999)
                 {
-                    UpdateCurrent(processor.Current);
+                    UpdateCurrentDisplay(processor.Current);
                     processor.Current = -9999;
                 }
             });
@@ -179,9 +182,10 @@ namespace Mndz7
                     {
                         if (!Util.TryDecimalParse(param, out a))
                             return;
-
+                        a = a / Convert.ToDecimal(1000); //in mV unit
                         processor.daoffset = a + processor.daoffset;
                         
+
                     }
                     if (id == "value")
                     {
@@ -207,14 +211,28 @@ namespace Mndz7
                             Program.Upgrade();
                             return;
                         }
+                        
                         if (param == "658901920") //input standard resistance
                         {
                             this.Invoke(new Action(() =>
                             {
-                                dlg_kbd.Init("请输入DA零位值", "daoffset", false, KbdData);
+                                dlg_kbd.Init("请输入DA零位值(mV),当前值:"+(processor.daoffset*1000).ToString(), "daoffset", false, KbdData);
                             }));
                             return;
                         }
+
+                        if (param == "658901921") //input standard resistance
+                        {
+                            processor.daoffset = 0;
+                            return;
+                        }
+                        if (param == "658901929") //debug display shown
+                        {
+                            btn_capture.Visible = true;
+                            lbl_davalue.Visible = true;
+                            return;
+                        }
+
                         if (!Util.TryDecimalParse(param, out a))
                             return;
                         a = a * dlg_kbd.scale;
@@ -277,7 +295,7 @@ namespace Mndz7
                 return;
             processor.resistance = a;
         }
-        public void UpdateCurrent(double reading)
+        public void UpdateCurrentDisplay(double reading)
         {
             if(processor.iRange < processor.RangeMin || processor.iRange > processor.RangeMax)
             {
@@ -358,8 +376,8 @@ namespace Mndz7
             }
         }
         //PC side command
-	//H reset
-	//ZERO zero current reading
+	    //H reset
+	    //ZERO zero current reading
         //resi: 1.234 on
         //resi: 1.345 off
         //resi? return resi: 1.234 on|off -1

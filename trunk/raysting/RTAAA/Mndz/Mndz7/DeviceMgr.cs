@@ -985,7 +985,8 @@ namespace Mndz7
             if (Math.Abs(volt) > 10) //turn off output or invalid adreading
                 return false;
 
-
+	    if(volt <0)
+		volt = 0;
             
             
                 Int32 d = Convert.ToInt32(Math.Round((volt+10) * (1048576 - 1) / 20.0));

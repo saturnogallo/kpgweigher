@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Diagnostics;
-
+using System.Windows.Forms;
 namespace Mndz
 {
     static class  DeviceMgr
@@ -903,22 +903,27 @@ namespace Mndz
 	    
             bool changed = false;
 
+            
+            
             double volt = voltage - Convert.ToDouble(daoffset);
             if (Math.Abs(volt) > 2.5) //turn off output or invalid adreading
                 return false;
-
-
-            
-            
+	        if (volt < 0)
+	    	    volt = 0;
+                        
                 Int32 d = Convert.ToInt32(Math.Round((volt+10) * (1048576 - 1) / 20.0));
                 tosend[5] = Convert.ToByte(d % 256); d = d / 256;
+
+                
                 tosend2[6] = tosend[5];
                 if (tosend[5] != lasttosend[5])
                 {
                     lasttosend[5] = tosend[5];
                     changed = true;
                 }
+
                 tosend[4] = Convert.ToByte(d % 256);
+                
                 tosend2[5] = tosend[4];
                 d = d / 256;
                 if (tosend[4] != lasttosend[4])
@@ -927,12 +932,14 @@ namespace Mndz
                     changed = true;
                 }
                 tosend[3] = Convert.ToByte(d % 256);
+                
                 tosend2[4] = tosend[3];
                 if (tosend[3] != lasttosend[3])
                 {
                     lasttosend[3] = tosend[3];
                     changed = true;
                 }
+
                 tosend[2] = Convert.ToByte((256 * 3 - 1 - Convert.ToInt32(tosend[3] + tosend[4] + tosend[5])) % 256);
                 tosend2[3] = tosend[2];
                 if (changed)

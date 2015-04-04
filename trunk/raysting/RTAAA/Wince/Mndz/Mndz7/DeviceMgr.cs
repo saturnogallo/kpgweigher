@@ -461,21 +461,28 @@ namespace Mndz7
                     port.DiscardInBuffer();
                     if (action == "toggle1")
                         portcmd[3] = (byte)(portcmd[3] | 0x01);
-                    else
+                    else if (action == "toggle10")
                         portcmd[3] = (byte)(portcmd[3] & 0xfe);
-
+                    else if (xstate == 1)
+                        portcmd[3] = (byte)(portcmd[3] | 0x01);
+                    else if (xstate == 10)
+                        portcmd[3] = (byte)(portcmd[3] & 0xfe);
                     
-                    portcmd[3] = (byte)(portcmd[3] & 0xf5); //0101
                     
-                    if (action == "poscurrrent") //1xxx
+                    portcmd[3] = (byte)(portcmd[3] | 0x0A); //1x1x
+                    
+                    if (action == "poscurrent") //0xxx   //down edge 
                     {
-                        portcmd[3] = (byte)(portcmd[3] | 0xf8);
+                        portcmd[3] = (byte)(portcmd[3] & 0xf7);
                     }
-                    else if (action == "negcurrrent") //xx1x
+                    else if (action == "negcurrent") //xx0x //down edge
                     {
-                        portcmd[3] = (byte)(portcmd[3] | 0xf2);
+                        portcmd[3] = (byte)(portcmd[3] & 0xfd);
                     }
-
+                    /*Logger.Log(String.Format("{0} {1} {2} {3}\n",portcmd[0].ToString("X2"),
+                        portcmd[1].ToString("X2"),
+                        portcmd[2].ToString("X2"),
+                        portcmd[3].ToString("X2")));*/
                     port.Write(portcmd, 0, portcmd.Length);
                     int timeout = 400;
                     while ((timeout-- > 0) && (!success))
@@ -485,9 +492,10 @@ namespace Mndz7
                     }
                     if (success)
                     {
+                        Logger.Log("ok");
                         if (action == "toggle1")
                             xstate = 1;
-                        else
+                        if (action == "toggle10")
                             xstate = 10;
                         break;
                     }
@@ -731,6 +739,13 @@ namespace Mndz7
                     if(b <= RangeLimit)
                          newresi = resistance;
                     resistance = newresi;
+                    
+                    //toggle range relay when range changes.
+                    if (RangeLimit < 1)
+                        DeviceMgr.Action("toggle1", "");
+                    if (RangeLimit > 1)
+                        DeviceMgr.Action("toggle10", "");
+
                 }
                 Util.ConstIni.WriteString("LASTSETTING", "range", _iRange.ToString());
             }
@@ -1052,10 +1067,15 @@ namespace Mndz7
             {
                 if (bPositive != -1)
                 {
+                    //Program.MsgShow("switch to negative current");
                     DeviceMgr.Action("defcurrent", 0);
+                    Thread.Sleep(100);
                     DeviceMgr.Action("negcurrent", 0);
+                    Thread.Sleep(100);
                     DeviceMgr.Action("defcurrent", 0);
+                    Thread.Sleep(100);
                     DeviceMgr.Action("negcurrent", 0);
+                    Thread.Sleep(100);
                     DeviceMgr.Action("defcurrent", 0);
                     bPositive = -1;
                 }
@@ -1064,11 +1084,17 @@ namespace Mndz7
             {
                 if (bPositive != 1)
                 {
+                    //Program.MsgShow("switch to positive current");
                     DeviceMgr.Action("defcurrent", 0);
+                    Thread.Sleep(100);
                     DeviceMgr.Action("poscurrent", 0);
+                    Thread.Sleep(100);
                     DeviceMgr.Action("defcurrent", 0);
+                    Thread.Sleep(100);
                     DeviceMgr.Action("poscurrent", 0);
+                    Thread.Sleep(100);
                     DeviceMgr.Action("defcurrent", 0);
+                    Thread.Sleep(100);
                     bPositive = 1;
                 }
 
@@ -1077,6 +1103,15 @@ namespace Mndz7
         }
         private byte[] lasttosend = new byte[] { 0x00,0x00,0xff, 0xff, 0xff, 0x00 };
         public bool bOverLoad = false;
+
+        private string _DAValue = "";
+        public string DAValue
+        {
+            get
+            {
+                return _DAValue;
+            }
+        }
         private bool ToDAValue(double voltage)
         {
             voltage = voltage; // nouse now / 2.0; //divide by 2 because hardware will multiple it with 2
@@ -1096,6 +1131,10 @@ namespace Mndz7
                 bOverLoad = true;
                 return false;
             }
+            if (volt < 0)
+                volt = 0;
+
+            _DAValue = String.Format("Volt:{0}, DA:{1}", voltage.ToString("F5"), volt.ToString("F5"));
             bOverLoad = false;
 
             
