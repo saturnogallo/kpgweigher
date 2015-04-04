@@ -30,21 +30,64 @@ namespace Mndz
         private StringBuilder data;
         public static Decimal scale = 300;
         public static string s_scale = "300";
+        public static string[] scale_vals = new string[] { "100", "200", "300", "400", "500", "600" };
+        private Dictionary<string, string[]> text_allbtns = new Dictionary<string, string[]>();
         public Form1()
         {
 
             DisablePowerSleep();
 
+            text_allbtns["1000"] = new string[] {" 10 A", "100 A", "1000 A", "","","" };
+            text_allbtns["600"] = new string[] { "  1 A", " 10 A", "100 A", "300 A", "600 A", "" };
+            text_allbtns["500"] = new string[] { "  1 A", " 10 A", "100 A", "200 A", "300 A", "500 A" };
+            text_allbtns["400"] = new string[] { "  1 A", " 10 A", "100 A", "200 A", "300 A", "400 A" };
+            text_allbtns["300"] = new string[] { "  1 A", " 10 A", "100 A", "200 A", "300 A", "" };
+            text_allbtns["200"] = new string[] { "  1 A", " 10 A", "100 A", "200 A", "", "" };
+            text_allbtns["100"] = new string[] { "  1 A", " 10 A", "100 A", "", "", "" };
             InitializeComponent();
             myBeep = new Beep("PWM1:");
 
+            //use a different way to check scale
+            s_scale = "300"; //default scale is 300
+
+            
+            if (File.Exists(Path.Combine(GlobalConfig.basedir, "1000.txt")))
+            {
+                s_scale = "1000";
+            }
+            foreach (string ss in scale_vals)
+            {
+                if (File.Exists(Path.Combine(GlobalConfig.basedir, ss + ".txt")))
+                {
+                    s_scale = ss;
+                    break;
+                }
+            }
+            string[] btn_texts = text_allbtns[s_scale];
+            rngbtn_1.Label = btn_texts[0];
+            rngbtn_10.Label = btn_texts[1];
+            rngbtn_100.Label = btn_texts[2];
+            rngbtn_300.Label = btn_texts[3];
+            rngbtn_600.Label = btn_texts[4];
+            rngbtn_1000.Label = btn_texts[5];
+
+            rngbtn_1.Visible = (btn_texts[0] != "");
+            rngbtn_10.Visible = (btn_texts[1] != "");
+            rngbtn_100.Visible = (btn_texts[2] != "");
+            rngbtn_300.Visible = (btn_texts[3] != "");
+            rngbtn_600.Visible = (btn_texts[4] != "");
+            rngbtn_1000.Visible = (btn_texts[5] != "");
+
+
+            this.label3.Text = label3.Text.Replace("300", s_scale);
+            /*
             if (this.label3.Text.IndexOf("1000A") >= 0)
                 s_scale = "1000";
             else if (this.label3.Text.IndexOf("600A") >= 0)
                 s_scale = "600";
             else
                 s_scale = "300";
-
+            */
             scale = Decimal.Parse(s_scale);
             this.BackColor = Color.LightSkyBlue;
             led_current.ColorDark = this.BackColor;
@@ -92,28 +135,13 @@ namespace Mndz
                 {
                     if (processor.bOn)
                         return;
-                    processor.range = Int32.Parse((o as RectButton).Name.Remove(0, "rngbtn_".Length));
+
+                    processor.range = Int32.Parse((o as RectButton).Label.Trim(new char[]{' ','A'}));
                     if (processor.setting > processor.range)
                         processor.setting = 0;
                     RefreshDisplay(false);
                     this.Beep();
                 });
-            }
-            if (s_scale == "300")
-            {
-                this.rngbtn_1000.Visible = false;
-                this.rngbtn_600.Visible = false;
-            }
-            if (s_scale == "600")
-            {
-                this.rngbtn_1000.Visible = false;
-            }
-            if (s_scale == "1000")
-            {
-                this.rngbtn_1.Visible = false;
-                this.rngbtn_300.Visible = false;
-                this.rngbtn_600.Visible = false;
-                this.rngbtn_1000.Top = this.rngbtn_300.Top;
             }
             #endregion
             #region digi up and down
@@ -266,7 +294,10 @@ namespace Mndz
                 case 1: unit = 1 - position; break;
                 case 10: unit = 2 - position; break;
                 case 100:
+                case 200:
                 case 300:
+                case 400:
+                case 500:
                 case 600:
                     unit = 3 - position; break;
                 case 1000: unit = 4 - position; break;
@@ -393,9 +424,8 @@ namespace Mndz
                             return;
                         }
 
-                        if ((s_scale == "1000" && !processor.CalibrateADScale(d/1000.0)) ||
-                            (s_scale == "600" && !processor.CalibrateADScale(d/1000.0)) ||
-                            (s_scale == "300" && !processor.CalibrateADScale(d/1000.0)) )
+                        if ((Form1.scale_vals.Contains(s_scale) && !processor.CalibrateADScale(d/1000.0)) ||
+                            (s_scale == "1000" && !processor.CalibrateADScale(d/1000.0)) )
                             Program.MsgShow("校准电流值失败.");
                     }
                     if (id == "value")
@@ -444,22 +474,14 @@ namespace Mndz
                         if (!IsValidCurrent(a))  //range check
                         {
                             this.Invoke(new Action(() => {
-                                if (Form1.s_scale == "300")
-                                    Program.MsgShow("输入值超出范围 (0-400 A)");
-                                if (Form1.s_scale == "600")
-                                    Program.MsgShow("输入值超出范围 (0-600 A)");
-                                if (Form1.s_scale == "1000")
-                                    Program.MsgShow("输入值超出范围 (0-1000 A)");
-
+                                    Program.MsgShow("输入值超出范围 (0-"+Form1.s_scale+" A)");
                             }));
                             return;
                         }
                         processor.setting = a;
                         if (Form1.s_scale == "300")
-                            rectMeter1.Angle = Convert.ToInt32(Math.Floor( Convert.ToDouble(a) * 180 / 300.0));
-                        if (Form1.s_scale == "600")
-                            rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(a) * 180 / (processor.range*1.0)));
-                        if (Form1.s_scale == "1000")
+                            rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(a) * 180 / 300.0));
+                        else
                             rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(a) * 180 / (processor.range * 1.0)));
                         
                         RefreshDisplay(true);
@@ -522,7 +544,10 @@ namespace Mndz
                     newcurr = reading.ToString("F5");
                     break;
                 case 100:
+                case 200:
                 case 300:
+                case 400:
+                case 500:
                 case 600:
                     newcurr = reading.ToString("F4");
                     break;
@@ -536,9 +561,7 @@ namespace Mndz
                 led_current.Value = newcurr;
                 if (Form1.s_scale == "300")
                     rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(reading) * 180 / 300.0));
-                if (Form1.s_scale == "600")
-                    rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(reading) * 180 / (processor.range * 1.0)));
-                if (Form1.s_scale == "1000")
+                else
                     rectMeter1.Angle = Convert.ToInt32(Math.Floor(Convert.ToDouble(reading) * 180 / (processor.range * 1.0)));
             }
         }
@@ -564,7 +587,10 @@ namespace Mndz
                     led_setting.Value = processor.setting.ToString("F5");
                     break;
                 case 100:
+                case 200:
                 case 300:
+                case 400:
+                case 500:
                 case 600: 
                     led_setting.Value = processor.setting.ToString("F4");
                     break;
@@ -575,7 +601,7 @@ namespace Mndz
             }
             foreach (RectButton rb in rng_btns)
             {
-                if (Int32.Parse(rb.Name.Remove(0, "rngbtn_".Length)) == processor.range)
+                if (rb.Visible && Int32.Parse(rb.Label.Trim(new char[]{' ','A'})) == processor.range)
                 {
                     if (rb.colorTop != Color.Orange)
                         rb.colorTop = Color.Orange;
@@ -592,7 +618,7 @@ namespace Mndz
         //curr: 1.345 off
         //setting? return setting: 1.234 on|off
         //curr? return curr: 1.234
-        private Regex resi_set_mode = new Regex(@"curr:\s+([0-9.Mk]+)\s+(on|off)\s+(1|10|100|300|600|1000)$");
+        private Regex resi_set_mode = new Regex(@"curr:\s+([0-9.Mk]+)\s+(on|off)\s+(1|10|100|200|300|400|500|600|1000)$");
         internal void pc_cmd(string cmd)
         {
             Logger.SysLog(cmd);
@@ -654,10 +680,8 @@ namespace Mndz
         {
             if (Form1.s_scale == "300")
                 return !(a < 0 || a > 400);
-            if (Form1.s_scale == "600")
-                return !(a < 0 || a > 600);
-            if (Form1.s_scale == "1000")
-                return !(a < 0 || a > 1000);
+            
+            return !(a < 0 || a > Int32.Parse(s_scale));
 
             return false;
         }
