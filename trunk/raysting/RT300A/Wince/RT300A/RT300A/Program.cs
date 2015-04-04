@@ -20,6 +20,9 @@ namespace Mndz
             msg = new MsgDlg();
             Application.Run(mainwnd);
         }
+        /*
+         * Change summary : 2015-03-14: use seperate relay for current from 100A to 600A, support 100,200,300,400,500,600,1000 now.
+         */
         internal static Form1 mainwnd;
         internal static MsgDlg msg;
         internal static void Debug(string line)

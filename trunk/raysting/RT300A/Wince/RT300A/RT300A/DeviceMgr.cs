@@ -64,6 +64,15 @@ namespace Mndz
         26 2F  REG44
          */
             regmap = new Dictionary<string, byte>();
+            /*
+             * equivilant in QJ55 and QJ58 W relay
+             * 100A:  64, 
+             * 200A:  128
+             * 300A:  2048
+             * 400A:  256
+             * 500A:  512
+             * 600A:  1024
+             */
             byte[]  all_relay = new byte[]{
                 0x40,0x41,0x42,0x43,0x13,0x1A,0x1E,0x17,
                 0x11,0x18,0x31,0x38,0x30,0x39,0x22,0x2B,
@@ -71,11 +80,11 @@ namespace Mndz
                 0x32,0x3B,0x21,0x28,0x33,0x3A,0x02,0x0B,
                 0x10,0x19,0x00,0x09,0x12,0x1B,0x01,0x08,
                 0x25,0x2C,0x24,0x2D,0x27,0x2E,0x26,0x2F};
-            string[] abbr_relay = {"REG21",     "REG22",    "REG23",     "REG24", 
+            string[] abbr_relay = {"REG21:200A",     "REG22:100A",    "REG23",     "REG24", 
                                    "REG11",     "REG12",    "REG13",     "REG14",
                                    "REG61",     "REG62",    "REG63",     "REG64",
                                    "REG51",     "REG52",    "REG53",     "REG54",
-                                   "REG31:300A","REG32:600A",    "REG33",     "REG34",
+                                   "REG31:300A","REG32:600A",    "REG33:500A",     "REG34:400A",
                                    "REG41",     "REG42",    "REG43",     "REG44"
                                   };
             int i;
@@ -154,7 +163,8 @@ namespace Mndz
             cmdport.DiscardInBuffer();
             cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
             #endregion
-/*
+            #region seperate AD port , not in use now
+            /*
             #region init AD board port
             adport = new SerialPort();
             adport.BaudRate = 2400;
@@ -176,8 +186,9 @@ namespace Mndz
             adport.DataReceived += new SerialDataReceivedEventHandler(adport_DataReceived);
             #endregion
  */
+            #endregion
         }
-
+        #region seperate AD port , not in use now
         //protocal of ad weighing board
         //02 26 30 20 31 30 30 34 33 35 30 30 30 30 30 30 0D
         static private int adstate = -1;
@@ -285,6 +296,7 @@ namespace Mndz
                 }
             }
         }*/
+        #endregion
         static void cmdport_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             if (!cmdport.IsOpen)
@@ -458,7 +470,7 @@ namespace Mndz
         static private string oldreal = "";  //old real resistance
         static private string oldoutput = ""; //old output status
         //static private string[] coiltbl = new string[] { "COIL_10T", "COIL_100T", "COIL_1T", "COIL_REAL" };
-        static private string[] outputtbl = new string[] { "300A", "600A"};
+        static private string[] outputtbl = new string[] { "100A", "200A", "300A", "400A", "500A", "600A" };
         static private byte[] UsHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('s'), Convert.ToByte('U'), Convert.ToByte('U') };
         static private byte[] UdHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('d') };
         static private byte[] UsTail = new byte[] { Convert.ToByte('V') };
@@ -469,7 +481,7 @@ namespace Mndz
                 return;
             DelayWrite(UsHead, 0, 4);
 
-            DelayWrite(new byte[] { regmap["300A_OFF"], regmap["600A_OFF"] }, 0, 2);
+            DelayWrite(new byte[] { regmap["100A_OFF"], regmap["200A_OFF"], regmap["300A_OFF"], regmap["400A_OFF"] , regmap["500A_OFF"], regmap["600A_OFF"] }, 0, 2);
             if (outputtbl.Contains(output))
             {
                 DelayWrite(new byte[] { regmap[output + "_ON"] }, 0, 1);
@@ -540,7 +552,7 @@ namespace Mndz
                 0.6V->600A
                 1V->1000A
                  */
-                if ((Form1.s_scale == "300") || (Form1.s_scale == "600")) //update relay state
+                if (Form1.scale_vals.Contains(Form1.s_scale)) //update relay state
                 {
                     DeviceMgr.RelayState(Form1.s_scale + "A");
                 }
@@ -593,7 +605,7 @@ namespace Mndz
                 }
             }
         }
-        private int[] validrng = new int[] { 1, 10, 100, 300, 600, 1000 };
+        private int[] validrng = new int[] { 1, 10, 100, 200, 300, 400, 500, 600, 1000 };
         private int _range;
         internal int range{
             get
