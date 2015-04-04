@@ -465,7 +465,7 @@ curr2, ktt, rs/rx, dvm  --  4
             inbuffer = new StringBuilder();
             cmdbuffer = new StringBuilder();
             port = new SerialPort();
-            
+
             #region init port
             port.BaudRate = 9600;
             if (!bDebugGPIB)
@@ -479,46 +479,57 @@ curr2, ktt, rs/rx, dvm  --  4
             int i;
             for (i = 0; i < 10; i++)
             {
-            if (bDebugGPIB)
-	break;
+                if (bDebugGPIB)
+	                break;
                 port.Open();
                 if (port.IsOpen)
                     break;
                 Thread.Sleep(3000);
             }
-            if(i >= 10)
+
+            if (i >= 10)
+            {
+                Program.DbgShow("Failed to open " + port.PortName);
                 throw new Exception("Failed to open port A");
+            }
             #endregion 
              
-            
             #region init cmdport
+            
             cmdport = new SerialPort();
             cmdport.BaudRate = 9600;
             if(!bDebugGPIB)
-                cmdport.PortName = "COM4"; //for old is COM2, for new is COM4
+                cmdport.PortName = "COM2"; //for old is COM2, for new is COM4
             else
-                cmdport.PortName = "COM4"; //for old is COM2, for new is COM4
+                cmdport.PortName = "COM2"; //for old is COM2, for new is COM4
             cmdport.Parity = Parity.None;
             cmdport.DataBits = 8;
             cmdport.StopBits = StopBits.One;
             cmdport.NewLine = "\r";
+            
             cmdport.Open();
-            #endregion
+                
+            
             if (!cmdport.IsOpen)
             {
                 port.Close();
-                throw new Exception("Failed to open port B");
+                Program.DbgShow("fail: cmdport open " + cmdport.PortName);
+                 throw new Exception("Failed to open port B");
             }
-            cmdport.DiscardInBuffer();
-            cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
+            else
+            {
+                cmdport.DiscardInBuffer();
+                cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
+            }
             
-             
+            #endregion
             agent_access = false;
             actmsg = new ActMessage();
             msg_loop = new Thread(new ThreadStart(MessageHandler));
             msg_loop.IsBackground = false;
             if(bDebugGPIB)
                 return;
+
             
             msg_loop.Start();
         }
@@ -593,6 +604,8 @@ curr2, ktt, rs/rx, dvm  --  4
         }
         static private void CmdReportSlow(string line)
         {
+            if(!(cmdport is SerialPort)&& cmdport.IsOpen)
+                return;
             cmdport.Write(cmdport.NewLine);
             lastword = line;
             foreach (char l in line.ToCharArray())
@@ -601,11 +614,14 @@ curr2, ktt, rs/rx, dvm  --  4
                 Thread.Sleep(3);
             }
             cmdport.Write(cmdport.NewLine);
+             
         }
         static private bool wlock = false;
         static public string lastword = "";
         static public void Resend()
         {
+            if (!(cmdport is SerialPort) && cmdport.IsOpen)
+                return;
             if (lastword == "")
                 return;
 
@@ -619,6 +635,8 @@ curr2, ktt, rs/rx, dvm  --  4
         }
         static public void ReportHeader(int total)
         {
+            if (!(cmdport is SerialPort) && cmdport.IsOpen)
+                return;
             while (wlock || cmdport.BytesToWrite > 0)
             {
                 ;
@@ -634,6 +652,8 @@ curr2, ktt, rs/rx, dvm  --  4
         }
         static public void ReportData(int index, double value)
         {
+            if (!(cmdport is SerialPort) && cmdport.IsOpen)
+                return;
             while (wlock || cmdport.BytesToWrite > 0)
             {
                 ;

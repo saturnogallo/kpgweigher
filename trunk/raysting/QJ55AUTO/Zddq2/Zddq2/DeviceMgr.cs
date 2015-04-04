@@ -101,6 +101,7 @@ namespace Zddq2
     public class TaskMachine
     {
         public RxInfo currRx;
+        public int retry = 0;
         public bool bPaused = false;
         public ActionMgr act_mgr;
         private DataMgr data_mgr;
@@ -155,6 +156,7 @@ namespace Zddq2
                 data_mgr.rx = currRx;
                 data_mgr.rs = Program.lst_rsinfo[0];
                 DeviceMgr.ReportHeader(RunWnd.syscfg.iMeasTimes);
+                retry = 0;
                 bRunning = true;
             }
         }
@@ -182,7 +184,7 @@ namespace Zddq2
             if (bPaused || !bRunning || act_mgr.IsBusy)
                 return;
 
-
+            Debug.WriteLine("Step:" + stm.ToString());
             if (stm == ACTION_STATE.INIT_FOR_START)//search the next valid channel
             {
                 currRx.i_State = RUN_STATE.SEARCHING;
@@ -234,7 +236,27 @@ namespace Zddq2
                 currRx.var.vRs = Math.Abs(currRx.var.vRs - val) / 2.0;
                 currRx.var.iSrc = currRx.var.vRs / currRx.var.rRs;
                 currRx.var.iSrc = currRx.var.iSrc * RX_VAR.INIT_LOOP / (double)currRx.var.iK;
-                stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_TRACKP, stm);
+                double stdcurr = RunWnd.syscfg.GetStdCurrent(currRx.iIx,currRx.bSqrt);
+                if (currRx.var.iSrc < 0 || (Math.Abs(stdcurr - currRx.var.iSrc) > stdcurr * 0.5))
+                {
+                    if (retry == 0)
+                    {
+                        retry++;
+                        stm = ACTION_STATE.INIT_FOR_SEARCH;
+                        DeviceMgr.SysLog(String.Format("Incorrect current {0} vs std:{1}, bSqrt is {2}, iIx is {3}",
+                            currRx.var.iSrc.ToString(), stdcurr.ToString(), currRx.bSqrt.ToString(), currRx.iIx.ToString())); 
+                    }
+                    else
+                    {
+                        currRx.i_State = RUN_STATE.STOPPING;
+                        StatusChanged(this, "stopping");
+                        return;
+                    }
+                }
+                else
+                {
+                    stm = act_mgr.Do(ACTION_REQUEST.SET_FOR_TRACKP, stm);
+                }
                 return;
             }
             #region  no use 
@@ -447,7 +469,7 @@ curr2, ktt, rs/rx, dvm  --  4
             #region init port
             port.BaudRate = 9600;
             if (!bDebugGPIB)
-                port.PortName = "COM10";
+                port.PortName = "COM5";
             else
                 port.PortName = "COM11";
             port.Parity = Parity.None;
@@ -473,7 +495,7 @@ curr2, ktt, rs/rx, dvm  --  4
             cmdport = new SerialPort();
             cmdport.BaudRate = 9600;
             if(!bDebugGPIB)
-                cmdport.PortName = "COM11";
+                cmdport.PortName = "COM4";
             else
                 cmdport.PortName = "COM10";
             cmdport.Parity = Parity.None;
@@ -565,34 +587,61 @@ curr2, ktt, rs/rx, dvm  --  4
                 }
                 fsLog.Close();
             }
-            catch (System.Exception ex)
+            catch 
             {
             }
         }
+        static private void CmdReportSlow(string line)
+        {
+            cmdport.Write(cmdport.NewLine);
+            lastword = line;
+            foreach (char l in line.ToCharArray())
+            {
+                cmdport.Write(l.ToString());
+                Thread.Sleep(3);
+            }
+            cmdport.Write(cmdport.NewLine);
+        }
+        static private bool wlock = false;
+        static public string lastword = "";
+        static public void Resend()
+        {
+            if (lastword == "")
+                return;
+
+            while (wlock || cmdport.BytesToWrite > 0)
+            {
+                ;
+            }
+            wlock = true;
+            CmdReportSlow(lastword);
+            wlock = false;
+        }
         static public void ReportHeader(int total)
         {
-            string reply;
-            cmdport.Write(cmdport.NewLine);
-            reply = String.Format("D{0} Measurements:", total);
-            cmdport.Write(reply);
-            cmdport.Write(cmdport.NewLine);
-            //cmdport.WriteLine(reply);
-            reply = String.Format("R{0}", Program.lst_rxinfo[0].dRxInput.ToString("E13"));
-            cmdport.WriteLine(reply);
-            cmdport.Write(cmdport.NewLine);
-            reply = String.Format("S{0}", Program.lst_rsinfo[0].dTValue.ToString("E13"));
-            cmdport.WriteLine(reply);
-            cmdport.Write(cmdport.NewLine);
+            while (wlock || cmdport.BytesToWrite > 0)
+            {
+                ;
+            }
+            wlock = true;
+
+            CmdReportSlow(String.Format("\r\nD{0} Measurements:\r\n", total) +
+                          String.Format("R{0}\r\n", Program.lst_rxinfo[0].dRxInput.ToString("E13")) +
+                          String.Format("S{0}\r\n", Program.lst_rsinfo[0].dTValue.ToString("E13")));
+            
+            wlock = false;
 
         }
         static public void ReportData(int index, double value)
         {
-            string reply = String.Format("#{0}", index.ToString());
-            cmdport.WriteLine(reply);
-            cmdport.Write(cmdport.NewLine);
-            reply = String.Format("&{0}", value.ToString("E11"));
-            cmdport.WriteLine(reply);
-            cmdport.Write(cmdport.NewLine);
+            while (wlock || cmdport.BytesToWrite > 0)
+            {
+                ;
+            }
+            wlock = true;
+            CmdReportSlow(String.Format("\r\n#{0}\r\n", index.ToString())+
+                          String.Format("&{0}\r\n", value.ToString("E11")));
+            wlock = false;
         }
         static void cmdport_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
@@ -645,12 +694,22 @@ curr2, ktt, rs/rx, dvm  --  4
                 }
             }
         }
+        static DateTime dt_lastact = DateTime.Now;
         static public bool IsInAction()
         {
             if(actmsg.action == "" || actmsg.action == null)
                 return false;
-            if (!OverEvent.WaitOne(30,false))
-                return true;
+            if ((DateTime.Now.Subtract(dt_lastact).TotalSeconds > 60) && !last_action.StartsWith("navto"))
+            {
+                DeviceMgr.reading = -9999;
+                SysLog("too long for action:" + last_action);
+                actmsg.action = "retry";
+            }
+            else
+            {
+                if (!OverEvent.WaitOne(30, false))
+                    return true;
+            }
             OverEvent.Reset();
             if ((actmsg.action != "retry") && (actmsg.action != "fail"))
             {
@@ -659,16 +718,21 @@ curr2, ktt, rs/rx, dvm  --  4
             }
             if (actmsg.action == "retry")
             {
-                throw new Exception(StringResource.str("tryagain"));
+                DeviceMgr.reading = -9999;
+                return false;
             }
             if (actmsg.action == "fail")
             {
+                DeviceMgr.reading = -9999;
                 throw new Exception("Critical Action failed.");
             }
             return false;
         }
+        static string last_action = "";
         static public void Action(string cmd, Int32 param)
         {
+            last_action = cmd;
+            dt_lastact = DateTime.Now;
             if (param < 0)
                 Action(cmd, 0);
             else
@@ -815,9 +879,16 @@ curr2, ktt, rs/rx, dvm  --  4
         }
         static public void Reset()
         {
-            KState(Convert.ToUInt32(65536)); //clear all
-            RelayState("MEAS_RS", "KTTP", "CURR_OFF", "X1", "STD_1", "VMODE_3V");
-            Action("navto1v", 0);
+            try
+            {
+                KState(Convert.ToUInt32(65536)); //clear all
+                RelayState("MEAS_RS", "KTTP", "CURR_OFF", "X1", "STD_1", "VMODE_3V");
+                Thread.Sleep(1000);
+                Action("navto1v", 0);
+            }
+            catch
+            {
+            }
         }
         static public void RelayState(string swi, string ktt, string curr, string sqr, string std, string constv)
         {
@@ -951,7 +1022,7 @@ curr2, ktt, rs/rx, dvm  --  4
                             port.Write(StringResource.str("NAV_30V_" + RunWnd.syscfg.sNavmeter)); //10mv
                         }
 
-                        Thread.Sleep(3000);
+                        Thread.Sleep(4000);
                         actmsg.action = "done";
                         OverEvent.Set();
                         continue;

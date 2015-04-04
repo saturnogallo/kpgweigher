@@ -96,7 +96,6 @@
             this.panel1.Location = new System.Drawing.Point(12, 88);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(994, 504);
-            this.panel1.GotFocus += new System.EventHandler(this.panel1_GotFocus);
             // 
             // lbl_vname
             // 

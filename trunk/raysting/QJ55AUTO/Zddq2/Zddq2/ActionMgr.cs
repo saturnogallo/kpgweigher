@@ -239,7 +239,7 @@ namespace Zddq2
                         nav_range = "navto1v";
 
                 }
-                delay = 3;
+                delay = 4;
                 DeviceMgr.Action(nav_range, 0);
                 return;
             }
@@ -516,50 +516,59 @@ namespace Zddq2
                 delayKI = 12; delayKTT = 12;
             }
         }
-        public static void SetIxRange(int selectedRx, double rname)
+        public static void SetIxRange(int selectedRx, double rname, bool setIx)
         {
             if (rname > 10240) //100k, 0.01mA
             {
-                Program.lst_rxinfo[selectedRx].iIx = -1;
+                if(setIx)
+                    Program.lst_rxinfo[selectedRx].iIx = -1;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_100K;
             }
             else if (rname > 1024) //10k, 0.1mA
             {
-                Program.lst_rxinfo[selectedRx].iIx = 0;
+                if (setIx)
+                    Program.lst_rxinfo[selectedRx].iIx = 0;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_10K;
             }
             else if (rname > 102.4) //1k, 1mA
             {
-                Program.lst_rxinfo[selectedRx].iIx = 0;
+                if (setIx)
+                    Program.lst_rxinfo[selectedRx].iIx = 0;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_1K;
             }
             else if (rname > 10.24) //100, 10mA
             {
-                Program.lst_rxinfo[selectedRx].iIx = 1;
+                if (setIx) 
+                    Program.lst_rxinfo[selectedRx].iIx = 1;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_100;
             }
             else if (rname > 1.024) //10, 10mA
             {
+                if (setIx)
                 Program.lst_rxinfo[selectedRx].iIx = 1;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_10;
             }
             else if (rname > 0.1024) //1, 100mA
             {
-                Program.lst_rxinfo[selectedRx].iIx = 2;
+                if (setIx)
+                    Program.lst_rxinfo[selectedRx].iIx = 2;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_1;
             }
             else if (rname > 0.05) //0.1, 0.3A
             {
-                Program.lst_rxinfo[selectedRx].iIx = 3;
+                if (setIx)
+                    Program.lst_rxinfo[selectedRx].iIx = 3;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_P1;
             }
             else if (rname > 0.005) //0.01, 1A
             {
-                Program.lst_rxinfo[selectedRx].iIx = 4;
+                if (setIx)
+                    Program.lst_rxinfo[selectedRx].iIx = 4;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_P01;
             }
             else  //0.001, 5A
             {
+                if (setIx)
                 Program.lst_rxinfo[selectedRx].iIx = 5;
                 Program.lst_rxinfo[selectedRx].iRRange = ActionMgr.RNG_P001;
             }
@@ -690,6 +699,8 @@ namespace Zddq2
                 if (rx.iRRange == RNG_P001) //0.001
                     sqr = GetSqrt3(10);
                 else if (rx.iRRange == RNG_P01) //0.01
+                    sqr = GetSqrt3(10);
+                else if (rx.iRRange == RNG_P1) //0.1
                     sqr = GetSqrt3(5);
                 else
                     sqr = GetSqrt3(3);

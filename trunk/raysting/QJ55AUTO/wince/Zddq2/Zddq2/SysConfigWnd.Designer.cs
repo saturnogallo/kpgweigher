@@ -90,7 +90,6 @@ namespace Zddq2
             this.lbl_fltlength.Name = "lbl_fltlength";
             this.lbl_fltlength.Size = new System.Drawing.Size(218, 48);
             this.lbl_fltlength.Text = "lbl_fltlength";
-            this.lbl_fltlength.ParentChanged += new System.EventHandler(this.lbl_fltlength_ParentChanged);
             // 
             // lbl_display
             // 
