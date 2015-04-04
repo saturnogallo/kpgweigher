@@ -59,6 +59,7 @@
             this.led_ohm = new DmitryBrant.CustomControls.SevenSegmentArray();
             this.btn_range0 = new Mndz7.RectButton();
             this.btn_turnon = new Mndz7.RectButton();
+            this.lbl_davalue = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lbl_currscale
@@ -103,7 +104,7 @@
             this.lbl_version.Location = new System.Drawing.Point(702, 10);
             this.lbl_version.Name = "lbl_version";
             this.lbl_version.Size = new System.Drawing.Size(94, 17);
-            this.lbl_version.Text = "版本:2015-01-13";
+            this.lbl_version.Text = "版本:2015-03-08";
             this.lbl_version.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // lbl_datetime
@@ -305,6 +306,13 @@
             this.btn_turnon.Size = new System.Drawing.Size(135, 134);
             this.btn_turnon.TabIndex = 25;
             // 
+            // lbl_davalue
+            // 
+            this.lbl_davalue.Location = new System.Drawing.Point(318, 436);
+            this.lbl_davalue.Name = "lbl_davalue";
+            this.lbl_davalue.Size = new System.Drawing.Size(249, 31);
+            this.lbl_davalue.Text = "label1";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -312,6 +320,7 @@
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(800, 480);
             this.ControlBox = false;
+            this.Controls.Add(this.lbl_davalue);
             this.Controls.Add(this.lbl_status);
             this.Controls.Add(this.btn_capture);
             this.Controls.Add(this.rbtn_2dn);
@@ -384,6 +393,7 @@
         private RectButton btn_range5;
         private RectButton btn_range6;
         private System.Windows.Forms.Label lbl_status;
+        private System.Windows.Forms.Label lbl_davalue;
     }
 }
 

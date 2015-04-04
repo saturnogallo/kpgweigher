@@ -140,7 +140,7 @@ namespace Mndz
                 processor.RefreshOutput();
                 if (processor.Current > -999)
                 {
-                    UpdateCurrent(processor.Current);
+                    UpdateCurrentDisplay(processor.Current);
                     processor.Current = -9999;
                 }
             });
@@ -179,7 +179,7 @@ namespace Mndz
                     {
                         if (!Util.TryDecimalParse(param, out a))
                             return;
-
+                        a = a / Convert.ToDecimal(1000); //in mV unit
                         processor.daoffset = a + processor.daoffset;
                         
                     }
@@ -211,7 +211,7 @@ namespace Mndz
                         {
                             this.Invoke(new Action(() =>
                             {
-                                dlg_kbd.Init("请输入DA零位值", "daoffset", false, KbdData);
+                                dlg_kbd.Init("请输入DA零位值(mV)", "daoffset", false, KbdData);
                             }));
                             return;
                         }
@@ -282,7 +282,7 @@ namespace Mndz
                 return;
             processor.resistance = a;
         }
-        public void UpdateCurrent(double reading)
+        public void UpdateCurrentDisplay(double reading)
         {
             if(processor.iRange < 0 || processor.iRange > 3)
             {
@@ -370,8 +370,8 @@ namespace Mndz
             }
         }
         //PC side command
-	//H reset
-	//ZERO zero current reading
+	    //H reset
+	    //ZERO zero current reading
         //resi: 1.234 on
         //resi: 1.345 off
         //resi? return resi: 1.234 on|off -1
