@@ -14,14 +14,14 @@ namespace Zddq2
         public RxConfigWnd()
         {
             InitializeComponent();
-            btn_current.SetStyle(Color.White, MyButtonType.round2RectButton);
+            btn_current.SetStyle(Color.White, MyButtonType.roundRectButton);
             btn_serial.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_stdchan.SetStyle(Color.Beige, MyButtonType.roundRectButton);
             btn_sqrt.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_vmode.SetStyle(Color.White, MyButtonType.round2RectButton);
+            btn_vmode.SetStyle(Color.White, MyButtonType.roundRectButton);
             btn_last.SetStyle(Color.Beige, MyButtonType.round2RectButton);
             btn_next.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_vname.SetStyle(Color.Beige, MyButtonType.round2RectButton);
+            btn_vname.SetStyle(Color.Beige, MyButtonType.roundRectButton);
 
             btn_vname.ValidClick += new EventHandler(input_GotFocus);
 
@@ -189,7 +189,7 @@ namespace Zddq2
                 {
                     double rname = Math.Abs(Convert.ToDouble(data));
                     Program.lst_rxinfo[selectedRx].dRxInput = rname;
-                    ActionMgr.SetIxRange(selectedRx, rname);
+                    ActionMgr.SetIxRange(selectedRx, rname,true);
                 }
                 InitDisplay(selectedRx);
             }
@@ -224,11 +224,12 @@ namespace Zddq2
                 btn_vname.Text = Util.FormatData(rx.dRxInput, 8);
                 btn_serial.Text = rx.sSerial;
                 btn_stdchan.Text = rx.iStdChan.ToString();
-                
-                if ((rx.iRRange == ActionMgr.RNG_10K && rx.bSqrt) || (rx.iRRange == ActionMgr.RNG_100K && rx.bSqrt))
+
+/*                if ((rx.iRRange == ActionMgr.RNG_10K && rx.bSqrt) || (rx.iRRange == ActionMgr.RNG_100K && rx.bSqrt))
                 {
                     rx.bSqrt = false;
                 }
+ */
                 if (rx.bSqrt)
                 {
                     btn_sqrt.Text = "x2";

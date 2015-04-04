@@ -95,6 +95,11 @@ namespace Zddq2
         public void pc_cmd(string cmd)
         {
             DeviceMgr.SysLog(cmd);
+            if (cmd == "ECHO")
+            {
+                DeviceMgr.Resend();
+                return;
+            }
             if (cmd == "S")
             {
                 if (task.bRunning)
@@ -235,12 +240,6 @@ namespace Zddq2
                 syscfg.iMeasDelay = Convert.ToInt32(m.Groups[1].Value);
                 return;
             }
-            m = reg_delay.Match(cmd);
-            if (m.Success)
-            {
-                syscfg.iMeasDelay = Convert.ToInt32(m.Groups[1].Value);
-                return;
-            }
             m = reg_meastimes.Match(cmd);
             if (m.Success)
             {
@@ -318,7 +317,7 @@ namespace Zddq2
             if (m.Success) //B mode
             {
                 Program.lst_rxinfo[0].dRxInput = Convert.ToDouble(m.Groups[1].Value);
-                ActionMgr.SetIxRange(0, Program.lst_rxinfo[0].dRxInput);
+                ActionMgr.SetIxRange(0, Program.lst_rxinfo[0].dRxInput,false);
                 Program.lst_rxinfo[0].cStdChan = 'B';
                 return;
             }

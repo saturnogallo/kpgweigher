@@ -58,7 +58,6 @@
             this.lbl_aux1.Name = "lbl_aux1";
             this.lbl_aux1.Size = new System.Drawing.Size(281, 49);
             this.lbl_aux1.Text = "0.0000000000";
-            this.lbl_aux1.ParentChanged += new System.EventHandler(this.lbl_aux1_ParentChanged);
             // 
             // lbl_aux2
             // 
@@ -169,7 +168,6 @@
             this.Controls.Add(this.btn_right);
             this.Name = "RxDisplay";
             this.Size = new System.Drawing.Size(1014, 718);
-            this.Click += new System.EventHandler(this.RxDisplay_Click);
             this.ResumeLayout(false);
 
         }

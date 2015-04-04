@@ -111,7 +111,6 @@
             this.lbl_rvalue.Name = "lbl_rvalue";
             this.lbl_rvalue.Size = new System.Drawing.Size(167, 52);
             this.lbl_rvalue.Text = "lbl_rvalue";
-            this.lbl_rvalue.ParentChanged += new System.EventHandler(this.lbl_rvalue_ParentChanged);
             // 
             // lbl_temp
             // 
