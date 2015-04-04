@@ -295,7 +295,7 @@
             // 
             // btn_capture
             // 
-            this.btn_capture.Location = new System.Drawing.Point(9, 9);
+            this.btn_capture.Location = new System.Drawing.Point(855, 9);
             this.btn_capture.Name = "btn_capture";
             this.btn_capture.Size = new System.Drawing.Size(166, 44);
             this.btn_capture.TabIndex = 27;
