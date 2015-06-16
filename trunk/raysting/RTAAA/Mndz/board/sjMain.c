@@ -242,7 +242,7 @@ void idle()
 //end interface routine
 void main()
 {
-	unsigned char temp;
+	unsigned char temp,temp1,temp2,temp3;
 	unsigned char *dacbuf;
 	unsigned char *clrbuf;
 	unsigned char sid;//id of serial to send 
@@ -437,10 +437,22 @@ void main()
 			}
 			if(sid == 't')
 			{
-				P0=sjSerialWaitForOneByte();
-				P1=sjSerialWaitForOneByte();
+				temp1=sjSerialWaitForOneByte();
+				temp2=sjSerialWaitForOneByte();
+				temp3=sjSerialWaitForOneByte();
+				if(temp3 == EMARK)
+				{
+					P0 = temp1;
+					P1 = temp2;
+					sjSerialSendByte(HMARK);
+					temp = 2;
+					sjSerialSendByte(temp);
+					temp = 2;
+					sjSerialSendByte(temp);
+					sjSerialSendByte(EMARK);					
+				}
 				sid = "";
-				sjSerialSendByte(EMARK);
+				//sjSerialSendByte(EMARK);
 			}
 		}
 		if(kbhit())

@@ -59,6 +59,7 @@
             this.btn_range4 = new Mndz7.RectButton();
             this.btn_range5 = new Mndz7.RectButton();
             this.btn_range6 = new Mndz7.RectButton();
+            this.lbl_status = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // btn_range0
@@ -383,6 +384,15 @@
             this.btn_range6.Size = new System.Drawing.Size(75, 44);
             this.btn_range6.TabIndex = 3;
             // 
+            // lbl_status
+            // 
+            this.lbl_status.AutoSize = true;
+            this.lbl_status.Location = new System.Drawing.Point(215, 416);
+            this.lbl_status.Name = "lbl_status";
+            this.lbl_status.Size = new System.Drawing.Size(41, 15);
+            this.lbl_status.TabIndex = 10;
+            this.lbl_status.Text = "label2";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -390,6 +400,7 @@
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(794, 451);
             this.Controls.Add(this.btn_zeroon);
+            this.Controls.Add(this.lbl_status);
             this.Controls.Add(this.lbl_datetime);
             this.Controls.Add(this.lbl_current);
             this.Controls.Add(this.lbl_range);
@@ -459,6 +470,7 @@
         private RectButton btn_range4;
         private RectButton btn_range5;
         private RectButton btn_range6;
+        private System.Windows.Forms.Label lbl_status;
     }
 }
 

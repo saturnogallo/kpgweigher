@@ -539,7 +539,7 @@ curr2, ktt, rs/rx, dvm  --  4
         }
         static public void TouchFile(string file)
         {
-                        if (!File.Exists(file))
+            if (!File.Exists(file))
             {
                 try
                 {

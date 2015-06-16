@@ -33,7 +33,7 @@ namespace Mndz7
             dlg_choice = new ChoiceWnd();
             dlg_kbd = new kbdWnd();
             range_btns = new RectButton[] { btn_range0, btn_range1, btn_range2, btn_range3, btn_range4, btn_range5, btn_range6 };
-            string[] range_string = new String[] { "200µΩ", "2mΩ", "20mΩ", "200mΩ", "2Ω", "4Ω", "20Ω" };
+            string[] range_string = new String[] { "200µΩ/600A", "2mΩ/200A", "20mΩ/100A", "200mΩ/80A", "2Ω/10A", "4Ω/5A", "20Ω/1A" };
             led_ohm.ColorLight = Color.Red;
             led_ohm.ColorBackground = this.BackColor;
             led_ohm.ElementWidth = 12;
@@ -85,7 +85,7 @@ namespace Mndz7
             }
             btn_turnon.SetStyle(Color.Green, MyButtonType.round2Button);
             btn_turnon.Text = "OFF";
-            btn_turnon.Click += new EventHandler((o, e) =>
+            btn_turnon.ValidClick += new EventHandler((o, e) =>
             {
                 if (!processor.bOn)
                     dt_lastoutput = DateTime.Now.AddSeconds(2);
@@ -106,8 +106,21 @@ namespace Mndz7
                     if( newrange == processor.iRange)
                         return;
 
-                    processor.iRange = newrange;
-                    RefreshDisplay(true); 
+                    try
+                    {
+                        if (Math.Abs(double.Parse(led_current.Value)) < 0.1)
+                        {
+                            processor.iRange = newrange;
+                            RefreshDisplay(true);
+                        }
+                        else
+                        {
+                            Program.MsgShow("请关闭输入电流后，再进行量程切换。");
+                        }
+                    }
+                    catch
+                    {
+                    }
                 });
             }
             tm = new Timer();
@@ -123,7 +136,7 @@ namespace Mndz7
                 processor.RefreshOutput();
                 if (processor.Current > -999)
                 {
-                    UpdateCurrent(processor.Current);
+                    UpdateCurrentDisplay(processor.Current);
                     processor.Current = -9999;
                 }
             });
@@ -153,7 +166,7 @@ namespace Mndz7
                     {
                         if (!Util.TryDecimalParse(param, out a))
                             return;
-
+                        a = a / Convert.ToDecimal(1000); //in mV unit
                         processor.daoffset = a + processor.daoffset;
                         
                     }
@@ -178,12 +191,18 @@ namespace Mndz7
                             Program.Upgrade();
                             return;
                         }
-                        if (param == "658901920") //input standard resistance
+                        
+                        if (param == "658901920") //input da offset
                         {
                             this.Invoke(new Action(() =>
                             {
-                                dlg_kbd.Init("请输入DA零位值", "daoffset", false, KbdData);
+                                dlg_kbd.Init("请输入DA零位值(mV),当前值:"+(processor.daoffset*1000).ToString(), "daoffset", false, KbdData);
                             }));
+                            return;
+                        }
+                        if (param == "658901921") //reset da offset to zero
+                        {
+                            processor.daoffset = 0;
                             return;
                         }
                         if (!Util.TryDecimalParse(param, out a))
@@ -247,7 +266,7 @@ namespace Mndz7
                 return;
             processor.resistance = a;
         }
-        public void UpdateCurrent(double reading)
+        public void UpdateCurrentDisplay(double reading)
         {
             if(processor.iRange < processor.RangeMin || processor.iRange > processor.RangeMax)
             {
@@ -270,6 +289,10 @@ namespace Mndz7
         }
         private void RefreshDisplay(bool bRangeChange)
         {
+            if (processor.bOverLoad)
+                lbl_status.Text = "输出饱和";
+            else
+                lbl_status.Text = "";
             if (processor.bOn)
             {
                 btn_turnon.Text = "ON";
