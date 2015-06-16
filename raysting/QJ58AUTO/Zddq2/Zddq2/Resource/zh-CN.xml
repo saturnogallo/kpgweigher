@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary>
-  <string skey="big_rs_volt">标准电阻电压读数错误</string>
-  <string skey="big_rx_volt">被测电阻电压读数错误</string>
+  <string skey="big_rs_volt">标准电压读数错误</string>
+  <string skey="big_rx_volt">被测电压读数错误</string>
   <string skey="big_vcrossp_volt">跟踪电压读数错误</string>
   <string skey="big_vcrossn_volt">跟踪电压读数错误</string>
   <string skey="stopping">正在停止...</string>
   <string skey="initialize">初始化...</string>
   <string skey="start">开始测量</string>
+  <string skey="continue">继续</string>
   <string skey="searching">粗调...</string>
+  <string skey="search">粗调...</string>
   <string skey="reading">等待读数...</string>
   <string skey="pause">暂停</string>
   <string skey="resume">继续</string>
@@ -19,13 +21,16 @@
   <string skey="clr">清除</string>
   <string skey="quit">退出</string>
   <string skey="ok">确定</string>
-  <string skey="on">开</string>
-  <string skey="off">关</string>
+  <string skey="on">开启</string>
+  <string skey="off">关闭</string>
   <string skey="menu">菜单</string>
   <string skey="ktt">换向时间(秒)</string>
   <string skey="enter_ktt">请输入换向时间(秒)</string>
   <string skey="backspace">退格</string>
   <string skey="rrange">电阻范围</string>
+  <string skey="resistance">电阻</string>
+  <string skey="input">请输入</string>
+  <string skey="choose">请选择</string>
   <string skey="emptydata">数据为空</string>
   <string skey="atleast1choice">请至少选择一个选项</string>
   <string skey="enter_current">请输入电流值(A)</string>
@@ -33,12 +38,12 @@
   <string skey="fltlength">滤波器长度</string>
   <string skey="enter_fltlength">请输入滤波器长度</string>
   <string skey="filtertype">滤波器类型</string>
-  <string skey="sampletimes">单次采样次数</string>
+  <string skey="sampletimes">数表单次采样个数</string>
   <string skey="shifttimes">通道切换间隔</string>
-  <string skey="enter_sampletimes">请输入单次采样次数</string>
-  <string skey="measdelay">测量间隔</string>
+  <string skey="enter_sampletimes">请输入数表单次采样个数</string>
+  <string skey="measdelay">各读数测量间隔</string>
   <string skey="enter_measdelay">请输入测量间隔时间(秒)</string>
-  <string skey="meastimes">测量次数</string>
+  <string skey="meastimes">各通道测量次数</string>
   <string skey="enter_meastimes">请输入测量次数</string>
   <string skey="enter_newdate">按格式输入新的日期(例:20120131)</string>
   <string skey="enter_newtime">按格式输入新的时间(例:235959)</string>
@@ -49,15 +54,17 @@
   <string skey="navmeter">纳伏表</string>
   <string skey="export_done">导出数据完成</string>
   <string skey="export_fail">导出数据失败</string>
-  <string skey="disp_grid">显示表格</string>
-  <string skey="disp_graph">显示绘图</string>
+  <string skey="disp_grid">表格显示</string>
+  <string skey="disp_graph">绘图显示</string>
   <string skey="disp_mixed">显示全部</string>
+  <string skey="val_rx">当前阻值</string>
+  <string skey="val_temp">当前温度</string>
   <string skey="val_last">当前值</string>
-  <string skey="val_average">&lt;Rx&gt;</string>
-  <string skey="val_variance">标准差</string>
-  <string skey="val_max">Max</string>
-  <string skey="val_min">Min</string>
-  <string skey="val_ratio">Rx/Rs</string>
+  <string skey="val_avg_rx">&lt;Rx&gt;</string>
+  <string skey="val_var_rx">标准差</string>
+  <string skey="val_max_rx">Max</string>
+  <string skey="val_min_rx">Min</string>
+  <string skey="val_ratio_rx">Rx/Rs</string>
   <string skey="val_rs">Rs</string>
 
   <string skey="enter_1kcurr">请输入1k ohm电流</string>
@@ -80,7 +87,14 @@
   <string skey="filtertype3">滤波算法3</string>
   <string skey="serial">序列号</string>
   <string skey="mychannel">被测通道</string>
+  <string skey="channel">通道</string>
+  <string skey="summary">通道</string>
+  <string skey="standard">标准</string>
+  <string skey="uut">被测</string>
   <string skey="current">电流</string>
+  <string skey="range">温度范围</string>
+  <string skey="probe">探头</string>
+  <string skey="prbtype">探头类型</string>
   <string skey="stdchan">标准通道</string>
   <string skey="sqrt">倍功率</string>
   <string skey="enabled">已启用</string>
@@ -92,6 +106,22 @@
   <string skey="temp">温度</string>
   <string skey="enter_temp">请输入温度</string>
 
+  <string skey="rs_select">标准选择</string>
+  <string skey="rx_select">被测选择</string>
+  <string skey="sys_config">其他设置</string>
+  <string skey="open_syscfg">系统参数</string>
+  <string skey="summary">总结</string>
+  <string skey="maxcurr">最大电流</string>
+  <string skey="coefA">系数A</string>
+  <string skey="coefB">系数B</string>
+  <string skey="coefC">系数C</string>
+  <string skey="flttype">滤波器</string>
+  <string skey="rxscanner">被测扫描器</string>
+  <string skey="rsscanner">标准扫描器</string>
+  <string skey="throw">自动筛选</string>
+  <string skey="newdate">日期</string>
+  
+  
   <string skey="ralpha">温度系数α</string>
   <string skey="enter_ralpha">输入温度系数α(x1e-6/℃)</string>
   <string skey="rbeta">温度系数β</string>
@@ -102,4 +132,13 @@
   <string skey="col_ratio">Rx/Rs比例值</string>
   <string skey="col_time">时间</string>
   <string skey="col_excluded">排除</string>
+  <string skey="lst_flttype">中位数平均|尾部平均|滑动平均</string>
+  <string skey="lst_range">-38.8344～29.7646℃|0～-189.8344℃|0～660.323℃|0～419.527℃|0～231.928℃|0～156.5985|0～29.7646℃</string>
+  <string skey="lst_current">2uA|5uA|10uA|0.1mA|1mA|3mA|10mA</string>
+  <string skey="lst_enable">已禁用|已启用</string>
+  <string skey="lst_rsscanner">无|12路扫描器|24路扫描器</string>
+  <string skey="lst_rxscanner">无|12路扫描器|24路扫描器</string>
+  <string skey="lst_navmeter">PZ158|2182</string>
+  <string skey="lst_prbtype">标准电阻|PT10|PT25|PT100|PT1000</string>
+  <string skey="edit">编辑</string>
 </ResourceDictionary>
