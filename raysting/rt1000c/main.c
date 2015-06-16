@@ -284,10 +284,17 @@ void display_scale()   //74164串行移位一个数
 		 uchar c= 0;
 		 switch(rdata.Ratio)
 		 {
+/*
  			case KEY_SCA10:  c = 0x11;break;
  			case KEY_SCA100: c = 0x22;break;
  			case KEY_SCA1K:  c = 0x44;break;
  			case KEY_SCA10K: c = 0x88;break;
+*/
+ 			case KEY_SCA10:  c = 0x88;break;
+ 			case KEY_SCA100: c = 0x44;break;
+ 			case KEY_SCA1K:  c = 0x22;break;
+ 			case KEY_SCA10K: c = 0x11;break;
+
 			default:
 				return;
 		 }

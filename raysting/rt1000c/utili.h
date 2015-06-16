@@ -24,10 +24,17 @@ uchar strlen(uchar *s);
 #define KEY_CE		'C'
 #define KEY_OK		'O'
 #define KEY_TAB		'T'
+
 #define KEY_SCA10	'a'
 #define KEY_SCA100	'b'
 #define KEY_SCA1K	'c'
 #define KEY_SCA10K  'd'
+
+//#define KEY_SCA10	'd'
+//#define KEY_SCA100	'c'
+//#define KEY_SCA1K	'b'
+//#define KEY_SCA10K  'a'
+
 											
 #define PG_MAIN		1
 #define PG_MENU1	2

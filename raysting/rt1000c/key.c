@@ -67,10 +67,17 @@ void decode_key()
      {
      switch(P1)
         {          //µÚÎåÐÐ
+	/*
         case 0xf7:{keykeep=KEY_SCA10K; break;}
         case 0xfb:{keykeep=KEY_SCA1K;break;}
         case 0xfd:{keykeep=KEY_SCA100; break;}
         case 0xfe:{keykeep=KEY_SCA10;break;}
+	*/
+        case 0xf7:{keykeep=KEY_SCA10; break;}
+        case 0xfb:{keykeep=KEY_SCA100;break;}
+        case 0xfd:{keykeep=KEY_SCA1K; break;}
+        case 0xfe:{keykeep=KEY_SCA10K;break;}
+		
 	    default:
 	    break;
 	    }	
