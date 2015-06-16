@@ -26,16 +26,23 @@ namespace Zddq2
         STOPPING,
         ERROR
     }
+    public enum RXDATA_MODE
+    {
+        RATIO_RX,
+        RX,
+        TEMPERATURE,
+        RS,
+        AVG_RX,
+        MAX_RX,
+        MIN_RX,
+        VAR_RX
 
+
+    }
  
 
 
-    internal class ActMessage
-    {
-        public string action;
-        public byte addr;
-        public UInt32 value;
-    }
+    
     /*
      1,2,4,8,16,32,64,128,256,512,1024,2048,4096  --- 12
 B -- 4
@@ -43,47 +50,56 @@ ohm 1, -1,-2,-3 --- 4
 A 0.1,0.3,10mA ,1A,5A-- 4 , ALL OFF IS 1MA
 curr2, ktt, rs/rx, dvm  --  4
 3V,10,30V -- 3
-00/09(ON),J6 -- 1024
-01/08(ON), J4 --- 256
-02/0B(ON), J0 -- 1 ohm
-03/0A -N/A
-04(ON)/0D, J10 -- BACKUP 3 -- 0.3A
-05(ON)/0C, J11 -- BACKUP 4  --1A
-06/0F(ON), J8 -- BACKUP 1 -- overlap - KTT,
-07/0E(ON), J9 -- BACKUP 2 -- 5A
-10/19(ON), 	J7 --- 2048
-11/18(ON) ---- 8
-12/1B(ON), J5 ---512
-13/1A(ON) ---- 32
-14/1D(ON) ---- x2 (big) -- 100mA
-15/1C - N/A
-16/1F(ON) ---- N/A
-1E/17(ON)  -- 16
-20/29(ON) --- N/A
-21/28(ON),  J2 --- 10^-2 ohm
-22/2B(ON) ----- 1
-23/2A(ON) ----  CURR x 2 (small) --0.1mA 
-24/2D(ON),  J14 --- GAOZU
-25/2C(ON), J15 --- 4096
-26/2F(ON),	J12 -- RS/RX
-27/2E(ON),  J13 -- DVM ON/OFF
-30/39(ON) --- 2
-31/38(ON)  -- 4
-32/3B(ON),  J3 --10^-3 ohm
-33/3A(ON), J1, --- 10^-1 ohm
-3D(ON)/34,   J19            --- 1 A / 100mA
-3C/35(ON), J17            -- 0.3A / 10mA
-3F/36(ON),   J18	      --- 1mA (9606)
-3E/37(ON), J16  -- 0.1mA - (9606)
-40/41(ON)  -- 128
-42/43(ON)  -- 64
+     * 
+00/09(ON), --- 1024 (J6) -d
+01/08(ON), --- 256 (J4) -d
+02/0B(ON), J0 -- Rx1
+03/0A    , -N/A
+04(ON)/0D, J10 NONE
+05(ON)/0C, J11 RS1/RS2 -D
+06/0F(ON), J8 NONE
+07/0E(ON), J9 NONE
+10/19(ON), --- 2048 (J7) -d
+11/18(ON), --- 8 -d
+12/1B(ON), ---512 (J5) -d 
+13/1A(ON), --- 32 -d 
+14/1D(ON) ---- SQRT -D
+15/1C     - NONE
+16/1F(ON) - 2uA -D
+1E/17(ON)  --- 16 -D
+20/29(ON) - - 10uA -D
+21/28(ON),  J2 --- Rx3 -D
+22/2B(ON), --- 1 -d
+23/2A(ON), ----  5uA -D
+24/2D(ON),  J14 --- KTT -D
+25/2C(ON), J15 --- 4096 -d
+26/2F(ON),	J12 -- RS/RX -D
+27/2E(ON),  J13 -- DVM ON/OFF -d
+30/39(ON),  --- 2  d
+31/38(ON),  --- 4  d
+32/3B(ON), J3  -- RX4 -D
+33/3A(ON), J1, -- RX2 -D
+3D(ON)/34, J19  --- 0.1mA(9606) -D
+3C/35(ON), J17  --- 1mA (9606) -D
+3F/36(ON), J18	--- 10mA (9606) -D
+3E/37(ON), J16  --- 3mA - (9606) -D
+40/41(ON),  --- 128 -d
+42/43(ON),  --- 64 -d
+     * 
+
 */
     internal class DeviceMgr
     {
         static public AutoResetEvent WaitEvent; //flag for wait response, when flag is on,node agent can process the command else node agent cannot do that
         static public AutoResetEvent OverEvent; //flag for process done event.
         static public object agent_access = new object(); //lock for agent access
-        static public ActMessage actmsg;
+        
+        //message 
+        static private string msg_action = "";
+        static private UInt32 msg_value;
+        static private DateTime msg_deaddate;
+
+
         static private Thread msg_loop;
         static public SerialPort port;  //all navmeter and relay will share the same port
         static public SerialPort cmdport; //all command from PC will use the port
@@ -95,8 +111,10 @@ curr2, ktt, rs/rx, dvm  --  4
         static public bool done;
         static private StringBuilder inbuffer;
         static private StringBuilder cmdbuffer;
+        static public bool DEBUG = true;
         static DeviceMgr()
         {
+            
             bool bDebugGPIB = true;
             Thread.Sleep(3000);
             WaitEvent = new AutoResetEvent(false);
@@ -104,6 +122,10 @@ curr2, ktt, rs/rx, dvm  --  4
             inbuffer = new StringBuilder();
             cmdbuffer = new StringBuilder();
             port = new SerialPort();
+
+            if (DEBUG)
+                return;
+
             
             #region init port
             port.BaudRate = 9600;
@@ -115,6 +137,7 @@ curr2, ktt, rs/rx, dvm  --  4
             port.DataBits = 8;
             port.StopBits = StopBits.One;
             port.NewLine = "\r";
+            port.DataReceived += new SerialDataReceivedEventHandler(swiport_DataReceived);
             int i;
             for (i = 0; i < 10; i++)
             {
@@ -152,13 +175,15 @@ curr2, ktt, rs/rx, dvm  --  4
             cmdport.DataReceived += new SerialDataReceivedEventHandler(cmdport_DataReceived);
             */ 
             agent_access = false;
-            actmsg = new ActMessage();
+            
             msg_loop = new Thread(new ThreadStart(MessageHandler));
             msg_loop.IsBackground = false;
             if(bDebugGPIB)
                 return;
             msg_loop.Start();
         }
+
+        
 
         static public string GetLogFileName()
         {
@@ -212,6 +237,8 @@ curr2, ktt, rs/rx, dvm  --  4
         }
         static public void ReportData(int index, double value)
         {
+            if (DEBUG)
+                return;
 
             string reply;
             reply = String.Format("#{0}",index.ToString());
@@ -220,6 +247,11 @@ curr2, ktt, rs/rx, dvm  --  4
             cmdport.WriteLine(reply);
             
         }
+        /// <summary>
+        /// PC command interface
+        /// </summary>
+        /// <param name="sender">object</param>
+        /// <param name="e">args</param>
         static void cmdport_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             while (cmdport.BytesToRead > 0)
@@ -239,10 +271,11 @@ curr2, ktt, rs/rx, dvm  --  4
                 }
             }
         }
-        static public void ScanPort()
+        /// <summary>
+        /// checking switch board port
+        /// </summary>
+        static void swiport_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
-
-            
             while (port.BytesToRead > 0)
             {
                 char data = Convert.ToChar(port.ReadChar());
@@ -261,45 +294,53 @@ curr2, ktt, rs/rx, dvm  --  4
                         }
                         catch
                         {
-                            reading = -9999;
+                            reading = INVALID_READING;
                         }
                     }
                     if(inbuffer.Length > 0)
-                    inbuffer.Remove(0, inbuffer.Length);
+                        inbuffer.Remove(0, inbuffer.Length);
                 }
             }
         }
-        static public bool IsInAction()
+        public const double INVALID_READING = -9999;
+        public const double MIN_READING = -999;
+        static public bool IsInAction
         {
-            if(actmsg.action == "" || actmsg.action == null)
-                return false;
-            if (!OverEvent.WaitOne(30,false))
-                return true;
-            OverEvent.Reset();
-            if ((actmsg.action != "retry") && (actmsg.action != "fail"))
-            {
-                actmsg.action = "";
-                return false;
+            get{
+                if (DEBUG)
+                    return false;
+                if (msg_action == "" || msg_action == null)
+                    return false;
+                else
+                    return true;
             }
-            if (actmsg.action == "retry")
-            {
-                throw new Exception(StringResource.str("tryagain"));
-            }
-            if (actmsg.action == "fail")
-            {
-                throw new Exception("Critical Action failed.");
-            }
-            return false;
+        }
+        static public bool IsTimeOut = false;
+
+        static public void Action(string cmd)
+        {
+            Action(cmd, 0, 300);
         }
         static public void Action(string cmd, UInt32 param)
         {
-            
-            actmsg.action = cmd;
-            actmsg.addr = 0;
-            actmsg.value = param;
-            WaitEvent.Set();
-//            OverEvent.WaitOne();
+            Action(cmd, param, 300);
         }
+        static Random rand = new Random();
+        static public void Action(string cmd, UInt32 param, UInt32 timeout)
+        {
+            if (DEBUG)
+            {
+                reading = rand.NextDouble();
+                return;
+            }
+            while (IsInAction)
+                Thread.Sleep(10);
+            IsTimeOut = false;
+            msg_action = cmd;
+            msg_value = param;
+            msg_deaddate = DateTime.Now.AddMilliseconds(timeout);
+        }
+        #region relay operation
         //k1 = RS/RX, DVM
         //ktt = ON/OFF
         //curr = CURR_P001|CURR_P01/P1/P3/1/5 ; 1mA/10mA,0.1A,0.3A,1A,5A
@@ -307,13 +348,14 @@ curr2, ktt, rs/rx, dvm  --  4
         static private string oldktt = "";
         static private string oldcurr = "";
         static private string oldsqr = "";
+        static private string oldrxch = "";
         static private UInt32 oldk = 0;
         static private string oldconstv = "";
         static private string oldstd = "";
-        static public string[] constvtbl = new string[] { "", "VMODE_3V", "VMODE_10V", "VMODE_30V","VMODE_10VHIGH","VMODE_30VHIGH" };
-        static public string[] stdtbl = new string[] { "",  "STD_P001", "STD_P01", "STD_P1","STD_1" };
+        static public string[] rstbl = new string[] { "",  "STD_CH1", "STD_CH2"};
+        static public string[] rxtbl = new string[] { "", "RX_CH1", "RX_CH2", "RX_CH3", "RX_CH4" };
         static public string[] meastbl = new string[] { "", "MEAS_RS","MEAS_RX","MEAS_DELTA" };
-        static public string[] currtbl = new string[] { "", "CURR_OFF", "CURR_P0001","CURR_P001", "CURR_P01", "CURR_P1", "CURR_P3", "CURR_1", "CURR_5"};
+        static public string[] currtbl = new string[] { "", "CURR_OFF", "CURR_2UA","CURR_5UA", "CURR_10UA", "CURR_P1MA", "CURR_1MA", "CURR_3MA", "CURR_10MA"};
         static private byte[] UsHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('s'), Convert.ToByte('U'), Convert.ToByte('U') };
         static private byte[] UsTail = new byte[] { Convert.ToByte('V')};
         static private void DelayWrite(byte[] buf, int start, int len)
@@ -325,8 +367,16 @@ curr2, ktt, rs/rx, dvm  --  4
                 Thread.Sleep(30 * len);
             }
         }
+        
+
+        /// <summary>
+        /// switch to k state
+        /// </summary>
+        /// <param name="k">coil number</param>
         static public void KState(UInt32 k)
         {
+            if (DEBUG)
+                return;
             if (oldk == k)
                 return;
             DelayWrite(UsHead, 0, 4);
@@ -400,16 +450,18 @@ curr2, ktt, rs/rx, dvm  --  4
         static public void Reset()
         {
             KState(Convert.ToUInt32(65536)); //clear all
-            RelayState("MEAS_RS", "KTTP", "CURR_OFF", "X1", "STD_1", "VMODE_3V");
+            RelayState("MEAS_RS", "KTTP", "CURR_OFF", "X1", "STD_CH1", "RX_OFF");
+            msg_action = "";
         }
-        static public void RelayState(string swi, string ktt, string curr, string sqr, string std, string constv)
+        static public void RelayState(string swi, string ktt, string curr, string sqr, string std, string rxch)
         {
+            if (DEBUG)
+                return;
             if (((swi == oldswi) || (swi == "")) && 
                 ((ktt == oldktt) || (ktt == "")) &&
                 ((curr == oldcurr) || (curr == "")) &&
                 ((sqr == oldsqr) || (sqr == "")) &&
-                ((std == oldstd) || (std == "")) &&
-                ((constv == oldconstv) || (constv == "")))
+                ((std == oldstd) || (std == "")))
                 return;
                 
             DelayWrite(UsHead, 0, 4);
@@ -427,48 +479,37 @@ curr2, ktt, rs/rx, dvm  --  4
                 if (swi == "MEAS_DELTA")
                 {
                     DelayWrite(new byte[] { 0x2F, 0x2E }, 0, 2);
-                    //std = "STD_OFF";
                 }
                 oldswi = swi;
             }
             if (ktt.StartsWith("KTT"))
             {
                 if(ktt == "KTTN")
-                    DelayWrite(new byte[] { 0x06 }, 0, 1);
+                    DelayWrite(new byte[] { 0x24 }, 0, 1); //0x06
                 if (ktt == "KTTP")
-                    DelayWrite(new byte[] { 0x0F }, 0, 1);
+                    DelayWrite(new byte[] { 0x2D }, 0, 1); //0x0F
                 oldktt = ktt;
             }
             if (sqr.StartsWith("X"))
             {
-                if ((curr == "CURR_P3") || (curr == "CURR_1") || (curr == "CURR_5"))
-                {
-                    DelayWrite(new byte[] { 0x24 }, 0, 1);
-                    if (sqr == "X2")
-                        DelayWrite(new byte[] { 0x2A }, 0, 1); //todo?
-                    if (sqr == "X1")
-                        DelayWrite(new byte[] { 0x23 }, 0, 1); //todo?
-                }
-                else
-                {
-                    DelayWrite(new byte[] { 0x2D }, 0, 1);
-                    if (sqr == "X2")
-                        DelayWrite(new byte[] { 0x1D }, 0, 1);
-                    if (sqr == "X1")
-                        DelayWrite(new byte[] { 0x14 }, 0, 1);
-                }
+                if (sqr == "X2")
+                    DelayWrite(new byte[] { 0x1D }, 0, 1);
+                if (sqr == "X1")
+                    DelayWrite(new byte[] { 0x14 }, 0, 1);
                 oldsqr = sqr;
             }
             if (curr.StartsWith("CURR_"))
             {
-                byte[] cb = new byte[] { 0x3E, 0x3F, 0x3C, 0x34, 0x0D, 0x0C, 0x0E }; //1mA
-                if (curr == "CURR_P0001") cb[0] = 0x37; //0.1mA
-                if (curr == "CURR_P001") cb[1] = 0x36; //1mA
-                if (curr == "CURR_P01") cb[2] = 0x35; //10mA
-                if (curr == "CURR_P1") cb[3] = 0x3d; //0.1A
-                if (curr == "CURR_P3") cb[4] = 0x04; //0.3A
-                if (curr == "CURR_1") cb[5] = 0x05; //1A
-                if (curr == "CURR_5") cb[6] = 0x07; //5A
+                //"CURR_OFF", "CURR_2UA","CURR_5UA", "CURR_10UA", "CURR_P1MA", "CURR_1MA", "CURR_3MA", "CURR_10MA"
+
+                byte[] cb = new byte[] { 0x16, 0x23, 0x20, 0x34, 0x3C, 0x3E, 0x3F }; //1mA
+                if (curr == "CURR_2UA") cb[0] = 0x1F; //2UA
+                if (curr == "CURR_5UA") cb[1] = 0x2A; //5UA
+                if (curr == "CURR_10UA") cb[2] = 0x29; //10UA
+                if (curr == "CURR_P1MA") cb[3] = 0x3D; //0.1MA
+                if (curr == "CURR_1MA") cb[4] = 0x35; //1MA
+                if (curr == "CURR_3MA") cb[5] = 0x37; //3MA
+                if (curr == "CURR_10MA") cb[6] = 0x36; //10MA
                 DelayWrite(cb, 0, 7);
                 //if (oldcurr == "CURR_P001") cb[0] = 0xff;//turn off all is 1mA
                 //                    if (oldcurr == "CURR_P01") cb[0] = 0x3E;
@@ -483,19 +524,23 @@ curr2, ktt, rs/rx, dvm  --  4
             }
             if (std.StartsWith("STD_"))
             {
-                if (std == "STD_OFF")
-                    DelayWrite(new byte[] { 0x02, 0x33, 0x21, 0x32 }, 0, 4);
-                if (std == "STD_1")
-                    DelayWrite(new byte[] { 0x0B, 0x33, 0x21, 0x32 }, 0, 4);
-                if (std == "STD_P1")
-                    DelayWrite(new byte[] { 0x3A, 0x02, 0x21, 0x32 }, 0, 4);
-                if (std == "STD_P01")
-                    DelayWrite(new byte[] { 0x28, 0x02, 0x33, 0x32 }, 0, 4);
-                if (std == "STD_P001")
-                    DelayWrite(new byte[] { 0x3B, 0x02, 0x33, 0x21,  }, 0, 4);
+                if (std == "STD_CH1")
+                    DelayWrite(new byte[] { 0x05 }, 0, 1);
+                if (std == "STD_CH2")
+                    DelayWrite(new byte[] { 0x0C }, 0, 1);
+            }
+            if (rxch.StartsWith("RX_"))
+            {
+                byte[] rxoff = new byte[] { 0x02, 0x33, 0x21, 0x32};
+                if (rxch == "RX_CH1") rxoff[0] = 0x0B;
+                if (rxch == "RX_CH2") rxoff[1] = 0x3A;
+                if (rxch == "RX_CH3") rxoff[2] = 0x28;
+                if (rxch == "RX_CH4") rxoff[3] = 0x3B;
+                DelayWrite(rxoff, 0, 4);
             }
             DelayWrite(UsTail, 0, 1);
         }
+        #endregion
         static public bool Loaded = false;
         static public void MessageHandler()
         {
@@ -503,80 +548,74 @@ curr2, ktt, rs/rx, dvm  --  4
             Loaded = true;
             while (true)
             {
-                if (!WaitEvent.WaitOne(10, false))
+                if (msg_action == "")
                 {
-                    ScanPort();
+                    Thread.Sleep(10);
                     continue;
                 }
-                WaitEvent.Reset();
+                if (DateTime.Now > msg_deaddate)
+                {
+                    IsTimeOut = true;
+                    msg_action = "";
+                    continue;
+                }
+                if (msg_action == "navread" && reading > MIN_READING)
+                {
+                    msg_action = "";
+                    continue;
+                }
                 try
                 {
                     #region navmeter action
-                    ActMessage msg = DeviceMgr.actmsg;
-                    if (msg.action == "navto1v" || msg.action == "navto120mv" || msg.action == "navto10mv")
+                    
+                    if (msg_action == "navto1v" || msg_action == "navto120mv" || msg_action == "navto10mv")
                     {
-                        if (msg.action == "navto1v")
+                        if (msg_action == "navto1v")
                         {
 //                            port.Write(NAV_INIT); //init
-                            port.Write(StringResource.str("NAV_1V_"+RunWnd.syscfg.sNavmeter)); //1v
+                            port.Write(StringResource.str("NAV_1V_"+Program.sysinfo.sNavmeter)); //1v
 //                            DelayWrite(NAV_AFLTON); //slowmode and aflton
                         }
-                        if (msg.action == "navto120mv")
+                        if (msg_action == "navto120mv")
                         {
-                            port.Write(StringResource.str("NAV_120MV_" + RunWnd.syscfg.sNavmeter)); //120mv
+                            port.Write(StringResource.str("NAV_120MV_" + Program.sysinfo.sNavmeter)); //120mv
                         }
-                        if (msg.action == "navto10mv")
+                        if (msg_action == "navto10mv")
                         {
-                            port.Write(StringResource.str("NAV_10MV_" + RunWnd.syscfg.sNavmeter)); //10mv
+                            port.Write(StringResource.str("NAV_10MV_" + Program.sysinfo.sNavmeter)); //10mv
                         }
-
-                        Thread.Sleep(3000);
-                        actmsg.action = "done";
-                        OverEvent.Set();
                         continue;
                     }
-                    if (msg.action == "navread")
+                    if (msg_action == "navread")
                     {
-                        reading = -9999;
+                        reading = INVALID_READING;
                         port.DiscardInBuffer();
-                        port.Write(StringResource.str("NAV_READ_" + RunWnd.syscfg.sNavmeter)); //1v
-                        Thread.Sleep(5);
-                        int timeout = 400;
-                        while ((timeout-- > 0) && (reading < -9000))
-                        {
-                            ScanPort();
-                            Thread.Sleep(5);
-                        }
-                        actmsg.action = "done";
-                        OverEvent.Set();
+                        port.Write(StringResource.str("NAV_READ_" + Program.sysinfo.sNavmeter)); //1v
                         continue;
                     }
-                    if (msg.action == "turnk")
+                    if (msg_action == "turnk")
                     {
-                        KState(msg.value);
-                        actmsg.action = "done";
-                        OverEvent.Set();
+                        KState(msg_value);
                         continue;
                     }
-                    if (msg.action.StartsWith("MEAS")) 
+                    if (msg_action.StartsWith("MEAS")) 
                     {
-                        string[] cmd = msg.action.Split(new char[]{'|'});
-                        if (cmd.Length == 6)
+                        string[] cmd = msg_action.Split(new char[]{'|'});
+                        if (cmd.Length >= 6)
                         {
-                            RelayState(cmd[0],cmd[1], cmd[2], cmd[3], cmd[4], cmd[5]);
+                            RelayState(cmd[0],cmd[1], cmd[2], cmd[3], cmd[4],cmd[5]);
                         }
-                        actmsg.action = "done";
-                        OverEvent.Set();
                         continue;
                     }
                     #endregion
-                    throw new Exception("Invalide command " + actmsg.action);
+                    throw new Exception("Invalide command " + msg_action);
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine(ex.Message);
-                    actmsg.action = "fail";
-                    OverEvent.Set();
+                    IsTimeOut = true;
+                    msg_action = "";
+                    
                 }
             }
         }
@@ -587,7 +626,7 @@ curr2, ktt, rs/rx, dvm  --  4
         public List<PointPair> PointList;
         public DataMgr()
         {
-     
+            PointList = new List<PointPair>();
         }
         public void ClearAll()
         {
@@ -683,6 +722,7 @@ curr2, ktt, rs/rx, dvm  --  4
         #endregion
 
 
+
     }
     public class PointPair : IComparable
     {
@@ -702,13 +742,14 @@ curr2, ktt, rs/rx, dvm  --  4
         {
             return this.value.CompareTo(r.value);
         }
-        public PointPair(string ch,int id, double val, double rt, double tp, bool ex, DateTime st)
+
+        public PointPair(string ch,int id, double val, double rt, double t, bool ex, DateTime st)
         {
             chan = ch;
             index = id;
             rvalue = val;
             ratio = rt;
-            temp = tp;
+            temp = t;
             stamp = st;
             excluded = ex;
         }
@@ -718,7 +759,7 @@ curr2, ktt, rs/rx, dvm  --  4
         public double value{
             get
             {
-                if (datamode == RXDATA_MODE.RATIO)
+                if (datamode == RXDATA_MODE.RATIO_RX)
                     return ratio;
                 else if (datamode == RXDATA_MODE.RX)
                     return rvalue;

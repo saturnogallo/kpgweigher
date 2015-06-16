@@ -11,6 +11,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO;
 using Raysting.Common;
+using Raysting.Controls;
 namespace Zddq2
 {
     public partial class SysConfigWnd : Form
@@ -33,122 +34,74 @@ namespace Zddq2
         public SysConfigWnd()
         {
             InitializeComponent();
-            lbl_fltlength.Text = StringResource.str("fltlength");
-            lbl_measdelay.Text = StringResource.str("measdelay");
-            lbl_sampletimes.Text = StringResource.str("sampletimes");
-            lbl_flttype.Text = StringResource.str("filtertype");
-            lbl_meastimes.Text = StringResource.str("meastimes");
-            lbl_throw.Text = StringResource.str("autothrow");
-            lbl_date.Text = StringResource.str("date");
-            lbl_ktt.Text = StringResource.str("ktt");
-            lbl_navmeter.Text = StringResource.str("navmeter");
-            lbl_shifttimes.Text = StringResource.str("shifttimes");
-
-//            btn_quit.SetStyle(Color.Beige, MyButtonType.round2Button);
+            lbl_sysconfig.Text = StringResource.str("sysconfig");
             btn_quit.Text = StringResource.str("quit");
+            btn_quit.BackColor = this.BackColor;
+            btn_quit.Style = MyButtonType.roundButton;
             btn_quit.ValidClick += new EventHandler((s, e) =>
             {
                 Program.SwitchWindow("mainwnd");
-                Program.mainwnd.Invoke(new Action<bool>(Program.mainwnd.ReDraw), new object[] { false }); 
+                Program.mainwnd.Invoke(new Action<bool>(Program.mainwnd.ReDraw), new object[] { false });
             });
-
-//            btn_flttype.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_flttype.ValidClick += new EventHandler(btn_flttype_ValidClick);
-
-            //btn_ktt.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_ktt.ValidClick += new EventHandler((s, e) => { Program.kbd.Init(StringResource.str("enter_ktt"), "ktt", false, KbdData); });
-
-//            btn_throw.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_throw.ValidClick += new EventHandler(btn_throw_ValidClick);
-
-
-  //          btn_navmeter.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_navmeter.ValidClick += new EventHandler(btn_navmeter_ValidClick);
-
-    //        btn_measdelay.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_measdelay.ValidClick += new EventHandler(input_GotFocus);
-
-      //      btn_meastimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_meastimes.ValidClick += new EventHandler(input_GotFocus);
-
-        //    btn_shifttimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_shifttimes.ValidClick += new EventHandler(input_GotFocus);
-
-          //  btn_date.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_date.ValidClick += new EventHandler((s,e) =>{Program.kbd.Init(StringResource.str("enter_newdate"), "newdate", false, KbdData);});
-
-//            btn_sampletimes.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_sampletimes.ValidClick += new EventHandler(input_GotFocus);
-
-  //          btn_fltlength.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_fltlength.ValidClick += new EventHandler(input_GotFocus);
-
-    //        btn_RsConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_RsConfig.Text = StringResource.str("rsconfig");
-            btn_RsConfig.ValidClick += new EventHandler((s, e) => { Program.SwitchWindow("rsconfig"); });
-
-      //      btn_RxConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_RxConfig.Text = StringResource.str("rxconfig");
-            btn_RxConfig.ValidClick += new EventHandler((s, e) => { Program.SwitchWindow("rxconfig"); });
-
-        //    btn_SysConfig.SetStyle(Color.LightBlue, MyButtonType.round2RectButton);
-            btn_SysConfig.Text = StringResource.str("sysconfig");
-            btn_SysConfig.ValidClick += new EventHandler( (s,e) => {});
-
-          //  btn_export.SetStyle(Color.LightSeaGreen, MyButtonType.round2RectButton);
-            btn_export.Text = StringResource.str("export");
-            btn_export.ValidClick += new EventHandler(btn_export_ValidClick);
-            InitDisplay();
-        }
-
-        void btn_navmeter_ValidClick(object sender, EventArgs e)
-        {
-            if (RunWnd.syscfg.sNavmeter == "PZ158")
-                RunWnd.syscfg.sNavmeter = "PZ2182";
-            else if (RunWnd.syscfg.sNavmeter == "PZ2182")
-                RunWnd.syscfg.sNavmeter = "2182";
-            else
-                RunWnd.syscfg.sNavmeter = "PZ158";
-        }
-
-        void btn_throw_ValidClick(object sender, EventArgs e)
-        {
-            RunWnd.syscfg.bThrow = !RunWnd.syscfg.bThrow;
-            InitDisplay();
-        }
-
-        void btn_export_ValidClick(object sender, EventArgs e)
-        {
-            if (!Directory.Exists("\\Hard Disk"))
+            RectButton[] kbdbtns = new RectButton[] { btn_ktt, btn_measdelay, btn_meastimes, btn_shifttimes, btn_newdate, btn_sampletimes, btn_fltlength };
+            //keyboard input buttons
+            foreach (RectButton rb in kbdbtns)
             {
-                MessageBox.Show(StringResource.str("noharddisk"));
-                return;
-            }
-            try
-            {
-                string basedir = StringResource.str("basedir");
-                foreach (string fname in Directory.GetFiles(basedir, "20*.txt"))
+                rb.Style = MyButtonType.rectButton;
+                rb.colorTop = Color.Beige;
+                rb.BackColor = this.BackColor;
+                
+                Label lbl = this.Controls.Find(rb.Name.Replace("btn_", "lbl_"),true)[0] as Label;
+                lbl.Text = StringResource.str(lbl.Name.Replace("lbl_",""));
+
+                rb.ValidClick += new EventHandler((s, e) =>
                 {
-                    FileInfo fi = new FileInfo(fname);
-                    File.Copy(Path.Combine(basedir,fi.Name), Path.Combine("\\Hard Disk\\", fi.Name));
-                }
-                MessageBox.Show(StringResource.str("export_done"));
+                    string regname = (s as Control).Name.Remove(0, 4);
+                    kbdWnd.Init(StringResource.str("input") + StringResource.str(regname), regname, false, KbdData);
+                });
             }
-            catch
-            {
-                MessageBox.Show(StringResource.str("export_fail"));
-                return;
-            }
-        }
 
-        public void entercurrent(string type)
-        {
-            Program.kbd.Init(StringResource.str("enter_"+type), type, false, KbdData);
+            //choice buttons 
+            RectButton[] choicebtns = new RectButton[] { btn_flttype, btn_navmeter, btn_rxscanner, btn_rsscanner };
+            foreach (RectButton rb in choicebtns)
+            {
+                rb.Style = MyButtonType.rectButton;
+                rb.colorTop = Color.Beige;
+                rb.BackColor = this.BackColor;
+
+                Label lbl = this.Controls.Find(rb.Name.Replace("btn_", "lbl_"),true)[0] as Label;
+                lbl.Text = StringResource.str(lbl.Name.Replace("lbl_", ""));
+
+                rb.ValidClick += new EventHandler((s,e) =>{
+                    string regname = (s as Control).Name.Remove(0, 4);
+                    ChoiceWnd.Init(StringResource.str("choose") + StringResource.str(regname),
+                        regname,
+                        StringResource.str("lst_" + regname).Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries),
+                        0, null, KbdData);
+                });
+            }
+
+            //toggle buttons 
+            RectButton[] togglebtns = new RectButton[] { btn_throw };
+            foreach (RectButton rb in togglebtns)
+            {
+                rb.Style = MyButtonType.rectButton;
+                rb.colorTop = Color.Beige;
+                rb.BackColor = this.BackColor;
+
+                Label lbl = this.Controls.Find(rb.Name.Replace("btn_", "lbl_"), true)[0] as Label;
+                lbl.Text = StringResource.str(lbl.Name.Replace("lbl_", ""));
+
+                rb.ValidClick += new EventHandler((s, e) =>
+                {
+                    string regname = (s as Control).Name.Remove(0, 4);
+                    KbdData(regname, "");
+                });
+            }
+
+            InitDisplay();
         }
-        public void EnterNewTime()
-        {
-            Program.kbd.Init(StringResource.str("enter_newtime"), "newtime", false, KbdData);
-        }
+       
         private string newdate = "";
 
 
@@ -156,29 +109,19 @@ namespace Zddq2
         {
             try
             {
-                if (param == "1kcurr")
-                {
-                    RunWnd.syscfg.d1Kcurr = Convert.ToDouble(data);
-                    return;
-                }
-                if (param == "10kcurr")
-                {
-                    RunWnd.syscfg.d10Kcurr = Convert.ToDouble(data);
-                    return;
-                }
-                if (param == "100kcurr")
-                {
-                    RunWnd.syscfg.d100Kcurr = Convert.ToDouble(data);
-                    return;
-                }
-
                 if (param == "newtime")
                 {
                     if (!Regex.IsMatch(newdate, "^\\d\\d\\d\\d\\d\\d\\d\\d$"))
+                    {
+                        MsgDlg.Show("日期格式不正确, 请按格式20120131输入");
                         return;
+                    }
 
                     if (!Regex.IsMatch(data, "^\\d\\d\\d\\d\\d\\d$"))
+                    {
+                        MsgDlg.Show("时间格式不正确, 请按格式235959输入");
                         return;
+                    }
                     SystemTime time = new SystemTime();
                     time.wYear = Convert.ToUInt16(newdate.Substring(0, 4));
                     time.wMonth = Convert.ToUInt16(newdate.Substring(4, 2));
@@ -191,105 +134,91 @@ namespace Zddq2
                 }
                 if (param == "newdate")
                 {
-                    if (data == "1000")
-                    {
-                        this.Invoke(new Action<string>(entercurrent), new string[] { "1kcurr" });
-                        return;
-                    }
-                    if (data == "10000")
-                    {
-                        this.Invoke(new Action<string>(entercurrent), new string[] { "10kcurr" });
-                        return;
-                    }
-                    if (data == "100000")
-                    {
-                        this.Invoke(new Action<string>(entercurrent), new string[] { "100kcurr" });
-                        return;
-                    }
-
                     newdate = data;
-                    this.Invoke(new Action(EnterNewTime));
+                    this.Invoke(new Action(() =>
+                    {
+                        kbdWnd.Init(StringResource.str("enter_newdate"), "newdata", false, KbdData);
+                    }));
                     return;
                 }
                 if (param == "ktt")
                 {
-                    RunWnd.syscfg.iKTT = Convert.ToInt32(data);
+                    Program.sysinfo.iKTT = Convert.ToInt32(data);
                 }
                 if (param == "measdelay")
                 {
-                    RunWnd.syscfg.iMeasDelay = Convert.ToInt32(data);
+                    Program.sysinfo.iMeasDelay = Convert.ToInt32(data);
                 }
                 if (param == "sampletimes")
                 {
-                    RunWnd.syscfg.iSampleTimes = Convert.ToInt32(data);
+                    Program.sysinfo.iSampleTimes = Convert.ToInt32(data);
                 }
                 if (param == "meastimes")
                 {
-                    RunWnd.syscfg.iMeasTimes = Convert.ToInt32(data);
+                    Program.sysinfo.iMeasTimes = Convert.ToInt32(data);
                 }
                 if (param == "shifttimes")
                 {
-                    RunWnd.syscfg.iShiftTimes = Convert.ToInt32(data);
+                    Program.sysinfo.iShiftTimes = Convert.ToInt32(data);
                 }
-
                 if (param == "fltlength")
                 {
-                    RunWnd.syscfg.iFilter = Convert.ToInt32(data);
+                    Program.sysinfo.iFilter = Convert.ToInt32(data);
+                }
+                if (param == "flttype")
+                {
+                    Program.sysinfo.sFilterType = Util.FindStringValue(Int32.Parse(data), StringResource.str("lst_"+param));
+                }
+                if (param == "navmeter")
+                {
+                    Program.sysinfo.sNavmeter = Util.FindStringValue(Int32.Parse(data), StringResource.str("lst_" + param));
+                }
+                if (param == "rsscanner")
+                {
+                    Program.sysinfo.sRsscanner = Util.FindStringValue(Int32.Parse(data), StringResource.str("lst_" + param));
+                }
+                if (param == "rxscanner")
+                {
+                    Program.sysinfo.sRxscanner = Util.FindStringValue(Int32.Parse(data), StringResource.str("lst_" + param));
+                }
+                
+                if (param == "throw")
+                {
+
+                    Program.sysinfo.bThrow = !Program.sysinfo.bThrow;
                 }
                 InitDisplay();
             }
             catch
             {
+                MsgDlg.Show("数据格式不正确。");
             }
         }
 
-        void input_GotFocus(object sender, EventArgs e)
+        public void InitDisplay()
         {
-            string regname = (sender as Control).Name.Remove(0, 4);
-            Program.kbd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
-        }
+            btn_ktt.Label = Program.sysinfo.iKTT.ToString();
+            btn_measdelay.Label = Program.sysinfo.iMeasDelay.ToString();
+            btn_meastimes.Label = Program.sysinfo.iMeasTimes.ToString();
+            btn_shifttimes.Label = Program.sysinfo.iShiftTimes.ToString();
+            btn_sampletimes.Label = Program.sysinfo.iSampleTimes.ToString();
+            btn_fltlength.Label = Program.sysinfo.iFilter.ToString();
 
-        
+            btn_newdate.Label = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
- 
+            btn_flttype.Label = Program.sysinfo.sFilterType;
+            btn_navmeter.Label = Program.sysinfo.sNavmeter;
+            btn_rxscanner.Label = Program.sysinfo.sRxscanner;
+            btn_rsscanner.Label = Program.sysinfo.sRsscanner;
+            
+            if (Program.sysinfo.iKTT <= 0)
+                btn_ktt.Label = StringResource.str("off");
 
-        void btn_flttype_ValidClick(object sender, EventArgs e)
-        {
-            if (RunWnd.syscfg.sFilterType == "filtertype1")
-            {
-                RunWnd.syscfg.sFilterType = "filtertype2";
-            }
+            if (Program.sysinfo.bThrow)
+                btn_throw.Label = StringResource.str("on");
             else
-            {
-                if (RunWnd.syscfg.sFilterType == "filtertype2")
-                {
-                    RunWnd.syscfg.sFilterType = "filtertype3";
-                }
-                else
-                {
-                    RunWnd.syscfg.sFilterType = "filtertype1";
-                }
-                
-            }
-            InitDisplay();
-        }
-
-         public void InitDisplay()
-        {
-            btn_flttype.Text = StringResource.str(RunWnd.syscfg.sFilterType);
-            btn_fltlength.Text = RunWnd.syscfg.iFilter.ToString();
-            btn_measdelay.Text = RunWnd.syscfg.iMeasDelay.ToString();
-            btn_sampletimes.Text = RunWnd.syscfg.iSampleTimes.ToString();
-            btn_meastimes.Text = RunWnd.syscfg.iMeasTimes.ToString();
-            btn_date.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            btn_ktt.Text = RunWnd.syscfg.iKTT.ToString();
-            btn_navmeter.Text = RunWnd.syscfg.sNavmeter;
-            if (RunWnd.syscfg.iKTT <= 0)
-                btn_ktt.Text = StringResource.str("off");
-            if (RunWnd.syscfg.bThrow)
-                btn_throw.Text = StringResource.str("on");
-            else
-                btn_throw.Text = StringResource.str("off");
+                btn_throw.Label = StringResource.str("off");
+            this.Invalidate();
         }
     }
 }

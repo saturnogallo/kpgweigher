@@ -7,187 +7,175 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Raysting.Common;
+using Raysting.Controls;
 namespace Zddq2
 {
     public partial class RsConfigWnd : Form
     {
-        private DataTable rs_dt;
-
-        private int selectedRs = 0;
+        public RsInfo Rs;
         public RsConfigWnd()
         {
             InitializeComponent();
-            //btn_RsConfig.SetStyle(Color.LightBlue, MyButtonType.round2RectButton);
-            btn_RsConfig.Text = StringResource.str("rsconfig");
-            //btn_RsConfig.ValidClick += new EventHandler(btn_RsConfig_ValidClick);
 
-            //btn_RxConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_RxConfig.Text = StringResource.str("rxconfig");
-            btn_RxConfig.ValidClick += new EventHandler(btn_RxConfig_ValidClick);
-            /*
-            btn_quit.SetStyle(Color.Beige, MyButtonType.round2Button);
-            btn_chan.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_next.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_last.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_serial.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_rvalue.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_ralpha.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_rbeta.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            btn_temp.SetStyle(Color.Beige, MyButtonType.roundRectButton);
-            */
+
             btn_quit.Text = StringResource.str("quit");
-            lbl_serial.Text = StringResource.str("serial");
-            lbl_rvalue.Text = StringResource.str("rvalue");
-            lbl_alpha.Text = StringResource.str("ralpha");
-            lbl_beta.Text = StringResource.str("rbeta");
-            lbl_temp.Text = StringResource.str("temp");
-            btn_last.Text = "<";
-            btn_next.Text = ">";
+            btn_quit.BackColor = this.BackColor;
+            btn_quit.Style = MyButtonType.roundButton;
 
-            btn_quit.ValidClick += new EventHandler(btn_quit_ValidClick);
-            btn_chan.ValidClick += new EventHandler(btn_dummy);
-            btn_serial.ValidClick += new EventHandler(input_GotFocus);
-            btn_rvalue.ValidClick += new EventHandler(input_GotFocus);
-            btn_ralpha.ValidClick += new EventHandler(input_GotFocus);
-            btn_rbeta.ValidClick += new EventHandler(input_GotFocus);
-            btn_temp.ValidClick += new EventHandler(input_GotFocus);
-            btn_last.ValidClick += new EventHandler(btn_last_ValidClick);
-            btn_next.ValidClick += new EventHandler(btn_next_ValidClick);
-
-//            btn_SysConfig.SetStyle(Color.Beige, MyButtonType.round2RectButton);
-            btn_SysConfig.Text = StringResource.str("sysconfig");
-            btn_SysConfig.ValidClick += new EventHandler(btn_SysConfig_ValidClick);
-
-            //no channel select for Rs channel
-            selectedRs = 0;
-            btn_last.Visible = false;
-            btn_next.Visible = false;
-            /*
-            rs_dt = new DataTable("RsInfo");
-            rs_dt.Columns.Add(StringResource.str("serial"));
-            rs_dt.Columns.Add(StringResource.str("rvalue"));
-            rs_dt.Columns.Add(StringResource.str("ralpha"));
-            rs_dt.Columns.Add(StringResource.str("rbeta"));
-
-            dataGridView1.DataSource = rs_dt;
-            dataGridView1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridView1.CellDoubleClick += new DataGridViewCellEventHandler(dataGridView1_CellDoubleClick);
-             * 
-             *         void dataGridView1_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-            MessageBox.Show(e.RowIndex.ToString() + "," + e.ColumnIndex.ToString());
-        }
-
-
-             *
-             *             rs_dt.Rows.Clear();
-            DataRow dr;
-            foreach (RsInfo rs in Program.lst_rsinfo)
+            btn_quit.ValidClick += new EventHandler((s, e) =>
             {
-                dr = rs_dt.NewRow();
-                dr[0] = rs.sSerial;
-                dr[1] = rs.dValue.ToString();
-                dr[2] = rs.dAlpha.ToString();
-                dr[3] = rs.dBeta.ToString();
-                rs_dt.Rows.Add(dr);
+                if (!Rs.bEnabled)
+                    Rs.bSelected = false;
+                Program.SwitchWindow("mainconfig");
+                //Program.mainwnd.Invoke(new Action<bool>(Program.mainwnd.ReDraw), new object[] { false });
+            });
+            RectButton[] kbdbtns = new RectButton[] { btn_serial, btn_rvalue, btn_ralpha, btn_rbeta, btn_maxcurr, btn_coefa, btn_coefb, btn_coefc, btn_rtp };
+            //keyboard input buttons
+            foreach (RectButton rb in kbdbtns)
+            {
+                rb.Style = MyButtonType.rectButton;
+                rb.BackColor = this.BackColor;
+
+                Label lbl = this.Controls.Find(rb.Name.Replace("btn_", "lbl_"), true)[0] as Label;
+                lbl.Text = StringResource.str(lbl.Name.Replace("lbl_", ""));
+
+                rb.ValidClick += new EventHandler((s, e) =>
+                {
+                    string regname = (s as Control).Name.Remove(0, 4);
+                    kbdWnd.Init(StringResource.str("input") + StringResource.str(regname), regname, false, KbdData);
+                });
             }
-             */
+
+            //choice buttons 
+            RectButton[] choicebtns = new RectButton[] { btn_prbtype, btn_range, btn_serial_select };
+            foreach (RectButton rb in choicebtns)
+            {
+                rb.Style = MyButtonType.rectButton;
+                rb.BackColor = this.BackColor;
+
+
+                Label lbl = this.Controls.Find(rb.Name.Replace("btn_", "lbl_"), true)[0] as Label;
+                lbl.Text = StringResource.str(lbl.Name.Replace("lbl_", ""));
+
+                rb.ValidClick += new EventHandler((s, e) =>
+                {
+                    string regname = (s as Control).Name.Remove(0, 4);
+                    ChoiceWnd.Init(StringResource.str("choose")  + StringResource.str(regname),
+                        regname,
+                        StringResource.str("lst_" + regname).Split(new char[] { '|' }, StringSplitOptions.RemoveEmptyEntries),
+                        0, null, KbdData);
+                });
+            }
+
+            //toggle buttons 
+            RectButton[] togglebtns = new RectButton[] { btn_enable };
+            foreach (RectButton rb in togglebtns)
+            {
+                rb.Style = MyButtonType.rectButton;
+                rb.BackColor = this.BackColor;
+
+
+                //Label lbl = this.Controls.Find(rb.Name.Replace("btn_", "lbl_"), true)[0] as Label;
+                //lbl.Text = StringResource.str(lbl.Name.Replace("lbl_", ""));
+
+                rb.ValidClick += new EventHandler((s, e) =>
+                {
+                    string regname = (s as Control).Name.Remove(0, 4);
+                    KbdData(regname, "");
+                });
+            }
         }
         void btn_dummy(object sender, EventArgs e)
         {
-        }
-        void btn_next_ValidClick(object sender, EventArgs e)
-        {
-            selectedRs += 1;
-            if (selectedRs >= Program.lst_rsinfo.Count)
-                selectedRs = 0;
-
-            InitDisplay(selectedRs);
-        }
-
-        void btn_last_ValidClick(object sender, EventArgs e)
-        {
-            if (selectedRs <= 0)
-                selectedRs = Program.lst_rsinfo.Count;
-            selectedRs -= 1;
-            InitDisplay(selectedRs);
-        }
-
-
-        void input_GotFocus(object sender, EventArgs e)
-        {
-            string regname = (sender as Control).Name.Replace("btn_", ""); //remove btn_
-            Program.kbd.Init(StringResource.str("enter_" + regname), regname, false, KbdData);
         }
 
         public void KbdData(string param, string data)
         {
             try
             {
-                if (param == "chan")
-                {
-                    selectedRs = Convert.ToInt32(data) - 1;
-                }
                 if (param == "serial")
                 {
-                    Program.lst_rsinfo[selectedRs].sSerial = data;
+                    Rs.sSerial = data;
                 }
                 if (param == "rvalue")
                 {
-                    Program.lst_rsinfo[selectedRs].dValue = Convert.ToDouble(data) ;
+                    Rs.dValue = Convert.ToDouble(data) ;
                 }
                 if (param == "ralpha")
                 {
-                    Program.lst_rsinfo[selectedRs].dAlpha = Convert.ToDouble(data);
+                    Rs.dAlpha = Convert.ToDouble(data);
                 }
                 if (param == "rbeta")
                 {
-                    Program.lst_rsinfo[selectedRs].dBeta = Convert.ToDouble(data);
+                    Rs.dBeta = Convert.ToDouble(data);
                 }
-                if (param == "temp")
+                if (param == "maxcurr")
                 {
-                    RunWnd.syscfg.dTemp = Convert.ToDouble(data);
+                    Rs.dMaxCurr = Convert.ToDouble(data);
                 }
-
-                InitDisplay(selectedRs);
+                if (param == "enable")
+                {
+                    Rs.bEnabled = !Rs.bEnabled;
+                }
+                if (param == "rtp")
+                {
+                    Rs.dRtp = Convert.ToDouble(data);
+                }
+                if (param == "ceofa")
+                {
+                    Rs.dCoefA = Convert.ToDouble(data);
+                }
+                if (param == "ceofb")
+                {
+                    Rs.dCoefB = Convert.ToDouble(data);
+                }
+                if (param == "ceofc")
+                {
+                    Rs.dCoefC = Convert.ToDouble(data);
+                }
+                if (param == "prbtype")
+                {
+                    Rs.sPTType = Util.FindStringValue(Int32.Parse(data), StringResource.str("lst_" + param));
+                }
+                if (param == "range")
+                {
+                    Rs.tRange = (TempRange)Convert.ToInt32(data);
+                }
+                InitDisplay();
             }
             catch
             {
             }
         }
-
-
-        void btn_SysConfig_ValidClick(object sender, EventArgs e)
+        public void InitDisplay()
         {
-            Program.SwitchWindow("sysconfig");   
-        }
+            if (!(Rs is RsInfo))
+                return;
+            lbl_rs_pos.Text = StringResource.str("standard") + "@" + StringResource.str("channel")+Rs.iChan.ToString();
+            btn_rvalue.Label = Util.FormatData(Rs.dValue, 7);
+            btn_ralpha.Label = Rs.dAlpha.ToString("F2");
+            btn_rbeta.Label = Rs.dBeta.ToString("F2");
+            btn_maxcurr.Label = Rs.dMaxCurr.ToString("F2");
+            btn_serial.Label = Rs.sSerial;
 
-        void btn_quit_ValidClick(object sender, EventArgs e)
-        {
-            Program.SwitchWindow("mainwnd");
-            Program.mainwnd.Invoke(new Action<bool>(Program.mainwnd.ReDraw), new object[] { false });
-        }
+            btn_prbtype.Label = Rs.sPTType;
 
-        void btn_RxConfig_ValidClick(object sender, EventArgs e)
-        {
-            Program.SwitchWindow("rxconfig");
-        }
+            btn_rtp.Visible = btn_coefa.Visible = btn_coefb.Visible = btn_coefc.Visible = btn_range.Visible = Rs.bTempProbe;
+            lbl_rtp.Visible = lbl_coefA.Visible = lbl_coefB.Visible = lbl_coefC.Visible = lbl_range.Visible = Rs.bTempProbe;
 
-        void btn_RsConfig_ValidClick(object sender, EventArgs e)
-        {
-            //same page no action
-        }
-        public void InitDisplay(int iRs)
-        {
-            selectedRs = iRs;
-            RsInfo rs = Program.lst_rsinfo[iRs];
-            btn_chan.Text = "CH " + (iRs + 1).ToString();
-            btn_rvalue.Text = Util.FormatData(rs.dValue,7); 
-            btn_ralpha.Text = rs.dAlpha.ToString("F2");
-            btn_rbeta.Text = rs.dBeta.ToString("F2");
-            btn_temp.Text = RunWnd.syscfg.dTemp.ToString("F3");
-            btn_serial.Text = rs.sSerial;
-            
+            btn_rtp.Label = Rs.dRtp.ToString();
+            btn_coefa.Label = Rs.dCoefA.ToString();
+            btn_coefb.Label = Rs.dCoefB.ToString();
+            btn_coefc.Label = Rs.dCoefC.ToString();
+            btn_range.Label = Util.FindStringValue((int)Rs.tRange, StringResource.str("lst_range"));
+
+            btn_enable.bOn = Rs.bEnabled;
+            if (Rs.bEnabled)
+                btn_enable.Label = Util.FindStringValue(1, StringResource.str("lst_enable"));
+            else
+                btn_enable.Label = Util.FindStringValue(0, StringResource.str("lst_enable"));
+
+            this.Invalidate();
         }
     }
 }

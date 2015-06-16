@@ -8,6 +8,7 @@ using System.Data;
 using System.Xml.Linq;
 using System.IO;
 using Raysting.Common;
+using Raysting.Controls;
 namespace Zddq2
 {
     /*
@@ -78,6 +79,19 @@ namespace Zddq2
     }
 
     //Information related to Rx
+    /*
+     * Fixed configuration includes:
+     * iMeasDelay :  delay between each sample (second)
+     * iMeasTimes :  measure times
+     * iChan      :  Rx channel index
+     * cChan      :  A/B of my channel, only used for self check
+     * bEnabled   :  whether it is enabled
+     * iIx        :  current to use
+     * bSqrt      :  sqrt function enabled or not
+     * sSerial    :  serial number to use
+     * dCoefA,B,C :  for temperature conversion
+     * sPTType    :  PT value
+     */
     public class RxInfo : IComparable
     {
         //for sorting of Rx according to channel number, and enabled channel goes first.
@@ -91,23 +105,40 @@ namespace Zddq2
                 if (!this.bEnabled && rx.bEnabled)
                     return -1;
 
-                if (this.cChan < rx.cChan)
+                if (this.iChan < rx.iChan)
                     return -1;
-                if (this.cChan > rx.cChan)
+                if (this.iChan > rx.iChan)
                     return 1;
                 return 0;
             }
             return 1;
         }
-        private SqlConfig config;
-        public RX_VAR var;
-        public RsInfo Rstd;
+        private SqlConfig config; //configuration dictionary
+        public RX_VAR var; //run time variable
+
+        private bool _bSelected = true;
+        public bool bSelected
+        {
+            get
+            {
+                if (!bEnabled)
+                    return false;
+                return _bSelected;
+            }
+            set
+            {
+                if (!bEnabled)
+                    return;
+                _bSelected = value;
+            }
+        }
         public RxInfo(int id)
         {
+            iChan = id;
             config = new SqlConfig("RxInfo", id.ToString());
             var = new RX_VAR(this);
         }
-        public double dRxInput  //target rx value
+        public double dRxInput  //target rx value, no use now
         {
             get
             {
@@ -126,7 +157,19 @@ namespace Zddq2
             }
         }
 
-        public double dCoefA  //Coeficient A
+        public bool bTempProbe  // whether the probe is a standard temperature probe , instead of a unknown probe
+        {
+            get
+            {
+                return (bool)this["bTempProbe"];
+            }
+            set
+            {
+                this["bTempProbe"] = value;
+            }
+        } 
+        #region temperature conversion related parameters
+        public double dCoefA  //Coeficient A for abcparam
         {
             get
             {
@@ -180,6 +223,44 @@ namespace Zddq2
                 this["dCoefC"] = value;
             }
         }
+        public TempRange tRange //temperature range for convert use
+        {
+            get
+            {
+                try
+                {
+                    return (TempRange)this["iTempRange"];
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                this["iTempRange"] = (int)value;
+            }
+        }
+        public double dRtp  //Rtp value
+        {
+            get
+            {
+                try
+                {
+                    return (double)this["dRtp"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dRtp"] = value;
+            }
+        }
+        #endregion
+        
         public int iMeasDelay   //delay between each voltage reading (second)
         {
             get
@@ -202,6 +283,24 @@ namespace Zddq2
                 this["iMeasTimes"] = value;
             }
         }
+        public double dIx   //real current setting based on iIx
+        {
+            get
+            {
+                switch (iIx)
+                {
+                    //TODO
+                    case 0: return 2e-6;
+                    case 1: return 5e-6;
+                    case 2: return 1e-5;
+                    case 3: return 1e-4;
+                    case 4: return 1e-3;
+                    case 5: return 3e-3;
+                    case 6: return 1e-3;
+                }
+                throw new Exception("Expected Current Setting");
+            }
+        }
         public int iIx  //index of current setting.
         {
             get
@@ -210,9 +309,23 @@ namespace Zddq2
             }
             set
             {
-                this["iIx"] = value;
+                if(value >=0 && value <= 6)
+                    this["iIx"] = value;
             }
         }
+       
+        public bool bSqrt
+        {
+            get
+            {
+                return (bool)this["bSqrt"];
+            }
+            set
+            {
+                this["bSqrt"] = value;
+            }
+        } //whether use sqrt current value
+
         public int iRRange  //index of range for resistance
         {
             get
@@ -224,16 +337,24 @@ namespace Zddq2
                 this["iRRange"] = value;
             }
         }
-        public char cChan
+        /// <summary>
+        /// A or B , for self check only
+        /// </summary>
+        public char cStdChan
         {
             get
             {
-                return (char)this["cChan"];
+                return (char)this["cStdChan"];
             }
             set
             {
-                this["cChan"] = value;
+                this["cStdChan"] = value;
             }
+        }
+
+        public int iChan
+        {
+            get;set;
         }
         public bool bEnabled
         {
@@ -246,28 +367,30 @@ namespace Zddq2
                 this["bEnabled"] = value;
             }
         }
-        public bool bSqrt
-        {
-            get
-            {
-                return (bool)this["bSqrt"];
-            }
-            set
-            {
-                this["bSqrt"] = value;
-            }
-        }
+
+        
+        /// <summary>
+        /// Serial number for the probe
+        /// </summary>
         public string sSerial
         {
             get
             {
-                return (string)this["sSerial"];
+                string ret = (string)this["sSerial"];
+                if (ret == "")
+                    return "PROBE" + config.sql_grp;
+                else
+                    return ret;
             }
             set
             {
                 this["sSerial"] = value;
             }
         }
+
+        /// <summary>
+        /// PT type for probe
+        /// </summary>
         public string sPTType
         {
             get
@@ -276,46 +399,42 @@ namespace Zddq2
             }
             set
             {
+                if (value.StartsWith("PT"))
+                {
+                    if (value == "PT10")
+                    {
+                        dRxInput = 10;
+                        //todo set other default parameters
+                    }
+
+                    if (value == "PT25")
+                    {
+                        dRxInput = 25;
+                        //todo set other default parameters
+                    }
+                    if (value == "PT100")
+                    {
+                        dRxInput = 100;
+                        //todo set other default parameters
+                    }
+                    if (value == "PT1000")
+                    {
+                        dRxInput = 1000;
+                        //todo set other default parameters
+                    }
+                    if (value == "标准电阻")
+                    {
+                        bTempProbe = false;
+                    }
+                    else
+                    {
+                        bTempProbe = true;
+                    }
+                }
                 this["sPTType"] = value;
             }
         }        
-        public RXDATA_MODE iMainData    //main display info
-        {
-            get
-            {
-                return (RXDATA_MODE)this["iMainData"];
-            }
-            set
-            {
-                this["iMainData"] = (int)value;
-            }
-        }
-        public RXDATA_MODE iAux1Data    //aux display info
-        {
-            get
-            {
-                return (RXDATA_MODE)this["iAux1Data"];
-            }
-            set
-            {
-                this["iAux1Data"] = (int)value;
-            }
-        }
-        /*
-         * Fixed configuration includes:
-         * iMeasDelay :  delay between each sample (second)
-         * iMeasTimes :  measure times
-         * iChan      :  my channel index
-         * cChan      :  A/B of my channel
-         * bEnabled   :  whether it is enabled
-         * iIx        :  current to use
-         * bSqrt      :  sqrt function enabled or not
-         * sSerial    :  serial number to use
-         * iMainData  :  main display info
-         * iAux1Data  :  1st aux display info
-         * dCoefA,B,C :  for temperature conversion
-         * sPTType    :  PT value
-         */
+
         public object this[string id]
         {
             get
@@ -331,12 +450,62 @@ namespace Zddq2
     public class RsInfo
     {
         private SqlConfig config;
-        
+
+        public bool bSelected = true;
+        public int iChan;
         public RsInfo(int id)
         {
+            iChan = id;
             config = new SqlConfig("RsInfo", id.ToString());
         }
-        
+
+        /// <summary>
+        /// PT type for probe
+        /// </summary>
+        public string sPTType
+        {
+            get
+            {
+                return (string)this["sPTType"];
+            }
+            set
+            {
+                if (value.StartsWith("PT"))
+                {
+                    if (value == "PT10")
+                    {
+                        dValue = 10;
+                        //todo set other default parameters
+                    }
+
+                    if (value == "PT25")
+                    {
+                        dValue = 25;
+                        //todo set other default parameters
+                    }
+                    if (value == "PT100")
+                    {
+                        dValue = 100;
+                        //todo set other default parameters
+                    }
+                    if (value == "PT1000")
+                    {
+                        dValue = 1000;
+                        //todo set other default parameters
+                    }
+                    if (value == "标准电阻")
+                    {
+                        bTempProbe = false;
+                    }
+                    else
+                    {
+                        bTempProbe = true;
+                    }
+                }
+                this["sPTType"] = value;
+            }
+        }        
+
         public int iRRange
         {
             get
@@ -352,14 +521,32 @@ namespace Zddq2
         {
             get
             {
-                return dValue * (1 + (1e-6) * dAlpha * (RunWnd.syscfg.dTemp - 20) + (1e-6) * dBeta * (RunWnd.syscfg.dTemp - 20) * (RunWnd.syscfg.dTemp - 20)); 
+                if (bStdRs)
+                    return dValue * (1 + (1e-6) * dAlpha * (Program.sysinfo.dTemp - 20) + (1e-6) * dBeta * (Program.sysinfo.dTemp - 20) * (Program.sysinfo.dTemp - 20));
+                else
+                    return dValue;
             }
         }
+
+        public bool bStdRs  //whether it is a known standard resistance
+        {
+            get
+            {
+                return (bool)this["bStdRs"];
+            }
+            set
+            {
+                this["bStdRs"] = value;
+            }
+        }
+        #region standared resistance related setting
+
         public double dValue    //nominal value
         {
             get
             {
-                return (double)this["dValue"];
+                    return (double)this["dValue"];
+                
             }
             set
             {
@@ -399,6 +586,7 @@ namespace Zddq2
                 this["dBeta"] = value;
             }
         }
+        #endregion
         public string sSerial
         {
             get
@@ -410,6 +598,121 @@ namespace Zddq2
                 this["sSerial"] = value;
             }
         }
+        public bool bTempProbe  // whether the probe is a standard temperature probe , instead of a unknown probe
+        {
+            get
+            {
+                return (bool)this["bTempProbe"];
+            }
+            set
+            {
+                this["bTempProbe"] = value;
+            }
+        }
+        #region temperature conversion related parameters
+        public double dCoefA  //Coeficient A for abcparam
+        {
+            get
+            {
+                try
+                {
+                    return (double)this["dCoefA"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dCoefA"] = value;
+            }
+        }
+        public double dCoefB  //Coeficient B
+        {
+            get
+            {
+                try
+                {
+                    return (double)this["dCoefB"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dCoefB"] = value;
+            }
+        }
+        public double dCoefC  //Coeficient C
+        {
+            get
+            {
+                try
+                {
+                    return (double)this["dCoefC"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dCoefC"] = value;
+            }
+        }
+        public TempRange tRange //temperature range for convert use
+        {
+            get
+            {
+                try
+                {
+                    return (TempRange)this["iTempRange"];
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
+            set
+            {
+                this["iTempRange"] = (int)value;
+            }
+        }
+        public double dRtp  //Rtp value
+        {
+            get
+            {
+                try
+                {
+                    return (double)this["dRtp"];
+                }
+                catch
+                {
+                    return 0.000001;
+                }
+            }
+            set
+            {
+                this["dRtp"] = value;
+            }
+        }
+
+        public bool bEnabled
+        {
+            get
+            {
+                return (bool)this["bEnabled"];
+            }
+            set
+            {
+                this["bEnabled"] = value;
+            }
+        }
+        #endregion
 
         /*  Fixed Configuration
          * dValue     : Rs value
@@ -440,11 +743,11 @@ namespace Zddq2
             config = new SqlConfig("UIInfo", disp.ToString());
         }
 
-        public RXDISP_MODE iDataMode    //current display mode
+        public int iDataMode    //current display mode
         {
             get
             {
-                return (RXDISP_MODE)this["iDataMode"];
+                return (int)this["iDataMode"];
             }
             set
             {
@@ -474,6 +777,14 @@ namespace Zddq2
             }
         }
     }
+
+    public enum RXDISP_MODE
+    {
+
+        GRID,
+        GRAPH,
+    }
+
     /*
      * Define system configuration
      */
@@ -484,6 +795,36 @@ namespace Zddq2
         public SysConfig()
         {
             config = new SqlConfig("SysInfo", "pc");
+        }
+
+        public RXDISP_MODE iDispMode = RXDISP_MODE.GRID;
+        
+        public int iRsCnts
+        {
+            get
+            {
+                int idx = Util.FindStringIndex(this.sRsscanner, StringResource.str("lst_rsscanner"));
+                if (idx == 1)
+                    return 12;
+                else if (idx == 2)
+                    return 24;
+                else
+                    return 2;
+            }
+        }
+
+        public int iRxCnts
+        {
+            get
+            {
+                int idx = Util.FindStringIndex(this.sRxscanner,StringResource.str("lst_rxscanner"));
+                if (idx == 1)
+                    return 12;
+                else if (idx == 2)
+                    return 24;
+                else
+                    return 4;
+            }
         }
         public int iMeasTimes
         {
@@ -572,7 +913,8 @@ namespace Zddq2
             }
             set
             {
-                this["sNavmeter"] = value;
+                if(Util.FindStringIndex(value, StringResource.str("lst_navmeter")) >= 0)
+                    this["sNavmeter"] = value;
             }
         }
         public string sFilterType
@@ -583,20 +925,35 @@ namespace Zddq2
             }
             set
             {
+                if (Util.FindStringIndex(value, StringResource.str("lst_flttype")) >= 0)
                 this["sFilterType"] = value;
             }
         }
-        public string sConvertMethod
+        public string sRxscanner
         {
             get
             {
-                return (string)this["sConvertMethod"];
+                return (string)this["sRxscanner"];
             }
             set
             {
-                this["sConvertMethod"] = value;
+                if (Util.FindStringIndex(value, StringResource.str("lst_rxscanner")) >= 0)
+                    this["sRxscanner"] = value;
             }
-        }        
+        }
+
+        public string sRsscanner
+        {
+            get
+            {
+                return (string)this["sRsscanner"];
+            }
+            set
+            {
+                if (Util.FindStringIndex(value, StringResource.str("lst_rsscanner")) >= 0)
+                    this["sRsscanner"] = value;
+            }
+        }
         public int iDisplay
         {
             get
@@ -660,7 +1017,7 @@ namespace Zddq2
      * Manage Sqlite based config file
      * All configure table has following structure 
      * id value group table
-     * for current configuration id='current' grp='current'
+     * for current configuration grp='current'
      */
     internal class SqlConfig
     {
@@ -671,8 +1028,8 @@ namespace Zddq2
         private DataSet DS = new DataSet();
         private DataTable DT = new DataTable();
 
-        private string sql_tbl;
-        private string sql_grp;
+        private string sql_tbl; //current table name 
+        public string sql_grp; //current group name
         static void SetConnection()
         {
             sql_con = new SQLiteConnection("Data Source="+Path.Combine(StringResource.str("basedir"),"Config.db2")+";Version=3;New=False;Compress=True;");
@@ -708,17 +1065,16 @@ namespace Zddq2
             }
             catch (System.Exception e)
             {
-//              Program.MsgShow(e.Message);
+              MsgDlg.Show(e.Message);
                 return false;
             }
-
         }
         private bool SaveConfigToFile(string id, string val)
         {
             try
             {
                 //save the current configuration 
-                //SetConnection();
+                SetConnection();
                 sql_con.Open();
                 sql_cmd = new SQLiteCommand();
                 sql_cmd.Connection = sql_con;
@@ -729,7 +1085,7 @@ namespace Zddq2
             }
             catch (System.Exception e)
             {
-//                Program.MsgShow(e.Message);
+                MsgDlg.Show(e.Message);
                 return false;
             }
         }
@@ -755,19 +1111,19 @@ namespace Zddq2
                     if (val.Length > 1)
                         return val[0];
                     else
-                        return " ";
+                        return ' ';
                 }
                 if (id.StartsWith("i")) //int
                 {
                     if (val == "")
-                        return 0;
+                        return (int)0;
                     else
                         return Convert.ToInt32(val);
                 }
                 if (id.StartsWith("d")) //double
                 {
                     if (val == "")
-                        return 0;
+                        return (double)0;
                     else
                         return Convert.ToDouble(val);
                 }

@@ -28,59 +28,46 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.lbl_stdchan = new System.Windows.Forms.Label();
             this.lbl_current = new System.Windows.Forms.Label();
             this.lbl_serial = new System.Windows.Forms.Label();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.lbl_sqrt = new System.Windows.Forms.Label();
+            this.lbl_serial_select = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.btn_ch4 = new Raysting.Controls.RectButton();
-            this.btn_ch3 = new Raysting.Controls.RectButton();
-            this.btn_ch2 = new Raysting.Controls.RectButton();
-            this.btn_ch1 = new Raysting.Controls.RectButton();
-            this.btn_next = new Raysting.Controls.RectButton();
-            this.btn_enable = new Raysting.Controls.RectButton();
-            this.btn_last = new Raysting.Controls.RectButton();
             this.lbl_range = new System.Windows.Forms.Label();
-            this.lbl_vmode = new System.Windows.Forms.Label();
-            this.btn_range100k = new Raysting.Controls.RectButton();
-            this.btn_range10k = new Raysting.Controls.RectButton();
-            this.btn_range1k = new Raysting.Controls.RectButton();
-            this.btn_range100 = new Raysting.Controls.RectButton();
-            this.btn_range10 = new Raysting.Controls.RectButton();
-            this.btn_range1 = new Raysting.Controls.RectButton();
-            this.btn_rangeP1 = new Raysting.Controls.RectButton();
-            this.btn_rangeP01 = new Raysting.Controls.RectButton();
-            this.btn_rangeP001 = new Raysting.Controls.RectButton();
-            this.btn_vmode = new Raysting.Controls.RectButton();
+            this.lbl_rtp = new System.Windows.Forms.Label();
+            this.lbl_coefB = new System.Windows.Forms.Label();
+            this.lbl_coefA = new System.Windows.Forms.Label();
+            this.lbl_coefC = new System.Windows.Forms.Label();
+            this.lbl_prbtype = new System.Windows.Forms.Label();
+            this.lbl_meastimes = new System.Windows.Forms.Label();
+            this.lbl_measdelay = new System.Windows.Forms.Label();
+            this.lbl_rx_pos = new System.Windows.Forms.Label();
+            this.btn_enable = new Raysting.Controls.RectButton();
+            this.btn_coefa = new Raysting.Controls.RectButton();
+            this.btn_coefb = new Raysting.Controls.RectButton();
+            this.btn_coefc = new Raysting.Controls.RectButton();
+            this.btn_range = new Raysting.Controls.RectButton();
+            this.btn_rtp = new Raysting.Controls.RectButton();
+            this.btn_meastimes = new Raysting.Controls.RectButton();
+            this.btn_measdelay = new Raysting.Controls.RectButton();
             this.btn_sqrt = new Raysting.Controls.RectButton();
             this.btn_current = new Raysting.Controls.RectButton();
+            this.btn_serial_select = new Raysting.Controls.RectButton();
             this.btn_serial = new Raysting.Controls.RectButton();
-            this.btn_stdchan = new Raysting.Controls.RectButton();
-            this.btn_SysConfig = new Raysting.Controls.RectButton();
-            this.btn_RxConfig = new Raysting.Controls.RectButton();
-            this.btn_RsConfig = new Raysting.Controls.RectButton();
+            this.btn_prbtype = new Raysting.Controls.RectButton();
             this.btn_quit = new Raysting.Controls.RectButton();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
-            // lbl_stdchan
-            // 
-            this.lbl_stdchan.AutoSize = true;
-            this.lbl_stdchan.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_stdchan.Location = new System.Drawing.Point(372, 213);
-            this.lbl_stdchan.Name = "lbl_stdchan";
-            this.lbl_stdchan.Size = new System.Drawing.Size(122, 25);
-            this.lbl_stdchan.TabIndex = 1;
-            this.lbl_stdchan.Text = "lbl_stdchan";
-            // 
             // lbl_current
             // 
             this.lbl_current.AutoSize = true;
             this.lbl_current.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_current.Location = new System.Drawing.Point(22, 132);
+            this.lbl_current.Location = new System.Drawing.Point(13, 80);
             this.lbl_current.Name = "lbl_current";
-            this.lbl_current.Size = new System.Drawing.Size(113, 25);
+            this.lbl_current.Size = new System.Drawing.Size(126, 29);
             this.lbl_current.TabIndex = 1;
             this.lbl_current.Text = "lbl_current";
             // 
@@ -88,371 +75,382 @@
             // 
             this.lbl_serial.AutoSize = true;
             this.lbl_serial.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_serial.Location = new System.Drawing.Point(372, 132);
+            this.lbl_serial.Location = new System.Drawing.Point(13, 7);
             this.lbl_serial.Name = "lbl_serial";
-            this.lbl_serial.Size = new System.Drawing.Size(98, 25);
+            this.lbl_serial.Size = new System.Drawing.Size(111, 29);
             this.lbl_serial.TabIndex = 1;
             this.lbl_serial.Text = "lbl_serial";
             // 
             // panel1
             // 
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel1.Controls.Add(this.lbl_sqrt);
+            this.panel1.Controls.Add(this.lbl_serial_select);
             this.panel1.Controls.Add(this.panel2);
-            this.panel1.Controls.Add(this.lbl_range);
-            this.panel1.Controls.Add(this.lbl_vmode);
+            this.panel1.Controls.Add(this.lbl_prbtype);
             this.panel1.Controls.Add(this.lbl_current);
             this.panel1.Controls.Add(this.lbl_serial);
-            this.panel1.Controls.Add(this.lbl_stdchan);
-            this.panel1.Controls.Add(this.btn_range100k);
-            this.panel1.Controls.Add(this.btn_range10k);
-            this.panel1.Controls.Add(this.btn_range1k);
-            this.panel1.Controls.Add(this.btn_range100);
-            this.panel1.Controls.Add(this.btn_range10);
-            this.panel1.Controls.Add(this.btn_range1);
-            this.panel1.Controls.Add(this.btn_rangeP1);
-            this.panel1.Controls.Add(this.btn_rangeP01);
-            this.panel1.Controls.Add(this.btn_rangeP001);
-            this.panel1.Controls.Add(this.btn_vmode);
+            this.panel1.Controls.Add(this.btn_meastimes);
+            this.panel1.Controls.Add(this.btn_measdelay);
             this.panel1.Controls.Add(this.btn_sqrt);
             this.panel1.Controls.Add(this.btn_current);
+            this.panel1.Controls.Add(this.btn_serial_select);
             this.panel1.Controls.Add(this.btn_serial);
-            this.panel1.Controls.Add(this.btn_stdchan);
+            this.panel1.Controls.Add(this.lbl_meastimes);
+            this.panel1.Controls.Add(this.btn_prbtype);
+            this.panel1.Controls.Add(this.lbl_measdelay);
             this.panel1.Location = new System.Drawing.Point(12, 88);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(722, 402);
             this.panel1.TabIndex = 6;
             // 
+            // lbl_sqrt
+            // 
+            this.lbl_sqrt.AutoSize = true;
+            this.lbl_sqrt.Location = new System.Drawing.Point(646, 21);
+            this.lbl_sqrt.Name = "lbl_sqrt";
+            this.lbl_sqrt.Size = new System.Drawing.Size(41, 15);
+            this.lbl_sqrt.TabIndex = 4;
+            this.lbl_sqrt.Text = "label1";
+            this.lbl_sqrt.Visible = false;
+            // 
+            // lbl_serial_select
+            // 
+            this.lbl_serial_select.AutoSize = true;
+            this.lbl_serial_select.Location = new System.Drawing.Point(588, 20);
+            this.lbl_serial_select.Name = "lbl_serial_select";
+            this.lbl_serial_select.Size = new System.Drawing.Size(41, 15);
+            this.lbl_serial_select.TabIndex = 4;
+            this.lbl_serial_select.Text = "label1";
+            this.lbl_serial_select.Visible = false;
+            // 
             // panel2
             // 
-            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel2.Controls.Add(this.btn_ch4);
-            this.panel2.Controls.Add(this.btn_ch3);
-            this.panel2.Controls.Add(this.btn_ch2);
-            this.panel2.Controls.Add(this.btn_ch1);
-            this.panel2.Controls.Add(this.btn_next);
-            this.panel2.Controls.Add(this.btn_enable);
-            this.panel2.Controls.Add(this.btn_last);
-            this.panel2.Location = new System.Drawing.Point(3, 3);
+            this.panel2.Controls.Add(this.btn_coefa);
+            this.panel2.Controls.Add(this.lbl_range);
+            this.panel2.Controls.Add(this.lbl_rtp);
+            this.panel2.Controls.Add(this.lbl_coefB);
+            this.panel2.Controls.Add(this.btn_coefb);
+            this.panel2.Controls.Add(this.lbl_coefA);
+            this.panel2.Controls.Add(this.btn_coefc);
+            this.panel2.Controls.Add(this.btn_range);
+            this.panel2.Controls.Add(this.btn_rtp);
+            this.panel2.Controls.Add(this.lbl_coefC);
+            this.panel2.Location = new System.Drawing.Point(-1, 263);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(714, 79);
-            this.panel2.TabIndex = 5;
-            // 
-            // btn_ch4
-            // 
-            this.btn_ch4.BackColor = System.Drawing.Color.Red;
-            this.btn_ch4.Enabled = true;
-            this.btn_ch4.bOn = true;
-            this.btn_ch4.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_ch4.Location = new System.Drawing.Point(256, 17);
-            this.btn_ch4.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_ch4.Name = "btn_ch4";
-            this.btn_ch4.Size = new System.Drawing.Size(52, 52);
-            this.btn_ch4.TabIndex = 8;
-            // 
-            // btn_ch3
-            // 
-            this.btn_ch3.BackColor = System.Drawing.Color.Red;
-            this.btn_ch3.Enabled = true;
-            this.btn_ch3.bOn = true;
-            this.btn_ch3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_ch3.Location = new System.Drawing.Point(194, 17);
-            this.btn_ch3.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_ch3.Name = "btn_ch3";
-            this.btn_ch3.Size = new System.Drawing.Size(52, 52);
-            this.btn_ch3.TabIndex = 7;
-            // 
-            // btn_ch2
-            // 
-            this.btn_ch2.BackColor = System.Drawing.Color.Red;
-            this.btn_ch2.Enabled = true;
-            this.btn_ch2.bOn = true;
-            this.btn_ch2.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_ch2.Location = new System.Drawing.Point(132, 17);
-            this.btn_ch2.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_ch2.Name = "btn_ch2";
-            this.btn_ch2.Size = new System.Drawing.Size(52, 52);
-            this.btn_ch2.TabIndex = 6;
-            // 
-            // btn_ch1
-            // 
-            this.btn_ch1.BackColor = System.Drawing.Color.Red;
-            this.btn_ch1.Enabled = true;
-            this.btn_ch1.bOn = true;
-            this.btn_ch1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_ch1.Location = new System.Drawing.Point(70, 17);
-            this.btn_ch1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_ch1.Name = "btn_ch1";
-            this.btn_ch1.Size = new System.Drawing.Size(52, 52);
-            this.btn_ch1.TabIndex = 5;
-            // 
-            // btn_next
-            // 
-            this.btn_next.BackColor = System.Drawing.Color.Red;
-            this.btn_next.Enabled = true;
-            this.btn_next.bOn = true;
-            this.btn_next.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_next.Location = new System.Drawing.Point(318, 29);
-            this.btn_next.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_next.Name = "btn_next";
-            this.btn_next.Size = new System.Drawing.Size(40, 40);
-            this.btn_next.TabIndex = 4;
-            // 
-            // btn_enable
-            // 
-            this.btn_enable.BackColor = System.Drawing.Color.Red;
-            this.btn_enable.Enabled = true;
-            this.btn_enable.bOn = true;
-            this.btn_enable.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_enable.Location = new System.Drawing.Point(597, 17);
-            this.btn_enable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btn_enable.Name = "btn_enable";
-            this.btn_enable.Size = new System.Drawing.Size(100, 46);
-            this.btn_enable.TabIndex = 3;
-            // 
-            // btn_last
-            // 
-            this.btn_last.BackColor = System.Drawing.Color.Red;
-            this.btn_last.Enabled = true;
-            this.btn_last.bOn = true;
-            this.btn_last.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_last.Location = new System.Drawing.Point(20, 29);
-            this.btn_last.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_last.Name = "btn_last";
-            this.btn_last.Size = new System.Drawing.Size(40, 40);
-            this.btn_last.TabIndex = 4;
+            this.panel2.Size = new System.Drawing.Size(721, 143);
+            this.panel2.TabIndex = 3;
             // 
             // lbl_range
             // 
             this.lbl_range.AutoSize = true;
             this.lbl_range.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_range.Location = new System.Drawing.Point(25, 290);
+            this.lbl_range.Location = new System.Drawing.Point(328, 17);
             this.lbl_range.Name = "lbl_range";
-            this.lbl_range.Size = new System.Drawing.Size(101, 25);
+            this.lbl_range.Size = new System.Drawing.Size(114, 29);
             this.lbl_range.TabIndex = 2;
             this.lbl_range.Text = "lbl_range";
             // 
-            // lbl_vmode
+            // lbl_rtp
             // 
-            this.lbl_vmode.AutoSize = true;
-            this.lbl_vmode.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lbl_vmode.Location = new System.Drawing.Point(25, 213);
-            this.lbl_vmode.Name = "lbl_vmode";
-            this.lbl_vmode.Size = new System.Drawing.Size(110, 25);
-            this.lbl_vmode.TabIndex = 2;
-            this.lbl_vmode.Text = "lbl_vmode";
+            this.lbl_rtp.AutoSize = true;
+            this.lbl_rtp.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_rtp.Location = new System.Drawing.Point(4, 17);
+            this.lbl_rtp.Name = "lbl_rtp";
+            this.lbl_rtp.Size = new System.Drawing.Size(80, 29);
+            this.lbl_rtp.TabIndex = 2;
+            this.lbl_rtp.Text = "lbl_rtp";
             // 
-            // btn_range100k
+            // lbl_coefB
             // 
-            this.btn_range100k.BackColor = System.Drawing.Color.Red;
-            this.btn_range100k.Enabled = true;
-            this.btn_range100k.bOn = true;
-            this.btn_range100k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range100k.Location = new System.Drawing.Point(423, 336);
-            this.btn_range100k.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range100k.Name = "btn_range100k";
-            this.btn_range100k.Size = new System.Drawing.Size(71, 46);
-            this.btn_range100k.TabIndex = 0;
+            this.lbl_coefB.AutoSize = true;
+            this.lbl_coefB.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_coefB.Location = new System.Drawing.Point(246, 85);
+            this.lbl_coefB.Name = "lbl_coefB";
+            this.lbl_coefB.Size = new System.Drawing.Size(80, 29);
+            this.lbl_coefB.TabIndex = 2;
+            this.lbl_coefB.Text = "CoefB";
             // 
-            // btn_range10k
+            // lbl_coefA
             // 
-            this.btn_range10k.BackColor = System.Drawing.Color.Red;
-            this.btn_range10k.Enabled = true;
-            this.btn_range10k.bOn = true;
-            this.btn_range10k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range10k.Location = new System.Drawing.Point(339, 336);
-            this.btn_range10k.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range10k.Name = "btn_range10k";
-            this.btn_range10k.Size = new System.Drawing.Size(71, 46);
-            this.btn_range10k.TabIndex = 0;
+            this.lbl_coefA.AutoSize = true;
+            this.lbl_coefA.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_coefA.Location = new System.Drawing.Point(5, 85);
+            this.lbl_coefA.Name = "lbl_coefA";
+            this.lbl_coefA.Size = new System.Drawing.Size(79, 29);
+            this.lbl_coefA.TabIndex = 2;
+            this.lbl_coefA.Text = "CoefA";
             // 
-            // btn_range1k
+            // lbl_coefC
             // 
-            this.btn_range1k.BackColor = System.Drawing.Color.Red;
-            this.btn_range1k.Enabled = true;
-            this.btn_range1k.bOn = true;
-            this.btn_range1k.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range1k.Location = new System.Drawing.Point(258, 336);
-            this.btn_range1k.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range1k.Name = "btn_range1k";
-            this.btn_range1k.Size = new System.Drawing.Size(71, 46);
-            this.btn_range1k.TabIndex = 0;
+            this.lbl_coefC.AutoSize = true;
+            this.lbl_coefC.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_coefC.Location = new System.Drawing.Point(489, 85);
+            this.lbl_coefC.Name = "lbl_coefC";
+            this.lbl_coefC.Size = new System.Drawing.Size(81, 29);
+            this.lbl_coefC.TabIndex = 2;
+            this.lbl_coefC.Text = "CoefC";
             // 
-            // btn_range100
+            // lbl_prbtype
             // 
-            this.btn_range100.BackColor = System.Drawing.Color.Red;
-            this.btn_range100.Enabled = true;
-            this.btn_range100.bOn = true;
-            this.btn_range100.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range100.Location = new System.Drawing.Point(167, 336);
-            this.btn_range100.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range100.Name = "btn_range100";
-            this.btn_range100.Size = new System.Drawing.Size(71, 46);
-            this.btn_range100.TabIndex = 0;
+            this.lbl_prbtype.AutoSize = true;
+            this.lbl_prbtype.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_prbtype.Location = new System.Drawing.Point(362, 80);
+            this.lbl_prbtype.Name = "lbl_prbtype";
+            this.lbl_prbtype.Size = new System.Drawing.Size(133, 29);
+            this.lbl_prbtype.TabIndex = 2;
+            this.lbl_prbtype.Text = "lbl_prbtype";
             // 
-            // btn_range10
+            // lbl_meastimes
             // 
-            this.btn_range10.BackColor = System.Drawing.Color.Red;
-            this.btn_range10.Enabled = true;
-            this.btn_range10.bOn = true;
-            this.btn_range10.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range10.Location = new System.Drawing.Point(513, 280);
-            this.btn_range10.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range10.Name = "btn_range10";
-            this.btn_range10.Size = new System.Drawing.Size(71, 46);
-            this.btn_range10.TabIndex = 0;
+            this.lbl_meastimes.AutoSize = true;
+            this.lbl_meastimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_meastimes.Location = new System.Drawing.Point(362, 142);
+            this.lbl_meastimes.Name = "lbl_meastimes";
+            this.lbl_meastimes.Size = new System.Drawing.Size(169, 29);
+            this.lbl_meastimes.TabIndex = 2;
+            this.lbl_meastimes.Text = "lbl_meastimes";
             // 
-            // btn_range1
+            // lbl_measdelay
             // 
-            this.btn_range1.BackColor = System.Drawing.Color.Red;
-            this.btn_range1.Enabled = true;
-            this.btn_range1.bOn = true;
-            this.btn_range1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_range1.Location = new System.Drawing.Point(423, 280);
-            this.btn_range1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_range1.Name = "btn_range1";
-            this.btn_range1.Size = new System.Drawing.Size(71, 46);
-            this.btn_range1.TabIndex = 0;
+            this.lbl_measdelay.AutoSize = true;
+            this.lbl_measdelay.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_measdelay.Location = new System.Drawing.Point(13, 142);
+            this.lbl_measdelay.Name = "lbl_measdelay";
+            this.lbl_measdelay.Size = new System.Drawing.Size(169, 29);
+            this.lbl_measdelay.TabIndex = 2;
+            this.lbl_measdelay.Text = "lbl_measdelay";
             // 
-            // btn_rangeP1
+            // lbl_rx_pos
             // 
-            this.btn_rangeP1.BackColor = System.Drawing.Color.Red;
-            this.btn_rangeP1.Enabled = true;
-            this.btn_rangeP1.bOn = true;
-            this.btn_rangeP1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_rangeP1.Location = new System.Drawing.Point(339, 280);
-            this.btn_rangeP1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_rangeP1.Name = "btn_rangeP1";
-            this.btn_rangeP1.Size = new System.Drawing.Size(71, 46);
-            this.btn_rangeP1.TabIndex = 0;
+            this.lbl_rx_pos.AutoSize = true;
+            this.lbl_rx_pos.Font = new System.Drawing.Font("Microsoft Sans Serif", 17.82178F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lbl_rx_pos.Location = new System.Drawing.Point(185, 20);
+            this.lbl_rx_pos.Name = "lbl_rx_pos";
+            this.lbl_rx_pos.Size = new System.Drawing.Size(138, 29);
+            this.lbl_rx_pos.TabIndex = 1;
+            this.lbl_rx_pos.Text = "lbl_rx_pos";
             // 
-            // btn_rangeP01
+            // btn_enable
             // 
-            this.btn_rangeP01.BackColor = System.Drawing.Color.Red;
-            this.btn_rangeP01.Enabled = true;
-            this.btn_rangeP01.bOn = true;
-            this.btn_rangeP01.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_rangeP01.Location = new System.Drawing.Point(258, 280);
-            this.btn_rangeP01.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_rangeP01.Name = "btn_rangeP01";
-            this.btn_rangeP01.Size = new System.Drawing.Size(71, 46);
-            this.btn_rangeP01.TabIndex = 0;
+            this.btn_enable.BackColor = System.Drawing.Color.Red;
+            this.btn_enable.bgScale = 3;
+            this.btn_enable.bOn = true;
+            this.btn_enable.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_enable.colorTop = System.Drawing.Color.Pink;
+            this.btn_enable.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_enable.Label = null;
+            this.btn_enable.Location = new System.Drawing.Point(12, 13);
+            this.btn_enable.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btn_enable.Name = "btn_enable";
+            this.btn_enable.Size = new System.Drawing.Size(128, 46);
+            this.btn_enable.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_enable.TabIndex = 3;
             // 
-            // btn_rangeP001
+            // btn_coefa
             // 
-            this.btn_rangeP001.BackColor = System.Drawing.Color.Red;
-            this.btn_rangeP001.Enabled = true;
-            this.btn_rangeP001.bOn = true;
-            this.btn_rangeP001.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_rangeP001.Location = new System.Drawing.Point(167, 280);
-            this.btn_rangeP001.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_rangeP001.Name = "btn_rangeP001";
-            this.btn_rangeP001.Size = new System.Drawing.Size(71, 46);
-            this.btn_rangeP001.TabIndex = 0;
+            this.btn_coefa.BackColor = System.Drawing.Color.Red;
+            this.btn_coefa.bgScale = 3;
+            this.btn_coefa.bOn = true;
+            this.btn_coefa.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_coefa.colorTop = System.Drawing.Color.Pink;
+            this.btn_coefa.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_coefa.Label = null;
+            this.btn_coefa.Location = new System.Drawing.Point(90, 68);
+            this.btn_coefa.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btn_coefa.Name = "btn_coefa";
+            this.btn_coefa.Size = new System.Drawing.Size(149, 46);
+            this.btn_coefa.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_coefa.TabIndex = 0;
             // 
-            // btn_vmode
+            // btn_coefb
             // 
-            this.btn_vmode.BackColor = System.Drawing.Color.Red;
-            this.btn_vmode.Enabled = true;
-            this.btn_vmode.bOn = true;
-            this.btn_vmode.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_vmode.Location = new System.Drawing.Point(167, 204);
-            this.btn_vmode.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
-            this.btn_vmode.Name = "btn_vmode";
-            this.btn_vmode.Size = new System.Drawing.Size(162, 46);
-            this.btn_vmode.TabIndex = 0;
+            this.btn_coefb.BackColor = System.Drawing.Color.Red;
+            this.btn_coefb.bgScale = 3;
+            this.btn_coefb.bOn = true;
+            this.btn_coefb.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_coefb.colorTop = System.Drawing.Color.Pink;
+            this.btn_coefb.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_coefb.Label = null;
+            this.btn_coefb.Location = new System.Drawing.Point(333, 68);
+            this.btn_coefb.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btn_coefb.Name = "btn_coefb";
+            this.btn_coefb.Size = new System.Drawing.Size(149, 46);
+            this.btn_coefb.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_coefb.TabIndex = 0;
+            // 
+            // btn_coefc
+            // 
+            this.btn_coefc.BackColor = System.Drawing.Color.Red;
+            this.btn_coefc.bgScale = 3;
+            this.btn_coefc.bOn = true;
+            this.btn_coefc.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_coefc.colorTop = System.Drawing.Color.Pink;
+            this.btn_coefc.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_coefc.Label = null;
+            this.btn_coefc.Location = new System.Drawing.Point(568, 68);
+            this.btn_coefc.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btn_coefc.Name = "btn_coefc";
+            this.btn_coefc.Size = new System.Drawing.Size(149, 46);
+            this.btn_coefc.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_coefc.TabIndex = 0;
+            // 
+            // btn_range
+            // 
+            this.btn_range.BackColor = System.Drawing.Color.Red;
+            this.btn_range.bgScale = 3;
+            this.btn_range.bOn = true;
+            this.btn_range.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_range.colorTop = System.Drawing.Color.Pink;
+            this.btn_range.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_range.Label = null;
+            this.btn_range.Location = new System.Drawing.Point(511, 5);
+            this.btn_range.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btn_range.Name = "btn_range";
+            this.btn_range.Size = new System.Drawing.Size(206, 46);
+            this.btn_range.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_range.TabIndex = 0;
+            // 
+            // btn_rtp
+            // 
+            this.btn_rtp.BackColor = System.Drawing.Color.Red;
+            this.btn_rtp.bgScale = 3;
+            this.btn_rtp.bOn = true;
+            this.btn_rtp.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_rtp.colorTop = System.Drawing.Color.Pink;
+            this.btn_rtp.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_rtp.Label = null;
+            this.btn_rtp.Location = new System.Drawing.Point(91, 5);
+            this.btn_rtp.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btn_rtp.Name = "btn_rtp";
+            this.btn_rtp.Size = new System.Drawing.Size(203, 46);
+            this.btn_rtp.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_rtp.TabIndex = 0;
+            // 
+            // btn_meastimes
+            // 
+            this.btn_meastimes.BackColor = System.Drawing.Color.Red;
+            this.btn_meastimes.bgScale = 3;
+            this.btn_meastimes.bOn = true;
+            this.btn_meastimes.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_meastimes.colorTop = System.Drawing.Color.Pink;
+            this.btn_meastimes.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_meastimes.Label = null;
+            this.btn_meastimes.Location = new System.Drawing.Point(538, 142);
+            this.btn_meastimes.Margin = new System.Windows.Forms.Padding(5);
+            this.btn_meastimes.Name = "btn_meastimes";
+            this.btn_meastimes.Size = new System.Drawing.Size(162, 46);
+            this.btn_meastimes.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_meastimes.TabIndex = 0;
+            // 
+            // btn_measdelay
+            // 
+            this.btn_measdelay.BackColor = System.Drawing.Color.Red;
+            this.btn_measdelay.bgScale = 3;
+            this.btn_measdelay.bOn = true;
+            this.btn_measdelay.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_measdelay.colorTop = System.Drawing.Color.Pink;
+            this.btn_measdelay.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_measdelay.Label = null;
+            this.btn_measdelay.Location = new System.Drawing.Point(167, 142);
+            this.btn_measdelay.Margin = new System.Windows.Forms.Padding(5);
+            this.btn_measdelay.Name = "btn_measdelay";
+            this.btn_measdelay.Size = new System.Drawing.Size(162, 46);
+            this.btn_measdelay.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_measdelay.TabIndex = 0;
             // 
             // btn_sqrt
             // 
             this.btn_sqrt.BackColor = System.Drawing.Color.Red;
-            this.btn_sqrt.Enabled = true;
+            this.btn_sqrt.bgScale = 3;
             this.btn_sqrt.bOn = true;
+            this.btn_sqrt.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_sqrt.colorTop = System.Drawing.Color.Pink;
             this.btn_sqrt.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_sqrt.Location = new System.Drawing.Point(277, 121);
-            this.btn_sqrt.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btn_sqrt.Label = null;
+            this.btn_sqrt.Location = new System.Drawing.Point(277, 80);
+            this.btn_sqrt.Margin = new System.Windows.Forms.Padding(5);
             this.btn_sqrt.Name = "btn_sqrt";
             this.btn_sqrt.Size = new System.Drawing.Size(52, 46);
+            this.btn_sqrt.Style = Raysting.Controls.MyButtonType.roundButton;
             this.btn_sqrt.TabIndex = 0;
             // 
             // btn_current
             // 
             this.btn_current.BackColor = System.Drawing.Color.Red;
-            this.btn_current.Enabled = true;
+            this.btn_current.bgScale = 3;
             this.btn_current.bOn = true;
+            this.btn_current.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_current.colorTop = System.Drawing.Color.Pink;
             this.btn_current.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_current.Location = new System.Drawing.Point(167, 121);
-            this.btn_current.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btn_current.Label = null;
+            this.btn_current.Location = new System.Drawing.Point(167, 80);
+            this.btn_current.Margin = new System.Windows.Forms.Padding(5);
             this.btn_current.Name = "btn_current";
             this.btn_current.Size = new System.Drawing.Size(98, 46);
+            this.btn_current.Style = Raysting.Controls.MyButtonType.roundButton;
             this.btn_current.TabIndex = 0;
+            // 
+            // btn_serial_select
+            // 
+            this.btn_serial_select.BackColor = System.Drawing.Color.Red;
+            this.btn_serial_select.bgScale = 3;
+            this.btn_serial_select.bOn = true;
+            this.btn_serial_select.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_serial_select.colorTop = System.Drawing.Color.Pink;
+            this.btn_serial_select.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_serial_select.Label = null;
+            this.btn_serial_select.Location = new System.Drawing.Point(433, 7);
+            this.btn_serial_select.Margin = new System.Windows.Forms.Padding(5);
+            this.btn_serial_select.Name = "btn_serial_select";
+            this.btn_serial_select.Size = new System.Drawing.Size(57, 46);
+            this.btn_serial_select.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_serial_select.TabIndex = 0;
             // 
             // btn_serial
             // 
             this.btn_serial.BackColor = System.Drawing.Color.Red;
-            this.btn_serial.Enabled = true;
+            this.btn_serial.bgScale = 3;
             this.btn_serial.bOn = true;
+            this.btn_serial.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_serial.colorTop = System.Drawing.Color.Pink;
             this.btn_serial.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_serial.Location = new System.Drawing.Point(529, 121);
-            this.btn_serial.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.btn_serial.Label = null;
+            this.btn_serial.Location = new System.Drawing.Point(167, 7);
+            this.btn_serial.Margin = new System.Windows.Forms.Padding(5);
             this.btn_serial.Name = "btn_serial";
-            this.btn_serial.Size = new System.Drawing.Size(162, 46);
+            this.btn_serial.Size = new System.Drawing.Size(243, 46);
+            this.btn_serial.Style = Raysting.Controls.MyButtonType.roundButton;
             this.btn_serial.TabIndex = 0;
             // 
-            // btn_stdchan
+            // btn_prbtype
             // 
-            this.btn_stdchan.BackColor = System.Drawing.Color.Red;
-            this.btn_stdchan.Enabled = true;
-            this.btn_stdchan.bOn = true;
-            this.btn_stdchan.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_stdchan.Location = new System.Drawing.Point(529, 204);
-            this.btn_stdchan.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.btn_stdchan.Name = "btn_stdchan";
-            this.btn_stdchan.Size = new System.Drawing.Size(162, 46);
-            this.btn_stdchan.TabIndex = 0;
-            // 
-            // btn_SysConfig
-            // 
-            this.btn_SysConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_SysConfig.Enabled = true;
-            this.btn_SysConfig.bOn = true;
-            this.btn_SysConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_SysConfig.Location = new System.Drawing.Point(12, 12);
-            this.btn_SysConfig.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btn_SysConfig.Name = "btn_SysConfig";
-            this.btn_SysConfig.Size = new System.Drawing.Size(136, 36);
-            this.btn_SysConfig.TabIndex = 5;
-            // 
-            // btn_RxConfig
-            // 
-            this.btn_RxConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_RxConfig.Enabled = true;
-            this.btn_RxConfig.bOn = true;
-            this.btn_RxConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_RxConfig.Location = new System.Drawing.Point(316, 12);
-            this.btn_RxConfig.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btn_RxConfig.Name = "btn_RxConfig";
-            this.btn_RxConfig.Size = new System.Drawing.Size(136, 36);
-            this.btn_RxConfig.TabIndex = 4;
-            // 
-            // btn_RsConfig
-            // 
-            this.btn_RsConfig.BackColor = System.Drawing.Color.Blue;
-            this.btn_RsConfig.Enabled = true;
-            this.btn_RsConfig.bOn = true;
-            this.btn_RsConfig.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btn_RsConfig.Location = new System.Drawing.Point(164, 12);
-            this.btn_RsConfig.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.btn_RsConfig.Name = "btn_RsConfig";
-            this.btn_RsConfig.Size = new System.Drawing.Size(136, 36);
-            this.btn_RsConfig.TabIndex = 3;
+            this.btn_prbtype.BackColor = System.Drawing.Color.Red;
+            this.btn_prbtype.bgScale = 3;
+            this.btn_prbtype.bOn = true;
+            this.btn_prbtype.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_prbtype.colorTop = System.Drawing.Color.Pink;
+            this.btn_prbtype.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btn_prbtype.Label = null;
+            this.btn_prbtype.Location = new System.Drawing.Point(538, 80);
+            this.btn_prbtype.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btn_prbtype.Name = "btn_prbtype";
+            this.btn_prbtype.Size = new System.Drawing.Size(149, 46);
+            this.btn_prbtype.Style = Raysting.Controls.MyButtonType.roundButton;
+            this.btn_prbtype.TabIndex = 0;
             // 
             // btn_quit
             // 
             this.btn_quit.BackColor = System.Drawing.Color.Red;
-            this.btn_quit.Enabled = true;
+            this.btn_quit.bgScale = 3;
             this.btn_quit.bOn = true;
+            this.btn_quit.colorShadow = System.Drawing.Color.LightGray;
+            this.btn_quit.colorTop = System.Drawing.Color.Pink;
+            this.btn_quit.Label = null;
             this.btn_quit.Location = new System.Drawing.Point(674, 1);
             this.btn_quit.Name = "btn_quit";
             this.btn_quit.Size = new System.Drawing.Size(71, 71);
+            this.btn_quit.Style = Raysting.Controls.MyButtonType.roundButton;
             this.btn_quit.TabIndex = 0;
             // 
             // RxConfigWnd
@@ -462,11 +460,10 @@
             this.BackColor = System.Drawing.Color.White;
             this.ClientSize = new System.Drawing.Size(745, 502);
             this.ControlBox = false;
+            this.Controls.Add(this.btn_enable);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.btn_SysConfig);
-            this.Controls.Add(this.btn_RxConfig);
-            this.Controls.Add(this.btn_RsConfig);
             this.Controls.Add(this.btn_quit);
+            this.Controls.Add(this.lbl_rx_pos);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "RxConfigWnd";
             this.ShowIcon = false;
@@ -476,43 +473,42 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
         #endregion
 
         private Raysting.Controls.RectButton btn_quit;
-        private System.Windows.Forms.Label lbl_stdchan;
-        private Raysting.Controls.RectButton btn_stdchan;
+        private Raysting.Controls.RectButton btn_prbtype;
         private Raysting.Controls.RectButton btn_current;
         private System.Windows.Forms.Label lbl_current;
         private Raysting.Controls.RectButton btn_sqrt;
         private System.Windows.Forms.Label lbl_serial;
         private Raysting.Controls.RectButton btn_serial;
-        private Raysting.Controls.RectButton btn_SysConfig;
-        private Raysting.Controls.RectButton btn_RxConfig;
-        private Raysting.Controls.RectButton btn_RsConfig;
         private System.Windows.Forms.Panel panel1;
         private Raysting.Controls.RectButton btn_enable;
-        private System.Windows.Forms.Label lbl_vmode;
-        private Raysting.Controls.RectButton btn_vmode;
-        private Raysting.Controls.RectButton btn_next;
-        private Raysting.Controls.RectButton btn_last;
-        private System.Windows.Forms.Label lbl_range;
-        private Raysting.Controls.RectButton btn_range100k;
-        private Raysting.Controls.RectButton btn_range10k;
-        private Raysting.Controls.RectButton btn_range1k;
-        private Raysting.Controls.RectButton btn_range100;
-        private Raysting.Controls.RectButton btn_range10;
-        private Raysting.Controls.RectButton btn_range1;
-        private Raysting.Controls.RectButton btn_rangeP1;
-        private Raysting.Controls.RectButton btn_rangeP01;
-        private Raysting.Controls.RectButton btn_rangeP001;
+        private System.Windows.Forms.Label lbl_measdelay;
+        private Raysting.Controls.RectButton btn_measdelay;
+        private System.Windows.Forms.Label lbl_prbtype;
+        private System.Windows.Forms.Label lbl_rx_pos;
+        private Raysting.Controls.RectButton btn_meastimes;
+        private System.Windows.Forms.Label lbl_meastimes;
+        private System.Windows.Forms.Label lbl_coefA;
+        private System.Windows.Forms.Label lbl_rtp;
+        private Raysting.Controls.RectButton btn_coefa;
+        private Raysting.Controls.RectButton btn_rtp;
+        private System.Windows.Forms.Label lbl_coefB;
+        private Raysting.Controls.RectButton btn_coefb;
         private System.Windows.Forms.Panel panel2;
-        private Raysting.Controls.RectButton btn_ch4;
-        private Raysting.Controls.RectButton btn_ch3;
-        private Raysting.Controls.RectButton btn_ch2;
-        private Raysting.Controls.RectButton btn_ch1;
+        private Raysting.Controls.RectButton btn_coefc;
+        private System.Windows.Forms.Label lbl_coefC;
+        private System.Windows.Forms.Label lbl_range;
+        private Raysting.Controls.RectButton btn_range;
+        private Raysting.Controls.RectButton btn_serial_select;
+        private System.Windows.Forms.Label lbl_serial_select;
+        private System.Windows.Forms.Label lbl_sqrt;
     }
 }
