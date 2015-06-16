@@ -188,8 +188,8 @@ void State_Change(uchar key)
 			if((key == KEY_OK) && (rdata.pos_len > 0))
 			{
 				rdata.Delay = buf2byte();
-				if(rdata.Delay < 10)
-					rdata.Delay = 10;
+				if(rdata.Delay < 3)
+					rdata.Delay = 3;
 				SaveToEEPROM();
 			}
 			rdata.pos_len = rdata.StateId;
