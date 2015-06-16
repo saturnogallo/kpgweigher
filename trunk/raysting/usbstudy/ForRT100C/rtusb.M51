@@ -1,4 +1,4 @@
-BL51 BANKED LINKER/LOCATER V5.01                                                        06/29/2014  16:17:12  PAGE 1
+BL51 BANKED LINKER/LOCATER V5.01                                                        06/14/2015  15:41:46  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V5.01, INVOKED BY:
@@ -59,7 +59,7 @@ LINK MAP OF MODULE:  rtusb (SJSERIAL)
             REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
             REG     0008H     0008H     ABSOLUTE     "REG BANK 1"
             REG     0010H     0008H     ABSOLUTE     "REG BANK 2"
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 2
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 2
 
 
             REG     0018H     0008H     ABSOLUTE     "REG BANK 3"
@@ -119,7 +119,7 @@ LINK MAP OF MODULE:  rtusb (SJSERIAL)
             CODE    1A24H     002CH     UNIT         ?PR?IO_HASC2?UART2
             CODE    1A50H     002BH     UNIT         ?PR?INIT_UART?UART
             CODE    1A7BH     002BH     UNIT         ?PR?INIT_UART2?UART2
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 3
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 3
 
 
             CODE    1AA6H     0029H     UNIT         ?PR?IO_GETC?UART
@@ -179,7 +179,7 @@ SEGMENT                                         BIT_GROUP          DATA_GROUP   
 
 ?PR?_NAV_UART_PUSH1?SJMAIN                   -----    -----      -----    -----      -----    -----
   +--> ?PR?_RESETNAV?SJMAIN
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 4
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 4
 
 
   +--> ?PR?ATOF?ATOF
@@ -239,7 +239,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   X:00BCH         SYMBOL        spHead2
   D:00A2H         PUBLIC        P_SW1
   D:00BAH         PUBLIC        P_SW2
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 5
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 5
 
 
   D:00A8H         PUBLIC        IE
@@ -299,7 +299,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:1BCEH         LINE#         42
   C:1BCEH         LINE#         43
   C:1BD1H         LINE#         44
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 6
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 6
 
 
   C:1BD4H         LINE#         45
@@ -359,7 +359,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:1BA1H         LINE#         124
   C:1BA3H         LINE#         125
   C:1BABH         LINE#         127
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 7
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 7
 
 
   -------         ENDPROC       _SJSERIALSENDBYTE
@@ -419,7 +419,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:1938H         LINE#         199
   C:1938H         LINE#         200
   C:1944H         LINE#         201
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 8
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 8
 
 
   C:194AH         LINE#         202
@@ -479,7 +479,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   X:0158H         SYMBOL        rx_num_of_bits
   X:0159H         SYMBOL        tx_num_of_bits
   X:015AH         SYMBOL        user_tx_buffer
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 9
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 9
 
 
   C:1BBDH         PUBLIC        asp_set_timer
@@ -539,7 +539,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:0FEEH         LINE#         167
   C:0FF9H         LINE#         168
   C:1001H         LINE#         169
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 10
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 10
 
 
   C:1001H         LINE#         170
@@ -599,7 +599,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   -------         ENDPROC       INIT_UART
   -------         PROC          IO_GETC
   -------         DO            
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 11
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 11
 
 
   D:0007H         SYMBOL        ch
@@ -659,7 +659,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   B:00A8H.7       PUBLIC        EA
   D:00E8H         PUBLIC        P6
   D:00F8H         PUBLIC        P7
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 12
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 12
 
 
   D:00A2H         PUBLIC        P_SW1
@@ -719,7 +719,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:1B6BH         LINE#         28
   C:1B75H         LINE#         29
   -------         ENDPROC       _DELAY
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 13
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 13
 
 
   -------         PROC          _LOWC
@@ -779,7 +779,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:146FH         LINE#         93
   C:1477H         LINE#         94
   C:147FH         LINE#         95
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 14
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 14
 
 
   C:1493H         LINE#         96
@@ -839,7 +839,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:0E83H         LINE#         170
   C:0E8AH         LINE#         171
   C:0E9FH         LINE#         172
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 15
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 15
 
 
   C:0EA6H         LINE#         173
@@ -899,7 +899,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:1790H         LINE#         228
   C:1790H         LINE#         229
   C:1797H         LINE#         230
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 16
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 16
 
 
   C:17A1H         LINE#         231
@@ -959,7 +959,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   X:010AH         SYMBOL        sid
   X:010BH         SYMBOL        temp
   X:010CH         SYMBOL        fail_cnt
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 17
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 17
 
 
   X:010DH         SYMBOL        curr_rng
@@ -1019,7 +1019,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:0C50H         LINE#         431
   C:0C5AH         LINE#         432
   C:0C64H         LINE#         433
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 18
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 18
 
 
   C:0C6BH         LINE#         434
@@ -1079,7 +1079,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:0DD2H         LINE#         490
   C:0DD5H         LINE#         491
   C:0DDCH         LINE#         492
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 19
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 19
 
 
   C:0DE3H         LINE#         493
@@ -1139,7 +1139,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   B:00B0H.5       PUBLIC        asp_tx2
   X:0020H         SYMBOL        inbuf2
   X:0167H         SYMBOL        timer_rx2_ctr
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 20
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 20
 
 
   X:0168H         SYMBOL        timer_tx2_ctr
@@ -1199,7 +1199,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:110AH         LINE#         160
   C:110AH         LINE#         161
   C:110AH         LINE#         162
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 21
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 21
 
 
   C:110BH         LINE#         164
@@ -1259,7 +1259,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   C:1AF8H         LINE#         221
   C:1AF8H         LINE#         222
   C:1AF8H         LINE#         226
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 22
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 22
 
 
   C:1AF8H         LINE#         227
@@ -1319,7 +1319,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   -------         MODULE        ATOF
   C:18AFH         PUBLIC        _ATOF
   -------         ENDMOD        ATOF
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 23
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 23
 
 
 
@@ -1379,7 +1379,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
   -------         ENDMOD        ?C?ULCMP
 
   -------         MODULE        ?C?ULSHR
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 24
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 24
 
 
   C:0629H         PUBLIC        ?C?ULSHR
@@ -1439,7 +1439,7 @@ SYMBOL TABLE OF MODULE:  rtusb (SJSERIAL)
 
 *** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
     SEGMENT: ?PR?SJSERIALWAITFORONEBYTE2?SJSERIAL
-BL51 BANKED LINKER/LOCATER V5.01                                                      06/29/2014  16:17:12  PAGE 25
+BL51 BANKED LINKER/LOCATER V5.01                                                      06/14/2015  15:41:46  PAGE 25
 
 
 

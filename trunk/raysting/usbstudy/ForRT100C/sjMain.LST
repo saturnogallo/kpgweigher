@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 1   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
@@ -62,7 +62,7 @@ stmt level    source
   53   1                      return 'A'+x-0x0a;
   54   1              else
   55   1                      return '0'+x;
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 2   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 2   
 
   56   1      }
   57          
@@ -126,7 +126,7 @@ stmt level    source
  115          
  116          #define NAV_INIT        1
  117          #define NAV_30V         2
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 3   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 3   
 
  118          #define NAV_1V          3
  119          #define NAV_120MV       4
@@ -179,9 +179,9 @@ stmt level    source
  166   1      //        if(cmd == NAV_30V)
  167   1      //             sprintf(navcmd,"%%01;12;02\r");
  168   1              if(cmd == NAV_1V)
- 169   1                     sprintf(navcmd,"%%01;12;02\r\n");
+ 169   1                     sprintf(navcmd,"%%01;12;01\r\n");
  170   1              if(cmd == NAV_120MV)
- 171   1                     sprintf(navcmd,"%%01;12;01\r\n");
+ 171   1                     sprintf(navcmd,"%%01;12;00\r\n");
  172   1              if(cmd == NAV_AFLTOFF)
  173   1                     sprintf(navcmd,"%%01;26\r");
  174   1              if(cmd == NAV_AFLTON)
@@ -190,7 +190,7 @@ stmt level    source
  177   1                     sprintf(navcmd,"%%01;27\r");
  178   1              if(cmd == NAV_ZEROON)    
  179   1              {
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 4   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 4   
 
  180   2                     sprintf(navcmd,"%%01;06\r\n");
  181   2              }
@@ -254,7 +254,7 @@ stmt level    source
  239   1      //              sjSerialSendByte(dat);                            
  240   1      //              return;
  241   1              if(navlen1 >= 19)
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 5   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 5   
 
  242   1              {                          
  243   2                      ResetNav('1');
@@ -318,7 +318,7 @@ stmt level    source
  301   1              navread2[navlen2] = '\0';        
  302   1              navlen2 = 0;         
  303   1              reading2 =  NAV_VALID; //valid data
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 6   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 6   
 
  304   1              reading2r = atof(navread2);
  305   1                      ResetNav('2');                  
@@ -382,7 +382,7 @@ stmt level    source
  363   1              
  364   1      //      sjRelayInit();
  365   1      
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 7   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 7   
 
  366   1              /*
  367   1              *       Protocal routine: 
@@ -446,7 +446,7 @@ stmt level    source
  425   2      
  426   2                      if(sjSerialIsDataWaiting())
  427   2                      {
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 8   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 8   
 
  428   3                              temp = sjSerialWaitForOneByte();
  429   3                              if (temp == CMD_ZERO)
@@ -510,7 +510,7 @@ stmt level    source
  487   4                                      nav_command(NAV_120MV,'2');
  488   4                                      curr_rng = 0;
  489   4                                      fail_cnt = 0;
-C51 COMPILER V7.01  SJMAIN                                                                 06/29/2014 16:17:12 PAGE 9   
+C51 COMPILER V7.01  SJMAIN                                                                 06/14/2015 15:41:46 PAGE 9   
 
  490   4                                      delay(10000);
  491   4                                      nav_command(NAV_120MV,'1');
