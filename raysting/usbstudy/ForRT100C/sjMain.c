@@ -166,9 +166,9 @@ void nav_command(uchar cmd, char port)
 //        if(cmd == NAV_30V)
 //             sprintf(navcmd,"%%01;12;02\r");
         if(cmd == NAV_1V)
-               sprintf(navcmd,"%%01;12;02\r\n");
-        if(cmd == NAV_120MV)
                sprintf(navcmd,"%%01;12;01\r\n");
+        if(cmd == NAV_120MV)
+               sprintf(navcmd,"%%01;12;00\r\n");
         if(cmd == NAV_AFLTOFF)
                sprintf(navcmd,"%%01;26\r");
         if(cmd == NAV_AFLTON)
