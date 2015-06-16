@@ -139,7 +139,7 @@ namespace Mndz7
                     dt_lastoutput = DateTime.Now;
                     return;
                 }
-                lbl_davalue.Text = processor.DAValue;
+                lbl_davalue.Text = DeviceMgr.LastAction + "\r\n" + processor.DAValue;
                 processor.RefreshOutput();
                 if (processor.Current > -999)
                 {
@@ -212,7 +212,7 @@ namespace Mndz7
                             return;
                         }
                         
-                        if (param == "658901920") //input standard resistance
+                        if (param == "658901920") //input da offset
                         {
                             this.Invoke(new Action(() =>
                             {
@@ -221,7 +221,7 @@ namespace Mndz7
                             return;
                         }
 
-                        if (param == "658901921") //input standard resistance
+                        if (param == "658901921") //reset da offset to zero
                         {
                             processor.daoffset = 0;
                             return;

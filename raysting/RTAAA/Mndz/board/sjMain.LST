@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 1   
+C51 COMPILER V7.01  SJMAIN                                                                 04/12/2015 10:28:46 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE SJMAIN
@@ -62,7 +62,7 @@ stmt level    source
   53          
   54          //  FKN1,FKN2,FKN3,FKN4,FKN5,OKN6,FHP6,FHP5
   55                  0x06,0x07,0x04,0x05,0x02,0x0A,0x31,0x00
-C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 2   
+C51 COMPILER V7.01  SJMAIN                                                                 04/12/2015 10:28:46 PAGE 2   
 
   56          ********************************************/
   57          };
@@ -126,7 +126,7 @@ stmt level    source
  115          21 28  REG52
  116          33 3A  REG53
  117          02 0B  REG54
-C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 3   
+C51 COMPILER V7.01  SJMAIN                                                                 04/12/2015 10:28:46 PAGE 3   
 
  118          
  119          10 19  REG31
@@ -190,7 +190,7 @@ stmt level    source
  177          {
  178   1              unsigned char exID;
  179   1      
-C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 4   
+C51 COMPILER V7.01  SJMAIN                                                                 04/12/2015 10:28:46 PAGE 4   
 
  180   1              if(SwiID >= sizeof(lut))
  181   1                      return;
@@ -254,12 +254,12 @@ stmt level    source
  239          // clear code is set to 0x0007ffff; since we enabled buffer function
  240          #define MYCLR_CODE      0x0007ffff
  241          #define CONFIG_MODE     RBUF_ON|OPGND_DIS|DACTRI_DIS|BIN_2SC_BIN|SDO_EN|LIN_COMP_10
-C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 5   
+C51 COMPILER V7.01  SJMAIN                                                                 04/12/2015 10:28:46 PAGE 5   
 
  242          //end interface routine
  243          void main()
  244          {
- 245   1              unsigned char temp;
+ 245   1              unsigned char temp,temp1,temp2,temp3;
  246   1              unsigned char *dacbuf;
  247   1              unsigned char *clrbuf;
  248   1              unsigned char sid;//id of serial to send 
@@ -318,7 +318,7 @@ stmt level    source
  301   1      
  302   1              while(1)
  303   1              {
-C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 6   
+C51 COMPILER V7.01  SJMAIN                                                                 04/12/2015 10:28:46 PAGE 6   
 
  304   2      
  305   2                      if(sjSerialIsDataWaiting())
@@ -382,7 +382,7 @@ stmt level    source
  362   6                                                              temp = 1;
  363   6                                                      }
  364   5                                                      else if(temp == 0x05)
-C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 7   
+C51 COMPILER V7.01  SJMAIN                                                                 04/12/2015 10:28:46 PAGE 7   
 
  365   5                                                      {
  366   6                                                              AD5791Registers[CLEARCODE] = 0;
@@ -446,7 +446,7 @@ stmt level    source
  424   5                                              temp = 0;
  425   5                                              if(P3^4)
  426   5                                                      temp |= (0x10);
-C51 COMPILER V7.01  SJMAIN                                                                 05/26/2013 15:32:03 PAGE 8   
+C51 COMPILER V7.01  SJMAIN                                                                 04/12/2015 10:28:46 PAGE 8   
 
  427   5                                              if(P3^5)
  428   5                                                      temp |= (0x20);
@@ -461,30 +461,42 @@ stmt level    source
  437   4                              }
  438   3                              if(sid == 't')
  439   3                              {
- 440   4                                      P0=sjSerialWaitForOneByte();
- 441   4                                      P1=sjSerialWaitForOneByte();
- 442   4                                      sid = "";
- 443   4                                      sjSerialSendByte(EMARK);
- 444   4                              }
- 445   3                      }
- 446   2                      if(kbhit())
- 447   2                      {
- 448   3                              temp = iogetchar();
- 449   3                              sjSerialSendByte(temp);
- 450   3                      }
- 451   2              }
- 452   1      }
- 453          
- 454          
- 455          
+ 440   4                                      temp1=sjSerialWaitForOneByte();
+ 441   4                                      temp2=sjSerialWaitForOneByte();
+ 442   4                                      temp3=sjSerialWaitForOneByte();
+ 443   4                                      if(temp3 == EMARK)
+ 444   4                                      {
+ 445   5                                              P0 = temp1;
+ 446   5                                              P1 = temp2;
+ 447   5                                              sjSerialSendByte(HMARK);
+ 448   5                                              temp = 2;
+ 449   5                                              sjSerialSendByte(temp);
+ 450   5                                              temp = 2;
+ 451   5                                              sjSerialSendByte(temp);
+ 452   5                                              sjSerialSendByte(EMARK);                                        
+ 453   5                                      }
+ 454   4                                      sid = "";
+ 455   4                                      //sjSerialSendByte(EMARK);
+ 456   4                              }
+ 457   3                      }
+ 458   2                      if(kbhit())
+ 459   2                      {
+ 460   3                              temp = iogetchar();
+ 461   3                              sjSerialSendByte(temp);
+ 462   3                      }
+ 463   2              }
+ 464   1      }
+ 465          
+ 466          
+ 467          
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    938    ----
+   CODE SIZE        =    972    ----
    CONSTANT SIZE    =    109    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =      1      12
+   DATA SIZE        =      1      14
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

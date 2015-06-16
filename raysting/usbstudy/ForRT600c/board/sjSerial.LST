@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  SJSERIAL                                                               01/13/2015 18:53:55 PAGE 1   
+C51 COMPILER V7.01  SJSERIAL                                                               04/14/2015 17:37:16 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE SJSERIAL
@@ -62,7 +62,7 @@ stmt level    source
   53   1      }
   54          
   55          
-C51 COMPILER V7.01  SJSERIAL                                                               01/13/2015 18:53:55 PAGE 2   
+C51 COMPILER V7.01  SJSERIAL                                                               04/14/2015 17:37:16 PAGE 2   
 
   56          
   57          
@@ -126,7 +126,7 @@ stmt level    source
  115          *       Send One Byte on Serial port , (under construction)
  116          *       and return with no wait for send finished
  117          *       @param udata the Byte to send
-C51 COMPILER V7.01  SJSERIAL                                                               01/13/2015 18:53:55 PAGE 3   
+C51 COMPILER V7.01  SJSERIAL                                                               04/14/2015 17:37:16 PAGE 3   
 
  118          *       @param PortID serial port to use
  119          */
@@ -190,7 +190,7 @@ stmt level    source
  177          *       @param PortID serial port to use
  178          *       @return Byte we received
  179          */
-C51 COMPILER V7.01  SJSERIAL                                                               01/13/2015 18:53:55 PAGE 4   
+C51 COMPILER V7.01  SJSERIAL                                                               04/14/2015 17:37:16 PAGE 4   
 
  180          BYTE sjSerialWaitForOneByte2()
  181          {

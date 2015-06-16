@@ -744,8 +744,9 @@ namespace Mndz
                         }
                         badcount = 0;
                         DeviceMgr.Action("navto1v", "");
-                        Thread.Sleep(3000);
-                        continue;
+                        return;
+                        //Thread.Sleep(3000);
+                        //continue;
                     }
                     else
                     {
@@ -767,7 +768,8 @@ namespace Mndz
 
                     badcount = 0;
                     DeviceMgr.Action("navto120mv", "");
-                    Thread.Sleep(3000);
+                    return;
+                    //Thread.Sleep(3000);
                     continue;
                 }
                 if (DeviceMgr.nav_range == "navto120mv")

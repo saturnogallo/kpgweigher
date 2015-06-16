@@ -104,7 +104,7 @@
             this.lbl_version.Location = new System.Drawing.Point(702, 10);
             this.lbl_version.Name = "lbl_version";
             this.lbl_version.Size = new System.Drawing.Size(94, 17);
-            this.lbl_version.Text = "版本:2015-03-08";
+            this.lbl_version.Text = "版本:2015-04-12";
             this.lbl_version.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // lbl_datetime
@@ -228,49 +228,50 @@
             // btn_range6
             // 
             this.btn_range6.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_range6.Location = new System.Drawing.Point(5, 407);
+            this.btn_range6.Location = new System.Drawing.Point(5, 405);
             this.btn_range6.Name = "btn_range6";
-            this.btn_range6.Size = new System.Drawing.Size(142, 48);
+            this.btn_range6.Size = new System.Drawing.Size(142, 52);
             this.btn_range6.TabIndex = 10;
             // 
             // btn_range5
             // 
             this.btn_range5.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_range5.Location = new System.Drawing.Point(5, 343);
+            this.btn_range5.Location = new System.Drawing.Point(5, 329);
             this.btn_range5.Name = "btn_range5";
-            this.btn_range5.Size = new System.Drawing.Size(142, 48);
+            this.btn_range5.Size = new System.Drawing.Size(142, 52);
             this.btn_range5.TabIndex = 10;
             // 
             // btn_range4
             // 
             this.btn_range4.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_range4.Location = new System.Drawing.Point(5, 279);
+            this.btn_range4.Location = new System.Drawing.Point(5, 253);
             this.btn_range4.Name = "btn_range4";
-            this.btn_range4.Size = new System.Drawing.Size(142, 48);
+            this.btn_range4.Size = new System.Drawing.Size(142, 52);
             this.btn_range4.TabIndex = 10;
             // 
             // btn_range3
             // 
             this.btn_range3.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_range3.Location = new System.Drawing.Point(5, 215);
+            this.btn_range3.Location = new System.Drawing.Point(283, 439);
             this.btn_range3.Name = "btn_range3";
-            this.btn_range3.Size = new System.Drawing.Size(142, 48);
+            this.btn_range3.Size = new System.Drawing.Size(60, 21);
             this.btn_range3.TabIndex = 10;
+            this.btn_range3.Visible = false;
             // 
             // btn_range2
             // 
             this.btn_range2.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_range2.Location = new System.Drawing.Point(5, 151);
+            this.btn_range2.Location = new System.Drawing.Point(5, 177);
             this.btn_range2.Name = "btn_range2";
-            this.btn_range2.Size = new System.Drawing.Size(142, 48);
+            this.btn_range2.Size = new System.Drawing.Size(142, 52);
             this.btn_range2.TabIndex = 9;
             // 
             // btn_range1
             // 
             this.btn_range1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_range1.Location = new System.Drawing.Point(5, 87);
+            this.btn_range1.Location = new System.Drawing.Point(5, 101);
             this.btn_range1.Name = "btn_range1";
-            this.btn_range1.Size = new System.Drawing.Size(142, 48);
+            this.btn_range1.Size = new System.Drawing.Size(142, 52);
             this.btn_range1.TabIndex = 8;
             // 
             // led_current
@@ -293,9 +294,9 @@
             // 
             this.btn_range0.BackColor = System.Drawing.Color.LightGoldenrodYellow;
             this.btn_range0.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Bold);
-            this.btn_range0.Location = new System.Drawing.Point(5, 23);
+            this.btn_range0.Location = new System.Drawing.Point(5, 25);
             this.btn_range0.Name = "btn_range0";
-            this.btn_range0.Size = new System.Drawing.Size(142, 48);
+            this.btn_range0.Size = new System.Drawing.Size(142, 52);
             this.btn_range0.TabIndex = 0;
             // 
             // btn_turnon
@@ -308,9 +309,9 @@
             // 
             // lbl_davalue
             // 
-            this.lbl_davalue.Location = new System.Drawing.Point(318, 436);
+            this.lbl_davalue.Location = new System.Drawing.Point(153, 319);
             this.lbl_davalue.Name = "lbl_davalue";
-            this.lbl_davalue.Size = new System.Drawing.Size(249, 31);
+            this.lbl_davalue.Size = new System.Drawing.Size(484, 31);
             this.lbl_davalue.Text = "label1";
             // 
             // Form1

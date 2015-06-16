@@ -1,4 +1,4 @@
-C51 COMPILER V7.01  AD5791                                                                 05/26/2013 15:32:04 PAGE 1   
+C51 COMPILER V7.01  AD5791                                                                 04/12/2015 10:28:46 PAGE 1   
 
 
 C51 COMPILER V7.01, COMPILATION OF MODULE AD5791
@@ -62,7 +62,7 @@ stmt level    source
   53   2               ReadData = (ReadData<<1) | ADuC7026InputBit(SDO); 
   54   2      
   55   2               ADuC7026OutputBit(SCLK,0);   /////
-C51 COMPILER V7.01  AD5791                                                                 05/26/2013 15:32:04 PAGE 2   
+C51 COMPILER V7.01  AD5791                                                                 04/12/2015 10:28:46 PAGE 2   
 
   56   2      
   57   2            }
@@ -126,7 +126,7 @@ stmt level    source
  115   1              AD5791HardwareReset();
  116   1              AD5791HardwareClear();
  117   1      }
-C51 COMPILER V7.01  AD5791                                                                 05/26/2013 15:32:04 PAGE 3   
+C51 COMPILER V7.01  AD5791                                                                 04/12/2015 10:28:46 PAGE 3   
 
  118          
  119          void WriteToAD5791ViaSPI(unsigned char RegisterStartAddress, unsigned long int *DataBuffer)

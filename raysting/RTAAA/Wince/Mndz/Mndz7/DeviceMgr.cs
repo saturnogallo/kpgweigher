@@ -70,13 +70,31 @@ namespace Mndz7
                 0x05,0x0C,0x04,0x0D,0x07,0x0E,0x06,0x0F,
                 0x32,0x3B,0x21,0x28,0x33,0x3A,0x02,0x0B,
                 0x10,0x19,0x00,0x09,0x12,0x1B,0x01,0x08,
-                0x25,0x2C,0x24,0x2D,0x27,0x2E,0x26,0x2F};
-            string[] abbr_relay = {"REG21",     "REG22:TOREAL", "REG23:OUT",    "REG24", 
-                                   "REG11",     "REG12:10T",    "REG13:100T",   "REG14",
-                                   "REG61:R13", "REG62:R14",    "REG63:R15",    "REG64",
-                                   "REG51:R9",  "REG52:R10",    "REG53:R11",    "REG54:R12",
-                                   "REG31:R1",  "REG32:R2",     "REG33:R3",     "REG34:R4",
-                                   "REG41:R5",  "REG42:R6",     "REG43:R7",     "REG44:R8"
+                0x25,0x2C,0x24,0x2D,0x27,0x2E,0x26,0x2F,
+                0x01,0x00,0x02,0x00,0x04,0x00,0x08,0x00,  //"BIT00",     "BIT01"   ,     "BIT02",        "BIT03",
+                0x10,0x00,0x20,0x00,0x40,0x00,0x80,0x00,  //"BIT04",     "BIT05"   ,     "BIT06",        "BIT07",                                 
+                0x00,0x01,0x00,0x02,0x00,0x04,0x00,0x08,  //"BIT08:RANGE_1A",       "BIT09:RANGE_5A"   ,     "BIT10:RANGE_10A",        "BIT11:RANGE_100A",                                   
+                0x00,0x10,0x00,0x20,0x00,0x40,0x00,0x80,
+
+                0x01,0x00,0x04,0x00,0x10,0x00,0x40,0x00,
+                0x00,0x01,0x00,0x04,0x00,0x10,0x00,0x40,
+                };
+            //REG is for relay board, which use x,y map
+            //BIT is the voltage control, which use 1 means on , 0 means off
+            //PUL means pulse, just give a pulse on give position
+            string[] abbr_relay = {"REG21",     "REG22",        "REG23",        "REG24", 
+                                   "REG11",     "REG12",        "REG13",        "REG14",
+                                   "REG61",     "REG62",        "REG63",        "REG64",
+                                   "REG51",     "REG52",        "REG53",        "REG54",
+                                   "REG31",     "REG32",        "REG33",        "REG34",
+                                   "REG41",     "REG42",        "REG43",        "REG44",
+                                   "BIT00",     "BIT01"   ,     "BIT02",        "BIT03",
+                                   "BIT04",     "BIT05"   ,     "BIT06",        "BIT07",                                 
+                                   "BIT08:RANGE_1A",       "BIT09:RANGE_5A"   ,     "BIT10:RANGE_10A",        "BIT11:RANGE_100A",
+                                   "BIT12:RANGE_200A",     "BIT13:RANGE_600A"   ,     "BIT14:+",        "BIT15:-",
+                                   "PUL00",     "PUL01"   ,     "PUL02",        "PUL03",
+                                   "PUL04",     "PUL05"   ,     "PUL06",        "PUL07",
+
                                   };
             int i;
             for (i = 0; i < abbr_relay.Length; i++)
@@ -87,16 +105,28 @@ namespace Mndz7
                 if (abbr.IndexOf(':') > 0)
                 {
                     abbrs = abbr.Split(new char[] { ':' });
-                    regmap[abbrs[0] + "_ON"] = all_relay[2 * i];
-                    regmap[abbrs[0] + "_OFF"] = all_relay[2 * i + 1];
-                    regmap[abbrs[1] + "_ON"] = all_relay[2 * i];
-                    regmap[abbrs[1] + "_OFF"] = all_relay[2 * i + 1];
+
+                    if (abbrs[0].StartsWith("BIT"))
+                    {
+                        regmap[abbrs[1] + "_ON_P0"] = all_relay[2 * i];
+                        regmap[abbrs[1] + "_OFF_P0"] =  Convert.ToByte(all_relay[2 * i] ^ 0xff);
+                        regmap[abbrs[1] + "_ON_P1"] = all_relay[2 * i+1];
+                        regmap[abbrs[1] + "_OFF_P1"] = Convert.ToByte(all_relay[2 * i + 1] ^ 0xff);
+                    }
+                    if (abbrs[0].StartsWith("REG"))
+                    {
+                        regmap[abbrs[1] + "_ON"] = all_relay[2 * i];
+                        regmap[abbrs[1] + "_OFF"] = all_relay[2 * i + 1];
+                    }
+                    if (abbrs[0].StartsWith("PUL"))
+                    {
+                        regmap[abbrs[1] + "_ON_P0"] = all_relay[2 * i];
+                        regmap[abbrs[1] + "_OFF_P0"] = Convert.ToByte(all_relay[2 * i] << 1);
+                        regmap[abbrs[1] + "_ON_P1"] = all_relay[2 * i + 1];
+                        regmap[abbrs[1] + "_OFF_P1"] = Convert.ToByte(all_relay[2 * i + 1] << 1);
+                    }
                 }
-                else
-                {
-                    regmap[abbr + "_ON"] = all_relay[2 * i];
-                    regmap[abbr + "_OFF"] = all_relay[2 * i + 1];
-                }
+                
             }
             #endregion
             Logger.SysLog("");
@@ -377,20 +407,29 @@ namespace Mndz7
             cmdport.WriteLine(line);
         }
         static public string nav_range = "";
-        static byte[] togglecmd = new byte[] { 0x55,  0x73,  0x55, 0x55, 0x02, 0x56  };
         
-        static byte[] toggle10cmd = new byte[] { 0x55, 0x74, 0xFF, 0xFE};
-        static byte[] toggle1cmd = new byte[] { 0x55, 0x74, 0xFF, 0xFF };
         
-        static byte[] portcmd = new byte[] { 0x55, 0x74, 0xFF, 0xFF };
-        static public int xstate = 1; //can be 1 or 10;
-        static private byte p0state = 0xff;
+        
+        public static string LastAction = "";
+
         static public void Action(string action, object param)
         {
+            
             if (GlobalConfig.ISDEBUG)
             {
                 success = true;
                 return;
+            }
+            if (action == "navread")
+            {
+                if (!LastAction.EndsWith("."))
+                    LastAction = LastAction + ".";
+            }
+            else
+            {
+                LastAction = LastAction + ","+action.Replace("curr","").Replace("output","");
+                while ((LastAction.Length > 40) && (LastAction.IndexOf(',')>=0))
+                    LastAction = LastAction.Remove(0,LastAction.IndexOf(',')+1);
             }
             if (action == "navto1v" || action == "navto120mv")
             {
@@ -450,39 +489,94 @@ namespace Mndz7
                     Thread.Sleep(5);
                 }
             }
-            if (action == "toggle1" || action == "toggle10" || 
-                action=="poscurrent" || action=="negcurrent" || action=="defcurrent")
+            #region old toggle method
+            /*
+            if (action == "toggle1" || action == "toggle2" || action == "toggle3" || action == "toggle4" || action == "toggle5" || action == "toggle6" || 
+                action=="poscurr" || action=="negcurr" || action=="defcurr")
             {
-                //55 73 55 55 02 56 
+                //{ 0x55, 0x74, 0xFF, 0xFF };
                 success = false;
                 int retry = 3;
                 while (retry-- > 0)
                 {
                     port.DiscardInBuffer();
-                    if (action == "toggle1")
-                        portcmd[3] = (byte)(portcmd[3] | 0x01);
-                    else if (action == "toggle10")
-                        portcmd[3] = (byte)(portcmd[3] & 0xfe);
-                    else if (xstate == 1)
-                        portcmd[3] = (byte)(portcmd[3] | 0x01);
-                    else if (xstate == 10)
-                        portcmd[3] = (byte)(portcmd[3] & 0xfe);
-                    
-                    
-                    portcmd[3] = (byte)(portcmd[3] | 0x0A); //1x1x
-                    
-                    if (action == "poscurrent") //0xxx   //down edge 
+                    if (action == "toggle1" || action == "toggle2" || action == "toggle3" || action == "toggle4" || action == "toggle5" || action == "toggle6")
                     {
-                        portcmd[3] = (byte)(portcmd[3] & 0xf7);
+
+                        if ((action == "toggle1"))  //bit 0
+                            portcmd[3] = (byte)(portcmd[3] | 0x01);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xfe);
+
+                        if ((action == "toggle2"))  //bit2
+                            portcmd[3] = (byte)(portcmd[3] | 0x02);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xfd);
+
+                        if ((action == "toggle3")) //bit 4
+                            portcmd[3] = (byte)(portcmd[3] | 0x80);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xef);
+
+                        if ((action == "toggle4")) //bit 5
+                            portcmd[3] = (byte)(portcmd[3] | 0x20);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xdf);
+
+                        if ((action == "toggle5")) //bit 6
+                            portcmd[3] = (byte)(portcmd[3] | 0x40);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xbf);
+
+                        if ((action == "toggle6")) //bit 7
+                            portcmd[3] = (byte)(portcmd[3] | 0x80);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0x7f);
                     }
-                    else if (action == "negcurrent") //xx0x //down edge
+                    else
+                    {
+
+                        if (xstate == 1)  //bit 0
+                            portcmd[3] = (byte)(portcmd[3] | 0x01);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xfe);
+
+                        if (xstate == 2)  //bit2
+                            portcmd[3] = (byte)(portcmd[3] | 0x02);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xfd);
+
+                        if (xstate == 3) //bit 4
+                            portcmd[3] = (byte)(portcmd[3] | 0x80);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xef);
+
+                        if (xstate == 4) //bit 5
+                            portcmd[3] = (byte)(portcmd[3] | 0x20);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xdf);
+
+                        if (xstate == 5) //bit 6
+                            portcmd[3] = (byte)(portcmd[3] | 0x40);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0xbf);
+
+                        if (xstate == 6) //bit 7
+                            portcmd[3] = (byte)(portcmd[3] | 0x80);
+                        else
+                            portcmd[3] = (byte)(portcmd[3] & 0x7f);
+                    }
+
+                    portcmd[3] = (byte)(portcmd[3] | 0x0A); //1x1x ,  bit 1 is for and bit 3 is for positive current and negative current, only down edge effects
+                    
+                    if (action == "poscurr") //0xxx   //down edge 
+                    {
+                        portcmd[3] = (byte)(portcmd[3] & 0xf7); //11110111
+                    }
+                    else if (action == "negcurr") //xx0x //down edge    
                     {
                         portcmd[3] = (byte)(portcmd[3] & 0xfd);
                     }
-                    /*Logger.Log(String.Format("{0} {1} {2} {3}\n",portcmd[0].ToString("X2"),
-                        portcmd[1].ToString("X2"),
-                        portcmd[2].ToString("X2"),
-                        portcmd[3].ToString("X2")));*/
                     port.Write(portcmd, 0, portcmd.Length);
                     int timeout = 400;
                     while ((timeout-- > 0) && (!success))
@@ -492,98 +586,159 @@ namespace Mndz7
                     }
                     if (success)
                     {
-                        Logger.Log("ok");
-                        if (action == "toggle1")
-                            xstate = 1;
-                        if (action == "toggle10")
-                            xstate = 10;
+                        //Logger.Log("ok");
+                        if (action.StartsWith("toggle")) //store status of toggle1 is to toggle6
+                            xstate = Int32.Parse(action.Replace("toggle",""));
                         break;
                     }
-                    Thread.Sleep(500);
+                    Thread.Sleep(200);
                 }
                 if (!success)
                 {
                     Program.MsgShow("开关切换失败,请重启后再试");
                 }
-            }
-            if (action == "togglex")
-            {
-                //55 73 55 55 02 56 
-                success = false;
-                port.DiscardInBuffer();
-                port.Write(togglecmd, 0, togglecmd.Length);
-                int timeout = 400;
-                while ((timeout-- > 0) && (!success))
-                {
-                    ScanPort();
-                    Thread.Sleep(5);
-                }
-                if (success)
-                {
-                    if (xstate == 1)
-                        xstate = 10;
-                    else
-                        xstate = 1;
-                }
-            }
+            }*/
+            #endregion
         }
+        
         static public void Reset()
         {
+            
+            RelayState("COIL_1T", "RANGE_1A", "+");
+            RelayState("COIL_1T", "RANGE_1A", "OFF");
+
+            /*do debug only
+
+            RelayState("", "RANGE_5A", "");
+            RelayState("", "RANGE_10A", "");
+            RelayState("", "RANGE_100A", "");
+            RelayState("", "RANGE_200A", "");
+            RelayState("", "RANGE_600A", "");
+
+            RelayState("", "", "-");
             RelayState("", "", "OFF");
+            RelayState("", "", "+");
+            RelayState("", "", "OFF");
+            */
             Action("daoutput", new byte[] { 0x55, 0x64, 0xfc, 0x00, 0x00, 0x00, 0x04 }); //set control
-            Action("navto120mv",0);
-            Action("toggle1",0);
+            Action("navto1v",0);
             Thread.Sleep(1000);
         }
 
         static private Dictionary<string, byte> regmap;
         static private string oldcoil = ""; //old coil switch satus
-        static private string oldreal = "";  //old real resistance
-        static private string oldoutput = ""; //old output status
-        static private string[] coiltbl = new string[] { "COIL_10T", "COIL_100T", "COIL_1T", "COIL_REAL" };
-        static private string[] outputtbl = new string[] { "ON", "OFF" };
+        static private string oldres = ""; //old resistor switch status
+        static private string oldktt = ""; //old current position
+        static private string[] coiltbl = new string[] { "COIL_10T", "COIL_100T", "COIL_20T","COIL_1T" };
+        static private string[] restbl = new string[] { "RANGE_1A", "RANGE_5A", "RANGE_10A", "RANGE_100A", "RANGE_200A", "RANGE_600A", };
+        static private string[] ktttbl = new string[] { "+", "-", "OFF" };
         static private byte[] UsHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('s'), Convert.ToByte('U'), Convert.ToByte('U') };
         static private byte[] UdHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('d') };
+        static private byte[] UtHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('t') };
         static private byte[] UsTail = new byte[] { Convert.ToByte('V') };
 
-        static public void RelayState(string coil, string real, string output)
+        static public void RelayState(string coil, string res, string ktt)
         {
-            return;
             if (((coil == oldcoil) || (coil == "")) &&
-                ((real == oldreal) || (real == "")) &&
-                ((output == oldoutput) || (output == "")))
+                ((res == oldres) || (res == "")) &&
+                ((ktt == oldktt) || (ktt == "")))
                 return;
-            DelayWrite(UsHead, 0, 4);
+            DelayWrite(UtHead, 0, 2);
 
+            Byte P0 = 0x00;
+            Byte P1 = 0xf3; //!00001100
+
+            oldcoil = coil;
+            /* COIL is no use now
             if (coiltbl.Contains(coil))
             {
                 if (coil == "COIL_1T")
-                    DelayWrite(new byte[] { regmap["10T_OFF"], regmap["100T_OFF"], regmap["TOREAL_OFF"] }, 0, 3);
-                if (coil == "COIL_10T")
-                    DelayWrite(new byte[] { regmap["10T_ON"], regmap["100T_OFF"],  regmap["TOREAL_OFF"] }, 0, 3);
-                if (coil == "COIL_100T")
-                    DelayWrite(new byte[] { regmap["10T_OFF"], regmap["100T_ON"],  regmap["TOREAL_OFF"] }, 0, 3);
-                if (coil == "COIL_REAL")
                 {
-                    oldreal = real;
-                    DelayWrite(new byte[] { regmap["10T_OFF"], regmap["100T_OFF"], regmap["TOREAL_ON"] }, 0, 3);
+                    P0 = (byte)(P0 | regmap["1T_ON_P0"] | regmap["10T_OFF_P0"] | regmap["100T_OFF_P0"]);
+                    P0 = (byte)(P1 | regmap["1T_ON_P1"] | regmap["10T_OFF_P1"] | regmap["100T_OFF_P1"]);;
+                }
+                if (coil == "COIL_10T")
+                {
+                    P0 = (byte)(P0 | regmap["1T_OFF_P0"] | regmap["10T_ON_P0"] | regmap["100T_OFF_P0"]);
+                    P0 = (byte)(P1 | regmap["1T_OFF_P1"] | regmap["10T_ON_P1"] | regmap["100T_OFF_P1"]);
+                }
+                if (coil == "COIL_20T")
+                {
+                    P0 = (byte)(P0 | regmap["1T_OFF_P0"] | regmap["10T_ON_P0"] | regmap["100T_OFF_P0"]);
+                    P0 = (byte)(P1 | regmap["1T_OFF_P1"] | regmap["10T_ON_P1"] | regmap["100T_OFF_P1"]);
+                }
+
+                if (coil == "COIL_100T")
+                {
+                    P0 = (byte)(P0 | regmap["1T_OFF_P0"] | regmap["10T_OFF_P0"] | regmap["100T_ON_P0"]);
+                    P0 = (byte)(P1 | regmap["1T_OFF_P1"] | regmap["10T_OFF_P1"] | regmap["100T_ON_P1"]);
                 }
                 oldcoil = coil;
             }
-
-            if (outputtbl.Contains(output))
+            */
+            if (ktttbl.Contains(ktt))
             {
-                DelayWrite(new byte[] { regmap["OUT_"+output] }, 0, 1);
-                oldoutput = output;
+                if(ktt == "+")
+                {
+                    P0  = (byte)(P0 & regmap["+_OFF_P0"]);
+                    P1  = (byte)(P1 & regmap["+_OFF_P1"]);
+                }
+                else if (ktt == "-")
+                {
+                    P0 = (byte)(P0 & regmap["-_OFF_P0"]);
+                    P1 = (byte)(P1 & regmap["-_OFF_P1"]);
+                }
+                oldktt = ktt;
             }
-            
+            if (!restbl.Contains(res))
+                res = oldres;
+            if (restbl.Contains(res))
+            {
+                foreach (string rng in restbl)
+                {
+                    if (rng == "RANGE_10A" || rng == "RANGE_100A")
+                    {
+                        if (res == rng)
+                        {
+                            P0 = (byte)(P0 | regmap[rng + "_ON_P0"]);
+                            P1 = (byte)(P1 | regmap[rng + "_ON_P1"]);
+                        }
+                        else
+                        {
+                            P0 = (byte)(P0 & regmap[rng + "_OFF_P0"]);
+                            P1 = (byte)(P1 & regmap[rng + "_OFF_P1"]);
+                        }
+                    }
+                    else
+                    {
+                        if (res != rng)
+                        {
+                            P0 = (byte)(P0 | regmap[rng + "_ON_P0"]);
+                            P1 = (byte)(P1 | regmap[rng + "_ON_P1"]);
+                        }
+                        else
+                        {
+                            P0 = (byte)(P0 & regmap[rng + "_OFF_P0"]);
+                            P1 = (byte)(P1 & regmap[rng + "_OFF_P1"]);
+                        }
+                    }
+                }
+                oldres = res;
+            }
+            DelayWrite(new byte[] { P0, P1 }, 0, 2);
             DelayWrite(UsTail, 0, 1);
+            Thread.Sleep(100);
+            //DelayWrite(new byte[] { 0x55, 0x74, 0x00, 0x00 }, 0, 4);
+            
         }
     }
     internal class Processor
     {
         internal int RangeMin = 0;
         internal int RangeMax = 6;
+        /// <summary>
+        /// Range for resistance input for each range
+        /// </summary>
         internal double RangeLimit
         {
             get{
@@ -609,6 +764,9 @@ namespace Mndz7
                 }
             }
         }
+        /// <summary>
+        /// Scale for digit position for display
+        /// </summary>
         internal int RangeScale
         {
             get
@@ -635,8 +793,59 @@ namespace Mndz7
             }
         }
 
+        /// <summary>
+        /// reference voltage for DA
+        /// </summary>
+        internal int VReference
+        {
+            get
+            {
+                return 20;
+            }
+        }
 
-        internal double OPCurrentOffset = 0.0; 
+
+
+        internal double OPCurrentOffset = 0.0;
+
+        /// <summary>
+        /// R scale for operation
+        /// volt = R*OPRatio*Vrefp
+        /// DA_Ratio=R*2000/RSample=Vo/Vrefp;
+        /// </summary>
+        internal double OPRatio
+        {
+            get
+            {
+                double Rsample = 0; //20V at most
+                switch (_iRange)
+                {
+                    case 0: //200u  5V->600A
+                        Rsample = (20 * 2000 / 600); break;
+                    case 1: //2m    5V->200A
+                        Rsample = (20 * 2000 / 200); break;
+                    case 2: //20m   5V->100A
+                        Rsample = (20 * 2000 / 100); break;
+                    case 3: //200m  5V->80A
+                        Rsample = (20 * 2000 / 100); break;
+                    case 4: //2     5V->10A
+                        Rsample = (20 * 2000 / 10); break;
+                    case 5: //4     5V->5A
+                        Rsample = (20 * 2000 / 5); break;
+                    case 6: //20    5V->1A
+                        Rsample = (20 * 2000 / 1); break;
+                    default:
+                        return -1;
+                }
+                return 2000 / Rsample;
+                return -1;
+            }
+        }
+
+        /// <summary>
+        /// Current scale for operation
+        /// volt = current*OPCurrentScale
+        /// </summary>
         internal double OPCurrentScale
         {
             get
@@ -660,9 +869,14 @@ namespace Mndz7
                     default:
                         return -1;
                 }
+                
                 return -1;
             }
         }
+        /// <summary>
+        /// coil state for current output
+        /// return are COIL_1T, COIL_10T, COIL_100T or ""
+        /// </summary>
         internal string OPCurrentCoil
         {
             get
@@ -684,32 +898,68 @@ namespace Mndz7
                 }
             }
         }
+        /// <summary>
+        /// Feedback current scale
+        /// used for voltage to current convert.
+        /// </summary>
         internal double FBCurrentScale
         {
             get
             {
-                if (DeviceMgr.xstate == 1)
-                    return 600;
-                else
-                    return 60;
-
-                switch (iRange)
+                double Rcurrent = 0; //1V at most
+                switch (_iRange)
                 {
-                    case 0: //200u  1V->600A
+                    case 0: //200u  
+                        Rcurrent = (8.2835/50) * (1 / (0.05)); break;
+                        //Rcurrent = 1 / (0.05 * 6); break;
                     case 1: //2m    
+                        Rcurrent = 1 / (0.05 * 2) ; break;
                     case 2: //20m   
+                        Rcurrent = 1 / (0.05 * 1); break;
                     case 3: //200m  
-                        return 600;
-                    case 4: //2     1V->60A
+                        Rcurrent = 1 / (0.05 * 0.8); break;
+                    case 4: //2 
+                        Rcurrent = 1 / (0.05 * 0.1); break;
                     case 5: //4     1V->5A
+                        Rcurrent = 1 / (0.05 * 0.05); break;
                     case 6: //20    1V->1A
-                        return 60;
+                        Rcurrent = 1 / (0.05 * 0.01); break;
                     default:
                         return -1;
                 }
+                //Feeback(1V) = 2000/Rcurr
+                return 2000 / Rcurrent;
             }
         }
 
+        /// <summary>
+        /// return the resistor postition for toggling
+        /// </summary>
+        internal string ToggleRes
+        {
+            get
+            {
+                switch (_iRange)
+                {
+                    case 0: //200u  5V->600A
+                        return "RANGE_600A";
+                    case 1: //2m    5V->200A
+                        return "RANGE_200A";
+                    case 2: //20m   5V->100A
+                    case 3: //200m  5V->80A
+                        return "RANGE_100A";
+                    case 4: //2     5V->10A
+                        return "RANGE_10A";
+                    case 5: //4     5V->5A
+                        return "RANGE_5A";
+                    case 6: //20    5V->1A
+                        return "RANGE_1A";
+                    default:
+                        return "";
+                }
+                return "";
+            }
+        }
         private int _iRange = 0;        //the range setting, -1 for null, 0 for 200uohm, 1 for 2mohm, 2 for 20mohm, 3 for 200mohm, 4 for 2ohm, 5 for 4ohm, 6 for 20ohm
         internal int iRange{
             get
@@ -721,7 +971,7 @@ namespace Mndz7
                 if (_iRange == value)
                     return;
                 bOn = false;
-                iReal = -1;
+                //iReal = -1; /* no real resistance now*/
                 if (value == -1)
                 {
                     _iRange = -1;
@@ -735,22 +985,21 @@ namespace Mndz7
                     if(value < RangeMin || value > RangeMax)
                         return;
                     _iRange = value;
-                    DeviceMgr.RelayState(OPCurrentCoil, "", "");
+//                    DeviceMgr.RelayState(OPCurrentCoil, ToggleRes, "");
                     if(b <= RangeLimit)
                          newresi = resistance;
                     resistance = newresi;
-                    
-                    //toggle range relay when range changes.
-                    if (RangeLimit < 1)
-                        DeviceMgr.Action("toggle1", "");
-                    if (RangeLimit > 1)
-                        DeviceMgr.Action("toggle10", "");
+
+                    DeviceMgr.RelayState(OPCurrentCoil, ToggleRes, "");
 
                 }
                 Util.ConstIni.WriteString("LASTSETTING", "range", _iRange.ToString());
             }
         }
         private Decimal _resistance;
+        /// <summary>
+        /// Setting of resistance
+        /// </summary>
         internal Decimal resistance
         {
             get
@@ -774,6 +1023,7 @@ namespace Mndz7
                 Util.ConstIni.WriteString("LASTSETTING", "resistance", _resistance.ToString());
             }
         }
+        /* no real resistance now
         private int _iReal = -1;         //real resistance index
         internal int iReal
         {
@@ -791,13 +1041,14 @@ namespace Mndz7
                 }
             }
         }
+        */
         private void SaveDA()
         {
             //sleep 500 ms, then reset configuration
-            Thread.Sleep(600);
+            //Thread.Sleep(600);
             bOverLoad = false;
-            DeviceMgr.Action("daoutput", new byte[] { 0x55, 0x64, 0xfc, 0x00, 0x00, 0x00, 0x04 }); //set control
-            Thread.Sleep(100);
+            
+            //Thread.Sleep(100);
         }
         private bool _bOn;  //current on or off state
         internal bool bOn
@@ -810,21 +1061,19 @@ namespace Mndz7
             {
                 if ((value == false) || (iRange < RangeMin || iRange > RangeMax))
                 {
-                    DeviceMgr.RelayState("", "", "OFF");
-                    ToDAValue(0);
+                    //DeviceMgr.RelayState("", "", "OFF");
+                    ToDAValue(0,false);
                     _bOn = false;
+                    SaveDA();
                     return;
                 }
                 else
                 {
                     bPositive = 0; //undetermined
-                    if (RangeLimit < 1) 
-                        DeviceMgr.Action("toggle1", "");
-                    if (RangeLimit > 1)
-                        DeviceMgr.Action("toggle10", "");
+                    
                     //DeviceMgr.RelayState("", "", "ON");
                 }
-                SaveDA();
+                
                 _bOn = true;
             }
         }
@@ -846,6 +1095,7 @@ namespace Mndz7
             }
         }
 
+        /* no standard use now
         private Decimal _standard;
         internal Decimal standard  //standard resistance
         {
@@ -863,29 +1113,29 @@ namespace Mndz7
 
             }
         }
-
+        */
         private Queue<double> datafilter;
         internal Processor()
         {
             datafilter = new Queue<double>();
             bPositive = 0;
             _resistance = 0;
-            _iRange = 0;
-            _standard = 1;
+            _iRange = 6;
+            //_standard = 1; no use now
             _daoffset = 0;
             try
             {
-                _iReal = Util.ConstIni.IntValue("LASTSETTING", "real");
+                //_iReal = Util.ConstIni.IntValue("LASTSETTING", "real");  /* no real resistance now */
                 _resistance = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "resistance"));
-                _standard = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "standard"));
+                //_standard = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "standard")); /* no use now*/
                 _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
             }
             catch
             {
             }
             if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.0001) //100uV
-                _standard = 0;
-            iRange = 0;// Util.ConstIni.IntValue("LASTSETTING", "range");
+                _daoffset = 0;
+            iRange = 6;// Util.ConstIni.IntValue("LASTSETTING", "range");
             bOn = false;
         }
         public void RefreshOutput()
@@ -901,6 +1151,12 @@ namespace Mndz7
                 ToResistance(resistance);
             }
         }
+        /// <summary>
+        /// collect voltage, collect 3 value, if (max-min) within range 1mv for 120mV ,10mV for 1V,
+        /// then return average of 3
+        /// </summary>
+        /// <param name="reading">output value</param>
+        /// <returns>succeed or not</returns>
         private bool CollectVoltage(out double reading)
         {
             int badcount = 0; //count of bad communication
@@ -932,7 +1188,7 @@ namespace Mndz7
                 else
                 {
                 }
-                if ((DeviceMgr.nav_range == "navto1v") && (Math.Abs(DeviceMgr.reading) < 0.10) && bOn)
+                if (false && (DeviceMgr.nav_range == "navto1v") && (Math.Abs(DeviceMgr.reading) < 0.10) && bOn) //skip range switch
                 {
                     badcount++;
                     if (badcount < 3)
@@ -1045,61 +1301,71 @@ namespace Mndz7
                 System.Threading.Thread.Sleep(1000);
             }
         }
+
         private bool ToResistance(Decimal resistance)
         {
             if (iRange < RangeMin || iRange > RangeMax) //invalide res case
             {
-                ToDAValue(0);
+                ToDAValue(0,false);
                 //DeviceMgr.Action("daoutput", new Byte[] { 0x55, 0x64, 0xff, 0x00, 0x00, 0x00, 0x01 }); //just set to 0
                 return DeviceMgr.success;
             }
             double va;
-            if(!CollectVoltage(out va))
-                return false;
-            double volt = Convert.ToDouble(resistance);
-            if(iRange < RangeMin || iRange > RangeMax)
-                return false;
             
+
+            if (iRange < RangeMin || iRange > RangeMax)
+                return false;
+
+            double volt = Convert.ToDouble(resistance);
+
+            
+            /* old way to calculate V=I*R
             volt = volt * va * FBCurrentScale;
-            Current = va * FBCurrentScale;
+            */
 
-            if (Current < -0.1) //current switch to negative
+            //new way to calculate DA_Ratio=R*2000/RSample=Vo/Vrefp;
+            volt = volt * OPRatio * (vrefp-0.1);
+
+            if (CollectVoltage(out va))
             {
-                if (bPositive != -1)
+                Current = va * FBCurrentScale;
+                if (Current < -0.05) //current switch to negative
                 {
-                    //Program.MsgShow("switch to negative current");
-                    DeviceMgr.Action("defcurrent", 0);
-                    Thread.Sleep(100);
-                    DeviceMgr.Action("negcurrent", 0);
-                    Thread.Sleep(100);
-                    DeviceMgr.Action("defcurrent", 0);
-                    Thread.Sleep(100);
-                    DeviceMgr.Action("negcurrent", 0);
-                    Thread.Sleep(100);
-                    DeviceMgr.Action("defcurrent", 0);
-                    bPositive = -1;
+                    if (bPositive != -1)
+                    {
+                        //Program.MsgShow("switch to negative current");
+                        DeviceMgr.RelayState("", "", "+");
+                        Thread.Sleep(100);
+                        DeviceMgr.RelayState("", "", "OFF");
+                        Thread.Sleep(100);
+
+                        bPositive = -1;
+                        return ToDAValue(Math.Abs(volt), true);
+                        
+                    }
                 }
-            }
-            if (Current > 0.1) //current switch to positive
-            {
-                if (bPositive != 1)
+                if (Current > 0.05) //current switch to positive
                 {
-                    //Program.MsgShow("switch to positive current");
-                    DeviceMgr.Action("defcurrent", 0);
-                    Thread.Sleep(100);
-                    DeviceMgr.Action("poscurrent", 0);
-                    Thread.Sleep(100);
-                    DeviceMgr.Action("defcurrent", 0);
-                    Thread.Sleep(100);
-                    DeviceMgr.Action("poscurrent", 0);
-                    Thread.Sleep(100);
-                    DeviceMgr.Action("defcurrent", 0);
-                    Thread.Sleep(100);
-                    bPositive = 1;
+                    if (bPositive != 1)
+                    {
+                        //Program.MsgShow("switch to positive current");
+
+                        DeviceMgr.RelayState("", "", "-");
+                        Thread.Sleep(100);
+                        DeviceMgr.RelayState("", "", "OFF");
+                        Thread.Sleep(100);
+                        
+                        
+                        bPositive = 1;
+                        return ToDAValue(Math.Abs(volt), true);
+                    }
                 }
 
             }
-            return ToDAValue(Math.Abs(volt));
+            
+            
+                return ToDAValue(Math.Abs(volt),false);
+            
         }
         private byte[] lasttosend = new byte[] { 0x00,0x00,0xff, 0xff, 0xff, 0x00 };
         public bool bOverLoad = false;
@@ -1112,11 +1378,12 @@ namespace Mndz7
                 return _DAValue;
             }
         }
-        private bool ToDAValue(double voltage)
+        private double vrefp = 20.1; //20.1 volts reference   //11;
+        private double vrefn = 0;
+        private bool ToDAValue(double voltage,bool bForce)
         {
             voltage = voltage; // nouse now / 2.0; //divide by 2 because hardware will multiple it with 2
-            double vrefp = 20.1; //20.1 volts reference   //11;
-            double vrefn = 0;
+            
             // Vout = (Vrefp-Vrefn)*D/(2^20-1)+Vrefn =>  D= (Vout-Vrefn)*(2^20-1)/(Vrefp-Vrefn)
             // when BUF is enabled , Vrefp = 10V;  Vrefn = -10V; D = (Vout+10)*(2^20-1)/(20)
             // If vrefn = 0 and vrefp = 10 then D = Vout*(2^20-1)/10;
@@ -1164,8 +1431,13 @@ namespace Mndz7
                 }
                 tosend[2] = Convert.ToByte((256 * 3 - 1 - Convert.ToInt32(tosend[3] + tosend[4] + tosend[5])) % 256);
                 tosend2[3] = tosend[2];
-                if (changed)
+                if (changed || bForce)
                 {
+                    if (bForce)
+                    {
+                        DeviceMgr.Action("daoutput", new byte[] { 0x55, 0x64, 0xfc, 0x00, 0x00, 0x00, 0x04 }); //set control
+                        Thread.Sleep(200);
+                    }
                     if(tosend[2] == 0x55)
                         DeviceMgr.Action("daoutput", tosend2);
                     else

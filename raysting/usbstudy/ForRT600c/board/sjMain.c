@@ -123,7 +123,7 @@ void swiDelay(unsigned char dl1,unsigned char dl2)
 			;
 }
 
-
+/*
 void swiAction(unsigned char SwiID)
 {
 	unsigned char exID;
@@ -151,14 +151,21 @@ void swiReset()
 		swiAction(inittbl[i]);
 	}
 }
-
+*/
 unsigned char delayc;
 
 /*
 */
 //end interface routine
 extern int	test( void );
-extern void DBGS(const char* s);
+
+void DBGS(const char* s)
+{
+	while(*s != 0x00)
+	{
+		sjSerialSendByte(*s++);
+	}
+}
 extern void DBG(unsigned char);
 
 
@@ -198,7 +205,7 @@ void main()
 	IE = 0;//close int
 				  // S1   CCP  SPI
 //	P_SW1 = 0x08  ; // 0 0  0 0  1 0   0  0
-	P_SW1 = 0x3C; // 0 0  1 1  1 1   0  0
+	P_SW1 = 0x1C; // 0 0  0 1  1 1   0  0
 				  // X X PWM6  PWM2345 X  S4_S S3_S S2_S
     P_SW2 = 0x07  ; // 0 0  0      0     0    1    1     1
 
@@ -254,6 +261,8 @@ void main()
 	PT0 = 1; 		//improve timer0 interrupt priority
     ET0 = 1;        //enable timer0 interrupt
 
+	//EA ELVD EADC ES ET1 EX1 ET0 EX0
+	//1   0    0   1  0    0  1    0
 	IE = 0x92;//enable serial int and timer0 interrupt//IE=90
 	IE2 = 1;
 	EA = 1;
@@ -282,7 +291,8 @@ void main()
 //	cm_ad5791(DACMD_OUTPUT,0);
 //	P1 = 0xDF; 
 //	P0 = 0x7F;
-	P1 = 0xfe;
+	
+	P1 = 0xf2; //11110011,//  00001101
 	P0 = 0xff;
 	while(1)
 	{
@@ -298,6 +308,7 @@ void main()
 					continue;
 				}
 			}
+			/*
 			if(sid == 's')//send to switch
 			{
 				if(temp == HMARK)
@@ -326,6 +337,7 @@ void main()
 					sjSerialSendByte(EMARK);
 				}
 			}
+			*/
 			if(sid == 'd')//send to DAC //5 byte data , 1st byte is for sum check = 0x00, (2nd-4th byte is data), 5th byte is function code,
 			{
 					//example:	55 64 cc 00 11 22 01
@@ -374,13 +386,19 @@ void main()
 			}
 			if(sid == 't')//direct io control
 			{
-				P0=temp;
-				P1=sjSerialWaitForOneByte();
+				d1 = temp;
+				d2 = sjSerialWaitForOneByte();
+				d3 = sjSerialWaitForOneByte();
+				if(d3 == EMARK)
+				{
+					P0=d1;
+					P1=d2;
+					sjSerialSendByte(HMARK);
+					sjSerialSendByte(0);
+					sjSerialSendByte(0);
+					sjSerialSendByte(EMARK);
+				}
 				sid = "";
-				sjSerialSendByte(HMARK);
-				sjSerialSendByte(0);
-				sjSerialSendByte(0);
-				sjSerialSendByte(EMARK);
 			}
 		}
 		if(sjSerialIsDataWaiting2())

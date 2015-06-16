@@ -104,6 +104,7 @@ uchar code coltbls[16] = {1,3,5,7,9,0xff,0xff,0xff,0,0xff,0xff,10,8,6,4,2};
 uchar code rowtbls[16] = {9,10,5,4,3,8,7,6,1,2,0xff,0xff,0xff,0,11};
 //parse the column position of 1 in P0 and P1
 xdata uchar hitrow[FULLCOLS];
+/*
 void getcols(uchar row)
 {
    uchar pv0,pv1,pos;
@@ -120,14 +121,6 @@ void getcols(uchar row)
             hitrow[coltbls[pos]] = 1;
             if((keypos[coltbls[pos]] != rowtbls[row]) || (wait < MAXRETRY))
             {
-/*debug only
-               sjSerialSendByte(pos);
-               sjSerialSendByte(keypos[coltbls[pos]]);
-               sjSerialSendByte(row);
-               sjSerialSendByte(rowtbls[row]);
-               sjSerialSendByte('.');
-               pause();
-*/               
                bUpdate = 1;
             }
             keypos[coltbls[pos]] = rowtbls[row];
@@ -146,14 +139,6 @@ void getcols(uchar row)
             hitrow[coltbls[pos]] = 1;
             if((keypos[coltbls[pos]] != rowtbls[row]) || (wait < MAXRETRY))
             {
-/*debug only
-               sjSerialSendByte(pos);
-               sjSerialSendByte(keypos[coltbls[pos]]);
-               sjSerialSendByte(row);
-               sjSerialSendByte(rowtbls[row]);
-               sjSerialSendByte('.');
-               pause();
-*/
                bUpdate = 1;
             }
             keypos[coltbls[pos]] = rowtbls[row];
@@ -352,7 +337,7 @@ void update_scaleknob(int type)
 
    leds[POINTPOS] = leds[POINTPOS] LEDPT_OP LED_PT;
 }
-
+*/
 void btnencode_loop()
 {
 	uchar type;
