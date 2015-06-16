@@ -264,7 +264,7 @@ namespace QJAppMini
         {
             if (IsConnected())
             {
-                serial.WriteLine(line);
+                serial.Write(line);
             }
         }
     }
@@ -279,16 +279,23 @@ namespace QJAppMini
     {
         MyDevice dev;
         ScannerType stype;
+        int ch_start=0;
+        int ch_end=0;
         string id;
         public bool bInUse;
         public Scanner(string section)
         {
             id = section;
             bInUse = (Util.ConstIni.IntValue(id, "InUse") == 1);
+            if (!bInUse)
+                return;
             if (Util.ConstIni.StringValue(id, "Type") == "GPIB")
                 dev = new GPIBDevice("GPIB0::" + Util.ConstIni.StringValue(id, "Address") + "::INSTR");
             else
                 dev = new SerialDevice("COM" + Util.ConstIni.StringValue(id, "Address"), 9600, System.IO.Ports.Parity.None, 8, System.IO.Ports.StopBits.One);
+
+            ch_start = Util.ConstIni.IntValue(id, "Channel_Start");
+            ch_end = Util.ConstIni.IntValue(id, "Channel_End");
 
             stype = (ScannerType)Util.ConstIni.IntValue(id, "Model");
         }
@@ -296,12 +303,22 @@ namespace QJAppMini
         {
             if (!bInUse)
                 return true; //in simulation mode
+            if (dev.IsConnected())
+                return true;
             return dev.Open();
         }
         public void SwitchTo(int port, bool Bmode)
         {
             if (!bInUse)
                 return;
+            
+            if (port < ch_start)
+                return;
+            if (port > ch_end)
+                port = ch_end;
+            else
+                port = port - ch_start + 1;//always starting from 1
+            
             if(stype == ScannerType.RT2010_MI)
             {
                 if(Bmode == true)

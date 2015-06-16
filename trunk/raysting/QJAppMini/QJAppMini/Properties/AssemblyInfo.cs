@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Raysting Instrument")]
 [assembly: AssemblyProduct("QJ55A Auto Bridge Application")]
-[assembly: AssemblyCopyright("Copyright © Raysting 2013")]
+[assembly: AssemblyCopyright("Copyright © Raysting 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

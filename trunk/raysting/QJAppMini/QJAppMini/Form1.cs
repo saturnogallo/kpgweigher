@@ -17,7 +17,8 @@ namespace QJAppMini
 
         private QJ55A qj_instr;
         private Scanner scrs_instr;
-        private Scanner scrx_instr;
+        private Scanner scrx_instr1;
+        private Scanner scrx_instr2;
 
         private enum RunState
         {
@@ -30,7 +31,7 @@ namespace QJAppMini
         {
             InitializeComponent();
             //this.Text = this.Text + "(版本:" + File.GetLastWriteTime(Util.basedir + "\\QJAppMini.exe").ToString("yyyyMMdd") + ")";
-            this.Text = this.Text + "(版本:" + "20130217" + ")";
+            this.Text = this.Text + "(版本:" + "20150614" + ")";
             Util.SysLog("");
             tabControl1.SelectedIndex = 1;
             tabControl1.Selecting +=new TabControlCancelEventHandler(btn_start_Click);
@@ -59,16 +60,20 @@ namespace QJAppMini
             qj_instr.DataRecieved += HasNewReading;
 
             scrs_instr = new Scanner("SCANNER_RS");
-            scrx_instr = new Scanner("SCANNER_RX");
+            scrx_instr1 = new Scanner("SCANNER_RX1");
+            scrx_instr2 = new Scanner("SCANNER_RX2");
 
             
         }
 
 
         #region backgroundwork event handler
-        private int meascount;
+        private int meascount; //recieved data couting
+        private int MeasTime; //totol measure time for this run
         private int meas_schid;
         private int rs_schid;
+        private int rs_chid; //rs channel for this run
+        private int rx_chid; //rx channel for this run
 
         void backgroundWorker1_Init()
         {
@@ -120,7 +125,8 @@ namespace QJAppMini
                 Thread.Sleep(5000);
                 qj_instr.Reset();
                 scrs_instr.Reset();
-                scrx_instr.Reset();
+                scrx_instr1.Reset();
+                scrx_instr2.Reset();
 
             }
             else
@@ -149,7 +155,7 @@ namespace QJAppMini
                 MessageBox.Show("无法打开GPIB端口,请检查连线");
                 return;
             }
-            if (!scrs_instr.Open() || !scrx_instr.Open())
+            if (!scrs_instr.Open() || !scrx_instr1.Open() || !scrx_instr2.Open())
             {
                 MessageBox.Show("无法使用扫描器,请检查连线");
                 return;
@@ -159,8 +165,9 @@ namespace QJAppMini
             Thread.Sleep(2000);
             qj_instr.Reset();
             scrs_instr.Reset();
-            scrx_instr.Reset();
-
+            scrx_instr1.Reset();
+            scrx_instr2.Reset();
+            Thread.Sleep(1000);
             DataTable taskdt;
             if (e.Argument is DataTable)
                 taskdt = e.Argument as DataTable;
@@ -177,18 +184,21 @@ namespace QJAppMini
                     runrs_dt.AcceptChanges();
                     rs_schid = runrs_dt.Rows.Count - 1;
 
-                    int meas = (int)taskdr["MeasTime"];
-                    if(meas > 0)
+                    MeasTime = (int)taskdr["MeasTime"];
+                    if (MeasTime > 0)
                     {
                         meascount = 0;
-                        scrs_instr.SwitchTo((int)taskdr["RsChannel"], false);
-                        scrx_instr.SwitchTo((int)taskdr["RxChannel"], false);
+                        rs_chid = (int)taskdr["RsChannel"];
+                        scrs_instr.SwitchTo(rs_chid, false);
+                        rx_chid = (int)taskdr["RxChannel"];
+                        scrx_instr1.SwitchTo(rx_chid, false);
+                        scrx_instr2.SwitchTo(rx_chid, false);
                         Thread.Sleep(200);
                         
                         qj_instr.SendParameter(taskdr,rsdrs[0]);                
                         Thread.Sleep(200);
-                        qj_instr.StartRun(meas);
-                        while(meascount < meas)
+                        qj_instr.StartRun(MeasTime);
+                        while (meascount < MeasTime)
                         {
                             if (worker.CancellationPending)
                             {
@@ -214,9 +224,9 @@ namespace QJAppMini
         private DataTable dt;//one scheme table
         private List<string> schemes;
 
-        readonly string[] colname = new string[] { "RsGroup", "RsID", "RsChannel", "RxValue", "RxSerial","RxCurrent", "RxChannel", "Temp", "MeasTime", "Delay", "SwitchTime", "SampleTime", "FilterLen" };
+        readonly string[] colname = new string[] { "RsGroup", "RsID", "RsChannel", "RxValue", "RxSerial", "RxCurrent", "RxChannel", "Temp", "MeasTime", "Delay", "SampleTime", "SwitchTime", "FilterLen" };
         readonly string[] coltype = new string[] { "String", "String", "Int32","Decimal", "String","Boolean", "Int32", "Decimal", "Int32", "Int32", "Int32", "Int32", "Int32" };
-        readonly string[] colalert = new string[] { "Rs 组名", "Rs 组内序号", "Rs 通道", "Rx 名义值", "Rx 编号", "电流 X 2", "Rx 通道", "温度(℃)", "测量次数", "测量间隔 (秒)", "换向延时 (秒)", "采样次数", "滤波器" };
+        readonly string[] colalert = new string[] { "Rs 组名", "Rs 组内序号", "Rs 通道", "Rx 名义值", "Rx 编号", "电流 X 2", "Rx 通道", "温度(℃)", "测量次数", "测量间隔 (秒)", "采样次数", "换向延时 (秒)", "滤波器" };
         readonly int[] colwidth = new int[] { 100, 100,60,150,20, 100, 60, 60,60, 60, 60, 60, 60 };
 
         readonly string SCH_DEFAULT = "默认程序";
@@ -843,10 +853,10 @@ namespace QJAppMini
         #endregion
 
         #region data page related variable
-        readonly string[] datacolname = new string[] { "RxValue", "RsValue", "Ratio", "Time", "scheme","RsID" };
-        readonly string[] datacoltype = new string[] { "Decimal", "Decimal", "Decimal", "DateTime", "Int32", "Int32" };
-        readonly string[] datacolalert = new string[] { "Rx电阻值", "Rs电阻值", "Rx/Rs比例值", "测试时间", "程序位置", "标准电阻位置" };
-        readonly int[] datacolwidth = new int[] { 150, 150, 150, 120, 120 };
+        readonly string[] datacolname = new string[] { "RxValue", "RsValue", "Ratio", "Time", "scheme","RsID", "rxch", "rsch" };
+        readonly string[] datacoltype = new string[] { "Decimal", "Decimal", "Decimal", "DateTime", "Int32", "Int32", "Int32", "Int32" };
+        readonly string[] datacolalert = new string[] { "Rx电阻值", "Rs电阻值", "Rx/Rs比例值", "测试时间", "程序位置", "标准电阻位置", "Rx通道", "Rs通道" };
+        readonly int[] datacolwidth = new int[] { 150, 150, 150, 120, 60,60,60,60 };
         readonly string DAT_DEFAULT = "当前结果";
         private DataSet dat_ds;     //contain test record, two table one is scheme content , another is test record
         private DataTable datsch_dt;//scheme table in current record
@@ -1274,6 +1284,8 @@ Rx通道\tCH{3}
         {
             if (dgv_result.SelectedRows.Count > 0)
                 Data_LoadGraph(dgv_result.SelectedRows[0].Index);
+            else if (dgv_result.SelectedCells.Count > 0)
+                Data_LoadGraph(dgv_result.SelectedCells[0].RowIndex);
             else
                 Data_LoadGraph(0);
         }
@@ -1425,12 +1437,16 @@ Rx通道\tCH{3}
                 return false;
             schdr = msch_dt.Rows[schrow-1];
 
+            int rxch = (int)dr["rxch"];
+            int rsch = (int)dr["rsch"];
+
             int rsrow = (int)dr["RsID"];
             if (mrs_dt == null || mrs_dt.Rows.Count <= rsrow)
                 return false;
             rsdr = mrs_dt.Rows[rsrow];
 
-            ylist = mdat_dt.Select("scheme='" + schrow.ToString() + "'").Select<DataRow, double>((o) => { return Convert.ToDouble(o["RxValue"].ToString()); });
+            string qry = "scheme='" + schrow.ToString() + "' and rxch='" + rxch.ToString() +  "' and rsch='" + rsch.ToString() + "'";
+            ylist = mdat_dt.Select(qry).Select<DataRow, double>((o) => { return Convert.ToDouble(o["RxValue"].ToString()); });
             return true;
         }
         void Data_LoadGraph(int rowid)
@@ -1535,9 +1551,11 @@ schdr["Temp"].ToString(), rsdr["Alpha"].ToString(), rsdr["Beta"].ToString(), rsd
             int val_index = Int32.Parse(sval_index);
             if (!bRunning)
                 return;
-            if (val_index != (runrec_dt.Rows.Count + 1))
+
+
+            if (val_index > MeasTime)   //            if (val_index != (runrec_dt.Rows.Count + 1))
             {
-                Util.SysLog("Expected reading:" + val_index.ToString());
+                Util.SysLog("Unexpected reading:" + val_index.ToString());
 //              MessageBox.Show("无效的读数");
                 return;
             }
@@ -1552,6 +1570,8 @@ schdr["Temp"].ToString(), rsdr["Alpha"].ToString(), rsdr["Beta"].ToString(), rsd
             dr["Time"] = DateTime.Now;
             dr["scheme"] = meas_schid+1;
             dr["rsid"] = rs_schid;
+            dr["rsch"] = rs_chid;
+            dr["rxch"] = rx_chid;
             runrec_dt.Rows.Add(dr);
             runrec_dt.AcceptChanges();
             meascount = val_index;
