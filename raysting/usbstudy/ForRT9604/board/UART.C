@@ -1,3 +1,4 @@
+
 #include "sjDefine.h"
 // UART.C
 //
@@ -46,14 +47,14 @@
 //    Writes a character to the serial port.
 
 #include <stdio.h>
-
+/*
 sbit asp_rx	= P3^6; //rx of simulated serial port1
 sbit asp_tx = P3^7; //tx of simulated serial port1
 
 
 sbit asp_rx2 = P3^4; //rx of simulated serial port2
 sbit asp_tx2 = P3^5; //tx of simulated serial port2
-
+*/
 
 
 #define IN_BUF_SIZE 32
@@ -79,7 +80,7 @@ Interface Routine for I/O analog serial port (UART.C)
 //    Enables the timer interrupt.
 
 ******************************************************/
-
+/*
 void asp_set_timer()
 {
 	AUXR |= 0x80;		//1T mod
@@ -272,4 +273,4 @@ BYTE io_hasc( void )
 	return qin+IN_BUF_SIZE -qout;
 }
 
-
+*/
