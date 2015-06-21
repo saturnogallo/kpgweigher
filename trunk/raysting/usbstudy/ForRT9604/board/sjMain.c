@@ -78,8 +78,8 @@ unsigned long count = 0;
 BOOL once = 0;
 void timer_isr(void) interrupt 1 using 1
 {
-	asp_handler();
-	asp_handler2();
+//	asp_handler();
+//	asp_handler2();
 	TF0 = 0; //clear timer
 }
 extern int	test( void );
@@ -158,6 +158,7 @@ void pause()
 
 #define MAXROWS	16	//max rows for one pan
 #define MAXCOLS	14	// pan number
+//#define MAXCOLS	16	// pan number
 #define FULLCOLS 16 //max cols for
 uchar keypos[FULLCOLS];
 void sleepms(unsigned int i)
@@ -174,49 +175,66 @@ char out_10knob[14]; //data buffer for serial output
 //translate the real led position to ideal led position.
 //ideal led arrangement is:  for 10knob there is led postion 0-----10,
 //						  :  for 4 knob there is led postion 11,12 for exp, 13,14,15,16 for val
-uchar code disptbls[17] = { 11, 12, 13, 14, 15, 16, 6,7,8,9,10,0,1,2,3,4,5};
+uchar code disptbls[17] = { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16};
 
 #define COL_SCALE		10
 #define LEDVAL_POS		13
 #define LEDEXP_POS		11
 
-#define COL_10			11
-#define COL_1			12
-#define COL_P1			13
+#define COL_100			5
+#define COL_10			4
+#define COL_1			3
+#define COL_P1			2
+#define COL_P01			1
+#define COL_P001		0
 
 			            //   N001  N01  N1	 P1   P10    P100   P1K   P10K    P100K   P1M  Z_SCA	Z_10	Z_1		Z_P1
 uchar code knobcol[MAXCOLS] = {0,    1,   2,   3,    4,     5,    6,     7,      8,     9,	10,		11,		12,		13};
 
 //translate real col value to ideal col value
-uchar code coltbls[16] = {1,    3,   5,   7,    9,   0xff,  13,    11,   12,    10, 0xff,    8,   6,    4,   2,  0};
+//uchar code coltbls[16] = {1,    3,   5,   7,    9,   0xff,  13,    11,   12,    10, 0xff,    8,   6,    4,   2,  0};
+uchar code coltbls[16] =   {1,    3,   5,   7,    9,    11,   13,  0xff,     0xff, 12, 10,   8,    6, 4,   2,  0};
+//uchar code coltbls[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 //translate real row value to ideal row value
-uchar code rowtbls[16] = {1,0,5,6,7,2,3,4,9,8,0xff,0xff,0xff,10,11,2};
+//uchar code rowtbls[16] = {1,0,5,6,7,2,3,4,9,8,0xff,0xff,0xff,10,11,2};
+uchar code rowtbls[16] = {0xff,0xff,11,9,7,5,3,1,0xff,12,10,8,6,4,2,0};
 //uchar code rowtbls[16] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
 //parse the column position of 1 in P0 and P1
 uchar hitrow[FULLCOLS];
+//key value (0-11 are row values)
 void getcols(uchar row)
 {
 	uchar pv0,pv1,pos;
 	pv0 = P0;
 	pv1 = P1;
 
+	/*
+	sjSerialSendByte(rowtbls[row]);
+	sjSerialSendByte(pv0);
+	sjSerialSendByte(pv1);
+	sjSerialSendByte('.');
+	pause();
+	*/
 	pos = 8;
 	while(pos < 16)
 	{
 		if((pv1 & 0x01) == 0)
 		{
-			if((rowtbls[row] != 0xff) && (coltbls[pos] != 0xff)) 
+			if((rowtbls[row] != 0xff) && (coltbls[pos] != 0xff)) //row is valid and col is valid
 			{
 				hitrow[coltbls[pos]] = 1;
-				if(keypos[coltbls[pos]] != rowtbls[row])
-				{/*
+				if(keypos[coltbls[pos]] != rowtbls[row]) //rowtbls[row] is the actual key number
+				{
+/*
 					sjSerialSendByte(pos);
+					sjSerialSendByte(coltbls[pos]);
 					sjSerialSendByte(keypos[coltbls[pos]]);
 					sjSerialSendByte(row);
 					sjSerialSendByte(rowtbls[row]);
 					sjSerialSendByte('.');
-					pause();
-					*/
+*/
+//					pause();
+					
 					bUpdate = 1;
 				}
 				keypos[coltbls[pos]] = rowtbls[row];
@@ -235,14 +253,16 @@ void getcols(uchar row)
 				hitrow[coltbls[pos]] = 1;
 				if(keypos[coltbls[pos]] != rowtbls[row])
 				{
-				/*
+/*				
 					sjSerialSendByte(pos);
+					sjSerialSendByte(coltbls[pos]);
 					sjSerialSendByte(keypos[coltbls[pos]]);
 					sjSerialSendByte(row);
 					sjSerialSendByte(rowtbls[row]);
 					sjSerialSendByte('.');
-					pause();
-				*/
+*/
+//					pause();
+				
 					bUpdate = 1;
 				}
 				keypos[coltbls[pos]] = rowtbls[row];
@@ -264,6 +284,16 @@ sbit PI14 = P3^5;
 sbit PI15 = P3^6;
 sbit PI16 = P3^7;
 
+sbit PI1 = P2^0;
+sbit PI2 = P2^1;
+sbit PI3 = P2^2;
+sbit PI4 = P2^3;
+sbit PI5 = P2^4;
+sbit PI6 = P2^5;
+sbit PI7 = P2^6;
+sbit PI8 = P2^7;
+
+
 void clearrows()
 {
 /*
@@ -273,7 +303,14 @@ void clearrows()
 		c164(1); //clear out all the output to 1	
 	}
 */
-	P2 = 0xff;
+	PI1 = 1; 	
+	PI2 = 1;
+	PI3 = 1;
+	PI4 = 1;
+	PI5 = 1;
+	PI6 = 1;
+	PI7 = 1; 	 	 	 	 	 	
+	PI8 = 1; 	
 	PI9 = 1; 	
 	PI10 = 1; 
 	PI11 = 1; 
@@ -291,15 +328,15 @@ void scanrows()
 	for(i = 0; i < MAXROWS; i++)
 	{
 	
-	P2 = (i==0)?0x7f:0xff;
-	P2 = (i==1)?0xBf:0xff;
-	P2 = (i==2)?0xDf:0xff;
-	P2 = (i==3)?0xEf:0xff;
+	PI1 = (i==0)?0:1;
+	PI2 = (i==1)?0:1;
+	PI3 = (i==2)?0:1;
+	PI4 = (i==3)?0:1;
 
-	P2 = (i==4)?0xF7:0xff;
-	P2 = (i==5)?0xFB:0xff;
-	P2 = (i==6)?0xFD:0xff;
-	P2 = (i==7)?0xFE:0xff;
+	PI5 = (i==4)?0:1;
+	PI6 = (i==5)?0:1;
+	PI7 = (i==6)?0:1;
+	PI8 = (i==7)?0:1;
 	PI9 = (i==8)?0:1; 	
 	PI10 = (i==9)?0:1; 
 	PI11 = (i==10)?0:1; 
@@ -311,7 +348,7 @@ void scanrows()
 
 		//c164(i); 	//only 1 '0' will be shift out
 		sleepms(100);
-		getcols(i); //fill the column with current col value
+		getcols(i); //fill the column with current row value
 	}
 	clearrows();
 	for(i = 0; i < FULLCOLS; i++)
@@ -349,7 +386,7 @@ void scanrows()
 void clear_10knob()
 {
 	uchar p;
-	for(p = 0;p < 11;p++)
+	for(p = 0;p < 17;p++)
 	{
 		leds[p] = LED_SPACE; //delight all the lines
 		out_10knob[p] = '0';
@@ -358,16 +395,17 @@ void clear_10knob()
 void update_10knob()
 {
 	uchar pre = 0; //½øÎ»
+	uchar head;
 	uchar p,i;
 
+	leds[11] = led_code[0];// LED_SPACE;
 	for(p = 0;p < 10;p++)
 	{
 		i = keypos[p] + pre;
 
 		if(i == 0xff)
 			break;
-		if(p == 2)
-			i = i+1; //100mohm start from 1
+//		if(p == 2)		i = i+1; //100mohm start from 1
 		if(i >= 10)
 		{
 			pre = 1;
@@ -387,13 +425,25 @@ void update_10knob()
 		leds[0] = led_code[1];
 	}else{
 		out_10knob[0] = '0';
-		leds[0] = LED_SPACE;
+		leds[0] = led_code[0];//LED_SPACE;
 	}
 	if(p < 10)	//invalid value
 	{
 		clear_10knob();
 		return;
 	}
+
+	/*check head
+	head = 0;
+	for(p = 0;p < 7;p++)
+	{
+		if((leds[p] != led_code[0])&&(leds[p] != LED_SPACE))
+		{
+			break;
+		}
+		leds[p] = LED_SPACE;
+	}
+	*/
 }
 void output_10knob()
 {
@@ -413,128 +463,95 @@ void output_10knob()
 	}
 }
 
-uchar exp;
-uchar val;
+//uchar exp;
+//uchar val;
 void clear_4knob()
 {
-		leds[LEDEXP_POS]	= LED_SPACE;
-		leds[LEDEXP_POS+1]	= LED_SPACE;
-		leds[LEDVAL_POS]	= LED_SPACE;
-		leds[LEDVAL_POS+1]	= LED_SPACE;
-		leds[LEDVAL_POS+2]	= LED_SPACE;
-		leds[LEDVAL_POS+3]	= LED_SPACE;
-		exp = 0;
-		val = 0;
+	uchar j;
+	for(j = 0; j < 17; j++)
+	{
+		leds[j] = LED_SPACE;
+	}		
+
+//	exp = 0;
+//	val = 0;
 
 }
 uchar out_4knob[10];
+uchar code2key(uchar c)
+{
+	uchar m;
+	for(m=0;m<10;m++)
+	{
+		if(led_code[m] == c)
+			return m;
+	}
+	return 0xff;
+}
+
 void update_4knob()
 {
-	uchar i;
+	uchar i,j,val;
 	i = keypos[COL_SCALE];
-	if(i == 11)	//OFF
-	{
-		val = 0xff;
-		clear_4knob();
+
+	if(i == 6)	//OFF
 		return;
-	}
-	if(i == 0)
+	clear_4knob();
+	if( i >= 7 ) //10^0 ..10^-4
 	{
-		val = keypos[COL_P1];
-		if(val >= 20) //invalid value
-			return;
-		leds[LEDEXP_POS] = LED_SPACE;
-		leds[LEDEXP_POS+1] = LED_SPACE;
-		out_4knob[0] = '0';
-		out_4knob[1] = '0';
-		leds[LEDVAL_POS] = LED_SPACE;
-		leds[LEDVAL_POS+1] = LED_SPACE;
-		if (val >= 10)
+		leds[7] = (i==7)?  led_code[1]:led_code[0];
+		leds[8] = (i==8)?  led_code[1]:led_code[0];
+		leds[9] = (i==9)?  led_code[1]:led_code[0];
+		leds[10]= (i==10)? led_code[1]:led_code[0];
+		leds[11]= (i==11)? led_code[1]:led_code[0];
+	}else{
+		leds[7] = led_code[0];
+		leds[8] = led_code[0];
+		leds[9] = led_code[0];
+		leds[10] = led_code[0];
+		leds[11] = led_code[0];
+		if((0 <= i) && (i <= 5) ) //11^-3 to 11x10^2
 		{
-			out_4knob[2] = '1';
-			out_4knob[3] = '0' + val - 10;
-			leds[LEDVAL_POS+2] = led_code[1] LEDPT_OP LED_PT;
-			leds[LEDVAL_POS+3] = led_code[val-10] ;
-		}else{
-			out_4knob[2] = '0';
-			out_4knob[3] = '0' + val;
-			leds[LEDVAL_POS+2] = led_code[0] LEDPT_OP LED_PT;
-			leds[LEDVAL_POS+3] = led_code[val];
+			for(j = (11-i); j < 12; j++)
+			{
+				leds[j] = led_code[0];
+			}		
+			val = keypos[i]; //0-3,1-
+			if(i < 4)
+				leds[9-i] = (val >= 10) ? led_code[1]:led_code[0];
+			else
+				leds[9-i] = (val >= 10) ? led_code[1]:LED_SPACE;
+			if(val >= 10)
+			{
+				val = val - 10;
+			}
+			if(val < 10)
+				leds[10-i] = led_code[val];
 		}
-		return;
 	}
-
-	if(i == 1)
-	{
-		val = keypos[COL_1];
-		if(val >= 20) //invalid value
-			return;
-
-		leds[LEDEXP_POS] = LED_SPACE;
-		leds[LEDEXP_POS+1] = LED_SPACE;
-		out_4knob[0] = '0';
-		leds[LEDVAL_POS] = LED_SPACE;
-		if (val >= 10)
-		{
-			out_4knob[1] = '1';
-			out_4knob[2] = '0' + val-10;
-			leds[LEDVAL_POS+1] = led_code[1];
-			leds[LEDVAL_POS+2] = led_code[val-10] LEDPT_OP LED_PT;
-		}else{
-			out_4knob[1] = '0';
-			out_4knob[2] = '0' + val;
-			leds[LEDVAL_POS+1] = LED_SPACE;
-			leds[LEDVAL_POS+2] = led_code[val] LEDPT_OP LED_PT;
-		}
-		out_4knob[3] = '0';
-		leds[LEDVAL_POS+3] = led_code[0];
-		return;
-	}
-	if(i == 2)
-	{
-
-		val = keypos[COL_10];
-		if(val >= 20) //invalid value
-			return;
-		leds[LEDEXP_POS] = LED_SPACE;
-		leds[LEDEXP_POS+1] = LED_SPACE;
-
-		if (val >= 10)
-		{
-			out_4knob[0] = '1';
-			out_4knob[1] = '0'+val-10;
-			leds[LEDVAL_POS] = led_code[1] ;
-			leds[LEDVAL_POS+1] = led_code[val-10] ;
-		}else{
-			out_4knob[0] = '0';
-			out_4knob[1] = '0' + val;
-			leds[LEDVAL_POS] = led_code[0];
-			leds[LEDVAL_POS+1] = led_code[val];
-		}
-		out_4knob[2] = '0';
-		out_4knob[3] = '0';
-		leds[LEDVAL_POS+2] = led_code[0] LEDPT_OP LED_PT;
-		leds[LEDVAL_POS+3] = led_code[0];
-		return;
-	}
-	if(i > 10)
-		return;
-	if( (3 <= i) && (i <= 6) ) //10^-4 ..10^-1
-	{
-		leds[LEDEXP_POS] = LED_HF; //set to '-';
-		exp = 7-i;
-	}
-	if((7 <= i) && (i <= 10) ) //10^0 ..10^3
-	{
-		leds[LEDEXP_POS] = LED_SPACE; //set to ' ';
-		exp = i - 7;
-	}
-	leds[LEDVAL_POS]	= LED_SPACE;
-	leds[LEDVAL_POS+1]	= LED_SPACE;
-	leds[LEDVAL_POS+2]	= LED_SPACE;
-	leds[LEDVAL_POS+3]	= LED_SPACE;
-	leds[LEDEXP_POS + 1] = led_code[exp];
+	leds[7] = leds[7] LEDPT_OP	LED_PT;
 }
+void output_4knob()
+{
+	uchar p,v;
+	uchar head = 0; //whether leading non-zero value is found
+	for(p = 0;p < 12;p++)
+	{
+		v = code2key(leds[p] & 0x7f);
+		if(v !=0 && v != 0xff)
+		{
+			head = 1;
+		}
+		if((p < 7) && (head == 0)) //remove leading zero
+			continue;
+
+		if(v != 0xff)
+			sjSerialSendByte('0'+v);
+		if(p == 7)
+			sjSerialSendByte('.');
+	}
+}
+/*
 void output_4knob()
 {
 	uchar p = 0;
@@ -567,11 +584,12 @@ void output_4knob()
 		sjSerialSendByte(exp+'0');		
 	}
 }
-
+*/
 //display 17 led code in leds based on hardware setting
 void led_show()
 {
 	uchar cnt;
+	/*
 	for(cnt = 0;cnt < 17;cnt++)
 	{
 		if(cnt == 6)
@@ -584,7 +602,13 @@ void led_show()
 		}
 		d164(leds[disptbls[cnt]]);
 	}
-	d164(LED_SPACE);d164(LED_SPACE);
+
+	*/
+	for(cnt = 0;cnt < 12;cnt++)
+	{
+			d164(leds[cnt]);
+	}
+	//d164(LED_SPACE);//d164(LED_SPACE);
 }
 
 
@@ -601,7 +625,8 @@ void main()
 
 	IE = 0;//close int
 				  // S1   CCP  SPI
-	P_SW1 = 0x08  ; // 0 0  0 0  1 0   0  0
+//	P_SW1 = 0x08  ; // 0 0  0 0  1 0   0  0
+	P_SW1 = 0x3C ;  // 0 0  1 1  1 1   0  0
 				  // X X PWM6  PWM2345 X  S4_S S3_S S2_S
     P_SW2 = 0x07  ; // 0 0  0      0     0    1    1     1
 
@@ -618,10 +643,10 @@ void main()
 					//	0      1        0    0     0      0       0 0  
 	CLK_DIV = 0x80; //MCKO_S1 MCKO_S0 ADRJ TX_RX MCLKO_2 CLKS2 S1 S0  //12Mhz
 					//	1      0        0    0     0      0       0 0  
-	init_uart();  //fake serial port 3
-	init_uart2(); //fake serial port 4
+//	init_uart();  //fake serial port 3
+//	init_uart2(); //fake serial port 4
 
-	asp_set_timer();
+//	asp_set_timer();
 
 
 	sid = 0;
@@ -717,22 +742,24 @@ void main()
 		continue;
 */		
 						
-		type = 0;
-		if(keypos[0] != 0xff)
+		type = 0; //type = 0
+		
+		if((keypos[0] != 0xff) && (keypos[COL_SCALE] == 6))
 		{
 			type = 1;
 			update_10knob();
 		}else{
-			clear_10knob();
+			if((keypos[COL_SCALE] != 0xff) && (keypos[COL_SCALE] != 6))
+			{
+				type = 2;
+				update_4knob();
+			}else{
+				clear_10knob();
+			}
 		}
-		if((keypos[COL_SCALE] != 0xff) && (keypos[COL_SCALE] != 11))
-		{
-			type = 2;
-			update_4knob();
-		}else{
-			clear_4knob();
-		}
-
+		
+		
+		
 		while(sjSerialIsDataWaiting() == TRUE)
 		{
 			if(sjSerialWaitForOneByte() == '?')
@@ -752,6 +779,7 @@ void main()
 				sjSerialSendByte(0x0D);
 				sjSerialSendByte(0x0A);
 			}
+			
 		}
 		if(bUpdate == 1)
 		{
