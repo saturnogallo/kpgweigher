@@ -22,6 +22,7 @@ namespace Mndz
         }
         /*
          * Change summary : 2015-03-14: use seperate relay for current from 100A to 600A, support 100,200,300,400,500,600,1000 now.
+         *                  2015-07-09: add 6000A support and use direct relay for 6000A
          */
         internal static Form1 mainwnd;
         internal static MsgDlg msg;

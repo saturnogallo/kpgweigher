@@ -28,15 +28,15 @@ namespace Mndz
         [DllImport("coredll")]
         public static extern bool TouchCalibrate(); //设置本地时间
         private StringBuilder data;
-        public static Decimal scale = 300;
-        public static string s_scale = "300";
+        public static Decimal scale = 6000;
+        public static string s_scale = "6000";
         public static string[] scale_vals = new string[] { "100", "200", "300", "400", "500", "600" };
         private Dictionary<string, string[]> text_allbtns = new Dictionary<string, string[]>();
         public Form1()
         {
 
             DisablePowerSleep();
-
+            text_allbtns["6000"] = new string[] { "", "", "", "", "", "" };
             text_allbtns["1000"] = new string[] {" 10 A", "100 A", "1000 A", "","","" };
             text_allbtns["600"] = new string[] { "  1 A", " 10 A", "100 A", "300 A", "600 A", "" };
             text_allbtns["500"] = new string[] { "  1 A", " 10 A", "100 A", "200 A", "300 A", "500 A" };
@@ -48,7 +48,7 @@ namespace Mndz
             myBeep = new Beep("PWM1:");
 
             //use a different way to check scale
-            s_scale = "300"; //default scale is 300
+            s_scale = "6000"; //default scale is 300
 
             
             if (File.Exists(Path.Combine(GlobalConfig.basedir, "1000.txt")))
@@ -78,6 +78,7 @@ namespace Mndz
             rngbtn_600.Visible = (btn_texts[4] != "");
             rngbtn_1000.Visible = (btn_texts[5] != "");
 
+            lbl_currscale.Visible = (s_scale != "6000");
 
             this.label3.Text = label3.Text.Replace("300", s_scale);
             /*
@@ -94,6 +95,7 @@ namespace Mndz
             led_setting.ColorDark = this.BackColor;
             btn_turnon.BackColor = this.BackColor;
             btn_zeroon.BackColor = this.BackColor;
+            btn_ktt.BackColor = this.BackColor;
             rectMeter1.BackColor = this.BackColor;
             btn_turnon.BackColor = this.BackColor;
             rectMeter1.BgResId = "BGMETER";
@@ -208,6 +210,18 @@ namespace Mndz
                 processor.ZeroON();
             });
 
+
+            btn_ktt.Style = MyButtonType.rectButton;
+            btn_ktt.Label = "电流换向";
+            btn_ktt.bOn = processor.bKTT;
+            btn_ktt.Click += new EventHandler((o, e) =>
+            {
+                this.Beep();
+                processor.bKTT = !processor.bKTT;
+                btn_ktt.bOn = processor.bKTT;
+                    
+            });
+
             //btn_turnon.bgColor = this.BackColor;
             //btn_turnon.SetStyle(Color.Green, MyButtonType.round2Button);
             btn_turnon.Label = "OFF";
@@ -301,6 +315,7 @@ namespace Mndz
                 case 600:
                     unit = 3 - position; break;
                 case 1000: unit = 4 - position; break;
+                case 6000: unit = 4 - position; break;
                 default:
                     return;
             }
@@ -425,7 +440,8 @@ namespace Mndz
                         }
 
                         if ((Form1.scale_vals.Contains(s_scale) && !processor.CalibrateADScale(d/1000.0)) ||
-                            (s_scale == "1000" && !processor.CalibrateADScale(d/1000.0)) )
+                            (s_scale == "1000" && !processor.CalibrateADScale(d/1000.0)) ||
+                            (s_scale == "6000" && !processor.CalibrateADScale(d/6000.0)) )
                             Program.MsgShow("校准电流值失败.");
                     }
                     if (id == "value")
@@ -554,6 +570,9 @@ namespace Mndz
                 case 1000:
                     newcurr = reading.ToString("F3");
                     break;
+                case 6000:
+                    newcurr = reading.ToString("F3");
+                    break;
                 default: break; ;
             }
             if (newcurr != led_current.Value)
@@ -597,6 +616,9 @@ namespace Mndz
                 case 1000:
                     led_setting.Value = processor.setting.ToString("F3");
                     break;
+                case 6000:
+                    led_setting.Value = processor.setting.ToString("F3");
+                    break;
                 default: break; ;
             }
             foreach (RectButton rb in rng_btns)
@@ -618,7 +640,7 @@ namespace Mndz
         //curr: 1.345 off
         //setting? return setting: 1.234 on|off
         //curr? return curr: 1.234
-        private Regex resi_set_mode = new Regex(@"curr:\s+([0-9.Mk]+)\s+(on|off)\s+(1|10|100|200|300|400|500|600|1000)$");
+        private Regex resi_set_mode = new Regex(@"curr:\s+([0-9.Mk]+)\s+(on|off)\s+(1|10|100|200|300|400|500|600|1000|6000)$");
         internal void pc_cmd(string cmd)
         {
             Logger.SysLog(cmd);

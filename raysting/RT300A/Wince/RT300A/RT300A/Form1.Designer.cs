@@ -74,6 +74,7 @@
             this.rngbtn_300 = new Mndz.RectButton();
             this.rngbtn_600 = new Mndz.RectButton();
             this.rngbtn_1000 = new Mndz.RectButton();
+            this.btn_ktt = new Mndz.RectButton();
             this.SuspendLayout();
             // 
             // lbl_currscale
@@ -91,7 +92,7 @@
             this.label3.Location = new System.Drawing.Point(136, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(736, 55);
-            this.label3.Text = "程控300A直流稳流源";
+            this.label3.Text = "程控1000A直流稳流源";
             this.label3.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // label4
@@ -109,7 +110,7 @@
             this.lbl_version.Location = new System.Drawing.Point(891, 38);
             this.lbl_version.Name = "lbl_version";
             this.lbl_version.Size = new System.Drawing.Size(114, 17);
-            this.lbl_version.Text = "版本:2014-08-09";
+            this.lbl_version.Text = "版本:2015-07-27";
             this.lbl_version.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // lbl_datetime
@@ -142,7 +143,7 @@
             // rectMeter1
             // 
             this.rectMeter1.BackColor = System.Drawing.Color.LightSkyBlue;
-            this.rectMeter1.Location = new System.Drawing.Point(1, 119);
+            this.rectMeter1.Location = new System.Drawing.Point(1, 96);
             this.rectMeter1.Name = "rectMeter1";
             this.rectMeter1.Size = new System.Drawing.Size(171, 89);
             this.rectMeter1.TabIndex = 45;
@@ -277,7 +278,7 @@
             // 
             this.btn_zeroon.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
             this.btn_zeroon.Label = "电流表清零";
-            this.btn_zeroon.Location = new System.Drawing.Point(42, 249);
+            this.btn_zeroon.Location = new System.Drawing.Point(34, 212);
             this.btn_zeroon.Name = "btn_zeroon";
             this.btn_zeroon.Size = new System.Drawing.Size(105, 33);
             this.btn_zeroon.TabIndex = 10;
@@ -520,6 +521,15 @@
             this.rngbtn_1000.Size = new System.Drawing.Size(100, 34);
             this.rngbtn_1000.TabIndex = 77;
             // 
+            // btn_ktt
+            // 
+            this.btn_ktt.Font = new System.Drawing.Font("Tahoma", 14F, System.Drawing.FontStyle.Bold);
+            this.btn_ktt.Label = "电流换向";
+            this.btn_ktt.Location = new System.Drawing.Point(721, 278);
+            this.btn_ktt.Name = "btn_ktt";
+            this.btn_ktt.Size = new System.Drawing.Size(105, 33);
+            this.btn_ktt.TabIndex = 10;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -566,6 +576,7 @@
             this.Controls.Add(this.btn_capture);
             this.Controls.Add(this.lbl_datetime);
             this.Controls.Add(this.lbl_version);
+            this.Controls.Add(this.btn_ktt);
             this.Controls.Add(this.btn_zeroon);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.lbl_currscale);
@@ -629,6 +640,7 @@
         private RectButton rngbtn_300;
         private RectButton rngbtn_600;
         private RectButton rngbtn_1000;
+        private RectButton btn_ktt;
     }
 }
 
