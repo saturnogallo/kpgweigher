@@ -29,7 +29,75 @@ namespace Mndz
         }
         static DeviceMgr()
         {
-            
+            #region bit relay definition
+            bitregmap = new Dictionary<string, byte>();
+            byte[] bitall_relay = new byte[]{
+                0x40,0x41,0x42,0x43,0x13,0x1A,0x1E,0x17,
+                0x11,0x18,0x31,0x38,0x30,0x39,0x22,0x2B,
+                0x05,0x0C,0x04,0x0D,0x07,0x0E,0x06,0x0F,
+                0x32,0x3B,0x21,0x28,0x33,0x3A,0x02,0x0B,
+                0x10,0x19,0x00,0x09,0x12,0x1B,0x01,0x08,
+                0x25,0x2C,0x24,0x2D,0x27,0x2E,0x26,0x2F,
+                0x01,0x00,0x02,0x00,0x04,0x00,0x08,0x00,  //"BIT00",     "BIT01"   ,     "BIT02",        "BIT03",
+                0x10,0x00,0x20,0x00,0x40,0x00,0x80,0x00,  //"BIT04",     "BIT05"   ,     "BIT06",        "BIT07",                                 
+                0x00,0x01,0x00,0x02,0x00,0x04,0x00,0x08,  //"BIT08:KTT",       "BIT09:RANGE_5A"   ,     "BIT10:RANGE_10A",        "BIT11:RANGE_100A",                                   
+                0x00,0x10,0x00,0x20,0x00,0x40,0x00,0x80,
+
+                0x01,0x00,0x04,0x00,0x10,0x00,0x40,0x00,
+                0x00,0x01,0x00,0x04,0x00,0x10,0x00,0x40,
+                };
+            //REG is for relay board, which use x,y map
+            //BIT is the voltage control, which use 1 means on , 0 means off
+            //PUL means pulse, just give a pulse on give position
+            string[] bitabbr_relay = {"REG21",     "REG22",        "REG23",        "REG24", 
+                                   "REG11",     "REG12",        "REG13",        "REG14",
+                                   "REG61",     "REG62",        "REG63",        "REG64",
+                                   "REG51",     "REG52",        "REG53",        "REG54",
+                                   "REG31",     "REG32",        "REG33",        "REG34",
+                                   "REG41",     "REG42",        "REG43",        "REG44",
+                                   "BIT00",     "BIT01"   ,     "BIT02",        "BIT03",
+                                   "BIT04",     "BIT05"   ,     "BIT06",        "BIT07",                                 
+                                   "BIT08:KTT",       "BIT09"   ,     "BIT10",        "BIT11",
+                                   "BIT12",     "BIT13"   ,     "BIT14",        "BIT15",
+                                   "PUL00",     "PUL01"   ,     "PUL02",        "PUL03",
+                                   "PUL04",     "PUL05"   ,     "PUL06",        "PUL07",
+
+                                  };
+            int i;
+            for (i = 0; i < bitabbr_relay.Length; i++)
+            {
+                string abbr = bitabbr_relay[i];
+
+                string[] abbrs;
+                if (abbr.IndexOf(':') > 0)
+                {
+                    abbrs = abbr.Split(new char[] { ':' });
+
+                    if (abbrs[0].StartsWith("BIT"))
+                    {
+                        bitregmap[abbrs[1] + "_ON_P0"] = bitall_relay[2 * i];
+                        bitregmap[abbrs[1] + "_OFF_P0"] = Convert.ToByte(bitall_relay[2 * i] ^ 0xff);
+                        bitregmap[abbrs[1] + "_ON_P1"] = bitall_relay[2 * i + 1];
+                        bitregmap[abbrs[1] + "_OFF_P1"] = Convert.ToByte(bitall_relay[2 * i + 1] ^ 0xff);
+                    }
+                    if (abbrs[0].StartsWith("REG"))
+                    {
+                        bitregmap[abbrs[1] + "_ON"] = bitall_relay[2 * i];
+                        bitregmap[abbrs[1] + "_OFF"] = bitall_relay[2 * i + 1];
+                    }
+                    if (abbrs[0].StartsWith("PUL"))
+                    {
+                        bitregmap[abbrs[1] + "_ON_P0"] = bitall_relay[2 * i];
+                        bitregmap[abbrs[1] + "_OFF_P0"] = Convert.ToByte(bitall_relay[2 * i] << 1);
+                        bitregmap[abbrs[1] + "_ON_P1"] = bitall_relay[2 * i + 1];
+                        bitregmap[abbrs[1] + "_OFF_P1"] = Convert.ToByte(bitall_relay[2 * i + 1] << 1);
+                    }
+                }
+
+            }
+
+            #endregion
+
             #region relay definition
             /*
          * ON OFF 
@@ -72,6 +140,7 @@ namespace Mndz
              * 400A:  256
              * 500A:  512
              * 600A:  1024
+             * KTT:   32
              */
             byte[]  all_relay = new byte[]{
                 0x40,0x41,0x42,0x43,0x13,0x1A,0x1E,0x17,
@@ -80,14 +149,14 @@ namespace Mndz
                 0x32,0x3B,0x21,0x28,0x33,0x3A,0x02,0x0B,
                 0x10,0x19,0x00,0x09,0x12,0x1B,0x01,0x08,
                 0x25,0x2C,0x24,0x2D,0x27,0x2E,0x26,0x2F};
-            string[] abbr_relay = {"REG21:200A",     "REG22:100A",    "REG23",     "REG24", 
+            string[] abbr_relay = {"REG21:200A",     "REG22:100A",    "REG23:KTT",     "REG24", 
                                    "REG11",     "REG12",    "REG13",     "REG14",
                                    "REG61",     "REG62",    "REG63",     "REG64",
                                    "REG51",     "REG52",    "REG53",     "REG54",
                                    "REG31:300A","REG32:600A",    "REG33:500A",     "REG34:400A",
                                    "REG41",     "REG42",    "REG43",     "REG44"
                                   };
-            int i;
+            
             for (i = 0; i < abbr_relay.Length; i++)
             {
                 string abbr = abbr_relay[i];
@@ -466,17 +535,52 @@ namespace Mndz
         }
 
         static private Dictionary<string, byte> regmap;
+        static private Dictionary<string, byte> bitregmap;
         static private string oldcoil = ""; //old coil switch satus
         static private string oldreal = "";  //old real resistance
         static private string oldoutput = ""; //old output status
         //static private string[] coiltbl = new string[] { "COIL_10T", "COIL_100T", "COIL_1T", "COIL_REAL" };
         static private string[] outputtbl = new string[] { "100A", "200A", "300A", "400A", "500A", "600A" };
         static private byte[] UsHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('s'), Convert.ToByte('U'), Convert.ToByte('U') };
+        static private byte[] UtHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('t') };
         static private byte[] UdHead = new byte[] { Convert.ToByte('U'), Convert.ToByte('d') };
         static private byte[] UsTail = new byte[] { Convert.ToByte('V') };
 
+        static private string oldktt = ""; //old ktt status
+        static public void RelayKTT(string ktt)
+        {
+            if (Form1.s_scale == "6000") //6000A use direct relay control
+            {
+                DelayWrite(UtHead, 0, 2);
+
+                Byte P0 = 0x00;
+                Byte P1 = 0xf3; //!00001100
+
+                P0 = (byte)(P0 | bitregmap["KTT_"+ktt+"_P0"]);
+                P1 = (byte)(P1 | bitregmap["KTT_"+ktt+"_P1"]);
+
+                DelayWrite(new byte[] { P0, P1 }, 0, 2);
+                DelayWrite(UsTail, 0, 1);
+                Thread.Sleep(100);
+
+                return;
+            }
+
+            if ((ktt == oldktt) || (ktt == ""))
+                return;
+            DelayWrite(UsHead, 0, 4);
+
+            DelayWrite(new byte[] { regmap["KTT_"+ktt] }, 0, 1);
+            oldktt = ktt;
+
+            DelayWrite(UsTail, 0, 1);
+        }
+
         static public void RelayState(string output)
         {
+            if (Form1.s_scale == "6000") //6000A use direct relay control
+                return;
+
             if((output == oldoutput) || (output == ""))
                 return;
             DelayWrite(UsHead, 0, 4);
@@ -524,6 +628,23 @@ namespace Mndz
             DeviceMgr.Action("daoutput", new byte[] { 0x55, 0x64, 0xfc, 0x00, 0x00, 0x00, 0x04 }); //set control
             Thread.Sleep(100);
         }
+        private bool _bKTT;
+        internal bool bKTT
+        {
+            get
+            {
+                return _bKTT;
+            }
+            set
+            {
+                _bKTT = value;
+                if (_bKTT)
+                    DeviceMgr.RelayKTT("ON");
+                else
+                    DeviceMgr.RelayKTT("OFF");
+                //TODO set relay;
+            }
+        }
         private bool _bOn;  //current on or off state
         internal bool bOn
         {
@@ -551,6 +672,7 @@ namespace Mndz
 
                 0.6V->600A
                 1V->1000A
+                1V->6000A
                  */
                 if (Form1.scale_vals.Contains(Form1.s_scale)) //update relay state
                 {
@@ -595,7 +717,7 @@ namespace Mndz
             }
             set
             {
-                if (Math.Abs(Convert.ToDouble(value)) > 0.01) //too much offset
+                if (Math.Abs(Convert.ToDouble(value)) > 0.1) //too much offset //change from 0.01 to 0.1 because for 6000A the offset could be bigger, 2015-07-27 song,jie
                     return;
                 
                 if (_daoffset != value)
@@ -605,14 +727,14 @@ namespace Mndz
                 }
             }
         }
-        private int[] validrng = new int[] { 1, 10, 100, 200, 300, 400, 500, 600, 1000 };
+        private int[] validrng = new int[] { 1, 10, 100, 200, 300, 400, 500, 600, 1000,6000};
         private int _range;
         internal int range{
             get
             {
                 if (!validrng.Contains(_range))
                 {
-                    if (Form1.s_scale == "1000")
+                    if (Form1.s_scale == "1000" || Form1.s_scale == "6000")
                         _range = 10;
                     else
                         _range = 1;
@@ -644,6 +766,8 @@ namespace Mndz
             _setting = 0;  //Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "setting"));
             _range = 10; // Int32.Parse(Util.ConstIni.StringValue("LASTSETTING", "range"));
 
+            if(Form1.s_scale == "6000")
+                _range = 6000; //for 6000A only
             try
             {
                 _daoffset = Decimal.Parse(Util.ConstIni.StringValue("LASTSETTING", "daoffset"));
@@ -664,10 +788,11 @@ namespace Mndz
            
             bTracking = true; // (Util.ConstIni.StringValue("LASTSETTING", "tracking") != "");
 
-            if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.01) //10mV
+            if (Math.Abs(Convert.ToDouble(_daoffset)) > 0.1) //100mV //changed from 10mV to 100mV because 6000A has bigger offset 2015-07-27 song,jie
                 _daoffset = 0;
 
             bOn = false;
+            bKTT = true;
         }
         private Decimal _track_setting = 0;
         public void RefreshOutput()
@@ -678,7 +803,7 @@ namespace Mndz
                 if (bTracking)
                 {
                     double _dsetting = Convert.ToDouble(_setting);
-                    if ((Math.Abs(_dsetting - Current) < _dsetting * 1e-3) &&  //close enough to setting 
+                    if ((Math.Abs(_dsetting - Current) < _dsetting * 3e-3) &&  //close enough to setting //change variance from 1e-3 to 3e-3 2015-07-27 song,jie
                         (Math.Abs(_dsetting - Current) > _dsetting * 2e-6) &&  //bigger than 2 ppm
                         (_dsetting >= range * 0.01))   //setting is big enough
                     {
@@ -821,13 +946,15 @@ namespace Mndz
             va = va * adscale;
             if((Form1.s_scale == "300") )
                Current = va * 1000.0; // 0-0.3V=>300A
-            if ((Form1.s_scale == "600") || (Form1.s_scale == "1000"))
+            if ((Form1.s_scale == "600") || (Form1.s_scale == "1000") || (Form1.s_scale == "6000"))
             {
-                if (range == 600 || range == 1000)
+                if (range == 6000)
+                    Current = va * 6000;//1V->6000A
+                else if (range == 600 || range == 1000)
                     Current = va * 1000.0; // 0-0.6V=>600A 0-1V=>1000A
                 else if (range == 300)
                     Current = va * range / 10.0; //0-10V=>range
-                else if(range == 10 || range == 100)
+                else if (range == 10 || range == 100)
                     Current = va * range;  //0-1V=>range
                 else
                     Current = va * range;  //0-1V=>range
@@ -883,7 +1010,12 @@ namespace Mndz
                     volt = Convert.ToDouble(current) / 100.0; //0-10V => 1000A
 
             }
+            if (Form1.s_scale == "6000")
+            {
+                if (range == 6000) //6000A
+                    volt = Convert.ToDouble(current) / 600.0; //0-10V => 6000A
 
+            }
             return ToDAValue(volt);
         }
         private byte[] lasttosend = new byte[] { 0x00,0x00,0xff, 0xff, 0xff, 0x00 };
